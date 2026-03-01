@@ -1,0 +1,137 @@
+{
+  "items": [
+    {
+      "key": "review.defaults",
+      "value": {
+        "severityThreshold": "LOW",
+        "ignorePaths": [],
+        "maxSuggestionsPerFile": 10,
+        "maxSuggestionsPerPR": 50,
+        "cadence": "automatic",
+        "customRuleIds": [],
+        "batchSize": 30,
+        "applyFiltersToCustomRules": true,
+        "descriptionMode": "COMPLEMENT",
+        "newCommitsDescriptionMode": "CONCATENATE",
+        "autoPauseThreshold": 20,
+        "maxReviewsPerWindow": 10,
+        "throttleWindowSeconds": 3600
+      }
+    },
+    {
+      "key": "review.binary_extensions",
+      "value": [
+        "png",
+        "jpg",
+        "jpeg",
+        "gif",
+        "bmp",
+        "ico",
+        "svg",
+        "webp",
+        "mp3",
+        "mp4",
+        "avi",
+        "mov",
+        "wav",
+        "flac",
+        "zip",
+        "tar",
+        "gz",
+        "bz2",
+        "rar",
+        "7z",
+        "woff",
+        "woff2",
+        "ttf",
+        "eot",
+        "otf",
+        "pdf",
+        "doc",
+        "docx",
+        "xls",
+        "xlsx",
+        "exe",
+        "dll",
+        "so",
+        "dylib",
+        "o",
+        "obj",
+        "class",
+        "jar",
+        "pyc",
+        "pdb",
+        "lock"
+      ]
+    },
+    {
+      "key": "review.blocking_severities",
+      "value": [
+        "CRITICAL",
+        "HIGH"
+      ]
+    },
+    {
+      "key": "detection.false_positive_thresholds",
+      "value": {
+        "threshold": 0.5,
+        "deactivateThreshold": 0.7,
+        "minSampleSize": 5,
+        "minDeactivateSampleSize": 10
+      }
+    },
+    {
+      "key": "llm_category_weights",
+      "value": {
+        "security": 20,
+        "breaking-change": 18,
+        "bug": 15,
+        "architecture": 12,
+        "performance": 10,
+        "testing": 10,
+        "maintainability": 8,
+        "complexity": 8,
+        "accessibility": 8,
+        "best-practice": 5,
+        "consistency": 5,
+        "style": 3,
+        "documentation": 2
+      }
+    },
+    {
+      "key": "mention.available_commands",
+      "value": [
+        "review",
+        "explain",
+        "fix",
+        "summary",
+        "help",
+        "config"
+      ]
+    },
+    {
+      "key": "review.overrides",
+      "value": {
+        "name": "default-review-overrides",
+        "categories": {
+          "descriptions": {
+            "bug": "- Execution breaks: Code throws unhandled exceptions\n- Wrong results: Output doesn't match expected behavior\n- Resource leaks: Unclosed files, connections, memory accumulation\n- State corruption: Invalid object/data states\n- Logic errors: Control flow produces incorrect outcomes\n- Race conditions: Concurrent access causes inconsistent state or duplicates\n- Incorrect measurements: Metrics/timings that don't reflect actual operations\n- Invariant violations: Broken constraints (size limits, uniqueness, etc.)\n- Async timing bugs: Variables captured incorrectly in async closures\n- Conditional validation errors: Logic that checks for presence/absence of values using truthiness tests (e.g., `if dict.get(\"key\")`) that fail with falsy values (0, None, False, \"\"), when membership tests (e.g., `if \"key\" in dict`) should be used\n- Dead computation: Code that computes/transforms values but never uses the result, instead using the original untransformed value - indicates copy-paste error or incomplete refactoring\n- Unbounded growth: Collections (lists, dicts, sets) that grow indefinitely within loops without size limits, potentially causing memory exhaustion\n- Duplicate operations: Same operation executed multiple times with identical inputs in sequence, wasting resources and potentially causing incorrect counts/metrics",
+            "performance": "- Algorithm complexity: O(n²) when O(n) is possible\n- Redundant operations: Duplicate calculations, unnecessary loops, or early returns that force multiple operations when a single operation would suffice (e.g., fail-fast in batch processing that requires multiple requests to get complete feedback)\n- Memory waste: Large allocations or leaks over time\n- Blocking operations: Synchronous I/O in critical paths\n- Database inefficiency: N+1, missing indexes, full scans\n- Cache misses: Not leveraging available caching mechanisms\n- Batch processing inefficiency: Validation or processing loops that return on first error instead of collecting all errors, forcing clients to make multiple requests to discover all issues",
+            "security": "- Injection vulnerabilities: SQL/NoSQL/command/LDAP injection\n- AuthZ/AuthN flaws: Missing checks, privilege escalation\n- Data exposure: Sensitive data in logs, responses, or errors\n- Crypto issues: Weak algorithms, hardcoded keys, improper validation\n- Input validation gaps: Missing sanitization or bounds checks\n- Session management: Predictable tokens or missing expiration\n- Timing attacks: Direct string/value comparison of secrets, tokens, passwords, or authentication credentials that leaks information through execution time - must use constant-time comparison functions\n- Insecure fallback values: Using empty strings, default values, or weak fallbacks for critical security parameters (encryption keys, secrets, tokens) when environment variables are missing - system should fail-fast instead\n- Input validation bypass: User-controlled parameters (offsets, limits, indices, IDs) accepted without validation or with inadequate bounds checking, especially negative values in array slicing or pagination that could bypass access controls\n- SSRF (Server-Side Request Forgery): Using user-controlled URLs in network operations (open, fetch, HTTP requests) without allowlist validation, enabling access to internal resources or arbitrary external sites\n- Case-sensitivity bypass: Inconsistent normalization in comparisons of case-insensitive data (emails, usernames, domains) where one side is normalized (toLowerCase/toUpperCase) but the other isn't, allowing bypass through case variations"
+          }
+        },
+        "severity": {
+          "flags": {
+            "critical": "Application crash/downtime\nData loss/corruption\nSecurity breach (unauthorized access/data exfiltration)\nCritical operation failure (auth/payment/authorization)\nDirect financial loss operations\nMemory leaks that inevitably crash production",
+            "high": "Important functionality broken\nMemory leaks that cause eventual crash\nPerformance degradation affecting UX under normal load\nSecurity issues with indirect exploitation paths\nFinancial calculation errors affecting revenue",
+            "medium": "Partially broken functionality\nPerformance issues in specific scenarios\nSecurity weaknesses requiring specific conditions\nIncorrect but recoverable data\nNon-critical business logic errors with workarounds",
+            "low": "Minor performance overhead\nLow-risk security improvements\nIncorrect metrics/logs\nRarely affecting few users\nEdge-case issues"
+          }
+        },
+        "generation": {
+          "main": "Detailed and verifiable issue description"
+        }
+      }
+    }
+  ]
+}
