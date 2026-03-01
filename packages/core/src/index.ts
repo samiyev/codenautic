@@ -8,19 +8,24 @@ export {
 } from "./application/use-cases/review/complete-review.use-case"
 export {AggregateRoot} from "./domain/aggregates/aggregate-root"
 export {REVIEW_STATUS, Review, type IReviewProps, type ReviewStatus} from "./domain/aggregates/review.aggregate"
+export {RULE_STATUS, Rule, type IRuleProps, type RuleStatus} from "./domain/aggregates/rule.aggregate"
 export {Entity} from "./domain/entities/entity"
 export {DomainError} from "./domain/errors/domain.error"
 export {ReviewNotFoundError} from "./domain/errors/review-not-found.error"
 export {ReviewSeverityBudgetExceededError} from "./domain/errors/review-severity-budget-exceeded.error"
 export {ReviewStatusTransitionError} from "./domain/errors/review-status-transition.error"
+export {RuleStatusTransitionError} from "./domain/errors/rule-status-transition.error"
 export {BaseDomainEvent} from "./domain/events/base-domain-event"
 export {ReviewCompleted, type IReviewCompletedPayload} from "./domain/events/review-completed"
 export {ReviewStarted, type IReviewStartedPayload} from "./domain/events/review-started"
+export {RuleActivated, type IRuleActivatedPayload} from "./domain/events/rule-activated"
 export {
     type ICreateReviewProps,
     type IReconstituteReviewProps,
     ReviewFactory,
 } from "./domain/factories/review.factory"
+export {type ICreateRuleProps, type IReconstituteRuleProps, RuleFactory} from "./domain/factories/rule.factory"
 export {type IEntityFactory} from "./domain/factories/entity-factory.interface"
+export {RuleStatusPolicyService} from "./domain/services/rule-status-policy.service"
 export {UniqueId} from "./domain/value-objects/unique-id.value-object"
 export {Result} from "./shared/result"
