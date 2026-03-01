@@ -1,0 +1,25 @@
+# M12 — Repository Onboarding UI
+
+> Источник: `packages/ui/TODO.md`
+
+> **Задач (ui):** 7 | **Проверка:** Repository onboarding wizard
+
+> **Результат milestone:** Готов onboarding UX для подключения репозиториев и запуска сканирования.
+
+## v0.23.0 — Репозиторий Onboarding UI
+
+> UI для онбординга репозиториев и визуализации прогресса сканирования. ~60K tokens.
+
+> **Результат версии:** Завершена версия «v0.23.0 — Repository Onboarding UI» в рамках M12; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| WEB-ONBRD-001 | Реализовать onboardingWizard | TODO | Не начато | Реализация: Multi-step wizard: paste URL → configure → scan. Progress stepper. Validation at each step. Готово, если: для WEB-ONBRD-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-ONBRD-002 | Реализовать scanProgressPage | TODO | Не начато | Реализация: Real-time scan progress via SSE. Phase indicators. ETA estimation. Logs panel. Готово, если: для WEB-ONBRD-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-ONBRD-003 | Реализовать репозиторийListPage | TODO | Не начато | Реализация: List onboarded repositories. Status badges (scanning/ready/error). Search, filter, sort. Готово, если: для WEB-ONBRD-003 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-ONBRD-004 | Реализовать репозиторийOverviewPage | TODO | Не начато | Реализация: Post-scan dashboard: tech stack, architecture summary, key metrics, health score. Готово, если: для WEB-ONBRD-004 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-ONBRD-005 | Реализовать rescanScheduleDialog | TODO | Не начато | Реализация: Configure periodic rescan schedule. Cron picker. Last scan timestamp. Готово, если: для WEB-ONBRD-005 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-ONBRD-006 | Реализовать onboardingEmptyState | TODO | Не начато | Реализация: Empty state for dashboard when no repos onboarded. CTA to start onboarding wizard. Готово, если: для WEB-ONBRD-006 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-ONBRD-007 | Реализовать scanErrorRecovery | TODO | Не начато | Реализация: Error handling UI: retry, partial results display, error details expansion. Готово, если: для WEB-ONBRD-007 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+
+---
