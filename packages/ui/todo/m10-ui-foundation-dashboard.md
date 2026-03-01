@@ -1,0 +1,197 @@
+# M10 — UI Foundation & Dashboard
+
+> Источник: `packages/ui/TODO.md`
+
+> **Задач:** 69 | **Проверка:** Dashboard в браузере с реальными данными
+
+> **Результат milestone:** Готов UI фундамент продукта: dashboard, settings, forms и ключевые пользовательские потоки.
+
+## v0.0.0 — Базовая структура пакета
+
+> Vite setup, Tailwind CSS, build infrastructure.
+
+> **Результат версии:** Завершена версия «v0.0.0 — Package Foundation» в рамках M10; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| WEB-000 | Реализовать базовую структуру пакета | TODO | Не начато | Реализация: package.json, tsconfig.json, vite.config.ts, postcss.config.mjs, index.html, src/main.tsx, src/routes. Сборка проходит успешно. Готово, если: для WEB-000 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+
+---
+
+## v0.1.0 — Базовая конфигурация
+
+> Vite setup, Tailwind, i18n, API client, testing, performance baseline. ~120K tokens.
+
+> **Результат версии:** Завершена версия «v0.1.0 — Foundation» в рамках M10; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| WEB-FOUND-001 | Реализовать настройку приложения Vite + TanStack Router | TODO | Не начато | Реализация: Настроены file-based routing, TypeScript, правила форматирования и ESLint/Prettier. Готово, если: для WEB-FOUND-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FOUND-002 | Реализовать конфигурацию Tailwind CSS | TODO | Не начато | Реализация: Настроены Tailwind 4, OKLch-токены, dark mode и адаптивность. Готово, если: для WEB-FOUND-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FOUND-003 | Реализовать CSP и security-заголовки | TODO | Не начато | Реализация: Content-Security-Policy. X-Frame-Options. HSTS. Готово, если: для WEB-FOUND-003 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FOUND-004 | Реализовать i18n setup (i18next) | TODO | Не начато | Реализация: i18next + react-i18next. Locale detection и persist предпочтений. Namespace structure для `en` и `ru`. Intl formatting (dates, numbers). Готово, если: для WEB-FOUND-004 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FOUND-005 | Реализовать font loading setup | TODO | Не начато | Реализация: Настроить системные и web-fonts через CSS/font-face. CLS prevention. Proper font display strategy. Готово, если: для WEB-FOUND-005 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FOUND-006 | Реализовать API client (fetch wrapper) | TODO | Не начато | Реализация: Fetch wrapper (НЕ axios). Retry logic (exponential backoff). AbortController. Error type guards. Rate limiting (429). Auth headers. Готово, если: для WEB-FOUND-006 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FOUND-007 | Реализовать провайдер React Query | TODO | Не начато | Реализация: Настроен QueryClient, кэширование, background refetch, mutations и фабрика query keys. Готово, если: для WEB-FOUND-007 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FOUND-008 | Реализовать error boundaries | TODO | Не начато | Реализация: Глобальные и route-level error boundaries с fallback UI 401→login redirect. 403→access denied. 500→retry UI. Partial failure handling. Готово, если: для WEB-FOUND-008 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FOUND-009 | Реализовать тестирование setup | TODO | Не начато | Реализация: @testing-library/react. @testing-library/user-event. MSW (Mock Service Worker). renderWithProviders utility. Test config in bunfig.toml. Готово, если: для WEB-FOUND-009 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FOUND-010 | Реализовать bundle analyzer + perf budget | TODO | Не начато | Реализация: vite/rollup bundle analyzer. Performance budget: LCP < 2.5s, INP < 200ms, CLS < 0.1, JS < 200KB/route. CI check. Готово, если: для WEB-FOUND-010 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FOUND-011 | Реализовать strategy границ UI-компонентов и lazy loading | TODO | Не начато | Реализация: Документ: какие компоненты грузятся eagerly/lazily, правила code-splitting по route. Suspense boundaries для тяжелых блоков. Готово, если: для WEB-FOUND-011 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FOUND-012 | Реализовать настройку OpenAPI codegen | TODO | Не начато | Реализация: Генерация DTO типов из API OpenAPI schema. Автообновление при изменении schema. Shared types между API и web. Готово, если: для WEB-FOUND-012 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+
+---
+
+## v0.2.0 — Auth & Мониторинг
+
+> Auth integration, Sentry, feature flags, Web Vitals. ~70K tokens.
+
+> **Результат версии:** Завершена версия «v0.2.0 — Auth & Monitoring» в рамках M10; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| WEB-AUTH-001 | Реализовать web auth integration | TODO | Не начато | Реализация: OAuth (GitHub, GitLab, Google). OIDC. JWT/session cookies. Protected routes и refresh flow. Готово, если: OAuth/OIDC login, refresh и logout проходят e2e, защищённые роуты недоступны без сессии, токены/куки не утекают в клиентские логи и URL; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-AUTH-002 | Реализовать sentry (browser) | TODO | Не начато | Реализация: Error tracking. Performance monitoring. Source maps upload. Готово, если: для WEB-AUTH-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-AUTH-003 | Реализовать web Vitals monitoring | TODO | Не начато | Реализация: Core Web Vitals (LCP, INP, CLS) reporting через Sentry Performance. Готово, если: метрики LCP/INP/CLS отправляются в monitoring без дублей, есть проверка на отсутствие регрессии web vitals по контрольному сценарию; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-AUTH-004 | Реализовать feature flags setup | TODO | Не начато | Реализация: Feature flags через React Query (server state). Gate premium features. Готово, если: feature flags переключают premium-функции без перезагрузки, есть deny-by-default поведение при недоступности flags backend; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-AUTH-005 | Реализовать проверку авторизации в layout | TODO | Не начато | Реализация: Redirect unauthenticated users. Protected route wrapper. Готово, если: guard корректно редиректит неавторизованных пользователей и сохраняет intended destination после логина, 403/401 состояния отображаются явно; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+
+---
+
+## v0.3.0 — Дизайн-система
+
+> Radix Primitives + CVA, Storybook, theming. ~80K tokens.
+
+> **Результат версии:** Завершена версия «v0.3.0 — Design System» в рамках M10; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| WEB-DS-001 | Реализовать base UI components | TODO | Не начато | Реализация: Button, Input, Select, Dialog, Dropdown, Table, Card, Tabs. Radix Primitives + CVA. A11y. Готово, если: для WEB-DS-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-DS-002 | Реализовать настройку Storybook | TODO | Не начато | Реализация: Storybook 8+. Stories для каждого base component. Dark mode toggle. A11y addon. Готово, если: для WEB-DS-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-DS-003 | Реализовать Theme provider (light/dark) | TODO | Не начато | Реализация: Light/dark/system mode. CSS variables (OKLch). Persisted preference. No flash on load. Готово, если: для WEB-DS-003 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-DS-004 | Реализовать cn() utility + shared patterns | TODO | Не начато | Реализация: Clsx + tailwind-merge. Compound component pattern. Shared component conventions documented. Готово, если: для WEB-DS-004 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+
+---
+
+## v0.4.0 — Лэйаут
+
+> App layout, sidebar, header, settings layout. ~70K tokens.
+
+> **Результат версии:** Завершена версия «v0.4.0 — Layout» в рамках M10; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| WEB-LAYOUT-001 | Реализовать app layout | TODO | Не начато | Реализация: Main layout structure. Route-level layouts с ленивой загрузкой страниц и секций. Готово, если: для WEB-LAYOUT-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-LAYOUT-002 | Реализовать sidebar navigation | TODO | Не начато | Реализация: Collapsible sidebar. Navigation items. Active state. Responsive. Готово, если: для WEB-LAYOUT-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-LAYOUT-003 | Реализовать header with user menu | TODO | Не начато | Реализация: User avatar. Dropdown menu. Notifications indicator. Готово, если: для WEB-LAYOUT-003 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-LAYOUT-004 | Реализовать loading states (route-level) | TODO | Не начато | Реализация: Skeleton loaders. Suspense boundaries per-section. Готово, если: для WEB-LAYOUT-004 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-LAYOUT-005 | Реализовать settings layout | TODO | Не начато | Реализация: Sidebar/tabs layout для 15+ settings подстраниц. Nested routing. Готово, если: для WEB-LAYOUT-005 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+
+---
+
+## v0.5.0 — Forms & List Инфраструктура
+
+> react-hook-form, Zod, virtual scrolling, infinite scroll, search hooks. ~90K tokens.
+
+> **Результат версии:** Завершена версия «v0.5.0 — Forms & List Infrastructure» в рамках M10; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| WEB-FORM-001 | Реализовать form components | TODO | Не начато | Реализация: React-hook-form integration. Reusable form field components. Готово, если: для WEB-FORM-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FORM-002 | Реализовать zod schema validation | TODO | Не начато | Реализация: Client-side validation. Zod schemas shared with API where needed. Готово, если: для WEB-FORM-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FORM-003 | Реализовать enum validation | TODO | Не начато | Реализация: Validate enum values from API types. Готово, если: для WEB-FORM-003 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-FORM-004 | Реализовать input sanitization | TODO | Не начато | Реализация: XSS prevention. DOMPurify or similar. Готово, если: для WEB-FORM-004 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-VIRT-001 | Реализовать tanStack Virtual setup | TODO | Не начато | Реализация: @tanstack/react-virtual configured. Base virtualized list/table. Готово, если: для WEB-VIRT-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-INF-001 | Реализовать useIntersectionObserver hook | TODO | Не начато | Реализация: Generic IntersectionObserver hook. Готово, если: для WEB-INF-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-INF-002 | Реализовать infiniteScrollContainer | TODO | Не начато | Реализация: Generic infinite scroll wrapper. React Query integration. Готово, если: для WEB-INF-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-HOOK-001 | Реализовать useDebounce() | TODO | Не начато | Реализация: Generic debounce hook. Готово, если: для WEB-HOOK-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-HOOK-002 | Реализовать useDebouncedSearch() | TODO | Не начато | Реализация: Debounced search hook (400ms). React Query integration. Готово, если: для WEB-HOOK-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+
+---
+
+## v0.6.0 — Core Pages
+
+> Dashboard, CCR management, Settings. ~100K tokens.
+
+> **Результат версии:** Завершена версия «v0.6.0 — Core Pages» в рамках M10; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| WEB-PAGE-001 | Реализовать панель управления | TODO | Не начато | Реализация: Summary metrics. Suspense boundaries per widget. Date range filter (URL search params). Route-level lazy loading для крупных виджетов. Готово, если: для WEB-PAGE-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-PAGE-002 | Реализовать CCR management | TODO | Не начато | Реализация: List with filters (team, repo, status). Virtual scrolling. Infinite scroll. nuqs for filter state. Готово, если: для WEB-PAGE-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-PAGE-003 | Реализовать code Review config | TODO | Не начато | Реализация: Review cadence. Ignore paths. Severity filters. Suggestion limits. Готово, если: для WEB-PAGE-003 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-PAGE-004 | Реализовать LLM provider config | TODO | Не начато | Реализация: Select provider. BYOK key input. Model selection. Test connection. Готово, если: для WEB-PAGE-004 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-PAGE-005 | Реализовать git provider config | TODO | Не начато | Реализация: Connect GitHub/GitLab/Azure/Bitbucket. OAuth flow. Webhook setup. Готово, если: для WEB-PAGE-005 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+
+---
+
+## v0.6.1 — UI Stack Migration: Настройка & Инфраструктура
+
+> Инициализация shadcn/ui, удаление Mantine, обновление провайдеров. ~40K tokens.
+
+> **Результат версии:** Завершена версия «v0.6.1 — UI Stack Migration: Setup & Infrastructure» в рамках M10; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| WEB-MIG-001 | Реализовать brand guidelines merge | TODO | Не начато | Реализация: Мердж OpenPayment стилей в SKILL.md. Gradients, button/card styles, metric formatting, provider colors, status colors. HEX → OKLch конвертация. Готово, если: для WEB-MIG-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-002 | Реализовать initialize shadcn/ui | TODO | Не начато | Реализация: `bunx shadcn@latest init`. Tailwind CSS variables в globals.css. cn() utility. components.json конфигурация. Готово, если: для WEB-MIG-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-003 | Реализовать install shadcn/ui components | TODO | Не начато | Реализация: Button, Card, Input, Select, Textarea, Checkbox, Switch, Avatar, Badge, Alert, Tooltip, DropdownMenu, Sheet, Skeleton, RadioGroup, Separator. Готово, если: для WEB-MIG-003 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-004 | Реализовать remove Mantine dependencies | TODO | Не начато | Реализация: Удалить @mantine/core, @mantine/charts, @mantine/hooks, @mantine/notifications, postcss-preset-mantine. Обновить globals.css, postcss.config.mjs. Готово, если: для WEB-MIG-004 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-005 | Реализовать add Sonner for toasts | TODO | Не начато | Реализация: Установить sonner. Заменить @mantine/notifications провайдер. Sonner Toaster в layout. Готово, если: для WEB-MIG-005 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-006 | Реализовать миграцию theme provider | TODO | Не начато | Реализация: Убрать MantineProvider и ColorSchemeScript. Оставить next-themes. Обновить theme-provider.tsx и layout.tsx. Готово, если: для WEB-MIG-006 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-007 | Реализовать обновление test render utility | TODO | Не начато | Реализация: Обновить tests/utils/render.tsx — убрать MantineProvider из wrapper. Готово, если: для WEB-MIG-007 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-008 | Реализовать storybook provider update | TODO | Не начато | Реализация: Обновить.storybook/preview.tsx — убрать Mantine, добавить shadcn/ui theming. Готово, если: для WEB-MIG-008 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+
+---
+
+## v0.6.2 — UI Stack Migration: Components
+
+> Замена Mantine компонентов на shadcn/ui и Tailwind. ~100K tokens.
+
+> **Результат версии:** Завершена версия «v0.6.2 — UI Stack Migration: Components» в рамках M10; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| WEB-MIG-009 | Реализовать layout components migration | TODO | Не начато | Реализация: Sidebar.tsx, sidebar-nav.tsx, header.tsx, dashboard-layout.tsx, mobile-sidebar.tsx, settings-nav.tsx, user-menu.tsx, theme-toggle.tsx. Stack→flex, Group→flex, NavLink→Tailwind, Drawer→Sheet, Menu→DropdownMenu, ActionIcon→Button icon. Готово, если: для WEB-MIG-009 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-010 | Реализовать form components migration | TODO | Не начато | Реализация: Form-text-field, form-textarea-field, form-select-field, form-number-field, form-password-field, form-checkbox-field, form-switch-field, form-radio-group-field, form-submit-button. TextInput→Input, Select→Select, Checkbox→Checkbox, Switch→Switch, Radio→RadioGroup. Готово, если: для WEB-MIG-010 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-011 | Реализовать панель управления components migration | TODO | Не начато | Реализация: Metric-card, metrics-grid, dashboard-content, activity-timeline, activity-timeline-item, dashboard-date-range-filter. Card→Card, Badge→Badge, Text→Tailwind, Title→h1-h6, Stack→flex, Grid→grid. Готово, если: для WEB-MIG-011 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-012 | Реализовать status distribution chart migration | TODO | Не начато | Реализация: Заменить @mantine/charts PieChart на Recharts PieChart. Файл: status-distribution-chart.tsx. Готово, если: для WEB-MIG-012 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-013 | Реализовать reviews components migration | TODO | Не начато | Реализация: Reviews-content, reviews-table, reviews-filters, review-status-badge. Table→Tailwind/shadcn, Badge→Badge, Select→Select, Text→Tailwind. Готово, если: для WEB-MIG-013 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-014 | Реализовать settings components migration | TODO | Не начато | Реализация: Git-provider-card, git-providers-list, llm-provider-form, test-connection-button, code-review-form, ignore-paths-editor. Card→Card, Button→Button, Alert→Alert, TextInput→Input. Готово, если: для WEB-MIG-014 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-015 | Реализовать settings pages migration | TODO | Не начато | Реализация: Settings/layout.tsx, git-providers/page.tsx, llm-providers/page.tsx, code-review/page.tsx. Stack→flex, Title→h1-h6. Готово, если: для WEB-MIG-015 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-016 | Реализовать skeleton components migration | TODO | Не начато | Реализация: Панель управления-skeleton, settings-skeleton, reviews-skeleton. Mantine Skeleton→shadcn Skeleton, Stack→flex, Grid→grid. Готово, если: для WEB-MIG-016 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+
+---
+
+## v0.6.3 — UI Stack Migration: Тесты & Verification
+
+> Обновление тестов, lint, build, финальная проверка. ~60K tokens.
+
+> **Результат версии:** Завершена версия «v0.6.3 — UI Stack Migration: Tests & Verification» в рамках M10; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| WEB-MIG-017 | Реализовать layout component tests update | TODO | Не начато | Реализация: Обновить. Готово, если: для WEB-MIG-017 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-018 | Реализовать form component tests update | TODO | Не начато | Реализация: Обновить. Готово, если: для WEB-MIG-018 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-019 | Реализовать lint and format | TODO | Не начато | Реализация: `bun run format` + `bun run lint` — 0 ошибок, 0 предупреждений. Готово, если: для WEB-MIG-019 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-020 | Реализовать typecheck | TODO | Не начато | Реализация: `bun run typecheck` — без ошибок. Готово, если: для WEB-MIG-020 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-021 | Реализовать all tests passing | TODO | Не начато | Реализация: `bun test` — все тесты зелёные. Покрытие ≥ 95%. Готово, если: для WEB-MIG-021 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-MIG-022 | Реализовать build verification | TODO | Не начато | Реализация: `bun run build` — успешная сборка. Нет Mantine импортов в бандле. Готово, если: для WEB-MIG-022 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+
+---
+
+## v0.7.0 — Панель управления Widgets
+
+> Stats cards, charts, timeline, indicators. ~80K tokens.
+
+> **Результат версии:** Завершена версия «v0.7.0 — Dashboard Widgets» в рамках M10; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| WEB-DASH-001 | Реализовать панель управления stats cards | TODO | Не начато | Реализация: Deploy frequency, CCR cycle time, suggestions, bug ratio, CCR size. Готово, если: для WEB-DASH-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-DASH-002 | Реализовать activity timeline | TODO | Не начато | Реализация: Recent reviews. Grouped by day. Expandable details. Готово, если: для WEB-DASH-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-COMP-001 | Реализовать recharts wrapper | TODO | Не начато | Реализация: Recharts wrapper component. Responsive. Loading state. Theme-aware. Готово, если: для WEB-COMP-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-COMP-002 | Реализовать metric card | TODO | Не начато | Реализация: Value, label, trend, sparkline. Configurable color. Готово, если: для WEB-COMP-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-COMP-003 | Реализовать trend indicator | TODO | Не начато | Реализация: Up/down arrow. Percentage change. Color coding. Accessible text. Готово, если: для WEB-COMP-003 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-COMP-004 | Реализовать провайдер connection card | TODO | Не начато | Реализация: Status indicator. Connect/disconnect. Last sync. Loading state. Готово, если: для WEB-COMP-004 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+
+---
