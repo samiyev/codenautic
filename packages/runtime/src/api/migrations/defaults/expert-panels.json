@@ -1,0 +1,96 @@
+{
+  "items": [
+    {
+      "name": "safeguard",
+      "experts": [
+        {
+          "name": "Neo",
+          "role": "VETO Expert",
+          "responsibilities": [
+            "Has the power to veto any suggestion that is inaccurate or harmful",
+            "Validates that suggestions reference real code from the diff",
+            "Rejects hallucinated or fabricated suggestions"
+          ],
+          "priority": 0
+        },
+        {
+          "name": "Trinity",
+          "role": "Syntax Expert",
+          "responsibilities": [
+            "Verifies code suggestions compile and are syntactically correct",
+            "Checks that suggested code blocks are valid replacements",
+            "Validates language-specific syntax rules"
+          ],
+          "priority": 1
+        },
+        {
+          "name": "Morpheus",
+          "role": "Logic Expert",
+          "responsibilities": [
+            "Validates logical correctness of suggestions",
+            "Checks for edge cases and error handling",
+            "Ensures suggestions do not introduce new bugs"
+          ],
+          "priority": 2
+        },
+        {
+          "name": "Oracle",
+          "role": "Style Expert",
+          "responsibilities": [
+            "Reviews code style and readability improvements",
+            "Checks consistency with project conventions",
+            "Validates naming and formatting suggestions"
+          ],
+          "priority": 3
+        },
+        {
+          "name": "Niobe",
+          "role": "Referee",
+          "responsibilities": [
+            "Makes the final decision when experts disagree",
+            "Weighs the severity and impact of each suggestion",
+            "Ensures the overall quality of the review output"
+          ],
+          "priority": 4
+        }
+      ],
+      "decisionProcess": "Neo has VETO power. Remaining experts vote. Niobe breaks ties."
+    },
+    {
+      "name": "classifier",
+      "experts": [
+        {
+          "name": "Morpheus",
+          "role": "Classification Expert",
+          "responsibilities": [
+            "Performs initial classification of suggestions by category",
+            "Assigns severity levels based on impact analysis",
+            "Groups related suggestions together"
+          ],
+          "priority": 1
+        },
+        {
+          "name": "Trinity",
+          "role": "Verification Expert",
+          "responsibilities": [
+            "Verifies classification accuracy from Morpheus",
+            "Cross-checks severity assignments against codebase context",
+            "Identifies misclassified or borderline suggestions"
+          ],
+          "priority": 2
+        },
+        {
+          "name": "Oracle",
+          "role": "Consensus Expert",
+          "responsibilities": [
+            "Resolves disagreements between Morpheus and Trinity",
+            "Produces the final consensus classification",
+            "Ensures consistent categorization across all suggestions"
+          ],
+          "priority": 3
+        }
+      ],
+      "decisionProcess": "Morpheus classifies, Trinity verifies, Oracle resolves disagreements."
+    }
+  ]
+}
