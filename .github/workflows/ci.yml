@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run --filter '*' lint
+
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run --filter '*' typecheck
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run --filter '*' test
+
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run --filter '*' format:check
+
+  commit-email:
+    name: Verify Commit Email
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check for corporate emails
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          ALLOWED="gmail\.com|users\.noreply\.github\.com|yahoo\.com|outlook\.com|hotmail\.com|protonmail\.com|icloud\.com|me\.com|hey\.com"
+
+          BLOCKED=$(git log "$PR_BASE_SHA".."$PR_HEAD_SHA" --format='%ae' | grep -vE "@($ALLOWED)$" || true)
+
+          if [ -n "$BLOCKED" ]; then
+            echo ""
+            echo "  BLOCKED: corporate email detected in commits:"
+            echo ""
+            echo "$BLOCKED" | sort -u | sed 's/^/    /'
+            echo ""
+            echo "  Fix: git config --local user.email \"you@gmail.com\""
+            echo "  Then amend or rebase your commits."
+            echo ""
+            exit 1
+          fi
