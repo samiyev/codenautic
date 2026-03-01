@@ -1,0 +1,24 @@
+# CodeNautic — Code Owners
+# Reviewers are automatically requested when a PR touches these paths.
+# Requires 2 approvals (configured in branch protection rules).
+
+# Default — all files
+* @samiyev
+
+# Core (domain, use cases, ports)
+packages/core/ @samiyev
+
+# Adapters (providers + libs)
+packages/adapters/ @samiyev
+
+# Runtime (api + workers + webhooks + scheduler + mcp)
+packages/runtime/ @samiyev
+
+# UI (frontend)
+packages/ui/ @samiyev
+
+# CI/CD and project config
+.github/ @samiyev
+.soul/ @samiyev
+CLAUDE.md @samiyev
+package.json @samiyev
