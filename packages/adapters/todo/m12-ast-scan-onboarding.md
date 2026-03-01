@@ -1,0 +1,70 @@
+# M12 — AST, Scan, Onboarding
+
+> Источник: `packages/adapters/TODO.md`
+
+> **Задач (adapters):** 19 | **Проверка:** AST парсинг, граф, Git scanning
+
+> **Результат milestone:** Готов AST- и scanning-слой для структурного понимания репозитория.
+
+## AST v0.1.0 — Parser Базовый слой
+
+> Base parser classes and factory. ~70K tokens.
+
+> **Результат версии:** Завершена версия «AST v0.1.0 — Parser Foundation» в рамках M12; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| AST-PARSER-001 | Реализовать base parser class | TODO | Не начато | Реализация: CollectAllInOnePass: imports, typeAliases, classes, functions, calls. Готово, если: для AST-PARSER-001 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| AST-PARSER-002 | Реализовать parser factory | TODO | Не начато | Реализация: Создает parser by language. Caches tree-sitter instances. Готово, если: для AST-PARSER-002 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| AST-PARSER-005 | Реализовать language detection service | TODO | Не начато | Реализация: By extension. By shebang. Возвращает SupportedLanguage. Готово, если: для AST-PARSER-005 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+
+---
+
+## AST v0.2.0 — TypeScript & JavaScript Parsers
+
+> Core language parsers. ~80K tokens.
+
+> **Результат версии:** Завершена версия «AST v0.2.0 — TypeScript & JavaScript Parsers» в рамках M12; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| AST-PARSER-003 | Реализовать typeScript parser | TODO | Не начато | Реализация:.ts/.tsx. Extracts: classes, interfaces, enums, type aliases, functions. Готово, если: для AST-PARSER-003 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| AST-PARSER-004 | Реализовать javaScript parser | TODO | Не начато | Реализация:.js/.jsx. Extracts: classes, functions, requires, exports. Готово, если: для AST-PARSER-004 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+
+---
+
+## AST v0.3.0 — Построение графа
+
+> CodeGraph builder and enrichment. ~90K tokens.
+
+> **Результат версии:** Завершена версия «AST v0.3.0 — Graph Building» в рамках M12; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| AST-GRAPH-001 | Реализовать codeGraph builder | TODO | Не начато | Реализация: Files Map, functions Map, types Map. Per repo+branch. Готово, если: для AST-GRAPH-001 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| AST-GRAPH-002 | Реализовать graph enrichment | TODO | Не начато | Реализация: Edges: IMPORTS, CALLS, HAS_METHOD, EXTENDS, реализует. O(1) lookup. Готово, если: для AST-GRAPH-002 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| AST-GRAPH-003 | Реализовать pageRank calculation | TODO | Не начато | Реализация: Identifies hot spots. Configurable damping factor. Готово, если: для AST-GRAPH-003 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| AST-GRAPH-004 | Реализовать impact analysis | TODO | Не начато | Реализация: DFS traversal. depth param. direction: forward/backward/both. Готово, если: для AST-GRAPH-004 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+
+---
+
+## Git v0.5.0 — Repository Scanning Support
+
+> Методы для полного сканирования репозитория (clone, file tree, blame, history). ~80K tokens.
+
+> **Результат версии:** Завершена версия «Git v0.5.0 — Repository Scanning Support» в рамках M12; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
+
+| ID | Задача | Статус | Результат | Acceptance Criteria |
+|----------|--------------------|--------|-----------|---------------------|
+| GIT-009 | Реализовать CloneRepository | TODO | Не начато | Реализация: Clone repo to temp dir. Shallow clone option. Auth via token. Cleanup on dispose. Progress callback. Готово, если: для GIT-009 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| GIT-010 | Реализовать GetFullFileTree | TODO | Не начато | Реализация: Возвращает complete file tree for ref. Recursive. Ignore patterns (.gitignore). Возвращает IFileTreeNode[]. Готово, если: для GIT-010 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| GIT-011 | Реализовать GetFileBlame | TODO | Не начато | Реализация: Возвращает blame info per line: author, date, commit. Batch support for multiple files. реализует IGitBlame. Готово, если: для GIT-011 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| GIT-012 | Реализовать GetCommitHistory | TODO | Не начато | Реализация: Возвращает commit history for file/directory. Pagination. Filters: author, dateRange, path. Возвращает ICommit[]. Готово, если: для GIT-012 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| GIT-013 | Реализовать GetBranchList | TODO | Не начато | Реализация: Возвращает all branches. Default branch indicator. Last commit date. Protection status. Готово, если: для GIT-013 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| GIT-014 | Реализовать getFileContent | TODO | Не начато | Реализация: Возвращает file content at specific ref. Binary detection. Encoding handling. Size limit check. Готово, если: для GIT-014 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| GIT-015 | Реализовать getDiffBetweenRefs | TODO | Не начато | Реализация: Возвращает diff between two refs (commits/branches/tags). Stat summary. Per-file changes. Rename detection. Готово, если: для GIT-015 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| GIT-016 | Реализовать getContributorStats | TODO | Не начато | Реализация: Возвращает contributor statistics: commits, lines added/removed, active period. Per-file breakdown. Готово, если: для GIT-016 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| GIT-017 | Реализовать getTagList | TODO | Не начато | Реализация: Возвращает all tags. Annotated tag messages. Associated commit. Sorted by date. Готово, если: для GIT-017 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| GIT-018 | Реализовать temporalCouplingDataSource | TODO | Не начато | Реализация: Возвращает co-change data: files changed together in commits. Window: configurable commit range. Batch support. Готово, если: для GIT-018 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+
+---
