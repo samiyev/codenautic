@@ -1,6 +1,6 @@
 {
   "name": "@codenautic/core",
-  "version": "0.29.1",
+  "version": "0.0.0",
   "description": "Core domain layer for CodeNautic — entities, value objects, ports, and utilities",
   "type": "module",
   "main": "./dist/src/index.js",

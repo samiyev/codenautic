@@ -1,6 +1,6 @@
 {
   "name": "@codenautic/runtime",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Server — API (NestJS), Webhooks, Workers (Review, Scan, Agent, Notification, Analytics), Scheduler, MCP",
   "type": "module",
   "private": true,

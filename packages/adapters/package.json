@@ -1,6 +1,6 @@
 {
   "name": "@codenautic/adapters",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Adapters layer — Git, LLM, Context, Notification providers, AST, Messaging, Worker infra, Database",
   "type": "module",
   "main": "./dist/src/index.js",

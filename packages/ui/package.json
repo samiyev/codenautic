@@ -1,6 +1,6 @@
 {
   "name": "@codenautic/ui",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Frontend — Vite + TanStack Router SPA dashboard for CodeNautic",
   "private": true,
   "type": "module",
