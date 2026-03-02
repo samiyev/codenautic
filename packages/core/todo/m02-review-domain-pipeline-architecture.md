@@ -6,6 +6,17 @@
 
 > **Результат milestone:** Готов доменный контур review и архитектура pipeline для автоматического анализа MR/PR.
 
+## Архитектурная фиксация (2026-03-02)
+
+> Единый контракт для задач core/runtime, где фигурируют pipeline, stage и orchestrator.
+
+1. Каждый stage реализуется как отдельный Use Case (`IUseCase`), а `IPipelineStage` остаётся thin-adapter для обратной совместимости.
+2. Выполнение управляется `PipelineOrchestratorUseCase` (orchestrated event-driven), а не свободной choreography.
+3. Порядок stage задаётся через `PipelineDefinition` с версией (`definitionVersion`), а не хардкодом внутри runner.
+4. Каждый `PipelineRun` фиксирует версию определения (`definitionVersion`) при старте; in-flight run не мигрирует на новую версию автоматически.
+5. После каждого stage сохраняется checkpoint (`currentStage`, `lastCompletedStage`, `attempt`, `status`) для resume/retry.
+6. Обязательные события: `PipelineStarted`, `StageStarted`, `StageCompleted`, `StageFailed`, `PipelineCompleted`, `PipelineFailed`.
+
 ## v0.6.0 — Review Entities
 
 > Ядро code review: Review aggregate, ReviewIssue entity, DiffFile VO.
@@ -95,11 +106,11 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| CORE-054 | Реализовать reviewPipelineState | TODO | Не начато | Реализация: Immutable data class. mergeRequest, config, files[], suggestions[], discardedSuggestions[], metrics?, checkId?, commentId?, externalContext?. with(updates) -> новый ReviewPipelineState. Готово, если: для CORE-054 полностью выполнены пункты блока «Реализация», поведение подтверждено unit/integration тестами (happy-path, negative, edge-case), контракты DTO/ports совместимы, регрессии в смежных use case отсутствуют; DoD: `cd packages/core && bun run lint && bun run typecheck && bun test`. |
-| CORE-055 | Реализовать iPipelineStage | TODO | Не начато | Реализация: Interface: name: string, execute(ctx: ReviewPipelineState): Promise<Result<ReviewPipelineState, StageError>>. Каждая stage получает context и возвращает новый. Готово, если: для CORE-055 полностью выполнены пункты блока «Реализация», поведение подтверждено unit/integration тестами (happy-path, negative, edge-case), контракты DTO/ports совместимы, регрессии в смежных use case отсутствуют; DoD: `cd packages/core && bun run lint && bun run typecheck && bun test`. |
-| CORE-056 | Реализовать pipelineRunner | TODO | Не начато | Реализация: Stages: IPipelineStage[]. run(initialCtx): Promise<PipelineResult>. Sequential execution. Short-circuit на fail. Timing каждой stage. Logging через ILogger. Готово, если: для CORE-056 полностью выполнены пункты блока «Реализация», поведение подтверждено unit/integration тестами (happy-path, negative, edge-case), контракты DTO/ports совместимы, регрессии в смежных use case отсутствуют; DoD: `cd packages/core && bun run lint && bun run typecheck && bun test`. |
-| CORE-057 | Реализовать stageError | TODO | Не начато | Реализация: Extends DomainError. code = "STAGE_ERROR". stageName: string, originalError?: Error, recoverable: boolean. Готово, если: для CORE-057 полностью выполнены пункты блока «Реализация», поведение подтверждено unit/integration тестами (happy-path, negative, edge-case), контракты DTO/ports совместимы, регрессии в смежных use case отсутствуют; DoD: `cd packages/core && bun run lint && bun run typecheck && bun test`. |
-| CORE-058 | Реализовать pipelineResult | TODO | Не начато | Реализация: Interface: context: ReviewPipelineState, stageResults: {name, duration: number, status: "ok" / "fail" / "skipped"}[], totalDuration: number, success: boolean. Готово, если: для CORE-058 полностью выполнены пункты блока «Реализация», поведение подтверждено unit/integration тестами (happy-path, negative, edge-case), контракты DTO/ports совместимы, регрессии в смежных use case отсутствуют; DoD: `cd packages/core && bun run lint && bun run typecheck && bun test`. |
+| CORE-054 | Реализовать reviewPipelineState | TODO | Не начато | Реализация: Immutable state + run metadata. mergeRequest, config, files[], suggestions[], discardedSuggestions[], metrics?, checkId?, commentId?, externalContext?, runId, definitionVersion, currentStageId?, lastCompletedStageId?, stageAttempts: Record<string, number>. `with(updates)` возвращает новый `ReviewPipelineState`. Готово, если: `ReviewPipelineState` хранит версию pipeline-определения и прогресс run, переходы состояния детерминированы и покрыты unit-тестами (включая resume после checkpoint), контракты DTO/ports совместимы; DoD: `cd packages/core && bun run lint && bun run typecheck && bun test`. |
+| CORE-055 | Реализовать iPipelineStage | TODO | Не начато | Реализация: Базовый stage-контракт как Use Case (`IUseCase<StageCommand, StageTransition, StageError>`), плюс adapter `IPipelineStage` для совместимости. Каждый stage получает `ReviewPipelineState` и возвращает transition с новым state и метаданными stage execution. Готово, если: каждый stage исполняется как отдельный use case, adapter-слой покрыт тестами совместимости, а контракты stage-входа/выхода типобезопасны и стабильны; DoD: `cd packages/core && bun run lint && bun run typecheck && bun test`. |
+| CORE-056 | Реализовать pipelineRunner | TODO | Не начато | Реализация: `PipelineOrchestratorUseCase` (совместимый alias: `PipelineRunner`) читает `PipelineDefinition`, фиксирует `definitionVersion` в run, исполняет stage последовательно по definition, публикует lifecycle events и сохраняет checkpoint после каждого stage. Готово, если: смена порядка stage делается через новую `PipelineDefinition` без поломки in-flight run, есть тесты на pinning версии, resume/retry и failure-path на середине pipeline; DoD: `cd packages/core && bun run lint && bun run typecheck && bun test`. |
+| CORE-057 | Реализовать stageError | TODO | Не начато | Реализация: Extends DomainError. code = "STAGE_ERROR". Поля: runId, definitionVersion, stageId, attempt, recoverable, originalError?. Поддержка сериализации для событий и retry-policy. Готово, если: `StageError` однозначно связывает ошибку со stage/run/версией pipeline, сериализуется без потерь данных и покрыт тестами на recoverable/non-recoverable ветки; DoD: `cd packages/core && bun run lint && bun run typecheck && bun test`. |
+| CORE-058 | Реализовать pipelineResult | TODO | Не начато | Реализация: Interface: runId, definitionVersion, context, stageResults: {stageId, stageName, durationMs, status: "ok" / "fail" / "skipped", attempt}[], totalDurationMs, success, stoppedAtStageId?, failureReason?. Готово, если: `PipelineResult` позволяет восстановить точку остановки и версию определения, содержит полный trace stage execution и подтверждён тестами на success/fail/partial completion; DoD: `cd packages/core && bun run lint && bun run typecheck && bun test`. |
 
 ---
 

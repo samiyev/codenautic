@@ -31,6 +31,7 @@
 - Цель: задачи пакета напрямую собирают заявленные продуктовые возможности CodeNautic из `PRODUCT.md`.
 - Ключевые capability направления:
 - API, Webhooks и worker-процессы review/scan/agent/notifications/analytics.
+- Runtime orchestration для versioned pipeline definitions (pinning, checkpoint/resume, stage lifecycle events).
 - Scheduler и MCP entrypoints для оркестрации процессов.
 - E2E доставка AI-review результата обратно в PR/MR.
 - Production-готовность: observability, security, deployment.

@@ -6,6 +6,16 @@
 
 > **Результат milestone:** Готов полный 20-stage pipeline и SafeGuard-фильтрация для качественного AI code review.
 
+## Контракт порядка стадий (связан с M02)
+
+> Для всех задач ниже применяется единая модель versioned pipeline definition.
+
+1. Нумерация `Stage 1..20` в этом файле — canonical alias для `PipelineDefinition v1`.
+2. Реальный порядок исполнения берётся из `PipelineDefinition`, а не из хардкода в runner.
+3. Добавление/перестановка stage выполняется только через новую `definitionVersion`.
+4. In-flight run остаётся на версии, с которой стартовал (pinning).
+5. Каждый stage публикует lifecycle events и завершает шаг checkpoint-обновлением run state.
+
 ## v0.12.0 — Pipeline: Validation Stages (1-4)
 
 > Проверка предпосылок и загрузка конфигурации.

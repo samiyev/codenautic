@@ -6,6 +6,15 @@
 
 > **Результат milestone:** Готов e2e поток webhook -> очередь -> pipeline -> комментарии в MR/PR.
 
+## Архитектурная фиксация orchestration (2026-03-02)
+
+> Runtime следует core-контракту M02/M03 для pipeline.
+
+1. Worker исполняет stage через orchestrator use case и versioned `PipelineDefinition`.
+2. `PipelineRun` фиксирует `definitionVersion` на старте и хранит checkpoint по каждому stage.
+3. Изменение порядка stage делается только новой `definitionVersion`; in-flight job не переключается автоматически.
+4. По каждому переходу публикуются lifecycle events (`StageStarted/Completed/Failed`) для наблюдаемости и retry.
+
 ## Webhooks v0.0.0 — Базовая структура пакета
 
 > Базовая инфраструктура, IoC-модуль и barrel export.
@@ -97,7 +106,7 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| REVW-001 | Реализовать code review processor | TODO | Не начато | Реализация: Executes 20-stage pipeline. 15min timeout. Parallel files (30). Готово, если: 20-stage pipeline выполняется в worker end-to-end на реальном payload, при timeout/исключениях задача переводится в корректный terminal state с retry/DLQ политикой; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
+| REVW-001 | Реализовать code review processor | TODO | Не начато | Реализация: Executes definition-driven review pipeline (базовая `PipelineDefinition v1` с 20 stage aliases). 15min timeout. Parallel files (30). `PipelineRun` хранит `definitionVersion`, progress checkpoint и stage attempts. Готово, если: pipeline выполняется end-to-end на реальном payload, при timeout/исключениях задача переводится в корректный terminal state с retry/DLQ, а resume продолжает run с последнего checkpoint; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
 
 ---
 
@@ -125,8 +134,8 @@
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
 | REVW-006 | Реализовать reviewJobConsumer | TODO | Не начато | Реализация: Покрыт REVW-001: ReviewTriggerProcessor extends BaseJobProcessor, обрабатывает review.trigger. Retry/DLQ через worker-infra. Готово, если: consumer корректно читает review.trigger, подтверждает успешные задачи и не ack-ает неуспешные до исчерпания retry, после чего отправляет в DLQ; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
-| REVW-007 | Реализовать reviewPipelineOrchestrator | TODO | Не начато | Реализация: Покрыт REVW-001: маппинг payload → PipelineContext, вызов PipelineRunnerUseCase, обработка stage errors. Готово, если: для REVW-007 процесс проходит e2e/integration happy-path и failure-path, DI wiring и queue contracts подтверждены тестами, а retry/timeout/DLQ переходы завершаются наблюдаемым terminal статусом и логируются; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
-| REVW-008 | Реализовать reviewWorkerContainer | TODO | Не начато | Реализация: IoC tokens, registerReviewWorkerModule: domain services, task use cases, task services, review stage deps, 21 stages, PipelineRunner, processor. Готово, если: для REVW-008 процесс проходит e2e/integration happy-path и failure-path, DI wiring и queue contracts подтверждены тестами, а retry/timeout/DLQ переходы завершаются наблюдаемым terminal статусом и логируются; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
+| REVW-007 | Реализовать reviewPipelineOrchestrator | TODO | Не начато | Реализация: Покрыт REVW-001: маппинг payload → `PipelineRunCommand`, вызов `PipelineOrchestratorUseCase` (alias `PipelineRunnerUseCase`), обработка stage errors, запись checkpoint после каждого stage, публикация lifecycle events. Готово, если: orchestrator корректно определяет текущий stage, точку остановки и возможность resume, поддерживает разные `definitionVersion`, а failure-path покрыт e2e/integration тестами; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
+| REVW-008 | Реализовать reviewWorkerContainer | TODO | Не начато | Реализация: IoC tokens, registerReviewWorkerModule: domain services, task use cases, task services, stage-use-case registry (`stageId -> use case`), `PipelineDefinitionProvider`, orchestrator, processor. Готово, если: DI wiring поддерживает переключение между версиями pipeline definition без изменения кода orchestrator, все stage зависимости резолвятся детерминированно, а queue contracts подтверждены тестами; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
 | REVW-009 | Реализовать reviewWorkerEntrypoint | TODO | Не начато | Реализация: Main.ts: env validation (Zod), Container setup, real provider/DB bindings (replaced placeholders), graceful shutdown, health check (Bun.serve), BullMQ consumer. Готово, если: для REVW-009 процесс проходит e2e/integration happy-path и failure-path, DI wiring и queue contracts подтверждены тестами, а retry/timeout/DLQ переходы завершаются наблюдаемым terminal статусом и логируются; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
 
 ---
@@ -140,8 +149,8 @@
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
 | REVW-010 | Реализовать resultPublisher | TODO | Не начато | Реализация: LocalEventBus (in-process IEventBus), ReviewCompletedHandler → enqueue notify.send + analytics.metrics через BullMQJobQueueAdapter. Partial failure. 9 тестов. Готово, если: для REVW-010 процесс проходит e2e/integration happy-path и failure-path, DI wiring и queue contracts подтверждены тестами, а retry/timeout/DLQ переходы завершаются наблюдаемым terminal статусом и логируются; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
-| REVW-011 | Реализовать reviewCommentWriter | TODO | Не начато | Реализация: Покрыт core stages: CreateCcrLevelCommentsStage (stage 12) + CreateFileCommentsStage (stage 14). Batching и update-on-re-review — future enhancement в core. Готово, если: для REVW-011 процесс проходит e2e/integration happy-path и failure-path, DI wiring и queue contracts подтверждены тестами, а retry/timeout/DLQ переходы завершаются наблюдаемым terminal статусом и логируются; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
-| REVW-012 | Реализовать reviewStatusUpdater | TODO | Не начато | Реализация: Покрыт core stages: RequestChangesOrApproveStage (stage 18) + FinalizeCheckStage (stage 19). Approve/requestChanges + updateCheckRun. Готово, если: для REVW-012 процесс проходит e2e/integration happy-path и failure-path, DI wiring и queue contracts подтверждены тестами, а retry/timeout/DLQ переходы завершаются наблюдаемым terminal статусом и логируются; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
+| REVW-011 | Реализовать reviewCommentWriter | TODO | Не начато | Реализация: Покрыт core stages: `CreateCcrLevelCommentsStage` и `CreateFileCommentsStage` (aliases default definition v1). Batching и update-on-re-review — future enhancement в core. Готово, если: writer корректно отрабатывает при изменении `definitionVersion` (по stage alias, а не по числу), failure-path логируется, а e2e/integration покрытие подтверждает отсутствие дублей комментариев; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
+| REVW-012 | Реализовать reviewStatusUpdater | TODO | Не начато | Реализация: Покрыт core stages: `RequestChangesOrApproveStage` и `FinalizeCheckStage` (aliases default definition v1). Approve/requestChanges + updateCheckRun. Готово, если: updater корректно определяет точку финализации по stage alias в текущей `definitionVersion`, а terminal status всегда согласован с pipeline result; DoD: `cd packages/runtime && bun run lint && bun run typecheck && bun test`. |
 
 ---
 

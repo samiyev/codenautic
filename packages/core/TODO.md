@@ -31,6 +31,7 @@
 - Цель: задачи пакета напрямую собирают заявленные продуктовые возможности CodeNautic из `PRODUCT.md`.
 - Ключевые capability направления:
 - 20-stage review pipeline и SafeGuard-фильтры.
+- Versioned pipeline orchestration: stage-as-use-case, checkpoint/resume, definition pinning.
 - Custom Rules и Continuous Learning в доменной модели.
 - Conversation Agent и CCR Summary на уровне use cases.
 - CodeCity, onboarding, causal/drift/predictive домены.
