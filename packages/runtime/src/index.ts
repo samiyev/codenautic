@@ -13,6 +13,19 @@ export {
     type IApiEnvironment,
 } from "./api/config/api-env"
 export {
+    ApiConfigModule,
+    ApiConfigurationValidationError,
+    loadApiConfig,
+    type IApiCacheConfig,
+    type IApiConfig,
+    type IApiConfigOverrides,
+    type IApiDatabaseConfig,
+    type IApiRuntimeConfig,
+    type IApiSecurityConfig,
+    type IApiServerConfig,
+    type ILoadApiConfigOptions,
+} from "./api/config/api-config.module"
+export {
     InMemoryRuntimeDomainEventBus,
 } from "./review-worker/adapters/in-memory-runtime-domain-event-bus"
 export {

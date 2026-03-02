@@ -1,7 +1,9 @@
 import {
-    type IApiEnvironment,
-    parseApiEnvironment,
-} from "./config/api-env"
+    ApiConfigModule,
+    type IApiConfig,
+    type IApiConfigOverrides,
+} from "./config/api-config.module"
+import {type IApiEnvironment} from "./config/api-env"
 
 /**
  * Minimal HTTP server abstraction for API runtime.
@@ -40,6 +42,7 @@ export interface IApiRuntime {
  */
 export interface IStartApiOptions {
     env?: Record<string, string | undefined>
+    configOverrides?: IApiConfigOverrides
     factory?: IApiServerFactory
 }
 
@@ -51,12 +54,17 @@ export interface IStartApiOptions {
  * @throws Error When environment or server factory is invalid.
  */
 export function startApi(options: IStartApiOptions = {}): Promise<IApiRuntime> {
-    const environment = parseApiEnvironment(options.env ?? process.env)
+    const configModule = ApiConfigModule.fromEnvironment({
+        env: options.env,
+        overrides: options.configOverrides,
+    })
+    const config = configModule.getConfig()
+    const environment = mapConfigToEnvironment(config)
     const factory = options.factory ?? bunServerFactory
 
     const server = factory({
-        port: environment.port,
-        hostname: environment.host,
+        port: config.server.port,
+        hostname: config.server.host,
         fetch(request: Request): Response {
             return handleRequest(request, environment)
         },
@@ -93,6 +101,24 @@ function handleRequest(request: Request, environment: IApiEnvironment): Response
     return new Response("Not Found", {
         status: 404,
     })
+}
+
+/**
+ * Maps API config to environment shape kept for runtime compatibility.
+ *
+ * @param config API configuration.
+ * @returns Environment-like runtime structure.
+ */
+function mapConfigToEnvironment(config: IApiConfig): IApiEnvironment {
+    return {
+        nodeEnv: config.runtime.nodeEnv,
+        adminApiKey: config.security.adminApiKey,
+        mongodbUri: config.database.mongodbUri,
+        redisUrl: config.cache.redisUrl,
+        host: config.server.host,
+        port: config.server.port,
+        healthcheckEnabled: config.server.healthcheckEnabled,
+    }
 }
 
 /**
