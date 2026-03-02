@@ -1,6 +1,8 @@
 import type {ReactElement} from "react"
+import {useTranslation} from "react-i18next"
 
 import {useHealthQuery} from "@/lib/hooks/queries"
+import {formatLocalizedDateTime, getCurrentLocale} from "@/lib/i18n/i18n"
 
 /**
  * Первый системный экран foundation-этапа: статус runtime/api.
@@ -8,6 +10,8 @@ import {useHealthQuery} from "@/lib/hooks/queries"
  * @returns Визуальное состояние health-check запроса.
  */
 export function SystemHealthPage(): ReactElement {
+    const {t, i18n} = useTranslation(["common", "system"])
+    const locale = getCurrentLocale(i18n)
     const healthQuery = useHealthQuery()
 
     const isPending = healthQuery.isPending
@@ -17,8 +21,8 @@ export function SystemHealthPage(): ReactElement {
                 aria-busy="true"
                 className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8"
             >
-                <h1 className="text-3xl font-semibold tracking-tight">CodeNautic Runtime</h1>
-                <p className="mt-4 text-base text-slate-600">Проверяем доступность API...</p>
+                <h1 className="text-3xl font-semibold tracking-tight">{t("common:appTitle")}</h1>
+                <p className="mt-4 text-base text-slate-600">{t("common:loading")}</p>
             </section>
         )
     }
@@ -26,9 +30,9 @@ export function SystemHealthPage(): ReactElement {
     if (healthQuery.error !== null && healthQuery.error !== undefined) {
         return (
             <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
-                <h1 className="text-3xl font-semibold tracking-tight">CodeNautic Runtime</h1>
+                <h1 className="text-3xl font-semibold tracking-tight">{t("common:appTitle")}</h1>
                 <p aria-live="assertive" className="mt-4 text-base text-rose-700" role="alert">
-                    Не удалось получить статус API
+                    {t("system:unavailable")}
                 </p>
                 <button
                     className="mt-6 rounded-full bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
@@ -37,7 +41,7 @@ export function SystemHealthPage(): ReactElement {
                     }}
                     type="button"
                 >
-                    Повторить проверку
+                    {t("common:retry")}
                 </button>
             </section>
         )
@@ -45,16 +49,21 @@ export function SystemHealthPage(): ReactElement {
 
     const healthData = healthQuery.data
 
+    const localizedTimestamp = formatLocalizedDateTime(healthData.timestamp, locale)
+
     return (
         <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
-            <h1 className="text-3xl font-semibold tracking-tight">CodeNautic Runtime</h1>
-            <p className="mt-3 text-sm uppercase tracking-[0.2em] text-slate-500">Состояние API</p>
+            <h1 className="text-3xl font-semibold tracking-tight">{t("common:appTitle")}</h1>
+            <p className="mt-3 text-sm uppercase tracking-[0.2em] text-slate-500">
+                {t("system:healthStatus")}
+            </p>
             <p className="mt-2 text-4xl font-bold text-emerald-700">{healthData.status}</p>
             <p className="mt-4 text-sm text-slate-600">
-                Service: <span className="font-medium text-slate-900">{healthData.service}</span>
+                {t("system:service")}: <span className="font-medium text-slate-900">{healthData.service}</span>
             </p>
             <p className="mt-1 text-sm text-slate-600">
-                Timestamp: <span className="font-medium text-slate-900">{healthData.timestamp}</span>
+                {t("system:timestamp")}:{" "}
+                <span className="font-medium text-slate-900">{localizedTimestamp}</span>
             </p>
         </section>
     )
