@@ -17,6 +17,8 @@ export interface IApiConfig {
  */
 export interface IUiEnv {
     readonly VITE_API_URL?: string
+    readonly MODE?: string
+    readonly PROD?: boolean
 }
 
 const DEFAULT_API_URL = "http://localhost:3000"
@@ -26,11 +28,17 @@ const DEFAULT_API_URL = "http://localhost:3000"
  *
  * @param env Переменные окружения Vite.
  * @returns Готовый объект конфигурации для API-клиента.
- * @throws Error Если `VITE_API_URL` передан, но пустой.
+ * @throws Error Если `VITE_API_URL` пустой или невалидный.
+ * @throws Error Если в production отсутствует `VITE_API_URL`.
  */
 export function createApiConfig(env: IUiEnv): IApiConfig {
     const rawBaseUrl = env.VITE_API_URL
+
     if (rawBaseUrl === undefined) {
+        if (isProductionEnvironment(env)) {
+            throw new Error("VITE_API_URL обязателен в production режиме")
+        }
+
         return {
             baseUrl: DEFAULT_API_URL,
             defaultHeaders: {
@@ -39,10 +47,7 @@ export function createApiConfig(env: IUiEnv): IApiConfig {
         }
     }
 
-    const normalizedBaseUrl = rawBaseUrl.trim()
-    if (normalizedBaseUrl.length === 0) {
-        throw new Error("VITE_API_URL не должен быть пустым")
-    }
+    const normalizedBaseUrl = normalizeBaseUrl(rawBaseUrl)
 
     return {
         baseUrl: normalizedBaseUrl,
@@ -50,4 +55,47 @@ export function createApiConfig(env: IUiEnv): IApiConfig {
             "Content-Type": "application/json",
         },
     }
+}
+
+/**
+ * Detects whether runtime environment is production.
+ *
+ * @param env UI environment source.
+ * @returns True for production mode.
+ */
+function isProductionEnvironment(env: IUiEnv): boolean {
+    if (env.PROD === true) {
+        return true
+    }
+    return env.MODE === "production"
+}
+
+/**
+ * Normalizes base URL and validates supported protocol.
+ *
+ * @param value Raw URL value from env.
+ * @returns Normalized URL without trailing slash.
+ */
+function normalizeBaseUrl(value: string): string {
+    const trimmedValue = value.trim()
+    if (trimmedValue.length === 0) {
+        throw new Error("VITE_API_URL не должен быть пустым")
+    }
+
+    let parsedUrl: URL
+    try {
+        parsedUrl = new URL(trimmedValue)
+    } catch {
+        throw new Error("VITE_API_URL должен быть абсолютным URL")
+    }
+
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+        throw new Error("VITE_API_URL должен использовать http или https")
+    }
+
+    if (trimmedValue.endsWith("/")) {
+        return trimmedValue.slice(0, -1)
+    }
+
+    return trimmedValue
 }

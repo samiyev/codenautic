@@ -97,6 +97,20 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run --filter '*' format:check
 
+  heuristics-guard:
+    name: Heuristics Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run heuristics:build-registry
+      - run: bun run heuristics:validate-registry
+      - run: bun run heuristics:validate-rules-794
+      - run: bun run heuristics:lint-plan-criteria
+
   commit-email:
     name: Verify Commit Email
     runs-on: ubuntu-latest

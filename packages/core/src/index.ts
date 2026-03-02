@@ -1,6 +1,16 @@
 export {type IUseCase} from "./application/ports/inbound/use-case.port"
 export {type IDomainEventBus} from "./application/ports/outbound/domain-event-bus.port"
 export {type IReviewRepository} from "./application/ports/outbound/review-repository.port"
+export {type IRuleRepository} from "./application/ports/outbound/rule-repository.port"
+export {
+    type IHeuristicRegistryEntry,
+    type IHeuristicResolutionMode,
+    type IHeuristicRiskLevel,
+    type IHeuristicStatus,
+    type IHeuristicType,
+    type IHeuristicVerificationRule,
+} from "./application/dto/heuristics/heuristic-registry-entry.dto"
+export {type IImportedRuleHeuristicsMetadata} from "./application/dto/rules/rule-import-metadata.dto"
 export {
     CompleteReviewUseCase,
     type ICompleteReviewInput,
@@ -28,4 +38,15 @@ export {type ICreateRuleProps, type IReconstituteRuleProps, RuleFactory} from ".
 export {type IEntityFactory} from "./domain/factories/entity-factory.interface"
 export {RuleStatusPolicyService} from "./domain/services/rule-status-policy.service"
 export {UniqueId} from "./domain/value-objects/unique-id.value-object"
+export {createToken, type InjectionToken} from "./ioc/create-token"
+export {TOKENS} from "./ioc/tokens"
+export {
+    ARCHITECTURE_LAYER,
+    collectTypeScriptFiles,
+    type ArchitectureLayer,
+    type IDependencyDirectionValidationOptions,
+    type IDependencyDirectionViolation,
+    type ISourceFileSnapshot,
+    validateDependencyDirection,
+} from "./shared/dependency-direction-guard"
 export {Result} from "./shared/result"

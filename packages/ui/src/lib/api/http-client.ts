@@ -105,7 +105,7 @@ export class FetchHttpClient implements IHttpClient {
     }
 
     private buildUrl(path: string, query: Readonly<Record<string, QueryValue | undefined>> | undefined): string {
-        const normalizedPath = path.startsWith("/") ? path : `/${path}`
+        const normalizedPath = normalizeRequestPath(path)
         const target = new URL(normalizedPath, this.config.baseUrl)
 
         if (query !== undefined) {
@@ -118,4 +118,47 @@ export class FetchHttpClient implements IHttpClient {
 
         return target.toString()
     }
+}
+
+/**
+ * Normalizes request path and rejects unsafe values.
+ *
+ * @param path Raw request path.
+ * @returns Normalized path that starts with `/`.
+ */
+function normalizeRequestPath(path: string): string {
+    const trimmedPath = path.trim()
+    if (trimmedPath.length === 0) {
+        throw new Error("Request path не должен быть пустым")
+    }
+
+    if (looksLikeAbsoluteUrl(trimmedPath)) {
+        throw new Error("Request path не должен быть абсолютным URL")
+    }
+
+    if (trimmedPath.startsWith("//")) {
+        throw new Error("Request path не должен начинаться с //")
+    }
+
+    if (trimmedPath.includes(" ")) {
+        throw new Error("Request path не должен содержать пробелы")
+    }
+
+    const normalizedPath = trimmedPath.startsWith("/") ? trimmedPath : `/${trimmedPath}`
+    const pathSegments = normalizedPath.split("/")
+    if (pathSegments.includes("..")) {
+        throw new Error("Request path не должен содержать '..'")
+    }
+
+    return normalizedPath
+}
+
+/**
+ * Detects whether path string already looks like absolute URL.
+ *
+ * @param value Path-like input.
+ * @returns True when value starts with URI scheme.
+ */
+function looksLikeAbsoluteUrl(value: string): boolean {
+    return /^[a-zA-Z][a-zA-Z\d+.-]*:\/\//.test(value)
 }

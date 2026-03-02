@@ -24,7 +24,11 @@
     "gitlab"
   ],
   "scripts": {
-    "postinstall": "git config --local core.hooksPath .githooks"
+    "postinstall": "git config --local core.hooksPath .githooks",
+    "heuristics:build-registry": "bun scripts/heuristics/build-registry.ts",
+    "heuristics:validate-registry": "bun scripts/heuristics/validate-registry.ts",
+    "heuristics:validate-rules-794": "bun scripts/heuristics/validate-registry.ts --rules-only",
+    "heuristics:lint-plan-criteria": "bun scripts/heuristics/lint-plan-criteria.ts"
   },
   "workspaces": [
     "packages/*"

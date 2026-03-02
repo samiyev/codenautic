@@ -1,6 +1,8 @@
 # M00 — DDD Bootstrap (Adapters)
 
 > Источник: `docs/ddd/sprint-1-ddd-bootstrap.md`
+>
+> Reference: `docs/ddd/context-map.md`, `docs/ddd/ubiquitous-language.md`, `docs/ddd/domain-events-catalog.md`
 
 > **Задач:** 4 | **Фокус:** ACL contract tests + messaging idempotency adapters
 
