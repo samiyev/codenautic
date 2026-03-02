@@ -20,6 +20,15 @@ export class RuleActivated extends BaseDomainEvent<IRuleActivatedPayload> {
      * @param occurredAt Event creation time.
      */
     public constructor(aggregateId: string, payload: IRuleActivatedPayload, occurredAt?: Date) {
-        super("RuleActivated", aggregateId, payload, occurredAt)
+        super(aggregateId, payload, occurredAt)
+    }
+
+    /**
+     * Resolves event name literal.
+     *
+     * @returns Event name.
+     */
+    protected resolveEventName(): string {
+        return "RuleActivated"
     }
 }

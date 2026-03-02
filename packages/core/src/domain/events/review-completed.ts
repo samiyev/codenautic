@@ -21,6 +21,15 @@ export class ReviewCompleted extends BaseDomainEvent<IReviewCompletedPayload> {
      * @param occurredAt Event creation time.
      */
     public constructor(aggregateId: string, payload: IReviewCompletedPayload, occurredAt?: Date) {
-        super("ReviewCompleted", aggregateId, payload, occurredAt)
+        super(aggregateId, payload, occurredAt)
+    }
+
+    /**
+     * Resolves event name literal.
+     *
+     * @returns Event name.
+     */
+    protected resolveEventName(): string {
+        return "ReviewCompleted"
     }
 }

@@ -16,6 +16,12 @@ interface IStubPayload extends DomainEventPayload {
     value: number
 }
 
+class StubAggregateEvent extends BaseDomainEvent<IStubPayload> {
+    protected resolveEventName(): string {
+        return "StubAggregateEventRaised"
+    }
+}
+
 class StubAggregateRoot extends AggregateRoot<IStubAggregateProps> {
     public constructor(id: UniqueId, props: IStubAggregateProps) {
         super(id, props)
@@ -35,8 +41,8 @@ describe("AggregateRoot", () => {
 
     test("accumulates domain events and exposes snapshot copy", () => {
         const aggregate = new StubAggregateRoot(UniqueId.create("aggregate-1"), {name: "stub"})
-        const first = new BaseDomainEvent<IStubPayload>("StubEventRaised", "aggregate-1", {value: 1})
-        const second = new BaseDomainEvent<IStubPayload>("StubEventRaised", "aggregate-1", {value: 2})
+        const first = new StubAggregateEvent("aggregate-1", {value: 1})
+        const second = new StubAggregateEvent("aggregate-1", {value: 2})
 
         aggregate.recordEvent(first)
         aggregate.recordEvent(second)
@@ -45,7 +51,7 @@ describe("AggregateRoot", () => {
         expect(firstSnapshot).toHaveLength(2)
 
         const mutableSnapshot = [...firstSnapshot]
-        mutableSnapshot.push(new BaseDomainEvent<IStubPayload>("Fake", "aggregate-1", {value: 3}))
+        mutableSnapshot.push(new StubAggregateEvent("aggregate-1", {value: 3}))
 
         expect(mutableSnapshot).toHaveLength(3)
         expect(aggregate.domainEvents).toHaveLength(2)
@@ -53,7 +59,7 @@ describe("AggregateRoot", () => {
 
     test("clearDomainEvents returns events and then empties buffer", () => {
         const aggregate = new StubAggregateRoot(UniqueId.create("aggregate-1"), {name: "stub"})
-        const event = new BaseDomainEvent<IStubPayload>("StubEventRaised", "aggregate-1", {value: 1})
+        const event = new StubAggregateEvent("aggregate-1", {value: 1})
         aggregate.recordEvent(event)
 
         const firstClear = aggregate.clearDomainEvents()
@@ -65,9 +71,7 @@ describe("AggregateRoot", () => {
 
     test("pullDomainEvents keeps backward-compatible behavior", () => {
         const aggregate = new StubAggregateRoot(UniqueId.create("aggregate-1"), {name: "stub"})
-        aggregate.recordEvent(
-            new BaseDomainEvent<IStubPayload>("StubEventRaised", "aggregate-1", {value: 1}),
-        )
+        aggregate.recordEvent(new StubAggregateEvent("aggregate-1", {value: 1}))
 
         const firstPull = aggregate.pullDomainEvents()
         const secondPull = aggregate.pullDomainEvents()
