@@ -84,6 +84,13 @@ export default tseslint.config(
         ...tseslint.configs.disableTypeChecked,
     },
     {
-        ignores: ["**/dist/", "**/node_modules/", "**/coverage/", "**/.next/", "**/generated/"],
+        ignores: [
+            "**/dist/",
+            "**/node_modules/",
+            "**/coverage/",
+            "**/.next/",
+            "**/generated/",
+            "**/routeTree.gen.ts",
+        ],
     },
 )
