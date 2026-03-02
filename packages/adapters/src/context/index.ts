@@ -12,3 +12,8 @@ export {
     type ContextAclErrorCode,
 } from "./errors/context-acl.error"
 export {JiraIssueAcl} from "./acl/jira-issue.acl"
+export {CONTEXT_TOKENS} from "./context.tokens"
+export {
+    registerContextModule,
+    type IContextModuleOverrides,
+} from "./register-context.module"

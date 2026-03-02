@@ -11,3 +11,5 @@ export {
 } from "./contracts/merge-request.contract"
 export {GIT_ACL_ERROR_CODE, GitAclError, type GitAclErrorCode} from "./errors/git-acl.error"
 export {GitLabMergeRequestAcl} from "./acl/gitlab-merge-request.acl"
+export {GIT_TOKENS} from "./git.tokens"
+export {registerGitModule, type IGitModuleOverrides} from "./register-git.module"

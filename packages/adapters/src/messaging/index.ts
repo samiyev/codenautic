@@ -15,3 +15,8 @@ export {
 } from "./errors/messaging-adapter.error"
 export {OutboxWriterAdapter} from "./outbox/outbox-writer.adapter"
 export {InboxDeduplicatorAdapter} from "./inbox/inbox-deduplicator.adapter"
+export {MESSAGING_TOKENS} from "./messaging.tokens"
+export {
+    registerMessagingModule,
+    type IMessagingModuleOverrides,
+} from "./register-messaging.module"
