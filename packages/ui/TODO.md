@@ -2,7 +2,7 @@
 
 > UI: единое web-приложение, вызывает `api` по HTTP
 
-> **Задач:** 236 | **Версий:** 39 | **Выполнено:** 88
+> **Задач:** 261 | **Версий:** 39 | **Выполнено:** 88
 
 ---
 
@@ -14,8 +14,8 @@
 4. **JSDoc only** — только `/** */`, без `//`
 5. **A11y Built-in** — ARIA labels, keyboard navigation, focus management в каждом компоненте. WCAG AA. Не отдельная
 задача — встроено в acceptance criteria каждого UI-элемента
-6. **Performance Built-in** — `next/image` для изображений, dynamic imports для тяжёлых компонентов, proper cleanup в
-useEffect. Базовые практики, не отдельная версия
+6. **Performance Built-in** — корректные размеры изображений (`width/height` + `loading="lazy"` + `decoding="async"`),
+dynamic imports для тяжёлых компонентов, proper cleanup в useEffect. Базовые практики, не отдельная версия
 
 ---
 
@@ -25,8 +25,22 @@ useEffect. Базовые практики, не отдельная версия
 spacing, компоненты)
 2. **frontend-design skill** — при создании UI компонентов и страниц используй skill `frontend-design` для генерации
 production-grade интерфейсов
-3. **Consistency** — все компоненты следуют OKLch color palette, Radix Primitives + CVA паттерну, Tailwind utility
+3. **Consistency** — все компоненты следуют OKLch color palette, HeroUI v3 паттерну и Tailwind utility
 classes
+
+---
+
+## Migration Priority — HeroUI v3
+
+- Принято решение о полной миграции UI-слоя на `HeroUI v3` (beta) c датой фиксации: `2026-03-03`.
+- Все новые UI-задачи проектируются сразу под `HeroUI v3`.
+- Упоминания `shadcn/ui`, `Radix`, `CVA` в старых задачах трактуются как legacy-формулировки и переписываются в рамках
+  текущей миграции.
+- Цель миграции: единый компонентный слой (`HeroUI v3`), единый theming, единая a11y-модель на базе React Aria.
+- Legacy-контроль: в рамках migration-задач обязательно удалить/заменить `packages/ui/components.json` (shadcn schema),
+  а также неиспользуемые зависимости legacy UI-слоя в `packages/ui/package.json`.
+- UX-цель по темам: пользователь может менять тему интерфейса в стиле HeroUI (mode + presets + предпросмотр) без
+  перезагрузки страницы.
 
 ---
 

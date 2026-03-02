@@ -75,7 +75,7 @@ bun add @codenautic/ui
 - **Dashboard**: metric cards, activity timeline, health ring, trend indicators, ambient background
 - **Code review UI**: diff viewer (split/unified), issue threads, feedback, streaming progress
 - **Graph visualization**: file dependency graph, call graph, module graph (React Flow/D3)
-- **Design system**: shadcn/ui (Radix + CVA), 15+ базовых компонентов
+- **Design system**: целевой стек HeroUI v3 (React Aria), миграция из legacy-слоя в процессе
 - **Settings**: git providers, LLM providers, code review config, teams, billing, API keys
 - **Auth**: protected routes, permissions (CASL), OAuth
 - **Observability**: Sentry error reporting, Pyroscope profiling, Web Vitals
@@ -92,7 +92,7 @@ bun add @codenautic/ui
 | Routing       | TanStack Router (file-based)                |
 | Server State  | TanStack React Query 5                      |
 | Forms         | React Hook Form + Zod                       |
-| Styling       | Tailwind CSS 4, shadcn/ui (Radix + CVA)     |
+| Styling       | Tailwind CSS 4, HeroUI v3 (target, migration in progress) |
 | Charts        | Recharts (единственная charting-библиотека) |
 | 3D            | Three.js (CodeCity visualization)           |
 | i18n          | i18next                                     |
@@ -270,7 +270,7 @@ bun run build-storybook # Storybook build
 - **@tanstack/react-router** — file-based routing
 - **@tanstack/react-query** — server state management
 - **tailwindcss** — utility-first CSS
-- **shadcn/ui** — component collection (Radix Primitives + CVA)
+- **UI component layer** — migration target: HeroUI v3 (React Aria), legacy: shadcn/ui
 - **recharts** — charting (единственная библиотека)
 - **react-hook-form** + **zod** — form management + validation
 - **i18next** — internationalization

@@ -99,7 +99,7 @@ analytics, настройки — через UI. Все 4 Git-платформы
 - **AST (0%):** 9 языков (Tree-sitter), Code Graph, PageRank, Impact Analysis, Clusters, Graph Diff
 - **Webhooks (0%):** Handlers для 4 платформ, Signature verification, Security, Inbox/Outbox, Mentions,
   Push-reindex, E2E tests
-- **UI (0%):** App Router, Auth, Design System (shadcn/ui), Layout, Forms, Core pages, Dashboard widgets
+- **UI (0%):** App Router, Auth, Design System (HeroUI v3 migration target), Layout, Forms, Core pages, Dashboard widgets
 - **Workers (0%):** Review Worker, Scheduler, Scan Worker, Notification Worker,
   Analytics Worker, Agent Worker
 

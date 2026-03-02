@@ -212,7 +212,7 @@ For more on the architecture, see [PRODUCT.md](./PRODUCT.md).
 |-------------|----------------------------------------------------------------------------------------------|
 | Runtime     | Bun 1.2, TypeScript 5.7                                                                      |
 | Backend     | NestJS 11, Pino, PM2                                                                         |
-| Frontend    | Vite 7, React 19, TanStack Router, Tailwind CSS 4, shadcn/ui (Radix + CVA), Recharts, Sonner |
+| Frontend    | Vite 7, React 19, TanStack Router, Tailwind CSS 4, HeroUI v3 (migration target), Recharts, Sonner |
 | Database    | MongoDB 8 (mongoose), Qdrant 1.13                                                            |
 | Queue/Cache | Redis 7.4 (Redis Streams), BullMQ                                                            |
 | Validation  | Zod                                                                                          |
