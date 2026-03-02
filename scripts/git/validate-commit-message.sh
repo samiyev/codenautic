@@ -22,6 +22,7 @@ fail_validation() {
     echo "  Required policy:"
     echo "    - Format: <type>(<scope>): <subject> (scope optional for repo-level changes)"
     echo "    - Allowed types: feat, fix, docs, style, refactor, perf, test, chore"
+    echo "    - Language: English only (no Cyrillic characters)"
     echo "    - Header length: at least 80 characters"
     echo "    - Body required: at least 20 words"
     echo "    - Forbidden: Co-Authored-By and AI attribution lines"
@@ -66,6 +67,10 @@ validate_message_file() {
 
     if printf "%s\n" "$header" | grep -q "[A-Z]"; then
         fail_validation "$context" "header must be lowercase"
+    fi
+
+    if printf "%s\n" "$message" | grep -Eq "[А-Яа-яЁё]"; then
+        fail_validation "$context" "commit message must be in english (cyrillic is not allowed)"
     fi
 
     header_length=${#header}

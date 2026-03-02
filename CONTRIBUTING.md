@@ -384,6 +384,7 @@ chore(repo): update workspace lint setup to enforce stable commit workflow consi
 - Imperative mood, lowercase, header length at least 80 characters
 - **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`
 - **Scope:** package name (omit for root changes)
+- Commit message language is **English only** (no Cyrillic characters in header or body)
 - One commit = one logical change (atomic commits)
 - Commit body is required and must contain at least 20 words with clear context
 - Do **NOT** add AI attribution or `Co-Authored-By` lines
