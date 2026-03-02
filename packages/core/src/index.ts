@@ -1,6 +1,10 @@
 export {type IUseCase} from "./application/ports/inbound/use-case.port"
 export {type IDomainEventBus} from "./application/ports/outbound/common/domain-event-bus.port"
 export {type ILogger} from "./application/ports/outbound/common/logger.port"
+export {type IRepository} from "./application/ports/outbound/common/repository.port"
+export {type ICache} from "./application/ports/outbound/cache/cache.port"
+export {type IGitProvider} from "./application/ports/outbound/git/git-provider.port"
+export {type ILLMProvider} from "./application/ports/outbound/llm/llm-provider.port"
 export {
     PIPELINE_CHECKPOINT_STATUS,
     type IPipelineCheckpointStore,
@@ -9,6 +13,11 @@ export {
 } from "./application/ports/outbound/review/pipeline-checkpoint-store.port"
 export {type IReviewRepository} from "./application/ports/outbound/review/review-repository.port"
 export {type IRuleRepository} from "./application/ports/outbound/rule/rule-repository.port"
+export {
+    type IVectorChunkDTO,
+    type IVectorRepository,
+    type IVectorSearchResultDTO,
+} from "./application/ports/outbound/vector/vector-repository.port"
 export {
     type IHeuristicRegistryEntry,
     type IHeuristicResolutionMode,

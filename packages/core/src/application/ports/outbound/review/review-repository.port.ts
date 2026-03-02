@@ -1,23 +1,40 @@
-import type {Review} from "../../../../domain/aggregates/review.aggregate"
-import type {UniqueId} from "../../../../domain/value-objects/unique-id.value-object"
+import type {Review, ReviewStatus} from "../../../../domain/aggregates/review.aggregate"
+import type {IRepository} from "../common/repository.port"
 
 /**
  * Outbound persistence contract for review aggregates.
  */
-export interface IReviewRepository {
+export interface IReviewRepository extends IRepository<Review> {
     /**
-     * Finds review by identifier.
+     * Finds review by merge request identifier.
      *
-     * @param id Review identifier.
+     * @param mergeRequestId Merge request identifier.
      * @returns Review aggregate or null.
      */
-    findById(id: UniqueId): Promise<Review | null>
+    findByMergeRequestId(mergeRequestId: string): Promise<Review | null>
 
     /**
-     * Persists review aggregate state.
+     * Finds reviews by lifecycle status.
      *
-     * @param review Review aggregate.
-     * @returns Promise that resolves when save is completed.
+     * @param status Review status.
+     * @returns Matching review list.
      */
-    save(review: Review): Promise<void>
+    findByStatus(status: ReviewStatus): Promise<readonly Review[]>
+
+    /**
+     * Finds reviews completed/updated within date range.
+     *
+     * @param from Range start.
+     * @param to Range end.
+     * @returns Matching review list.
+     */
+    findByDateRange(from: Date, to: Date): Promise<readonly Review[]>
+
+    /**
+     * Finds reviews by repository identifier.
+     *
+     * @param repositoryId Repository identifier.
+     * @returns Matching review list.
+     */
+    findByRepositoryId(repositoryId: string): Promise<readonly Review[]>
 }

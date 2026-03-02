@@ -3,7 +3,7 @@ import {describe, expect, test} from "bun:test"
 import type {IDomainEventBus} from "../../../../src/application/ports/outbound/common/domain-event-bus.port"
 import type {IReviewRepository} from "../../../../src/application/ports/outbound/review/review-repository.port"
 import {CompleteReviewUseCase} from "../../../../src/application/use-cases/review/complete-review.use-case"
-import type {Review} from "../../../../src/domain/aggregates/review.aggregate"
+import type {Review, ReviewStatus} from "../../../../src/domain/aggregates/review.aggregate"
 import type {BaseDomainEvent, DomainEventPayload} from "../../../../src/domain/events/base-domain-event"
 import {ReviewFactory} from "../../../../src/domain/factories/review.factory"
 import {UniqueId} from "../../../../src/domain/value-objects/unique-id.value-object"
@@ -20,6 +20,45 @@ class InMemoryReviewRepository implements IReviewRepository {
         this.saved += 1
         this.store.set(review.id.value, review)
         return Promise.resolve()
+    }
+
+    public findByMergeRequestId(mergeRequestId: string): Promise<Review | null> {
+        for (const review of this.store.values()) {
+            if (review.mergeRequestId === mergeRequestId) {
+                return Promise.resolve(review)
+            }
+        }
+
+        return Promise.resolve(null)
+    }
+
+    public findByStatus(status: ReviewStatus): Promise<readonly Review[]> {
+        return Promise.resolve(
+            [...this.store.values()].filter((review) => {
+                return review.status === status
+            }),
+        )
+    }
+
+    public findByDateRange(from: Date, to: Date): Promise<readonly Review[]> {
+        return Promise.resolve(
+            [...this.store.values()].filter((review) => {
+                const completedAt = review.completedAt
+                if (completedAt === null) {
+                    return false
+                }
+
+                return completedAt >= from && completedAt <= to
+            }),
+        )
+    }
+
+    public findByRepositoryId(repositoryId: string): Promise<readonly Review[]> {
+        return Promise.resolve(
+            [...this.store.values()].filter((review) => {
+                return review.repositoryId === repositoryId
+            }),
+        )
     }
 }
 
