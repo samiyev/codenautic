@@ -40,6 +40,11 @@ export {RuleStatusPolicyService} from "./domain/services/rule-status-policy.serv
 export {FilePath} from "./domain/value-objects/file-path.value-object"
 export {LineRange} from "./domain/value-objects/line-range.value-object"
 export {
+    MEMBER_ROLE,
+    MemberRole,
+    type MemberRoleValue,
+} from "./domain/value-objects/member-role.value-object"
+export {
     REPOSITORY_PLATFORM,
     RepositoryId,
     type RepositoryPlatform,
