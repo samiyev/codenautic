@@ -1,4 +1,18 @@
 export {
+    type IApiRuntime,
+    type IApiServer,
+    type IApiServerFactory,
+    type IApiServerFactoryOptions,
+    type IStartApiOptions,
+    startApi,
+} from "./api/bootstrap"
+export {
+    API_NODE_ENV,
+    ApiEnvironmentValidationError,
+    parseApiEnvironment,
+    type IApiEnvironment,
+} from "./api/config/api-env"
+export {
     InMemoryRuntimeDomainEventBus,
 } from "./review-worker/adapters/in-memory-runtime-domain-event-bus"
 export {
