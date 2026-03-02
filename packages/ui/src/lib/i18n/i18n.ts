@@ -35,6 +35,8 @@ const resources = {
             oauthStartFailed: "Failed to start OAuth authorization. Please try again.",
             logout: "Log out",
             logoutFailed: "Failed to complete logout. Please try again.",
+            unauthorizedState: "Authorization required (401). Sign in to continue.",
+            forbiddenState: "Access denied (403). Your account has no access to this resource.",
         },
     },
     ru: {
@@ -62,6 +64,8 @@ const resources = {
             oauthStartFailed: "Не удалось начать OAuth авторизацию. Повторите попытку.",
             logout: "Выйти",
             logoutFailed: "Не удалось завершить сессию. Повторите попытку.",
+            unauthorizedState: "Требуется авторизация (401). Войдите, чтобы продолжить.",
+            forbiddenState: "Доступ запрещён (403). У аккаунта нет прав на этот ресурс.",
         },
     },
 } as const

@@ -20,7 +20,7 @@ const LazySystemHealthPage = lazy(async (): Promise<{default: () => ReactElement
  */
 function IndexRouteComponent(): ReactElement {
     return (
-        <AuthBoundary>
+        <AuthBoundary loginPath="/login">
             <Suspense fallback={<RouteSuspenseFallback />}>
                 <LazySystemHealthPage />
             </Suspense>

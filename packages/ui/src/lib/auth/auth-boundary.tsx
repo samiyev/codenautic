@@ -10,7 +10,7 @@ import {
 import {useTranslation} from "react-i18next"
 
 import type {IAuthApi} from "@/lib/api"
-import {createApiContracts} from "@/lib/api"
+import {createApiContracts, isApiHttpError} from "@/lib/api"
 import {queryKeys} from "@/lib/query/query-keys"
 import {
     clearPersistedAuthSession,
@@ -22,6 +22,8 @@ import {OAUTH_PROVIDERS, type IAuthSession, type TOAuthProvider} from "./types"
 
 const DEFAULT_AUTH_API = createApiContracts().auth
 
+export type TAuthGuardStatusCode = 401 | 403
+
 /**
  * Конфигурация boundary-компонента для защищённых route.
  */
@@ -30,6 +32,10 @@ export interface IAuthBoundaryProps {
     readonly authApi?: IAuthApi
     readonly storage?: Storage
     readonly onRedirect?: (authorizationUrl: string) => void
+    readonly loginPath?: string
+    readonly intendedDestination?: string
+    readonly authStatusHint?: TAuthGuardStatusCode
+    readonly onNavigateToLogin?: (loginPath: string) => void
 }
 
 /**
@@ -42,6 +48,8 @@ interface IAuthBoundaryLabels {
     readonly logout: string
     readonly oauthStartFailed: string
     readonly logoutFailed: string
+    readonly unauthorizedState: string
+    readonly forbiddenState: string
 }
 
 /**
@@ -52,6 +60,7 @@ interface IUseAuthBoundaryStateArgs {
     readonly storage: Storage | undefined
     readonly redirect: (authorizationUrl: string) => void
     readonly labels: IAuthBoundaryLabels
+    readonly intendedDestination: string
 }
 
 /**
@@ -61,6 +70,7 @@ interface IAuthBoundaryState {
     readonly session: IAuthSession | null | undefined
     readonly isPending: boolean
     readonly interactionError: string | null
+    readonly authStatusCode: TAuthGuardStatusCode | undefined
     readonly handleOAuthSignIn: (provider: TOAuthProvider) => Promise<void>
     readonly handleLogout: () => Promise<void>
 }
@@ -77,16 +87,64 @@ export function AuthBoundary(props: IAuthBoundaryProps): ReactElement {
     const storage = props.storage ?? getSessionStorageOrUndefined()
     const authApi = props.authApi ?? DEFAULT_AUTH_API
     const redirect = props.onRedirect ?? redirectToAuthorizationUrl
+    const intendedDestination = resolveIntendedDestinationPath(props.intendedDestination)
 
     const state = useAuthBoundaryState({
         authApi,
         storage,
         redirect,
         labels,
+        intendedDestination,
     })
+    const authStatusCode = resolveAuthStatusCode(
+        state.authStatusCode,
+        props.authStatusHint,
+    )
+    const effectiveAuthStatusCode = resolveDefaultAuthStatusCode(authStatusCode, state.session)
+    const shouldRedirectToLogin = shouldNavigateToLogin(
+        props.loginPath,
+        state.isPending,
+        state.session,
+        effectiveAuthStatusCode,
+    )
+    const loginRedirectPath = createLoginRedirectPath(
+        props.loginPath,
+        intendedDestination,
+        effectiveAuthStatusCode,
+    )
+    const navigateToLogin = props.onNavigateToLogin ?? navigateToPath
 
-    if (state.isPending === true || state.session === undefined) {
+    useEffect((): void => {
+        if (shouldRedirectToLogin !== true) {
+            return
+        }
+
+        if (loginRedirectPath === undefined) {
+            return
+        }
+
+        navigateToLogin(loginRedirectPath)
+    }, [loginRedirectPath, navigateToLogin, shouldRedirectToLogin])
+
+    if (state.isPending === true || shouldRedirectToLogin === true) {
         return renderAuthLoadingState(labels.appTitle, labels.checkingSession)
+    }
+
+    const authStatusMessage = resolveAuthStatusMessage(
+        effectiveAuthStatusCode,
+        labels,
+    )
+
+    if (state.session === undefined) {
+        return (
+            <AuthLoginPanel
+                appTitle={labels.appTitle}
+                description={labels.loginTitle}
+                interactionError={state.interactionError}
+                onOAuthSignIn={state.handleOAuthSignIn}
+                statusMessage={authStatusMessage}
+            />
+        )
     }
 
     if (state.session === null) {
@@ -96,6 +154,7 @@ export function AuthBoundary(props: IAuthBoundaryProps): ReactElement {
                 description={labels.loginTitle}
                 interactionError={state.interactionError}
                 onOAuthSignIn={state.handleOAuthSignIn}
+                statusMessage={authStatusMessage}
             />
         )
     }
@@ -167,9 +226,11 @@ function useAuthBoundaryState(args: IUseAuthBoundaryStateArgs): IAuthBoundarySta
         session: sessionQuery.data,
         isPending: sessionQuery.isPending,
         interactionError,
+        authStatusCode: resolveAuthStatusCodeFromError(sessionQuery.error),
         handleOAuthSignIn: createHandleOAuthSignIn(
             args.authApi,
             args.redirect,
+            args.intendedDestination,
             args.labels.oauthStartFailed,
             setInteractionError,
         ),
@@ -268,6 +329,7 @@ function useRefreshSessionEffect(
  *
  * @param authApi Auth endpoint client.
  * @param redirect Redirect callback.
+ * @param intendedDestination Path назначения после успешного логина.
  * @param oauthErrorText Текст ошибки OAuth старта.
  * @param setInteractionError Setter UI ошибки.
  * @returns Обработчик входа через provider.
@@ -275,6 +337,7 @@ function useRefreshSessionEffect(
 function createHandleOAuthSignIn(
     authApi: IAuthApi,
     redirect: (authorizationUrl: string) => void,
+    intendedDestination: string,
     oauthErrorText: string,
     setInteractionError: (value: string | null) => void,
 ): (provider: TOAuthProvider) => Promise<void> {
@@ -284,7 +347,7 @@ function createHandleOAuthSignIn(
         try {
             const response = await authApi.startOAuth({
                 provider,
-                redirectUri: resolveAuthRedirectUri(),
+                redirectUri: resolveAuthRedirectUri(intendedDestination),
             })
             redirect(response.authorizationUrl)
         } catch {
@@ -337,6 +400,8 @@ function createAuthBoundaryLabels(t: (key: string) => string): IAuthBoundaryLabe
         logout: t("auth:logout"),
         oauthStartFailed: t("auth:oauthStartFailed"),
         logoutFailed: t("auth:logoutFailed"),
+        unauthorizedState: t("auth:unauthorizedState"),
+        forbiddenState: t("auth:forbiddenState"),
     }
 }
 
@@ -366,6 +431,7 @@ interface IAuthLoginPanelProps {
     readonly appTitle: string
     readonly description: string
     readonly interactionError: string | null
+    readonly statusMessage: string | undefined
     readonly onOAuthSignIn: (provider: TOAuthProvider) => Promise<void>
 }
 
@@ -380,6 +446,11 @@ function AuthLoginPanel(props: IAuthLoginPanelProps): ReactElement {
         <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
             <h1 className="text-3xl font-semibold tracking-tight">{props.appTitle}</h1>
             <p className="mt-4 text-base text-slate-600">{props.description}</p>
+            {props.statusMessage !== undefined ? (
+                <p aria-live="polite" className="mt-3 text-sm text-amber-700" role="status">
+                    {props.statusMessage}
+                </p>
+            ) : null}
             <div className="mt-8 grid w-full max-w-sm gap-3">
                 {OAUTH_PROVIDERS.map((provider) => {
                     return (
@@ -472,10 +543,207 @@ function resolveProviderLabel(provider: TOAuthProvider): string {
 /**
  * Формирует redirect URI для OAuth/OIDC flow.
  *
+ * @param intendedDestination Целевой путь после успешной авторизации.
  * @returns Redirect URI в текущем origin.
  */
-function resolveAuthRedirectUri(): string {
-    return `${window.location.origin}/`
+function resolveAuthRedirectUri(intendedDestination: string): string {
+    return new URL(intendedDestination, window.location.origin).toString()
+}
+
+/**
+ * Возвращает актуальный status code для auth guard.
+ *
+ * @param runtimeCode Код, вычисленный из runtime ошибки.
+ * @param hintCode Код, переданный через route search.
+ * @returns Приоритетный статус для UI/redirect.
+ */
+function resolveAuthStatusCode(
+    runtimeCode: TAuthGuardStatusCode | undefined,
+    hintCode: TAuthGuardStatusCode | undefined,
+): TAuthGuardStatusCode | undefined {
+    if (runtimeCode !== undefined) {
+        return runtimeCode
+    }
+
+    return hintCode
+}
+
+/**
+ * Подставляет default auth код для null session (анонимный пользователь).
+ *
+ * @param authStatusCode Текущий auth status code.
+ * @param session Текущее session состояние.
+ * @returns Итоговый статус для redirect/login state.
+ */
+function resolveDefaultAuthStatusCode(
+    authStatusCode: TAuthGuardStatusCode | undefined,
+    session: IAuthSession | null | undefined,
+): TAuthGuardStatusCode | undefined {
+    if (authStatusCode !== undefined) {
+        return authStatusCode
+    }
+
+    if (session === null) {
+        return 401
+    }
+
+    return undefined
+}
+
+/**
+ * Извлекает auth status code из ошибки запроса session endpoint.
+ *
+ * @param error Ошибка загрузки auth session.
+ * @returns `401`/`403` или undefined.
+ */
+function resolveAuthStatusCodeFromError(error: Error | null): TAuthGuardStatusCode | undefined {
+    if (error === null) {
+        return undefined
+    }
+
+    if (isApiHttpError(error) !== true) {
+        return undefined
+    }
+
+    if (error.status === 401 || error.status === 403) {
+        return error.status
+    }
+
+    return undefined
+}
+
+/**
+ * Определяет, нужно ли перенаправить пользователя на login route.
+ *
+ * @param loginPath Путь login route.
+ * @param isPending Признак pending состояния session query.
+ * @param session Текущая auth session.
+ * @param authStatusCode Текущий auth статус.
+ * @returns true, если нужно выполнить redirect.
+ */
+function shouldNavigateToLogin(
+    loginPath: string | undefined,
+    isPending: boolean,
+    session: IAuthSession | null | undefined,
+    authStatusCode: TAuthGuardStatusCode | undefined,
+): boolean {
+    if (loginPath === undefined || isPending === true) {
+        return false
+    }
+
+    if (isCurrentPage(loginPath) === true) {
+        return false
+    }
+
+    if (session !== undefined && session !== null) {
+        return false
+    }
+
+    if (authStatusCode === 401 || authStatusCode === 403 || session === null) {
+        return true
+    }
+
+    return false
+}
+
+/**
+ * Формирует login route path с сохранением intended destination.
+ *
+ * @param loginPath Базовый путь страницы логина.
+ * @param intendedDestination Целевой путь после успешной авторизации.
+ * @param authStatusCode Код auth статуса.
+ * @returns Финальный redirect path.
+ */
+function createLoginRedirectPath(
+    loginPath: string | undefined,
+    intendedDestination: string,
+    authStatusCode: TAuthGuardStatusCode | undefined,
+): string | undefined {
+    if (loginPath === undefined) {
+        return undefined
+    }
+
+    const searchParams = new URLSearchParams()
+    searchParams.set("next", intendedDestination)
+
+    if (authStatusCode === 401 || authStatusCode === 403) {
+        searchParams.set("reason", String(authStatusCode))
+    }
+
+    return `${loginPath}?${searchParams.toString()}`
+}
+
+/**
+ * Формирует текущий относительный URL (path + search + hash).
+ *
+ * @returns Относительный URL текущей страницы.
+ */
+function getCurrentRelativeUrl(): string {
+    return `${window.location.pathname}${window.location.search}${window.location.hash}`
+}
+
+/**
+ * Проверяет, открыта ли текущая страница по целевому path.
+ *
+ * @param path Path для сравнения.
+ * @returns true, если path совпадает с текущим pathname.
+ */
+function isCurrentPage(path: string): boolean {
+    return window.location.pathname === path
+}
+
+/**
+ * Нормализует intended destination и блокирует внешние URL.
+ *
+ * @param destination Желаемый путь после авторизации.
+ * @returns Безопасный относительный путь.
+ */
+function resolveIntendedDestinationPath(destination: string | undefined): string {
+    if (destination === undefined) {
+        return getCurrentRelativeUrl()
+    }
+
+    const trimmedDestination = destination.trim()
+    if (trimmedDestination.length === 0) {
+        return "/"
+    }
+
+    if (trimmedDestination.startsWith("/")) {
+        return trimmedDestination
+    }
+
+    try {
+        const parsedDestination = new URL(trimmedDestination)
+        if (parsedDestination.origin !== window.location.origin) {
+            return "/"
+        }
+
+        return `${parsedDestination.pathname}${parsedDestination.search}${parsedDestination.hash}`
+    } catch {
+        return "/"
+    }
+}
+
+/**
+ * Возвращает текст auth статуса для явного отображения 401/403 состояний.
+ *
+ * @param authStatusCode Auth статус.
+ * @param labels Локализованные метки auth boundary.
+ * @returns Текстовое сообщение или undefined.
+ */
+function resolveAuthStatusMessage(
+    authStatusCode: TAuthGuardStatusCode | undefined,
+    labels: IAuthBoundaryLabels,
+): string | undefined {
+    if (authStatusCode === 401) {
+        return labels.unauthorizedState
+    }
+
+    if (authStatusCode === 403) {
+        return labels.forbiddenState
+    }
+
+    return undefined
 }
 
 /**
@@ -485,6 +753,15 @@ function resolveAuthRedirectUri(): string {
  */
 function redirectToAuthorizationUrl(authorizationUrl: string): void {
     window.location.assign(authorizationUrl)
+}
+
+/**
+ * Выполняет redirect на внутренний путь приложения.
+ *
+ * @param path Внутренний путь с query-параметрами.
+ */
+function navigateToPath(path: string): void {
+    window.location.assign(path)
 }
 
 /**

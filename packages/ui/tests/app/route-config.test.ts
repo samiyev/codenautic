@@ -2,6 +2,7 @@ import {describe, expect, it} from "vitest"
 
 import {Route as RootRoute} from "@/routes/__root"
 import {Route as IndexRoute} from "@/routes/index"
+import {Route as LoginRoute} from "@/routes/login"
 
 describe("route configuration", (): void => {
     it("настраивает глобальные fallback components в root route", (): void => {
@@ -11,5 +12,9 @@ describe("route configuration", (): void => {
 
     it("настраивает route-level error fallback для главной страницы", (): void => {
         expect(typeof IndexRoute.options.errorComponent).toBe("function")
+    })
+
+    it("регистрирует login route для auth redirect flow", (): void => {
+        expect(typeof LoginRoute.options.component).toBe("function")
     })
 })
