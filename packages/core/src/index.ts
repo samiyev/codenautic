@@ -48,6 +48,11 @@ export {
 } from "./domain/value-objects/member-role.value-object"
 export {OrganizationId} from "./domain/value-objects/organization-id.value-object"
 export {
+    PROGRAMMING_LANGUAGE,
+    ProgrammingLanguage,
+    type ProgrammingLanguageValue,
+} from "./domain/value-objects/programming-language.value-object"
+export {
     REPOSITORY_PLATFORM,
     RepositoryId,
     type RepositoryPlatform,
