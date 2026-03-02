@@ -11,6 +11,7 @@ export {
     type IPipelineStageCheckpoint,
     type PipelineCheckpointStatus,
 } from "./application/ports/outbound/review/pipeline-checkpoint-store.port"
+export {type IRepositoryConfigLoader} from "./application/ports/outbound/review/repository-config-loader.port"
 export {type IReviewRepository} from "./application/ports/outbound/review/review-repository.port"
 export {type IRuleRepository} from "./application/ports/outbound/rule/rule-repository.port"
 export {
@@ -80,6 +81,18 @@ export {
     type IPipelineOrchestratorDependencies,
     type IPipelineRunCommand,
 } from "./application/use-cases/review/pipeline-orchestrator.use-case"
+export {
+    ResolveConfigStageUseCase,
+} from "./application/use-cases/review/resolve-config-stage.use-case"
+export {
+    ValidateConfigStageUseCase,
+} from "./application/use-cases/review/validate-config-stage.use-case"
+export {
+    ValidateNewCommitsStageUseCase,
+} from "./application/use-cases/review/validate-new-commits-stage.use-case"
+export {
+    ValidatePrerequisitesStageUseCase,
+} from "./application/use-cases/review/validate-prerequisites-stage.use-case"
 export {type IPipelineDefinition, type IPipelineDefinitionStage} from "./application/types/review/pipeline-definition.type"
 export {
     PIPELINE_STAGE_RESULT_STATUS,
