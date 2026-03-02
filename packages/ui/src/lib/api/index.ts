@@ -1,5 +1,6 @@
 import {createApiConfig} from "./config"
 import {AuthApi} from "./endpoints/auth.endpoint"
+import {FeatureFlagsApi} from "./endpoints/feature-flags.endpoint"
 import {SystemApi} from "./endpoints/system.endpoint"
 import {FetchHttpClient} from "./http-client"
 
@@ -8,13 +9,18 @@ import {FetchHttpClient} from "./http-client"
  *
  * @returns Набор endpoint-клиентов для runtime/api.
  */
-export function createApiContracts(): {readonly system: SystemApi; readonly auth: AuthApi} {
+export function createApiContracts(): {
+    readonly system: SystemApi
+    readonly auth: AuthApi
+    readonly featureFlags: FeatureFlagsApi
+} {
     const config = createApiConfig({})
     const httpClient = new FetchHttpClient(config)
 
     return {
         system: new SystemApi(httpClient),
         auth: new AuthApi(httpClient),
+        featureFlags: new FeatureFlagsApi(httpClient),
     }
 }
 
@@ -39,5 +45,6 @@ export type {
     IRetryPolicy,
     QueryValue,
 } from "./http-client"
+export type {IFeatureFlagsApi} from "./endpoints/feature-flags.endpoint"
 export type {ISystemApi} from "./endpoints/system.endpoint"
 export type {TSystemHealthResponse, THealthStatus} from "./types"

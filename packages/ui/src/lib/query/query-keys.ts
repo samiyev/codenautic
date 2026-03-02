@@ -5,6 +5,9 @@ export const queryKeys = {
     auth: {
         session: (): readonly ["auth", "session"] => ["auth", "session"] as const,
     },
+    featureFlags: {
+        all: (): readonly ["feature-flags"] => ["feature-flags"] as const,
+    },
     system: {
         health: (): readonly ["system", "health"] => ["system", "health"] as const,
     },

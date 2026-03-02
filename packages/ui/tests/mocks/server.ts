@@ -111,4 +111,11 @@ export const server = setupServer(
             timestamp: "2026-03-02T00:00:00.000Z",
         })
     }),
+    http.get("http://localhost:3000/api/v1/feature-flags", () => {
+        return HttpResponse.json({
+            flags: {
+                premium_dashboard: true,
+            },
+        })
+    }),
 )

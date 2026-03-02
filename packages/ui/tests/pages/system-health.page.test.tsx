@@ -28,6 +28,9 @@ describe("SystemHealthPage", (): void => {
 
         const statusMessage = await screen.findByText("ok")
         expect(statusMessage.textContent).toBe("ok")
+
+        const premiumEnabled = await screen.findByText("Premium функции включены")
+        expect(premiumEnabled.textContent).toBe("Premium функции включены")
     })
 
     it("показывает ошибку и позволяет повторить запрос", async (): Promise<void> => {
@@ -75,5 +78,39 @@ describe("SystemHealthPage", (): void => {
         const statusMessage = await screen.findByText("ok")
         expect(statusMessage.textContent).toBe("ok")
         expect(requestCount).toBe(4)
+    })
+
+    it("держит premium функции выключенными при ошибке flags backend", async (): Promise<void> => {
+        server.use(
+            http.get("http://localhost:3000/api/v1/health", () => {
+                return HttpResponse.json({
+                    status: "ok",
+                    service: "api",
+                    timestamp: "2026-03-02T10:00:00.000Z",
+                })
+            }),
+            http.get("http://localhost:3000/api/v1/feature-flags", () => {
+                return HttpResponse.json(
+                    {
+                        message: "flags backend unavailable",
+                    },
+                    {
+                        status: 503,
+                    },
+                )
+            }),
+        )
+
+        renderWithProviders(<SystemHealthPage />)
+
+        const premiumDisabled = await screen.findByText("Premium функции выключены")
+        expect(premiumDisabled.textContent).toBe("Premium функции выключены")
+
+        const premiumHint = screen.getByText(
+            "Сервис feature flags недоступен или premium-доступ не выдан.",
+        )
+        expect(premiumHint.textContent).toBe(
+            "Сервис feature flags недоступен или premium-доступ не выдан.",
+        )
     })
 })

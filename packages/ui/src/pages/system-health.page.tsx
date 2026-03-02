@@ -1,7 +1,8 @@
 import type {ReactElement} from "react"
 import {useTranslation} from "react-i18next"
 
-import {useHealthQuery} from "@/lib/hooks/queries"
+import {FEATURE_FLAG_KEYS} from "@/lib/feature-flags/feature-flags"
+import {isFeatureFlagEnabled, useFeatureFlagsQuery, useHealthQuery} from "@/lib/hooks/queries"
 import {formatLocalizedDateTime, getCurrentLocale} from "@/lib/i18n/i18n"
 
 /**
@@ -13,6 +14,11 @@ export function SystemHealthPage(): ReactElement {
     const {t, i18n} = useTranslation(["common", "system"])
     const locale = getCurrentLocale(i18n)
     const healthQuery = useHealthQuery()
+    const featureFlagsQuery = useFeatureFlagsQuery()
+    const isPremiumDashboardEnabled = isFeatureFlagEnabled(
+        featureFlagsQuery,
+        FEATURE_FLAG_KEYS.premiumDashboard,
+    )
 
     const isPending = healthQuery.isPending
     if (isPending === true) {
@@ -65,6 +71,28 @@ export function SystemHealthPage(): ReactElement {
                 {t("system:timestamp")}:{" "}
                 <span className="font-medium text-slate-900">{localizedTimestamp}</span>
             </p>
+            <section
+                aria-label={t("system:premiumSectionTitle")}
+                className="mt-8 w-full rounded-2xl border border-slate-200 bg-white/80 p-5 text-left shadow-sm backdrop-blur"
+            >
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    {t("system:premiumSectionTitle")}
+                </p>
+                <p
+                    className={`mt-2 text-base font-semibold ${
+                        isPremiumDashboardEnabled === true ? "text-emerald-700" : "text-amber-700"
+                    }`}
+                >
+                    {isPremiumDashboardEnabled === true
+                        ? t("system:premiumEnabled")
+                        : t("system:premiumDisabled")}
+                </p>
+                {isPremiumDashboardEnabled === true ? (
+                    <p className="mt-1 text-sm text-slate-600">{t("system:premiumEnabledDescription")}</p>
+                ) : (
+                    <p className="mt-1 text-sm text-slate-600">{t("system:premiumDisabledDescription")}</p>
+                )}
+            </section>
         </section>
     )
 }

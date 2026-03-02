@@ -22,6 +22,12 @@ const resources = {
             timestamp: "Timestamp",
             unavailable: "Failed to fetch API status",
             noData: "No API status data",
+            premiumSectionTitle: "Premium insights",
+            premiumEnabled: "Premium features are enabled",
+            premiumDisabled: "Premium features are disabled",
+            premiumEnabledDescription: "Advanced dashboard widgets are available for this account.",
+            premiumDisabledDescription:
+                "Feature flags backend is unavailable or premium access is not granted.",
         },
         auth: {
             checkingSession: "Checking current session...",
@@ -43,6 +49,12 @@ const resources = {
             timestamp: "Время",
             unavailable: "Не удалось получить статус API",
             noData: "Нет данных о состоянии API",
+            premiumSectionTitle: "Premium возможности",
+            premiumEnabled: "Premium функции включены",
+            premiumDisabled: "Premium функции выключены",
+            premiumEnabledDescription: "Для аккаунта доступны расширенные виджеты dashboard.",
+            premiumDisabledDescription:
+                "Сервис feature flags недоступен или premium-доступ не выдан.",
         },
         auth: {
             checkingSession: "Проверяем активную сессию...",
