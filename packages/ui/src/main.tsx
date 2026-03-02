@@ -5,8 +5,12 @@ import {App} from "@/app/app"
 import "@/app/globals.css"
 import {initializeI18n} from "@/lib/i18n/i18n"
 import {initializeSentryBrowser} from "@/lib/monitoring/sentry"
+import {initializeWebVitalsMonitoring} from "@/lib/monitoring/web-vitals"
 
-void initializeSentryBrowser(import.meta.env)
+const isSentryInitialized = initializeSentryBrowser(import.meta.env)
+void initializeWebVitalsMonitoring({
+    enabled: isSentryInitialized,
+})
 void initializeI18n()
 
 const rootElement = document.getElementById("root")
