@@ -4,6 +4,10 @@ import {TanStackRouterVite} from "@tanstack/router-plugin/vite"
 import {sentryVitePlugin} from "@sentry/vite-plugin"
 import path from "path"
 
+import {createSecurityHeaders} from "./src/lib/security/security-headers"
+
+const securityHeaders = createSecurityHeaders()
+
 export default defineConfig({
     plugins: [
         TanStackRouterVite({
@@ -29,6 +33,10 @@ export default defineConfig({
     },
     server: {
         port: 3000,
+        headers: securityHeaders,
+    },
+    preview: {
+        headers: securityHeaders,
     },
     build: {
         sourcemap: true,
