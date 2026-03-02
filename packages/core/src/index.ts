@@ -19,6 +19,19 @@ export {
 } from "./application/dto/heuristics/heuristic-registry-entry.dto"
 export {type IImportedRuleHeuristicsMetadata} from "./application/dto/rules/rule-import-metadata.dto"
 export {
+    type IDiscardedSuggestionDTO,
+    type IReviewConfigDTO,
+    type IReviewIssueDTO,
+    type IReviewPromptOverridesDTO,
+    type IReviewResultDTO,
+    type IReviewResultMetricsDTO,
+    type ISuggestionDTO,
+    type ITokenUsageBreakdownDTO,
+    type ITokenUsageByModelDTO,
+    type ITokenUsageByStageDTO,
+    type ITokenUsageDTO,
+} from "./application/dto/review"
+export {
     CompleteReviewUseCase,
     type ICompleteReviewInput,
     type ICompleteReviewOutput,
