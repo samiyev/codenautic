@@ -65,6 +65,7 @@ export {
 } from "./domain/value-objects/risk-score.value-object"
 export {SEVERITY_LEVEL, Severity, type SeverityLevel} from "./domain/value-objects/severity.value-object"
 export {UniqueId} from "./domain/value-objects/unique-id.value-object"
+export {ValueObject} from "./domain/value-objects/value-object"
 export {createToken, type InjectionToken} from "./ioc/create-token"
 export {TOKENS} from "./ioc/tokens"
 export {
