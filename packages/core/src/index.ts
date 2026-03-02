@@ -1,5 +1,12 @@
 export {type IUseCase} from "./application/ports/inbound/use-case.port"
+export {type ILogger} from "./application/ports/outbound/common/logger.port"
 export {type IDomainEventBus} from "./application/ports/outbound/domain-event-bus.port"
+export {
+    PIPELINE_CHECKPOINT_STATUS,
+    type IPipelineCheckpointStore,
+    type IPipelineStageCheckpoint,
+    type PipelineCheckpointStatus,
+} from "./application/ports/outbound/review/pipeline-checkpoint-store.port"
 export {type IReviewRepository} from "./application/ports/outbound/review-repository.port"
 export {type IRuleRepository} from "./application/ports/outbound/rule-repository.port"
 export {
@@ -16,6 +23,33 @@ export {
     type ICompleteReviewInput,
     type ICompleteReviewOutput,
 } from "./application/use-cases/review/complete-review.use-case"
+export {
+    PipelineOrchestratorUseCase,
+    PipelineRunner,
+    type IPipelineOrchestratorDependencies,
+    type IPipelineRunCommand,
+} from "./application/use-cases/review/pipeline-orchestrator.use-case"
+export {type IPipelineDefinition, type IPipelineDefinitionStage} from "./application/types/review/pipeline-definition.type"
+export {
+    PIPELINE_STAGE_RESULT_STATUS,
+    type IPipelineResult,
+    type IPipelineStageExecutionResult,
+    type PipelineStageResultStatus,
+} from "./application/types/review/pipeline-result.type"
+export {
+    PipelineStageUseCaseAdapter,
+    type IPipelineStage,
+    type IPipelineStageUseCase,
+    type IStageCommand,
+    type IStageTransition,
+    type IStageTransitionMetadata,
+} from "./application/types/review/pipeline-stage.contract"
+export {
+    ReviewPipelineState,
+    type ICreateReviewPipelineStateProps,
+    type IReviewPipelineStateProps,
+    type IUpdateReviewPipelineStateProps,
+} from "./application/types/review/review-pipeline-state"
 export {AggregateRoot} from "./domain/aggregates/aggregate-root"
 export {REVIEW_STATUS, Review, type IReviewProps, type ReviewStatus} from "./domain/aggregates/review.aggregate"
 export {RULE_STATUS, Rule, type IRuleProps, type RuleStatus} from "./domain/aggregates/rule.aggregate"
@@ -28,12 +62,19 @@ export {ReviewNotFoundError} from "./domain/errors/review-not-found.error"
 export {ReviewSeverityBudgetExceededError} from "./domain/errors/review-severity-budget-exceeded.error"
 export {ReviewStatusTransitionError} from "./domain/errors/review-status-transition.error"
 export {RuleStatusTransitionError} from "./domain/errors/rule-status-transition.error"
+export {StageError, type ICreateStageErrorParams} from "./domain/errors/stage.error"
 export {UnauthorizedError} from "./domain/errors/unauthorized.error"
 export {ValidationError, type IValidationErrorField} from "./domain/errors/validation.error"
 export {BaseDomainEvent} from "./domain/events/base-domain-event"
+export {PipelineCompleted, type IPipelineCompletedPayload} from "./domain/events/pipeline-completed"
+export {PipelineFailed, type IPipelineFailedPayload} from "./domain/events/pipeline-failed"
+export {PipelineStarted, type IPipelineStartedPayload} from "./domain/events/pipeline-started"
 export {ReviewCompleted, type IReviewCompletedPayload} from "./domain/events/review-completed"
 export {ReviewStarted, type IReviewStartedPayload} from "./domain/events/review-started"
 export {RuleActivated, type IRuleActivatedPayload} from "./domain/events/rule-activated"
+export {StageCompleted, type IStageCompletedPayload} from "./domain/events/stage-completed"
+export {StageFailed, type IStageFailedPayload} from "./domain/events/stage-failed"
+export {StageStarted, type IStageStartedPayload} from "./domain/events/stage-started"
 export {
     type ICreateReviewProps,
     type IReconstituteReviewProps,

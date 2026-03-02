@@ -9,6 +9,11 @@ interface IAmountProps {
     }
 }
 
+interface IComplexProps {
+    tags: readonly string[]
+    touchedAt: Date
+}
+
 class AmountValueObject extends ValueObject<IAmountProps> {
     private static validationCalls = 0
 
@@ -43,6 +48,14 @@ class DiscountValueObject extends ValueObject<IAmountProps> {
     }
 
     protected validate(_props: IAmountProps): void {}
+}
+
+class ComplexValueObject extends ValueObject<IComplexProps> {
+    public static create(props: IComplexProps): ComplexValueObject {
+        return new ComplexValueObject(props)
+    }
+
+    protected validate(_props: IComplexProps): void {}
 }
 
 describe("ValueObject", () => {
@@ -115,5 +128,37 @@ describe("ValueObject", () => {
         expect(left.isEqual(null)).toBe(false)
         expect(left.isEqual(undefined)).toBe(false)
         expect(left.isEqual(otherType)).toBe(false)
+    })
+
+    test("isEqual compares Date and array props deeply", () => {
+        const baseDate = new Date("2026-03-02T12:00:00.000Z")
+        const left = ComplexValueObject.create({
+            tags: ["core", "pipeline"],
+            touchedAt: baseDate,
+        })
+        const right = ComplexValueObject.create({
+            tags: ["core", "pipeline"],
+            touchedAt: new Date("2026-03-02T12:00:00.000Z"),
+        })
+
+        expect(left.isEqual(right)).toBe(true)
+    })
+
+    test("isEqual returns false when array lengths differ or nested values mismatch", () => {
+        const first = ComplexValueObject.create({
+            tags: ["core", "pipeline"],
+            touchedAt: new Date("2026-03-02T12:00:00.000Z"),
+        })
+        const differentLength = ComplexValueObject.create({
+            tags: ["core"],
+            touchedAt: new Date("2026-03-02T12:00:00.000Z"),
+        })
+        const differentItem = ComplexValueObject.create({
+            tags: ["core", "orchestrator"],
+            touchedAt: new Date("2026-03-02T12:00:00.000Z"),
+        })
+
+        expect(first.isEqual(differentLength)).toBe(false)
+        expect(first.isEqual(differentItem)).toBe(false)
     })
 })
