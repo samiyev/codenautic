@@ -76,6 +76,10 @@ export {
     type ICompleteReviewOutput,
 } from "./application/use-cases/review/complete-review.use-case"
 export {
+    AggregateResultsStageUseCase,
+    type IAggregateResultsStageDependencies,
+} from "./application/use-cases/review/aggregate-results-stage.use-case"
+export {
     CreateCcrLevelCommentsStageUseCase,
     type ICreateCcrLevelCommentsStageDependencies,
 } from "./application/use-cases/review/create-ccr-level-comments-stage.use-case"
@@ -90,6 +94,10 @@ export {
     type ICreateCheckStageDependencies,
 } from "./application/use-cases/review/create-check-stage.use-case"
 export {
+    EmitEventsStageUseCase,
+    type IEmitEventsStageDependencies,
+} from "./application/use-cases/review/emit-events-stage.use-case"
+export {
     FetchChangedFilesStageUseCase,
     type IFetchChangedFilesStageDependencies,
 } from "./application/use-cases/review/fetch-changed-files-stage.use-case"
@@ -97,9 +105,17 @@ export {
     FileContextGateStageUseCase,
 } from "./application/use-cases/review/file-context-gate-stage.use-case"
 export {
+    FinalizeCheckStageUseCase,
+    type IFinalizeCheckStageDependencies,
+} from "./application/use-cases/review/finalize-check-stage.use-case"
+export {
     CreateFileCommentsStageUseCase,
     type ICreateFileCommentsStageDependencies,
 } from "./application/use-cases/review/create-file-comments-stage.use-case"
+export {
+    GenerateSummaryStageUseCase,
+    type IGenerateSummaryStageDependencies,
+} from "./application/use-cases/review/generate-summary-stage.use-case"
 export {
     InitialCommentStageUseCase,
     type IInitialCommentStageDependencies,
@@ -117,8 +133,16 @@ export {
     type IProcessFilesReviewStageDependencies,
 } from "./application/use-cases/review/process-files-review-stage.use-case"
 export {
+    RequestChangesOrApproveStageUseCase,
+    type IRequestChangesOrApproveStageDependencies,
+} from "./application/use-cases/review/request-changes-or-approve-stage.use-case"
+export {
     ResolveConfigStageUseCase,
 } from "./application/use-cases/review/resolve-config-stage.use-case"
+export {
+    UpdateMetricsStageUseCase,
+    type IUpdateMetricsStageDependencies,
+} from "./application/use-cases/review/update-metrics-stage.use-case"
 export {
     ValidateSuggestionsStageUseCase,
     type IValidateSuggestionsStageDependencies,
@@ -151,6 +175,7 @@ export {
     type ISafeGuardFilter,
     type ISafeGuardFilterResult,
 } from "./application/types/review/safeguard-filter.contract"
+export {type IPendingDomainEventEnvelope} from "./application/types/review/pending-domain-event.contract"
 export {
     ReviewPipelineState,
     type ICreateReviewPipelineStateProps,
@@ -184,7 +209,7 @@ export {RuleStatusTransitionError} from "./domain/errors/rule-status-transition.
 export {StageError, type ICreateStageErrorParams} from "./domain/errors/stage.error"
 export {UnauthorizedError} from "./domain/errors/unauthorized.error"
 export {ValidationError, type IValidationErrorField} from "./domain/errors/validation.error"
-export {BaseDomainEvent} from "./domain/events/base-domain-event"
+export {BaseDomainEvent, type DomainEventPayload} from "./domain/events/base-domain-event"
 export {
     FEEDBACK_TYPE,
     FeedbackReceived,
