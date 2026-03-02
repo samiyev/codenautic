@@ -22,7 +22,7 @@ Groq), and enriches review context with data from Jira, Linear, Sentry, and othe
 flowchart LR
     MR["MR/PR\ncreated"] --> WH["Webhook"]
     WH --> CTX["Context\ncollection"]
-    CTX --> PIPE["20-stage\nAI Pipeline"]
+    CTX --> PIPE["Definition-driven\nAI Pipeline (v1: 20 aliases)"]
     PIPE --> SG["SafeGuard\nfiltering"]
     SG --> COMMENTS["MR/PR\ncomments"]
 
@@ -43,7 +43,7 @@ flowchart LR
 
 1. Git platform sends a webhook when an MR/PR is created
 2. CodeNautic collects the diff, linked tasks, and error history
-3. Code passes through a 20-stage pipeline with AI analysis
+3. Code passes through an orchestrated definition-driven pipeline (v1 has 20 stage aliases)
 4. SafeGuard filters hallucinations, duplicates, and irrelevant findings
 5. Results are published as comments on the MR/PR
 6. The system learns from developer feedback
@@ -54,7 +54,7 @@ flowchart LR
 
 ### Core
 
-- **20-Stage Review Pipeline** — from validation to comment publishing, immutable context via Immer
+- **Definition-Driven Review Pipeline** — orchestrated execution from `PipelineDefinition` (v1 has 20 stage aliases), run version pinning, checkpoint/resume support
 - **SafeGuard** — 5 filters to combat AI artifacts: deduplication, anti-hallucination, severity threshold,
   prioritization, relevance check
 - **Expert Panel** — multiple LLMs analyze code in parallel, results are aggregated
@@ -137,7 +137,7 @@ flowchart TD
     subgraph SERVER["@codenautic/runtime — 9 processes"]
         API["api :3000\nNestJS 11"]
         WH["webhooks :3001\nverify + route"]
-        RW["review-worker\n20-stage pipeline"]
+        RW["review-worker\nversioned pipeline execution"]
         SW["scan-worker\nAST + Code Graph"]
         AW["agent-worker\n@mention + CCR summary"]
         NW["notification-worker\nSlack / Discord / Teams"]
