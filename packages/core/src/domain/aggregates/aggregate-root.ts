@@ -31,13 +31,31 @@ export abstract class AggregateRoot<TProps> extends Entity<TProps> {
     }
 
     /**
-     * Returns and clears queued domain events.
+     * Returns immutable snapshot of queued domain events.
      *
      * @returns Immutable snapshot of queued events.
      */
-    public pullDomainEvents(): readonly BaseDomainEvent<DomainEventPayload>[] {
+    public get domainEvents(): readonly BaseDomainEvent<DomainEventPayload>[] {
+        return [...this.domainEventsBuffer]
+    }
+
+    /**
+     * Returns and clears queued domain events.
+     *
+     * @returns Immutable snapshot of queued events before clearing.
+     */
+    public clearDomainEvents(): readonly BaseDomainEvent<DomainEventPayload>[] {
         const events = [...this.domainEventsBuffer]
         this.domainEventsBuffer.splice(0, this.domainEventsBuffer.length)
         return events
+    }
+
+    /**
+     * Backward-compatible alias for event buffer draining.
+     *
+     * @returns Immutable snapshot of queued events before clearing.
+     */
+    public pullDomainEvents(): readonly BaseDomainEvent<DomainEventPayload>[] {
+        return this.clearDomainEvents()
     }
 }
