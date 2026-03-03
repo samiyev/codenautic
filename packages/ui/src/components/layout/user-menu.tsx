@@ -1,6 +1,6 @@
 import type { ReactElement } from "react"
-import { Avatar, Button } from "@/components/ui"
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@/components/ui"
+import { Avatar } from "@/components/ui"
 
 /**
  * Настройки отображения пользовательского блока в header.
@@ -27,16 +27,19 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
 
     return (
         <Dropdown>
-            <DropdownTrigger>
-                <Button className="h-8 min-h-8 px-1" radius="full" size="sm" variant="light">
-                    <div className="inline-flex items-center gap-2 rounded-full">
-                        <Avatar label={props.userName ?? "User"} size="sm" />
-                        <span className="hidden text-xs font-medium sm:inline">
-                            {props.userName ?? "User"}
-                        </span>
-                        <span className="sr-only">{initials}</span>
-                    </div>
-                </Button>
+            <DropdownTrigger
+                className="h-8 min-h-8 rounded-full px-1"
+                radius="full"
+                size="sm"
+                variant="light"
+            >
+                <span className="inline-flex items-center gap-2 rounded-full">
+                    <Avatar label={props.userName ?? "User"} size="sm" />
+                    <span className="hidden text-xs font-medium sm:inline">
+                        {props.userName ?? "User"}
+                    </span>
+                    <span className="sr-only">{initials}</span>
+                </span>
             </DropdownTrigger>
             <DropdownMenu aria-label="User menu">
                 <DropdownItem key="name">{props.userName ?? "User"}</DropdownItem>

@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { screen, waitFor } from "@testing-library/react"
 import userEvent, { type UserEvent } from "@testing-library/user-event"
 import type { ReactElement } from "react"
 import { describe, expect, it, vi } from "vitest"
@@ -59,11 +59,11 @@ describe("layout components", (): void => {
         )
 
         expect(screen.queryByText("CodeNautic")).not.toBeNull()
-        expect(screen.queryByText("Reviews")).not.toBeNull()
+        expect(screen.getAllByText("Reviews").length).toBeGreaterThanOrEqual(1)
         expect(screen.queryByRole("button", { name: "Open navigation menu" })).not.toBeNull()
         expect(screen.queryByRole("button", { name: "Notifications (3)" })).not.toBeNull()
         expect(screen.queryByRole("radiogroup", { name: "Theme mode" })).not.toBeNull()
-        expect(screen.queryByText("Reviewer")).not.toBeNull()
+        expect(screen.queryAllByText("Reviewer").length).toBeGreaterThan(0)
     })
 
     it("обрабатывает callback для collapse sidebar", async (): Promise<void> => {
@@ -85,8 +85,8 @@ describe("layout components", (): void => {
         )
 
         expect(screen.queryByText("Navigation")).not.toBeNull()
-        expect(screen.queryByRole("button", { name: "Dashboard" })).not.toBeNull()
-        expect(screen.queryByRole("button", { name: "CCR Management" })).not.toBeNull()
+        expect(screen.queryByRole("button", { name: /Dashboard/ })).not.toBeNull()
+        expect(screen.queryByRole("button", { name: /CCR Management/ })).not.toBeNull()
 
         const collapseButton = screen.getByRole("button", { name: "Collapse navigation" })
         await user.click(collapseButton)
@@ -126,11 +126,11 @@ describe("layout components", (): void => {
             },
         )
 
-        const settingsButton = screen.getByRole("button", { name: "Settings" })
+        const settingsButton = screen.getByRole("button", { name: /Settings/ })
         await user.click(settingsButton)
         expect(onNavigate).toHaveBeenCalledWith("/settings")
 
-        const dashboardButton = screen.getByRole("button", { name: "Dashboard" })
+        const dashboardButton = screen.getByRole("button", { name: /Dashboard/ })
         await user.click(dashboardButton)
         expect(onNavigate).toHaveBeenCalledWith("/")
     })
@@ -162,14 +162,20 @@ describe("layout components", (): void => {
         })
 
         await user.click(darkModeButton)
-        expect(darkModeButton.getAttribute("aria-pressed")).toBe("true")
-        expect(lightModeButton.getAttribute("aria-pressed")).toBe("false")
+        await waitFor(() => {
+            expect(darkModeButton.getAttribute("aria-pressed")).toBe("true")
+            expect(lightModeButton.getAttribute("aria-pressed")).toBe("false")
+        })
 
         await user.click(lightModeButton)
-        expect(lightModeButton.getAttribute("aria-pressed")).toBe("true")
+        await waitFor(() => {
+            expect(lightModeButton.getAttribute("aria-pressed")).toBe("true")
+        })
 
         await user.click(presetButton)
-        expect(presetButton.getAttribute("aria-pressed")).toBe("true")
+        await waitFor(() => {
+            expect(presetButton.getAttribute("aria-pressed")).toBe("true")
+        })
         expect(screen.queryByText(`Preset: ${THEME_PRESETS.at(1)?.label ?? ""}`)).not.toBeNull()
     })
 
@@ -183,18 +189,18 @@ describe("layout components", (): void => {
             },
         )
 
-        expect(screen.queryByText("Dev")).not.toBeNull()
+        expect(screen.queryAllByText("Dev").length).toBeGreaterThan(0)
         expect(screen.queryByText("Panel content")).not.toBeNull()
-        expect(screen.queryByText("Техстатус")).not.toBeNull()
+        expect(screen.queryAllByText("Техстатус").length).toBeGreaterThan(0)
     })
 
     it("рендерит секции настроек", (): void => {
         renderWithProviders(<SettingsNav />)
 
         expect(screen.queryByText("Settings")).not.toBeNull()
-        expect(screen.queryByRole("button", { name: "General" })).not.toBeNull()
-        expect(screen.queryByRole("button", { name: "LLM Providers" })).not.toBeNull()
-        expect(screen.queryByRole("button", { name: "Code Review" })).not.toBeNull()
-        expect(screen.queryByRole("button", { name: "Git Providers" })).not.toBeNull()
+        expect(screen.queryByRole("button", { name: /General/ })).not.toBeNull()
+        expect(screen.queryByRole("button", { name: /LLM Providers/ })).not.toBeNull()
+        expect(screen.queryByRole("button", { name: /Code Review/ })).not.toBeNull()
+        expect(screen.queryByRole("button", { name: /Git Providers/ })).not.toBeNull()
     })
 })

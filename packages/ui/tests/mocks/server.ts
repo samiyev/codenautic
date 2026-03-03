@@ -118,4 +118,28 @@ export const server = setupServer(
             },
         })
     }),
+    http.get("http://localhost:3000/api/v1/user/settings", () => {
+        return HttpResponse.json({}, { status: 404 })
+    }),
+    http.get("http://localhost:3000/api/v1/user/preferences", () => {
+        return HttpResponse.json({}, { status: 404 })
+    }),
+    http.post("http://localhost:3000/api/v1/user/settings", () => {
+        return HttpResponse.json({}, { status: 404 })
+    }),
+    http.post("http://localhost:3000/api/v1/user/preferences", () => {
+        return HttpResponse.json({}, { status: 404 })
+    }),
+    http.patch("http://localhost:3000/api/v1/user/settings", () => {
+        return HttpResponse.json({}, { status: 404 })
+    }),
+    http.patch("http://localhost:3000/api/v1/user/preferences", () => {
+        return HttpResponse.json({}, { status: 404 })
+    }),
+    http.put("http://localhost:3000/api/v1/user/settings", () => {
+        return HttpResponse.json({}, { status: 404 })
+    }),
+    http.put("http://localhost:3000/api/v1/user/preferences", () => {
+        return HttpResponse.json({}, { status: 404 })
+    }),
 )
