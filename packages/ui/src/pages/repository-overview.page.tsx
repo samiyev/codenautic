@@ -12,6 +12,7 @@ import {
     type IFileDependencyNode,
     type IFileDependencyRelation,
 } from "@/components/graphs/file-dependency-graph"
+import { CodeCityTreemap } from "@/components/graphs/codecity-treemap"
 import {
     FunctionClassCallGraph,
     type IFunctionCallNode,
@@ -2136,6 +2137,11 @@ export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactEl
                 showControls
                 showMiniMap
                 title="Package dependency graph"
+            />
+            <CodeCityTreemap
+                files={fileDependencyGraph.files}
+                height="440px"
+                title="CodeCity treemap"
             />
         </section>
     )

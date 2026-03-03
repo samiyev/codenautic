@@ -53,6 +53,17 @@ const mockPackageDependencyGraph = vi.fn(
     },
 )
 
+const mockCodeCityTreemap = vi.fn(
+    (props: { readonly files: ReadonlyArray<unknown>; readonly title?: string }): JSX.Element => {
+        return (
+            <div>
+                <p>{props.title}</p>
+                <p>{String(props.files.length)}</p>
+            </div>
+        )
+    },
+)
+
 vi.mock("@/components/graphs/file-dependency-graph", () => ({
     FileDependencyGraph: mockFileDependencyGraph,
 }))
@@ -62,11 +73,15 @@ vi.mock("@/components/graphs/function-class-call-graph", () => ({
 vi.mock("@/components/graphs/package-dependency-graph", () => ({
     PackageDependencyGraph: mockPackageDependencyGraph,
 }))
+vi.mock("@/components/graphs/codecity-treemap", () => ({
+    CodeCityTreemap: mockCodeCityTreemap,
+}))
 
 beforeEach((): void => {
     mockFileDependencyGraph.mockClear()
     mockFunctionClassCallGraph.mockClear()
     mockPackageDependencyGraph.mockClear()
+    mockCodeCityTreemap.mockClear()
 })
 
 describe("repository overview page", (): void => {
@@ -89,6 +104,10 @@ describe("repository overview page", (): void => {
         expect(thirdRenderCall).not.toBeUndefined()
         expect(thirdRenderCall?.title).toBe("Package dependency graph")
         expect(thirdRenderCall?.nodes.length).toBeGreaterThan(0)
+        const fourthRenderCall = mockCodeCityTreemap.mock.calls[0]?.[0]
+        expect(fourthRenderCall).not.toBeUndefined()
+        expect(fourthRenderCall?.title).toBe("CodeCity treemap")
+        expect(fourthRenderCall?.files.length).toBeGreaterThan(0)
         expect(screen.getByText("Tech stack")).not.toBeNull()
         expect(screen.getByText("Architecture summary")).not.toBeNull()
         expect(screen.getByLabelText("Repository health score")).not.toBeNull()
