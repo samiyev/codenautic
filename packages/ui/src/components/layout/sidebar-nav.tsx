@@ -48,6 +48,11 @@ const DEFAULT_SIDEBAR_ITEMS: readonly ISidebarItem[] = [
         to: "/scan-progress",
     },
     {
+        icon: "🗂️",
+        label: "Repositories",
+        to: "/repositories",
+    },
+    {
         icon: "⚙️",
         label: "Settings",
         to: "/settings",
