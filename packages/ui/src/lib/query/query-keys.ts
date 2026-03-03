@@ -17,6 +17,29 @@ export const queryKeys = {
     system: {
         health: (): readonly ["system", "health"] => ["system", "health"] as const,
     },
+    customRules: {
+        all: (): readonly ["custom-rules"] => ["custom-rules"] as const,
+        list: (
+            scope?: string,
+            status?: string,
+        ): readonly [
+            "custom-rules",
+            "list",
+            {
+                readonly scope?: string
+                readonly status?: string
+            },
+        ] => {
+            return [
+                "custom-rules",
+                "list",
+                {
+                    scope,
+                    status,
+                },
+            ] as const
+        },
+    },
     codeReview: {
         all: (): readonly ["code-review"] => ["code-review"] as const,
         byId: (reviewId: string): readonly ["code-review", "by-id", string] => {

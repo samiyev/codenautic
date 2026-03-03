@@ -1,6 +1,7 @@
 import { createApiConfig } from "./config"
 import { AuthApi } from "./endpoints/auth.endpoint"
 import { CodeReviewApi } from "./endpoints/code-review.endpoint"
+import { CustomRulesApi } from "./endpoints/custom-rules.endpoint"
 import { PermissionsApi } from "./endpoints/permissions.endpoint"
 import { FeatureFlagsApi } from "./endpoints/feature-flags.endpoint"
 import { SystemApi } from "./endpoints/system.endpoint"
@@ -15,6 +16,7 @@ export function createApiContracts(): {
     readonly system: SystemApi
     readonly auth: AuthApi
     readonly codeReview: CodeReviewApi
+    readonly customRules: CustomRulesApi
     readonly featureFlags: FeatureFlagsApi
     readonly permissions: PermissionsApi
 } {
@@ -25,6 +27,7 @@ export function createApiContracts(): {
         system: new SystemApi(httpClient),
         auth: new AuthApi(httpClient),
         codeReview: new CodeReviewApi(httpClient),
+        customRules: new CustomRulesApi(httpClient),
         permissions: new PermissionsApi(httpClient),
         featureFlags: new FeatureFlagsApi(httpClient),
     }
@@ -44,6 +47,7 @@ export type { IApiConfig, IUiEnv } from "./config"
 export type { IAuthApi } from "./endpoints/auth.endpoint"
 export type { IPermissionsApi } from "./endpoints/permissions.endpoint"
 export type { ICodeReviewApi } from "./endpoints/code-review.endpoint"
+export type { ICustomRulesApi } from "./endpoints/custom-rules.endpoint"
 export type {
     IDelayFunction,
     IFetchHttpClientDependencies,

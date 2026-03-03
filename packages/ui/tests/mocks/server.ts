@@ -129,6 +129,64 @@ export const server = setupServer(
     http.get("http://localhost:3000/api/v1/user/preferences", () => {
         return HttpResponse.json({}, { status: 404 })
     }),
+    http.get("http://localhost:3000/api/v1/rules", () => {
+        return HttpResponse.json({
+            rules: [],
+            total: 0,
+        })
+    }),
+    http.post("http://localhost:3000/api/v1/rules", async ({ request }) => {
+        const payload = (await request.json()) as {
+            readonly title?: string
+            readonly rule?: string
+            readonly type?: string
+            readonly scope?: string
+            readonly severity?: string
+            readonly status?: string
+            readonly examples?: readonly unknown[]
+        }
+
+        return HttpResponse.json({
+            id: "rule-default",
+            title: payload.title ?? "Default rule",
+            rule: payload.rule ?? "",
+            type: payload.type ?? "REGEX",
+            scope: payload.scope ?? "FILE",
+            severity: payload.severity ?? "LOW",
+            status: payload.status ?? "ACTIVE",
+            examples: payload.examples ?? [],
+        })
+    }),
+    http.get("http://localhost:3000/api/v1/rules/:ruleId", ({ params }) => {
+        return HttpResponse.json({
+            id: String(params.ruleId),
+            title: "Default rule",
+            rule: "title !== ''",
+            type: "REGEX",
+            scope: "FILE",
+            severity: "LOW",
+            status: "ACTIVE",
+            examples: [],
+        })
+    }),
+    http.put("http://localhost:3000/api/v1/rules/:ruleId", ({ params }) => {
+        return HttpResponse.json({
+            id: String(params.ruleId),
+            title: "Updated rule",
+            rule: "title !== ''",
+            type: "REGEX",
+            scope: "FILE",
+            severity: "LOW",
+            status: "ACTIVE",
+            examples: [],
+        })
+    }),
+    http.delete("http://localhost:3000/api/v1/rules/:ruleId", ({ params }) => {
+        return HttpResponse.json({
+            id: String(params.ruleId),
+            removed: true,
+        })
+    }),
     http.post("http://localhost:3000/api/v1/user/settings", () => {
         return HttpResponse.json({}, { status: 404 })
     }),
