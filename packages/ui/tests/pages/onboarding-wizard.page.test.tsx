@@ -72,5 +72,136 @@ describe("OnboardingWizardPage", (): void => {
             notifyEmail: "",
         })
     })
-})
 
+    it("валидирует список репозиториев в bulk-режиме и показывает ошибки по строкам", async (): Promise<void> => {
+        const user = userEvent.setup()
+
+        renderWithProviders(<OnboardingWizardPage />)
+
+        await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
+        await user.type(
+            screen.getByRole("textbox", { name: "Список репозиториев (по одной ссылке на строку)" }),
+            "https://github.com/org/first\ninvalid-url",
+        )
+        await user.click(screen.getByRole("button", { name: "Далее" }))
+
+        expect(
+            screen.queryByText("Некорректные ссылки: 2: invalid-url"),
+        ).not.toBeNull()
+        expect(screen.queryByText("Выбрано 1 из 1 репозиториев")).not.toBeNull()
+    })
+
+    it("запускает bulk onboarding по общему шаблону и показывает ошибочный репозиторий", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const onScanStart = vi.fn()
+
+        renderWithProviders(
+            <OnboardingWizardPage
+                onScanStart={onScanStart}
+            />,
+        )
+
+        await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
+        await user.type(
+            screen.getByRole("textbox", { name: "Список репозиториев (по одной ссылке на строку)" }),
+            "https://github.com/org/first\nhttps://github.com/org/second",
+        )
+        await user.click(screen.getByRole("button", { name: "Далее" }))
+        await user.click(screen.getByRole("button", { name: "Далее" }))
+        await user.click(screen.getByRole("button", { name: "Запустить сканирование" }))
+
+        expect(onScanStart).toHaveBeenCalledTimes(1)
+        expect(onScanStart.mock.calls.at(0)?.at(0)).toMatchObject({
+            onboardingMode: "bulk",
+            scanMode: "incremental",
+            scanSchedule: "manual",
+            scanThreads: 4,
+            includeSubmodules: true,
+            includeHistory: false,
+            notifyEmail: "",
+            targetRepositories: [
+                "https://github.com/org/first",
+                "https://github.com/org/second",
+            ],
+        })
+        expect(
+            screen.queryByText("Прогресс массового сканирования"),
+        ).not.toBeNull()
+        expect(screen.queryByText("Сканирование прервано: ошибка доступа к репозиторию")).not.toBeNull()
+    })
+
+    it("показывает предпросмотр шаблона и применяет его в single режиме", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const onScanStart = vi.fn()
+
+        renderWithProviders(
+            <OnboardingWizardPage
+                onScanStart={onScanStart}
+            />,
+        )
+
+        await user.type(
+            screen.getByRole("textbox", { name: "URL репозитория" }),
+            "https://github.com/example/repository",
+        )
+        await user.click(screen.getByRole("button", { name: "Далее" }))
+
+        await user.click(
+            await screen.findByRole("radio", { name: "Security Baseline — v1.2.0" }),
+        )
+        expect(screen.queryByText("Что будет применено")).not.toBeNull()
+        expect(screen.queryByText("Rules: security-first")).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "Применить шаблон" }))
+        await user.click(screen.getByRole("button", { name: "Далее" }))
+        expect(screen.queryByText("Mode: full")).not.toBeNull()
+        await user.click(screen.getByRole("button", { name: "Далее" }))
+        await user.click(screen.getByRole("button", { name: "Запустить сканирование" }))
+
+        expect(onScanStart).toHaveBeenCalledTimes(1)
+        expect(onScanStart.mock.calls.at(0)?.at(0)).toMatchObject({
+            onboardingTemplateId: "security-baseline",
+            appliedTemplate: {
+                id: "security-baseline",
+                name: "Security Baseline",
+                rulesPreset: "security-first",
+                version: "v1.2.0",
+            },
+            scanMode: "full",
+            scanSchedule: "daily",
+            scanThreads: 8,
+            includeSubmodules: true,
+            includeHistory: true,
+            notifyEmail: "security-ops@example.com",
+            tags: "security, policy, sensitive",
+        })
+    })
+
+    it("поддерживает rollback после применения шаблона", async (): Promise<void> => {
+        const user = userEvent.setup()
+
+        renderWithProviders(<OnboardingWizardPage />)
+
+        await user.type(
+            screen.getByRole("textbox", { name: "URL репозитория" }),
+            "https://github.com/example/repository",
+        )
+        await user.click(screen.getByRole("button", { name: "Далее" }))
+
+        const workersInput = screen.getByRole("spinbutton", { name: "Количество воркеров" })
+        await user.clear(workersInput)
+        await user.type(workersInput, "2")
+
+        await user.click(await screen.findByRole("radio", { name: "Quality Scan — v1.0.1" }))
+        await user.click(screen.getByRole("button", { name: "Применить шаблон" }))
+        expect((screen.getByRole("spinbutton", { name: "Количество воркеров" }) as HTMLInputElement).value).toBe(
+            "6",
+        )
+
+        await user.click(screen.getByRole("button", { name: "Применённые шаблоны (audit log)" }))
+        await user.click(screen.getByRole("button", { name: "Откатить последнее применение" }))
+        expect((screen.getByRole("spinbutton", { name: "Количество воркеров" }) as HTMLInputElement).value).toBe(
+            "2",
+        )
+    })
+})
