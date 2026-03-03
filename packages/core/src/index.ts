@@ -125,6 +125,11 @@ export {
     type IGetScanStatusUseCaseDependencies,
 } from "./application/use-cases/scanning/get-scan-status.use-case"
 export {
+    GetRepositoryIndexUseCase,
+    type IGetRepositoryIndexInput,
+    type IGetRepositoryIndexUseCaseDependencies,
+} from "./application/use-cases/scanning/get-repository-index.use-case"
+export {
     CHECK_RUN_CONCLUSION,
     CHECK_RUN_STATUS,
     INLINE_COMMENT_SIDE,
