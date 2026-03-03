@@ -41,43 +41,54 @@ export function StatusDistributionChart(props: IStatusDistributionChartProps): R
 
     return (
         <RechartsChartWrapper
+            data={props.data}
             isLoading={props.isLoading === true}
             loadingText={props.loadingText}
             title={title}
+            scalePolicy={{
+                aggregator: "sum",
+                hardThreshold: 2000,
+                maxPoints: 500,
+                aggregatorKeys: ["count"],
+            }}
         >
-            <div className="h-72">
-                <ResponsiveContainer height="100%" width="100%">
-                    <PieChart>
-                        <Pie
-                            data={props.data}
-                            dataKey="count"
-                            nameKey="status"
-                            outerRadius={80}
-                            paddingAngle={2}
-                        >
-                            {props.data.map(
-                                (point): ReactElement => (
-                                    <Cell key={point.status} fill={point.color} />
-                                ),
-                            )}
-                        </Pie>
-                        <Tooltip />
-                    </PieChart>
-                </ResponsiveContainer>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2" aria-label="Status legend">
-                {props.data.map(
-                    (point): ReactElement => (
-                        <Chip
-                            key={point.status}
-                            style={{ backgroundColor: `${point.color}20` }}
-                            className="border border-current/20"
-                        >
-                            {point.status}: {point.count}
-                        </Chip>
-                    ),
-                )}
-            </div>
+            {({ displayData }): ReactElement => (
+                <>
+                    <div className="h-72">
+                        <ResponsiveContainer height="100%" width="100%">
+                            <PieChart>
+                                <Pie
+                                    data={displayData}
+                                    dataKey="count"
+                                    nameKey="status"
+                                    outerRadius={80}
+                                    paddingAngle={2}
+                                >
+                                    {displayData.map(
+                                        (point): ReactElement => (
+                                            <Cell key={point.status} fill={point.color} />
+                                        ),
+                                    )}
+                                </Pie>
+                                <Tooltip />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-2" aria-label="Status legend">
+                        {displayData.map(
+                            (point): ReactElement => (
+                                <Chip
+                                    key={point.status}
+                                    style={{ backgroundColor: `${point.color}20` }}
+                                    className="border border-current/20"
+                                >
+                                    {point.status}: {point.count}
+                                </Chip>
+                            ),
+                        )}
+                    </div>
+                </>
+            )}
         </RechartsChartWrapper>
     )
 }

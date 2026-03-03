@@ -1,19 +1,212 @@
-import type { ReactElement, ReactNode } from "react"
+import { type ReactElement, type ReactNode, useMemo } from "react"
 
-import { Card, CardBody, CardHeader } from "@/components/ui"
+import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+
+type TChartPoint = Record<string, unknown>
+
+type TRechartsScaleAggregator = "sum" | "mean"
+
+type TRechartsChildrenRenderer<TPoint extends TChartPoint> =
+    | ReactNode
+    | ((props: IRechartsChartRenderContext<TPoint>) => ReactNode)
+
+interface IRechartsChartScalePolicy<TPoint extends TChartPoint> {
+    /** Включена ли агрегация. */
+    readonly enabled?: boolean
+    /** Порог для включения downsampling (>= threshold начинает сжиматься). */
+    readonly hardThreshold?: number
+    /** Максимум точек после агрегации. */
+    readonly maxPoints?: number
+    /** Какие поля учитывать при агрегации. */
+    readonly aggregatorKeys?: ReadonlyArray<keyof TPoint>
+    /** Метод агрегирования. */
+    readonly aggregator?: TRechartsScaleAggregator
+}
+
+interface IRechartsChartRenderContext<TPoint extends TChartPoint> {
+    /** Исходные точки, до downsampling/агрегации. */
+    readonly rawData: ReadonlyArray<TPoint>
+    /** Точки, которые реально рендерятся. */
+    readonly displayData: ReadonlyArray<TPoint>
+    /** Включена ли агрегация. */
+    readonly isAggregated: boolean
+    /** Во сколько раз уменьшен объём данных. */
+    readonly aggregationFactor: number
+}
+
+interface IRechartsChartScaleResult<TPoint extends TChartPoint> {
+    /** Данные, которые рендерит график. */
+    readonly data: ReadonlyArray<TPoint>
+    /** Включена ли агрегация. */
+    readonly isAggregated: boolean
+    /** Во сколько раз уменьшен объём данных. */
+    readonly aggregationFactor: number
+}
 
 /**
  * Пропсы generic обертки для Recharts-виджетов.
+ *
+ * @template TPoint тип точки графика.
  */
-export interface IRechartsChartWrapperProps {
+export interface IRechartsChartWrapperProps<TPoint extends TChartPoint = Record<string, unknown>> {
     /** Заголовок виджета. */
     readonly title: string
+    /** Исходные точки для графика. */
+    readonly data?: ReadonlyArray<TPoint>
+    /** Политика downsampling/scale. */
+    readonly scalePolicy?: IRechartsChartScalePolicy<TPoint>
     /** Состояние ожидания данных/инициализации. */
     readonly isLoading?: boolean
     /** Текст-заглушка во время загрузки. */
     readonly loadingText?: string
+    /** Название CSV-файла при скачивании raw данных. */
+    readonly csvFileName?: string
+    /** Поля для формирования CSV. */
+    readonly csvColumns?: ReadonlyArray<keyof TPoint>
+    /** Кастомный экспорт raw данных. */
+    readonly onExportRawData?: (rawData: ReadonlyArray<TPoint>) => void
+    /** Текст кнопки экспорта. */
+    readonly exportRawDataLabel?: string
+    /** Кнопка запроса серверной агрегации (для больших диапазонов). */
+    readonly onRequestServerAggregation?: () => void
     /** Графический контент. */
-    readonly children: ReactNode
+    readonly children: TRechartsChildrenRenderer<TPoint>
+}
+
+function isValidNumeric(value: unknown): value is number {
+    return typeof value === "number" && Number.isFinite(value)
+}
+
+function detectNumericKeys<TPoint extends TChartPoint>(point: TPoint): ReadonlyArray<keyof TPoint> {
+    return Object.keys(point).filter((rawKey): rawKey is keyof TPoint => {
+        const value = point[rawKey]
+        return isValidNumeric(value)
+    })
+}
+
+function scaleChartData<TPoint extends TChartPoint>(
+    data: ReadonlyArray<TPoint>,
+    scalePolicy: IRechartsChartScalePolicy<TPoint> | undefined,
+): IRechartsChartScaleResult<TPoint> {
+    const policy = scalePolicy ?? {}
+    const isEnabled = policy.enabled !== false
+    const hardThreshold = policy.hardThreshold ?? 2000
+    const maxPoints = policy.maxPoints ?? 500
+
+    if (isEnabled === false || data.length <= hardThreshold || data.length <= maxPoints) {
+        return {
+            data,
+            isAggregated: false,
+            aggregationFactor: 1,
+        }
+    }
+
+    const bucketSize = Math.ceil(data.length / maxPoints)
+    if (bucketSize <= 1) {
+        return {
+            data,
+            isAggregated: false,
+            aggregationFactor: 1,
+        }
+    }
+
+    const firstPoint = data[0]
+    const defaultAggregatorKeys = firstPoint === undefined ? [] : detectNumericKeys(firstPoint)
+    const aggregatorKeys = (policy.aggregatorKeys ?? defaultAggregatorKeys) as ReadonlyArray<keyof TPoint>
+    const aggregator = policy.aggregator ?? "sum"
+
+    const scaledData: TPoint[] = []
+    for (let index = 0; index < data.length; index += bucketSize) {
+        const segment = data.slice(index, index + bucketSize)
+        const segmentLength = segment.length
+        const aggregated = { ...segment[0] } as TPoint
+
+        if (segmentLength > 1 && aggregatorKeys.length > 0) {
+            for (const key of aggregatorKeys) {
+                let total = 0
+                let numericCount = 0
+
+                for (const point of segment) {
+                    const value = point[key]
+                    if (isValidNumeric(value)) {
+                        total += value
+                        numericCount += 1
+                    }
+                }
+
+                if (numericCount > 0) {
+                    aggregated[key] =
+                        (aggregator === "mean" ? total / segmentLength : total) as TPoint[keyof TPoint]
+                }
+            }
+        }
+
+        scaledData.push(aggregated)
+    }
+
+    return {
+        data: scaledData,
+        isAggregated: true,
+        aggregationFactor: Math.ceil(data.length / scaledData.length),
+    }
+}
+
+function convertToCsvCell(value: unknown): string {
+    if (value === null || value === undefined) {
+        return ""
+    }
+
+    if (typeof value === "string") {
+        if (value.includes(",") || value.includes("\n") || value.includes("\"")) {
+            return `"${value.replaceAll("\"", "\"\"")}"`
+        }
+
+        return value
+    }
+
+    if (typeof value === "number" || typeof value === "boolean") {
+        return String(value)
+    }
+
+    return JSON.stringify(value)
+}
+
+function convertToCsv<TPoint extends TChartPoint>(
+    rawData: ReadonlyArray<TPoint>,
+    csvColumns: ReadonlyArray<keyof TPoint> | undefined,
+): string {
+    if (rawData.length === 0) {
+        return ""
+    }
+
+    const columns = csvColumns ?? (Object.keys(rawData[0]) as ReadonlyArray<keyof TPoint>)
+    const header = columns.map((column): string => String(column)).join(",")
+    const rows = rawData.map((point) =>
+        columns
+            .map((column): string => convertToCsvCell(point[column]))
+            .join(","),
+    )
+
+    return `${header}\n${rows.join("\n")}`
+}
+
+function downloadCsv<TPoint extends TChartPoint>(
+    rawData: ReadonlyArray<TPoint>,
+    csvColumns: ReadonlyArray<keyof TPoint> | undefined,
+    csvFileName: string | undefined,
+): void {
+    const payload = convertToCsv(rawData, csvColumns)
+    const blob = new Blob([payload], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+
+    link.href = url
+    link.download = csvFileName ?? "chart-raw-data.csv"
+    link.style.display = "none"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
 }
 
 /**
@@ -22,7 +215,49 @@ export interface IRechartsChartWrapperProps {
  * @param props Конфигурация.
  * @returns Карточный блок с состоянием loading и theme-friendly стилями.
  */
-export function RechartsChartWrapper(props: IRechartsChartWrapperProps): ReactElement {
+export function RechartsChartWrapper<TPoint extends TChartPoint>(
+    props: IRechartsChartWrapperProps<TPoint>,
+): ReactElement {
+    const scaleResult = useMemo((): IRechartsChartScaleResult<TPoint> => {
+        if (props.data === undefined) {
+            return {
+                data: [],
+                isAggregated: false,
+                aggregationFactor: 1,
+            }
+        }
+
+        return scaleChartData(props.data, props.scalePolicy)
+    }, [props.data, props.scalePolicy])
+
+    const handleExportRawData = (): void => {
+        if (props.onExportRawData === undefined) {
+            if (props.data === undefined || props.data.length === 0) {
+                return
+            }
+
+            downloadCsv(props.data, props.csvColumns, props.csvFileName)
+            return
+        }
+
+        if (props.data !== undefined) {
+            props.onExportRawData(props.data)
+        }
+    }
+
+    const content = (() => {
+        if (typeof props.children === "function") {
+            return props.children({
+                aggregationFactor: scaleResult.aggregationFactor,
+                displayData: scaleResult.data,
+                isAggregated: scaleResult.isAggregated,
+                rawData: props.data ?? [],
+            })
+        }
+
+        return props.children
+    })()
+
     return (
         <Card>
             <CardHeader>
@@ -30,9 +265,53 @@ export function RechartsChartWrapper(props: IRechartsChartWrapperProps): ReactEl
             </CardHeader>
             <CardBody>
                 {props.isLoading === true ? (
-                    <p className="text-sm text-slate-600">{props.loadingText ?? "Loading chart..."}</p>
+                    <p className="text-sm text-slate-600">
+                        {props.loadingText ?? "Loading chart..."}
+                    </p>
                 ) : (
-                    props.children
+                    <div className="space-y-2">
+                        {scaleResult.isAggregated === true ? (
+                            <Alert color="warning">
+                                <div className="space-y-2">
+                                    <p className="text-sm">
+                                        Data aggregated for interactive rendering. Showing
+                                        {" "}
+                                        {scaleResult.data.length}
+                                        {" "}
+                                        of
+                                        {" "}
+                                        {props.data === undefined ? 0 : props.data.length}
+                                        {" "}
+                                        points.
+                                        {" "}
+                                        Aggregation factor:
+                                        {" "}
+                                        {scaleResult.aggregationFactor}x.
+                                    </p>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        {props.onRequestServerAggregation === undefined ? null : (
+                                            <Button
+                                                color="warning"
+                                                onPress={props.onRequestServerAggregation}
+                                                size="sm"
+                                                variant="flat"
+                                            >
+                                                Request server aggregation
+                                            </Button>
+                                        )}
+                                        <Button
+                                            onPress={handleExportRawData}
+                                            size="sm"
+                                            variant="light"
+                                        >
+                                            {props.exportRawDataLabel ?? "Export raw CSV"}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Alert>
+                        ) : null}
+                        {content}
+                    </div>
                 )}
             </CardBody>
         </Card>
