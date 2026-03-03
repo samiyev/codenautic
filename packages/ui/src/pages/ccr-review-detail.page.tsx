@@ -3,7 +3,13 @@ import { Link } from "@tanstack/react-router"
 
 import { Card, CardBody, CardHeader } from "@/components/ui"
 import { ChatPanel, type IChatPanelContext, type IChatPanelMessage } from "@/components/chat/chat-panel"
-import { ccrToContextItem, type ICcrRowData } from "@/pages/ccr-data"
+import { CodeDiffViewer } from "@/components/reviews/code-diff-viewer"
+import {
+    ccrToContextItem,
+    getCcrDiffById,
+    type ICcrDiffFile,
+    type ICcrRowData,
+} from "@/pages/ccr-data"
 
 /** Свойства страницы диффа CCR. */
 export interface ICcrReviewDetailPageProps {
@@ -40,6 +46,9 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     const contextItem = useMemo((): IChatPanelContext => {
         return ccrToContextItem(ccr)
     }, [ccr])
+    const ccrDiffFiles = useMemo((): ReadonlyArray<ICcrDiffFile> => {
+        return getCcrDiffById(ccr.id)
+    }, [ccr.id])
 
     const quickActions = useMemo(
         (): ReadonlyArray<{
@@ -113,6 +122,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                 </CardBody>
             </Card>
 
+            <CodeDiffViewer files={ccrDiffFiles} />
             <ChatPanel
                 contextItems={[contextItem]}
                 isOpen

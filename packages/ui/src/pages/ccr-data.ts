@@ -28,6 +28,252 @@ export interface ICcrRowData {
     readonly attachedFiles: ReadonlyArray<string>
 }
 
+/** Сторона строки диффа. */
+export type TCcrDiffLineSide = "left" | "right"
+
+/** Тип статуса строки в диффе. */
+export type TCcrDiffLineType = "context" | "removed" | "added"
+
+/** Inline-комментарий к конкретной строке диффа. */
+export interface ICcrDiffComment {
+    /** Автор комментария. */
+    readonly author: string
+    /** Текст комментария. */
+    readonly message: string
+    /** Позиция линии комментария. */
+    readonly line: number
+    /** Сторона строки для комментария. */
+    readonly side: TCcrDiffLineSide
+}
+
+/** Одна строка unified-диффа. */
+export interface ICcrDiffLine {
+    /** Номер строки слева. */
+    readonly leftLine?: number
+    /** Номер строки справа. */
+    readonly rightLine?: number
+    /** Содержимое слева. */
+    readonly leftText: string
+    /** Содержимое справа. */
+    readonly rightText: string
+    /** Тип изменения строки. */
+    readonly type: TCcrDiffLineType
+    /** Комментарии к строке. */
+    readonly comments?: ReadonlyArray<ICcrDiffComment>
+}
+
+/** Дифф по файлу. */
+export interface ICcrDiffFile {
+    /** Путь файла. */
+    readonly filePath: string
+    /** Язык для подсветки. */
+    readonly language: string
+    /** Строки диффа. */
+    readonly lines: ReadonlyArray<ICcrDiffLine>
+}
+
+/** Mock-диффы для CCR-деталок. */
+const MOCK_CCR_DIFFS: ReadonlyArray<{ ccrId: string; files: ReadonlyArray<ICcrDiffFile> }> = [
+    {
+        ccrId: "ccr-9001",
+        files: [
+            {
+                filePath: "src/auth/middleware.ts",
+                language: "typescript",
+                lines: [
+                    {
+                        leftLine: 1,
+                        rightLine: 1,
+                        leftText: 'import { verifyToken } from "@/lib/auth/legacy"',
+                        rightText: 'import { verifyToken } from "@/lib/auth/legacy"',
+                        type: "context",
+                    },
+                    {
+                        leftLine: 2,
+                        rightLine: 2,
+                        leftText: "import { log } from \"./logger\"",
+                        rightText: "import { log } from \"./logger\"",
+                        type: "context",
+                    },
+                    {
+                        leftLine: 3,
+                        rightLine: 3,
+                        leftText: "import { isUserBlocked } from \"./policy\"",
+                        rightText: 'import { isUserBlocked, isUserRevoked } from "./policy"',
+                        type: "added",
+                    },
+                    {
+                        leftLine: 4,
+                        rightLine: 4,
+                        leftText: "export function authMiddleware(req, res, next) {",
+                        rightText: "export function authMiddleware(req, res, next) {",
+                        type: "context",
+                    },
+                    {
+                        leftLine: 5,
+                        rightLine: 5,
+                        leftText: "  const token = req.headers.authorization?.replace(\"Bearer \", \"\")",
+                        rightText: "  const token = req.headers.authorization?.replace(\"Bearer \", \"\")",
+                        type: "context",
+                    },
+                    {
+                        leftLine: 6,
+                        rightLine: 6,
+                        leftText: "  const user = verifyToken(token)",
+                        rightText: '  const user = verifyToken(token)',
+                        type: "context",
+                    },
+                    {
+                        leftLine: 7,
+                        rightLine: 7,
+                        leftText: "  if (!user || isUserBlocked(user.id)) {",
+                        rightText: "  if (!user || isUserBlocked(user.id)) {",
+                        type: "context",
+                    },
+                    {
+                        leftLine: 8,
+                        rightLine: 8,
+                        leftText: '    return res.status(401).json({ error: "invalid token" })',
+                        rightText: '    return res.status(401).json({ error: "invalid token" })',
+                        type: "context",
+                    },
+                    {
+                        leftLine: 9,
+                        rightLine: 9,
+                        leftText: "  }",
+                        rightText: "  }",
+                        type: "context",
+                    },
+                    {
+                        leftLine: 10,
+                        rightLine: 10,
+                        leftText: "",
+                        rightText: '  if (isUserRevoked(user.id)) {',
+                        type: "added",
+                    },
+                    {
+                        leftLine: undefined,
+                        rightLine: 11,
+                        leftText: "",
+                        rightText: '    return res.status(401).json({ error: "revoked" })',
+                        type: "added",
+                        comments: [
+                            {
+                                author: "Ari",
+                                line: 11,
+                                message: "Need consistent error message with existing auth errors.",
+                                side: "right",
+                            },
+                        ],
+                    },
+                    {
+                        leftLine: undefined,
+                        rightLine: 12,
+                        leftText: "",
+                        rightText: "  }",
+                        type: "added",
+                    },
+                    {
+                        leftLine: 11,
+                        rightLine: 13,
+                        leftText: "  req.user = user",
+                        rightText: "  req.user = user",
+                        type: "context",
+                    },
+                    {
+                        leftLine: 12,
+                        rightLine: 14,
+                        leftText: "  next()",
+                        rightText: "  return next()",
+                        type: "added",
+                    },
+                    {
+                        leftLine: 13,
+                        rightLine: undefined,
+                        leftText: "}",
+                        rightText: "",
+                        type: "removed",
+                        comments: [
+                            {
+                                author: "Nika",
+                                line: 13,
+                                message: "Should we keep explicit return for middleware consistency?",
+                                side: "left",
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                filePath: "src/auth/index.ts",
+                language: "typescript",
+                lines: [
+                    {
+                        leftLine: 1,
+                        rightLine: 1,
+                        leftText: "export * from \"./middleware\"",
+                        rightText: "export * from \"./middleware\"",
+                        type: "context",
+                    },
+                    {
+                        leftLine: 2,
+                        rightLine: undefined,
+                        leftText: "",
+                        rightText: "export { isAdmin } from \"./policy\"",
+                        type: "added",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        ccrId: "ccr-9002",
+        files: [
+            {
+                filePath: "src/scanner/retry.ts",
+                language: "typescript",
+                lines: [
+                    {
+                        leftLine: 1,
+                        rightLine: 1,
+                        leftText: "import pLimit from \"p-limit\"",
+                        rightText: "import pLimit from \"p-limit\"",
+                        type: "context",
+                    },
+                    {
+                        leftLine: 2,
+                        rightLine: 2,
+                        leftText: "import { RetryPolicy } from \"./retry-policy\"",
+                        rightText: "import { RetryPolicy } from \"./retry-policy\"",
+                        type: "context",
+                    },
+                    {
+                        leftLine: 3,
+                        rightLine: 3,
+                        leftText: "const DEFAULT_RETRIES = 2",
+                        rightText: "const DEFAULT_RETRIES = 3",
+                        type: "added",
+                    },
+                    {
+                        leftLine: 4,
+                        rightLine: 4,
+                        leftText: "const timeout = 500",
+                        rightText: "const timeout = 500",
+                        type: "context",
+                    },
+                    {
+                        leftLine: 5,
+                        rightLine: undefined,
+                        leftText: "",
+                        rightText: "const jitterBase = 75",
+                        type: "added",
+                    },
+                ],
+            },
+        ],
+    },
+]
+
 /**
  * Mock CCR-данные для UI-экранов review.
  */
@@ -177,4 +423,20 @@ export function ccrToContextItem(ccr: ICcrRowData): IChatPanelContext {
         id: ccr.id,
         repoName: ccr.repository,
     }
+}
+
+/**
+ * Получить mock-диффы для заданного CCR.
+ *
+ * @param ccrId Идентификатор CCR.
+ * @returns Массив диффов по файлам.
+ */
+export function getCcrDiffById(ccrId: string): ReadonlyArray<ICcrDiffFile> {
+    const entry = MOCK_CCR_DIFFS.find((row): boolean => row.ccrId === ccrId)
+
+    if (entry === undefined) {
+        return []
+    }
+
+    return entry.files
 }

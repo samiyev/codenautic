@@ -28,4 +28,16 @@ describe("ccr review detail page", (): void => {
         expect(screen.getByText(/Please explain the current diff/)).not.toBeNull()
         expect(screen.getByText("You")).not.toBeNull()
     })
+
+    it("рендерит code diff с inline комментариями", (): void => {
+        const ccr = MOCK_CCR_ROWS[0]
+
+        renderWithProviders(<CcrReviewDetailPage ccr={ccr} />)
+
+        expect(screen.getByRole("heading", { name: "Code diff" })).not.toBeNull()
+        expect(screen.getByText("src/auth/middleware.ts")).not.toBeNull()
+        expect(screen.getByText(/Need consistent error message with existing auth errors/)).not.toBeNull()
+        expect(screen.getByText("10")).not.toBeNull()
+        expect(screen.getByText("11")).not.toBeNull()
+    })
 })
