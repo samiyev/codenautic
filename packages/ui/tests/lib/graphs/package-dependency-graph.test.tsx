@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
 import {
@@ -93,5 +94,52 @@ describe("package dependency graph", (): void => {
         expect(screen.getByTestId("xyflow-edge-count")).toHaveTextContent("1")
         expect(screen.getByPlaceholderText("Filter packages by name")).not.toBeNull()
     })
-})
 
+    it("фильтрует граф по типу связи", async (): Promise<void> => {
+        const user = userEvent.setup()
+        render(
+            <PackageDependencyGraph
+                nodes={[
+                    {
+                        id: "pkg-ui",
+                        layer: "ui",
+                        name: "pkg-ui",
+                    },
+                    {
+                        id: "pkg-core",
+                        layer: "core",
+                        name: "pkg-core",
+                    },
+                    {
+                        id: "pkg-shared",
+                        layer: "infra",
+                        name: "pkg-shared",
+                    },
+                ]}
+                relations={[
+                    {
+                        relationType: "runtime",
+                        source: "pkg-ui",
+                        target: "pkg-core",
+                    },
+                    {
+                        relationType: "peer",
+                        source: "pkg-ui",
+                        target: "pkg-shared",
+                    },
+                ]}
+                title="Package graph"
+            />,
+        )
+
+        expect(screen.getByTestId("xyflow-edge-count")).toHaveTextContent("2")
+
+        const peerFilter = screen.getByRole("button", { name: "peer" })
+        await user.click(peerFilter)
+        expect(screen.getByTestId("xyflow-edge-count")).toHaveTextContent("1")
+
+        const clearFiltersButton = screen.getByRole("button", { name: "Clear relation filters" })
+        await user.click(clearFiltersButton)
+        expect(screen.getByTestId("xyflow-edge-count")).toHaveTextContent("2")
+    })
+})

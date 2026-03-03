@@ -59,6 +59,8 @@ export interface IPackageDependencyGraphProps {
 interface IPackageDependencyGraphState {
     /** Поисковый запрос по названию пакета. */
     readonly query: string
+    /** Фильтры по типам зависимостей. */
+    readonly selectedRelationTypes: ReadonlyArray<string>
 }
 
 const MAX_LABEL_LENGTH = 40
@@ -107,7 +109,6 @@ export function buildPackageDependencyGraphData(
             label: `${label} (${node.layer})`,
             width: 230 + (node.size ?? 1) * 1.8,
             height: 74,
-            // Доп.данные сохраняем в data, но типы для render оставляем базовыми.
         }
     })
 
@@ -144,6 +145,59 @@ function filterByPackageName(
     }
 }
 
+/** Возвращает список relationType для фильтрации в детерминированном порядке. */
+function collectRelationTypes(
+    relations: ReadonlyArray<IPackageDependencyRelation>,
+): ReadonlyArray<string> {
+    const relationTypes = new Set<string>()
+    for (const relation of relations) {
+        if (relation.relationType !== undefined && relation.relationType.length > 0) {
+            relationTypes.add(relation.relationType)
+        }
+    }
+
+    return Array.from(relationTypes).sort()
+}
+
+/** Фильтрует рёбра по выбранным типам зависимостей. */
+function filterByRelationTypes(
+    data: IPackageDependencyGraphData,
+    selectedRelationTypes: ReadonlyArray<string>,
+): IPackageDependencyGraphData {
+    const trimSelected = selectedRelationTypes
+        .map((relationType): string => relationType.trim())
+        .filter((relationType): boolean => relationType.length > 0)
+    if (trimSelected.length === 0) {
+        return data
+    }
+
+    const selectedSet = new Set<string>(trimSelected)
+    const edges = data.edges.filter((edge): boolean =>
+        edge.label !== undefined && selectedSet.has(edge.label),
+    )
+    const edgeNodeIds = new Set<string>(
+        edges.flatMap(
+            (edge): ReadonlyArray<string> => [edge.source, edge.target],
+        ),
+    )
+    const nodes = data.nodes.filter((node): boolean => edgeNodeIds.has(node.id))
+
+    return { edges, nodes }
+}
+
+/** Рекомендует next состояния для фильтра relationType по клику на кнопке. */
+function toggleRelationFilter(
+    selected: ReadonlyArray<string>,
+    relationType: string,
+): ReadonlyArray<string> {
+    const current = selected.findIndex((entry): boolean => entry === relationType)
+    if (current >= 0) {
+        return selected.filter((entry): boolean => entry !== relationType)
+    }
+
+    return [...selected, relationType]
+}
+
 /** Формирует summary строку. */
 function createSummaryText(nodesCount: number, edgesCount: number): string {
     return `Nodes: ${nodesCount}, edges: ${edgesCount}`
@@ -155,7 +209,10 @@ function createSummaryText(nodesCount: number, edgesCount: number): string {
  * @param props Пропсы компонента.
  */
 export function PackageDependencyGraph(props: IPackageDependencyGraphProps): ReactElement {
-    const [state, setState] = useState<IPackageDependencyGraphState>({ query: "" })
+    const [state, setState] = useState<IPackageDependencyGraphState>({
+        query: "",
+        selectedRelationTypes: [],
+    })
     const title = props.title ?? "Package dependency graph"
     const emptyStateLabel = props.emptyStateLabel ?? "No package dependencies yet."
     const graphData = useMemo(
@@ -163,11 +220,13 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
             buildPackageDependencyGraphData(props.nodes, props.relations),
         [props.nodes, props.relations],
     )
-    const visibleGraphData = useMemo(
-        (): IPackageDependencyGraphData =>
-            filterByPackageName(graphData, props.nodes, state.query),
-        [graphData, props.nodes, state.query],
-    )
+    const relationTypes = useMemo((): ReadonlyArray<string> => {
+        return collectRelationTypes(props.relations)
+    }, [props.relations])
+    const visibleGraphData = useMemo((): IPackageDependencyGraphData => {
+        const dataByName = filterByPackageName(graphData, props.nodes, state.query)
+        return filterByRelationTypes(dataByName, state.selectedRelationTypes)
+    }, [graphData, props.nodes, state.query, state.selectedRelationTypes])
     const layoutedNodes = useMemo(
         () =>
             calculateGraphLayout(visibleGraphData.nodes, visibleGraphData.edges, {
@@ -211,6 +270,20 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                             }))
                         }}
                     />
+                    {relationTypes.length > 0 ? (
+                        <Button
+                            color="default"
+                            onPress={(): void => {
+                                setState((previous): IPackageDependencyGraphState => ({
+                                    ...previous,
+                                    selectedRelationTypes: [],
+                                }))
+                            }}
+                            variant="flat"
+                        >
+                            Clear relation filters
+                        </Button>
+                    ) : null}
                     {state.query.length > 0 ? (
                         <Button
                             color="default"
@@ -226,6 +299,33 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         </Button>
                     ) : null}
                 </div>
+                {relationTypes.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        {relationTypes.map((relationType): ReactElement => {
+                            const isActive = state.selectedRelationTypes.includes(relationType)
+                            return (
+                                <Button
+                                    key={relationType}
+                                    color="default"
+                                    size="sm"
+                                    variant={isActive ? "flat" : "light"}
+                                   onPress={(): void => {
+                                        const selectedRelationTypes = toggleRelationFilter(
+                                            state.selectedRelationTypes,
+                                            relationType,
+                                        )
+                                        setState((previous): IPackageDependencyGraphState => ({
+                                            ...previous,
+                                            selectedRelationTypes,
+                                        }))
+                                    }}
+                                >
+                                    {relationType}
+                                </Button>
+                            )
+                        })}
+                    </div>
+                ) : null}
             </CardHeader>
             <CardBody>
                 <XyFlowGraph
@@ -240,4 +340,3 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
         </Card>
     )
 }
-

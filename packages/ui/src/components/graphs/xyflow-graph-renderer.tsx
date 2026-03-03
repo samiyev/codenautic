@@ -1,5 +1,15 @@
 import { type ReactElement, useMemo } from "react"
-import { Background, Controls, MiniMap, type Edge, ReactFlow, type Node } from "@xyflow/react"
+import {
+    Background,
+    Controls,
+    MiniMap,
+    Panel,
+    Position,
+    type Edge,
+    ReactFlow,
+    type Node,
+    useReactFlow,
+} from "@xyflow/react"
 
 import "@xyflow/react/dist/style.css"
 
@@ -30,6 +40,113 @@ interface IXYFlowGraphRendererProps {
     readonly ariaLabel?: string
     /** Высота графа. */
     readonly height: string
+}
+
+const VIEWPORT_ZOOM_STEP = 0.25
+const VIEWPORT_PAN_STEP = 160
+
+/** Панель ручных контролов для управления видом графа. */
+function XYFlowViewportControls(): ReactElement {
+    const flowInstance = useReactFlow()
+
+    const moveViewport = (deltaX: number, deltaY: number): void => {
+        const viewport = flowInstance.getViewport()
+        flowInstance.setViewport(
+            {
+                x: viewport.x + deltaX,
+                y: viewport.y + deltaY,
+                zoom: viewport.zoom,
+            },
+            { duration: 220 },
+        )
+    }
+
+    return (
+        <Panel
+            className="flex flex-col gap-2 rounded border bg-white/95 p-2"
+            position={Position.TopRight}
+        >
+            <div className="flex gap-1">
+                <button
+                    aria-label="Zoom in"
+                    className="rounded border border-slate-300 px-2 py-1 text-sm"
+                    onClick={(): void => {
+                        flowInstance.zoomIn({ duration: 180, amount: VIEWPORT_ZOOM_STEP })
+                    }}
+                    type="button"
+                >
+                    +
+                </button>
+                <button
+                    aria-label="Zoom out"
+                    className="rounded border border-slate-300 px-2 py-1 text-sm"
+                    onClick={(): void => {
+                        flowInstance.zoomOut({ duration: 180, amount: VIEWPORT_ZOOM_STEP })
+                    }}
+                    type="button"
+                >
+                    -
+                </button>
+                <button
+                    aria-label="Reset zoom"
+                    className="rounded border border-slate-300 px-2 py-1 text-xs"
+                    onClick={(): void => {
+                        void flowInstance.fitView({ padding: 0.15, duration: 220 })
+                    }}
+                    type="button"
+                >
+                    fit
+                </button>
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+                <span />
+                <button
+                    aria-label="Pan up"
+                    className="rounded border border-slate-300 px-2 py-1 text-sm"
+                    onClick={(): void => {
+                        moveViewport(0, VIEWPORT_PAN_STEP)
+                    }}
+                    type="button"
+                >
+                    ↑
+                </button>
+                <span />
+                <button
+                    aria-label="Pan left"
+                    className="rounded border border-slate-300 px-2 py-1 text-sm"
+                    onClick={(): void => {
+                        moveViewport(VIEWPORT_PAN_STEP, 0)
+                    }}
+                    type="button"
+                >
+                    ←
+                </button>
+                <span />
+                <button
+                    aria-label="Pan right"
+                    className="rounded border border-slate-300 px-2 py-1 text-sm"
+                    onClick={(): void => {
+                        moveViewport(-VIEWPORT_PAN_STEP, 0)
+                    }}
+                    type="button"
+                >
+                    →
+                </button>
+                <span />
+                <button
+                    aria-label="Pan down"
+                    className="rounded border border-slate-300 px-2 py-1 text-sm"
+                    onClick={(): void => {
+                        moveViewport(0, -VIEWPORT_PAN_STEP)
+                    }}
+                    type="button"
+                >
+                    ↓
+                </button>
+                <span />
+            </div>
+        </Panel>
+    )
 }
 
 /** Реальный рендерер графа на базе `@xyflow/react`. */
@@ -106,7 +223,12 @@ export function XYFlowGraphRenderer(props: IXYFlowGraphRendererProps): ReactElem
                 elementsSelectable={false}
             >
                 <Background color="hsl(var(--nextui-colors-defaultBorder))" gap={16} />
-                {showControls === true ? <Controls /> : null}
+                {showControls === true ? (
+                    <>
+                        <Controls />
+                        <XYFlowViewportControls />
+                    </>
+                ) : null}
                 {showMiniMap === true ? <MiniMap pannable /> : null}
             </ReactFlow>
         </section>
