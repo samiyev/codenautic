@@ -20,27 +20,27 @@ describe("expert panel presets", () => {
             }),
         ).toEqual([
             {
-                name: "Edward",
+                name: "Neo",
                 role: "VETO",
                 priority: 0,
             },
             {
-                name: "Alice",
+                name: "Trinity",
                 role: "Syntax",
                 priority: 1,
             },
             {
-                name: "Bob",
+                name: "Morpheus",
                 role: "Logic",
                 priority: 2,
             },
             {
-                name: "Charles",
+                name: "Oracle",
                 role: "Style",
                 priority: 3,
             },
             {
-                name: "Diana",
+                name: "Niobe",
                 role: "Referee",
                 priority: 4,
             },
@@ -61,17 +61,17 @@ describe("expert panel presets", () => {
             }),
         ).toEqual([
             {
-                name: "Alice",
+                name: "Trinity",
                 role: "Syntax peer-review",
                 priority: 0,
             },
             {
-                name: "Bob",
+                name: "Morpheus",
                 role: "Logic peer-review",
                 priority: 1,
             },
             {
-                name: "Charles",
+                name: "Oracle",
                 role: "Style peer-review",
                 priority: 2,
             },

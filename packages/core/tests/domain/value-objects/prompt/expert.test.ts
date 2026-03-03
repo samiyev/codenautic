@@ -5,13 +5,13 @@ import {Expert} from "../../../../src/domain/value-objects/prompt/expert"
 describe("Expert", () => {
     test("creates expert with normalized fields", () => {
         const expert = Expert.create({
-            name: "  Alice  ",
+            name: "  Trinity  ",
             role: "  Security Reviewer  ",
             responsibilities: [" Find vulnerabilities ", " Validate auth "],
             priority: 1,
         })
 
-        expect(expert.name).toBe("Alice")
+        expect(expert.name).toBe("Trinity")
         expect(expert.role).toBe("Security Reviewer")
         expect(expert.responsibilities).toEqual([
             "Find vulnerabilities",
@@ -22,7 +22,7 @@ describe("Expert", () => {
 
     test("returns immutable responsibilities snapshot", () => {
         const expert = Expert.create({
-            name: "Bob",
+            name: "Morpheus",
             role: "Logic Checker",
             responsibilities: ["Check consistency"],
             priority: 2,
@@ -48,7 +48,7 @@ describe("Expert", () => {
     test("throws when role is empty", () => {
         expect(() => {
             Expert.create({
-                name: "Alice",
+                name: "Trinity",
                 role: "   ",
                 responsibilities: ["Find vulnerabilities"],
                 priority: 1,
@@ -59,7 +59,7 @@ describe("Expert", () => {
     test("throws when responsibility is empty", () => {
         expect(() => {
             Expert.create({
-                name: "Alice",
+                name: "Trinity",
                 role: "Security Reviewer",
                 responsibilities: ["  "],
                 priority: 1,
@@ -70,7 +70,7 @@ describe("Expert", () => {
     test("throws when priority is negative", () => {
         expect(() => {
             Expert.create({
-                name: "Alice",
+                name: "Trinity",
                 role: "Security Reviewer",
                 responsibilities: ["Find vulnerabilities"],
                 priority: -1,
@@ -81,7 +81,7 @@ describe("Expert", () => {
     test("throws when priority is not finite", () => {
         expect(() => {
             Expert.create({
-                name: "Alice",
+                name: "Trinity",
                 role: "Security Reviewer",
                 responsibilities: ["Find vulnerabilities"],
                 priority: Number.POSITIVE_INFINITY,
@@ -91,7 +91,7 @@ describe("Expert", () => {
 
     test("formats expert for prompt injection", () => {
         const expert = Expert.create({
-            name: "Alice",
+            name: "Trinity",
             role: "Security Reviewer",
             responsibilities: ["Find vulnerabilities", "Validate auth"],
             priority: 1,
@@ -99,7 +99,7 @@ describe("Expert", () => {
 
         expect(expert.formatForPrompt()).toBe(
             [
-                "Name: Alice",
+                "Name: Trinity",
                 "Role: Security Reviewer",
                 "Responsibilities:",
                 "- Find vulnerabilities",
@@ -111,7 +111,7 @@ describe("Expert", () => {
 
     test("formats empty responsibilities explicitly", () => {
         const expert = Expert.create({
-            name: "Diana",
+            name: "Niobe",
             role: "Referee",
             responsibilities: [],
             priority: 5,
@@ -119,7 +119,7 @@ describe("Expert", () => {
 
         expect(expert.formatForPrompt()).toBe(
             [
-                "Name: Diana",
+                "Name: Niobe",
                 "Role: Referee",
                 "Responsibilities:",
                 "- none",

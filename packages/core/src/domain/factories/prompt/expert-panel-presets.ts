@@ -3,7 +3,7 @@ import {ExpertPanel} from "../../value-objects/prompt/expert-panel"
 
 const SAFEGUARD_PANEL_PRESET: readonly IExpertProps[] = [
     {
-        name: "Edward",
+        name: "Neo",
         role: "VETO",
         responsibilities: [
             "Block suggestions with critical regression risk",
@@ -12,7 +12,7 @@ const SAFEGUARD_PANEL_PRESET: readonly IExpertProps[] = [
         priority: 0,
     },
     {
-        name: "Alice",
+        name: "Trinity",
         role: "Syntax",
         responsibilities: [
             "Verify syntax correctness in generated patches",
@@ -21,7 +21,7 @@ const SAFEGUARD_PANEL_PRESET: readonly IExpertProps[] = [
         priority: 1,
     },
     {
-        name: "Bob",
+        name: "Morpheus",
         role: "Logic",
         responsibilities: [
             "Validate semantic correctness of code changes",
@@ -30,7 +30,7 @@ const SAFEGUARD_PANEL_PRESET: readonly IExpertProps[] = [
         priority: 2,
     },
     {
-        name: "Charles",
+        name: "Oracle",
         role: "Style",
         responsibilities: [
             "Check readability and maintainability conventions",
@@ -39,7 +39,7 @@ const SAFEGUARD_PANEL_PRESET: readonly IExpertProps[] = [
         priority: 3,
     },
     {
-        name: "Diana",
+        name: "Niobe",
         role: "Referee",
         responsibilities: [
             "Resolve conflicts between expert recommendations",
@@ -51,7 +51,7 @@ const SAFEGUARD_PANEL_PRESET: readonly IExpertProps[] = [
 
 const CLASSIFIER_PANEL_PRESET: readonly IExpertProps[] = [
     {
-        name: "Alice",
+        name: "Trinity",
         role: "Syntax peer-review",
         responsibilities: [
             "Classify syntax-level defects in proposed changes",
@@ -60,7 +60,7 @@ const CLASSIFIER_PANEL_PRESET: readonly IExpertProps[] = [
         priority: 0,
     },
     {
-        name: "Bob",
+        name: "Morpheus",
         role: "Logic peer-review",
         responsibilities: [
             "Classify semantic and behavioral defects",
@@ -69,7 +69,7 @@ const CLASSIFIER_PANEL_PRESET: readonly IExpertProps[] = [
         priority: 1,
     },
     {
-        name: "Charles",
+        name: "Oracle",
         role: "Style peer-review",
         responsibilities: [
             "Classify maintainability and readability concerns",

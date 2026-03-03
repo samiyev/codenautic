@@ -21,13 +21,13 @@ describe("ExpertPanel", () => {
     test("creates panel and exposes size", () => {
         const panel = ExpertPanel.create([
             createExpert({
-                name: "Alice",
+                name: "Trinity",
                 role: "Syntax",
                 responsibilities: ["Check syntax"],
                 priority: 2,
             }),
             createExpert({
-                name: "Bob",
+                name: "Morpheus",
                 role: "Logic",
                 responsibilities: ["Check logic"],
                 priority: 1,
@@ -41,7 +41,7 @@ describe("ExpertPanel", () => {
     test("returns immutable experts snapshot", () => {
         const panel = ExpertPanel.create([
             createExpert({
-                name: "Alice",
+                name: "Trinity",
                 role: "Syntax",
                 responsibilities: ["Check syntax"],
                 priority: 2,
@@ -59,25 +59,25 @@ describe("ExpertPanel", () => {
         )
 
         expect(panel.size).toBe(1)
-        expect(panel.experts[0]?.name).toBe("Alice")
+        expect(panel.experts[0]?.name).toBe("Trinity")
     })
 
     test("formats experts sorted by priority then name", () => {
         const panel = ExpertPanel.create([
             createExpert({
-                name: "Diana",
+                name: "Niobe",
                 role: "Referee",
                 responsibilities: ["Resolve conflicts"],
                 priority: 3,
             }),
             createExpert({
-                name: "Bob",
+                name: "Morpheus",
                 role: "Logic",
                 responsibilities: ["Check logic"],
                 priority: 1,
             }),
             createExpert({
-                name: "Alice",
+                name: "Trinity",
                 role: "Syntax",
                 responsibilities: ["Check syntax"],
                 priority: 1,
@@ -87,21 +87,21 @@ describe("ExpertPanel", () => {
         expect(panel.formatForPrompt()).toBe(
             [
                 "Expert 1:",
-                "Name: Alice",
-                "Role: Syntax",
-                "Responsibilities:",
-                "- Check syntax",
-                "Priority: 1",
-                "",
-                "Expert 2:",
-                "Name: Bob",
+                "Name: Morpheus",
                 "Role: Logic",
                 "Responsibilities:",
                 "- Check logic",
                 "Priority: 1",
                 "",
+                "Expert 2:",
+                "Name: Trinity",
+                "Role: Syntax",
+                "Responsibilities:",
+                "- Check syntax",
+                "Priority: 1",
+                "",
                 "Expert 3:",
-                "Name: Diana",
+                "Name: Niobe",
                 "Role: Referee",
                 "Responsibilities:",
                 "- Resolve conflicts",
@@ -121,7 +121,7 @@ describe("ExpertPanel", () => {
         expect(() => {
             ExpertPanel.create([
                 createExpert({
-                    name: "Alice",
+                    name: "Trinity",
                     role: "Syntax",
                     responsibilities: ["Check syntax"],
                     priority: 1,
@@ -134,7 +134,7 @@ describe("ExpertPanel", () => {
     test("serializes to plain object", () => {
         const panel = ExpertPanel.create([
             createExpert({
-                name: "Alice",
+                name: "Trinity",
                 role: "Syntax",
                 responsibilities: ["Check syntax"],
                 priority: 1,
@@ -144,7 +144,7 @@ describe("ExpertPanel", () => {
         expect(panel.toJSON()).toEqual({
             experts: [
                 {
-                    name: "Alice",
+                    name: "Trinity",
                     role: "Syntax",
                     responsibilities: ["Check syntax"],
                     priority: 1,
