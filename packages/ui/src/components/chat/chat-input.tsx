@@ -11,6 +11,16 @@ export interface IChatFileContextOption {
     readonly label: string
 }
 
+/** Экшен быстрого ответа. */
+export interface IChatQuickAction {
+    /** Уникальный идентификатор действия. */
+    readonly id: string
+    /** Название кнопки. */
+    readonly label: string
+    /** Сообщение, отправляемое в чат. */
+    readonly message: string
+}
+
 /** Пропсы полевой части чата. */
 export interface IChatInputProps {
     /** Текущая строка ввода. */
@@ -33,10 +43,14 @@ export interface IChatInputProps {
     readonly contextAriaLabel?: string
     /** Список контекстов для выбора файла/ресурса. */
     readonly contextOptions?: ReadonlyArray<IChatFileContextOption>
+    /** Быстрые действия внизу инпута. */
+    readonly quickActions?: ReadonlyArray<IChatQuickAction>
     /** Идентификатор выбранного контекста (если выбранный контролируется извне). */
     readonly selectedContextId?: string
     /** Callback при смене контекста. */
     readonly onContextChange?: (contextId: string) => void
+    /** Callback при запуске quick action. */
+    readonly onQuickAction?: (message: string) => void
 }
 
 function resolveSelection(keys: "all" | Set<string>): string | undefined {
@@ -62,6 +76,7 @@ function resolveSelection(keys: "all" | Set<string>): string | undefined {
 export function ChatInput(props: IChatInputProps): ReactElement {
     const [selectedContext, setSelectedContext] = useState("")
     const contextOptions = props.contextOptions ?? []
+    const quickActions = props.quickActions ?? []
     const maxLength = props.maxLength ?? 4000
     const normalizedLength = props.draft.length
     const maxLengthLabel = `${String(normalizedLength)}/${String(maxLength)}`
@@ -137,6 +152,14 @@ export function ChatInput(props: IChatInputProps): ReactElement {
         props.onContextChange?.(nextContext)
     }
 
+    const handleQuickAction = (message: string): void => {
+        if (props.isLoading === true) {
+            return
+        }
+
+        props.onQuickAction?.(message)
+    }
+
     return (
         <form className="border-t border-[var(--border)]" onSubmit={handleSubmit}>
             {contextOptions.length === 0 ? null : (
@@ -160,6 +183,26 @@ export function ChatInput(props: IChatInputProps): ReactElement {
                             ),
                         )}
                     </Select>
+                </div>
+            )}
+            {quickActions.length === 0 ? null : (
+                <div className="flex flex-wrap gap-2 border-b border-[var(--border)] px-3 pb-2 pt-2">
+                    {quickActions.map(
+                        (action): ReactElement => (
+                            <Button
+                                key={action.id}
+                                isDisabled={props.isLoading}
+                                size="sm"
+                                type="button"
+                                variant="flat"
+                                onPress={(): void => {
+                                    handleQuickAction(action.message)
+                                }}
+                            >
+                                {action.label}
+                            </Button>
+                        ),
+                    )}
                 </div>
             )}
             <div className="p-3">

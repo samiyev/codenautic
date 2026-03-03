@@ -14,6 +14,7 @@ import { Route as SettingsGitProvidersRouteImport } from './routes/settings-git-
 import { Route as SettingsCodeReviewRouteImport } from './routes/settings-code-review'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReviewsRouteImport } from './routes/reviews'
+import { Route as ReviewsReviewRouteImport } from './routes/reviews.$reviewId'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -42,6 +43,11 @@ const ReviewsRoute = ReviewsRouteImport.update({
   path: '/reviews',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReviewsReviewRoute = ReviewsReviewRouteImport.update({
+  id: '/reviews/$reviewId',
+  path: '/reviews/$reviewId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/reviews': typeof ReviewsRoute
+  '/reviews/$reviewId': typeof ReviewsReviewRoute
   '/settings': typeof SettingsRoute
   '/settings-code-review': typeof SettingsCodeReviewRoute
   '/settings-git-providers': typeof SettingsGitProvidersRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/reviews': typeof ReviewsRoute
+  '/reviews/$reviewId': typeof ReviewsReviewRoute
   '/settings': typeof SettingsRoute
   '/settings-code-review': typeof SettingsCodeReviewRoute
   '/settings-git-providers': typeof SettingsGitProvidersRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/reviews': typeof ReviewsRoute
+  '/reviews/$reviewId': typeof ReviewsReviewRoute
   '/settings': typeof SettingsRoute
   '/settings-code-review': typeof SettingsCodeReviewRoute
   '/settings-git-providers': typeof SettingsGitProvidersRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/reviews'
+    | '/reviews/$reviewId'
     | '/settings'
     | '/settings-code-review'
     | '/settings-git-providers'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/reviews'
+    | '/reviews/$reviewId'
     | '/settings'
     | '/settings-code-review'
     | '/settings-git-providers'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/reviews'
+    | '/reviews/$reviewId'
     | '/settings'
     | '/settings-code-review'
     | '/settings-git-providers'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   ReviewsRoute: typeof ReviewsRoute
+  ReviewsReviewRoute: typeof ReviewsReviewRoute
   SettingsRoute: typeof SettingsRoute
   SettingsCodeReviewRoute: typeof SettingsCodeReviewRoute
   SettingsGitProvidersRoute: typeof SettingsGitProvidersRoute
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReviewsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reviews/$reviewId': {
+      id: '/reviews/$reviewId'
+      path: '/reviews/$reviewId'
+      fullPath: '/reviews/$reviewId'
+      preLoaderRoute: typeof ReviewsReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   ReviewsRoute: ReviewsRoute,
+  ReviewsReviewRoute: ReviewsReviewRoute,
   SettingsRoute: SettingsRoute,
   SettingsCodeReviewRoute: SettingsCodeReviewRoute,
   SettingsGitProvidersRoute: SettingsGitProvidersRoute,

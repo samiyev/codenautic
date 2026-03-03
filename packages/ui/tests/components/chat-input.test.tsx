@@ -106,4 +106,34 @@ describe("chat input", (): void => {
         const submitButton = screen.getByRole("button", { name: "Отправить" })
         expect(submitButton).toBeDisabled()
     })
+
+    it("рендерит и запускает quick actions", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const onSubmit = vi.fn()
+        const onQuickAction = vi.fn()
+
+        renderWithProviders(
+            <ChatInputHarness
+                onQuickAction={onQuickAction}
+                onSubmit={onSubmit}
+                quickActions={[
+                    {
+                        id: "qa-explain",
+                        label: "explain this file",
+                        message: "explain file diff",
+                    },
+                    {
+                        id: "qa-summary",
+                        label: "summarize changes",
+                        message: "summary",
+                    },
+                ]}
+            />,
+        )
+
+        const explainButton = screen.getByRole("button", { name: "explain this file" })
+        await user.click(explainButton)
+        expect(onQuickAction).toHaveBeenCalledTimes(1)
+        expect(onQuickAction).toHaveBeenCalledWith("explain file diff")
+    })
 })

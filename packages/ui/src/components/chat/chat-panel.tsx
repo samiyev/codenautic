@@ -3,7 +3,11 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 import { ChatMessageBubble } from "@/components/chat/chat-message-bubble"
 import { ChatContextIndicator } from "@/components/chat/chat-context-indicator"
-import { ChatInput, type IChatFileContextOption } from "@/components/chat/chat-input"
+import {
+    ChatInput,
+    type IChatFileContextOption,
+    type IChatQuickAction,
+} from "@/components/chat/chat-input"
 import { ChatStreamingResponse } from "@/components/chat/chat-streaming-response"
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
 import type { IChatCodeReference } from "@/components/chat/chat-message-bubble"
@@ -93,6 +97,10 @@ export interface IChatPanelProps {
     readonly onCodeReferenceClick?: (reference: IChatCodeReference) => void
     /** Callback hover/focus по ссылке на код. */
     readonly onCodeReferencePreview?: (reference: IChatCodeReference) => void
+    /** Быстрые действия, например: explain/summarize. */
+    readonly quickActions?: ReadonlyArray<IChatQuickAction>
+    /** Callback запуска quick action. */
+    readonly onQuickAction?: (message: string) => void
     /** Закрыть панель (опционально). */
     readonly onClose?: () => void
 }
@@ -186,6 +194,20 @@ export function ChatPanel(props: IChatPanelProps): ReactElement {
         props.onContextChange?.(contextId)
     }
 
+    const handleQuickAction = (message: string): void => {
+        if (isSending === true) {
+            return
+        }
+
+        const normalizedMessage = message.trim()
+        if (normalizedMessage.length === 0) {
+            return
+        }
+
+        props.onQuickAction?.(normalizedMessage)
+        props.onSendMessage(normalizedMessage)
+    }
+
     return (
         <aside
             aria-label={panelAriaLabel}
@@ -255,11 +277,13 @@ export function ChatPanel(props: IChatPanelProps): ReactElement {
                         ) : null}
                     </ul>
                     <ChatInput
+                        quickActions={props.quickActions}
                         contextAriaLabel={contextAriaLabel}
                         contextOptions={inputContextOptions}
                         selectedContextId={effectiveContextId}
                         counterAriaLabel="Message character count"
                         draft={draftMessage}
+                        onQuickAction={handleQuickAction}
                         inputAriaLabel={inputAriaLabel}
                         isLoading={isSending}
                         maxLength={maxMessageLength}

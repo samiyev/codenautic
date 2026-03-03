@@ -1,6 +1,7 @@
 import { type ChangeEvent, type ReactElement, useEffect, useMemo, useState } from "react"
 
 import { ReviewsContent, type IReviewRow } from "@/components/reviews/reviews-content"
+import { MOCK_CCR_ROWS, type ICcrRowData } from "@/pages/ccr-data"
 
 /** Параметры URL-фильтров для страницы CCR. */
 export interface ICcrFilters {
@@ -14,13 +15,8 @@ export interface ICcrFilters {
     readonly repository: string
 }
 
-/** Формат данных mock CCR для демонстрации списочного экрана. */
-interface ICcrRow extends IReviewRow {
-    /** Команда. */
-    readonly team: string
-    /** Уровень критичности. */
-    readonly severity: "low" | "medium" | "high"
-}
+/** Формат строки CCR для списка. */
+type ICcrRow = ICcrRowData
 
 /** Параметры страницы CCR Management. */
 export interface ICcrManagementPageProps extends ICcrFilters {
@@ -43,119 +39,6 @@ function toFilterMatch(fieldValue: string, filterValue: string): boolean {
 
     return fieldValue === filterValue
 }
-
-const MOCK_CCR_ROWS: ReadonlyArray<ICcrRow> = [
-    {
-        assignee: "Ari",
-        comments: 12,
-        id: "ccr-9001",
-        repository: "repo-core",
-        severity: "high",
-        status: "new",
-        team: "runtime",
-        title: "Refactor auth middleware",
-        updatedAt: "2026-03-01 10:12",
-    },
-    {
-        assignee: "Nika",
-        comments: 3,
-        id: "ccr-9002",
-        repository: "repo-ui",
-        severity: "medium",
-        status: "queued",
-        team: "frontend",
-        title: "Add retry policy for scanner",
-        updatedAt: "2026-03-01 09:40",
-    },
-    {
-        assignee: "Ari",
-        comments: 9,
-        id: "ccr-9003",
-        repository: "repo-mobile",
-        severity: "low",
-        status: "in_progress",
-        team: "mobile",
-        title: "Fix memory leaks in stream parser",
-        updatedAt: "2026-02-28 19:18",
-    },
-    {
-        assignee: "Sari",
-        comments: 4,
-        id: "ccr-9004",
-        repository: "repo-core",
-        severity: "medium",
-        status: "approved",
-        team: "runtime",
-        title: "Tune telemetry export window",
-        updatedAt: "2026-02-28 16:10",
-    },
-    {
-        assignee: "Nika",
-        comments: 13,
-        id: "ccr-9005",
-        repository: "repo-ui",
-        severity: "high",
-        status: "rejected",
-        team: "frontend",
-        title: "Large bundle regression",
-        updatedAt: "2026-02-28 12:43",
-    },
-    {
-        assignee: "Oleg",
-        comments: 2,
-        id: "ccr-9006",
-        repository: "repo-api",
-        severity: "low",
-        status: "in_progress",
-        team: "backend",
-        title: "Endpoint contract drift",
-        updatedAt: "2026-02-27 14:20",
-    },
-    {
-        assignee: "Mila",
-        comments: 1,
-        id: "ccr-9007",
-        repository: "repo-api",
-        severity: "high",
-        status: "new",
-        team: "backend",
-        title: "Critical auth edge-case",
-        updatedAt: "2026-02-27 11:01",
-    },
-    {
-        assignee: "Ari",
-        comments: 5,
-        id: "ccr-9008",
-        repository: "repo-data",
-        severity: "medium",
-        status: "queued",
-        team: "data",
-        title: "Optimize graph traversal path",
-        updatedAt: "2026-02-26 17:30",
-    },
-    {
-        assignee: "Nika",
-        comments: 6,
-        id: "ccr-9009",
-        repository: "repo-core",
-        severity: "low",
-        status: "new",
-        team: "runtime",
-        title: "Clean up deprecated API docs",
-        updatedAt: "2026-02-26 10:12",
-    },
-    {
-        assignee: "Mila",
-        comments: 2,
-        id: "ccr-9010",
-        repository: "repo-data",
-        severity: "medium",
-        status: "approved",
-        team: "data",
-        title: "Rework data contract validation",
-        updatedAt: "2026-02-25 09:45",
-    },
-]
 
 function createSortedOptions(values: ReadonlyArray<string>): ReadonlyArray<string> {
     return Array.from(new Set(values)).sort()
