@@ -77,10 +77,33 @@ export {
     type ITokenUsageDTO,
 } from "./application/dto/review"
 export {
+    PROJECT_GRAPH_EDGE_RELATION,
+    PROJECT_GRAPH_NODE_TYPE,
+    type ICreateProjectInput,
+    type ICreateProjectOutput,
+    type IDeleteProjectOutput,
+    type IListProjectsInput,
+    type IListProjectsOutput,
+    type IProjectDTO,
+    type IProjectGraphDTO,
+    type IProjectGraphEdgeDTO,
+    type IProjectGraphNodeDTO,
+    type IProjectGraphOutput,
+    type IProjectIdInput,
+    type IProjectSettingsDTO,
+    type IUpdateProjectInput,
+    type IUpdateProjectOutput,
+    mapProjectToDTO,
+} from "./application/dto/project/project.dto"
+export {
     CompleteReviewUseCase,
     type ICompleteReviewInput,
     type ICompleteReviewOutput,
 } from "./application/use-cases/review/complete-review.use-case"
+export {
+    CreateProjectUseCase,
+    type ICreateProjectUseCaseDependencies,
+} from "./application/use-cases/create-project.use-case"
 export {
     AggregateResultsStageUseCase,
     type IAggregateResultsStageDependencies,
@@ -170,6 +193,11 @@ export {
 export {
     ValidatePrerequisitesStageUseCase,
 } from "./application/use-cases/review/validate-prerequisites-stage.use-case"
+export {DeleteProjectUseCase} from "./application/use-cases/delete-project.use-case"
+export {GetProjectByIdUseCase} from "./application/use-cases/get-project-by-id.use-case"
+export {GetProjectGraphUseCase} from "./application/use-cases/get-project-graph.use-case"
+export {ListProjectsUseCase} from "./application/use-cases/list-projects.use-case"
+export {UpdateProjectUseCase} from "./application/use-cases/update-project.use-case"
 export {type IPipelineDefinition, type IPipelineDefinitionStage} from "./application/types/review/pipeline-definition.type"
 export {
     PIPELINE_STAGE_RESULT_STATUS,

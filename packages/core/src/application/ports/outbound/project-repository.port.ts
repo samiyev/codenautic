@@ -1,6 +1,7 @@
 import type {OrganizationId} from "../../../domain/value-objects/organization-id.value-object"
 import type {Project} from "../../../domain/entities/project.entity"
 import type {RepositoryId} from "../../../domain/value-objects/repository-id.value-object"
+import type {UniqueId} from "../../../domain/value-objects/unique-id.value-object"
 import type {IRepository} from "./common/repository.port"
 
 /**
@@ -53,4 +54,11 @@ export interface IProjectRepository extends IRepository<Project> {
      * @returns Matching count.
      */
     count(filters?: IProjectFilters): Promise<number>
+
+    /**
+     * Deletes project by identifier.
+     *
+     * @param id Project identifier.
+     */
+    delete(id: UniqueId): Promise<void>
 }

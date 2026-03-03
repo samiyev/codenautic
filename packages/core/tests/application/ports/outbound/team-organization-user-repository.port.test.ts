@@ -82,6 +82,11 @@ class InMemoryProjectRepository implements IProjectRepository {
         return Promise.resolve()
     }
 
+    public delete(id: UniqueId): Promise<void> {
+        this.storage.delete(id.value)
+        return Promise.resolve()
+    }
+
     public findByRepositoryId(repositoryId: RepositoryId): Promise<Project | null> {
         for (const project of this.storage.values()) {
             if (project.repositoryId.toString() === repositoryId.toString()) {
@@ -295,5 +300,22 @@ describe("IProjectRepository contract", () => {
         expect(countMain).toBe(2)
         expect(allMainAndRepo).toHaveLength(1)
         expect(allMainAndRepo[0]?.repositoryId.toString()).toBe("gl:repo-other")
+    })
+
+    test("deletes project by identifier", async () => {
+        const projectFactory = new ProjectFactory()
+        const repository = new InMemoryProjectRepository()
+        const project = projectFactory.create({
+            repositoryId: "gh:to-delete",
+            organizationId: "org-delete",
+        })
+
+        await repository.save(project)
+
+        await repository.delete(project.id)
+
+        const reloaded = await repository.findById(project.id)
+
+        expect(reloaded).toBeNull()
     })
 })
