@@ -4,6 +4,7 @@ import {useTranslation} from "react-i18next"
 import {FEATURE_FLAG_KEYS} from "@/lib/feature-flags/feature-flags"
 import {isFeatureFlagEnabled, useFeatureFlagsQuery, useHealthQuery} from "@/lib/hooks/queries"
 import {formatLocalizedDateTime, getCurrentLocale} from "@/lib/i18n/i18n"
+import {Button} from "@/components/ui"
 
 /**
  * Первый системный экран foundation-этапа: статус runtime/api.
@@ -40,15 +41,14 @@ export function SystemHealthPage(): ReactElement {
                 <p aria-live="assertive" className="mt-4 text-base text-rose-700" role="alert">
                     {t("system:unavailable")}
                 </p>
-                <button
+                <Button
                     className="mt-6 rounded-full bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
-                    onClick={(): void => {
+                    onPress={(): void => {
                         void healthQuery.refetch()
                     }}
-                    type="button"
                 >
                     {t("common:retry")}
-                </button>
+                </Button>
             </section>
         )
     }

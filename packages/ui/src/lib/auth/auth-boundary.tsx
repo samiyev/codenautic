@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-query"
 import {useTranslation} from "react-i18next"
 
+import {Button} from "@/components/ui"
 import type {IAuthApi} from "@/lib/api"
 import {createApiContracts, isApiHttpError} from "@/lib/api"
 import {queryKeys} from "@/lib/query/query-keys"
@@ -452,20 +453,17 @@ function AuthLoginPanel(props: IAuthLoginPanelProps): ReactElement {
                 </p>
             ) : null}
             <div className="mt-8 grid w-full max-w-sm gap-3">
-                {OAUTH_PROVIDERS.map((provider) => {
-                    return (
-                        <button
-                            className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-400 hover:bg-slate-100"
-                            key={provider}
-                            onClick={(): void => {
-                                void props.onOAuthSignIn(provider)
-                            }}
-                            type="button"
-                        >
-                            {resolveProviderLabel(provider)}
-                        </button>
-                    )
-                })}
+                {OAUTH_PROVIDERS.map((provider) => (
+                    <Button
+                        className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-400 hover:bg-slate-100"
+                        key={provider}
+                        onPress={(): void => {
+                            void props.onOAuthSignIn(provider)
+                        }}
+                    >
+                        {resolveProviderLabel(provider)}
+                    </Button>
+                ))}
             </div>
             {props.interactionError !== null ? (
                 <p aria-live="assertive" className="mt-4 text-sm text-rose-700" role="alert">
@@ -503,15 +501,14 @@ function AuthenticatedShell(props: IAuthenticatedShellProps): ReactElement {
                     <h2 className="text-lg font-semibold text-slate-900">{props.userDisplayName}</h2>
                     <p className="text-sm text-slate-600">{props.userEmail}</p>
                 </div>
-                <button
+                <Button
                     className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
-                    onClick={(): void => {
+                    onPress={(): void => {
                         void props.onLogout()
                     }}
-                    type="button"
                 >
                     {props.logoutLabel}
-                </button>
+                </Button>
             </header>
             {props.children}
         </div>
