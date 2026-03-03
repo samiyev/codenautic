@@ -14,7 +14,7 @@ describe("PromptTemplate", () => {
     test("creates template with normalized and unique fields", () => {
         const template = new PromptTemplate(UniqueId.create("template-1"), {
             name: "  Review Summary  ",
-            category: "  review  " as PromptTemplateCategory,
+            category: "  cross-file  " as PromptTemplateCategory,
             type: "  system  " as PromptTemplateType,
             content: "  Hello {{name}}  ",
             variables: [
@@ -28,7 +28,7 @@ describe("PromptTemplate", () => {
 
         expect(template.id.value).toBe("template-1")
         expect(template.name).toBe("Review Summary")
-        expect(template.category).toBe(PROMPT_TEMPLATE_CATEGORY.REVIEW)
+        expect(template.category).toBe(PROMPT_TEMPLATE_CATEGORY.CROSS_FILE)
         expect(template.type).toBe(PROMPT_TEMPLATE_TYPE.SYSTEM)
         expect(template.content).toBe("Hello {{name}}")
         expect(template.version).toBe(2)
@@ -42,7 +42,7 @@ describe("PromptTemplate", () => {
     test("defaults organization scope rule for global templates", () => {
         const template = new PromptTemplate(UniqueId.create("template-2"), {
             name: "Global template",
-            category: PROMPT_TEMPLATE_CATEGORY.REVIEW,
+            category: PROMPT_TEMPLATE_CATEGORY.RULES,
             type: PROMPT_TEMPLATE_TYPE.SYSTEM,
             content: "Hello",
             variables: [],
@@ -51,6 +51,20 @@ describe("PromptTemplate", () => {
         })
 
         expect(template.organizationId).toBeUndefined()
+    })
+
+    test("accepts safeguard category", () => {
+        const template = new PromptTemplate(UniqueId.create("template-2a"), {
+            name: "Safeguard template",
+            category: PROMPT_TEMPLATE_CATEGORY.SAFEGUARD,
+            type: PROMPT_TEMPLATE_TYPE.SYSTEM,
+            content: "Validate suggestions",
+            variables: [],
+            version: 1,
+            isGlobal: true,
+        })
+
+        expect(template.category).toBe(PROMPT_TEMPLATE_CATEGORY.SAFEGUARD)
     })
 
     test("throws when global template has organizationId", () => {
@@ -86,7 +100,7 @@ describe("PromptTemplate", () => {
         expect(() => {
             return new PromptTemplate(UniqueId.create("template-5"), {
                 name: "Bad",
-                category: "invalid" as "review",
+                category: "invalid" as PromptTemplateCategory,
                 type: PROMPT_TEMPLATE_TYPE.SYSTEM,
                 content: "Hello",
                 variables: [],
@@ -98,7 +112,7 @@ describe("PromptTemplate", () => {
         expect(() => {
             return new PromptTemplate(UniqueId.create("template-6"), {
                 name: "Bad",
-                category: PROMPT_TEMPLATE_CATEGORY.REVIEW,
+                category: PROMPT_TEMPLATE_CATEGORY.RULES,
                 type: "unknown" as "system",
                 content: "Hello",
                 variables: [],
@@ -110,7 +124,7 @@ describe("PromptTemplate", () => {
         expect(() => {
             return new PromptTemplate(UniqueId.create("template-7"), {
                 name: "Bad",
-                category: PROMPT_TEMPLATE_CATEGORY.REVIEW,
+                category: PROMPT_TEMPLATE_CATEGORY.RULES,
                 type: PROMPT_TEMPLATE_TYPE.USER,
                 content: "   ",
                 variables: [],

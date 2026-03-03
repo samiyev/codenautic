@@ -110,7 +110,7 @@ describe("GeneratePromptUseCase", () => {
 
         const template = new PromptTemplate(UniqueId.create("template-1"), {
             name: "review-summary",
-            category: PROMPT_TEMPLATE_CATEGORY.REVIEW,
+            category: PROMPT_TEMPLATE_CATEGORY.RULES,
             type: PROMPT_TEMPLATE_TYPE.SYSTEM,
             content: "User:{{user.name}}|Level:{{level}}|Tags:{{extra.tags}}|Nested:{{extra.nested.value}}|Missing:{{extra.missing}}",
             variables: [],
@@ -182,7 +182,7 @@ describe("GeneratePromptUseCase", () => {
         })
         const template = new PromptTemplate(UniqueId.create("template-2"), {
             name: "bare-template",
-            category: PROMPT_TEMPLATE_CATEGORY.REVIEW,
+            category: PROMPT_TEMPLATE_CATEGORY.RULES,
             type: PROMPT_TEMPLATE_TYPE.SYSTEM,
             content: "Hello {{name}}",
             variables: [],
@@ -264,7 +264,7 @@ describe("GeneratePromptUseCase", () => {
 
         const globalTemplate = new PromptTemplate(UniqueId.create("template-3"), {
             name: "org-template",
-            category: PROMPT_TEMPLATE_CATEGORY.REVIEW,
+            category: PROMPT_TEMPLATE_CATEGORY.RULES,
             type: PROMPT_TEMPLATE_TYPE.SYSTEM,
             content: "Global {{name}}",
             variables: [],
@@ -273,7 +273,7 @@ describe("GeneratePromptUseCase", () => {
         })
         const scopedTemplate = new PromptTemplate(UniqueId.create("template-4"), {
             name: "org-template",
-            category: PROMPT_TEMPLATE_CATEGORY.REVIEW,
+            category: PROMPT_TEMPLATE_CATEGORY.RULES,
             type: PROMPT_TEMPLATE_TYPE.SYSTEM,
             content: "Scoped {{name}}",
             variables: [],

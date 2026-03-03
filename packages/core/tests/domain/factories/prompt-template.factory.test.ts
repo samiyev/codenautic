@@ -8,7 +8,7 @@ describe("PromptTemplateFactory", () => {
         const factory = new PromptTemplateFactory()
         const template = factory.create({
             name: "  review summary  ",
-            category: "  review  ",
+            category: "  cross-file  ",
             type: "  SYSTEM  ",
             content: "Hello {{ name }}",
             variables: [{name: " name "}],
@@ -18,7 +18,7 @@ describe("PromptTemplateFactory", () => {
         expect(template.id.value).toHaveLength(36)
         expect(template.version).toBe(1)
         expect(template.name).toBe("review summary")
-        expect(template.category).toBe(PROMPT_TEMPLATE_CATEGORY.REVIEW)
+        expect(template.category).toBe(PROMPT_TEMPLATE_CATEGORY.CROSS_FILE)
         expect(template.type).toBe(PROMPT_TEMPLATE_TYPE.SYSTEM)
         expect(template.variables).toEqual([{name: "name"}])
         expect(template.isGlobal).toBe(true)
@@ -29,7 +29,7 @@ describe("PromptTemplateFactory", () => {
         const factory = new PromptTemplateFactory()
         const template = factory.create({
             name: "Repo summary",
-            category: PROMPT_TEMPLATE_CATEGORY.ANALYSIS,
+            category: PROMPT_TEMPLATE_CATEGORY.SAFEGUARD,
             type: PROMPT_TEMPLATE_TYPE.USER,
             content: "Repo {{name}}",
             isGlobal: false,
@@ -38,6 +38,7 @@ describe("PromptTemplateFactory", () => {
 
         expect(template.isGlobal).toBe(false)
         expect(template.organizationId?.value).toBe("org-1")
+        expect(template.category).toBe(PROMPT_TEMPLATE_CATEGORY.SAFEGUARD)
     })
 
     test("reconstitutes template from persisted payload", () => {
@@ -64,7 +65,7 @@ describe("PromptTemplateFactory", () => {
             return factory.reconstitute({
                 id: "template-2",
                 name: "Invalid",
-                category: PROMPT_TEMPLATE_CATEGORY.REVIEW,
+                category: PROMPT_TEMPLATE_CATEGORY.RULES,
                 type: PROMPT_TEMPLATE_TYPE.USER,
                 content: "Hello",
                 variables: [],

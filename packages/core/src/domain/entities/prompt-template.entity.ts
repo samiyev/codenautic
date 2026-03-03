@@ -6,10 +6,11 @@ import {UniqueId} from "../value-objects/unique-id.value-object"
  * Supported prompt template categories.
  */
 export const PROMPT_TEMPLATE_CATEGORY = {
-    REVIEW: "review",
     RULES: "rules",
     ANALYSIS: "analysis",
     OUTPUT: "output",
+    SAFEGUARD: "safeguard",
+    CROSS_FILE: "cross-file",
 } as const
 
 /**
