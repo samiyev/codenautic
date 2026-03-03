@@ -7,6 +7,8 @@ export {type IProjectFilters} from "./application/ports/outbound/project-reposit
 export {type IOrganizationRepository} from "./application/ports/outbound/organization-repository.port"
 export {type ICache} from "./application/ports/outbound/cache/cache.port"
 export {type IGitProvider} from "./application/ports/outbound/git/git-provider.port"
+export {type IFileMetricsProvider} from "./application/ports/outbound/analysis/file-metrics-provider"
+export {type IIssueAggregationProvider} from "./application/ports/outbound/review/issue-aggregation-provider"
 export {type ILLMProvider} from "./application/ports/outbound/llm/llm-provider.port"
 export {
     PIPELINE_CHECKPOINT_STATUS,

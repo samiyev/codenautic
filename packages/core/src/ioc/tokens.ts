@@ -4,6 +4,8 @@ import type {IPipelineCheckpointStore} from "../application/ports/outbound/revie
 import type {IReviewRepository} from "../application/ports/outbound/review/review-repository.port"
 import type {IRuleRepository} from "../application/ports/outbound/rule/rule-repository.port"
 import {createToken} from "./create-token"
+import type {IFileMetricsProvider} from "../application/ports/outbound/analysis/file-metrics-provider"
+import type {IIssueAggregationProvider} from "../application/ports/outbound/review/issue-aggregation-provider"
 import type {ITeamRuleProvider} from "../application/ports/outbound/rule/team-rule-provider.port"
 
 /**
@@ -18,6 +20,14 @@ export const TOKENS = {
         Repository: createToken<IReviewRepository>("core.review.repository"),
         PipelineCheckpointStore: createToken<IPipelineCheckpointStore>(
             "core.review.pipeline-checkpoint-store",
+        ),
+        IssueAggregationProvider: createToken<IIssueAggregationProvider>(
+            "core.review.issue-aggregation-provider",
+        ),
+    },
+    Analysis: {
+        FileMetricsProvider: createToken<IFileMetricsProvider>(
+            "core.analysis.file-metrics-provider",
         ),
     },
     Rule: {

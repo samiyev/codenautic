@@ -3,6 +3,8 @@ import {describe, expect, test} from "bun:test"
 import {type ILogger} from "../../src/application/ports/outbound/common/logger.port"
 import {type IDomainEventBus} from "../../src/application/ports/outbound/common/domain-event-bus.port"
 import {type IPipelineCheckpointStore} from "../../src/application/ports/outbound/review/pipeline-checkpoint-store.port"
+import {type IFileMetricsProvider} from "../../src/application/ports/outbound/analysis/file-metrics-provider"
+import {type IIssueAggregationProvider} from "../../src/application/ports/outbound/review/issue-aggregation-provider"
 import {type IReviewRepository} from "../../src/application/ports/outbound/review/review-repository.port"
 import {type IRuleRepository} from "../../src/application/ports/outbound/rule/rule-repository.port"
 import type {ITeamRuleProvider} from "../../src/application/ports/outbound/rule/team-rule-provider.port"
@@ -42,6 +44,10 @@ describe("TOKENS", () => {
         const reviewToken: InjectionToken<IReviewRepository> = TOKENS.Review.Repository
         const checkpointToken: InjectionToken<IPipelineCheckpointStore> =
             TOKENS.Review.PipelineCheckpointStore
+        const issueAggregationProviderToken: InjectionToken<IIssueAggregationProvider> =
+            TOKENS.Review.IssueAggregationProvider
+        const fileMetricsProviderToken: InjectionToken<IFileMetricsProvider> =
+            TOKENS.Analysis.FileMetricsProvider
         const ruleToken: InjectionToken<IRuleRepository> = TOKENS.Rule.Repository
         const teamRuleProviderToken: InjectionToken<ITeamRuleProvider> =
             TOKENS.Rules.TeamRuleProvider
@@ -49,6 +55,8 @@ describe("TOKENS", () => {
         const loggerToken: InjectionToken<ILogger> = TOKENS.Common.Logger
         const reviewSymbol: symbol = reviewToken
         const checkpointSymbol: symbol = checkpointToken
+        const issueAggregationSymbol: symbol = issueAggregationProviderToken
+        const fileMetricsSymbol: symbol = fileMetricsProviderToken
         const ruleSymbol: symbol = ruleToken
         const teamRuleProviderSymbol: symbol = teamRuleProviderToken
         const eventBusSymbol: symbol = eventBusToken
@@ -56,6 +64,8 @@ describe("TOKENS", () => {
 
         expect(typeof reviewToken).toBe("symbol")
         expect(typeof checkpointToken).toBe("symbol")
+        expect(typeof issueAggregationProviderToken).toBe("symbol")
+        expect(typeof fileMetricsProviderToken).toBe("symbol")
         expect(typeof ruleToken).toBe("symbol")
         expect(typeof teamRuleProviderToken).toBe("symbol")
         expect(typeof eventBusToken).toBe("symbol")
@@ -63,10 +73,15 @@ describe("TOKENS", () => {
         expect(reviewSymbol === ruleSymbol).toBe(false)
         expect(reviewSymbol === checkpointSymbol).toBe(false)
         expect(checkpointSymbol === ruleSymbol).toBe(false)
+        expect(checkpointSymbol === issueAggregationSymbol).toBe(false)
+        expect(checkpointSymbol === fileMetricsSymbol).toBe(false)
         expect(checkpointSymbol === eventBusSymbol).toBe(false)
         expect(checkpointSymbol === loggerSymbol).toBe(false)
         expect(reviewSymbol === eventBusSymbol).toBe(false)
         expect(reviewSymbol === loggerSymbol).toBe(false)
+        expect(checkpointSymbol === fileMetricsSymbol).toBe(false)
+        expect(issueAggregationSymbol === eventBusSymbol).toBe(false)
+        expect(issueAggregationSymbol === fileMetricsSymbol).toBe(false)
         expect(ruleSymbol === eventBusSymbol).toBe(false)
         expect(ruleSymbol === loggerSymbol).toBe(false)
         expect(teamRuleProviderSymbol === reviewSymbol).toBe(false)
@@ -74,6 +89,9 @@ describe("TOKENS", () => {
         expect(teamRuleProviderSymbol === ruleSymbol).toBe(false)
         expect(teamRuleProviderSymbol === eventBusSymbol).toBe(false)
         expect(teamRuleProviderSymbol === loggerSymbol).toBe(false)
+        expect(teamRuleProviderSymbol === issueAggregationSymbol).toBe(false)
+        expect(teamRuleProviderSymbol === fileMetricsSymbol).toBe(false)
+        expect(issueAggregationSymbol === fileMetricsSymbol).toBe(false)
         expect(eventBusSymbol === loggerSymbol).toBe(false)
     })
 })
