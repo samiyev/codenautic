@@ -56,16 +56,16 @@ export class PromptEngineService {
                 }
 
                 const normalized = normalizeVariableName(variableName)
-                if (Object.prototype.hasOwnProperty.call(values, normalized) === false) {
+                const lookup = resolveTemplateVariable(values, normalized)
+                if (lookup.found === false) {
                     return ""
                 }
 
-                const value = values[normalized]
-                if (value === undefined || value === null) {
+                if (lookup.value === undefined || lookup.value === null) {
                     return ""
                 }
 
-                return normalizeTemplateValue(value)
+                return normalizeTemplateValue(lookup.value)
             },
         )
     }
@@ -174,6 +174,39 @@ function normalizeTemplateValue(value: unknown): string {
     }
 
     return JSON.stringify(value) ?? ""
+}
+
+/**
+ * Resolves template variable with dot path support.
+ *
+ * @param values Flat or nested variables map.
+ * @param variableName Variable token.
+ * @returns Resolution result.
+ */
+function resolveTemplateVariable(
+    values: Record<string, unknown>,
+    variableName: string,
+): {found: boolean; value?: unknown} {
+    const normalized = variableName.trim()
+    if (Object.prototype.hasOwnProperty.call(values, normalized) === true) {
+        return {found: true, value: values[normalized]}
+    }
+
+    const path = normalized.split(".")
+    let current: unknown = values
+    for (const pathPart of path) {
+        if (typeof current !== "object" || current === null) {
+            return {found: false}
+        }
+
+        if (pathPart.length === 0 || Object.prototype.hasOwnProperty.call(current, pathPart) === false) {
+            return {found: false}
+        }
+
+        current = (current as Record<string, unknown>)[pathPart]
+    }
+
+    return {found: true, value: current}
 }
 
 /**

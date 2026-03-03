@@ -17,6 +17,8 @@ export {
 export {type IRepositoryConfigLoader} from "./application/ports/outbound/review/repository-config-loader.port"
 export {type IReviewRepository} from "./application/ports/outbound/review/review-repository.port"
 export {type IRuleRepository} from "./application/ports/outbound/rule/rule-repository.port"
+export {type IPromptConfigurationRepository} from "./application/ports/outbound/prompt-configuration-repository.port"
+export {type IPromptTemplateRepository} from "./application/ports/outbound/prompt-template-repository.port"
 export {type ITeamRepository} from "./application/ports/outbound/team-repository.port"
 export {type IUserRepository} from "./application/ports/outbound/user-repository.port"
 export {
@@ -241,6 +243,11 @@ export {
     type IConfigurationValidatorInput,
 } from "./application/use-cases/configuration-validator.use-case"
 export {
+    GeneratePromptUseCase,
+    type IGeneratePromptInput,
+    type IGeneratePromptUseCaseDependencies,
+} from "./application/use-cases/generate-prompt.use-case"
+export {
     ResolveConfigStageUseCase,
 } from "./application/use-cases/review/resolve-config-stage.use-case"
 export {
@@ -337,6 +344,19 @@ export {
     CustomRule,
 } from "./domain/entities/custom-rule.entity"
 export {
+    type ITemplateVariable,
+    PROMPT_TEMPLATE_CATEGORY,
+    PROMPT_TEMPLATE_TYPE,
+    PromptTemplate,
+    type IPromptTemplateProps,
+    type PromptTemplateCategory,
+    type PromptTemplateType,
+} from "./domain/entities/prompt-template.entity"
+export {
+    PromptConfiguration,
+    type IPromptConfigurationProps,
+} from "./domain/entities/prompt-configuration.entity"
+export {
     type ITeamProps,
     Team,
 } from "./domain/entities/team.entity"
@@ -419,6 +439,16 @@ export {
     type IReconstituteCustomRuleProps,
     CustomRuleFactory,
 } from "./domain/factories/custom-rule.factory"
+export {
+    type ICreatePromptConfigurationProps,
+    type IReconstitutePromptConfigurationProps,
+    PromptConfigurationFactory,
+} from "./domain/factories/prompt-configuration.factory"
+export {
+    type ICreatePromptTemplateProps,
+    type IReconstitutePromptTemplateProps,
+    PromptTemplateFactory,
+} from "./domain/factories/prompt-template.factory"
 export {
     type ICreateUserProps,
     type IReconstituteUserProps,

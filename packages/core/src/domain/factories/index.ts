@@ -35,6 +35,16 @@ export {
     CustomRuleFactory,
 } from "./custom-rule.factory"
 export {
+    type ICreatePromptConfigurationProps,
+    type IReconstitutePromptConfigurationProps,
+    PromptConfigurationFactory,
+} from "./prompt-configuration.factory"
+export {
+    type ICreatePromptTemplateProps,
+    type IReconstitutePromptTemplateProps,
+    PromptTemplateFactory,
+} from "./prompt-template.factory"
+export {
     type ICreateUserProps,
     type IReconstituteUserProps,
     UserFactory,

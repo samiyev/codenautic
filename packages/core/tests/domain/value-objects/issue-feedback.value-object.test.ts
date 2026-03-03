@@ -1,7 +1,7 @@
 import {describe, expect, test} from "bun:test"
 
 import {FEEDBACK_TYPE} from "../../../src/domain/events/feedback-received"
-import {IssueFeedback, type IssueFeedbackType} from "../../../src/domain/value-objects/issue-feedback.value-object"
+import {IssueFeedback} from "../../../src/domain/value-objects/issue-feedback.value-object"
 import {UniqueId} from "../../../src/domain/value-objects/unique-id.value-object"
 
 describe("IssueFeedback", () => {

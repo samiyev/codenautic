@@ -29,6 +29,19 @@ export {
     CustomRule,
 } from "./entities/custom-rule.entity"
 export {
+    type ITemplateVariable,
+    PROMPT_TEMPLATE_CATEGORY,
+    PROMPT_TEMPLATE_TYPE,
+    type IPromptTemplateProps,
+    type PromptTemplateCategory,
+    type PromptTemplateType,
+    PromptTemplate,
+} from "./entities/prompt-template.entity"
+export {
+    type IPromptConfigurationProps,
+    PromptConfiguration,
+} from "./entities/prompt-configuration.entity"
+export {
     type ITeamProps,
     Team,
 } from "./entities/team.entity"
