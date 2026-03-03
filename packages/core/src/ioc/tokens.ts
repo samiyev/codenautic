@@ -10,6 +10,7 @@ import type {ITeamRuleProvider} from "../application/ports/outbound/rule/team-ru
 import type {IConversationThreadRepository} from "../application/ports/outbound/messaging/conversation-thread-repository.port"
 import type {IRepositoryScanner} from "../application/ports/outbound/scanning/repository-scanner"
 import type {IRepositoryIndexRepository} from "../application/ports/outbound/scanning/repository-index-repository"
+import type {IScanProgressRepository} from "../application/ports/outbound/scanning/scan-progress-repository"
 
 /**
  * Core package DI tokens.
@@ -39,6 +40,9 @@ export const TOKENS = {
         ),
         RepositoryIndexRepository: createToken<IRepositoryIndexRepository>(
             "core.scanning.repository-index-repository",
+        ),
+        ScanProgressRepository: createToken<IScanProgressRepository>(
+            "core.scanning.scan-progress-repository",
         ),
     },
     Rule: {

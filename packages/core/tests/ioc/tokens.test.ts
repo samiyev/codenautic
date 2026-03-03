@@ -11,6 +11,7 @@ import type {ITeamRuleProvider} from "../../src/application/ports/outbound/rule/
 import type {IConversationThreadRepository} from "../../src/application/ports/outbound/messaging/conversation-thread-repository.port"
 import type {IRepositoryScanner} from "../../src/application/ports/outbound/scanning/repository-scanner"
 import type {IRepositoryIndexRepository} from "../../src/application/ports/outbound/scanning/repository-index-repository"
+import type {IScanProgressRepository} from "../../src/application/ports/outbound/scanning/scan-progress-repository"
 import {createToken, TOKENS, type InjectionToken} from "../../src/index"
 
 interface IExamplePort {
@@ -60,6 +61,8 @@ describe("TOKENS", () => {
             TOKENS.Scanning.RepositoryScanner
         const repositoryIndexRepositoryToken: InjectionToken<IRepositoryIndexRepository> =
             TOKENS.Scanning.RepositoryIndexRepository
+        const scanProgressRepositoryToken: InjectionToken<IScanProgressRepository> =
+            TOKENS.Scanning.ScanProgressRepository
         const eventBusToken: InjectionToken<IDomainEventBus> = TOKENS.Common.DomainEventBus
         const loggerToken: InjectionToken<ILogger> = TOKENS.Common.Logger
         const reviewSymbol: symbol = reviewToken
@@ -72,6 +75,7 @@ describe("TOKENS", () => {
             conversationThreadRepositoryToken
         const repositoryScannerSymbol: symbol = repositoryScannerToken
         const repositoryIndexRepositorySymbol: symbol = repositoryIndexRepositoryToken
+        const scanProgressRepositorySymbol: symbol = scanProgressRepositoryToken
         const eventBusSymbol: symbol = eventBusToken
         const loggerSymbol: symbol = loggerToken
 
@@ -84,6 +88,7 @@ describe("TOKENS", () => {
         expect(typeof conversationThreadRepositoryToken).toBe("symbol")
         expect(typeof repositoryScannerToken).toBe("symbol")
         expect(typeof repositoryIndexRepositoryToken).toBe("symbol")
+        expect(typeof scanProgressRepositoryToken).toBe("symbol")
         expect(typeof eventBusToken).toBe("symbol")
         expect(typeof loggerToken).toBe("symbol")
         expect(reviewSymbol === ruleSymbol).toBe(false)
@@ -118,6 +123,7 @@ describe("TOKENS", () => {
         expect(conversationThreadRepositorySymbol === fileMetricsSymbol).toBe(false)
         expect(conversationThreadRepositorySymbol === repositoryScannerSymbol).toBe(false)
         expect(conversationThreadRepositorySymbol === repositoryIndexRepositorySymbol).toBe(false)
+        expect(conversationThreadRepositorySymbol === scanProgressRepositorySymbol).toBe(false)
         expect(issueAggregationSymbol === fileMetricsSymbol).toBe(false)
         expect(eventBusSymbol === loggerSymbol).toBe(false)
         expect(repositoryScannerSymbol === reviewSymbol).toBe(false)
@@ -130,6 +136,7 @@ describe("TOKENS", () => {
         expect(repositoryScannerSymbol === loggerSymbol).toBe(false)
         expect(repositoryScannerSymbol === conversationThreadRepositorySymbol).toBe(false)
         expect(repositoryScannerSymbol === repositoryIndexRepositorySymbol).toBe(false)
+        expect(repositoryScannerSymbol === scanProgressRepositorySymbol).toBe(false)
         expect(repositoryIndexRepositorySymbol === reviewSymbol).toBe(false)
         expect(repositoryIndexRepositorySymbol === checkpointSymbol).toBe(false)
         expect(repositoryIndexRepositorySymbol === issueAggregationSymbol).toBe(false)
@@ -140,5 +147,17 @@ describe("TOKENS", () => {
         expect(repositoryIndexRepositorySymbol === loggerSymbol).toBe(false)
         expect(repositoryIndexRepositorySymbol === conversationThreadRepositorySymbol).toBe(false)
         expect(repositoryIndexRepositorySymbol === repositoryScannerSymbol).toBe(false)
+        expect(repositoryIndexRepositorySymbol === scanProgressRepositorySymbol).toBe(false)
+        expect(scanProgressRepositorySymbol === reviewSymbol).toBe(false)
+        expect(scanProgressRepositorySymbol === checkpointSymbol).toBe(false)
+        expect(scanProgressRepositorySymbol === issueAggregationSymbol).toBe(false)
+        expect(scanProgressRepositorySymbol === fileMetricsSymbol).toBe(false)
+        expect(scanProgressRepositorySymbol === ruleSymbol).toBe(false)
+        expect(scanProgressRepositorySymbol === teamRuleProviderSymbol).toBe(false)
+        expect(scanProgressRepositorySymbol === eventBusSymbol).toBe(false)
+        expect(scanProgressRepositorySymbol === loggerSymbol).toBe(false)
+        expect(scanProgressRepositorySymbol === conversationThreadRepositorySymbol).toBe(false)
+        expect(scanProgressRepositorySymbol === repositoryScannerSymbol).toBe(false)
+        expect(scanProgressRepositorySymbol === repositoryIndexRepositorySymbol).toBe(false)
     })
 })

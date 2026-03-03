@@ -42,6 +42,7 @@ export {type ICustomRuleRepository} from "./application/ports/outbound/custom-ru
 export {type ITeamRuleProvider} from "./application/ports/outbound/rule/team-rule-provider.port"
 export {type IRepositoryScanner} from "./application/ports/outbound/scanning/repository-scanner"
 export {type IRepositoryIndexRepository} from "./application/ports/outbound/scanning/repository-index-repository"
+export {type IScanProgressRepository} from "./application/ports/outbound/scanning/scan-progress-repository"
 export {type IPromptConfigurationRepository} from "./application/ports/outbound/prompt-configuration-repository.port"
 export {type IPromptTemplateRepository} from "./application/ports/outbound/prompt-template-repository.port"
 export {type ITeamRepository} from "./application/ports/outbound/team-repository.port"
