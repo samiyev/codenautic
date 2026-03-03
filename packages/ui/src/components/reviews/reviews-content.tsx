@@ -1,9 +1,12 @@
-import { type ReactElement, useMemo, useState } from "react"
+import { type ReactElement, useMemo, useRef, useState } from "react"
+import { Link } from "@tanstack/react-router"
+import { useVirtualizer } from "@tanstack/react-virtual"
 
 import { useDebounce } from "@/lib/hooks/use-debounce"
 import { InfiniteScrollContainer } from "@/components/infrastructure/infinite-scroll-container"
 import { ReviewsFilters } from "./reviews-filters"
-import { ReviewsTable, type IReviewRow } from "./reviews-table"
+import { type IReviewRow } from "./reviews-table"
+import { ReviewStatusBadge } from "./review-status-badge"
 import { type TReviewStatus } from "./review-status-badge"
 
 /**
@@ -27,6 +30,7 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
     const [search, setSearch] = useState("")
     const [statusFilter, setStatusFilter] = useState<string>("all")
     const [assigneeFilter, setAssigneeFilter] = useState<string>("all")
+    const listRef = useRef<HTMLDivElement | null>(null)
     const debouncedSearch = useDebounce(search, 220)
 
     const statusOptions = useMemo((): string[] => {
@@ -61,6 +65,13 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
 
     const hasActiveFilter =
         statusFilter !== "all" || assigneeFilter !== "all" || debouncedSearch.trim().length > 0
+    const rowVirtualizer = useVirtualizer({
+        count: filteredRows.length,
+        getScrollElement: (): HTMLDivElement | null => listRef.current,
+        estimateSize: (): number => 84,
+        overscan: 8,
+    })
+    const virtualRows = rowVirtualizer.getVirtualItems()
 
     return (
         <section className="space-y-4">
@@ -90,8 +101,50 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
                 isLoading={props.isLoadingMore}
                 loadingText="Подгружаем дополнительные CCR..."
                 onLoadMore={props.onLoadMore}
+                rootRef={listRef}
             >
-                <ReviewsTable rows={filteredRows as IReviewRow[]} />
+                <div
+                    ref={listRef}
+                    className="max-h-[560px] overflow-auto rounded-lg border border-slate-200 bg-white"
+                >
+                    <div
+                        className="relative"
+                        style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+                    >
+                        {virtualRows.map((virtualRow): ReactElement | null => {
+                            const row = filteredRows[virtualRow.index]
+                            if (row === undefined) {
+                                return null
+                            }
+
+                            return (
+                                <article
+                                    className="absolute left-0 top-0 w-full border-b border-slate-100 px-4 py-3"
+                                    key={row.id}
+                                    style={{
+                                        height: `${virtualRow.size}px`,
+                                        transform: `translateY(${virtualRow.start}px)`,
+                                    }}
+                                >
+                                    <div className="grid gap-2 md:grid-cols-[120px_1.8fr_1fr_1fr_80px_110px_110px] md:items-center">
+                                        <Link
+                                            className="text-sm font-semibold text-slate-900 underline underline-offset-4"
+                                            to={`/reviews/${row.id}`}
+                                        >
+                                            {row.id}
+                                        </Link>
+                                        <p className="text-sm text-slate-800">{row.title}</p>
+                                        <p className="text-sm text-slate-700">{row.repository}</p>
+                                        <p className="text-sm text-slate-700">{row.assignee}</p>
+                                        <p className="text-sm text-slate-700">{row.comments}</p>
+                                        <p className="text-sm text-slate-700">{row.updatedAt}</p>
+                                        <ReviewStatusBadge status={row.status} />
+                                    </div>
+                                </article>
+                            )
+                        })}
+                    </div>
+                </div>
             </InfiniteScrollContainer>
         </section>
     )

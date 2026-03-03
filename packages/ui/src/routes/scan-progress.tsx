@@ -4,7 +4,7 @@ import { RouteSuspenseFallback } from "@/app/route-suspense-fallback"
 import { RouteErrorFallback } from "@/app/error-fallback"
 import { AuthBoundary } from "@/lib/auth/auth-boundary"
 import { DashboardLayout } from "@/components/layout"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 
 const LazyScanProgressPage = lazy(
     async (): Promise<{
@@ -20,6 +20,10 @@ const LazyScanProgressPage = lazy(
 interface IScanProgressSearch {
     /** Optional scan job id from query, used to open stream url. */
     readonly jobId?: string
+    /** Optional repository id to open overview when scan is done. */
+    readonly repositoryId?: string
+    /** Optional source marker for onboarding flow. */
+    readonly source?: "onboarding"
 }
 
 /**
@@ -29,7 +33,9 @@ interface IScanProgressSearch {
  */
 function ScanProgressRouteComponent(): ReactElement {
     const search = Route.useSearch()
+    const navigate = useNavigate()
     const routeJobId = search.jobId
+    const routeRepositoryId = search.repositoryId
     const pageProps = routeJobId === undefined || routeJobId.length === 0 ? {} : { jobId: routeJobId }
 
     return (
@@ -42,7 +48,33 @@ function ScanProgressRouteComponent(): ReactElement {
                     userName={context.userName}
                 >
                     <Suspense fallback={<RouteSuspenseFallback />}>
-                        <LazyScanProgressPage {...pageProps} eventSourceUrl="/api/v1/scans/progress" />
+                        <LazyScanProgressPage
+                            {...pageProps}
+                            eventSourceUrl="/api/v1/scans/progress"
+                            repositoryId={routeRepositoryId}
+                            onCancel={(): void => {
+                                void navigate({ to: "/repositories" })
+                            }}
+                            onOpenRepositoryOverview={(): void => {
+                                if (
+                                    typeof routeRepositoryId === "string"
+                                    && routeRepositoryId.trim().length > 0
+                                ) {
+                                    void navigate({
+                                        to: "/repositories/$repositoryId",
+                                        params: {
+                                            repositoryId: routeRepositoryId,
+                                        },
+                                    })
+                                    return
+                                }
+
+                                void navigate({ to: "/repositories" })
+                            }}
+                            onRetry={(): void => {
+                                void navigate({ to: "/onboarding" })
+                            }}
+                        />
                     </Suspense>
                 </DashboardLayout>
             )}
@@ -51,13 +83,19 @@ function ScanProgressRouteComponent(): ReactElement {
 }
 
 export function validateScanProgressSearch(rawSearch: Record<string, unknown>): IScanProgressSearch {
-    if (typeof rawSearch.jobId === "string" && rawSearch.jobId.trim().length > 0) {
-        return {
-            jobId: rawSearch.jobId.trim(),
-        }
-    }
+    const jobId = typeof rawSearch.jobId === "string" && rawSearch.jobId.trim().length > 0
+        ? rawSearch.jobId.trim()
+        : undefined
+    const repositoryId = typeof rawSearch.repositoryId === "string" && rawSearch.repositoryId.trim().length > 0
+        ? rawSearch.repositoryId.trim()
+        : undefined
+    const source = rawSearch.source === "onboarding" ? "onboarding" : undefined
 
-    return {}
+    return {
+        jobId,
+        repositoryId,
+        source,
+    }
 }
 
 export const Route = createFileRoute("/scan-progress")({

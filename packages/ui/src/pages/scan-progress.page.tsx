@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
 import { useEffect, useMemo, useState } from "react"
 
-import { Alert, Card, CardBody, CardHeader } from "@/components/ui"
+import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
 
 const PHASES = ["queue", "clone", "analysis", "indexing", "report"] as const
 const DEFAULT_JOB_ID = "scan-job-local"
@@ -70,6 +70,14 @@ interface IScanProgressPageProps {
     readonly eventSourceUrl?: string
     /** Начальные события, используемые в демо-режиме. */
     readonly seedEvents?: ReadonlyArray<IScanProgressEvent>
+    /** Идентификатор репозитория для перехода в overview. */
+    readonly repositoryId?: string
+    /** Повторно открыть onboarding для повторного запуска скана. */
+    readonly onRetry?: () => void
+    /** Отменить текущий flow и вернуться в список репозиториев. */
+    readonly onCancel?: () => void
+    /** Открыть обзор репозитория после завершения скана. */
+    readonly onOpenRepositoryOverview?: () => void
 }
 
 interface IUseScanProgressState {
@@ -404,6 +412,37 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                                 <p className="text-xs text-slate-600">{phase.message}</p>
                             </article>
                         ))}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        <Button
+                            onPress={props.onRetry}
+                            size="sm"
+                            type="button"
+                            variant="light"
+                        >
+                            Retry
+                        </Button>
+                        <Button
+                            color="danger"
+                            onPress={props.onCancel}
+                            size="sm"
+                            type="button"
+                            variant="ghost"
+                        >
+                            Cancel
+                        </Button>
+                        {progressState.isDone && props.repositoryId !== undefined ? (
+                            <Button
+                                color="success"
+                                onPress={props.onOpenRepositoryOverview}
+                                size="sm"
+                                type="button"
+                                variant="solid"
+                            >
+                                Open repository overview
+                            </Button>
+                        ) : null}
                     </div>
                 </CardBody>
             </Card>

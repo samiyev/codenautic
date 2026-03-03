@@ -130,6 +130,14 @@ const DASHBOARD_PAYLOAD: IWorkQueuePayload = {
     workQueue: WORK_QUEUE_ENTRIES,
 }
 
+const ORG_SCOPE_OPTIONS = ["all-orgs", "platform-team", "frontend-team", "runtime-team"] as const
+const REPOSITORY_SCOPE_OPTIONS = ["all-repos", "repo-core", "repo-ui", "repo-api"] as const
+const TEAM_SCOPE_OPTIONS = ["all-teams", "runtime", "frontend", "backend", "data"] as const
+
+type TOrgScope = (typeof ORG_SCOPE_OPTIONS)[number]
+type TRepositoryScope = (typeof REPOSITORY_SCOPE_OPTIONS)[number]
+type TTeamScope = (typeof TEAM_SCOPE_OPTIONS)[number]
+
 /**
  * Формирует метрики по выбранному диапазону.
  *
@@ -244,7 +252,23 @@ function renderExploreCard(): ReactElement {
                             className="text-sm font-medium underline underline-offset-4"
                             to="/reviews"
                         >
-                            Open CCRs deep-link
+                            Open CCR
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            className="text-sm font-medium underline underline-offset-4"
+                            to="/issues"
+                        >
+                            Open Issues
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            className="text-sm font-medium underline underline-offset-4"
+                            to="/dashboard/code-city"
+                        >
+                            Open CodeCity
                         </Link>
                     </li>
                     <li>
@@ -306,6 +330,9 @@ function renderSignalsCard(): ReactElement {
  */
 export function DashboardMissionControlPage(): ReactElement {
     const [range, setRange] = useState<TDashboardDateRange>("7d")
+    const [orgScope, setOrgScope] = useState<TOrgScope>("all-orgs")
+    const [repositoryScope, setRepositoryScope] = useState<TRepositoryScope>("all-repos")
+    const [teamScope, setTeamScope] = useState<TTeamScope>("all-teams")
 
     const metrics = useMemo(
         (): ReadonlyArray<IMetricGridMetric> => getDashboardMetrics(range),
@@ -329,15 +356,61 @@ export function DashboardMissionControlPage(): ReactElement {
                         Dashboard Mission Control
                     </h1>
                     <p className="text-sm text-slate-600">
-                        Scope: all org units. Use quick links for deep navigation.
+                        Scope: {orgScope} / {repositoryScope} / {teamScope}. Use quick links for deep
+                        navigation.
                     </p>
                 </div>
-                <DashboardDateRangeFilter
-                    value={range}
-                    onChange={(next): void => {
-                        setRange(next)
-                    }}
-                />
+                <div className="grid gap-2 sm:min-w-[380px] sm:grid-cols-2">
+                    <select
+                        aria-label="Organization scope"
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                        value={orgScope}
+                        onChange={(event): void => {
+                            const nextScope = event.currentTarget.value as TOrgScope
+                            setOrgScope(nextScope)
+                        }}
+                    >
+                        <option value="all-orgs">Org: all</option>
+                        <option value="platform-team">Org: platform-team</option>
+                        <option value="frontend-team">Org: frontend-team</option>
+                        <option value="runtime-team">Org: runtime-team</option>
+                    </select>
+                    <select
+                        aria-label="Repository scope"
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                        value={repositoryScope}
+                        onChange={(event): void => {
+                            const nextScope = event.currentTarget.value as TRepositoryScope
+                            setRepositoryScope(nextScope)
+                        }}
+                    >
+                        <option value="all-repos">Repo: all</option>
+                        <option value="repo-core">Repo: repo-core</option>
+                        <option value="repo-ui">Repo: repo-ui</option>
+                        <option value="repo-api">Repo: repo-api</option>
+                    </select>
+                    <select
+                        aria-label="Team scope"
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                        value={teamScope}
+                        onChange={(event): void => {
+                            const nextScope = event.currentTarget.value as TTeamScope
+                            setTeamScope(nextScope)
+                        }}
+                    >
+                        <option value="all-teams">Team: all</option>
+                        <option value="runtime">Team: runtime</option>
+                        <option value="frontend">Team: frontend</option>
+                        <option value="backend">Team: backend</option>
+                        <option value="data">Team: data</option>
+                    </select>
+                    <DashboardDateRangeFilter
+                        value={range}
+                        onChange={(next): void => {
+                            setRange(next)
+                        }}
+                    />
+                </div>
             </div>
 
             {opsBanner.isDegraded === true ? (

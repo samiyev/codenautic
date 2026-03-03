@@ -19,6 +19,7 @@ import { showToastSuccess } from "@/lib/notifications/toast"
 const SCAN_MODE_OPTIONS = ["incremental", "full", "delta"] as const
 const SCAN_SCHEDULE_OPTIONS = ["manual", "hourly", "daily", "weekly"] as const
 const ONBOARDING_MODE_OPTIONS = ["single", "bulk"] as const
+const GIT_PROVIDER_OPTIONS = ["github", "gitlab", "bitbucket"] as const
 const ONBOARDING_TEMPLATE_IDS = [
     "custom",
     "security-baseline",
@@ -30,6 +31,7 @@ const CUSTOM_TEMPLATE_ID = ONBOARDING_TEMPLATE_IDS[0]
 type TScanMode = (typeof SCAN_MODE_OPTIONS)[number]
 type TScanSchedule = (typeof SCAN_SCHEDULE_OPTIONS)[number]
 type TOnboardingMode = (typeof ONBOARDING_MODE_OPTIONS)[number]
+type TGitProvider = (typeof GIT_PROVIDER_OPTIONS)[number]
 type TBulkScanStatus = "queued" | "running" | "paused" | "completed" | "error" | "cancelled"
 type TOnboardingTemplateId = (typeof ONBOARDING_TEMPLATE_IDS)[number]
 
@@ -92,7 +94,7 @@ interface IOnboardingTemplateAuditEntry {
     readonly after: IOnboardingTemplateFormState
 }
 
-interface IOnboardingAppliedTemplateMeta {
+export interface IOnboardingAppliedTemplateMeta {
     /** Идентификатор источника конфигурации. */
     readonly id: TOnboardingTemplateId
     /** Название источника конфигурации. */
@@ -150,6 +152,8 @@ interface IBulkScanSummary {
 }
 
 interface IOnboardingFormValues {
+    /** Git-провайдер для подключения репозитория. */
+    readonly provider: TGitProvider
     /** Идентификатор выбранного шаблона. */
     readonly onboardingTemplateId: TOnboardingTemplateId
     /** Режим онбординга: одиночный или массовый. */
@@ -174,14 +178,16 @@ interface IOnboardingFormValues {
     readonly notifyEmail: string
 }
 
+export interface IOnboardingScanStartPayload extends IOnboardingFormValues {
+    /** Целевые репозитории для сканирования. */
+    readonly targetRepositories: ReadonlyArray<string>
+    /** Метаинформация примененного шаблона. */
+    readonly appliedTemplate: IOnboardingAppliedTemplateMeta
+}
+
 interface IOnboardingWizardPageProps {
     /** Callback после подтверждения запуска сканирования. */
-    readonly onScanStart?: (
-        values: IOnboardingFormValues & {
-            readonly targetRepositories: ReadonlyArray<string>
-            readonly appliedTemplate: IOnboardingAppliedTemplateMeta
-        },
-    ) => void
+    readonly onScanStart?: (values: IOnboardingScanStartPayload) => void
 }
 
 const EMAIL_OPTIONAL_SCHEMA = z
@@ -195,6 +201,7 @@ const EMAIL_OPTIONAL_SCHEMA = z
 
 const ONBOARDING_FORM_SCHEMA = z
     .object({
+        provider: z.enum(GIT_PROVIDER_OPTIONS),
         onboardingTemplateId: z.enum(ONBOARDING_TEMPLATE_IDS),
         onboardingMode: z.enum(ONBOARDING_MODE_OPTIONS),
         repositoryUrl: z.string().trim(),
@@ -259,6 +266,7 @@ const ONBOARDING_FORM_SCHEMA = z
     })
 
 const DEFAULT_ONBOARDING_VALUES: IOnboardingFormValues = {
+    provider: "github",
     onboardingTemplateId: "custom",
     onboardingMode: "single",
     repositoryUrl: "",
@@ -274,14 +282,14 @@ const DEFAULT_ONBOARDING_VALUES: IOnboardingFormValues = {
 
 const WIZARD_STEPS = [
     {
-        id: "paste",
-        label: "Указать репозиторий",
-        description: "Добавьте URL, выберите режим и продолжите.",
+        id: "provider",
+        label: "Подключить провайдера",
+        description: "Выберите Git-провайдера и подтвердите подключение.",
     },
     {
-        id: "configure",
-        label: "Настроить сканирование",
-        description: "Задайте режим, треды и опции качества.",
+        id: "repository",
+        label: "Выбрать репозиторий",
+        description: "Укажите URL/список репозиториев для сканирования.",
     },
     {
         id: "launch",
@@ -339,12 +347,31 @@ const ONBOARDING_MODE_SELECT_OPTIONS: ReadonlyArray<IFormSelectOption> = [
     },
 ]
 
+const GIT_PROVIDER_SELECT_OPTIONS: ReadonlyArray<IFormSelectOption> = [
+    {
+        description: "OAuth + API token flow",
+        label: "GitHub",
+        value: "github",
+    },
+    {
+        description: "OAuth + project/repo scopes",
+        label: "GitLab",
+        value: "gitlab",
+    },
+    {
+        description: "Workspace app or app password",
+        label: "Bitbucket",
+        value: "bitbucket",
+    },
+]
+
 const STEP_FIELDS: Record<
     (typeof WIZARD_STEPS)[number]["id"],
     ReadonlyArray<keyof IOnboardingFormValues>
 > = {
-    paste: ["onboardingMode", "repositoryUrl", "repositoryUrlList"],
-    configure: [
+    provider: ["provider"],
+    repository: ["onboardingMode", "repositoryUrl", "repositoryUrlList"],
+    launch: [
         "onboardingTemplateId",
         "scanMode",
         "scanSchedule",
@@ -354,7 +381,6 @@ const STEP_FIELDS: Record<
         "tags",
         "notifyEmail",
     ],
-    launch: [],
 }
 
 const BULK_PROGRESS_PREVIEW_LABEL_LIMIT = 3
@@ -725,6 +751,18 @@ function formatBooleanForSummary(value: boolean): string {
     return value ? "Да" : "Нет"
 }
 
+function mapProviderLabel(provider: TGitProvider): string {
+    if (provider === "github") {
+        return "GitHub"
+    }
+
+    if (provider === "gitlab") {
+        return "GitLab"
+    }
+
+    return "Bitbucket"
+}
+
 /**
  * Экран multi-step мастера onboarding.
  *
@@ -734,6 +772,8 @@ function formatBooleanForSummary(value: boolean): string {
 export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactElement {
     const [activeStep, setActiveStep] = useState<0 | 1 | 2>(0)
     const [isStarted, setIsStarted] = useState(false)
+    const [connectedProvider, setConnectedProvider] = useState<TGitProvider | undefined>(undefined)
+    const [providerConnectionError, setProviderConnectionError] = useState<string | undefined>(undefined)
     const [activeTemplateId, setActiveTemplateId] =
         useState<TOnboardingTemplateId>(CUSTOM_TEMPLATE_ID)
     const [templateAuditLog, setTemplateAuditLog] = useState<
@@ -757,7 +797,9 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
     const scanModeOptions = SCAN_MODE_SELECT_OPTIONS
     const scheduleOptions = SCAN_SCHEDULE_SELECT_OPTIONS
     const values = form.watch()
+    const providerOptions = GIT_PROVIDER_SELECT_OPTIONS
     const isSingleMode = values.onboardingMode === "single"
+    const isProviderConnected = connectedProvider === values.provider
     const selectedTemplateId = values.onboardingTemplateId
     const selectedTemplate = getTemplateById(selectedTemplateId)
     const activeTemplate = getTemplateById(activeTemplateId)
@@ -820,7 +862,21 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
     const lastTemplateAudit = templateAuditLog.at(-1)
 
     const validateCurrentStep = async (): Promise<boolean> => {
-        if (activeStepId === "paste") {
+        if (activeStepId === "provider") {
+            const isProviderValid = await form.trigger(["provider"])
+            if (isProviderValid === false) {
+                return false
+            }
+
+            if (isProviderConnected === false) {
+                setProviderConnectionError("Сначала подключите Git-провайдера.")
+                return false
+            }
+
+            return true
+        }
+
+        if (activeStepId === "repository") {
             if (isSingleMode) {
                 const isSingleValid = await form.trigger(["onboardingMode", "repositoryUrl"])
                 return isSingleValid
@@ -893,6 +949,12 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
             targetRepositories,
             appliedTemplate,
         })
+    }
+
+    const handleConnectProvider = (): void => {
+        setConnectedProvider(values.provider)
+        setProviderConnectionError(undefined)
+        showToastSuccess(`${mapProviderLabel(values.provider)} подключен.`)
     }
 
     const applyTemplateToForm = (template: IOnboardingTemplate): void => {
@@ -1116,6 +1178,14 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
         form.setValue("onboardingTemplateId", CUSTOM_TEMPLATE_ID, { shouldDirty: false })
     }, [activeTemplate, activeTemplateId, form, values])
 
+    useEffect((): void => {
+        if (isProviderConnected === false) {
+            return
+        }
+
+        setProviderConnectionError(undefined)
+    }, [isProviderConnected])
+
     return (
         <section className="space-y-4">
             <h1 className="text-2xl font-semibold text-slate-900">Repository Onboarding</h1>
@@ -1161,6 +1231,41 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
                 <CardBody>
                     <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
                         {activeStep === 0 ? (
+                            <section className="space-y-3">
+                                <FormSelectField<IOnboardingFormValues, "provider">
+                                    control={form.control}
+                                    id="provider"
+                                    label="Git-провайдер"
+                                    name="provider"
+                                    options={providerOptions}
+                                    helperText="Подключение нужно для доступа к репозиториям и запуску скана."
+                                />
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <Button
+                                        onPress={(): void => {
+                                            handleConnectProvider()
+                                        }}
+                                        type="button"
+                                    >
+                                        Connect provider
+                                    </Button>
+                                    <Chip
+                                        color={isProviderConnected ? "success" : "warning"}
+                                        size="sm"
+                                        variant="flat"
+                                    >
+                                        {isProviderConnected
+                                            ? `${mapProviderLabel(values.provider)} connected`
+                                            : "Not connected"}
+                                    </Chip>
+                                </div>
+                                {providerConnectionError === undefined ? null : (
+                                    <Alert color="danger">{providerConnectionError}</Alert>
+                                )}
+                            </section>
+                        ) : null}
+
+                        {activeStep === 1 ? (
                             <section className="space-y-3">
                                 <FormRadioGroupField<IOnboardingFormValues, "onboardingMode">
                                     control={form.control}
@@ -1277,7 +1382,7 @@ https://github.com/owner/repo-b`,
                             </section>
                         ) : null}
 
-                        {activeStep === 1 ? (
+                        {activeStep === 2 ? (
                             <section className="space-y-3">
                                 <div className="rounded-md border border-slate-200 p-3">
                                     <p className="text-sm font-semibold text-slate-800">
@@ -1510,6 +1615,11 @@ https://github.com/owner/repo-b`,
                                             )}
                                         </details>
                                     )}
+                                    <p className="text-sm">
+                                        <span className="font-semibold">Provider:</span>{" "}
+                                        {mapProviderLabel(values.provider)} (
+                                        {isProviderConnected ? "connected" : "not connected"})
+                                    </p>
                                     <p className="text-sm">
                                         <span className="font-semibold">Mode:</span> {values.scanMode}
                                     </p>
