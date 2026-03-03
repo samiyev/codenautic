@@ -4,6 +4,10 @@ import {
     type PromptTemplateCategory,
     type PromptTemplateType,
 } from "../../../../domain/entities/prompt-template.entity"
+import {OUTPUT_PROMPT_SEEDS} from "./output/output-prompt-seeds"
+import {REVIEW_PROMPT_SEEDS} from "./review/review-prompt-seeds"
+import {RULES_PROMPT_SEEDS} from "./rules/rules-prompt-seeds"
+import {SAFEGUARD_PROMPT_SEEDS} from "./safeguard/safeguard-prompt-seeds"
 
 /**
  * Prompt category used by seed payloads.
@@ -29,7 +33,12 @@ export interface IPromptSeedData {
 /**
  * Canonical prompt template registry used by seed pipeline.
  */
-export const PROMPT_SEED_REGISTRY: readonly IPromptSeedData[] = definePromptSeedRegistry([])
+export const PROMPT_SEED_REGISTRY: readonly IPromptSeedData[] = definePromptSeedRegistry([
+    ...REVIEW_PROMPT_SEEDS,
+    ...RULES_PROMPT_SEEDS,
+    ...SAFEGUARD_PROMPT_SEEDS,
+    ...OUTPUT_PROMPT_SEEDS,
+])
 
 /**
  * Defines immutable prompt seed registry with normalization and guardrails.

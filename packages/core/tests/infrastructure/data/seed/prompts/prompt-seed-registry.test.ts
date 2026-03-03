@@ -80,8 +80,25 @@ describe("prompt seed registry", () => {
         }).toThrow("Prompt seed variable name cannot be empty")
     })
 
-    test("exposes empty immutable default registry", () => {
-        expect(PROMPT_SEED_REGISTRY).toEqual([])
+    test("exposes immutable default registry", () => {
         expect(Object.isFrozen(PROMPT_SEED_REGISTRY)).toBe(true)
+        expect(PROMPT_SEED_REGISTRY).toHaveLength(21)
+
+        const seedNames = PROMPT_SEED_REGISTRY.map((seed) => seed.name)
+        expect(seedNames).toContain("code-review-system")
+        expect(seedNames).toContain("rules-classifier-system")
+        expect(seedNames).toContain("safeguard-5experts-panel")
+        expect(seedNames).toContain("remove-repeated-suggestions")
+
+        const seedsByName = new Map(PROMPT_SEED_REGISTRY.map((seed) => [seed.name, seed]))
+        const reviewSeed = seedsByName.get("code-review-system")
+        expect(reviewSeed).toBeDefined()
+        if (reviewSeed === undefined) {
+            throw new Error("Expected code-review-system seed to be available")
+        }
+
+        expect(reviewSeed.category).toBe(PROMPT_TEMPLATE_CATEGORY.ANALYSIS)
+        expect(reviewSeed.type).toBe(PROMPT_TEMPLATE_TYPE.SYSTEM)
+        expect(reviewSeed.variables).toContain("bugText")
     })
 })
