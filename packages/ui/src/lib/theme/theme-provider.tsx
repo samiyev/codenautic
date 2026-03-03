@@ -4,11 +4,16 @@ import {
     type ReactNode,
     type SetStateAction,
     createContext,
+    useCallback,
     useContext,
     useEffect,
     useMemo,
+    useRef,
     useState,
 } from "react"
+import { createApiConfig } from "../api/config"
+import { FetchHttpClient, isApiHttpError } from "../api/http-client"
+import type { IHttpClient } from "../api/http-client"
 
 /**
  * Доступные режимы темы интерфейса.
@@ -69,6 +74,16 @@ export interface IThemePreset {
 }
 
 /**
+ * Набор значений для синхронизации пользовательской темы.
+ */
+interface IThemeSettingsPayload {
+    /** Темная/светлая/системная схема. */
+    readonly mode?: ThemeMode | string
+    /** Код пресета темы. */
+    readonly preset?: ThemePresetId | string
+}
+
+/**
  * Результат инициализации темы.
  */
 export interface IThemeBootstrapState {
@@ -82,8 +97,273 @@ export interface IThemeBootstrapState {
 
 const THEME_MODE_STORAGE_KEY = "codenautic:ui:theme-mode"
 const THEME_PRESET_STORAGE_KEY = "codenautic:ui:theme-preset"
+const THEME_PROFILE_STORAGE_SYNC_KEY = "codenautic:ui:theme-profile-synced"
 const THEME_DEFAULT_MODE: ThemeMode = "system"
 const DEFAULT_THEME_PRESET_ID = "moonstone"
+const THEME_SETTINGS_TIMEOUT_MS = 2_000
+const THEME_SETTINGS_SAVE_DEBOUNCE_MS = 200
+const THEME_PROFILE_DEFAULT_UPDATED_AT_MS = 0
+const THEME_SETTINGS_ENDPOINTS = ["/api/v1/user/settings", "/api/v1/user/preferences"] as const
+const THEME_SETTINGS_WRITE_METHODS = ["PUT", "PATCH", "POST"] as const
+
+/**
+ * Ограниченный профиль темы для API-памяти.
+ */
+interface IThemeProfile {
+    /** Темная/светлая/системная схема. */
+    readonly mode: ThemeMode
+    /** Код пресета. */
+    readonly preset: ThemePresetId
+    /** Время синхронизации в миллисекундах. */
+    readonly updatedAtMs: number
+}
+
+interface IThemeProfileSyncState {
+    /** Идентификатор режима. */
+    readonly mode: ThemeMode
+    /** Идентификатор пресета. */
+    readonly preset: ThemePresetId
+    /** Время последнего успешного/локального обновления в ms. */
+    readonly updatedAtMs: number
+}
+
+interface IThemeProfileResponse {
+    /** Результат чтения. */
+    readonly profile: IThemeSettingsPayload
+    /** Время обновления из источника. */
+    readonly updatedAtMs: number
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null && Array.isArray(value) === false
+}
+
+function isThemeModeValue(rawMode: unknown): rawMode is ThemeMode {
+    if (typeof rawMode !== "string") {
+        return false
+    }
+    return isThemeMode(rawMode)
+}
+
+function isThemePresetValue(rawPreset: unknown): rawPreset is ThemePresetId {
+    if (typeof rawPreset !== "string") {
+        return false
+    }
+    return isThemePreset(rawPreset)
+}
+
+function toThemeProfile(value: unknown, fallback: IThemeProfile): IThemeProfile {
+    if (isRecord(value) === false) {
+        return fallback
+    }
+
+    const mode = isThemeModeValue(value.mode) ? value.mode : fallback.mode
+    const preset = isThemePresetValue(value.preset) ? value.preset : fallback.preset
+    const updatedAtMs = parseUpdatedAtValue(value.updatedAtMs)
+
+    return {
+        mode,
+        preset,
+        updatedAtMs: Number.isFinite(updatedAtMs) ? updatedAtMs : fallback.updatedAtMs,
+    }
+}
+
+function readThemeSettingsPayload(raw: unknown): IThemeSettingsPayload {
+    if (isRecord(raw) === false) {
+        return {}
+    }
+
+    const directMode =
+        isThemeModeValue(raw.mode) === true
+            ? raw.mode
+            : isThemeModeValue(raw.themeMode) === true
+              ? raw.themeMode
+              : undefined
+    const directPreset =
+        isThemePresetValue(raw.preset) === true
+            ? raw.preset
+            : isThemePresetValue(raw.themePreset) === true
+              ? raw.themePreset
+              : undefined
+
+    if (directMode !== undefined || directPreset !== undefined) {
+        return {
+            mode: directMode,
+            preset: directPreset,
+        }
+    }
+
+    if (isRecord(raw.theme) === true) {
+        const fromTheme = readThemeSettingsPayload(raw.theme)
+        if (fromTheme.mode !== undefined || fromTheme.preset !== undefined) {
+            return fromTheme
+        }
+    }
+
+    if (isRecord(raw.settings) === true) {
+        const fromSettings = readThemeSettingsPayload(raw.settings)
+        if (fromSettings.mode !== undefined || fromSettings.preset !== undefined) {
+            return fromSettings
+        }
+    }
+
+    if (isRecord(raw.preferences) === true) {
+        const fromPreferences = readThemeSettingsPayload(raw.preferences)
+        if (fromPreferences.mode !== undefined || fromPreferences.preset !== undefined) {
+            return fromPreferences
+        }
+    }
+
+    if (isRecord(raw.data) === true) {
+        const fromData = readThemeSettingsPayload(raw.data)
+        if (fromData.mode !== undefined || fromData.preset !== undefined) {
+            return fromData
+        }
+    }
+
+    return {}
+}
+
+function parseUpdatedAtValue(rawValue: unknown): number {
+    if (typeof rawValue === "number" && Number.isFinite(rawValue)) {
+        return rawValue
+    }
+
+    if (typeof rawValue === "string") {
+        const parsed = Date.parse(rawValue)
+        if (Number.isFinite(parsed)) {
+            return parsed
+        }
+    }
+
+    return THEME_PROFILE_DEFAULT_UPDATED_AT_MS
+}
+
+function readThemeProfileSyncState(): IThemeProfileSyncState | undefined {
+    if (typeof window === "undefined") {
+        return undefined
+    }
+
+    const rawState = window.localStorage.getItem(THEME_PROFILE_STORAGE_SYNC_KEY)
+    if (rawState === null) {
+        return undefined
+    }
+
+    try {
+        const parsed = JSON.parse(rawState) as Record<string, unknown>
+        const mode = isThemeModeValue(parsed.mode) === true ? parsed.mode : undefined
+        const preset = isThemePresetValue(parsed.preset) === true ? parsed.preset : undefined
+        const updatedAtMs = parseUpdatedAtValue(parsed.updatedAtMs)
+
+        if (mode === undefined || preset === undefined) {
+            return undefined
+        }
+
+        return {
+            mode,
+            preset,
+            updatedAtMs,
+        }
+    } catch {
+        return undefined
+    }
+}
+
+function writeThemeProfileSyncState(profile: IThemeProfile): void {
+    if (typeof window === "undefined") {
+        return
+    }
+
+    const payload = {
+        mode: profile.mode,
+        preset: profile.preset,
+        updatedAtMs: profile.updatedAtMs,
+    }
+
+    window.localStorage.setItem(THEME_PROFILE_STORAGE_SYNC_KEY, JSON.stringify(payload))
+}
+
+function createThemeSettingsApiClient(): IHttpClient | undefined {
+    try {
+        const config = createApiConfig({
+            VITE_API_URL: import.meta.env.VITE_API_URL,
+            VITE_API_BEARER_TOKEN: import.meta.env.VITE_API_BEARER_TOKEN,
+            MODE: import.meta.env.MODE,
+            PROD: import.meta.env.PROD,
+        })
+
+        return new FetchHttpClient(config)
+    } catch {
+        return undefined
+    }
+}
+
+async function fetchThemeProfileFromApi(
+    client: IHttpClient,
+    signal: AbortSignal,
+    endpoint: string,
+): Promise<IThemeProfileResponse | undefined> {
+    try {
+        const response = await client.request<unknown>({
+            method: "GET",
+            path: endpoint,
+            credentials: "include",
+            signal,
+        })
+
+        const profile = readThemeSettingsPayload(response)
+        const updatedAtMs = parseUpdatedAtValue((response as Record<string, unknown>).updatedAt)
+
+        if (
+            isThemeModeValue(profile.mode) === false &&
+            isThemePresetValue(profile.preset) === false
+        ) {
+            return undefined
+        }
+
+        return {
+            profile,
+            updatedAtMs,
+        }
+    } catch {
+        return undefined
+    }
+}
+
+async function saveThemeProfileToApi(
+    client: IHttpClient,
+    signal: AbortSignal,
+    endpoint: string,
+    profile: IThemeProfile,
+): Promise<boolean> {
+    const payload: IThemeSettingsPayload = {
+        mode: profile.mode,
+        preset: profile.preset,
+    }
+
+    for (const method of THEME_SETTINGS_WRITE_METHODS) {
+        try {
+            await client.request<unknown>({
+                method,
+                path: endpoint,
+                body: payload,
+                credentials: "include",
+                signal,
+            })
+            return true
+        } catch (error: unknown) {
+            if (isApiHttpError(error) === true && error.status === 404) {
+                return false
+            }
+
+            if (isApiHttpError(error) === true && error.status === 405) {
+                continue
+            }
+        }
+    }
+
+    return false
+}
 
 /**
  * Реестр HeroUI-подобных пресетов.
@@ -440,6 +720,25 @@ export function initializeTheme(): IThemeBootstrapState {
     return initializeFromStorage()
 }
 
+function selectThemeProfile(
+    remoteProfile: IThemeProfileResponse | undefined,
+    localProfile: IThemeProfile,
+): IThemeProfile {
+    if (remoteProfile === undefined) {
+        return localProfile
+    }
+
+    const candidate = toThemeProfile(remoteProfile.profile, localProfile)
+    if (
+        localProfile.updatedAtMs !== THEME_PROFILE_DEFAULT_UPDATED_AT_MS &&
+        candidate.updatedAtMs < localProfile.updatedAtMs
+    ) {
+        return localProfile
+    }
+
+    return candidate
+}
+
 /**
  * Provider для глобальной настройки темы.
  *
@@ -451,9 +750,9 @@ export function ThemeProvider(props: {
     readonly defaultMode?: ThemeMode
     readonly defaultPreset?: ThemePresetId
 }): ReactElement {
-    const {children, defaultMode, defaultPreset} = props
+    const { children, defaultMode, defaultPreset } = props
 
-    const [mode, setMode] = useState<ThemeMode>(() => {
+    const [mode, setThemeMode] = useState<ThemeMode>(() => {
         const persistedMode = readStoredThemeMode()
         if (defaultMode !== undefined && isThemeMode(defaultMode) === true) {
             return defaultMode
@@ -461,7 +760,7 @@ export function ThemeProvider(props: {
 
         return persistedMode
     })
-    const [preset, setPreset] = useState<ThemePresetId>(() => {
+    const [preset, setThemePreset] = useState<ThemePresetId>(() => {
         const persistedPreset = readStoredThemePreset()
         if (isThemePreset(persistedPreset) === true) {
             return persistedPreset
@@ -474,6 +773,32 @@ export function ThemeProvider(props: {
         () => resolveThemeMode(mode, systemMode),
         [mode, systemMode],
     )
+    const shouldSyncProfileRef = useRef(false)
+    const lastSyncSignatureRef = useRef("")
+
+    const setMode = useCallback((nextMode: SetStateAction<ThemeMode>): void => {
+        setThemeMode((stateMode): ThemeMode => {
+            const modeCandidate =
+                nextMode instanceof Function === true ? nextMode(stateMode) : nextMode
+            if (isThemeMode(modeCandidate) === true) {
+                return modeCandidate
+            }
+
+            return stateMode
+        })
+    }, [])
+
+    const setPreset = useCallback((nextPreset: SetStateAction<ThemePresetId>): void => {
+        setThemePreset((statePreset): ThemePresetId => {
+            const presetCandidate =
+                nextPreset instanceof Function === true ? nextPreset(statePreset) : nextPreset
+            if (isThemePreset(presetCandidate) === true) {
+                return presetCandidate
+            }
+
+            return statePreset
+        })
+    }, [])
 
     useEffect((): (() => void) | undefined => {
         if (typeof window === "undefined") {
@@ -499,7 +824,155 @@ export function ThemeProvider(props: {
 
         window.localStorage.setItem(THEME_MODE_STORAGE_KEY, mode)
         window.localStorage.setItem(THEME_PRESET_STORAGE_KEY, preset)
+        writeThemeProfileSyncState({
+            mode,
+            preset,
+            updatedAtMs: Date.now(),
+        })
     }, [mode, preset, resolvedMode])
+
+    useEffect((): (() => void) | undefined => {
+        if (typeof window === "undefined") {
+            return undefined
+        }
+
+        const apiClient = createThemeSettingsApiClient()
+        if (apiClient === undefined) {
+            shouldSyncProfileRef.current = true
+            return undefined
+        }
+
+        const localSyncState = readThemeProfileSyncState()
+        const localProfile = toThemeProfile(
+            {
+                mode,
+                preset,
+            },
+            {
+                mode,
+                preset,
+                updatedAtMs: localSyncState?.updatedAtMs ?? THEME_PROFILE_DEFAULT_UPDATED_AT_MS,
+            },
+        )
+        const abortController = new AbortController()
+        const timeoutHandle = window.setTimeout((): void => {
+            abortController.abort()
+        }, THEME_SETTINGS_TIMEOUT_MS)
+
+        const syncFromProfile = async (): Promise<void> => {
+            let selectedProfile = localProfile
+            for (const endpoint of THEME_SETTINGS_ENDPOINTS) {
+                const response = await fetchThemeProfileFromApi(
+                    apiClient,
+                    abortController.signal,
+                    endpoint,
+                )
+                if (response !== undefined) {
+                    const responseProfile = selectThemeProfile(response, localProfile)
+                    selectedProfile = responseProfile
+                    break
+                }
+            }
+
+            if (abortController.signal.aborted) {
+                return
+            }
+
+            setThemeMode((_: ThemeMode): ThemeMode => {
+                if (selectedProfile.mode !== localProfile.mode) {
+                    return selectedProfile.mode
+                }
+                return localProfile.mode
+            })
+            setThemePreset((_: ThemePresetId): ThemePresetId => {
+                if (selectedProfile.preset !== localProfile.preset) {
+                    return selectedProfile.preset
+                }
+                return localProfile.preset
+            })
+            writeThemeProfileSyncState({
+                ...selectedProfile,
+                updatedAtMs: selectedProfile.updatedAtMs,
+            })
+            shouldSyncProfileRef.current = true
+        }
+
+        void syncFromProfile().catch(() => {
+            shouldSyncProfileRef.current = true
+        })
+
+        return (): void => {
+            clearTimeout(timeoutHandle)
+            abortController.abort()
+            shouldSyncProfileRef.current = true
+        }
+    }, [])
+
+    useEffect(() => {
+        if (typeof window === "undefined") {
+            return undefined
+        }
+
+        if (shouldSyncProfileRef.current === false) {
+            return undefined
+        }
+
+        const signature = `${mode}:${preset}`
+        if (lastSyncSignatureRef.current === signature) {
+            return undefined
+        }
+
+        const apiClient = createThemeSettingsApiClient()
+        if (apiClient === undefined) {
+            lastSyncSignatureRef.current = signature
+            return undefined
+        }
+
+        const abortController = new AbortController()
+        const timeoutHandle = window.setTimeout((): void => {
+            abortController.abort()
+        }, THEME_SETTINGS_TIMEOUT_MS)
+        const timerHandle = window.setTimeout((): void => {
+            const profile: IThemeProfile = {
+                mode,
+                preset,
+                updatedAtMs: Date.now(),
+            }
+
+            void (async (): Promise<void> => {
+                let synced = false
+                for (const endpoint of THEME_SETTINGS_ENDPOINTS) {
+                    if (abortController.signal.aborted) {
+                        break
+                    }
+
+                    if (
+                        (await saveThemeProfileToApi(
+                            apiClient,
+                            abortController.signal,
+                            endpoint,
+                            profile,
+                        )) === true
+                    ) {
+                        synced = true
+                        break
+                    }
+                }
+
+                if (synced === false) {
+                    writeThemeProfileSyncState(profile)
+                }
+            })()
+            writeThemeProfileSyncState(profile)
+            lastSyncSignatureRef.current = signature
+        }, THEME_SETTINGS_SAVE_DEBOUNCE_MS)
+
+        return (): void => {
+            clearTimeout(timeoutHandle)
+            clearTimeout(timerHandle)
+            abortController.abort()
+        }
+    }, [mode, preset])
 
     useEffect((): (() => void) | undefined => {
         if (typeof window === "undefined") {
