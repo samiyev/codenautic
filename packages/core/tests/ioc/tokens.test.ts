@@ -9,6 +9,7 @@ import {type IReviewRepository} from "../../src/application/ports/outbound/revie
 import {type IRuleRepository} from "../../src/application/ports/outbound/rule/rule-repository.port"
 import type {ITeamRuleProvider} from "../../src/application/ports/outbound/rule/team-rule-provider.port"
 import type {IConversationThreadRepository} from "../../src/application/ports/outbound/messaging/conversation-thread-repository.port"
+import type {IRepositoryScanner} from "../../src/application/ports/outbound/scanning/repository-scanner"
 import {createToken, TOKENS, type InjectionToken} from "../../src/index"
 
 interface IExamplePort {
@@ -54,6 +55,8 @@ describe("TOKENS", () => {
             TOKENS.Rules.TeamRuleProvider
         const conversationThreadRepositoryToken: InjectionToken<IConversationThreadRepository> =
             TOKENS.Messaging.ConversationThreadRepository
+        const repositoryScannerToken: InjectionToken<IRepositoryScanner> =
+            TOKENS.Scanning.RepositoryScanner
         const eventBusToken: InjectionToken<IDomainEventBus> = TOKENS.Common.DomainEventBus
         const loggerToken: InjectionToken<ILogger> = TOKENS.Common.Logger
         const reviewSymbol: symbol = reviewToken
@@ -64,6 +67,7 @@ describe("TOKENS", () => {
         const teamRuleProviderSymbol: symbol = teamRuleProviderToken
         const conversationThreadRepositorySymbol: symbol =
             conversationThreadRepositoryToken
+        const repositoryScannerSymbol: symbol = repositoryScannerToken
         const eventBusSymbol: symbol = eventBusToken
         const loggerSymbol: symbol = loggerToken
 
@@ -74,6 +78,7 @@ describe("TOKENS", () => {
         expect(typeof ruleToken).toBe("symbol")
         expect(typeof teamRuleProviderToken).toBe("symbol")
         expect(typeof conversationThreadRepositoryToken).toBe("symbol")
+        expect(typeof repositoryScannerToken).toBe("symbol")
         expect(typeof eventBusToken).toBe("symbol")
         expect(typeof loggerToken).toBe("symbol")
         expect(reviewSymbol === ruleSymbol).toBe(false)
@@ -97,6 +102,7 @@ describe("TOKENS", () => {
         expect(teamRuleProviderSymbol === loggerSymbol).toBe(false)
         expect(teamRuleProviderSymbol === issueAggregationSymbol).toBe(false)
         expect(teamRuleProviderSymbol === fileMetricsSymbol).toBe(false)
+        expect(teamRuleProviderSymbol === repositoryScannerSymbol).toBe(false)
         expect(conversationThreadRepositorySymbol === reviewSymbol).toBe(false)
         expect(conversationThreadRepositorySymbol === checkpointSymbol).toBe(false)
         expect(conversationThreadRepositorySymbol === ruleSymbol).toBe(false)
@@ -105,7 +111,17 @@ describe("TOKENS", () => {
         expect(conversationThreadRepositorySymbol === loggerSymbol).toBe(false)
         expect(conversationThreadRepositorySymbol === issueAggregationSymbol).toBe(false)
         expect(conversationThreadRepositorySymbol === fileMetricsSymbol).toBe(false)
+        expect(conversationThreadRepositorySymbol === repositoryScannerSymbol).toBe(false)
         expect(issueAggregationSymbol === fileMetricsSymbol).toBe(false)
         expect(eventBusSymbol === loggerSymbol).toBe(false)
+        expect(repositoryScannerSymbol === reviewSymbol).toBe(false)
+        expect(repositoryScannerSymbol === checkpointSymbol).toBe(false)
+        expect(repositoryScannerSymbol === issueAggregationSymbol).toBe(false)
+        expect(repositoryScannerSymbol === fileMetricsSymbol).toBe(false)
+        expect(repositoryScannerSymbol === ruleSymbol).toBe(false)
+        expect(repositoryScannerSymbol === teamRuleProviderSymbol).toBe(false)
+        expect(repositoryScannerSymbol === eventBusSymbol).toBe(false)
+        expect(repositoryScannerSymbol === loggerSymbol).toBe(false)
+        expect(repositoryScannerSymbol === conversationThreadRepositorySymbol).toBe(false)
     })
 })

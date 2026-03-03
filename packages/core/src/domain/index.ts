@@ -76,8 +76,17 @@ export {
     type FeedbackType,
     type IFeedbackReceivedPayload,
 } from "./events/feedback-received"
+export {ScanCompleted, type IScanCompletedPayload} from "./events/scan-completed"
+export {
+    ScanFailed,
+    type IScanFailedPayload,
+    type ScanPhase,
+    SCAN_PHASE,
+} from "./events/scan-failed"
+export {RepositoryIndexed, type IRepositoryIndexedPayload} from "./events/repository-indexed"
 export {IssueFound, type IIssueFoundPayload} from "./events/issue-found"
 export {MetricsCalculated, type IMetricsCalculatedPayload, type ITokenUsagePayload} from "./events/metrics-calculated"
+export {ScanStarted, type IScanStartedPayload} from "./events/scan-started"
 export {PipelineCompleted, type IPipelineCompletedPayload} from "./events/pipeline-completed"
 export {PipelineFailed, type IPipelineFailedPayload} from "./events/pipeline-failed"
 export {PipelineStarted, type IPipelineStartedPayload} from "./events/pipeline-started"

@@ -3,6 +3,10 @@ import {describe, expect, test} from "bun:test"
 import {FEEDBACK_TYPE, FeedbackReceived} from "../../../src/domain/events/feedback-received"
 import {IssueFound} from "../../../src/domain/events/issue-found"
 import {MetricsCalculated} from "../../../src/domain/events/metrics-calculated"
+import {ScanStarted} from "../../../src/domain/events/scan-started"
+import {ScanCompleted} from "../../../src/domain/events/scan-completed"
+import {ScanFailed, SCAN_PHASE} from "../../../src/domain/events/scan-failed"
+import {RepositoryIndexed} from "../../../src/domain/events/repository-indexed"
 import {
     REVIEW_COMPLETION_STATUS,
     ReviewCompleted,
@@ -104,6 +108,72 @@ describe("review lifecycle events", () => {
             reviewId: "review-1",
             feedbackType: "FALSE_POSITIVE",
             userId: "user-7",
+        })
+    })
+
+    test("resolves ScanStarted event name and payload", () => {
+        const event = new ScanStarted("repo-1", {
+            repositoryId: "repo-1",
+            scanId: "scan-1",
+            triggeredBy: "scheduler",
+        })
+
+        expect(event.eventName).toBe("ScanStarted")
+        expect(event.payload).toEqual({
+            repositoryId: "repo-1",
+            scanId: "scan-1",
+            triggeredBy: "scheduler",
+        })
+    })
+
+    test("resolves ScanCompleted event name and payload", () => {
+        const event = new ScanCompleted("repo-1", {
+            repositoryId: "repo-1",
+            scanId: "scan-1",
+            totalFiles: 120,
+            totalNodes: 460,
+            duration: 15300,
+        })
+
+        expect(event.eventName).toBe("ScanCompleted")
+        expect(event.payload).toEqual({
+            repositoryId: "repo-1",
+            scanId: "scan-1",
+            totalFiles: 120,
+            totalNodes: 460,
+            duration: 15300,
+        })
+    })
+
+    test("resolves ScanFailed event name and payload", () => {
+        const event = new ScanFailed("repo-1", {
+            repositoryId: "repo-1",
+            scanId: "scan-1",
+            errorMessage: "temporary git failure",
+            phase: SCAN_PHASE.GRAPH_BUILDING,
+        })
+
+        expect(event.eventName).toBe("ScanFailed")
+        expect(event.payload).toEqual({
+            repositoryId: "repo-1",
+            scanId: "scan-1",
+            errorMessage: "temporary git failure",
+            phase: "GRAPH_BUILDING",
+        })
+    })
+
+    test("resolves RepositoryIndexed event name and payload", () => {
+        const event = new RepositoryIndexed("repo-1", {
+            repositoryId: "repo-1",
+            totalFiles: 120,
+            languages: ["ts", "tsx"],
+        })
+
+        expect(event.eventName).toBe("RepositoryIndexed")
+        expect(event.payload).toEqual({
+            repositoryId: "repo-1",
+            totalFiles: 120,
+            languages: ["ts", "tsx"],
         })
     })
 })
