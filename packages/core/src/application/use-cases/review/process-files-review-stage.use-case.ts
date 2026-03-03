@@ -15,6 +15,8 @@ import {
     REVIEW_DEPTH_STRATEGY,
     type ReviewDepthStrategy,
 } from "../../dto/review/review-config.dto"
+import type {IDirectoryConfig} from "../../dto/config/directory-config.dto"
+import type {IReviewConfigDTO} from "../../dto/review/review-config.dto"
 import type {ILLMProvider} from "../../ports/outbound/llm/llm-provider.port"
 import type {
     PipelineCollectionItem,
@@ -531,6 +533,8 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
         const hunks = this.resolveHunks(file["hunks"])
         const status = this.resolveDiffFileStatus(file["status"])
         const filePath = this.createFilePath(filePathValue)
+        const fileReviewConfig = this.resolveFileConfig(config, filePath)
+        const fileReviewDepthStrategy = this.resolveReviewDepthStrategy(fileReviewConfig)
 
         const diffFile = this.resolveDiffFile({
             filePath,
@@ -539,8 +543,7 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
             patch,
             oldPathValue: this.resolveOldPath(file["oldPath"], status),
         })
-
-        const requestedMode = this.resolveRequestedMode(reviewDepthStrategy, diffFile)
+        const requestedMode = this.resolveRequestedMode(fileReviewDepthStrategy, diffFile)
         const hasFileContent = fullFileContent !== undefined
         const fallbackToLight =
             requestedMode === REVIEW_DEPTH_MODE.HEAVY && hasFileContent === false
@@ -550,7 +553,7 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
         const request = this.buildFileChatRequest(
             filePathValue,
             patch,
-            config,
+            fileReviewConfig,
             effectiveMode,
             fullFileContent,
         )
@@ -566,7 +569,7 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
                 failed: false,
                 requestedMode,
                 effectiveMode,
-                reviewDepthStrategy,
+                reviewDepthStrategy: fileReviewDepthStrategy,
                 fallbackToLight,
                 hasFileContent,
             }
@@ -580,7 +583,7 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
                     failed: false,
                     requestedMode,
                     effectiveMode,
-                    reviewDepthStrategy,
+                    reviewDepthStrategy: fileReviewDepthStrategy,
                     fallbackToLight,
                     hasFileContent,
                 }
@@ -593,7 +596,7 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
                 failed: true,
                 requestedMode,
                 effectiveMode,
-                reviewDepthStrategy,
+                reviewDepthStrategy: fileReviewDepthStrategy,
                 fallbackToLight,
                 hasFileContent,
             }
@@ -634,6 +637,255 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
      */
     private createFilePath(rawPath: string): FilePath {
         return FilePath.create(rawPath)
+    }
+
+    /**
+     * Resolves effective config for a concrete file path.
+     *
+     * @param config Base pipeline config.
+     * @param filePath File path.
+     * @returns Config merged with most specific directory override.
+     */
+    private resolveFileConfig(
+        config: Readonly<Record<string, unknown>>,
+        filePath: FilePath,
+    ): Readonly<Record<string, unknown>> {
+        const directoryConfig = this.resolveMatchingDirectoryConfig(config, filePath)
+        if (directoryConfig === undefined) {
+            return config
+        }
+
+        const mergedConfig: Record<string, unknown> = {
+            ...config,
+        }
+        delete mergedConfig.directories
+
+        const override = directoryConfig.config
+        const overridePromptOverrides = readObjectField(
+            override as Readonly<Record<string, unknown>>,
+            "promptOverrides",
+        )
+        const basePromptOverrides = readObjectField(config, "promptOverrides")
+        const mergedPromptOverrides = this.mergePromptOverrides(
+            basePromptOverrides,
+            overridePromptOverrides,
+        )
+        if (mergedPromptOverrides === undefined) {
+            delete mergedConfig.promptOverrides
+        } else {
+            mergedConfig.promptOverrides = mergedPromptOverrides
+        }
+
+        for (const [key, value] of Object.entries(override)) {
+            if (key === "promptOverrides") {
+                continue
+            }
+
+            mergedConfig[key] = value
+        }
+
+        return mergedConfig
+    }
+
+    /**
+     * Chooses the most specific matching directory override.
+     *
+     * @param config Pipeline config payload.
+     * @param filePath File path.
+     * @returns The selected directory override or undefined.
+     */
+    private resolveMatchingDirectoryConfig(
+        config: Readonly<Record<string, unknown>>,
+        filePath: FilePath,
+    ): IDirectoryConfig | undefined {
+        const directories = this.resolveDirectoryConfigs(config)
+        let selectedDirectory: IDirectoryConfig | undefined
+        let bestSpecificity = -1
+        let bestIndex = -1
+
+        for (let index = 0; index < directories.length; index += 1) {
+            const directoryConfig = directories[index]
+            if (directoryConfig === undefined) {
+                continue
+            }
+
+            if (this.isDirectoryMatch(filePath, directoryConfig.path) === false) {
+                continue
+            }
+
+            const specificity = this.calculateDirectorySpecificity(directoryConfig.path)
+            if (
+                specificity > bestSpecificity ||
+                (specificity === bestSpecificity && index > bestIndex)
+            ) {
+                selectedDirectory = directoryConfig
+                bestSpecificity = specificity
+                bestIndex = index
+            }
+        }
+
+        return selectedDirectory
+    }
+
+    /**
+     * Resolves directory configs from base config.
+     *
+     * @param config Pipeline config.
+     * @returns Directory configurations.
+     */
+    private resolveDirectoryConfigs(
+        config: Readonly<Record<string, unknown>>,
+    ): readonly IDirectoryConfig[] {
+        const directories = config["directories"]
+        if (Array.isArray(directories) === false) {
+            return []
+        }
+
+        const parsedDirectories: IDirectoryConfig[] = []
+
+        for (const rawDirectoryConfig of directories) {
+            const directoryConfig = this.resolveDirectoryConfig(rawDirectoryConfig)
+            if (directoryConfig !== undefined) {
+                parsedDirectories.push(directoryConfig)
+            }
+        }
+
+        return parsedDirectories
+    }
+
+    /**
+     * Normalizes and validates one directory config entry.
+     *
+     * @param rawDirectoryConfig Raw directory config value.
+     * @returns Parsed directory config or undefined.
+     */
+    private resolveDirectoryConfig(rawDirectoryConfig: unknown): IDirectoryConfig | undefined {
+        if (rawDirectoryConfig === null || typeof rawDirectoryConfig !== "object" || Array.isArray(rawDirectoryConfig)) {
+            return undefined
+        }
+
+        const record = rawDirectoryConfig as Readonly<Record<string, unknown>>
+        const path = this.resolveString(record["path"])
+        if (path === undefined) {
+            return undefined
+        }
+
+        const config = readObjectField(record, "config")
+        if (config === undefined) {
+            return undefined
+        }
+
+        return {
+            path,
+            config: config as Partial<IReviewConfigDTO>,
+        }
+    }
+
+    /**
+     * Checks whether file path matches configured directory rule.
+     *
+     * @param filePath File path.
+     * @param directoryPath Directory matcher.
+     * @returns True when path matches directory rule.
+     */
+    private isDirectoryMatch(filePath: FilePath, directoryPath: string): boolean {
+        const normalizedPath = this.normalizeDirectoryPath(directoryPath)
+        if (normalizedPath.length === 0) {
+            return false
+        }
+
+        const normalizedFilePath = filePath.toString()
+        if (this.isGlobPattern(normalizedPath) === true) {
+            return filePath.matchesGlob(normalizedPath)
+        }
+
+        if (normalizedFilePath === normalizedPath) {
+            return true
+        }
+
+        return normalizedFilePath.startsWith(`${normalizedPath}/`)
+    }
+
+    /**
+     * Checks whether directory pattern contains wildcards.
+     *
+     * @param path Pattern.
+     * @returns True when wildcard tokens are present.
+     */
+    private isGlobPattern(path: string): boolean {
+        return path.includes("*") || path.includes("?")
+    }
+
+    /**
+     * Calculates pattern precedence for conflicting directory overrides.
+     *
+     * @param path Directory pattern.
+     * @returns Numeric specificity score.
+     */
+    private calculateDirectorySpecificity(path: string): number {
+        const normalizedPath = this.normalizeDirectoryPath(path)
+        if (this.isGlobPattern(normalizedPath) === false) {
+            return normalizedPath.length + 1000
+        }
+
+        return normalizedPath.length
+    }
+
+    /**
+     * Normalizes directory rule path before matching.
+     *
+     * @param path Raw directory path.
+     * @returns Normalized path.
+     */
+    private normalizeDirectoryPath(path: string): string {
+        const normalized = path.trim().replaceAll("\\", "/")
+        if (normalized.length === 0) {
+            return ""
+        }
+
+        let result = normalized
+        if (result.startsWith("./")) {
+            result = result.slice(2)
+        }
+
+        while (result.startsWith("/")) {
+            result = result.slice(1)
+        }
+
+        while (result.length > 1 && result.endsWith("/")) {
+            result = result.slice(0, -1)
+        }
+
+        return result
+    }
+
+    /**
+     * Merges base and directory-level prompt overrides.
+     *
+     * @param base Base prompt overrides.
+     * @param directory Directory-specific prompt overrides.
+     * @returns Merged prompt overrides.
+     */
+    private mergePromptOverrides(
+        base: Readonly<Record<string, unknown>> | undefined,
+        directory: Readonly<Record<string, unknown>> | undefined,
+    ): Readonly<Record<string, unknown>> | undefined {
+        if (base === undefined && directory === undefined) {
+            return undefined
+        }
+
+        if (base === undefined) {
+            return directory
+        }
+
+        if (directory === undefined) {
+            return base
+        }
+
+        return {
+            ...base,
+            ...directory,
+        }
     }
 
     /**

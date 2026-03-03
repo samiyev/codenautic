@@ -380,6 +380,200 @@ describe("ProcessFilesReviewStageUseCase", () => {
         expect(userMessage).toContain("export const value = 1")
     })
 
+    test("applies matching directory overrides for heavy strategy and system prompt", async () => {
+        const llmProvider = new InMemoryLLMProvider()
+        llmProvider.replies.set(
+            "src/core/index.ts",
+            {
+                content: JSON.stringify({
+                    message: "Core issue",
+                }),
+            },
+        )
+
+        const useCase = new ProcessFilesReviewStageUseCase({
+            llmProvider,
+        })
+        const state = createState(
+            [
+                {
+                    path: "src/core/index.ts",
+                    patch: "@@ -1,1 +1,1 @@\n+import a from \"x\"\n",
+                    fullFileContent: "export const value = 1",
+                    status: "modified",
+                },
+                {
+                    path: "src/app.ts",
+                    patch: "@@ -1,1 +1,1 @@\n-console\n+result\n",
+                    status: "modified",
+                },
+            ],
+            {
+                reviewDepthStrategy: "always-light",
+                promptOverrides: {
+                    systemPrompt: "GLOBAL_SYSTEM",
+                    reviewerPrompt: "GLOBAL_REVIEWER",
+                },
+                directories: [
+                    {
+                        path: "src/core",
+                        config: {
+                            reviewDepthStrategy: "always-heavy",
+                            promptOverrides: {
+                                systemPrompt: "CORE_SYSTEM",
+                            },
+                        },
+                    },
+                ],
+            },
+            null,
+        )
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isOk).toBe(true)
+        const coreRequest = llmProvider.requests.at(0)
+        const requestMessages = coreRequest?.messages
+
+        expect(requestMessages?.at(0)?.content).toContain("CORE_SYSTEM")
+        expect(requestMessages?.at(1)?.content).toContain("FULL_FILE:")
+        expect(requestMessages?.at(1)?.content).toContain("GLOBAL_REVIEWER")
+    })
+
+    test("keeps global prompts and light strategy for non-matching file", async () => {
+        const llmProvider = new InMemoryLLMProvider()
+        llmProvider.replies.set(
+            "src/app.ts",
+            {
+                content: JSON.stringify({
+                    message: "App issue",
+                }),
+            },
+        )
+
+        const useCase = new ProcessFilesReviewStageUseCase({
+            llmProvider,
+        })
+        const state = createState(
+            [
+                {
+                    path: "src/app.ts",
+                    patch: "@@ -1,1 +1,1 @@\n-console\n+result\n",
+                    status: "modified",
+                },
+            ],
+            {
+                reviewDepthStrategy: "always-light",
+                promptOverrides: {
+                    systemPrompt: "GLOBAL_SYSTEM",
+                    reviewerPrompt: "GLOBAL_REVIEWER",
+                },
+                directories: [
+                    {
+                        path: "src/core",
+                        config: {
+                            reviewDepthStrategy: "always-heavy",
+                            promptOverrides: {
+                                systemPrompt: "CORE_SYSTEM",
+                            },
+                        },
+                    },
+                ],
+            },
+            null,
+        )
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isOk).toBe(true)
+        const appRequest = llmProvider.requests.at(0)
+        const requestMessages = appRequest?.messages
+
+        expect(requestMessages?.at(0)?.content).toContain("GLOBAL_SYSTEM")
+        expect(requestMessages?.at(1)?.content).toContain("GLOBAL_REVIEWER")
+        expect(requestMessages?.at(1)?.content).not.toContain("FULL_FILE:")
+
+        const stats = result.value.state.externalContext?.["fileReviewStats"] as
+            | Readonly<Record<string, unknown>>
+            | undefined
+        expect(stats?.["modeSummary"]).toMatchObject({
+            requested: {
+                light: 1,
+                heavy: 0,
+            },
+        })
+    })
+
+    test("chooses more specific directory config when multiple patterns match", async () => {
+        const llmProvider = new InMemoryLLMProvider()
+        llmProvider.replies.set(
+            "src/core/index.ts",
+            {
+                content: JSON.stringify({
+                    message: "Core issue",
+                }),
+            },
+        )
+
+        const useCase = new ProcessFilesReviewStageUseCase({
+            llmProvider,
+        })
+        const state = createState(
+            [
+                {
+                    path: "src/core/index.ts",
+                    patch: "@@ -1,1 +1,1 @@\n+import a from \"x\"\n",
+                    fullFileContent: "export const value = 1",
+                    status: "modified",
+                },
+            ],
+            {
+                reviewDepthStrategy: "always-light",
+                directories: [
+                    {
+                        path: "src",
+                        config: {
+                            reviewDepthStrategy: "always-light",
+                            promptOverrides: {
+                                systemPrompt: "PARENT_SYSTEM",
+                            },
+                        },
+                    },
+                    {
+                        path: "src/core",
+                        config: {
+                            reviewDepthStrategy: "always-heavy",
+                            promptOverrides: {
+                                systemPrompt: "CHILD_SYSTEM",
+                            },
+                        },
+                    },
+                ],
+            },
+            null,
+        )
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isOk).toBe(true)
+        const stats = result.value.state.externalContext?.["fileReviewStats"] as
+            | Readonly<Record<string, unknown>>
+            | undefined
+        expect(stats?.["modeSummary"]).toMatchObject({
+            requested: {
+                light: 0,
+                heavy: 1,
+            },
+        })
+        expect(llmProvider.requests.at(0)?.messages.at(0)?.content).toContain("CHILD_SYSTEM")
+    })
+
     test("returns recoverable stage error when unexpected internal failure escapes analyzer", async () => {
         const llmProvider = new InMemoryLLMProvider()
         const useCase = new ProcessFilesReviewStageUseCase({
