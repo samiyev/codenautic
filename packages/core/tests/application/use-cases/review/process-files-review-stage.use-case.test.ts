@@ -118,6 +118,35 @@ function createState(
     })
 }
 
+/**
+ * Builds a map from reviewed file path to request message texts.
+ *
+ * @param requests Chat requests.
+ * @returns File-to-messages mapping.
+ */
+function indexRequestsByFile(requests: readonly IChatRequestDTO[]): Map<string, string[]> {
+    const requestByFile = new Map<string, string[]>()
+    for (const request of requests) {
+        const userMessage = request.messages[1]?.content ?? ""
+        const filePath = userMessage.includes("FILE: ") === false
+            ? ""
+            : userMessage.slice(userMessage.indexOf("FILE: ") + 6)
+
+        const lineBreakIndex = filePath.indexOf("\n")
+        const currentFile = lineBreakIndex < 0
+            ? filePath.trim()
+            : filePath.slice(0, lineBreakIndex).trim()
+
+        if (currentFile.length === 0) {
+            continue
+        }
+
+        requestByFile.set(currentFile, request.messages.map((message) => message.content))
+    }
+
+    return requestByFile
+}
+
 describe("ProcessFilesReviewStageUseCase", () => {
     test("processes files by batches and deduplicates collected suggestions", async () => {
         const llmProvider = new InMemoryLLMProvider()
@@ -572,6 +601,91 @@ describe("ProcessFilesReviewStageUseCase", () => {
             },
         })
         expect(llmProvider.requests.at(0)?.messages.at(0)?.content).toContain("CHILD_SYSTEM")
+    })
+
+    test("supports glob pattern override and keeps light mode for non-matching files", async () => {
+        const llmProvider = new InMemoryLLMProvider()
+        llmProvider.replies.set(
+            "src/core/index.ts",
+            {
+                content: JSON.stringify({
+                    message: "Root file issue",
+                }),
+            },
+        )
+        llmProvider.replies.set(
+            "src/core/utils/helper.ts",
+            {
+                content: JSON.stringify({
+                    message: "Nested file issue",
+                }),
+            },
+        )
+        llmProvider.replies.set(
+            "src/core/utils/inner/nested.ts",
+            {
+                content: JSON.stringify({
+                    message: "Nested inner issue",
+                }),
+            },
+        )
+
+        const useCase = new ProcessFilesReviewStageUseCase({
+            llmProvider,
+        })
+        const state = createState(
+            [
+                {
+                    path: "src/core/index.ts",
+                    patch: "@@ -1,1 +1,1 @@\n+import a from \"x\"\n",
+                    fullFileContent: "export const value = 1",
+                    status: "modified",
+                },
+                {
+                    path: "src/core/utils/helper.ts",
+                    patch: "@@ -1,1 +1,1 @@\n+export const b = 2\n",
+                    status: "modified",
+                },
+                {
+                    path: "src/core/utils/inner/nested.ts",
+                    patch: "@@ -1,1 +1,1 @@\n+export const c = 3\n",
+                    fullFileContent: "export const c = 3",
+                    status: "modified",
+                },
+            ],
+            {
+                reviewDepthStrategy: "always-light",
+                directories: [
+                    {
+                        path: "./src/core/*.ts",
+                        config: {
+                            reviewDepthStrategy: "always-heavy",
+                            promptOverrides: {
+                                systemPrompt: "GLOB_SYSTEM",
+                            },
+                        },
+                    },
+                ],
+            },
+            null,
+        )
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isOk).toBe(true)
+        expect(llmProvider.requests).toHaveLength(3)
+        const requestByFile = indexRequestsByFile(llmProvider.requests)
+
+        expect(requestByFile.has("src/core/index.ts")).toBe(true)
+        expect(requestByFile.has("src/core/utils/helper.ts")).toBe(true)
+        expect(requestByFile.has("src/core/utils/inner/nested.ts")).toBe(true)
+
+        expect(llmProvider.requests.at(0)?.messages.at(0)?.content).toContain("GLOB_SYSTEM")
+        expect(llmProvider.requests.at(0)?.messages.at(1)?.content).toContain("FULL_FILE:")
+        expect(llmProvider.requests.at(1)?.messages.at(1)?.content).not.toContain("FULL_FILE:")
+        expect(llmProvider.requests.at(2)?.messages.at(1)?.content).not.toContain("FULL_FILE:")
     })
 
     test("returns recoverable stage error when unexpected internal failure escapes analyzer", async () => {
