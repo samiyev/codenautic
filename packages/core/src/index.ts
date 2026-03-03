@@ -48,6 +48,12 @@ export {
 } from "./application/dto/heuristics/heuristic-registry-entry.dto"
 export {type IFileMetricsDTO} from "./application/dto/analytics"
 export {
+    TREEMAP_NODE_TYPE,
+    type ITreemapNodeDTO,
+    type ITreemapNodeMetrics,
+    type TreemapNodeType,
+} from "./application/dto/analytics"
+export {
     type IAnemicModelViolationType,
     type IDDDComplianceReport,
     type IDDDViolation,
