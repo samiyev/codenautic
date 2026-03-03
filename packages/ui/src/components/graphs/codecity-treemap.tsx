@@ -1,10 +1,151 @@
-import { type ReactElement, useMemo } from "react"
+import { type ChangeEvent, type ReactElement, useMemo, useState } from "react"
 
 import { Card, CardBody, CardHeader } from "@/components/ui"
 import { ResponsiveContainer, Treemap } from "recharts"
 
 const DEFAULT_HEIGHT = "420px"
+const DEFAULT_METRIC: ICodeCityTreemapMetric = "complexity"
 const DEFAULT_EMPTY_LABEL = "No file data for CodeCity treemap yet."
+const DEFAULT_METRIC_SELECTOR_ID = "codecity-metric-selector"
+
+const CODE_CITY_METRICS = ["complexity", "coverage", "churn"] as const
+
+/** Метрика для цветовой индикации.
+ * @see WEB-CITY-002
+ */
+type ICodeCityTreemapMetric = (typeof CODE_CITY_METRICS)[number]
+
+const CODE_CITY_METRIC_LABELS: Record<ICodeCityTreemapMetric, string> = {
+    complexity: "Complexity",
+    coverage: "Coverage",
+    churn: "Churn",
+}
+
+interface ICodeCityTreemapMetricRange {
+    readonly min: number
+    readonly max: number
+}
+
+interface ICodeCityTreemapTreemapNodePayload {
+    readonly children?: ReadonlyArray<unknown>
+    readonly color?: string
+    readonly depth?: number
+    readonly height?: number
+    readonly name?: string
+    readonly value?: number
+    readonly width?: number
+    readonly x?: number
+    readonly y?: number
+}
+
+interface ICodeCityTreemapTreemapContentProps {
+    readonly fill?: string
+    readonly payload?: ICodeCityTreemapTreemapNodePayload
+    readonly x?: number
+    readonly y?: number
+    readonly width?: number
+    readonly height?: number
+}
+
+function resolveMetricByValue(value: string): ICodeCityTreemapMetric {
+    if (value === "coverage" || value === "churn") {
+        return value
+    }
+
+    return "complexity"
+}
+
+function resolveMetricRange(values: ReadonlyArray<number>): ICodeCityTreemapMetricRange {
+    if (values.length === 0) {
+        return { max: 0, min: 0 }
+    }
+
+    let min = values[0] ?? 0
+    let max = values[0] ?? 0
+
+    for (const current of values) {
+        if (current < min) {
+            min = current
+        }
+        if (current > max) {
+            max = current
+        }
+    }
+
+    return { max, min }
+}
+
+function resolveMetricLabel(metric: ICodeCityTreemapMetric): string {
+    return CODE_CITY_METRIC_LABELS[metric]
+}
+
+function resolveMetricColor(range: ICodeCityTreemapMetricRange, value: number): string {
+    if (range.max <= range.min) {
+        return "hsl(120, 80%, 44%)"
+    }
+
+    const ratio = Math.max(
+        0,
+        Math.min(1, (value - range.min) / (range.max - range.min)),
+    )
+    const hue = Math.round(120 - ratio * 120)
+
+    return `hsl(${hue}, 78%, 44%)`
+}
+
+function resolveTreemapFileMetricValue(
+    file: ICodeCityTreemapFileDescriptor,
+    metric: ICodeCityTreemapMetric,
+): number {
+    const value = (() => {
+        if (metric === "coverage") {
+            return file.coverage
+        }
+
+        if (metric === "churn") {
+            return file.churn
+        }
+
+        return file.complexity
+    })()
+
+    if (typeof value !== "number" || Number.isNaN(value) || value < 0) {
+        return 0
+    }
+
+    return value
+}
+
+function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactElement {
+    const x = props.x ?? 0
+    const y = props.y ?? 0
+    const width = props.width ?? 0
+    const height = props.height ?? 0
+    const node = props.payload
+    const color = node?.color ?? (props.fill ?? "hsl(120, 80%, 44%)")
+    const nodeName = typeof node?.name === "string" ? node.name : ""
+    const canShowText = width > 42 && height > 16
+    const isLeaf = (node?.children?.length ?? 0) === 0
+
+    if (width <= 0 || height <= 0) {
+        return <g />
+    }
+
+    return (
+        <g>
+            <rect
+                fill={color}
+                height={height}
+                stroke="hsl(var(--nextui-colors-defaultBorder))"
+                strokeWidth={1}
+                width={width}
+                x={x}
+                y={y}
+            />
+            {isLeaf && canShowText ? <text x={x + 4} y={y + 14} fill="#fff">{nodeName}</text> : null}
+        </g>
+    )
+}
 
 /** Файл для источника CodeCity 2D treemap. */
 export interface ICodeCityTreemapFileDescriptor {
@@ -16,6 +157,10 @@ export interface ICodeCityTreemapFileDescriptor {
     readonly loc?: number
     /** Комплексная метрика сложности (fallback при отсутствии LOC). */
     readonly complexity?: number
+    /** Покрытие по файла в проценте (0..100). */
+    readonly coverage?: number
+    /** Churn/изменчивость файла в окне анализа. */
+    readonly churn?: number
     /** Общее количество строк (fallback при отсутствии LOC/complexity). */
     readonly size?: number
 }
@@ -29,6 +174,10 @@ interface ICodeCityTreemapFileNode {
     readonly path: string
     /** Значение веса для treemap. */
     readonly value: number
+    /** Значение выбранной метрики для цветовой шкалы. */
+    readonly metricValue: number
+    /** Цвет по метрике для узла. */
+    readonly color: string
 }
 
 interface ICodeCityTreemapPackageNode {
@@ -38,6 +187,10 @@ interface ICodeCityTreemapPackageNode {
     readonly value: number
     /** Файлы в пакете. */
     readonly children: ReadonlyArray<ICodeCityTreemapFileNode>
+    /** Значение выбранной метрики для пакета. */
+    readonly metricValue: number
+    /** Цвет пакета. */
+    readonly color: string
 }
 
 /** Агрегированные данные для визуализации treemap. */
@@ -48,12 +201,18 @@ export interface ICodeCityTreemapData {
     readonly totalLoc: number
     /** Общее число файлов в виджете. */
     readonly totalFiles: number
+    /** Выбранная метрика цвета. */
+    readonly metric: ICodeCityTreemapMetric
+    /** Диапазон значений выбранной метрики. */
+    readonly metricRange: ICodeCityTreemapMetricRange
 }
 
 /** Пропсы компонента treemap. */
 export interface ICodeCityTreemapProps {
     /** Файлы для постройки 2D treemap. */
     readonly files: ReadonlyArray<ICodeCityTreemapFileDescriptor>
+    /** Выбранная метрика по умолчанию для цветовой кодировки. */
+    readonly defaultMetric?: ICodeCityTreemapMetric
     /** Высота контейнера. */
     readonly height?: string
     /** Заголовок. */
@@ -103,11 +262,13 @@ function resolveFileLoc(file: ICodeCityTreemapFileDescriptor): number {
  */
 export function buildCodeCityTreemapData(
     files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+    metric: ICodeCityTreemapMetric = DEFAULT_METRIC,
 ): ICodeCityTreemapData {
     const packageMap = new Map<string, ICodeCityTreemapFileNode[]>()
     const fileIds = new Set<string>()
     let totalFiles = 0
     let totalLoc = 0
+    const metricValues: number[] = []
 
     for (const file of files) {
         const normalizedPath = normalizePath(file.path)
@@ -122,13 +283,17 @@ export function buildCodeCityTreemapData(
         const packageName = resolvePackageName(normalizedPath)
         const fileName = resolveFileName(normalizedPath)
         const fileLoc = resolveFileLoc(file)
+        const metricValue = resolveTreemapFileMetricValue(file, metric)
         const packageFiles = packageMap.get(packageName)
         const fileNode: ICodeCityTreemapFileNode = {
             id: file.id,
             name: fileName,
             path: normalizedPath,
+            color: "",
+            metricValue,
             value: fileLoc,
         }
+        metricValues.push(metricValue)
 
         if (packageFiles === undefined) {
             packageMap.set(packageName, [fileNode])
@@ -138,20 +303,38 @@ export function buildCodeCityTreemapData(
         packageFiles.push(fileNode)
     }
 
+    const metricRange = resolveMetricRange(metricValues)
+
     const packages: ICodeCityTreemapPackageNode[] = Array.from(packageMap.entries())
         .map(([name, children]): ICodeCityTreemapPackageNode => {
-            const sortedChildren = [...children].sort((left, right): number => {
+            const coloredChildren = [...children].map((fileNode): ICodeCityTreemapFileNode => {
+                return {
+                    ...fileNode,
+                    color: resolveMetricColor(metricRange, fileNode.metricValue),
+                }
+            })
+            const sortedChildren = [...coloredChildren].sort((left, right): number => {
                 return right.value - left.value
             })
             const packageValue = sortedChildren.reduce(
                 (total, fileNode): number => total + fileNode.value,
                 0,
             )
+            const packageMetricValue = sortedChildren.length === 0
+                ? 0
+                : sortedChildren.reduce(
+                    (total, fileNode): number => total + fileNode.metricValue,
+                    0,
+                ) / sortedChildren.length
+
+            const packageColor = resolveMetricColor(metricRange, packageMetricValue)
 
             return {
                 children: sortedChildren,
                 name,
+                color: packageColor,
                 value: packageValue,
+                metricValue: packageMetricValue,
             }
         })
         .filter((entry): boolean => entry.children.length > 0)
@@ -166,6 +349,8 @@ export function buildCodeCityTreemapData(
         packages,
         totalFiles,
         totalLoc,
+        metric,
+        metricRange,
     }
 }
 
@@ -178,12 +363,21 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     const title = props.title ?? "CodeCity treemap"
     const emptyStateLabel = props.emptyStateLabel ?? DEFAULT_EMPTY_LABEL
     const height = props.height ?? DEFAULT_HEIGHT
-    const treemapData = useMemo(
-        () => buildCodeCityTreemapData(props.files),
-        [props.files],
+    const [metric, setMetric] = useState<ICodeCityTreemapMetric>(
+        props.defaultMetric ?? DEFAULT_METRIC,
     )
+    const treemapData = useMemo(
+        () => buildCodeCityTreemapData(props.files, metric),
+        [props.files, metric],
+    )
+    const metricLabel = resolveMetricLabel(metric)
+    const selectorId = `${DEFAULT_METRIC_SELECTOR_ID}-${title.toLowerCase().replaceAll(" ", "-")}`
 
     const summaryText = `Packages: ${treemapData.packages.length}, Files: ${treemapData.totalFiles}, LOC: ${treemapData.totalLoc}`
+    const metricRangeText = `Min ${treemapData.metricRange.min} — Max ${treemapData.metricRange.max}`
+    const handleMetricChange = (event: ChangeEvent<HTMLSelectElement>): void => {
+        setMetric(resolveMetricByValue(event.target.value))
+    }
 
     if (treemapData.packages.length === 0) {
         return (
@@ -201,9 +395,42 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     return (
         <Card aria-label={title}>
             <CardHeader>
-                <div>
+                <div className="flex flex-col gap-2">
                     <h3 className="text-lg font-semibold">{title}</h3>
                     <p className="text-sm text-foreground-500">{summaryText}</p>
+                    <p className="text-sm text-foreground-500">Color metric: {metricLabel}</p>
+                    <div className="flex flex-wrap items-end gap-2">
+                        <label className="text-sm" htmlFor={selectorId}>
+                            Metric
+                        </label>
+                        <select
+                            className="rounded-md border border-default-200 bg-transparent px-2 py-1 text-sm"
+                            id={selectorId}
+                            onChange={handleMetricChange}
+                            value={metric}
+                        >
+                            {CODE_CITY_METRICS.map((metricName): ReactElement => (
+                                <option key={metricName} value={metricName}>
+                                    {resolveMetricLabel(metricName)}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div
+                        className="flex items-center gap-2 text-xs text-foreground-500"
+                        aria-label="Metric legend"
+                    >
+                        <span>Low</span>
+                        <div
+                            className="h-2 flex-1 rounded-full"
+                            style={{
+                                background:
+                                    "linear-gradient(90deg, hsl(120, 80%, 44%), hsl(0, 78%, 44%))",
+                            }}
+                        />
+                        <span>High</span>
+                        <span>{metricRangeText}</span>
+                    </div>
                 </div>
             </CardHeader>
             <CardBody>
@@ -214,7 +441,8 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                             dataKey="value"
                             nameKey="name"
                             stroke="hsl(var(--nextui-colors-defaultBorder))"
-                            fill="hsl(var(--nextui-colors-primary))"
+                            fill="hsl(var(--nextui-colors-success-500))"
+                            content={renderTreemapCell}
                         />
                     </ResponsiveContainer>
                 </div>
@@ -222,4 +450,3 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         </Card>
     )
 }
-
