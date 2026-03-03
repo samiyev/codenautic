@@ -1,12 +1,6 @@
-import {clsx, type ClassValue} from "clsx"
-import {twMerge} from "tailwind-merge"
-
-/**
- * Объединяет CSS-классы с дедупликацией Tailwind-утилит.
- *
- * @param values - классы для объединения
- * @returns итоговая строка классов
- */
-export function cn(...values: ClassValue[]): string {
-    return twMerge(clsx(values))
+export function cn(...values: Array<string | number | undefined | null | false>): string {
+    return values
+        .filter((value): value is string | number => value !== undefined && value !== null && value !== false)
+        .map((value) => value.toString())
+        .join(" ")
 }
