@@ -59,6 +59,7 @@ export {type IScanProgressRepository} from "./application/ports/outbound/scannin
 export {type IPromptConfigurationRepository} from "./application/ports/outbound/prompt-configuration-repository.port"
 export {type IPromptTemplateRepository} from "./application/ports/outbound/prompt-template-repository.port"
 export {type ITeamRepository} from "./application/ports/outbound/team-repository.port"
+export {type ITaskRepository} from "./application/ports/outbound/task-repository.port"
 export {type IUserRepository} from "./application/ports/outbound/user-repository.port"
 export {
     type IAuditLogPaginationOptions,

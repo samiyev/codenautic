@@ -1,21 +1,71 @@
 import {describe, expect, test} from "bun:test"
 
-import {type ILogger} from "../../src/application/ports/outbound/common/logger.port"
-import {type IDomainEventBus} from "../../src/application/ports/outbound/common/domain-event-bus.port"
-import {type IPipelineCheckpointStore} from "../../src/application/ports/outbound/review/pipeline-checkpoint-store.port"
-import {type IFileMetricsProvider} from "../../src/application/ports/outbound/analysis/file-metrics-provider"
-import {type IIssueAggregationProvider} from "../../src/application/ports/outbound/review/issue-aggregation-provider"
-import {type IReviewRepository} from "../../src/application/ports/outbound/review/review-repository.port"
-import {type IRuleRepository} from "../../src/application/ports/outbound/rule/rule-repository.port"
-import type {ITeamRuleProvider} from "../../src/application/ports/outbound/rule/team-rule-provider.port"
+import type {IFileMetricsProvider} from "../../src/application/ports/outbound/analysis/file-metrics-provider"
+import type {IAnalyticsService} from "../../src/application/ports/outbound/analytics/analytics-service.port"
+import type {IAuditLogRepository} from "../../src/application/ports/outbound/audit-log-repository.port"
+import type {ICache} from "../../src/application/ports/outbound/cache/cache.port"
+import type {IDomainEventBus} from "../../src/application/ports/outbound/common/domain-event-bus.port"
+import type {ILogger} from "../../src/application/ports/outbound/common/logger.port"
+import type {ICustomRuleRepository} from "../../src/application/ports/outbound/custom-rule-repository.port"
+import type {IFeedbackRepository} from "../../src/application/ports/outbound/feedback-repository.port"
+import type {IGitProvider} from "../../src/application/ports/outbound/git/git-provider.port"
+import type {IGraphRepository} from "../../src/application/ports/outbound/graph/code-graph-repository.port"
+import type {ILLMProvider} from "../../src/application/ports/outbound/llm/llm-provider.port"
 import type {IConversationThreadRepository} from "../../src/application/ports/outbound/messaging/conversation-thread-repository.port"
-import type {IRepositoryScanner} from "../../src/application/ports/outbound/scanning/repository-scanner"
+import type {IInboxRepository} from "../../src/application/ports/outbound/messaging/inbox-repository.port"
+import type {IMessageBroker} from "../../src/application/ports/outbound/messaging/message-broker.port"
+import type {IOutboxRepository} from "../../src/application/ports/outbound/messaging/outbox-repository.port"
+import type {INotificationProvider} from "../../src/application/ports/outbound/notification/notification-provider.port"
+import type {INotificationService} from "../../src/application/ports/outbound/notification/notification-service.port"
+import type {IOrganizationRepository} from "../../src/application/ports/outbound/organization-repository.port"
+import type {IProjectRepository} from "../../src/application/ports/outbound/project-repository.port"
+import type {IPromptConfigurationRepository} from "../../src/application/ports/outbound/prompt-configuration-repository.port"
+import type {IPromptTemplateRepository} from "../../src/application/ports/outbound/prompt-template-repository.port"
+import type {IExternalContextProvider} from "../../src/application/ports/outbound/review/external-context-provider.port"
+import type {IIssueAggregationProvider} from "../../src/application/ports/outbound/review/issue-aggregation-provider"
+import type {IPipelineCheckpointStore} from "../../src/application/ports/outbound/review/pipeline-checkpoint-store.port"
+import type {IRepositoryConfigLoader} from "../../src/application/ports/outbound/review/repository-config-loader.port"
+import type {IReviewRepository} from "../../src/application/ports/outbound/review/review-repository.port"
+import type {ICustomRuleAstEvaluator} from "../../src/application/ports/outbound/rule/custom-rule-ast-evaluator.port"
+import type {ILibraryRuleRepository} from "../../src/application/ports/outbound/rule/library-rule-repository.port"
+import type {IRuleCategoryRepository} from "../../src/application/ports/outbound/rule/rule-category-repository.port"
+import type {IRuleRepository} from "../../src/application/ports/outbound/rule/rule-repository.port"
+import type {ITeamRuleProvider} from "../../src/application/ports/outbound/rule/team-rule-provider.port"
 import type {IRepositoryIndexRepository} from "../../src/application/ports/outbound/scanning/repository-index-repository"
+import type {IRepositoryScanner} from "../../src/application/ports/outbound/scanning/repository-scanner"
 import type {IScanProgressRepository} from "../../src/application/ports/outbound/scanning/scan-progress-repository"
+import type {ITaskRepository} from "../../src/application/ports/outbound/task-repository.port"
+import type {ITeamRepository} from "../../src/application/ports/outbound/team-repository.port"
+import type {IUserRepository} from "../../src/application/ports/outbound/user-repository.port"
+import type {IVectorRepository} from "../../src/application/ports/outbound/vector/vector-repository.port"
 import {createToken, TOKENS, type InjectionToken} from "../../src/index"
 
 interface IExamplePort {
     ping(): string
+}
+
+interface ITokenTree {
+    readonly [key: string]: InjectionToken<unknown> | ITokenTree
+}
+
+function collectTokenSymbols(tree: ITokenTree): readonly symbol[] {
+    const symbols: symbol[] = []
+
+    for (const key of Object.keys(tree)) {
+        const value = tree[key]
+        if (value === undefined) {
+            continue
+        }
+
+        if (typeof value === "symbol") {
+            symbols.push(value)
+            continue
+        }
+
+        symbols.push(...collectTokenSymbols(value))
+    }
+
+    return symbols
 }
 
 describe("createToken", () => {
@@ -45,119 +95,122 @@ describe("createToken", () => {
 
 describe("TOKENS", () => {
     test("exposes typed symbols for outbound core ports", () => {
-        const reviewToken: InjectionToken<IReviewRepository> = TOKENS.Review.Repository
-        const checkpointToken: InjectionToken<IPipelineCheckpointStore> =
-            TOKENS.Review.PipelineCheckpointStore
-        const issueAggregationProviderToken: InjectionToken<IIssueAggregationProvider> =
-            TOKENS.Review.IssueAggregationProvider
+        const analyticsServiceToken: InjectionToken<IAnalyticsService> = TOKENS.Analytics.Service
         const fileMetricsProviderToken: InjectionToken<IFileMetricsProvider> =
             TOKENS.Analysis.FileMetricsProvider
-        const ruleToken: InjectionToken<IRuleRepository> = TOKENS.Rule.Repository
-        const teamRuleProviderToken: InjectionToken<ITeamRuleProvider> =
-            TOKENS.Rules.TeamRuleProvider
+        const graphRepositoryToken: InjectionToken<IGraphRepository> =
+            TOKENS.Analysis.GraphRepository
+        const auditLogRepositoryToken: InjectionToken<IAuditLogRepository> =
+            TOKENS.Audit.LogRepository
+        const cacheToken: InjectionToken<ICache> = TOKENS.Common.Cache
+        const domainEventBusToken: InjectionToken<IDomainEventBus> =
+            TOKENS.Common.DomainEventBus
+        const loggerToken: InjectionToken<ILogger> = TOKENS.Common.Logger
+        const feedbackRepositoryToken: InjectionToken<IFeedbackRepository> =
+            TOKENS.Feedback.Repository
+        const gitProviderToken: InjectionToken<IGitProvider> = TOKENS.Git.Provider
+        const llmProviderToken: InjectionToken<ILLMProvider> = TOKENS.LLM.Provider
+        const messageBrokerToken: InjectionToken<IMessageBroker> = TOKENS.Messaging.MessageBroker
         const conversationThreadRepositoryToken: InjectionToken<IConversationThreadRepository> =
             TOKENS.Messaging.ConversationThreadRepository
-        const repositoryScannerToken: InjectionToken<IRepositoryScanner> =
-            TOKENS.Scanning.RepositoryScanner
+        const inboxRepositoryToken: InjectionToken<IInboxRepository> =
+            TOKENS.Messaging.InboxRepository
+        const outboxRepositoryToken: InjectionToken<IOutboxRepository> =
+            TOKENS.Messaging.OutboxRepository
+        const notificationProviderToken: InjectionToken<INotificationProvider> =
+            TOKENS.Notification.Provider
+        const notificationServiceToken: InjectionToken<INotificationService> =
+            TOKENS.Notification.Service
+        const organizationRepositoryToken: InjectionToken<IOrganizationRepository> =
+            TOKENS.Organization.Repository
+        const projectRepositoryToken: InjectionToken<IProjectRepository> =
+            TOKENS.Project.Repository
+        const promptConfigurationRepositoryToken: InjectionToken<IPromptConfigurationRepository> =
+            TOKENS.Prompt.ConfigurationRepository
+        const promptTemplateRepositoryToken: InjectionToken<IPromptTemplateRepository> =
+            TOKENS.Prompt.TemplateRepository
+        const externalContextProviderToken: InjectionToken<IExternalContextProvider> =
+            TOKENS.Review.ExternalContextProvider
+        const issueAggregationProviderToken: InjectionToken<IIssueAggregationProvider> =
+            TOKENS.Review.IssueAggregationProvider
+        const pipelineCheckpointStoreToken: InjectionToken<IPipelineCheckpointStore> =
+            TOKENS.Review.PipelineCheckpointStore
+        const reviewRepositoryToken: InjectionToken<IReviewRepository> = TOKENS.Review.Repository
+        const repositoryConfigLoaderToken: InjectionToken<IRepositoryConfigLoader> =
+            TOKENS.Review.RepositoryConfigLoader
+        const ruleCategoryRepositoryToken: InjectionToken<IRuleCategoryRepository> =
+            TOKENS.Rule.CategoryRepository
+        const customRuleAstEvaluatorToken: InjectionToken<ICustomRuleAstEvaluator> =
+            TOKENS.Rule.CustomAstEvaluator
+        const customRuleRepositoryToken: InjectionToken<ICustomRuleRepository> =
+            TOKENS.Rule.CustomRepository
+        const libraryRuleRepositoryToken: InjectionToken<ILibraryRuleRepository> =
+            TOKENS.Rule.LibraryRepository
+        const ruleRepositoryToken: InjectionToken<IRuleRepository> = TOKENS.Rule.Repository
+        const teamRuleProviderToken: InjectionToken<ITeamRuleProvider> =
+            TOKENS.Rules.TeamRuleProvider
         const repositoryIndexRepositoryToken: InjectionToken<IRepositoryIndexRepository> =
             TOKENS.Scanning.RepositoryIndexRepository
+        const repositoryScannerToken: InjectionToken<IRepositoryScanner> =
+            TOKENS.Scanning.RepositoryScanner
         const scanProgressRepositoryToken: InjectionToken<IScanProgressRepository> =
             TOKENS.Scanning.ScanProgressRepository
-        const eventBusToken: InjectionToken<IDomainEventBus> = TOKENS.Common.DomainEventBus
-        const loggerToken: InjectionToken<ILogger> = TOKENS.Common.Logger
-        const reviewSymbol: symbol = reviewToken
-        const checkpointSymbol: symbol = checkpointToken
-        const issueAggregationSymbol: symbol = issueAggregationProviderToken
-        const fileMetricsSymbol: symbol = fileMetricsProviderToken
-        const ruleSymbol: symbol = ruleToken
-        const teamRuleProviderSymbol: symbol = teamRuleProviderToken
-        const conversationThreadRepositorySymbol: symbol =
-            conversationThreadRepositoryToken
-        const repositoryScannerSymbol: symbol = repositoryScannerToken
-        const repositoryIndexRepositorySymbol: symbol = repositoryIndexRepositoryToken
-        const scanProgressRepositorySymbol: symbol = scanProgressRepositoryToken
-        const eventBusSymbol: symbol = eventBusToken
-        const loggerSymbol: symbol = loggerToken
+        const taskRepositoryToken: InjectionToken<ITaskRepository> = TOKENS.Task.Repository
+        const teamRepositoryToken: InjectionToken<ITeamRepository> = TOKENS.Team.Repository
+        const userRepositoryToken: InjectionToken<IUserRepository> = TOKENS.User.Repository
+        const vectorRepositoryToken: InjectionToken<IVectorRepository> = TOKENS.Vector.Repository
 
-        expect(typeof reviewToken).toBe("symbol")
-        expect(typeof checkpointToken).toBe("symbol")
-        expect(typeof issueAggregationProviderToken).toBe("symbol")
-        expect(typeof fileMetricsProviderToken).toBe("symbol")
-        expect(typeof ruleToken).toBe("symbol")
-        expect(typeof teamRuleProviderToken).toBe("symbol")
-        expect(typeof conversationThreadRepositoryToken).toBe("symbol")
-        expect(typeof repositoryScannerToken).toBe("symbol")
-        expect(typeof repositoryIndexRepositoryToken).toBe("symbol")
-        expect(typeof scanProgressRepositoryToken).toBe("symbol")
-        expect(typeof eventBusToken).toBe("symbol")
-        expect(typeof loggerToken).toBe("symbol")
-        expect(reviewSymbol === ruleSymbol).toBe(false)
-        expect(reviewSymbol === checkpointSymbol).toBe(false)
-        expect(checkpointSymbol === ruleSymbol).toBe(false)
-        expect(checkpointSymbol === issueAggregationSymbol).toBe(false)
-        expect(checkpointSymbol === fileMetricsSymbol).toBe(false)
-        expect(checkpointSymbol === eventBusSymbol).toBe(false)
-        expect(checkpointSymbol === loggerSymbol).toBe(false)
-        expect(reviewSymbol === eventBusSymbol).toBe(false)
-        expect(reviewSymbol === loggerSymbol).toBe(false)
-        expect(checkpointSymbol === fileMetricsSymbol).toBe(false)
-        expect(issueAggregationSymbol === eventBusSymbol).toBe(false)
-        expect(issueAggregationSymbol === fileMetricsSymbol).toBe(false)
-        expect(ruleSymbol === eventBusSymbol).toBe(false)
-        expect(ruleSymbol === loggerSymbol).toBe(false)
-        expect(teamRuleProviderSymbol === reviewSymbol).toBe(false)
-        expect(teamRuleProviderSymbol === checkpointSymbol).toBe(false)
-        expect(teamRuleProviderSymbol === ruleSymbol).toBe(false)
-        expect(teamRuleProviderSymbol === eventBusSymbol).toBe(false)
-        expect(teamRuleProviderSymbol === loggerSymbol).toBe(false)
-        expect(teamRuleProviderSymbol === issueAggregationSymbol).toBe(false)
-        expect(teamRuleProviderSymbol === fileMetricsSymbol).toBe(false)
-        expect(teamRuleProviderSymbol === repositoryScannerSymbol).toBe(false)
-        expect(conversationThreadRepositorySymbol === reviewSymbol).toBe(false)
-        expect(conversationThreadRepositorySymbol === checkpointSymbol).toBe(false)
-        expect(conversationThreadRepositorySymbol === ruleSymbol).toBe(false)
-        expect(conversationThreadRepositorySymbol === teamRuleProviderSymbol).toBe(false)
-        expect(conversationThreadRepositorySymbol === eventBusSymbol).toBe(false)
-        expect(conversationThreadRepositorySymbol === loggerSymbol).toBe(false)
-        expect(conversationThreadRepositorySymbol === issueAggregationSymbol).toBe(false)
-        expect(conversationThreadRepositorySymbol === fileMetricsSymbol).toBe(false)
-        expect(conversationThreadRepositorySymbol === repositoryScannerSymbol).toBe(false)
-        expect(conversationThreadRepositorySymbol === repositoryIndexRepositorySymbol).toBe(false)
-        expect(conversationThreadRepositorySymbol === scanProgressRepositorySymbol).toBe(false)
-        expect(issueAggregationSymbol === fileMetricsSymbol).toBe(false)
-        expect(eventBusSymbol === loggerSymbol).toBe(false)
-        expect(repositoryScannerSymbol === reviewSymbol).toBe(false)
-        expect(repositoryScannerSymbol === checkpointSymbol).toBe(false)
-        expect(repositoryScannerSymbol === issueAggregationSymbol).toBe(false)
-        expect(repositoryScannerSymbol === fileMetricsSymbol).toBe(false)
-        expect(repositoryScannerSymbol === ruleSymbol).toBe(false)
-        expect(repositoryScannerSymbol === teamRuleProviderSymbol).toBe(false)
-        expect(repositoryScannerSymbol === eventBusSymbol).toBe(false)
-        expect(repositoryScannerSymbol === loggerSymbol).toBe(false)
-        expect(repositoryScannerSymbol === conversationThreadRepositorySymbol).toBe(false)
-        expect(repositoryScannerSymbol === repositoryIndexRepositorySymbol).toBe(false)
-        expect(repositoryScannerSymbol === scanProgressRepositorySymbol).toBe(false)
-        expect(repositoryIndexRepositorySymbol === reviewSymbol).toBe(false)
-        expect(repositoryIndexRepositorySymbol === checkpointSymbol).toBe(false)
-        expect(repositoryIndexRepositorySymbol === issueAggregationSymbol).toBe(false)
-        expect(repositoryIndexRepositorySymbol === fileMetricsSymbol).toBe(false)
-        expect(repositoryIndexRepositorySymbol === ruleSymbol).toBe(false)
-        expect(repositoryIndexRepositorySymbol === teamRuleProviderSymbol).toBe(false)
-        expect(repositoryIndexRepositorySymbol === eventBusSymbol).toBe(false)
-        expect(repositoryIndexRepositorySymbol === loggerSymbol).toBe(false)
-        expect(repositoryIndexRepositorySymbol === conversationThreadRepositorySymbol).toBe(false)
-        expect(repositoryIndexRepositorySymbol === repositoryScannerSymbol).toBe(false)
-        expect(repositoryIndexRepositorySymbol === scanProgressRepositorySymbol).toBe(false)
-        expect(scanProgressRepositorySymbol === reviewSymbol).toBe(false)
-        expect(scanProgressRepositorySymbol === checkpointSymbol).toBe(false)
-        expect(scanProgressRepositorySymbol === issueAggregationSymbol).toBe(false)
-        expect(scanProgressRepositorySymbol === fileMetricsSymbol).toBe(false)
-        expect(scanProgressRepositorySymbol === ruleSymbol).toBe(false)
-        expect(scanProgressRepositorySymbol === teamRuleProviderSymbol).toBe(false)
-        expect(scanProgressRepositorySymbol === eventBusSymbol).toBe(false)
-        expect(scanProgressRepositorySymbol === loggerSymbol).toBe(false)
-        expect(scanProgressRepositorySymbol === conversationThreadRepositorySymbol).toBe(false)
-        expect(scanProgressRepositorySymbol === repositoryScannerSymbol).toBe(false)
-        expect(scanProgressRepositorySymbol === repositoryIndexRepositorySymbol).toBe(false)
+        const tokens: readonly InjectionToken<unknown>[] = [
+            analyticsServiceToken,
+            fileMetricsProviderToken,
+            graphRepositoryToken,
+            auditLogRepositoryToken,
+            cacheToken,
+            domainEventBusToken,
+            loggerToken,
+            feedbackRepositoryToken,
+            gitProviderToken,
+            llmProviderToken,
+            messageBrokerToken,
+            conversationThreadRepositoryToken,
+            inboxRepositoryToken,
+            outboxRepositoryToken,
+            notificationProviderToken,
+            notificationServiceToken,
+            organizationRepositoryToken,
+            projectRepositoryToken,
+            promptConfigurationRepositoryToken,
+            promptTemplateRepositoryToken,
+            externalContextProviderToken,
+            issueAggregationProviderToken,
+            pipelineCheckpointStoreToken,
+            reviewRepositoryToken,
+            repositoryConfigLoaderToken,
+            ruleCategoryRepositoryToken,
+            customRuleAstEvaluatorToken,
+            customRuleRepositoryToken,
+            libraryRuleRepositoryToken,
+            ruleRepositoryToken,
+            teamRuleProviderToken,
+            repositoryIndexRepositoryToken,
+            repositoryScannerToken,
+            scanProgressRepositoryToken,
+            taskRepositoryToken,
+            teamRepositoryToken,
+            userRepositoryToken,
+            vectorRepositoryToken,
+        ]
+
+        for (const token of tokens) {
+            expect(typeof token).toBe("symbol")
+        }
+    })
+
+    test("contains only unique symbols", () => {
+        const symbols = collectTokenSymbols(TOKENS)
+        const unique = new Set(symbols)
+
+        expect(symbols.length).toBeGreaterThan(0)
+        expect(unique.size).toBe(symbols.length)
     })
 })

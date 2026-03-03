@@ -92,7 +92,7 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| CORE-169 | Реализовать централизованные IoC-токены | TODO | Не начато | Реализация: Файл `infrastructure/ioc/tokens.ts`. Один `createToken<T>()` на каждый outbound port (IGitProvider, ILLMProvider, IReviewRepository, ICache, ILogger, IEventBus и т.д.). Экспорт объекта `TOKENS` с namespace группировкой (TOKENS.Git, TOKENS.LLM, TOKENS.Review.). Все пакеты-потребители используют эти токены вместо создания своих. Готово, если: для CORE-169 полностью выполнены пункты блока «Реализация», поведение подтверждено unit/integration тестами (happy-path, negative, edge-case), контракты DTO/ports совместимы, регрессии в смежных use case отсутствуют; DoD: `cd packages/core && bun run lint && bun run typecheck && bun test`. |
+| CORE-169 | Реализовать централизованные IoC-токены | DONE | Реализовано | Реализация: Файл `src/ioc/tokens.ts`. Один `createToken<T>()` на каждый outbound port (IGitProvider, ILLMProvider, IReviewRepository, ICache, ILogger, IEventBus и т.д.). Экспорт объекта `TOKENS` с namespace группировкой (TOKENS.Git, TOKENS.LLM, TOKENS.Review.). Все пакеты-потребители используют эти токены вместо создания своих. Готово, если: для CORE-169 полностью выполнены пункты блока «Реализация», поведение подтверждено unit/integration тестами (happy-path, negative, edge-case), контракты DTO/ports совместимы, регрессии в смежных use case отсутствуют; DoD: `cd packages/core && bun run lint && bun run typecheck && bun test`. |
 
 ---
 
