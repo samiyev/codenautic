@@ -12,6 +12,14 @@ export {
     type IReviewResultMetricsDTO,
 } from "./review-result.dto"
 export {
+    EXTERNAL_CONTEXT_SOURCE,
+    type ExternalContextSource,
+    type IExternalContext,
+    type IJiraTicket,
+    type ILinearIssue,
+    type ISentryError,
+} from "./external-context.dto"
+export {
     type ISuggestionClusterDTO,
     type SuggestionClusterType,
 } from "./suggestion-cluster.dto"

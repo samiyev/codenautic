@@ -72,6 +72,12 @@ export {
     type IFeedbackRepository,
 } from "./application/ports/outbound/feedback-repository.port"
 export {
+    type IExternalContextProvider,
+    type IJiraProvider,
+    type ILinearProvider,
+    type ISentryProvider,
+} from "./application/ports/outbound/review/external-context-provider.port"
+export {
     type IVectorChunkDTO,
     type IVectorRepository,
     type IVectorSearchResultDTO,
@@ -223,6 +229,11 @@ export {
     type IReviewIssueDTO,
     type IReviewPromptOverridesDTO,
     type ValidatedConfig,
+    type ExternalContextSource,
+    type IExternalContext,
+    type ILinearIssue,
+    type IJiraTicket,
+    type ISentryError,
     type IReviewResultDTO,
     type IReviewResultMetricsDTO,
     type ISuggestionClusterDTO,
@@ -289,6 +300,10 @@ export {
     type IPipelineRunCommand,
 } from "./application/use-cases/review/pipeline-orchestrator.use-case"
 export {
+    AugmentContextUseCase,
+    type IAugmentContextDependencies,
+} from "./application/use-cases/review/augment-context.use-case"
+export {
     CreateCheckStageUseCase,
     type ICreateCheckStageDependencies,
 } from "./application/use-cases/review/create-check-stage.use-case"
@@ -323,6 +338,11 @@ export {
     LoadExternalContextStageUseCase,
     type ILoadExternalContextStageDependencies,
 } from "./application/use-cases/review/load-external-context-stage.use-case"
+export {
+    DryRunReviewUseCase,
+    type IDryRunReviewCommand,
+    type IDryRunReviewDependencies,
+} from "./application/use-cases/review/dry-run-review.use-case"
 export {
     ProcessCcrLevelReviewStageUseCase,
     type IProcessCcrLevelReviewStageDependencies,
