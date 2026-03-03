@@ -18,10 +18,12 @@ export interface IReviewStatusBadgeProps {
 /**
  * Цветовые пары по статусам.
  */
-const STATUS_VISUALS: Record<TReviewStatus, string> = {
+type TReviewStatusChipColor = "accent" | "default" | "danger" | "success" | "warning"
+
+const STATUS_VISUALS: Record<TReviewStatus, TReviewStatusChipColor> = {
     approved: "success",
-    in_progress: "primary",
-    new: "secondary",
+    in_progress: "accent",
+    new: "default",
     queued: "warning",
     rejected: "danger",
 }
