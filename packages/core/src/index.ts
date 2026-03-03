@@ -633,6 +633,7 @@ export {
     type IReconstitutePromptTemplateProps,
     PromptTemplateFactory,
 } from "./domain/factories/prompt-template.factory"
+export {createClassifierPanel, createSafeguardPanel} from "./domain/factories/prompt/expert-panel-presets"
 export {
     type ICreateUserProps,
     type IReconstituteUserProps,

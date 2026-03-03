@@ -49,6 +49,7 @@ export {
     type IReconstitutePromptTemplateProps,
     PromptTemplateFactory,
 } from "./prompt-template.factory"
+export {createClassifierPanel, createSafeguardPanel} from "./prompt/expert-panel-presets"
 export {
     type ICreateUserProps,
     type IReconstituteUserProps,
