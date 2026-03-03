@@ -117,6 +117,11 @@ export {
     type SuggestionClusteringMode,
 } from "./application/use-cases/cluster-suggestions.use-case"
 export {
+    CheckCommittabilityUseCase,
+    type ICheckCommittabilityInput,
+    type ICheckCommittabilityOutput,
+} from "./application/use-cases/check-committability.use-case"
+export {
     CompleteReviewUseCase,
     type ICompleteReviewInput,
     type ICompleteReviewOutput,
