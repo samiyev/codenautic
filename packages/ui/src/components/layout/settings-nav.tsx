@@ -36,6 +36,11 @@ const DEFAULT_SETTINGS_NAV_ITEMS = [
         label: "Integrations",
         to: "/settings-integrations",
     },
+    {
+        icon: "🪝",
+        label: "Webhooks",
+        to: "/settings-webhooks",
+    },
 ] as const
 
 /**

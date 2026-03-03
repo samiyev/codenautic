@@ -40,6 +40,11 @@ const SETTINGS_NAV = [
         label: "Integrations",
         to: "/settings-integrations",
     },
+    {
+        icon: "🪝",
+        label: "Webhooks",
+        to: "/settings-webhooks",
+    },
 ] as const
 
 /**
