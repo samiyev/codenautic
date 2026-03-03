@@ -20,3 +20,8 @@ export {
     type MergeRequestDiffFileStatus,
 } from "./merge-request.dto"
 export {type IWebhookEventDTO} from "./webhook-event.dto"
+export {
+    FILE_TREE_NODE_TYPE,
+    type FileTreeNodeType,
+    type IFileTreeNode,
+} from "./file-tree-node.dto"

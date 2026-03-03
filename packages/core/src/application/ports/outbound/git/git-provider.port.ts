@@ -4,6 +4,7 @@ import type {
     ICheckRunDTO,
     ICommentDTO,
     IInlineCommentDTO,
+    IFileTreeNode,
     IMergeRequestDTO,
     IMergeRequestDiffFileDTO,
 } from "../../../dto/git"
@@ -27,6 +28,14 @@ export interface IGitProvider {
      * @returns Changed files list.
      */
     getChangedFiles(mergeRequestId: string): Promise<readonly IMergeRequestDiffFileDTO[]>
+
+    /**
+     * Fetches repository file tree for a commit/branch reference.
+     *
+     * @param ref Commit SHA or branch name.
+     * @returns File tree nodes.
+     */
+    getFileTree(ref: string): Promise<readonly IFileTreeNode[]>
 
     /**
      * Posts regular comment to merge request.

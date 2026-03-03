@@ -6,6 +6,7 @@ import type {
     ICheckRunDTO,
     ICommentDTO,
     IGitProvider,
+    IFileTreeNode,
     IInlineCommentDTO,
     IMergeRequestDTO,
     IMergeRequestDiffFileDTO,
@@ -27,6 +28,10 @@ class InMemoryGitProvider implements IGitProvider {
         }
 
         return Promise.resolve(this.files)
+    }
+
+    public getFileTree(_ref: string): Promise<readonly IFileTreeNode[]> {
+        return Promise.resolve([])
     }
 
     public postComment(_mergeRequestId: string, _body: string): Promise<ICommentDTO> {

@@ -11,6 +11,7 @@ import {
     type ICommentDTO,
     type IGitProvider,
     type IInlineCommentDTO,
+    type IFileTreeNode,
     type IMergeRequestDTO,
     type IMergeRequestDiffFileDTO,
 } from "../../../../src"
@@ -58,6 +59,10 @@ class InMemoryGitProvider implements IGitProvider {
                 hunks: ["@@ -1,1 +1,2 @@"],
             },
         ])
+    }
+
+    public getFileTree(_ref: string): Promise<readonly IFileTreeNode[]> {
+        return Promise.resolve([])
     }
 
     public postComment(_mergeRequestId: string, body: string): Promise<ICommentDTO> {
