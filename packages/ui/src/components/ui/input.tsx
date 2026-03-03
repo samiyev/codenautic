@@ -1,2 +1,113 @@
-export { Input } from "@heroui/react"
-export type { InputProps } from "@heroui/react"
+import type { ChangeEvent, ReactElement, ReactNode } from "react"
+import {
+    Input as HeroUIInput,
+    type InputProps as HeroUIInputProps,
+} from "@heroui/react"
+
+/**
+ * Свойства `Input` с поддержкой legacy-свойств.
+ */
+export interface IInputProps extends Omit<HeroUIInputProps, "onChange"> {
+    /** Legacy callback из старого слоя при изменении строки значения. */
+    readonly onValueChange?: (value: string) => void
+    readonly onChange?: (event: ChangeEvent<HTMLInputElement>) => void
+    /** Legacy label prop (обертка-лейбл на месте внутреннего лэйаута). */
+    readonly label?: string
+    /** Legacy префикс для поля ввода. */
+    readonly startContent?: ReactNode
+    /** Legacy суффикс для поля ввода. */
+    readonly endContent?: ReactNode
+    /** Legacy флаг ошибки валидации. */
+    readonly isInvalid?: boolean
+}
+
+/**
+ * Алиас для совместимости внешних импортов старого имени типа.
+ */
+export type InputProps = IInputProps
+
+/**
+ * Input с обратной совместимостью `onValueChange`.
+ *
+ * @param props Свойства поля ввода.
+ * @returns Поле ввода HeroUI с нормализованным callback.
+ */
+export function Input(props: InputProps): ReactElement {
+    const {
+        className,
+        endContent,
+        label,
+        onChange,
+        onValueChange,
+        isInvalid,
+        startContent,
+        ...inputProps
+    } = props
+
+    const validationState =
+        isInvalid === true ? "invalid" : isInvalid === false ? "valid" : undefined
+    const inputClassName = buildInputClassName(
+        className ?? "",
+        startContent !== undefined,
+        endContent !== undefined,
+    )
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
+        if (onChange !== undefined) {
+            onChange(event)
+        }
+
+        if (onValueChange !== undefined) {
+            const target = event.target as HTMLInputElement
+            onValueChange(target.value)
+        }
+    }
+
+    const input = (
+        <HeroUIInput
+            {...inputProps}
+            className={inputClassName}
+            validationState={validationState}
+            onChange={handleChange}
+        />
+    )
+
+    if (startContent === undefined && endContent === undefined && label === undefined) {
+        return input
+    }
+
+    return (
+        <div className="flex flex-col gap-1">
+            {label === undefined ? null : <label className="text-sm font-medium">{label}</label>}
+            <div className="relative">
+                {startContent === undefined ? null : (
+                    <span className="pointer-events-none absolute left-2 top-1/2 inline-flex -translate-y-1/2 text-slate-500">
+                        {startContent}
+                    </span>
+                )}
+                {input}
+                {endContent === undefined ? null : (
+                    <span className="pointer-events-none absolute right-2 top-1/2 inline-flex -translate-y-1/2 text-slate-500">
+                        {endContent}
+                    </span>
+                )}
+            </div>
+        </div>
+    )
+}
+
+function buildInputClassName(
+    className: string,
+    hasStartContent: boolean,
+    hasEndContent: boolean,
+): string {
+    const entries: string[] = [className]
+    if (hasStartContent === true) {
+        entries.push("pl-9")
+    }
+    if (hasEndContent === true) {
+        entries.push("pr-9")
+    }
+
+    return entries.filter((entry): boolean => entry.length > 0).join(" ")
+}

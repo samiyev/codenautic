@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode, ReactElement } from "react"
+import { type ReactElement, type ReactNode } from "react"
 import {
     ListBox,
     ListBoxItem,
@@ -6,35 +6,74 @@ import {
     Select as HeroUISelect,
 } from "@heroui/react"
 
+type THeroUISelectProps = React.ComponentProps<typeof HeroUISelect>
+type TSelection = Set<string> | "all"
+type TSelectionChangeHandler = (keys: TSelection) => void
+
 /**
- * Свойства совместимого select с поддержкой старого API (`SelectItem`).
+ * Свойства совместимого select с поддержкой старого API (`selectedKeys`).
  */
-export type SelectProps = Omit<ComponentProps<typeof HeroUISelect>, "children"> & {
-    /** Дочерние элементы пунктов/секций. */
-    readonly children?: ReactNode
+export interface ISelectProps extends Omit<THeroUISelectProps, "selectedKey" | "defaultSelectedKey" | "onSelectionChange"> {
+    /** Legacy API: legacy-набор строковых ключей для одного выбора. */
+    readonly selectedKeys?: ReadonlySet<string> | "all"
+    /** Legacy API: дефолтный набор ключей для одного выбора. */
+    readonly defaultSelectedKeys?: ReadonlySet<string> | "all"
+    /** Legacy API-обратный callback в формате `Set` для совместимости. */
+    readonly onSelectionChange?: TSelectionChangeHandler
 }
+
+export type SelectProps = ISelectProps
 
 /**
  * Свойства пункта select.
  */
-export type SelectItemProps = ComponentProps<typeof ListBoxItem> & {
-    /** Идентификатор пункта для `selectedKeys`. */
+export interface ISelectItemProps {
+    /** Идентификатор пункта для `selectedKey`. */
     readonly value?: string
+    readonly id?: string
+    readonly children?: ReactNode
 }
+
+export type SelectItemProps = ISelectItemProps
 
 /**
  * Свойства секции select.
  */
-export type SelectSectionProps = ComponentProps<typeof ListBoxSection>
+export interface ISelectSectionProps {
+    readonly children: ReactNode
+}
+
+export type SelectSectionProps = ISelectSectionProps
 
 /**
  * Select-компонент с совместимым API.
  */
 export function Select(props: SelectProps): ReactElement {
-    const { children, ...selectProps } = props
+    const {
+        children,
+        defaultSelectedKeys,
+        onSelectionChange,
+        selectedKeys,
+        ...selectProps
+    } = props
+
+    const selectedKey = getSelectedKey(selectedKeys)
+    const defaultSelectedKey = getSelectedKey(defaultSelectedKeys)
 
     return (
-        <HeroUISelect {...selectProps}>
+        <HeroUISelect
+            {...selectProps}
+            defaultSelectedKey={defaultSelectedKey}
+            selectedKey={selectedKey}
+            onSelectionChange={(keys): void => {
+                if (onSelectionChange === undefined) {
+                    return
+                }
+
+                const nextKey = resolveSelectionKey(keys)
+                onSelectionChange(nextKey === undefined ? "all" : new Set([nextKey]))
+            }}
+        >
             <HeroUISelect.Trigger>
                 <HeroUISelect.Value />
             </HeroUISelect.Trigger>
@@ -49,15 +88,52 @@ export function Select(props: SelectProps): ReactElement {
  * Пункт выборки в совместимом Select.
  */
 export function SelectItem(props: SelectItemProps): ReactElement {
-    const { value, ...nextProps } = props
-    const itemId = value ?? (nextProps as { readonly id?: string }).id
+    const { id, value, children } = props
+    const itemId = value ?? id
 
-    return <ListBoxItem id={itemId} {...nextProps} />
+    return (
+        <ListBoxItem id={itemId} textValue={itemId}>
+            {children}
+        </ListBoxItem>
+    )
 }
 
 /**
  * Секция выборки в совместимом Select.
  */
 export function SelectSection(props: SelectSectionProps): ReactElement {
-    return <ListBoxSection {...props} />
+    return <ListBoxSection>{props.children}</ListBoxSection>
+}
+
+function getSelectedKey(keys: ReadonlySet<string> | "all" | undefined): string | undefined {
+    if (keys === undefined || keys === "all") {
+        return undefined
+    }
+
+    const next = keys.values().next()
+    if (next.done === true) {
+        return undefined
+    }
+
+    return String(next.value)
+}
+
+function resolveSelectionKey(value: unknown): string | undefined {
+    if (value instanceof Set === false) {
+        if (typeof value === "string") {
+            return value === "all" ? undefined : value
+        }
+        return undefined
+    }
+
+    const next = value.values().next()
+    if (next.done === true) {
+        return undefined
+    }
+
+    if (typeof next.value === "string") {
+        return next.value
+    }
+
+    return undefined
 }

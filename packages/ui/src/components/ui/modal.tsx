@@ -1,26 +1,33 @@
-import type { HTMLAttributes, ReactElement, ReactNode } from "react"
+import type {
+    HTMLAttributes,
+    ReactElement,
+    ReactNode,
+} from "react"
 import {
     Modal as HeroUIModal,
+    type ModalBodyProps as HeroUIModalBodyProps,
+    type ModalBackdropProps as HeroUIModalBackdropProps,
+    type ModalDialogProps as HeroUIModalDialogProps,
+    type ModalFooterProps as HeroUIModalFooterProps,
+    type ModalHeaderProps as HeroUIModalHeaderProps,
     type ModalProps as HeroUIModalProps,
+    type ModalRootProps as HeroUIModalRootProps,
 } from "@heroui/react"
 
 /**
  * Совместимый с legacy API root-модальный компонент.
  */
-export const Modal: typeof HeroUIModal = HeroUIModal
+export const Modal = HeroUIModal
 
 /**
  * Legacy `ModalContent` wrapper.
  */
-export function ModalContent({
-    children,
-    ...props
-}: Omit<HTMLAttributes<HTMLDivElement>, "children"> & { readonly children?: ReactNode }): ReactElement {
-    return (
-        <div className="max-h-[85vh] w-full overflow-hidden" {...props}>
-            {children}
-        </div>
-    )
+export function ModalContent(
+    props: Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
+        readonly children?: ReactNode
+    },
+): ReactElement {
+    return <HeroUIModal.Dialog {...props} />
 }
 
 /**
@@ -29,8 +36,8 @@ export function ModalContent({
 export function ModalHeader({
     children,
     ...props
-}: Omit<HTMLAttributes<HTMLDivElement>, "children"> & { readonly children?: ReactNode }): ReactElement {
-    return <div className="px-6 pt-6" {...props}>{children}</div>
+}: Omit<HeroUIModalHeaderProps, "children"> & { readonly children?: ReactNode }): ReactElement {
+    return <HeroUIModal.Header {...props}>{children}</HeroUIModal.Header>
 }
 
 /**
@@ -39,12 +46,8 @@ export function ModalHeader({
 export function ModalBody({
     children,
     ...props
-}: Omit<HTMLAttributes<HTMLDivElement>, "children"> & { readonly children?: ReactNode }): ReactElement {
-    return (
-        <div className="px-6 py-4" {...props}>
-            {children}
-        </div>
-    )
+}: Omit<HeroUIModalBodyProps, "children"> & { readonly children?: ReactNode }): ReactElement {
+    return <HeroUIModal.Body {...props}>{children}</HeroUIModal.Body>
 }
 
 /**
@@ -53,29 +56,29 @@ export function ModalBody({
 export function ModalFooter({
     children,
     ...props
-}: Omit<HTMLAttributes<HTMLDivElement>, "children"> & { readonly children?: ReactNode }): ReactElement {
-    return (
-        <div className="flex items-center justify-end gap-2 px-6 pb-6" {...props}>
-            {children}
-        </div>
-    )
+}: Omit<HeroUIModalFooterProps, "children"> & { readonly children?: ReactNode }): ReactElement {
+    return <HeroUIModal.Footer {...props}>{children}</HeroUIModal.Footer>
 }
 
 /**
  * Прозрачный fallback для старого экспорта `ModalBackdrop`.
  */
-export function ModalBackdrop({ ...props }: Omit<HTMLAttributes<HTMLDivElement>, "children">): ReactElement {
-    return <div {...props} />
+export function ModalBackdrop(
+    props: Omit<HTMLAttributes<HTMLDivElement>, "children">,
+): ReactElement {
+    return <HeroUIModal.Backdrop {...props} />
 }
 
 export type ModalProps = HeroUIModalProps
-export type ModalContentProps = Omit<HTMLAttributes<HTMLDivElement>, "children">
-    & { readonly children?: ReactNode }
-export type ModalHeaderProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
+export type ModalContentProps = Omit<HeroUIModalDialogProps, "children"> & {
     readonly children?: ReactNode
 }
-export type ModalBodyProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & { readonly children?: ReactNode }
-export type ModalFooterProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
+export type ModalHeaderProps = Omit<HeroUIModalHeaderProps, "children"> & {
     readonly children?: ReactNode
 }
-export type ModalBackdropProps = Omit<HTMLAttributes<HTMLDivElement>, "children">
+export type ModalBodyProps = Omit<HeroUIModalBodyProps, "children"> & { readonly children?: ReactNode }
+export type ModalFooterProps = Omit<HeroUIModalFooterProps, "children"> & {
+    readonly children?: ReactNode
+}
+export type ModalBackdropProps = HeroUIModalBackdropProps
+export type ModalRootProps = HeroUIModalRootProps
