@@ -74,6 +74,14 @@ export {
 export {type IFileMetricsDTO} from "./application/dto/analytics"
 export {type ICodeCityDataDTO, type IHotspotMetric} from "./application/dto/analytics"
 export {
+    type IFileMetricField,
+    type ITemporalDiffChangedFile,
+    type IGetTemporalDiffInput,
+    type ITemporalDiffFileNode,
+    type ITemporalDiffMetricDelta,
+    type ITemporalDiffResult,
+} from "./application/dto/analytics"
+export {
     TREEMAP_NODE_TYPE,
     type ITreemapNodeDTO,
     type ITreemapNodeMetrics,
@@ -119,6 +127,10 @@ export {
     type IGetCodeCityDataInput,
     type IGetCodeCityDataUseCaseDependencies,
 } from "./application/use-cases/analytics/get-code-city-data.use-case"
+export {
+    GetTemporalDiffUseCase,
+    type IGetTemporalDiffUseCaseDependencies,
+} from "./application/use-cases/analytics/get-temporal-diff.use-case"
 export {
     GetScanStatusUseCase,
     type IGetScanStatusInput,
