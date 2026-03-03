@@ -39,13 +39,13 @@
 
 ## v0.10.0 — Graph Visualization Part 1
 
-> React Flow/D3, file-level view, function graph. ~100K tokens.
+> XYFlow (`@xyflow/react`) + dagre, file-level view, function graph. ~100K tokens.
 
 > **Результат версии:** Завершена версия «v0.10.0 — Graph Visualization Part 1» в рамках M13; инкремент готовит продукт к стабильному end-to-end сценарию в своем слое.
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| WEB-GRAPH-001 | Реализовать react Flow/D3 component | TODO | Не начато | Реализация: Graph visualization. Dynamic import. Готово, если: для WEB-GRAPH-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
+| WEB-GRAPH-001 | Реализовать XYFlow graph component | TODO | Не начато | Реализация: Graph visualization на базе XYFlow (`@xyflow/react`) + auto-layout (`@dagrejs/dagre`). Dynamic import. Готово, если: для WEB-GRAPH-001 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
 | WEB-GRAPH-002 | Реализовать file-level dependency view | TODO | Не начато | Реализация: File dependencies graph. Готово, если: для WEB-GRAPH-002 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
 | WEB-GRAPH-003 | Реализовать function/class call graph | TODO | Не начато | Реализация: Call relationships. Готово, если: для WEB-GRAPH-003 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |
 | WEB-GRAPH-004 | Реализовать модуль/package view | TODO | Не начато | Реализация: Package dependencies. Готово, если: для WEB-GRAPH-004 ключевой пользовательский флоу проходит end-to-end в UI без ошибок, есть component + integration покрытие, проверены a11y (keyboard/focus/aria/contrast) и responsive для mobile/tablet/desktop; DoD: `cd packages/ui && bun run lint && bun run typecheck && bun run test`. |

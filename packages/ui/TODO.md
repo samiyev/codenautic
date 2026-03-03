@@ -44,6 +44,20 @@ classes
 
 ---
 
+## Политика зависимостей — Только OSS (No Paid)
+
+- UI-слой использует **только** open-source зависимости, разрешающие коммерческое использование (например: MIT, Apache-2.0, BSD).
+- Запрещено добавлять зависимости, где критичные функции закрыты paywall-ом (Pro/Enterprise/Commercial license).
+- Если библиотека имеет dual-license или “free tier + paid extensions”, разрешено использовать только OSS-часть и только
+  если это не блокирует реализацию задач из `packages/ui/TODO.md`.
+
+Примеры запрещённых категорий (не исчерпывающе):
+
+- Enterprise-таблицы/гриды с paywall: AG Grid Pro/Enterprise, MUI X Pro, KendoReact (commercial)
+- Графы/лейауты с paywall: yFiles (commercial)
+- Чарты с non-OSS лицензией: Highcharts (commercial)
+- Платные расширения редакторов: TipTap Pro extensions (допускается только OSS-часть)
+
 ## Соответствие ROADMAP.md
 
 - Источник приоритезации: `ROADMAP.md` -> таблица milestones

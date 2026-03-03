@@ -2,6 +2,9 @@ export {type IUseCase} from "./application/ports/inbound/use-case.port"
 export {type IDomainEventBus} from "./application/ports/outbound/common/domain-event-bus.port"
 export {type ILogger} from "./application/ports/outbound/common/logger.port"
 export {type IRepository} from "./application/ports/outbound/common/repository.port"
+export {type IProjectRepository} from "./application/ports/outbound/project-repository.port"
+export {type IProjectFilters} from "./application/ports/outbound/project-repository.port"
+export {type IOrganizationRepository} from "./application/ports/outbound/organization-repository.port"
 export {type ICache} from "./application/ports/outbound/cache/cache.port"
 export {type IGitProvider} from "./application/ports/outbound/git/git-provider.port"
 export {type ILLMProvider} from "./application/ports/outbound/llm/llm-provider.port"
@@ -14,6 +17,8 @@ export {
 export {type IRepositoryConfigLoader} from "./application/ports/outbound/review/repository-config-loader.port"
 export {type IReviewRepository} from "./application/ports/outbound/review/review-repository.port"
 export {type IRuleRepository} from "./application/ports/outbound/rule/rule-repository.port"
+export {type ITeamRepository} from "./application/ports/outbound/team-repository.port"
+export {type IUserRepository} from "./application/ports/outbound/user-repository.port"
 export {
     type IVectorChunkDTO,
     type IVectorRepository,
@@ -62,6 +67,7 @@ export {
     type IReviewConfigDTO,
     type IReviewIssueDTO,
     type IReviewPromptOverridesDTO,
+    type ValidatedConfig,
     type IReviewResultDTO,
     type IReviewResultMetricsDTO,
     type ISuggestionDTO,
@@ -137,6 +143,14 @@ export {
     type IRequestChangesOrApproveStageDependencies,
 } from "./application/use-cases/review/request-changes-or-approve-stage.use-case"
 export {
+    ConfigurationMergerUseCase,
+    type IConfigurationMergerInput,
+} from "./application/use-cases/configuration-merger.use-case"
+export {
+    ConfigurationValidatorUseCase,
+    type IConfigurationValidatorInput,
+} from "./application/use-cases/configuration-validator.use-case"
+export {
     ResolveConfigStageUseCase,
 } from "./application/use-cases/review/resolve-config-stage.use-case"
 export {
@@ -207,6 +221,14 @@ export {
     type IUserProps,
     User,
 } from "./domain/entities/user.entity"
+export {
+    type ITeamProps,
+    Team,
+} from "./domain/entities/team.entity"
+export {
+    type IProjectProps,
+    Project,
+} from "./domain/entities/project.entity"
 export {ConflictError} from "./domain/errors/conflict.error"
 export {DomainError} from "./domain/errors/domain.error"
 export {InvalidUniqueIdError} from "./domain/errors/invalid-unique-id.error"
@@ -267,6 +289,16 @@ export {
     OrganizationFactory,
 } from "./domain/factories/organization.factory"
 export {
+    type ICreateTeamProps,
+    type IReconstituteTeamProps,
+    TeamFactory,
+} from "./domain/factories/team.factory"
+export {
+    type ICreateProjectProps,
+    type IReconstituteProjectProps,
+    ProjectFactory,
+} from "./domain/factories/project.factory"
+export {
     type ICreateUserProps,
     type IReconstituteUserProps,
     UserFactory,
@@ -314,6 +346,13 @@ export {
     OrgSettings,
     type OrgSettingsProps,
 } from "./domain/value-objects/org-settings.value-object"
+export {
+    PROJECT_CADENCE,
+    type IProjectSettingsInput,
+    type IProjectSettingsProps,
+    type ProjectCadence,
+    ProjectSettings,
+} from "./domain/value-objects/project-settings.value-object"
 export {
     REPOSITORY_PLATFORM,
     RepositoryId,

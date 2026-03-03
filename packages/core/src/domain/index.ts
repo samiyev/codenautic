@@ -16,6 +16,14 @@ export {
     type IUserProps,
     User,
 } from "./entities/user.entity"
+export {
+    type ITeamProps,
+    Team,
+} from "./entities/team.entity"
+export {
+    type IProjectProps,
+    Project,
+} from "./entities/project.entity"
 export {BaseDomainEvent, type DomainEventPayload} from "./events/base-domain-event"
 export {
     FEEDBACK_TYPE,
@@ -66,6 +74,13 @@ export {
     OrgSettings,
     type OrgSettingsProps,
 } from "./value-objects/org-settings.value-object"
+export {
+    PROJECT_CADENCE,
+    type IProjectSettingsProps,
+    type IProjectSettingsInput,
+    type ProjectCadence,
+    ProjectSettings,
+} from "./value-objects/project-settings.value-object"
 export {CodeChunk, type ICreateCodeChunkProps} from "./value-objects/code-chunk.value-object"
 export {
     DIFF_FILE_STATUS,

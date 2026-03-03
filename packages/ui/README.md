@@ -74,7 +74,7 @@ bun add @codenautic/ui
 - **Widget composition**: крупные UI-блоки собирают несколько features
 - **Dashboard**: metric cards, activity timeline, health ring, trend indicators, ambient background
 - **Code review UI**: diff viewer (split/unified), issue threads, feedback, streaming progress
-- **Graph visualization**: file dependency graph, call graph, module graph (React Flow/D3)
+- **Graph visualization**: file dependency graph, call graph, module graph (XYFlow `@xyflow/react` + dagre layout)
 - **Design system**: целевой стек HeroUI v3 (React Aria), миграция из legacy-слоя в процессе
 - **Settings**: git providers, LLM providers, code review config, teams, billing, API keys
 - **Auth**: protected routes, permissions (CASL), OAuth
@@ -94,6 +94,9 @@ bun add @codenautic/ui
 | Forms         | React Hook Form + Zod                       |
 | Styling       | Tailwind CSS 4, HeroUI v3 (target, migration in progress) |
 | Charts        | Recharts (единственная charting-библиотека) |
+| Tables        | TanStack Table (enterprise lists)           |
+| Virtualization| TanStack Virtual                            |
+| Graph         | XYFlow (`@xyflow/react`) + dagre            |
 | 3D            | Three.js (CodeCity visualization)           |
 | i18n          | i18next                                     |
 | Тесты         | Vitest, happy-dom, MSW (API mocking)        |
@@ -272,8 +275,12 @@ bun run build-storybook # Storybook build
 - **tailwindcss** — utility-first CSS
 - **UI component layer** — migration target: HeroUI v3 (React Aria), legacy: shadcn/ui
 - **recharts** — charting (единственная библиотека)
+- **@tanstack/react-table** — enterprise tables (target, `WEB-TBL-001`)
+- **@tanstack/react-virtual** — virtualization для списков/таблиц
+- **@xyflow/react** + **@dagrejs/dagre** — graph explorer + auto-layout
 - **react-hook-form** + **zod** — form management + validation
 - **i18next** — internationalization
 - **three** — 3D visualization (CodeCity)
 - **msw** — API mocking в тестах
 - **@sentry/react** — error reporting
+- **Policy** — UI зависимости только OSS (no paid/pro/enterprise лицензий)

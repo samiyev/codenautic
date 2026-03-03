@@ -8,6 +8,16 @@ export interface IReviewPromptOverridesDTO {
 }
 
 /**
+ * Fully resolved and validated review config payload.
+ *
+ * Index signature keeps backward-compatible extensibility for adapter-specific
+ * configuration flags that are not part of core review contract.
+ */
+export type ValidatedConfig = IReviewConfigDTO & {
+    readonly [key: string]: unknown
+}
+
+/**
  * Review configuration snapshot used across application boundaries.
  *
  * This DTO intentionally uses only primitive values and arrays of primitives.

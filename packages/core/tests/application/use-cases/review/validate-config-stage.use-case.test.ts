@@ -1,43 +1,13 @@
 import {describe, expect, test} from "bun:test"
 
-import {ReviewPipelineState} from "../../../../src/application/types/review/review-pipeline-state"
-import {ValidateConfigStageUseCase} from "../../../../src/application/use-cases/review/validate-config-stage.use-case"
+import type {IUseCase} from "../../../../src/application/ports/inbound/use-case.port"
+import type {ValidatedConfig} from "../../../../src/application/dto/review/review-config.dto"
 import {ValidationError} from "../../../../src/domain/errors/validation.error"
-
-interface IValidateConfigStagePrivateMethods {
-    validateSeverityThreshold(value: unknown, fields: {field: string; message: string}[]): string | undefined
-    validateRequiredString(
-        value: unknown,
-        fieldName: string,
-        fields: {field: string; message: string}[],
-    ): string | undefined
-    validatePositiveInteger(
-        value: unknown,
-        fieldName: string,
-        fields: {field: string; message: string}[],
-    ): number | undefined
-    validateStringArray(
-        value: unknown,
-        fieldName: string,
-        fields: {field: string; message: string}[],
-    ): readonly string[] | undefined
-    validatePromptOverrides(
-        value: unknown,
-        fields: {field: string; message: string}[],
-    ): Record<string, unknown> | undefined
-    validateOptionalString(
-        value: unknown,
-        fieldName: string,
-        fields: {field: string; message: string}[],
-    ): string | undefined
-    createStageError(
-        runId: string,
-        definitionVersion: string,
-        message: string,
-        recoverable: boolean,
-        originalError?: Error,
-    ): Error
-}
+import {Result} from "../../../../src/shared/result"
+import {ReviewPipelineState} from "../../../../src/application/types/review/review-pipeline-state"
+import {
+    ValidateConfigStageUseCase,
+} from "../../../../src/application/use-cases/review/validate-config-stage.use-case"
 
 /**
  * Creates baseline state for validate-config stage tests.
@@ -130,30 +100,38 @@ describe("ValidateConfigStageUseCase", () => {
         expect(result.error.originalError?.name).toBe("ValidationError")
     })
 
-    test("covers private validators for deterministic schema checks", () => {
-        const useCase = new ValidateConfigStageUseCase()
-        const fields: {field: string; message: string}[] = []
-        const privateMethods = useCase as unknown as IValidateConfigStagePrivateMethods
+    test("uses injected validator result as error source", async () => {
+        const validator: IUseCase<unknown, ValidatedConfig, ValidationError> = {
+            execute: () => {
+                return Promise.resolve(
+                    Result.fail<ValidatedConfig, ValidationError>(
+                        new ValidationError("custom invalid config", [
+                            {
+                                field: "severityThreshold",
+                                message: "must be one of LOW | MEDIUM | HIGH | CRITICAL",
+                            },
+                        ]),
+                    ),
+                )
+            },
+        }
 
-        expect(privateMethods.validateSeverityThreshold("medium", fields)).toBe("MEDIUM")
-        expect(privateMethods.validateRequiredString(" value ", "cadence", fields)).toBe("value")
-        expect(privateMethods.validatePositiveInteger(2, "maxSuggestionsPerFile", fields)).toBe(2)
-        expect(privateMethods.validateStringArray([" a ", "b"], "ignorePaths", fields)).toEqual([
-            "a",
-            "b",
-        ])
-        expect(privateMethods.validatePromptOverrides(undefined, fields)).toBeUndefined()
-        expect(privateMethods.validateOptionalString(undefined, "optional", fields)).toBeUndefined()
+        const useCase = new ValidateConfigStageUseCase(validator)
+        const state = createState({
+            severityThreshold: "LOW",
+            ignorePaths: [],
+            maxSuggestionsPerFile: 2,
+            maxSuggestionsPerCCR: 10,
+            cadence: "standard",
+            customRuleIds: [],
+        })
 
-        const stageError = privateMethods.createStageError(
-            "run-private",
-            "v1",
-            "config-private-error",
-            false,
-            new ValidationError("config invalid", []),
-        )
+        const result = await useCase.execute({
+            state,
+        })
 
-        expect(stageError.name).toBe("StageError")
-        expect(stageError.message).toContain("config-private-error")
+        expect(result.isFail).toBe(true)
+        expect(result.error.message).toBe("Resolved review config is invalid")
+        expect(result.error.originalError?.message).toBe("custom invalid config")
     })
 })

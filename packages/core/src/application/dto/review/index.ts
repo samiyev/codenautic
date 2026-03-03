@@ -1,5 +1,5 @@
 export {type IDiscardedSuggestionDTO} from "./discarded-suggestion.dto"
-export {type IReviewConfigDTO, type IReviewPromptOverridesDTO} from "./review-config.dto"
+export {type IReviewConfigDTO, type IReviewPromptOverridesDTO, type ValidatedConfig} from "./review-config.dto"
 export {
     type IReviewIssueDTO,
     type IReviewResultDTO,

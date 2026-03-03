@@ -20,6 +20,16 @@ export {
     OrganizationFactory,
 } from "./organization.factory"
 export {
+    type ICreateTeamProps,
+    type IReconstituteTeamProps,
+    TeamFactory,
+} from "./team.factory"
+export {
+    type ICreateProjectProps,
+    type IReconstituteProjectProps,
+    ProjectFactory,
+} from "./project.factory"
+export {
     type ICreateUserProps,
     type IReconstituteUserProps,
     UserFactory,

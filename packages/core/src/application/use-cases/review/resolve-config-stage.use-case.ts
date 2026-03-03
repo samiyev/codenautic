@@ -1,4 +1,5 @@
-import type {IReviewConfigDTO, IReviewPromptOverridesDTO} from "../../dto/review/review-config.dto"
+import {ConfigurationMergerUseCase} from "../configuration-merger.use-case"
+import type {IReviewConfigDTO} from "../../dto/review/review-config.dto"
 import type {IRepositoryConfigLoader} from "../../ports/outbound/review/repository-config-loader.port"
 import type {
     IPipelineStageUseCase,
@@ -19,6 +20,12 @@ const DEFAULT_REVIEW_CONFIG: IReviewConfigDTO = {
     customRuleIds: [],
 }
 
+interface IConfigResolutionContext {
+    readonly repositoryId: string
+    readonly organizationId: string
+    readonly teamId: string
+}
+
 /**
  * Stage 3 use case. Resolves layered review configuration (default -> org -> repo).
  */
@@ -27,14 +34,19 @@ export class ResolveConfigStageUseCase implements IPipelineStageUseCase {
     public readonly stageName = "Resolve Config"
 
     private readonly repositoryConfigLoader: IRepositoryConfigLoader
+    private readonly configMerger: ConfigurationMergerUseCase
 
     /**
      * Creates resolve-config stage use case.
      *
      * @param repositoryConfigLoader Layered config loader dependency.
      */
-    public constructor(repositoryConfigLoader: IRepositoryConfigLoader) {
+    public constructor(
+        repositoryConfigLoader: IRepositoryConfigLoader,
+        configMerger: ConfigurationMergerUseCase = new ConfigurationMergerUseCase(),
+    ) {
         this.repositoryConfigLoader = repositoryConfigLoader
+        this.configMerger = configMerger
     }
 
     /**
@@ -44,42 +56,106 @@ export class ResolveConfigStageUseCase implements IPipelineStageUseCase {
      * @returns Updated state transition or stage error.
      */
     public async execute(input: IStageCommand): Promise<Result<IStageTransition, StageError>> {
+        const context = this.resolveContext(input)
+        if (context.isFail) {
+            return Result.fail<IStageTransition, StageError>(context.error)
+        }
+
+        return this.mergeAndResolveConfig(input.state, context.value)
+    }
+
+    /**
+     * Resolves required identifiers from stage context.
+     *
+     * @param input Stage execution input.
+     * @returns Resolved identifiers.
+     */
+    private resolveContext(
+        input: IStageCommand,
+    ): Result<
+        IConfigResolutionContext,
+        StageError
+    > {
         const repositoryId = this.resolveRepositoryId(input)
         if (repositoryId.isFail) {
-            return Result.fail<IStageTransition, StageError>(repositoryId.error)
+            return Result.fail<IConfigResolutionContext, StageError>(repositoryId.error)
         }
 
         const organizationId = this.resolveOrganizationId(input)
         if (organizationId.isFail) {
-            return Result.fail<IStageTransition, StageError>(organizationId.error)
+            return Result.fail<IConfigResolutionContext, StageError>(organizationId.error)
         }
 
         const teamId = this.resolveTeamId(input)
         if (teamId.isFail) {
-            return Result.fail<IStageTransition, StageError>(teamId.error)
+            return Result.fail<IConfigResolutionContext, StageError>(teamId.error)
         }
 
+        return Result.ok<IConfigResolutionContext, StageError>({
+            repositoryId: repositoryId.value,
+            organizationId: organizationId.value,
+            teamId: teamId.value,
+        })
+    }
+
+    /**
+     * Loads config layers and merges them for resolved context.
+     *
+     * @param state Pipeline state.
+     * @param context Resolved identifiers.
+     * @returns State transition with merged config.
+     */
+    private async mergeAndResolveConfig(
+        state: IStageTransition["state"],
+        context: IConfigResolutionContext,
+    ): Promise<Result<IStageTransition, StageError>> {
         try {
             const defaultLayer = await this.repositoryConfigLoader.loadDefault()
             const organizationLayer = await this.repositoryConfigLoader.loadOrganization(
-                organizationId.value,
-                teamId.value,
+                context.organizationId,
+                context.teamId,
             )
-            const repositoryLayer = await this.repositoryConfigLoader.loadRepository(repositoryId.value)
+            const repositoryLayer = await this.repositoryConfigLoader.loadRepository(context.repositoryId)
 
-            const mergedConfig = this.mergeConfigLayers([
-                DEFAULT_REVIEW_CONFIG,
-                defaultLayer ?? {},
-                organizationLayer ?? {},
-                repositoryLayer ?? {},
-            ])
-            const mergedConfigPayload: Readonly<Record<string, unknown>> = {
-                ...mergedConfig,
+            const defaultMergedResult = await this.configMerger.execute({
+                default: DEFAULT_REVIEW_CONFIG as unknown as Readonly<Record<string, unknown>>,
+                org: defaultLayer ?? undefined,
+                repo: undefined,
+            })
+
+            if (defaultMergedResult.isFail) {
+                return Result.fail<IStageTransition, StageError>(
+                    this.createStageError(
+                        state.runId,
+                        state.definitionVersion,
+                        "Failed to resolve repository configuration layers",
+                        true,
+                        defaultMergedResult.error,
+                    ),
+                )
+            }
+
+            const mergedConfigResult = await this.configMerger.execute({
+                default: defaultMergedResult.value,
+                org: organizationLayer ?? undefined,
+                repo: repositoryLayer ?? undefined,
+            })
+
+            if (mergedConfigResult.isFail) {
+                return Result.fail<IStageTransition, StageError>(
+                    this.createStageError(
+                        state.runId,
+                        state.definitionVersion,
+                        "Failed to resolve repository configuration layers",
+                        true,
+                        mergedConfigResult.error,
+                    ),
+                )
             }
 
             return Result.ok<IStageTransition, StageError>({
-                state: input.state.with({
-                    config: mergedConfigPayload,
+                state: state.with({
+                    config: mergedConfigResult.value,
                 }),
                 metadata: {
                     checkpointHint: "config:resolved",
@@ -88,8 +164,8 @@ export class ResolveConfigStageUseCase implements IPipelineStageUseCase {
         } catch (error: unknown) {
             return Result.fail<IStageTransition, StageError>(
                 this.createStageError(
-                    input.state.runId,
-                    input.state.definitionVersion,
+                    state.runId,
+                    state.definitionVersion,
                     "Failed to resolve repository configuration layers",
                     true,
                     error instanceof Error ? error : undefined,
@@ -165,54 +241,6 @@ export class ResolveConfigStageUseCase implements IPipelineStageUseCase {
         }
 
         return Result.ok<string, StageError>(teamId)
-    }
-
-    /**
-     * Merges config layers in deterministic order.
-     *
-     * @param layers Configuration layers.
-     * @returns Fully merged config payload.
-     */
-    private mergeConfigLayers(layers: readonly Partial<IReviewConfigDTO>[]): IReviewConfigDTO {
-        let currentConfig = {
-            ...DEFAULT_REVIEW_CONFIG,
-        }
-
-        for (const layer of layers) {
-            currentConfig = {
-                ...currentConfig,
-                ...layer,
-                promptOverrides: this.mergePromptOverrides(
-                    currentConfig.promptOverrides,
-                    layer.promptOverrides,
-                ),
-            }
-        }
-
-        return {
-            ...currentConfig,
-        }
-    }
-
-    /**
-     * Merges optional prompt override layers.
-     *
-     * @param current Current prompt overrides.
-     * @param patch Next prompt override patch.
-     * @returns Merged prompt overrides or undefined.
-     */
-    private mergePromptOverrides(
-        current: IReviewPromptOverridesDTO | undefined,
-        patch: IReviewPromptOverridesDTO | undefined,
-    ): IReviewPromptOverridesDTO | undefined {
-        if (current === undefined && patch === undefined) {
-            return undefined
-        }
-
-        return {
-            ...(current ?? {}),
-            ...(patch ?? {}),
-        }
     }
 
     /**
