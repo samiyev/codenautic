@@ -265,6 +265,15 @@ export {
     type IChatUseCaseDependencies,
 } from "./application/use-cases/messaging/chat.use-case"
 export {
+    ChatCommandHandler,
+} from "./application/use-cases/messaging/chat-command.handler"
+export {
+    type ICommandResult,
+    type CommandType,
+    type ICommandHandler,
+    type IMentionCommand,
+} from "./application/use-cases/messaging/mention-command.types"
+export {
     GetEnabledRulesUseCase,
     type IGetEnabledRulesDependencies,
 } from "./application/use-cases/rules/get-enabled-rules.use-case"
