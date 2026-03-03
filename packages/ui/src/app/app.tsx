@@ -3,6 +3,7 @@ import {QueryClientProvider} from "@tanstack/react-query"
 import {RouterProvider} from "@tanstack/react-router"
 
 import {createQueryClient} from "@/lib/query/query-client"
+import {ThemeProvider} from "@/lib/theme/theme-provider"
 import {router} from "./router"
 
 const queryClient = createQueryClient()
@@ -14,8 +15,10 @@ const queryClient = createQueryClient()
  */
 export function App(): ReactElement {
     return (
-        <QueryClientProvider client={queryClient}>
-            <RouterProvider router={router} />
-        </QueryClientProvider>
+        <ThemeProvider>
+            <QueryClientProvider client={queryClient}>
+                <RouterProvider router={router} />
+            </QueryClientProvider>
+        </ThemeProvider>
     )
 }
