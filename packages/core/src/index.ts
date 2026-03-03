@@ -259,6 +259,12 @@ export {
     ApplyRuleUseCase,
 } from "./application/use-cases/apply-rule.use-case"
 export {
+    ChatUseCase,
+    type IChatInput,
+    type IChatOutput,
+    type IChatUseCaseDependencies,
+} from "./application/use-cases/messaging/chat.use-case"
+export {
     GetEnabledRulesUseCase,
     type IGetEnabledRulesDependencies,
 } from "./application/use-cases/rules/get-enabled-rules.use-case"
