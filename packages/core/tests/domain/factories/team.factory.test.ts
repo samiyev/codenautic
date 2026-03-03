@@ -11,6 +11,7 @@ describe("TeamFactory", () => {
             memberIds: ["member-1", "member-1"],
             repoIds: ["gh:repo-1", "gh:repo-2"],
             ruleIds: ["rule-1"],
+            disabledRuleUuids: ["disabled-rule-1", "disabled-rule-1", "disabled-rule-2"],
         })
 
         expect(team.name).toBe("Review Team")
@@ -19,6 +20,10 @@ describe("TeamFactory", () => {
         expect(team.repoIds.map((repo) => repo.toString())).toEqual([
             "gh:repo-1",
             "gh:repo-2",
+        ])
+        expect(team.disabledRuleUuids.map((id) => id.value)).toEqual([
+            "disabled-rule-1",
+            "disabled-rule-2",
         ])
     })
 
@@ -31,6 +36,7 @@ describe("TeamFactory", () => {
             memberIds: ["member-1", "member-2"],
             repoIds: ["gl:repo-1"],
             ruleIds: ["rule-10", "rule-11"],
+            disabledRuleUuids: ["rule-disabled-1", "rule-disabled-2"],
         })
 
         expect(team.id.value).toBe("team-1")
@@ -39,5 +45,9 @@ describe("TeamFactory", () => {
         expect(team.memberIds).toHaveLength(2)
         expect(team.repoIds.map((repo) => repo.toString())).toEqual(["gl:repo-1"])
         expect(team.ruleIds.map((rule) => rule.value)).toEqual(["rule-10", "rule-11"])
+        expect(team.disabledRuleUuids.map((rule) => rule.value)).toEqual([
+            "rule-disabled-1",
+            "rule-disabled-2",
+        ])
     })
 })

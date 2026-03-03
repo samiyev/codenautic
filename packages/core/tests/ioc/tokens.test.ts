@@ -5,6 +5,7 @@ import {type IDomainEventBus} from "../../src/application/ports/outbound/common/
 import {type IPipelineCheckpointStore} from "../../src/application/ports/outbound/review/pipeline-checkpoint-store.port"
 import {type IReviewRepository} from "../../src/application/ports/outbound/review/review-repository.port"
 import {type IRuleRepository} from "../../src/application/ports/outbound/rule/rule-repository.port"
+import type {ITeamRuleProvider} from "../../src/application/ports/outbound/rule/team-rule-provider.port"
 import {createToken, TOKENS, type InjectionToken} from "../../src/index"
 
 interface IExamplePort {
@@ -42,17 +43,21 @@ describe("TOKENS", () => {
         const checkpointToken: InjectionToken<IPipelineCheckpointStore> =
             TOKENS.Review.PipelineCheckpointStore
         const ruleToken: InjectionToken<IRuleRepository> = TOKENS.Rule.Repository
+        const teamRuleProviderToken: InjectionToken<ITeamRuleProvider> =
+            TOKENS.Rules.TeamRuleProvider
         const eventBusToken: InjectionToken<IDomainEventBus> = TOKENS.Common.DomainEventBus
         const loggerToken: InjectionToken<ILogger> = TOKENS.Common.Logger
         const reviewSymbol: symbol = reviewToken
         const checkpointSymbol: symbol = checkpointToken
         const ruleSymbol: symbol = ruleToken
+        const teamRuleProviderSymbol: symbol = teamRuleProviderToken
         const eventBusSymbol: symbol = eventBusToken
         const loggerSymbol: symbol = loggerToken
 
         expect(typeof reviewToken).toBe("symbol")
         expect(typeof checkpointToken).toBe("symbol")
         expect(typeof ruleToken).toBe("symbol")
+        expect(typeof teamRuleProviderToken).toBe("symbol")
         expect(typeof eventBusToken).toBe("symbol")
         expect(typeof loggerToken).toBe("symbol")
         expect(reviewSymbol === ruleSymbol).toBe(false)
@@ -64,6 +69,11 @@ describe("TOKENS", () => {
         expect(reviewSymbol === loggerSymbol).toBe(false)
         expect(ruleSymbol === eventBusSymbol).toBe(false)
         expect(ruleSymbol === loggerSymbol).toBe(false)
+        expect(teamRuleProviderSymbol === reviewSymbol).toBe(false)
+        expect(teamRuleProviderSymbol === checkpointSymbol).toBe(false)
+        expect(teamRuleProviderSymbol === ruleSymbol).toBe(false)
+        expect(teamRuleProviderSymbol === eventBusSymbol).toBe(false)
+        expect(teamRuleProviderSymbol === loggerSymbol).toBe(false)
         expect(eventBusSymbol === loggerSymbol).toBe(false)
     })
 })

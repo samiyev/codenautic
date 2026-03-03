@@ -17,6 +17,7 @@ export {
 export {type IRepositoryConfigLoader} from "./application/ports/outbound/review/repository-config-loader.port"
 export {type IReviewRepository} from "./application/ports/outbound/review/review-repository.port"
 export {type IRuleRepository} from "./application/ports/outbound/rule/rule-repository.port"
+export {type ITeamRuleProvider} from "./application/ports/outbound/rule/team-rule-provider.port"
 export {type IPromptConfigurationRepository} from "./application/ports/outbound/prompt-configuration-repository.port"
 export {type IPromptTemplateRepository} from "./application/ports/outbound/prompt-template-repository.port"
 export {type ITeamRepository} from "./application/ports/outbound/team-repository.port"
@@ -63,6 +64,10 @@ export {
     type ISuggestionClusteringService,
 } from "./application/services/suggestion-clustering.service"
 export {type IImportedRuleHeuristicsMetadata} from "./application/dto/rules/rule-import-metadata.dto"
+export {
+    type IGetEnabledRulesInput,
+    type IGetEnabledRulesOutput,
+} from "./application/dto/rules/get-enabled-rules.dto"
 export {
     CHECK_RUN_CONCLUSION,
     CHECK_RUN_STATUS,
@@ -217,6 +222,10 @@ export {
 export {
     ApplyRuleUseCase,
 } from "./application/use-cases/apply-rule.use-case"
+export {
+    GetEnabledRulesUseCase,
+    type IGetEnabledRulesDependencies,
+} from "./application/use-cases/rules/get-enabled-rules.use-case"
 export {
     AnalyzeFeedbackUseCase,
     type IAnalyzeFeedbackInput,

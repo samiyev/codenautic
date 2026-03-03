@@ -11,6 +11,7 @@ export interface ITeamProps {
     memberIds: UniqueId[]
     repoIds: RepositoryId[]
     ruleIds: UniqueId[]
+    disabledRuleUuids: UniqueId[]
 }
 
 /**
@@ -29,6 +30,7 @@ export class Team extends Entity<ITeamProps> {
         this.props.memberIds = normalizeMembers(props.memberIds)
         this.props.repoIds = normalizeRepoIds(props.repoIds)
         this.props.ruleIds = normalizeRuleIds(props.ruleIds)
+        this.props.disabledRuleUuids = normalizeRuleIds(props.disabledRuleUuids)
         this.ensureStateIsValid()
     }
 
@@ -75,6 +77,15 @@ export class Team extends Entity<ITeamProps> {
      */
     public get ruleIds(): readonly UniqueId[] {
         return [...this.props.ruleIds]
+    }
+
+    /**
+     * Rule uuids disabled on this team.
+     *
+     * @returns Copy of disabled rule uuids.
+     */
+    public get disabledRuleUuids(): readonly UniqueId[] {
+        return [...this.props.disabledRuleUuids]
     }
 
     /**
@@ -126,6 +137,41 @@ export class Team extends Entity<ITeamProps> {
      */
     public hasMember(userId: UniqueId): boolean {
         return this.props.memberIds.some((memberId) => memberId.value === userId.value)
+    }
+
+    /**
+     * Disables a rule for this team.
+     *
+     * @param ruleId Rule identifier.
+     */
+    public disableRule(ruleId: UniqueId): void {
+        if (this.hasRule(this.props.disabledRuleUuids, ruleId) === true) {
+            return
+        }
+
+        this.props.disabledRuleUuids = [...this.props.disabledRuleUuids, ruleId]
+    }
+
+    /**
+     * Re-enables a previously disabled rule for this team.
+     *
+     * @param ruleId Rule identifier.
+     */
+    public enableRule(ruleId: UniqueId): void {
+        this.props.disabledRuleUuids = this.props.disabledRuleUuids.filter((item) => {
+            return item.value !== ruleId.value
+        })
+    }
+
+    /**
+     * Checks whether provided identifier exists in given collection.
+     *
+     * @param ruleIds Collection of rule identifiers.
+     * @param ruleId Identifier to lookup.
+     * @returns True when identifier is present.
+     */
+    private hasRule(ruleIds: readonly UniqueId[], ruleId: UniqueId): boolean {
+        return ruleIds.some((item) => item.value === ruleId.value)
     }
 
     /**

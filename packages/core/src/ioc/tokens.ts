@@ -4,6 +4,7 @@ import type {IPipelineCheckpointStore} from "../application/ports/outbound/revie
 import type {IReviewRepository} from "../application/ports/outbound/review/review-repository.port"
 import type {IRuleRepository} from "../application/ports/outbound/rule/rule-repository.port"
 import {createToken} from "./create-token"
+import type {ITeamRuleProvider} from "../application/ports/outbound/rule/team-rule-provider.port"
 
 /**
  * Core package DI tokens.
@@ -21,5 +22,8 @@ export const TOKENS = {
     },
     Rule: {
         Repository: createToken<IRuleRepository>("core.rule.repository"),
+    },
+    Rules: {
+        TeamRuleProvider: createToken<ITeamRuleProvider>("core.rules.team-rule-provider"),
     },
 } as const

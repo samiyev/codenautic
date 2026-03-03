@@ -12,6 +12,7 @@ describe("Team", () => {
             memberIds: ["member-1", "member-1", "member-2"],
             repoIds: ["gh:repo-1", "gh:repo-1", "gh:repo-2"],
             ruleIds: ["rule-1", "rule-1", "rule-3"],
+            disabledRuleUuids: ["rule-disabled-1"],
         }))
 
         expect(team.name).toBe("Core Team")
@@ -28,6 +29,7 @@ describe("Team", () => {
             memberIds: ["member-1"],
             repoIds: [],
             ruleIds: [],
+            disabledRuleUuids: [],
         }))
         const memberId = UniqueId.create("member-2")
 
@@ -50,6 +52,7 @@ describe("Team", () => {
             memberIds: [],
             repoIds: ["gh:repo-1"],
             ruleIds: [],
+            disabledRuleUuids: [],
         }))
         const repoId = RepositoryId.parse("gl:repo-2")
 
@@ -68,6 +71,7 @@ describe("Team", () => {
             memberIds: ["member-1"],
             repoIds: [],
             ruleIds: [],
+            disabledRuleUuids: [],
         }))
 
         expect(() => {
@@ -82,6 +86,7 @@ describe("Team", () => {
             memberIds: ["member-1"],
             repoIds: [],
             ruleIds: [],
+            disabledRuleUuids: [],
         }))
 
         expect(() => {
@@ -96,6 +101,7 @@ describe("Team", () => {
             memberIds: [],
             repoIds: ["gh:repo-1"],
             ruleIds: [],
+            disabledRuleUuids: [],
         }))
 
         expect(() => {
@@ -111,6 +117,7 @@ describe("Team", () => {
                 memberIds: [],
                 repoIds: [],
                 ruleIds: [],
+                disabledRuleUuids: [],
             }))
         }).toThrow("Team name cannot be empty")
     })
@@ -122,6 +129,7 @@ describe("Team", () => {
             memberIds: ["member-1"],
             repoIds: ["gh:repo-1"],
             ruleIds: ["rule-1"],
+            disabledRuleUuids: ["rule-disabled-1"],
         }))
 
         const members = team.memberIds
@@ -131,6 +139,35 @@ describe("Team", () => {
         expect(members).not.toBe(team.memberIds)
         expect(repos).not.toBe(team.repoIds)
         expect(rules).not.toBe(team.ruleIds)
+
+        const disabledRuleIds = team.disabledRuleUuids
+        const disabledRuleIdsCopy = [...disabledRuleIds]
+
+        expect(disabledRuleIds).not.toBe(disabledRuleIdsCopy)
+    })
+
+    test("handles disabled rules for disable/enable workflow", () => {
+        const team = new Team(UniqueId.create(), createTeamProps({
+            name: "Disabled Team",
+            organizationId: "org-9",
+            memberIds: [],
+            repoIds: [],
+            ruleIds: ["rule-1", "rule-2"],
+            disabledRuleUuids: [],
+        }))
+
+        expect(team.disabledRuleUuids).toEqual([])
+
+        const disableRule = UniqueId.create("rule-1")
+        const enableRule = UniqueId.create("rule-2")
+        team.disableRule(disableRule)
+        team.disableRule(enableRule)
+
+        expect(team.disabledRuleUuids.map((id) => id.value)).toEqual(["rule-1", "rule-2"])
+
+        team.enableRule(disableRule)
+
+        expect(team.disabledRuleUuids.map((id) => id.value)).toEqual(["rule-2"])
     })
 })
 
@@ -146,6 +183,7 @@ function createTeamProps(overrides: {
     memberIds: readonly string[]
     repoIds: readonly string[]
     ruleIds: readonly string[]
+    disabledRuleUuids: readonly string[]
 }): ITeamProps {
     return {
         name: overrides.name,
@@ -153,5 +191,6 @@ function createTeamProps(overrides: {
         memberIds: overrides.memberIds.map((id) => UniqueId.create(id)),
         repoIds: overrides.repoIds.map((id) => RepositoryId.parse(id)),
         ruleIds: overrides.ruleIds.map((id) => UniqueId.create(id)),
+        disabledRuleUuids: overrides.disabledRuleUuids.map((id) => UniqueId.create(id)),
     }
 }
