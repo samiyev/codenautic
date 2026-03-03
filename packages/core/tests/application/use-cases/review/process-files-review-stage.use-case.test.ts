@@ -682,10 +682,28 @@ describe("ProcessFilesReviewStageUseCase", () => {
         expect(requestByFile.has("src/core/utils/helper.ts")).toBe(true)
         expect(requestByFile.has("src/core/utils/inner/nested.ts")).toBe(true)
 
-        expect(llmProvider.requests.at(0)?.messages.at(0)?.content).toContain("GLOB_SYSTEM")
-        expect(llmProvider.requests.at(0)?.messages.at(1)?.content).toContain("FULL_FILE:")
-        expect(llmProvider.requests.at(1)?.messages.at(1)?.content).not.toContain("FULL_FILE:")
-        expect(llmProvider.requests.at(2)?.messages.at(1)?.content).not.toContain("FULL_FILE:")
+        const indexRequest = requestByFile.get("src/core/index.ts")
+        const helperRequest = requestByFile.get("src/core/utils/helper.ts")
+        const nestedRequest = requestByFile.get("src/core/utils/inner/nested.ts")
+        expect(indexRequest).toBeDefined()
+        expect(helperRequest).toBeDefined()
+        expect(nestedRequest).toBeDefined()
+
+        const hasGlobalSystem = (messages: string[] | undefined): boolean => {
+            return messages?.at(0)?.includes("GLOB_SYSTEM") ?? false
+        }
+        const hasFullFile = (messages: string[] | undefined): boolean => {
+            return messages?.at(1)?.includes("FULL_FILE:") ?? false
+        }
+
+        expect(hasGlobalSystem(indexRequest)).toBe(true)
+        expect(hasFullFile(indexRequest)).toBe(true)
+
+        expect(hasGlobalSystem(helperRequest)).toBe(false)
+        expect(hasFullFile(helperRequest)).toBe(false)
+
+        expect(hasGlobalSystem(nestedRequest)).toBe(false)
+        expect(hasFullFile(nestedRequest)).toBe(false)
     })
 
     test("returns recoverable stage error when unexpected internal failure escapes analyzer", async () => {
