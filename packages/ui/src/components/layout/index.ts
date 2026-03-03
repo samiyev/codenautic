@@ -1,2 +1,6 @@
-export {ThemeToggle} from "./theme-toggle"
 export {DashboardLayout} from "./dashboard-layout"
+export {Header} from "./header"
+export {Sidebar} from "./sidebar"
+export {SidebarNav} from "./sidebar-nav"
+export {ThemeToggle} from "./theme-toggle"
+export {UserMenu} from "./user-menu"

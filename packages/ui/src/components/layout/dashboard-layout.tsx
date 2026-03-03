@@ -1,7 +1,7 @@
 import type {ReactElement, ReactNode} from "react"
-import {Navbar, NavbarBrand, NavbarContent, NavbarItem} from "@heroui/react"
 
-import {ThemeToggle} from "./theme-toggle"
+import {Header} from "./header"
+import {Sidebar} from "./sidebar"
 
 /**
  * Свойства layout-контейнера для страниц dashboard.
@@ -14,7 +14,7 @@ export interface IDashboardLayoutProps {
 }
 
 /**
- * Базовый layout для dashboard-экранов с HeroUI navbar и глобальными контролами.
+ * Базовый layout для dashboard-экранов с HeroUI navbar и глобальными контролями.
  *
  * @param props Конфигурация контента.
  * @returns Обёрнутый контент с верхней панелью.
@@ -22,29 +22,13 @@ export interface IDashboardLayoutProps {
 export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
     return (
         <div className="relative min-h-screen bg-[linear-gradient(140deg,#f7f8fa_0%,#eef4ff_55%,#f6fbe7_100%)] text-slate-900">
-            <Navbar
-                isBlurred
-                className="border-b border-slate-200 bg-white/80 backdrop-blur"
-                maxWidth="full"
-                position="sticky"
-            >
-                <NavbarContent justify="start">
-                    <NavbarBrand>
-                        <p className="text-sm font-semibold tracking-wide">CodeNautic</p>
-                    </NavbarBrand>
-                </NavbarContent>
-                <NavbarContent justify="center">
-                    {props.title !== undefined ? (
-                        <span className="text-sm font-medium text-slate-700">{props.title}</span>
-                    ) : null}
-                </NavbarContent>
-                <NavbarContent justify="end">
-                    <NavbarItem>
-                        <ThemeToggle />
-                    </NavbarItem>
-                </NavbarContent>
-            </Navbar>
-            <main className="px-4 py-6 sm:px-6">{props.children}</main>
+            <Header title={props.title} />
+            <div className="mx-auto flex w-full max-w-screen-xl gap-4 px-4 py-4 sm:px-6">
+                <div className="hidden min-h-0 flex-shrink-0 md:block md:w-64">
+                    <Sidebar title="Menu" />
+                </div>
+                <main className="min-h-0 flex-1 rounded-lg bg-white/80 p-4 shadow-sm">{props.children}</main>
+            </div>
         </div>
     )
 }
