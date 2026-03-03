@@ -9,6 +9,7 @@ describe("IScanResult", () => {
             repositoryId: "repo-001",
             totalFiles: 12,
             totalNodes: 37,
+            totalEdges: 24,
             languages: [
                 {
                     language: "TypeScript",
@@ -35,6 +36,7 @@ describe("IScanResult", () => {
             repositoryId: "repo-002",
             totalFiles: 0,
             totalNodes: 0,
+            totalEdges: 0,
             languages: emptyLanguages,
             duration: 300,
             completedAt: "2026-03-03T12:10:00.000Z",

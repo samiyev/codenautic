@@ -18,6 +18,7 @@ class InMemoryRepositoryScanner implements IRepositoryScanner {
             repositoryId: "repo-1",
             totalFiles: 4,
             totalNodes: 9,
+            totalEdges: 11,
             languages: [
                 {
                     language: "TypeScript",

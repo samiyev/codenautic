@@ -43,6 +43,11 @@ export interface IScanResult {
     readonly totalNodes: number
 
     /**
+     * Total number of AST graph edges created.
+     */
+    readonly totalEdges: number
+
+    /**
      * Language statistics aggregated during scan.
      */
     readonly languages: readonly ILanguageStat[]
