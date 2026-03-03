@@ -8,6 +8,12 @@ export const queryKeys = {
     featureFlags: {
         all: (): readonly ["feature-flags"] => ["feature-flags"] as const,
     },
+    permissions: {
+        all: (): readonly ["permissions"] => ["permissions"] as const,
+        byRole: (role: string): readonly ["permissions", "by-role", string] => {
+            return ["permissions", "by-role", role]
+        },
+    },
     system: {
         health: (): readonly ["system", "health"] => ["system", "health"] as const,
     },

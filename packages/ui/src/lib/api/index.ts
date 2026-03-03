@@ -1,5 +1,6 @@
 import { createApiConfig } from "./config"
 import { AuthApi } from "./endpoints/auth.endpoint"
+import { PermissionsApi } from "./endpoints/permissions.endpoint"
 import { FeatureFlagsApi } from "./endpoints/feature-flags.endpoint"
 import { SystemApi } from "./endpoints/system.endpoint"
 import { FetchHttpClient } from "./http-client"
@@ -13,6 +14,7 @@ export function createApiContracts(): {
     readonly system: SystemApi
     readonly auth: AuthApi
     readonly featureFlags: FeatureFlagsApi
+    readonly permissions: PermissionsApi
 } {
     const config = createApiConfig({})
     const httpClient = new FetchHttpClient(config)
@@ -20,6 +22,7 @@ export function createApiContracts(): {
     return {
         system: new SystemApi(httpClient),
         auth: new AuthApi(httpClient),
+        permissions: new PermissionsApi(httpClient),
         featureFlags: new FeatureFlagsApi(httpClient),
     }
 }
@@ -36,6 +39,7 @@ export {
 } from "./http-client"
 export type { IApiConfig, IUiEnv } from "./config"
 export type { IAuthApi } from "./endpoints/auth.endpoint"
+export type { IPermissionsApi } from "./endpoints/permissions.endpoint"
 export type {
     IDelayFunction,
     IFetchHttpClientDependencies,

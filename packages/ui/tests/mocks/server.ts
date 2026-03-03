@@ -118,6 +118,11 @@ export const server = setupServer(
             },
         })
     }),
+    http.get("http://localhost:3000/api/v1/permissions", () => {
+        return HttpResponse.json({
+            permissions: ["review:read", "settings:read"],
+        })
+    }),
     http.get("http://localhost:3000/api/v1/user/settings", () => {
         return HttpResponse.json({}, { status: 404 })
     }),
