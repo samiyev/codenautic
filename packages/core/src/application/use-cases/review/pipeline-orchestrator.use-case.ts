@@ -186,6 +186,11 @@ export class PipelineOrchestratorUseCase
     private async executeInternal(
         input: IPipelineRunCommand,
     ): Promise<Result<IPipelineResult, StageError>> {
+        const definitionValidationResult = this.validateDefinition(input.initialState, input.definition)
+        if (definitionValidationResult.isFail) {
+            return Result.fail<IPipelineResult, StageError>(definitionValidationResult.error)
+        }
+
         const pinnedStateResult = this.pinDefinitionVersion(input.initialState, input.definition)
         if (pinnedStateResult.isFail) {
             return Result.fail<IPipelineResult, StageError>(pinnedStateResult.error)
@@ -235,6 +240,70 @@ export class PipelineOrchestratorUseCase
             skippedResults,
             startedAt,
         )
+    }
+
+    /**
+     * Validates pipeline definition consistency before execution.
+     *
+     * @param state Current state.
+     * @param definition Pipeline definition.
+     * @returns Validation result.
+     */
+    private validateDefinition(
+        state: ReviewPipelineState,
+        definition: IPipelineDefinition,
+    ): Result<void, StageError> {
+        if (definition.stages.length === 0) {
+            return Result.fail<void, StageError>(
+                this.createPipelineError(
+                    state,
+                    definition.definitionVersion,
+                    PIPELINE_DEFINITION_STAGE_ID,
+                    "Pipeline definition must contain at least one stage",
+                ),
+            )
+        }
+
+        const stageIds = new Set<string>()
+        for (const stage of definition.stages) {
+            const stageId = stage.stageId.trim()
+            if (stageId.length === 0) {
+                return Result.fail<void, StageError>(
+                    this.createPipelineError(
+                        state,
+                        definition.definitionVersion,
+                        PIPELINE_DEFINITION_STAGE_ID,
+                        "Pipeline definition contains empty stageId",
+                    ),
+                )
+            }
+
+            if (stageIds.has(stageId)) {
+                return Result.fail<void, StageError>(
+                    this.createPipelineError(
+                        state,
+                        definition.definitionVersion,
+                        PIPELINE_DEFINITION_STAGE_ID,
+                        `Pipeline definition contains duplicate stageId: ${stageId}`,
+                    ),
+                )
+            }
+
+            stageIds.add(stageId)
+
+            if (this.stages[stageId] === undefined) {
+                return Result.fail<void, StageError>(
+                    this.createPipelineError(
+                        state,
+                        definition.definitionVersion,
+                        PIPELINE_DEFINITION_STAGE_ID,
+                        `No stage implementation registered for stageId ${stageId}`,
+                    ),
+                )
+            }
+        }
+
+        return Result.ok<void, StageError>(undefined)
     }
 
     /**

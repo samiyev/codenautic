@@ -296,6 +296,76 @@ describe("PipelineOrchestratorUseCase", () => {
         expect(result.error.message).toContain("startFromStageId must be a non-empty string")
     })
 
+    test("returns fail when pipeline definition contains duplicate stage ids", async () => {
+        const orchestrator = new PipelineOrchestratorUseCase({
+            stages: {
+                "stage-a": new StaticStageUseCase("stage-a", "Stage A", (state) => {
+                    return Result.ok<IStageTransition, StageError>({
+                        state,
+                    })
+                }),
+            },
+            domainEventBus: new InMemoryDomainEventBus(),
+            checkpointStore: new InMemoryCheckpointStore(),
+            logger: new InMemoryLogger(),
+        })
+
+        const result = await orchestrator.execute({
+            initialState: ReviewPipelineState.create({
+                runId: "run-dup-id",
+                definitionVersion: "v1",
+                mergeRequest: {},
+                config: {},
+            }),
+            definition: {
+                definitionVersion: "v1",
+                stages: [
+                    {stageId: "stage-a", stageName: "Stage A"},
+                    {stageId: "stage-a", stageName: "Stage A duplicated"},
+                ],
+            },
+        })
+
+        expect(result.isFail).toBe(true)
+        expect(result.error.code).toBe("STAGE_ERROR")
+        expect(result.error.message).toContain("contains duplicate stageId: stage-a")
+    })
+
+    test("returns fail when stage implementation is missing for a definition item", async () => {
+        const orchestrator = new PipelineOrchestratorUseCase({
+            stages: {
+                "stage-a": new StaticStageUseCase("stage-a", "Stage A", (state) => {
+                    return Result.ok<IStageTransition, StageError>({
+                        state,
+                    })
+                }),
+            },
+            domainEventBus: new InMemoryDomainEventBus(),
+            checkpointStore: new InMemoryCheckpointStore(),
+            logger: new InMemoryLogger(),
+        })
+
+        const result = await orchestrator.execute({
+            initialState: ReviewPipelineState.create({
+                runId: "run-missing-stage",
+                definitionVersion: "v1",
+                mergeRequest: {},
+                config: {},
+            }),
+            definition: {
+                definitionVersion: "v1",
+                stages: [
+                    {stageId: "stage-a", stageName: "Stage A"},
+                    {stageId: "stage-b", stageName: "Stage B"},
+                ],
+            },
+        })
+
+        expect(result.isFail).toBe(true)
+        expect(result.error.code).toBe("STAGE_ERROR")
+        expect(result.error.message).toContain("No stage implementation registered for stageId stage-b")
+    })
+
     test("returns fail result when checkpoint side effect rejects", async () => {
         const orchestrator = new PipelineOrchestratorUseCase({
             stages: {
@@ -387,6 +457,11 @@ describe("PipelineOrchestratorUseCase", () => {
         })
         const orchestrator = new PipelineOrchestratorUseCase({
             stages: {
+                "stage-a": new StaticStageUseCase("stage-a", "Stage A", (state) => {
+                    return Result.ok<IStageTransition, StageError>({
+                        state,
+                    })
+                }),
                 "stage-b": new StaticStageUseCase("stage-b", "Stage B", (state) => {
                     return Result.ok<IStageTransition, StageError>({
                         state,
