@@ -66,6 +66,14 @@ export function SettingsPage(): ReactElement {
                         <li>
                             <Link
                                 className="underline underline-offset-4"
+                                to="/settings-token-usage"
+                            >
+                                Token usage
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                className="underline underline-offset-4"
                                 to="/onboarding"
                             >
                                 Start repository onboarding

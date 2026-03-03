@@ -45,6 +45,11 @@ const SETTINGS_NAV = [
         label: "Webhooks",
         to: "/settings-webhooks",
     },
+    {
+        icon: "💳",
+        label: "Token Usage",
+        to: "/settings-token-usage",
+    },
 ] as const
 
 /**
