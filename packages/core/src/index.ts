@@ -46,6 +46,7 @@ export {
     type IHeuristicType,
     type IHeuristicVerificationRule,
 } from "./application/dto/heuristics/heuristic-registry-entry.dto"
+export {type IFileMetricsDTO} from "./application/dto/analytics"
 export {
     type IAnemicModelViolationType,
     type IDDDComplianceReport,
