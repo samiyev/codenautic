@@ -63,6 +63,28 @@ interface ICodeCityTreemapIssueSummary {
     readonly totalIssues: number
 }
 
+interface ICodeCityTreemapFileTooltip {
+    /** Ссылка на файл в quick link (если определена). */
+    readonly fileLink?: string
+    readonly complexity?: number
+    readonly coverage?: number
+    readonly fileId: string
+    readonly fileName: string
+    readonly issueCount: number
+    readonly lastReviewAt?: string
+    readonly loc: number
+    readonly path: string
+}
+
+interface ICodeCityTreemapFileLinkResolver {
+    /** Идентификатор файла. */
+    readonly fileId: string
+    /** Отображаемое имя файла. */
+    readonly fileName: string
+    /** Полный путь к файлу. */
+    readonly path: string
+}
+
 interface ICodeCityTreemapViewSummary {
     readonly files: number
     readonly impactSummary: ICodeCityTreemapImpactSummary
@@ -78,20 +100,27 @@ interface ICodeCityTreemapMetricRange {
 
 interface ICodeCityTreemapTreemapNodePayload {
     readonly children?: ReadonlyArray<unknown>
+    readonly complexity?: number
     readonly color?: string
     readonly depth?: number
     readonly height?: number
+    readonly id?: string
+    readonly coverage?: number
     readonly impactType?: ICodeCityTreemapImpactLevel
     readonly issueHeatmapColor?: string
-    readonly name?: string
-    readonly value?: number
     readonly issueCount?: number
+    readonly lastReviewAt?: string
+    readonly name?: string
+    readonly path?: string
+    readonly value?: number
     readonly width?: number
     readonly x?: number
     readonly y?: number
 }
 
 interface ICodeCityTreemapTreemapContentProps {
+    readonly onFileHover?: (payload?: ICodeCityTreemapFileTooltip) => void
+    readonly fileLink?: (file: ICodeCityTreemapFileLinkResolver) => string
     readonly fill?: string
     readonly onPackageSelect?: (packageName: string) => void
     readonly payload?: ICodeCityTreemapTreemapNodePayload
@@ -121,6 +150,45 @@ function resolveIssueHeatmapColor(
     const hue = Math.round(120 - ratio * 120)
 
     return `hsla(${hue}, 86%, 52%, 0.45)`
+}
+
+function resolveLastReviewLabel(lastReviewAt: string | undefined): string {
+    if (typeof lastReviewAt !== "string") {
+        return "—"
+    }
+
+    const date = new Date(lastReviewAt)
+    if (Number.isNaN(date.getTime()) === true) {
+        return "—"
+    }
+
+    return date.toLocaleDateString([], {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    })
+}
+
+function resolveCoverageLabel(coverage: number | undefined): string {
+    if (typeof coverage !== "number" || Number.isNaN(coverage)) {
+        return "—"
+    }
+
+    const normalizedCoverage = Math.max(0, Math.min(100, coverage))
+
+    return `${Math.round(normalizedCoverage * 10) / 10}%`
+}
+
+function resolveNumberLabel(value: number | undefined): string {
+    if (typeof value !== "number" || Number.isNaN(value) || value < 0) {
+        return "—"
+    }
+
+    if (Number.isInteger(value) === true) {
+        return String(value)
+    }
+
+    return String(Math.round(value * 10) / 10)
 }
 
 function buildImpactedFileIndex(
@@ -312,12 +380,42 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
     const isPackage = (node?.children?.length ?? 0) > 0
     const canShowText = width > 42 && height > 16
     const isLeaf = (node?.children?.length ?? 0) === 0
+    const fileId = typeof node?.id === "string" && node.id.length > 0 ? node.id : nodeName
+    const filePath = typeof node?.path === "string" && node.path.length > 0 ? node.path : nodeName
+
     const handlePackageSelect = (): void => {
         if (isPackage === false || props.onPackageSelect === undefined || nodeName.length === 0) {
             return
         }
 
         props.onPackageSelect(nodeName)
+    }
+    const handleFileMouseEnter = (): void => {
+        if (isPackage === true || props.onFileHover === undefined || nodeName.length === 0) {
+            return
+        }
+
+        props.onFileHover({
+            complexity: typeof node?.complexity === "number" ? node.complexity : undefined,
+            coverage: typeof node?.coverage === "number" ? node.coverage : undefined,
+            fileId,
+            fileName: nodeName,
+            issueCount: resolveIssueCount(node?.issueCount),
+            fileLink:
+                props.fileLink === undefined
+                    ? undefined
+                    : props.fileLink({
+                          fileId,
+                          fileName: nodeName,
+                          path: filePath,
+                      }),
+            lastReviewAt: node?.lastReviewAt,
+            loc: typeof node?.value === "number" ? node.value : 0,
+            path: filePath,
+        })
+    }
+    const handleFileMouseLeave = (): void => {
+        props.onFileHover?.(undefined)
     }
     const handlePackageKeyDown = (event: KeyboardEvent<SVGGElement>): void => {
         if (event.key === "Enter" || event.key === " ") {
@@ -336,10 +434,14 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
                 isPackage ? `Open package ${nodeName}` : `File ${nodeName}`
             }
             className={isPackage === true ? "cursor-pointer" : ""}
+            onBlur={isPackage === false ? handleFileMouseLeave : undefined}
+            onFocus={isPackage === false ? handleFileMouseEnter : undefined}
+            onMouseEnter={isPackage === false ? handleFileMouseEnter : undefined}
+            onMouseLeave={isPackage === false ? handleFileMouseLeave : undefined}
             onKeyDown={isPackage === true ? handlePackageKeyDown : undefined}
             onClick={isPackage === true ? handlePackageSelect : undefined}
-            role={isPackage ? "button" : undefined}
-            tabIndex={isPackage ? 0 : undefined}
+            role="button"
+            tabIndex={0}
         >
             <rect
                 fill={color}
@@ -379,6 +481,8 @@ export interface ICodeCityTreemapFileDescriptor {
     readonly impactType?: ICodeCityTreemapImpactLevel
     /** Покрытие по файла в проценте (0..100). */
     readonly coverage?: number
+    /** Дата последнего ревью для tooltip блока. */
+    readonly lastReviewAt?: string
     /** Churn/изменчивость файла в окне анализа. */
     readonly churn?: number
     /** Количество найденных найденных проблем для heatmap. */
@@ -402,6 +506,12 @@ interface ICodeCityTreemapFileNode {
     readonly metricValue: number
     /** Уровень CCR-влияния для узла (если применимо). */
     readonly impactType?: ICodeCityTreemapImpactLevel
+    /** Сложность файла для tooltip блока. */
+    readonly complexity?: number
+    /** Покрытие файла для tooltip блока. */
+    readonly coverage?: number
+    /** Дата последнего ревью для tooltip блока. */
+    readonly lastReviewAt?: string
     /** Цвет heatmap-оверлея по issue density. */
     readonly issueHeatmapColor?: string
     /** Цвет по метрике для узла. */
@@ -453,6 +563,8 @@ export interface ICodeCityTreemapProps {
     readonly title?: string
     /** Текст пустого состояния. */
     readonly emptyStateLabel?: string
+    /** Генератор quick link-URL к файлу по наведению. */
+    readonly fileLink?: (file: ICodeCityTreemapFileLinkResolver) => string
 }
 
 function normalizePath(rawPath: string): string {
@@ -535,6 +647,9 @@ export function buildCodeCityTreemapData(
             path: normalizedPath,
             issueCount,
             color: "",
+            complexity: file.complexity,
+            coverage: file.coverage,
+            lastReviewAt: file.lastReviewAt,
             impactType,
             metricValue,
             value: fileLoc,
@@ -628,6 +743,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         props.defaultMetric ?? DEFAULT_METRIC,
     )
     const [selectedPackage, setSelectedPackage] = useState<string | undefined>()
+    const [hoveredFile, setHoveredFile] = useState<ICodeCityTreemapFileTooltip | undefined>()
     const treemapData = useMemo(
         () => buildCodeCityTreemapData(props.files, metric, props.impactedFiles ?? []),
         [props.files, props.impactedFiles, metric],
@@ -657,9 +773,13 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     const breadcrumbText = selectedPackage === undefined
         ? "All packages"
         : `All packages / ${selectedPackage}`
+    const tooltipTitle = hoveredFile === undefined
+        ? "Hover a file for quick metrics and quick link."
+        : `File details for ${hoveredFile.fileName}`
 
     const handleResetSelection = (): void => {
         setSelectedPackage(undefined)
+        setHoveredFile(undefined)
     }
     const handleMetricChange = (event: ChangeEvent<HTMLSelectElement>): void => {
         setMetric(resolveMetricByValue(event.target.value))
@@ -673,6 +793,10 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         }
 
         setSelectedPackage(packageName)
+        setHoveredFile(undefined)
+    }
+    const handleFileHover = (payload?: ICodeCityTreemapFileTooltip): void => {
+        setHoveredFile(payload)
     }
     const metricRangeText = `Min ${treemapData.metricRange.min} — Max ${treemapData.metricRange.max}`
 
@@ -814,11 +938,57 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                 return renderTreemapCell({
                                     ...contentProps,
                                     onPackageSelect: handlePackageSelect,
+                                    onFileHover: handleFileHover,
+                                    fileLink: props.fileLink,
                                 })
                             }}
                             onClick={handleTreemapNodeClick}
                         />
                     </ResponsiveContainer>
+                </div>
+                <div
+                    aria-label="Code city file tooltip"
+                    className="mt-3 rounded-md border border-default-200 bg-default-50 p-3"
+                >
+                    <p className="mb-1 text-xs text-foreground-500">{tooltipTitle}</p>
+                    {hoveredFile === undefined ? null : (
+                        <div className="space-y-1 text-sm text-foreground-500">
+                            <p>
+                                <span className="font-semibold">File:</span> {hoveredFile.fileName}
+                            </p>
+                            <p>
+                                <span className="font-semibold">Path:</span> {hoveredFile.path}
+                            </p>
+                            <p>
+                                <span className="font-semibold">LOC:</span> {hoveredFile.loc}
+                            </p>
+                            <p>
+                                <span className="font-semibold">Complexity:</span>{" "}
+                                {resolveNumberLabel(hoveredFile.complexity)}
+                            </p>
+                            <p>
+                                <span className="font-semibold">Coverage:</span>{" "}
+                                {resolveCoverageLabel(hoveredFile.coverage)}
+                            </p>
+                            <p>
+                                <span className="font-semibold">Last review:</span>{" "}
+                                {resolveLastReviewLabel(hoveredFile.lastReviewAt)}
+                            </p>
+                            <p>
+                                <span className="font-semibold">Issue count:</span>{" "}
+                                {hoveredFile.issueCount}
+                            </p>
+                            {hoveredFile.fileLink === undefined ? null : (
+                                <a
+                                    href={hoveredFile.fileLink}
+                                    rel="noopener noreferrer"
+                                    target="_blank"
+                                >
+                                    Open file
+                                </a>
+                            )}
+                        </div>
+                    )}
                 </div>
             </CardBody>
         </Card>

@@ -12,51 +12,100 @@ interface ICodeCityTreemapNodeData {
     readonly children?: ReadonlyArray<{
         readonly color?: string
         readonly id?: string
-        readonly impactType?: string
         readonly issueCount?: number
+        readonly impactType?: string
+        readonly coverage?: number
+        readonly complexity?: number
+        readonly lastReviewAt?: string
+        readonly name?: string
+        readonly path?: string
+        readonly value?: number
         readonly issueHeatmapColor?: string
     }>
     readonly name?: string
 }
 
+interface ICodeCityTreemapContentPayload {
+    readonly children?: ReadonlyArray<{
+        readonly color?: string
+        readonly id?: string
+        readonly complexity?: number
+        readonly coverage?: number
+        readonly issueCount?: number
+        readonly lastReviewAt?: string
+        readonly name?: string
+        readonly path?: string
+        readonly value?: number
+    }>
+    readonly fill?: string
+    readonly height: number
+    readonly payload?: {
+        readonly name?: string
+        readonly children?: ReadonlyArray<unknown>
+        readonly value?: number
+        readonly issueCount?: number
+        readonly issueHeatmapColor?: string
+        readonly color?: string
+        readonly complexity?: number
+        readonly coverage?: number
+        readonly lastReviewAt?: string
+        readonly path?: string
+        readonly id?: string
+    }
+    readonly width: number
+    readonly x: number
+    readonly y: number
+}
+
 const mockTreemap = vi.fn(
-    (
-        props: {
-            readonly data: ReadonlyArray<ICodeCityTreemapNodeData>
-            readonly onClick?: (
-                node?: Readonly<{
-                    readonly children?: ReadonlyArray<unknown>
-                    readonly color?: string
-                    readonly name?: string
-                    readonly issueCount?: number
-                    readonly issueHeatmapColor?: string
-                }>,
-            ) => void
+    (props: {
+        readonly content?: (contentProps: ICodeCityTreemapContentPayload) => JSX.Element
+        readonly data: ReadonlyArray<ICodeCityTreemapNodeData>
+        readonly onClick?: (
+            node?: Readonly<{
+                readonly children?: ReadonlyArray<unknown>
+                readonly color?: string
+                readonly name?: string
+                readonly issueCount?: number
+                readonly issueHeatmapColor?: string
+            }>,
+        ) => void
+    }): JSX.Element => {
+        const renderNode = (node: ICodeCityTreemapNodeData, key: string): ReadonlyArray<JSX.Element> => {
+            const children = node.children ?? []
+            const content = props.content?.({
+                children,
+                fill: node.color,
+                height: 60,
+                payload: node,
+                width: 120,
+                x: 0,
+                y: 0,
+            })
+            const nestedNodes = children.flatMap((child, childIndex): ReadonlyArray<JSX.Element> => {
+                return renderNode(
+                    child as ICodeCityTreemapNodeData,
+                    `${key}-child-${String(childIndex)}`,
+                )
+            })
+
+            return content === undefined
+                ? nestedNodes
+                : [
+                      <span key={key}>
+                          {content}
+                      </span>,
+                      ...nestedNodes,
+                  ]
         },
     ): JSX.Element => {
+        const renderedNodes = props.data.flatMap((item, index): ReadonlyArray<JSX.Element> => {
+            return renderNode(item, `package-${String(index)}`)
+        })
         return (
             <div>
                 <span data-testid="treemap-packages">{props.data.length}</span>
-                {props.data.map((item): JSX.Element => {
-                    const packageName = typeof item.name === "string" ? item.name : ""
-                    return (
-                        <button
-                            key={packageName.length > 0 ? packageName : "package"}
-                            onClick={(): void => {
-                                props.onClick?.({
-                                    children: item.children,
-                                    name: packageName,
-                                    issueHeatmapColor: item.issueHeatmapColor,
-                                    issueCount: item.issueCount,
-                                    color: item.color,
-                                })
-                            }}
-                            type="button"
-                        >
-                            {packageName.length > 0 ? packageName : "package"}
-                        </button>
-                    )
-                })}
+                {renderedNodes}
             </div>
         )
     },
@@ -75,14 +124,30 @@ vi.mock("recharts", () => ({
 
 describe("codecity treemap graph", (): void => {
     const sampleFiles: ReadonlyArray<ICodeCityTreemapFileDescriptor> = [
-        { id: "src/api/auth.ts", issueCount: 2, loc: 80, path: "src/api/auth.ts" },
+        {
+            id: "src/api/auth.ts",
+            issueCount: 2,
+            complexity: 45,
+            coverage: 88,
+            lastReviewAt: "2026-02-01T10:00:00.000Z",
+            loc: 80,
+            path: "src/api/auth.ts",
+        },
         {
             id: "src/api/session.ts",
             issueCount: 0,
             complexity: 30,
+            coverage: 76,
             path: "src/api/session.ts",
         },
-        { id: "src/ui/index.ts", issueCount: 1, size: 40, path: "src/ui/index.ts" },
+        {
+            id: "src/ui/index.ts",
+            issueCount: 1,
+            complexity: 10,
+            coverage: 55,
+            size: 40,
+            path: "src/ui/index.ts",
+        },
     ]
     const sampleImpactedFiles: ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor> = [
         { fileId: "src/api/auth.ts", impactType: "changed" },
@@ -159,6 +224,7 @@ describe("codecity treemap graph", (): void => {
 
         expect(screen.getByText("CodeCity treemap")).not.toBeNull()
         expect(screen.getByText("Packages: 2, Files: 3, LOC: 150")).not.toBeNull()
+        expect(screen.getByText("Hover a file for quick metrics and quick link.")).not.toBeNull()
         expect(screen.getByTestId("treemap-packages")).not.toBeNull()
         expect(screen.getByText("Color metric: Complexity")).not.toBeNull()
         expect(screen.getByText("Low")).not.toBeNull()
@@ -182,7 +248,7 @@ describe("codecity treemap graph", (): void => {
         expect(screen.getByText("Packages: 2, Files: 3, LOC: 150")).not.toBeNull()
         expect(screen.getByText("All packages")).not.toBeNull()
 
-        const packageButton = screen.getByRole("button", { name: "src/api" })
+        const packageButton = screen.getByRole("button", { name: "Open package src/api" })
         fireEvent.click(packageButton)
 
         expect(screen.getByText("Packages: 1, Files: 2, LOC: 110")).not.toBeNull()
@@ -223,6 +289,43 @@ describe("codecity treemap graph", (): void => {
         expect(secondCallPackages?.[0]?.children?.[0]?.color).not.toBe(
             firstCallPackages?.[0]?.children?.[0]?.color,
         )
+    })
+
+    it("показывает hover tooltip с метриками и quick link", (): void => {
+        const fileLink = vi.fn(
+            (payload: { fileId: string; fileName: string; path: string }): string => {
+                return `/files/${payload.fileId}`
+            },
+        )
+
+        render(
+            <CodeCityTreemap
+                fileLink={fileLink}
+                files={sampleFiles}
+                title="CodeCity treemap"
+            />,
+        )
+
+        expect(screen.getByText("Hover a file for quick metrics and quick link.")).not.toBeNull()
+
+        const fileCell = screen.getByLabelText("File auth.ts")
+        fireEvent.mouseEnter(fileCell)
+
+        expect(screen.getByText("File details for auth.ts")).not.toBeNull()
+        expect(screen.getByText("File: auth.ts")).not.toBeNull()
+        expect(screen.getByText("Path: src/api/auth.ts")).not.toBeNull()
+        expect(screen.getByText("LOC: 80")).not.toBeNull()
+        expect(screen.getByText("Complexity: 45")).not.toBeNull()
+        expect(screen.getByText("Coverage: 88%")).not.toBeNull()
+        expect(screen.getByText("Issue count: 2")).not.toBeNull()
+        expect(screen.getByRole("link", { name: "Open file" })).toHaveAttribute(
+            "href",
+            "/files/src/api/auth.ts",
+        )
+        expect(fileLink).toHaveBeenCalledTimes(1)
+
+        fireEvent.mouseLeave(fileCell)
+        expect(screen.getByText("Hover a file for quick metrics and quick link.")).not.toBeNull()
     })
 
     it("показывает пустое состояние для пустого набора файлов", (): void => {
