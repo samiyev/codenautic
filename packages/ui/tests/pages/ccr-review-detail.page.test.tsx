@@ -1,10 +1,27 @@
-import { screen } from "@testing-library/react"
+import { act, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { CcrReviewDetailPage } from "@/pages/ccr-review-detail.page"
 import { MOCK_CCR_ROWS } from "@/pages/ccr-data"
 import { renderWithProviders } from "../utils/render"
+
+const originalEventSource = globalThis.EventSource
+
+interface IMockEventSource {
+    close: () => void
+    emit: (eventType: string, payload: string) => void
+    url: string
+}
+
+class MockEventSource {
+afterEach((): void => {
+    if (originalEventSource === undefined) {
+        delete (globalThis as { EventSource?: typeof EventSource }).EventSource
+    } else {
+        globalThis.EventSource = originalEventSource
+    }
+})
 
 describe("ccr review detail page", (): void => {
     it("рендерит карточку CCR и заголовок чата", (): void => {
@@ -27,6 +44,69 @@ describe("ccr review detail page", (): void => {
 
         expect(screen.getByText(/Please explain the current diff/)).not.toBeNull()
         expect(screen.getByText("You")).not.toBeNull()
+    })
+
+    it("рендерит SSE viewer при streamSourceUrl", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const ccr = MOCK_CCR_ROWS[0]
+        const createdSources: Array<{ emit: (eventType: string, payload: string) => void }> = []
+
+        class LocalMockEventSource {
+            public close: () => void
+            public readonly url: string
+            private readonly listeners: Record<string, Array<(event: MessageEvent<string>) => void>>
+
+            public constructor(url: string) {
+                this.url = url
+                this.close = vi.fn()
+                this.listeners = {}
+                createdSources.push(this)
+            }
+
+            public addEventListener(type: string, listener: (event: MessageEvent<string>) => void): void {
+                const listeners = this.listeners[type]
+                if (listeners === undefined) {
+                    this.listeners[type] = [listener]
+                    return
+                }
+
+                listeners.push(listener)
+            }
+
+            public emit(eventType: string, payload: string): void {
+                const listeners = this.listeners[eventType]
+                if (listeners === undefined) {
+                    return
+                }
+
+                const event = { data: payload } as MessageEvent<string>
+                listeners.forEach((listener): void => {
+                    listener(event)
+                })
+            }
+        }
+
+        // @ts-expect-error mock EventSource only for test
+        globalThis.EventSource = LocalMockEventSource as IMockEventSource
+
+        renderWithProviders(
+            <CcrReviewDetailPage
+                ccr={ccr}
+                streamSourceUrl="/api/v1/ccr/stream"
+            />,
+        )
+
+        const startButton = screen.getByRole("button", { name: "Start" })
+        await user.click(startButton)
+
+        const source = createdSources.at(0)
+        expect(source).not.toBeUndefined()
+        act((): void => {
+            source?.emit("message", JSON.stringify({ message: "stream started" }))
+        })
+
+        expect(screen.getByText("Live review stream")).not.toBeNull()
+        expect(screen.getByText("stream started")).not.toBeNull()
     })
 
     it("рендерит code diff с inline комментариями", (): void => {

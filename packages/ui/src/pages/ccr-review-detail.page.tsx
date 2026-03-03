@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router"
 import { Card, CardBody, CardHeader } from "@/components/ui"
 import { ChatPanel, type IChatPanelContext, type IChatPanelMessage } from "@/components/chat/chat-panel"
 import { CodeDiffViewer } from "@/components/reviews/code-diff-viewer"
+import { SseStreamViewer } from "@/components/streaming/sse-stream-viewer"
 import { ReviewCommentThread } from "@/components/reviews/review-comment-thread"
 import {
     ccrToContextItem,
@@ -18,6 +19,8 @@ import {
 export interface ICcrReviewDetailPageProps {
     /** Данные CCR, для которой рендерится review context. */
     readonly ccr: ICcrRowData
+    /** SSE источник для дополнительного стриминга по CCR. */
+    readonly streamSourceUrl?: string
 }
 
 function buildExplainMessage(ccr: ICcrRowData): string {
@@ -129,6 +132,14 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
             </Card>
 
             <CodeDiffViewer files={ccrDiffFiles} />
+            {props.streamSourceUrl === undefined ? null : (
+                <SseStreamViewer
+                    autoStart={false}
+                    eventSourceUrl={props.streamSourceUrl}
+                    title={`Live review stream · ${ccr.id}`}
+                    maxReconnectAttempts={2}
+                />
+            )}
             <ReviewCommentThread threads={ccrReviewThreads} />
             <ChatPanel
                 contextItems={[contextItem]}
