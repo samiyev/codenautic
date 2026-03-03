@@ -35,7 +35,12 @@ export interface IFeedbackRecord {
     /**
      * Reviewed rule identifier.
      */
-    readonly ruleId: string
+    readonly ruleId?: string
+
+    /**
+     * Optional comment text.
+     */
+    readonly comment?: string
 
     /**
      * Optional team scope where feedback originated.
@@ -64,6 +69,11 @@ export interface IFeedbackRecord {
 }
 
 /**
+ * Aggregate count by feedback type.
+ */
+export type IFeedbackTypeAggregate = Partial<Record<FeedbackType, number>>
+
+/**
  * Analytics query for feedback buckets.
  */
 export interface IFeedbackAnalysisCriteria {
@@ -84,9 +94,64 @@ export interface IFeedbackAnalysisCriteria {
 }
 
 /**
+ * Filter for query by review id.
+ */
+export interface IFeedbackReviewCriteria {
+    /**
+     * Review identifier.
+     */
+    readonly reviewId: string
+}
+
+/**
+ * Filter for query by issue id.
+ */
+export interface IFeedbackIssueCriteria {
+    /**
+     * Issue identifier.
+     */
+    readonly issueId: string
+}
+
+/**
  * Feedback repository contract for analytical queries.
  */
 export interface IFeedbackRepository {
+    /**
+     * Persists one feedback row.
+     *
+     * @param feedback Feedback row.
+     */
+    save(feedback: IFeedbackRecord): Promise<void>
+
+    /**
+     * Persists multiple feedback rows.
+     *
+     * @param feedbacks Feedback rows.
+     */
+    saveMany(feedbacks: readonly IFeedbackRecord[]): Promise<void>
+
+    /**
+     * Finds all feedback rows for one review.
+     *
+     * @param criteria Review filter.
+     */
+    findByReviewId(criteria: IFeedbackReviewCriteria): Promise<readonly IFeedbackRecord[]>
+
+    /**
+     * Finds all feedback rows for one issue.
+     *
+     * @param criteria Issue filter.
+     */
+    findByIssueId(criteria: IFeedbackIssueCriteria): Promise<readonly IFeedbackRecord[]>
+
+    /**
+     * Aggregates feedback by type for one review.
+     *
+     * @param criteria Review filter.
+     */
+    aggregateByType(criteria: IFeedbackReviewCriteria): Promise<IFeedbackTypeAggregate>
+
     /**
      * Finds feedback rows for optional criteria.
      *

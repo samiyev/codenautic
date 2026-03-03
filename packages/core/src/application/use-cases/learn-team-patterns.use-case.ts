@@ -2,6 +2,7 @@ import type {IUseCase} from "../ports/inbound/use-case.port"
 import type {IFeedbackRepository} from "../ports/outbound/feedback-repository.port"
 import {FEEDBACK_TYPE} from "../../domain/events/feedback-received"
 import {ValidationError, type IValidationErrorField} from "../../domain/errors/validation.error"
+import type {IFeedbackRecord} from "../ports/outbound/feedback-repository.port"
 import {Result} from "../../shared/result"
 
 interface ITeamPatternConfig {
@@ -415,10 +416,7 @@ export class LearnTeamPatternsUseCase
      * @returns Aggregated counters.
      */
     private aggregateByRule(
-        feedback: readonly {
-            readonly ruleId: string
-            readonly type: string
-        }[],
+        feedback: readonly IFeedbackRecord[],
     ): Map<string, {
         total: number
         accepted: number
@@ -427,8 +425,8 @@ export class LearnTeamPatternsUseCase
         const result = new Map<string, {total: number; accepted: number; falsePositive: number}>()
 
         for (const record of feedback) {
-            const ruleId = record.ruleId.trim()
-            if (ruleId.length === 0) {
+            const ruleId = record.ruleId?.trim()
+            if (ruleId === undefined || ruleId.length === 0) {
                 continue
             }
 

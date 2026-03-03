@@ -134,8 +134,8 @@ export class DetectFalsePositivesUseCase
         const uniqueRuleIds = new Set<string>()
 
         for (const item of feedback) {
-            const ruleId = item.ruleId.trim()
-            if (ruleId.length === 0) {
+            const ruleId = item.ruleId?.trim()
+            if (ruleId === undefined || ruleId.length === 0) {
                 continue
             }
 

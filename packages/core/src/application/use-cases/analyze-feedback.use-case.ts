@@ -228,8 +228,8 @@ export class AnalyzeFeedbackUseCase
         aggregate: Map<string, IRuleFeedbackAccumulate>,
         item: IFeedbackRecord,
     ): void {
-        const ruleId = item.ruleId.trim()
-        if (ruleId.length === 0) {
+        const ruleId = item.ruleId?.trim()
+        if (ruleId === undefined || ruleId.length === 0) {
             return
         }
 

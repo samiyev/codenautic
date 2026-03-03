@@ -85,6 +85,14 @@ export {
     type ITeamPatternAdjustment,
 } from "./services/learning.service"
 export {RuleEffectivenessService} from "./services/rule-effectiveness.service"
+export {PromptEngineService} from "./services/prompt-engine.service"
+export {RuleValidationService} from "./services/rule-validation.service"
+export {
+    IssueFeedback,
+    type IIssueFeedbackProps,
+    type IssueFeedbackType,
+} from "./value-objects/issue-feedback.value-object"
+export {ISSUE_FEEDBACK_TYPE} from "./value-objects/issue-feedback.value-object"
 export {
     API_KEY_STATUS,
     type ApiKeyStatus,

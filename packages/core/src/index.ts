@@ -221,6 +221,11 @@ export {
     type IAnalyzeFeedbackOutput,
 } from "./application/use-cases/analyze-feedback.use-case"
 export {
+    CollectFeedbackUseCase,
+    type ICollectFeedbackInput,
+    type ICollectFeedbackUseCaseDependencies,
+} from "./application/use-cases/collect-feedback.use-case"
+export {
     DetectFalsePositivesUseCase,
     type IDetectFalsePositivesInput,
     type IDetectFalsePositivesOutput,

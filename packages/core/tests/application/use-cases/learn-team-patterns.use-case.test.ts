@@ -18,6 +18,40 @@ class InMemoryFeedbackRepository implements IFeedbackRepository {
         this.records = records
     }
 
+    public save(_feedback: IFeedbackRecord): Promise<void> {
+        return Promise.resolve()
+    }
+
+    public saveMany(_feedbacks: readonly IFeedbackRecord[]): Promise<void> {
+        return Promise.resolve()
+    }
+
+    public findByReviewId(criteria: {readonly reviewId: string}): Promise<readonly IFeedbackRecord[]> {
+        return Promise.resolve(
+            this.records.filter((record): boolean => record.reviewId === criteria.reviewId),
+        )
+    }
+
+    public findByIssueId(criteria: {readonly issueId: string}): Promise<readonly IFeedbackRecord[]> {
+        return Promise.resolve(
+            this.records.filter((record): boolean => record.issueId === criteria.issueId),
+        )
+    }
+
+    public aggregateByType(criteria: {readonly reviewId: string}): Promise<Record<string, number>> {
+        const result: Record<string, number> = {}
+        for (const record of this.records) {
+            if (record.reviewId !== criteria.reviewId || record.ruleId === undefined) {
+                continue
+            }
+
+            const current = result[record.type] ?? 0
+            result[record.type] = current + 1
+        }
+
+        return Promise.resolve(result)
+    }
+
     public findByFilter(criteria?: {
         readonly ruleIds?: readonly string[]
         readonly teamIds?: readonly string[]
@@ -32,7 +66,7 @@ class InMemoryFeedbackRepository implements IFeedbackRepository {
         }
 
         const filtered = this.records.filter((record): boolean => {
-            const ruleMatch = hasRuleFilter === false || ruleIds.has(record.ruleId)
+            const ruleMatch = hasRuleFilter === false || (record.ruleId !== undefined && ruleIds.has(record.ruleId))
             const teamMatch = hasTeamFilter === false || (record.teamId !== undefined && teamIds.has(record.teamId))
             return ruleMatch && teamMatch
         })

@@ -4,9 +4,13 @@ import {BaseDomainEvent, type DomainEventPayload} from "./base-domain-event"
  * Supported feedback kinds for review findings.
  */
 export const FEEDBACK_TYPE = {
-    ACCEPTED: "ACCEPTED",
-    REJECTED: "REJECTED",
     FALSE_POSITIVE: "FALSE_POSITIVE",
+    ALREADY_KNOWN: "ALREADY_KNOWN",
+    HELPFUL: "HELPFUL",
+    IMPLEMENTED: "IMPLEMENTED",
+    DISMISSED: "DISMISSED",
+    REJECTED: "REJECTED",
+    ACCEPTED: "ACCEPTED",
     IGNORED: "IGNORED",
 } as const
 
