@@ -1,8 +1,9 @@
-import type { FormEvent, KeyboardEvent, ReactElement } from "react"
+import type { ReactElement } from "react"
 import { useState } from "react"
 
 import { ChatMessageBubble } from "@/components/chat/chat-message-bubble"
-import { Button, Card, CardBody, CardHeader, Textarea } from "@/components/ui"
+import { ChatInput, type IChatFileContextOption } from "@/components/chat/chat-input"
+import { Button, Card, CardBody, CardHeader } from "@/components/ui"
 
 /** Роль сообщения в чате. */
 export type TChatMessageRole = "assistant" | "system" | "user"
@@ -43,8 +44,16 @@ export interface IChatPanelProps {
     readonly emptyStateText?: string
     /** Подпись к input для a11y. */
     readonly inputAriaLabel?: string
+    /** Лимит символов в поле ввода. */
+    readonly maxMessageLength?: number
     /** Ария-метка для списка сообщений. */
     readonly messageListAriaLabel?: string
+    /** Опции контекста файла для отправки сообщения. */
+    readonly contextOptions?: ReadonlyArray<IChatFileContextOption>
+    /** Ария-метка для селектора контекста. */
+    readonly contextAriaLabel?: string
+    /** Callback смены выбранного контекста. */
+    readonly onContextChange?: (contextId: string) => void
     /** Доступный label для панели (в т.ч. скрин-ридерам). */
     readonly panelAriaLabel?: string
     /** Переопределение контейнера. */
@@ -68,31 +77,24 @@ export function ChatPanel(props: IChatPanelProps): ReactElement {
     const panelAriaLabel = props.panelAriaLabel ?? "Conversation panel"
     const messageListAriaLabel = props.messageListAriaLabel ?? "Conversation messages"
     const inputAriaLabel = props.inputAriaLabel ?? "Message input"
+    const contextAriaLabel = props.contextAriaLabel ?? "File context"
+    const maxMessageLength = props.maxMessageLength ?? 4000
     const wrapperClassName =
         `fixed inset-y-0 right-0 z-40 flex w-full transform flex-col border-l border-[var(--border)] bg-[var(--surface)] shadow-2xl transition-transform duration-200 sm:max-w-[420px] ${
             isPanelOpen ? "translate-x-0" : "translate-x-full"
         } ${props.className ?? ""}`
 
-    const sendMessage = (): void => {
-        const normalized = draftMessage.trim()
-        if (normalized.length === 0 || isSending) {
+    const handleSubmit = (message: string): void => {
+        if (message.length === 0 || isSending) {
             return
         }
 
-        props.onSendMessage(normalized)
+        props.onSendMessage(message)
         setDraftMessage("")
     }
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
-        event.preventDefault()
-        sendMessage()
-    }
-
-    const handleKeyDown = (event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-        if (event.key === "Enter" && event.shiftKey === false) {
-            event.preventDefault()
-            sendMessage()
-        }
+    const handleContextChange = (contextId: string): void => {
+        props.onContextChange?.(contextId)
     }
 
     return (
@@ -137,35 +139,19 @@ export function ChatPanel(props: IChatPanelProps): ReactElement {
                             )}
                         </ul>
                     )}
-
-                    <form
-                        className="border-t border-[var(--border)] p-3"
+                    <ChatInput
+                        contextAriaLabel={contextAriaLabel}
+                        contextOptions={props.contextOptions}
+                        counterAriaLabel="Message character count"
+                        draft={draftMessage}
+                        inputAriaLabel={inputAriaLabel}
+                        isLoading={isSending}
+                        maxLength={maxMessageLength}
+                        onContextChange={handleContextChange}
+                        onDraftChange={setDraftMessage}
                         onSubmit={handleSubmit}
-                    >
-                        <label className="sr-only" htmlFor="conversation-input">
-                            {inputAriaLabel}
-                        </label>
-                        <Textarea
-                            aria-label={inputAriaLabel}
-                            className="min-h-20 rounded-lg bg-[var(--surface)]"
-                            id="conversation-input"
-                            isDisabled={isSending}
-                            minRows={2}
-                            onKeyDown={handleKeyDown}
-                            onValueChange={(value): void => {
-                                setDraftMessage(value)
-                            }}
-                            placeholder={inputPlaceholder}
-                            value={draftMessage}
-                        />
-                        <Button
-                            className="mt-2 w-full"
-                            isDisabled={draftMessage.trim().length === 0 || isSending}
-                            type="submit"
-                        >
-                            Отправить
-                        </Button>
-                    </form>
+                        placeholder={inputPlaceholder}
+                    />
                 </CardBody>
             </Card>
         </aside>
