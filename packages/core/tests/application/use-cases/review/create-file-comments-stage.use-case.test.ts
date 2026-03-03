@@ -30,6 +30,18 @@ class InMemoryGitProvider implements IGitProvider {
         return Promise.resolve([])
     }
 
+    public getFileContentByRef(_filePath: string, _ref: string): Promise<string> {
+        return Promise.resolve("")
+    }
+
+    public getCommitHistory(_ref: string): Promise<readonly never[]> {
+        return Promise.resolve([])
+    }
+
+    public getBranches(): Promise<readonly never[]> {
+        return Promise.resolve([])
+    }
+
     public postComment(_mergeRequestId: string, _body: string): Promise<ICommentDTO> {
         return Promise.reject(new Error("not implemented in test"))
     }

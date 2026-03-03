@@ -31,6 +31,18 @@ class InMemoryGitProvider implements IGitProvider {
         return Promise.resolve([])
     }
 
+    public getFileContentByRef(_filePath: string, _ref: string): Promise<string> {
+        return Promise.resolve("")
+    }
+
+    public getCommitHistory(_ref: string): Promise<readonly never[]> {
+        return Promise.resolve([])
+    }
+
+    public getBranches(): Promise<readonly never[]> {
+        return Promise.resolve([])
+    }
+
     public postComment(mergeRequestId: string, body: string): Promise<ICommentDTO> {
         if (this.shouldThrowOnComment) {
             return Promise.reject(new Error("provider unavailable"))

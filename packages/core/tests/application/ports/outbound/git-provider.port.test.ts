@@ -11,9 +11,12 @@ import {
     type ICommentDTO,
     type IGitProvider,
     type IInlineCommentDTO,
+    type ICommitHistoryOptions,
+    type ICommitInfo,
     type IFileTreeNode,
     type IMergeRequestDTO,
     type IMergeRequestDiffFileDTO,
+    type IBranchInfo,
 } from "../../../../src"
 
 class InMemoryGitProvider implements IGitProvider {
@@ -63,6 +66,51 @@ class InMemoryGitProvider implements IGitProvider {
 
     public getFileTree(_ref: string): Promise<readonly IFileTreeNode[]> {
         return Promise.resolve([])
+    }
+
+    public getFileContentByRef(_filePath: string, _ref: string): Promise<string> {
+        return Promise.resolve("mock file content")
+    }
+
+    public getCommitHistory(
+        _ref: string,
+        _options?: ICommitHistoryOptions,
+    ): Promise<readonly ICommitInfo[]> {
+        return Promise.resolve([
+            {
+                sha: "commit-1",
+                message: "Initial scaffold",
+                authorName: "Alice",
+                authorEmail: "alice@example.com",
+                date: "2026-03-03T08:00:00.000Z",
+                filesChanged: ["src/index.ts"],
+            },
+            {
+                sha: "commit-2",
+                message: "Refactor review pipeline",
+                authorName: "Bob",
+                authorEmail: "bob@example.com",
+                date: "2026-03-03T10:00:00.000Z",
+                filesChanged: ["src/pipeline.ts"],
+            },
+        ])
+    }
+
+    public getBranches(): Promise<readonly IBranchInfo[]> {
+        return Promise.resolve([
+            {
+                name: "main",
+                sha: "abc123",
+                isDefault: true,
+                isProtected: true,
+            },
+            {
+                name: "develop",
+                sha: "def456",
+                isDefault: false,
+                isProtected: false,
+            },
+        ])
     }
 
     public postComment(_mergeRequestId: string, body: string): Promise<ICommentDTO> {
@@ -141,5 +189,36 @@ describe("IGitProvider contract", () => {
         expect(createdCheck.status).toBe("queued")
         expect(updatedCheck.status).toBe("completed")
         expect(updatedCheck.conclusion).toBe("success")
+    })
+
+    test("gets file content by ref", async () => {
+        const provider = new InMemoryGitProvider()
+        const fileContent = await provider.getFileContentByRef("src/contracts.ts", "feature/contracts")
+
+        expect(fileContent).toBe("mock file content")
+    })
+
+    test("returns commit history", async () => {
+        const provider = new InMemoryGitProvider()
+        const commits = await provider.getCommitHistory("main", {
+            maxCount: 2,
+            since: "2026-01-01T00:00:00.000Z",
+        })
+
+        expect(commits).toHaveLength(2)
+        expect(commits[0]?.sha).toBe("commit-1")
+        expect(commits[1]?.sha).toBe("commit-2")
+        expect(commits[0]?.filesChanged).toHaveLength(1)
+        expect(commits[1]?.filesChanged[0]).toBe("src/pipeline.ts")
+    })
+
+    test("gets branch metadata", async () => {
+        const provider = new InMemoryGitProvider()
+        const branches = await provider.getBranches()
+
+        expect(branches).toHaveLength(2)
+        expect(branches[0]?.name).toBe("main")
+        expect(branches[0]?.isDefault).toBe(true)
+        expect(branches[1]?.isProtected).toBe(false)
     })
 })

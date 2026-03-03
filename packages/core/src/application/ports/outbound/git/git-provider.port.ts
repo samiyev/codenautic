@@ -4,6 +4,9 @@ import type {
     ICheckRunDTO,
     ICommentDTO,
     IInlineCommentDTO,
+    IBranchInfo,
+    ICommitHistoryOptions,
+    ICommitInfo,
     IFileTreeNode,
     IMergeRequestDTO,
     IMergeRequestDiffFileDTO,
@@ -36,6 +39,34 @@ export interface IGitProvider {
      * @returns File tree nodes.
      */
     getFileTree(ref: string): Promise<readonly IFileTreeNode[]>
+
+    /**
+     * Fetches file content for a specific reference.
+     *
+     * @param filePath File path relative to repository root.
+     * @param ref Commit SHA or branch name.
+     * @returns Raw file content.
+     */
+    getFileContentByRef(filePath: string, ref: string): Promise<string>
+
+    /**
+     * Fetches repository branches metadata.
+     *
+     * @returns Branch list with default and protection metadata.
+     */
+    getBranches(): Promise<readonly IBranchInfo[]>
+
+    /**
+     * Fetches commit history for a branch or commit reference.
+     *
+     * @param ref Commit SHA or branch name.
+     * @param options Optional history query options.
+     * @returns Ordered commit list.
+     */
+    getCommitHistory(
+        ref: string,
+        options?: ICommitHistoryOptions,
+    ): Promise<readonly ICommitInfo[]>
 
     /**
      * Posts regular comment to merge request.
