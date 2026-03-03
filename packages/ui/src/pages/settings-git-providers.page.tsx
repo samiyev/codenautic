@@ -102,12 +102,14 @@ function withActions(
     providers: ReadonlyArray<IGitProviderState>,
     onAction: (providerName: string) => void,
 ): ReadonlyArray<IGitProviderState> {
-    return providers.map((item): IGitProviderState => ({
-        ...item,
-        onAction: (): void => {
-            onAction(item.provider)
-        },
-    }))
+    return providers.map(
+        (item): IGitProviderState => ({
+            ...item,
+            onAction: (): void => {
+                onAction(item.provider)
+            },
+        }),
+    )
 }
 
 /**
@@ -150,7 +152,7 @@ function renderConnectionRow(
                     onToggle(provider.provider)
                 }}
                 size="sm"
-                variant="flat"
+                variant="secondary"
             >
                 {provider.connected ? "Force reconnect" : "Connect"}
             </Button>
@@ -164,7 +166,8 @@ function renderConnectionRow(
  * @returns Список Git подключений и кнопки подключения/теста.
  */
 export function SettingsGitProvidersPage(): ReactElement {
-    const [providers, setProviders] = useState<ReadonlyArray<IGitProviderState>>(getMockProvidersState)
+    const [providers, setProviders] =
+        useState<ReadonlyArray<IGitProviderState>>(getMockProvidersState)
 
     const handleAction = (providerName: string): void => {
         setProviders(
@@ -190,7 +193,9 @@ export function SettingsGitProvidersPage(): ReactElement {
 
     const hasActiveKey = hasProviderKey(providers, "GitHub")
     const isKeyConfigured =
-        hasActiveKey || hasProviderKey(providers, "GitLab") || hasProviderKey(providers, "Bitbucket")
+        hasActiveKey ||
+        hasProviderKey(providers, "GitLab") ||
+        hasProviderKey(providers, "Bitbucket")
 
     return (
         <section className="space-y-4">
@@ -203,8 +208,9 @@ export function SettingsGitProvidersPage(): ReactElement {
                 <CardBody className="space-y-3">
                     <p className="text-sm font-medium text-slate-700">Connectivity checks</p>
                     <div className="space-y-2">
-                        {providersWithActions.map((provider): ReactElement =>
-                            renderConnectionRow(provider, handleTestConnection, handleAction),
+                        {providersWithActions.map(
+                            (provider): ReactElement =>
+                                renderConnectionRow(provider, handleTestConnection, handleAction),
                         )}
                     </div>
                     <p className="text-xs text-slate-500">

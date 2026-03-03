@@ -1,4 +1,4 @@
-import { Drawer, DrawerBody, DrawerContent, DrawerHeader } from "@heroui/react"
+import { Drawer, DrawerBody, DrawerContent, DrawerHeader } from "@/components/ui"
 
 import type { ReactElement } from "react"
 

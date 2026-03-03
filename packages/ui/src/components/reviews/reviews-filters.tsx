@@ -3,6 +3,25 @@ import type { ReactElement } from "react"
 import { Button, Input, Select, SelectItem } from "@/components/ui"
 
 /**
+ * Возвращает выбранный ключ из структуры выбора HeroUI.
+ *
+ * @param keys Значение из onSelectionChange.
+ * @returns Строковый ключ или `all`.
+ */
+function getSelectedKey(keys: unknown): string {
+    if (keys === "all") {
+        return "all"
+    }
+
+    if (keys instanceof Set === false) {
+        return "all"
+    }
+
+    const nextValue = [...keys][0]
+    return typeof nextValue === "string" ? nextValue : "all"
+}
+
+/**
  * Параметры поиска и фильтрации CCR.
  */
 export interface IReviewsFiltersProps {
@@ -46,14 +65,15 @@ export function ReviewsFilters(props: IReviewsFiltersProps): ReactElement {
                 placeholder="All statuses"
                 selectedKeys={new Set([props.status])}
                 onSelectionChange={(keys): void => {
-                    const [nextStatus] = Array.from(keys)
-                    props.onStatusChange(typeof nextStatus === "string" ? nextStatus : "all")
+                    props.onStatusChange(getSelectedKey(keys))
                 }}
             >
-                <SelectItem key="all">All statuses</SelectItem>
+                <SelectItem value="all">All statuses</SelectItem>
                 {props.statusOptions.map(
                     (status): ReactElement => (
-                        <SelectItem key={status}>{status}</SelectItem>
+                        <SelectItem key={status} value={status}>
+                            {status}
+                        </SelectItem>
                     ),
                 )}
             </Select>
@@ -62,18 +82,19 @@ export function ReviewsFilters(props: IReviewsFiltersProps): ReactElement {
                 placeholder="All assignees"
                 selectedKeys={new Set([props.assignee])}
                 onSelectionChange={(keys): void => {
-                    const [nextAssignee] = Array.from(keys)
-                    props.onAssigneeChange(typeof nextAssignee === "string" ? nextAssignee : "all")
+                    props.onAssigneeChange(getSelectedKey(keys))
                 }}
             >
-                <SelectItem key="all">All assignees</SelectItem>
+                <SelectItem value="all">All assignees</SelectItem>
                 {props.assigneeOptions.map(
                     (assignee): ReactElement => (
-                        <SelectItem key={assignee}>{assignee}</SelectItem>
+                        <SelectItem key={assignee} value={assignee}>
+                            {assignee}
+                        </SelectItem>
                     ),
                 )}
             </Select>
-            <Button variant="flat" onPress={props.onReset}>
+            <Button variant="secondary" onPress={props.onReset}>
                 Reset
             </Button>
         </div>

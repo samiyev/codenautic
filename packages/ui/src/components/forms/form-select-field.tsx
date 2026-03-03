@@ -6,9 +6,28 @@ import {
     type FieldPath,
     type FieldValues,
 } from "react-hook-form"
-import { type Selection, Select, SelectItem } from "@heroui/react"
+import { Select, SelectItem } from "@/components/ui"
 
 import { pickFieldMessage } from "./form-field-utils"
+
+/**
+ * Возвращает выбранное значение из selection-структуры.
+ *
+ * @param keys Значение из onSelectionChange.
+ * @returns Идентификатор выбранного пункта или undefined.
+ */
+function getSelectedValue(keys: unknown): string | undefined {
+    if (keys === "all") {
+        return undefined
+    }
+
+    if (keys instanceof Set === false) {
+        return undefined
+    }
+
+    const nextValue = [...keys][0]
+    return typeof nextValue === "string" ? nextValue : undefined
+}
 
 /**
  * Опция для form-select-field.
@@ -99,29 +118,8 @@ export function FormSelectField<
                             id={fieldId}
                             isInvalid={hasError}
                             selectedKeys={selectedKeys}
-                            onSelectionChange={(keys: Selection): void => {
-                                if (keys === "all") {
-                                    field.onChange(undefined)
-                                    return
-                                }
-
-                                if (keys instanceof Set === false) {
-                                    field.onChange(undefined)
-                                    return
-                                }
-
-                                if (keys.size === 0) {
-                                    field.onChange(undefined)
-                                    return
-                                }
-
-                                const nextValue = [...keys][0]
-                                if (typeof nextValue !== "string") {
-                                    field.onChange(undefined)
-                                    return
-                                }
-
-                                field.onChange(nextValue)
+                            onSelectionChange={(keys): void => {
+                                field.onChange(getSelectedValue(keys))
                             }}
                         >
                             {props.options.map((option): ReactElement => {

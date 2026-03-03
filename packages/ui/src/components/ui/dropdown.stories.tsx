@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@heroui/react"
 import { useState } from "react"
 
 import { Button } from "@/components/ui"
 import { Dropdown } from "./dropdown"
+import { DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "./dropdown"
 
 const meta = {
     title: "Base/Dropdown",
@@ -22,7 +22,7 @@ export const Default: Story = {
         return (
             <Dropdown>
                 <DropdownTrigger>
-                    <Button variant="flat">{label}</Button>
+                    <Button variant="secondary">{label}</Button>
                 </DropdownTrigger>
                 <DropdownMenu
                     aria-label="Options"

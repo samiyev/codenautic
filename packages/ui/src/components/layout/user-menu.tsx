@@ -1,12 +1,6 @@
 import type { ReactElement } from "react"
 import { Avatar, Button } from "@/components/ui"
-import {
-    Dropdown,
-    DropdownItem,
-    DropdownMenu,
-    DropdownSection,
-    DropdownTrigger,
-} from "@heroui/react"
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@/components/ui"
 
 /**
  * Настройки отображения пользовательского блока в header.
@@ -45,10 +39,8 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
                 </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="User menu">
-                <DropdownSection showDivider title="Account">
-                    <DropdownItem key="name">{props.userName ?? "User"}</DropdownItem>
-                    <DropdownItem key="email">{props.userEmail ?? "user@example.com"}</DropdownItem>
-                </DropdownSection>
+                <DropdownItem key="name">{props.userName ?? "User"}</DropdownItem>
+                <DropdownItem key="email">{props.userEmail ?? "user@example.com"}</DropdownItem>
                 {props.onSignOut === undefined ? null : (
                     <DropdownItem
                         key="logout"

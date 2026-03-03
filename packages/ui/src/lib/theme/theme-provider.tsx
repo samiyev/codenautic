@@ -338,9 +338,7 @@ async function fetchThemeProfileFromApi(
         })
 
         const profile = readThemeSettingsPayload(response)
-        const responsePayload = isRecord(response)
-            ? response
-            : ({} as Record<string, unknown>)
+        const responsePayload = isRecord(response) ? response : ({} as Record<string, unknown>)
         const updatedAtMs = parseUpdatedAtValue(responsePayload.updatedAt)
 
         if (

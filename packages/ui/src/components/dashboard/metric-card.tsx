@@ -46,7 +46,7 @@ export function MetricCard(props: IMetricCardProps): ReactElement {
                     <p className="mt-1 text-sm text-slate-600">{props.caption}</p>
                 )}
                 {hasTrend ? (
-                    <Chip className={`mt-3 ${trendLabel}`} color="default" size="sm" variant="flat">
+                    <Chip className={`mt-3 ${trendLabel}`} color="default" size="sm" variant="soft">
                         {props.trendLabel}
                     </Chip>
                 ) : null}

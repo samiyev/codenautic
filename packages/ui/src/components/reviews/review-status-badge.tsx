@@ -45,7 +45,7 @@ const STATUS_LABELS: Record<TReviewStatus, string> = {
  */
 export function ReviewStatusBadge(props: IReviewStatusBadgeProps): ReactElement {
     return (
-        <Chip color={STATUS_VISUALS[props.status]} size="sm" variant="flat">
+        <Chip color={STATUS_VISUALS[props.status]} size="sm" variant="soft">
             {STATUS_LABELS[props.status]}
         </Chip>
     )

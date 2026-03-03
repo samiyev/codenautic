@@ -6,7 +6,7 @@ import {
     type FieldPath,
     type FieldValues,
 } from "react-hook-form"
-import { Radio, RadioGroup } from "@heroui/react"
+import { Radio, RadioGroup } from "@/components/ui"
 
 import { pickFieldMessage } from "./form-field-utils"
 

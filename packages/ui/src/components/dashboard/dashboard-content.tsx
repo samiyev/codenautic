@@ -59,10 +59,13 @@ export function DashboardContent(props: IDashboardContentProps): ReactElement {
                             <Alert
                                 className="mb-4"
                                 color="warning"
-                                title="Ops notice"
-                                variant="flat"
                             >
-                                Есть критические сигналы, проверьте вкладку CCR Management.
+                                <p className="mb-1 text-sm font-semibold text-amber-900">
+                                    Ops notice
+                                </p>
+                                <p className="text-sm text-amber-900/90">
+                                    Есть критические сигналы, проверьте вкладку CCR Management.
+                                </p>
                             </Alert>
                         ) : null}
                         <ul className="space-y-2" aria-label="Work queue">

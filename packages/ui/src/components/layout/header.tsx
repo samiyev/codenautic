@@ -1,6 +1,5 @@
 import type { ReactElement } from "react"
 import { Bell, Menu } from "lucide-react"
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@heroui/react"
 
 import { Button } from "@/components/ui"
 
@@ -35,13 +34,9 @@ export function Header(props: IHeaderProps): ReactElement {
     const hasNotifications = props.notificationCount !== undefined && props.notificationCount > 0
 
     return (
-        <Navbar
-            isBlurred
-            className="border-b border-slate-200 bg-white/80 backdrop-blur"
-            maxWidth="full"
-        >
-            <NavbarContent justify="start">
-                <NavbarItem className="md:hidden">
+        <div className="border-b border-slate-200 bg-white/80 backdrop-blur">
+            <div className="mx-auto flex h-16 items-center gap-3 px-3">
+                <div className={props.title === undefined ? "md:hidden" : "hidden md:flex"}>
                     <Button
                         isIconOnly
                         radius="full"
@@ -51,18 +46,14 @@ export function Header(props: IHeaderProps): ReactElement {
                     >
                         <Menu size={20} />
                     </Button>
-                </NavbarItem>
-                <NavbarBrand>
-                    <p className="text-sm font-semibold tracking-wide">CodeNautic</p>
-                </NavbarBrand>
-            </NavbarContent>
-            <NavbarContent justify="center">
-                {props.title !== undefined ? (
-                    <p className="text-sm font-medium text-slate-700">{props.title}</p>
-                ) : null}
-            </NavbarContent>
-            <NavbarContent justify="end">
-                <NavbarItem>
+                </div>
+                <p className="text-sm font-semibold tracking-wide text-slate-900">CodeNautic</p>
+                <div className="mx-auto hidden md:block">
+                    {props.title !== undefined ? (
+                        <p className="text-sm font-medium text-slate-700">{props.title}</p>
+                    ) : null}
+                </div>
+                <div className="ml-auto flex items-center gap-2">
                     <Button
                         isIconOnly
                         radius="full"
@@ -81,18 +72,19 @@ export function Header(props: IHeaderProps): ReactElement {
                             ) : null}
                         </span>
                     </Button>
-                </NavbarItem>
-                <NavbarItem>
                     <ThemeToggle />
-                </NavbarItem>
-                <NavbarItem>
                     <UserMenu
                         onSignOut={props.onSignOut}
                         userEmail={props.userEmail}
                         userName={props.userName}
                     />
-                </NavbarItem>
-            </NavbarContent>
-        </Navbar>
+                </div>
+            </div>
+            {props.title === undefined ? null : (
+                <div className="border-t border-slate-100 px-3 py-2 md:hidden">
+                    <p className="text-sm text-slate-700">{props.title}</p>
+                </div>
+            )}
+        </div>
     )
 }

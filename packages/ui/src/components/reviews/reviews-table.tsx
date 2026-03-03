@@ -48,26 +48,28 @@ export function ReviewsTable(props: IReviewsTableProps): ReactElement {
                 <TableColumn>Status</TableColumn>
             </TableHeader>
             <TableBody emptyContent="No CCRs found for this filter set">
-                {props.rows.map((row): ReactElement => (
-                    <TableRow key={row.id}>
-                        <TableCell>
-                            <Link
-                                className="text-sm font-semibold text-slate-900 underline underline-offset-4"
-                                to="/reviews"
-                            >
-                                {row.id}
-                            </Link>
-                        </TableCell>
-                        <TableCell>{row.title}</TableCell>
-                        <TableCell>{row.repository}</TableCell>
-                        <TableCell>{row.assignee}</TableCell>
-                        <TableCell>{row.comments}</TableCell>
-                        <TableCell>{row.updatedAt}</TableCell>
-                        <TableCell>
-                            <ReviewStatusBadge status={row.status} />
-                        </TableCell>
-                    </TableRow>
-                ))}
+                {props.rows.map(
+                    (row): ReactElement => (
+                        <TableRow key={row.id}>
+                            <TableCell>
+                                <Link
+                                    className="text-sm font-semibold text-slate-900 underline underline-offset-4"
+                                    to="/reviews"
+                                >
+                                    {row.id}
+                                </Link>
+                            </TableCell>
+                            <TableCell>{row.title}</TableCell>
+                            <TableCell>{row.repository}</TableCell>
+                            <TableCell>{row.assignee}</TableCell>
+                            <TableCell>{row.comments}</TableCell>
+                            <TableCell>{row.updatedAt}</TableCell>
+                            <TableCell>
+                                <ReviewStatusBadge status={row.status} />
+                            </TableCell>
+                        </TableRow>
+                    ),
+                )}
             </TableBody>
         </Table>
     )

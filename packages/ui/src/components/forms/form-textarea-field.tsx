@@ -6,8 +6,7 @@ import {
     type FieldPath,
     type FieldValues,
 } from "react-hook-form"
-import { Textarea } from "@/components/ui"
-import { type TextareaProps } from "@heroui/react"
+import { Textarea, type TextareaProps } from "@/components/ui"
 
 import { pickFieldMessage } from "./form-field-utils"
 
@@ -39,7 +38,14 @@ export interface IFormTextareaFieldProps<
     /** Пропсы HeroUI Textarea без значений/обработчиков. */
     readonly textareaProps?: Omit<
         TextareaProps,
-        "name" | "value" | "defaultValue" | "onChange" | "onBlur" | "isInvalid" | "isDisabled"
+        | "name"
+        | "value"
+        | "defaultValue"
+        | "onChange"
+        | "onValueChange"
+        | "onBlur"
+        | "isInvalid"
+        | "isDisabled"
     >
     /** Идентификатор для accessibility. */
     readonly id?: string
@@ -89,7 +95,9 @@ export function FormTextareaField<
                             name={field.name}
                             value={value}
                             onBlur={field.onBlur}
-                            onChange={field.onChange}
+                            onValueChange={(nextValue: string): void => {
+                                field.onChange(nextValue)
+                            }}
                             {...props.textareaProps}
                         />
                         <span id={`${fieldId}-helper`}>

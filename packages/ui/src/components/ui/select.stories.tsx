@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import type { ReactElement } from "react"
-import { type Selection, SelectItem } from "@heroui/react"
 import { useState } from "react"
 
-import { Select } from "./select"
+import { Select, SelectItem } from "./select"
 
 const meta = {
     title: "Base/Select",
@@ -43,9 +42,12 @@ function DefaultSelectStory(): ReactElement {
             placeholder="Select provider"
             selectionMode="single"
             selectedKeys={new Set([selected])}
-            variant="flat"
-            onSelectionChange={(keys: Selection): void => {
+            onSelectionChange={(keys): void => {
                 if (keys instanceof Set === false) {
+                    return
+                }
+
+                if (keys.size === 0) {
                     return
                 }
 
@@ -57,7 +59,9 @@ function DefaultSelectStory(): ReactElement {
         >
             {providers.map(
                 (provider): ReactElement => (
-                    <SelectItem key={provider.value}>{provider.label}</SelectItem>
+                    <SelectItem key={provider.value} value={provider.value}>
+                        {provider.label}
+                    </SelectItem>
                 ),
             )}
         </Select>

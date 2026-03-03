@@ -1,4 +1,4 @@
-import { type ChangeEvent, type FormEvent, type ReactElement, useEffect, useState } from "react"
+import { type FormEvent, type ReactElement, useEffect, useState } from "react"
 
 import { Textarea } from "@/components/ui"
 import { Button } from "@/components/ui"
@@ -48,12 +48,6 @@ export function IgnorePathsEditor(props: IIgnorePathsEditorProps): ReactElement 
         props.onChange(Array.from(new Set(nextValue)))
     }
 
-    const handleValueChange = (
-        event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    ): void => {
-        setRawValue(event.target.value)
-    }
-
     return (
         <form className="space-y-3" onSubmit={applyChanges}>
             <label className="text-sm font-medium text-slate-700" htmlFor={textareaId}>
@@ -63,8 +57,9 @@ export function IgnorePathsEditor(props: IIgnorePathsEditorProps): ReactElement 
                 id={textareaId}
                 rows={6}
                 value={rawValue}
-                onChange={handleValueChange}
-                onValueChange={setRawValue}
+                onValueChange={(value: string): void => {
+                    setRawValue(value)
+                }}
             />
             <p className="text-xs text-slate-500">{props.helperText ?? "Один шаблон на строку."}</p>
             <Button type="submit" variant="solid">

@@ -169,11 +169,13 @@ function ThemePresetButtons({
 function ThemePalettePreview({
     palette,
 }: {
-    readonly palette: {
-        readonly primary: string
-        readonly accent: string
-        readonly success: string
-    } | undefined
+    readonly palette:
+        | {
+              readonly primary: string
+              readonly accent: string
+              readonly success: string
+          }
+        | undefined
 }): ReactElement | null {
     if (palette === undefined) {
         return null

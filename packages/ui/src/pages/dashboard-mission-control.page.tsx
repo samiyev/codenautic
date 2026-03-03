@@ -171,7 +171,9 @@ function getDashboardMetrics(range: TDashboardDateRange): ReadonlyArray<IMetricG
  * @param range Выбранный диапазон дат.
  * @returns Точки distribution.
  */
-function getStatusDistribution(range: TDashboardDateRange): ReadonlyArray<IStatusDistributionPoint> {
+function getStatusDistribution(
+    range: TDashboardDateRange,
+): ReadonlyArray<IStatusDistributionPoint> {
     if (range === "1d") {
         return [
             { status: "approved", count: 42, color: "oklch(0.65 0.17 142)" },
@@ -295,19 +297,19 @@ function renderSignalsCard(): ReactElement {
 export function DashboardMissionControlPage(): ReactElement {
     const [range, setRange] = useState<TDashboardDateRange>("7d")
 
-    const metrics = useMemo((): ReadonlyArray<IMetricGridMetric> => getDashboardMetrics(range), [range])
+    const metrics = useMemo(
+        (): ReadonlyArray<IMetricGridMetric> => getDashboardMetrics(range),
+        [range],
+    )
     const statusDistribution = useMemo(
         (): ReadonlyArray<IStatusDistributionPoint> => getStatusDistribution(range),
         [range],
     )
     const opsBanner = useMemo((): IOpsBannerProps => getOpsBanner(range), [range])
     const dashboardPayload = useMemo((): IWorkQueuePayload => DASHBOARD_PAYLOAD, [])
-    const timelinePayload = useMemo(
-        (): ReadonlyArray<IWorkQueuePayload["timeline"][number]> => {
-            return getTimelinePayload(dashboardPayload)
-        },
-        [dashboardPayload],
-    )
+    const timelinePayload = useMemo((): ReadonlyArray<IWorkQueuePayload["timeline"][number]> => {
+        return getTimelinePayload(dashboardPayload)
+    }, [dashboardPayload])
 
     return (
         <section className="space-y-4">
@@ -329,9 +331,12 @@ export function DashboardMissionControlPage(): ReactElement {
             </div>
 
             {opsBanner.isDegraded === true ? (
-                <Alert color="warning" title="Ops notice" variant="flat">
-                    Provider health degraded in this window. Check settings and review queue for
-                    mitigation.
+                <Alert color="warning" className="space-y-1">
+                    <p className="text-sm font-semibold text-amber-900">Ops notice</p>
+                    <p className="text-sm text-amber-900/90">
+                        Provider health degraded in this window. Check settings and review queue for
+                        mitigation.
+                    </p>
                 </Alert>
             ) : null}
 

@@ -4,7 +4,6 @@ import { Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 import {
     LlmProviderForm,
-    type ILlmProviderFormValues,
 } from "@/components/settings/llm-provider-form"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
 
@@ -22,9 +21,35 @@ interface ILlmProviderConfig {
     readonly connected: boolean
 }
 
-const LL_MODEL_OPTIONS = ["gpt-4o-mini", "gpt-4o", "claude-3-7-sonnet", "mistral-small-latest"]
+const LL_MODEL_OPTIONS = [
+    "gpt-4o-mini",
+    "gpt-4o",
+    "claude-3-7-sonnet",
+    "mistral-small-latest",
+] as const
 const LLM_PROVIDER_OPTIONS = ["OpenAI", "Anthropic", "Azure OpenAI", "Mistral"] as const
 type TLlmProvider = (typeof LLM_PROVIDER_OPTIONS)[number]
+interface INormalizedLlmProviderFormValues {
+    /** Провайдер. */
+    readonly provider: string
+    /** Модель. */
+    readonly model: string
+    /** API key. */
+    readonly apiKey: string
+    /** Custom endpoint. */
+    readonly endpoint: string
+    /** Признак теста после сохранения. */
+    readonly testAfterSave: boolean
+}
+
+const DEFAULT_INITIAL_PROVIDER: string = LLM_PROVIDER_OPTIONS[0]
+const DEFAULT_FORM_VALUES: INormalizedLlmProviderFormValues = {
+    apiKey: "",
+    endpoint: "",
+    model: LL_MODEL_OPTIONS[0],
+    provider: DEFAULT_INITIAL_PROVIDER,
+    testAfterSave: false,
+}
 
 const INITIAL_CONFIG: Record<TLlmProvider, ILlmProviderConfig> = {
     OpenAI: {
@@ -57,6 +82,10 @@ const INITIAL_CONFIG: Record<TLlmProvider, ILlmProviderConfig> = {
     },
 }
 
+function safeString(value: unknown, fallback: string): string {
+    return typeof value === "string" ? value : fallback
+}
+
 /**
  * Проверяет, есть ли сохранённые ключи у хотя бы одного провайдера.
  *
@@ -81,6 +110,36 @@ function getProviderConfig(
     return configs[provider]
 }
 
+function sanitizeChoice<TValue extends string>(
+    allowed: readonly [TValue, ...TValue[]],
+    value: unknown,
+): TValue {
+    if (typeof value === "string" && allowed.includes(value as TValue) === true) {
+        return value as TValue
+    }
+
+    return allowed[0]
+}
+
+function normalizeFormValues(raw: unknown): INormalizedLlmProviderFormValues {
+    if (raw !== null && typeof raw === "object") {
+        const next = raw as Record<string, unknown>
+
+        return {
+            apiKey: safeString(next.apiKey, ""),
+            endpoint:
+                typeof next.endpoint === "string" && next.endpoint.length > 0
+                    ? next.endpoint
+                    : DEFAULT_FORM_VALUES.endpoint,
+            model: sanitizeChoice(LL_MODEL_OPTIONS, next.model),
+            provider: sanitizeChoice(LLM_PROVIDER_OPTIONS, next.provider),
+            testAfterSave: next.testAfterSave === true,
+        }
+    }
+
+    return DEFAULT_FORM_VALUES
+}
+
 /**
  * Обновляет состояние провайдера.
  *
@@ -92,17 +151,17 @@ function getProviderConfig(
 function toNextProviderConfig(
     previousValue: Record<TLlmProvider, ILlmProviderConfig>,
     provider: TLlmProvider,
-    next: ILlmProviderFormValues,
+    next: INormalizedLlmProviderFormValues,
 ): Record<TLlmProvider, ILlmProviderConfig> {
     return {
         ...previousValue,
         [provider]: {
             ...previousValue[provider],
-            connected: next.testAfterSave ? previousValue[provider].connected === true : false,
+            connected: next.testAfterSave === true ? previousValue[provider].connected === true : false,
             provider: next.provider,
             apiKey: next.apiKey,
             model: next.model,
-            endpoint: next.endpoint ?? "",
+            endpoint: next.endpoint,
         },
     }
 }
@@ -119,7 +178,7 @@ function toNextProviderConfig(
 function renderProviderCard(
     provider: TLlmProvider,
     config: ILlmProviderConfig,
-    onSave: (next: ILlmProviderFormValues) => void,
+    onSave: (next: unknown) => void,
     onTest: () => Promise<boolean>,
     isActionDisabled: boolean,
 ): ReactElement {
@@ -140,7 +199,7 @@ function renderProviderCard(
                     modelOptions={LL_MODEL_OPTIONS}
                     providers={[...LLM_PROVIDER_OPTIONS]}
                     onSubmit={(next): void => {
-                        onSave(next)
+                        onSave(normalizeFormValues(next))
                     }}
                 />
                 <div className="flex items-center gap-3">
@@ -172,11 +231,10 @@ export function SettingsLlmProvidersPage(): ReactElement {
         [configs],
     )
 
-    const saveConfig = (provider: TLlmProvider, next: ILlmProviderFormValues): void => {
-        setConfigs(
-            (previousValue): Record<TLlmProvider, ILlmProviderConfig> =>
-                toNextProviderConfig(previousValue, provider, next),
-        )
+    const saveConfig = (provider: TLlmProvider, next: INormalizedLlmProviderFormValues): void => {
+        setConfigs((previousValue): Record<TLlmProvider, ILlmProviderConfig> => {
+            return toNextProviderConfig(previousValue, provider, next)
+        })
         showToastSuccess(`Saved ${provider} provider config.`)
     }
 
@@ -187,19 +245,17 @@ export function SettingsLlmProvidersPage(): ReactElement {
     }
 
     const handleConnectionResult = (provider: TLlmProvider, next: boolean): void => {
-        setConfigs(
-            (previousValue): Record<TLlmProvider, ILlmProviderConfig> => {
-                const currentConfig = getProviderConfig(previousValue, provider)
+        setConfigs((previousValue): Record<TLlmProvider, ILlmProviderConfig> => {
+            const currentConfig = getProviderConfig(previousValue, provider)
 
-                return {
-                    ...previousValue,
-                    [provider]: {
-                        ...currentConfig,
-                        connected: next,
-                    },
-                }
-            },
-        )
+            return {
+                ...previousValue,
+                [provider]: {
+                    ...currentConfig,
+                    connected: next,
+                },
+            }
+        })
         if (next === true) {
             showToastSuccess(`${provider} marked as connected.`)
             return
@@ -233,7 +289,7 @@ export function SettingsLlmProvidersPage(): ReactElement {
                         provider,
                         config,
                         (next): void => {
-                            saveConfig(provider, next)
+                            saveConfig(provider, normalizeFormValues(next))
                         },
                         async (): Promise<boolean> => testAndPersistConnection(provider),
                         hasAtLeastOneConfigured === false,
