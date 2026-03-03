@@ -262,7 +262,7 @@ export class PipelineOrchestratorUseCase
         }
 
         if (startFromStageId === undefined) {
-            return Result.ok<number, StageError>(0)
+            return this.resolveImplicitStartIndex(state, definition)
         }
 
         if (startFromStageId.trim().length === 0) {
@@ -292,6 +292,89 @@ export class PipelineOrchestratorUseCase
         }
 
         return Result.ok<number, StageError>(startIndex)
+    }
+
+    /**
+     * Resolves start index from current state when startFromStageId is not set.
+     *
+     * - if currentStageId is present and differs from lastCompletedStageId,
+     *   resume starts from current stage;
+     * - otherwise resume starts from the next stage after lastCompletedStageId.
+     *
+     * @param state Current state.
+     * @param definition Pipeline definition.
+     * @returns Stage index or stage error.
+     */
+    private resolveImplicitStartIndex(
+        state: ReviewPipelineState,
+        definition: IPipelineDefinition,
+    ): Result<number, StageError> {
+        if (state.currentStageId !== null) {
+            const currentIndex = definition.stages.findIndex((stage): boolean => {
+                return stage.stageId === state.currentStageId
+            })
+            if (currentIndex < 0) {
+                return Result.fail<number, StageError>(
+                    this.createPipelineError(
+                        state,
+                        definition.definitionVersion,
+                        PIPELINE_RUNTIME_STAGE_ID,
+                        `Current stage id ${state.currentStageId} not found in definition`,
+                    ),
+                )
+            }
+
+            if (state.currentStageId === state.lastCompletedStageId) {
+                const completedStage = currentIndex + 1
+                if (completedStage >= definition.stages.length) {
+                    return Result.fail<number, StageError>(
+                        this.createPipelineError(
+                            state,
+                            definition.definitionVersion,
+                            PIPELINE_RUNTIME_STAGE_ID,
+                            "Pipeline run is already completed, no stages left to execute",
+                        ),
+                    )
+                }
+
+                return Result.ok<number, StageError>(completedStage)
+            }
+
+            return Result.ok<number, StageError>(currentIndex)
+        }
+
+        if (state.lastCompletedStageId !== null) {
+            const lastCompletedIndex = definition.stages.findIndex((stage): boolean => {
+                return stage.stageId === state.lastCompletedStageId
+            })
+
+            if (lastCompletedIndex < 0) {
+                return Result.fail<number, StageError>(
+                    this.createPipelineError(
+                        state,
+                        definition.definitionVersion,
+                        PIPELINE_RUNTIME_STAGE_ID,
+                        `Last completed stage id ${state.lastCompletedStageId} not found in definition`,
+                    ),
+                )
+            }
+
+            const nextIndex = lastCompletedIndex + 1
+            if (nextIndex >= definition.stages.length) {
+                return Result.fail<number, StageError>(
+                    this.createPipelineError(
+                        state,
+                        definition.definitionVersion,
+                        PIPELINE_RUNTIME_STAGE_ID,
+                        "Pipeline run is already completed, no stages left to execute",
+                    ),
+                )
+            }
+
+            return Result.ok<number, StageError>(nextIndex)
+        }
+
+        return Result.ok<number, StageError>(0)
     }
 
     /**

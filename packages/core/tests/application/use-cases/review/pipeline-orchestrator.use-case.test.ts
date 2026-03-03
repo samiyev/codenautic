@@ -416,4 +416,174 @@ describe("PipelineOrchestratorUseCase", () => {
         expect(result.value.stageResults[1]?.stageId).toBe("stage-b")
         expect(result.value.stageResults[2]?.stageId).toBe("stage-c")
     })
+
+    test("auto-resumes from current stage when startFromStageId is not provided", async () => {
+        const definition = {
+            definitionVersion: "v1",
+            stages: [
+                {stageId: "stage-a", stageName: "Stage A"},
+                {stageId: "stage-b", stageName: "Stage B"},
+                {stageId: "stage-c", stageName: "Stage C"},
+            ],
+        }
+        const initialState = ReviewPipelineState.create({
+            runId: "run-5",
+            definitionVersion: "v1",
+            mergeRequest: {id: "mr-5"},
+            config: {},
+            currentStageId: "stage-b",
+            lastCompletedStageId: "stage-a",
+            stageAttempts: {
+                "stage-a": 1,
+                "stage-b": 1,
+            },
+        })
+        const orchestrator = new PipelineOrchestratorUseCase({
+            stages: {
+                "stage-a": new StaticStageUseCase("stage-a", "Stage A", (state) => {
+                    return Result.ok<IStageTransition, StageError>({
+                        state,
+                    })
+                }),
+                "stage-b": new StaticStageUseCase("stage-b", "Stage B", (state) => {
+                    return Result.ok<IStageTransition, StageError>({
+                        state,
+                    })
+                }),
+                "stage-c": new StaticStageUseCase("stage-c", "Stage C", (state) => {
+                    return Result.ok<IStageTransition, StageError>({
+                        state,
+                    })
+                }),
+            },
+            domainEventBus: new InMemoryDomainEventBus(),
+            checkpointStore: new InMemoryCheckpointStore(),
+            logger: new InMemoryLogger(),
+        })
+
+        const result = await orchestrator.execute({
+            initialState,
+            definition,
+        })
+
+        expect(result.isOk).toBe(true)
+        expect(result.value.success).toBe(true)
+        expect(result.value.stageResults).toHaveLength(3)
+        expect(result.value.stageResults[0]?.status).toBe(
+            PIPELINE_STAGE_RESULT_STATUS.SKIPPED,
+        )
+        expect(result.value.stageResults[0]?.stageId).toBe("stage-a")
+        expect(result.value.stageResults[1]?.stageId).toBe("stage-b")
+        expect(result.value.stageResults[2]?.stageId).toBe("stage-c")
+    })
+
+    test("auto-resumes from stage after completed stage when current equals lastCompleted", async () => {
+        const definition = {
+            definitionVersion: "v1",
+            stages: [
+                {stageId: "stage-a", stageName: "Stage A"},
+                {stageId: "stage-b", stageName: "Stage B"},
+                {stageId: "stage-c", stageName: "Stage C"},
+            ],
+        }
+        const initialState = ReviewPipelineState.create({
+            runId: "run-6",
+            definitionVersion: "v1",
+            mergeRequest: {id: "mr-6"},
+            config: {},
+            currentStageId: "stage-b",
+            lastCompletedStageId: "stage-b",
+            stageAttempts: {
+                "stage-a": 1,
+                "stage-b": 1,
+            },
+        })
+        const orchestrator = new PipelineOrchestratorUseCase({
+            stages: {
+                "stage-a": new StaticStageUseCase("stage-a", "Stage A", (state) => {
+                    return Result.ok<IStageTransition, StageError>({
+                        state,
+                    })
+                }),
+                "stage-b": new StaticStageUseCase("stage-b", "Stage B", (state) => {
+                    return Result.ok<IStageTransition, StageError>({
+                        state,
+                    })
+                }),
+                "stage-c": new StaticStageUseCase("stage-c", "Stage C", (state) => {
+                    return Result.ok<IStageTransition, StageError>({
+                        state,
+                    })
+                }),
+            },
+            domainEventBus: new InMemoryDomainEventBus(),
+            checkpointStore: new InMemoryCheckpointStore(),
+            logger: new InMemoryLogger(),
+        })
+
+        const result = await orchestrator.execute({
+            initialState,
+            definition,
+        })
+
+        expect(result.isOk).toBe(true)
+        expect(result.value.success).toBe(true)
+        expect(result.value.stageResults).toHaveLength(3)
+        expect(result.value.stageResults[0]?.status).toBe(
+            PIPELINE_STAGE_RESULT_STATUS.SKIPPED,
+        )
+        expect(result.value.stageResults[0]?.stageId).toBe("stage-a")
+        expect(result.value.stageResults[1]?.status).toBe(
+            PIPELINE_STAGE_RESULT_STATUS.SKIPPED,
+        )
+        expect(result.value.stageResults[1]?.stageId).toBe("stage-b")
+        expect(result.value.stageResults[2]?.stageId).toBe("stage-c")
+    })
+
+    test("returns fail when resumed state already completed and no stages left", async () => {
+        const definition = {
+            definitionVersion: "v1",
+            stages: [
+                {stageId: "stage-a", stageName: "Stage A"},
+                {stageId: "stage-b", stageName: "Stage B"},
+            ],
+        }
+        const initialState = ReviewPipelineState.create({
+            runId: "run-7",
+            definitionVersion: "v1",
+            mergeRequest: {id: "mr-7"},
+            config: {},
+            currentStageId: "stage-b",
+            lastCompletedStageId: "stage-b",
+            stageAttempts: {
+                "stage-a": 1,
+                "stage-b": 1,
+            },
+        })
+        const orchestrator = new PipelineOrchestratorUseCase({
+            stages: {
+                "stage-a": new StaticStageUseCase("stage-a", "Stage A", (state) => {
+                    return Result.ok<IStageTransition, StageError>({
+                        state,
+                    })
+                }),
+                "stage-b": new StaticStageUseCase("stage-b", "Stage B", (state) => {
+                    return Result.ok<IStageTransition, StageError>({
+                        state,
+                    })
+                }),
+            },
+            domainEventBus: new InMemoryDomainEventBus(),
+            checkpointStore: new InMemoryCheckpointStore(),
+            logger: new InMemoryLogger(),
+        })
+
+        const result = await orchestrator.execute({
+            initialState,
+            definition,
+        })
+
+        expect(result.isFail).toBe(true)
+        expect(result.error.message).toContain("no stages left to execute")
+    })
 })
