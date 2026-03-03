@@ -1,5 +1,19 @@
 export {type IFileMetricsDTO} from "./file-metrics.dto"
 export {
+    ANALYTICS_GROUP_BY,
+    type IAnalyticsAggregatedMetrics,
+    type IAnalyticsAggregationInput,
+    type IAnalyticsCcrMetrics,
+    type IAnalyticsCostEstimate,
+    type IAnalyticsDoraMetrics,
+    type IAnalyticsGroupBy,
+    type IAnalyticsTokenUsage,
+    type IAnalyticsTokenUsageByModel,
+    type IAnalyticsTimeRange,
+    type INormalizedAnalyticsAggregationQuery,
+} from "./analytics-aggregation.dto"
+export {type IAnalyticsAggregationBucket} from "./analytics-aggregation.dto"
+export {
     type IFileMetricField,
     type ITemporalDiffMetricDelta,
 } from "./temporal-diff.dto"
