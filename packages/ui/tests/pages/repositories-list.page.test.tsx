@@ -53,4 +53,15 @@ describe("repositories list page", (): void => {
 
         expect(screen.getAllByText("payment-worker").length).toBe(1)
     })
+
+    it("показывает empty state и CTA для пустого onboarding", (): void => {
+        renderWithProviders(<RepositoriesListPage repositories={[]} />)
+
+        expect(screen.getByText("Нет подключенных репозиториев")).not.toBeNull()
+        expect(screen.getByRole("link", { name: "Начать onboarding" })).not.toBeNull()
+        expect(screen.getByRole("link", { name: "Начать onboarding" })).toHaveAttribute(
+            "href",
+            "/onboarding",
+        )
+    })
 })

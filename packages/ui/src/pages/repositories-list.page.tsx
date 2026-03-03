@@ -212,6 +212,24 @@ function RepositoryCountSummary(props: { label: string; value: number }): ReactE
     )
 }
 
+function RepositoriesEmptyState(): ReactElement {
+    return (
+        <section className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+            <p className="text-sm font-semibold text-slate-900">Нет подключенных репозиториев</p>
+            <p className="mt-2 text-sm text-slate-600">
+                Подключите репозиторий, чтобы начать сканирование и увидеть его прогресс, метрики и
+                архитектурный обзор.
+            </p>
+            <Link
+                className="mt-4 inline-flex rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm text-white"
+                to="/onboarding"
+            >
+                Начать onboarding
+            </Link>
+        </section>
+    )
+}
+
 /**
  * Страница списка подключенных репозиториев с поиском и сортировкой.
  *
@@ -253,6 +271,18 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
         if (next === "name" || next === "status" || next === "lastScanAt") {
             setSortBy(next)
         }
+    }
+
+    if (repositories.length === 0) {
+        return (
+            <section className="space-y-4">
+                <h1 className="text-2xl font-semibold text-slate-900">Onboarded repositories</h1>
+                <p className="text-sm text-slate-600">
+                    Отслеживайте подключенные репозитории и состояние их сканирования.
+                </p>
+                <RepositoriesEmptyState />
+            </section>
+        )
     }
 
     return (
