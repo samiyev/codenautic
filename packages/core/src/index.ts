@@ -53,6 +53,7 @@ export {
     type ITreemapNodeMetrics,
     type TreemapNodeType,
 } from "./application/dto/analytics"
+export {type IIssueHeatmapEntryDTO} from "./application/dto/analytics"
 export {
     type IAnemicModelViolationType,
     type IDDDComplianceReport,
