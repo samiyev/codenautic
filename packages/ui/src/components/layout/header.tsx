@@ -1,5 +1,8 @@
 import type {ReactElement} from "react"
+import {Menu} from "lucide-react"
 import {Navbar, NavbarBrand, NavbarContent, NavbarItem} from "@heroui/react"
+
+import {Button} from "@/components/ui"
 
 import {ThemeToggle} from "./theme-toggle"
 import {UserMenu} from "./user-menu"
@@ -16,6 +19,8 @@ export interface IHeaderProps {
     readonly userEmail?: string
     /** Действие выхода. */
     readonly onSignOut?: () => void
+    /** Открыть мобильную панель навигации. */
+    readonly onMobileMenuOpen?: () => void
 }
 
 /**
@@ -28,6 +33,17 @@ export function Header(props: IHeaderProps): ReactElement {
     return (
         <Navbar isBlurred className="border-b border-slate-200 bg-white/80 backdrop-blur" maxWidth="full">
             <NavbarContent justify="start">
+                <NavbarItem className="md:hidden">
+                    <Button
+                        isIconOnly
+                        radius="full"
+                        variant="light"
+                        aria-label="Open navigation menu"
+                        onPress={props.onMobileMenuOpen}
+                    >
+                        <Menu size={20} />
+                    </Button>
+                </NavbarItem>
                 <NavbarBrand>
                     <p className="text-sm font-semibold tracking-wide">CodeNautic</p>
                 </NavbarBrand>

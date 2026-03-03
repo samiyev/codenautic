@@ -1,5 +1,6 @@
 export {DashboardLayout} from "./dashboard-layout"
 export {Header} from "./header"
+export {MobileSidebar} from "./mobile-sidebar"
 export {Sidebar} from "./sidebar"
 export {SidebarNav} from "./sidebar-nav"
 export {ThemeToggle} from "./theme-toggle"

@@ -1,5 +1,5 @@
 import type {ReactElement} from "react"
-import {Link, useLocation} from "@tanstack/react-router"
+import {useLocation, useNavigate} from "@tanstack/react-router"
 import {Avatar, Button} from "@/components/ui"
 
 /**
@@ -20,6 +20,8 @@ interface ISidebarItem {
 export interface ISidebarNavProps {
     /** Список элементов меню. */
     readonly items?: ReadonlyArray<ISidebarItem>
+    /** Коллбэк при выборе элемента, полезен для закрытия mobile-drawer. */
+    readonly onNavigate?: (to: string) => void
 }
 
 const DEFAULT_SIDEBAR_ITEMS: readonly ISidebarItem[] = [
@@ -38,6 +40,7 @@ const DEFAULT_SIDEBAR_ITEMS: readonly ISidebarItem[] = [
  */
 export function SidebarNav(props: ISidebarNavProps): ReactElement {
     const currentLocation = useLocation()
+    const navigate = useNavigate()
     const items = props.items ?? DEFAULT_SIDEBAR_ITEMS
 
     return (
@@ -45,22 +48,34 @@ export function SidebarNav(props: ISidebarNavProps): ReactElement {
             <ul className="flex flex-col gap-1">
                 {items.map((item): ReactElement => {
                     const isActive = currentLocation.pathname === item.to
+
+                    const handlePress = (): void => {
+                        if (item.to === currentLocation.pathname) {
+                            if (props.onNavigate !== undefined) {
+                                props.onNavigate(item.to)
+                            }
+                            return
+                        }
+
+                        if (props.onNavigate !== undefined) {
+                            props.onNavigate(item.to)
+                        }
+
+                        void navigate({to: item.to})
+                    }
+
                     return (
                         <li key={item.to}>
-                            <Link
-                                className="inline-flex w-full rounded-lg"
-                                to={item.to}
-                                viewTransition={false}
+                            <Button
+                                aria-current={isActive ? "page" : undefined}
+                                className="w-full justify-start"
+                                fullWidth
+                                startContent={item.icon === undefined ? undefined : <Avatar name={item.icon} size="sm" />}
+                                variant={isActive ? "solid" : "light"}
+                                onPress={handlePress}
                             >
-                                <Button
-                                    className="w-full justify-start"
-                                    fullWidth
-                                    startContent={item.icon === undefined ? undefined : <Avatar name={item.icon} size="sm" />}
-                                    variant={isActive ? "solid" : "light"}
-                                >
-                                    {item.label}
-                                </Button>
-                            </Link>
+                                {item.label}
+                            </Button>
                         </li>
                     )
                 })}
