@@ -91,4 +91,39 @@ describe("chat panel", (): void => {
         await user.click(closeButton)
         expect(onClose).toHaveBeenCalledTimes(1)
     })
+
+    it("рендерит стриминг-ответ с индикатором и активной кнопкой Cancel", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const onCancelStreaming = vi.fn()
+        vi.useFakeTimers()
+
+        try {
+            renderWithProviders(
+                <ChatPanel
+                    isOpen
+                    isStreaming
+                    messages={messageList}
+                    onCancelStreaming={onCancelStreaming}
+                    onSendMessage={vi.fn()}
+                    streamTokens={["Hello", ", ", "world"]}
+                    streamingTokenDelayMs={10}
+                />,
+            )
+
+            expect(screen.getByText("AI пишет…")).not.toBeNull()
+            expect(screen.getByRole("button", { name: "Cancel" })).not.toBeDisabled()
+
+            vi.advanceTimersByTime(10)
+            expect(screen.getByText("Hello")).not.toBeNull()
+            vi.advanceTimersByTime(10)
+            expect(screen.getByText("Hello, ")).not.toBeNull()
+            vi.advanceTimersByTime(10)
+            expect(screen.getByText("Hello, world")).not.toBeNull()
+
+            await user.click(screen.getByRole("button", { name: "Cancel" }))
+            expect(onCancelStreaming).toHaveBeenCalledTimes(1)
+        } finally {
+            vi.useRealTimers()
+        }
+    })
 })

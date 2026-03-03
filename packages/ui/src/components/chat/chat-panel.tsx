@@ -1,8 +1,9 @@
 import type { ReactElement } from "react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import { ChatMessageBubble } from "@/components/chat/chat-message-bubble"
 import { ChatInput, type IChatFileContextOption } from "@/components/chat/chat-input"
+import { ChatStreamingResponse } from "@/components/chat/chat-streaming-response"
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
 
 /** Роль сообщения в чате. */
@@ -58,6 +59,16 @@ export interface IChatPanelProps {
     readonly panelAriaLabel?: string
     /** Переопределение контейнера. */
     readonly className?: string
+    /** Токены для стримингового ответа в режиме реального времени. */
+    readonly streamTokens?: ReadonlyArray<string>
+    /** Показывать ли стриминговый рендеринг ответа. */
+    readonly isStreaming?: boolean
+    /** Отмена стримингового запроса. */
+    readonly onCancelStreaming?: () => void
+    /** Подпись отправителя в стриминговом ответе. */
+    readonly streamingSenderLabel?: string
+    /** Скорость token-to-token рендера (ms). */
+    readonly streamingTokenDelayMs?: number
     /** Закрыть панель (опционально). */
     readonly onClose?: () => void
 }
@@ -68,7 +79,10 @@ export interface IChatPanelProps {
 export function ChatPanel(props: IChatPanelProps): ReactElement {
     const [draftMessage, setDraftMessage] = useState("")
     const isPanelOpen = props.isOpen === true
+    const isStreaming = props.isStreaming === true
+    const streamingTokens = props.streamTokens ?? []
     const isSending = props.isLoading === true
+    const messageListRef = useRef<HTMLUListElement>(null)
 
     const title = props.title ?? "Conversation"
     const inputPlaceholder = props.placeholder ?? "Type a message and press Enter"
@@ -121,24 +135,35 @@ export function ChatPanel(props: IChatPanelProps): ReactElement {
                 </CardHeader>
 
                 <CardBody className="flex min-h-0 flex-1 flex-col gap-3 bg-[var(--surface-muted)] p-0">
-                    {props.messages.length === 0 ? (
-                        <div className="p-4 text-sm text-[var(--foreground)]/70" role="status">
-                            {emptyText}
-                        </div>
-                    ) : (
-                        <ul
-                            aria-live="polite"
-                            aria-label={messageListAriaLabel}
-                            className="flex flex-1 flex-col gap-3 overflow-y-auto px-3 py-3"
-                            role="log"
-                        >
-                            {props.messages.map(
+                    <ul
+                        aria-label={messageListAriaLabel}
+                        aria-live="polite"
+                        className="flex flex-1 flex-col gap-3 overflow-y-auto px-3 py-3"
+                        ref={messageListRef}
+                        role="log"
+                    >
+                        {props.messages.length === 0 ? (
+                            <li className="text-sm text-[var(--foreground)]/70" role="status">
+                                {emptyText}
+                            </li>
+                        ) : (
+                            props.messages.map(
                                 (message): ReactElement => (
                                     <ChatMessageBubble key={message.id} message={message} />
                                 ),
-                            )}
-                        </ul>
-                    )}
+                            )
+                        )}
+                        {isStreaming ? (
+                            <ChatStreamingResponse
+                                isStreaming={isStreaming}
+                                onCancel={props.onCancelStreaming}
+                                senderLabel={props.streamingSenderLabel}
+                                scrollContainerRef={messageListRef}
+                                streamTokens={streamingTokens}
+                                tokenDelayMs={props.streamingTokenDelayMs}
+                            />
+                        ) : null}
+                    </ul>
                     <ChatInput
                         contextAriaLabel={contextAriaLabel}
                         contextOptions={props.contextOptions}
