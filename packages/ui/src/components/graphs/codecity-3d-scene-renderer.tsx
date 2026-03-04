@@ -8,7 +8,10 @@ interface ICodeCity3DSceneRendererProps {
     readonly files: ReadonlyArray<ICodeCity3DSceneFileDescriptor>
 }
 
-interface ICodeCityBuildingMesh {
+/**
+ * Подготовленная геометрия здания в 3D CodeCity.
+ */
+export interface ICodeCityBuildingMesh {
     readonly id: string
     readonly x: number
     readonly z: number
@@ -19,8 +22,20 @@ interface ICodeCityBuildingMesh {
 }
 
 const BASE_GRID_SPACING = 4
+const MIN_BUILDING_WIDTH = 1
+const MAX_BUILDING_WIDTH = 3.4
+const MIN_BUILDING_HEIGHT = 1.2
+const BUILDING_DEPTH = 2.2
+const COMPLEXITY_TO_WIDTH_RATIO = 8
+const LOC_TO_HEIGHT_RATIO = 24
 
-function toBuildingColor(coverage: number | undefined): string {
+/**
+ * Преобразует coverage файла в цвет здания.
+ *
+ * @param coverage Покрытие файла тестами в процентах.
+ * @returns Hex-цвет для материала здания.
+ */
+export function resolveCodeCityBuildingColor(coverage: number | undefined): string {
     if (coverage === undefined) {
         return "#facc15"
     }
@@ -36,25 +51,36 @@ function toBuildingColor(coverage: number | undefined): string {
     return "#ef4444"
 }
 
-function createBuildingMeshes(
+/**
+ * Генерирует 3D-здания по файлам репозитория.
+ *
+ * @param files Набор файлов CodeCity.
+ * @returns Нормализованные меши зданий.
+ */
+export function createCodeCityBuildingMeshes(
     files: ReadonlyArray<ICodeCity3DSceneFileDescriptor>,
 ): ReadonlyArray<ICodeCityBuildingMesh> {
     const columns = Math.max(1, Math.ceil(Math.sqrt(files.length)))
+    const rows = Math.max(1, Math.ceil(files.length / columns))
 
     return files.map((file, index): ICodeCityBuildingMesh => {
         const rowIndex = Math.floor(index / columns)
         const columnIndex = index % columns
         const horizontalOffset = (columns - 1) / 2
+        const verticalOffset = (rows - 1) / 2
         const fileComplexity = file.complexity ?? 0
         const fileLoc = file.loc ?? 0
         const x = (columnIndex - horizontalOffset) * BASE_GRID_SPACING
-        const z = (rowIndex - horizontalOffset) * BASE_GRID_SPACING
-        const width = Math.max(1, Math.min(3.4, fileComplexity / 8))
-        const depth = Math.max(1, Math.min(3.4, fileLoc / 100))
-        const height = Math.max(1.2, fileLoc / 26 + fileComplexity / 7)
+        const z = (rowIndex - verticalOffset) * BASE_GRID_SPACING
+        const width = Math.max(
+            MIN_BUILDING_WIDTH,
+            Math.min(MAX_BUILDING_WIDTH, fileComplexity / COMPLEXITY_TO_WIDTH_RATIO),
+        )
+        const depth = BUILDING_DEPTH
+        const height = Math.max(MIN_BUILDING_HEIGHT, fileLoc / LOC_TO_HEIGHT_RATIO)
 
         return {
-            color: toBuildingColor(file.coverage),
+            color: resolveCodeCityBuildingColor(file.coverage),
             depth,
             height,
             id: file.id,
@@ -73,7 +99,7 @@ function createBuildingMeshes(
  */
 export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): ReactElement {
     const buildings = useMemo(
-        (): ReadonlyArray<ICodeCityBuildingMesh> => createBuildingMeshes(props.files),
+        (): ReadonlyArray<ICodeCityBuildingMesh> => createCodeCityBuildingMeshes(props.files),
         [props.files],
     )
 

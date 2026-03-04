@@ -171,6 +171,20 @@ describe("CodeCityDashboardPage", (): void => {
         expect(first3DCall).not.toBeUndefined()
         expect(first3DCall?.title).toBe("platform-team/api-gateway 3D scene")
         expect(first3DCall?.files.length).toBeGreaterThan(0)
+        const first3DFile = first3DCall?.files.at(0) as
+            | {
+                readonly complexity?: number
+                readonly coverage?: number
+                readonly id: string
+                readonly loc?: number
+                readonly path: string
+            }
+            | undefined
+        expect(first3DFile?.id.length).toBeGreaterThan(0)
+        expect(first3DFile?.path.length).toBeGreaterThan(0)
+        expect(first3DFile?.loc).toBeGreaterThan(0)
+        expect(first3DFile?.complexity).toBeGreaterThan(0)
+        expect(first3DFile?.coverage).toBeGreaterThan(0)
 
         const firstScatterCall = mockChurnComplexityScatter.mock.calls.at(0)?.[0]
         expect(firstScatterCall).not.toBeUndefined()
