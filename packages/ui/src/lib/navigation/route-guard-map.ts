@@ -62,6 +62,18 @@ export const ROUTE_GUARD_MAP: ReadonlyArray<INavigationRouteEntry> = [
         section: "workflows",
     },
     {
+        breadcrumbs: ["Dashboard", "Code City"],
+        guards: {
+            requiresAuth: true,
+            roles: BASE_ROLES,
+            tenants: BASE_TENANTS,
+        },
+        label: "Code City",
+        path: "/dashboard/code-city",
+        searchKeywords: ["code city", "architecture", "graph"],
+        section: "dashboard",
+    },
+    {
         breadcrumbs: ["Settings"],
         guards: {
             requiresAuth: true,
@@ -267,4 +279,3 @@ export function searchAccessibleRoutes(
         return haystack.includes(normalizedQuery)
     })
 }
-
