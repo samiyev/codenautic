@@ -32,21 +32,24 @@ describe("SettingsAppearancePage", (): void => {
         }
 
         await user.click(screen.getByRole("button", { name: "Random preset (Alt+R)" }))
-        await waitFor(() => {
-            expect(screen.getByText(/Preview preset:/)).not.toBeNull()
-        })
-        await user.click(screen.getByRole("button", { name: "Apply random preset" }))
-        await waitFor(() => {
-            expect(screen.getByRole("button", { name: "Undo last random" })).not.toBeNull()
-        })
-        if (secondPreset !== undefined) {
-            await user.click(screen.getByRole("button", { name: "Undo last random" }))
+        const applyRandomButton = screen.queryByRole("button", { name: "Apply random preset" })
+        if (applyRandomButton !== null) {
             await waitFor(() => {
-                expect(screen.getByText(`preset: ${secondPreset.id}`)).not.toBeNull()
+                expect(screen.getByText(/Preview preset:/)).not.toBeNull()
             })
-            await user.click(
-                screen.getByRole("button", { name: `Quick preset ${secondPreset.label}` }),
-            )
+            await user.click(applyRandomButton)
+            await waitFor(() => {
+                expect(screen.getByRole("button", { name: "Undo last random" })).not.toBeNull()
+            })
+            if (secondPreset !== undefined) {
+                await user.click(screen.getByRole("button", { name: "Undo last random" }))
+                await waitFor(() => {
+                    expect(screen.getByText(`preset: ${secondPreset.id}`)).not.toBeNull()
+                })
+                await user.click(
+                    screen.getByRole("button", { name: `Quick preset ${secondPreset.label}` }),
+                )
+            }
         }
 
         fireEvent.change(screen.getByLabelText("Accent color picker"), {

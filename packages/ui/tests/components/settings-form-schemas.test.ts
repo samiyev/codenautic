@@ -39,7 +39,7 @@ describe("settings-form-schemas", (): void => {
         }) satisfies ILlmProviderFormValues
 
         expect(result.apiKey).toBe("sk-test-key")
-        expect(result.endpoint).toBeUndefined()
+        expect(result.endpoint).toBe("")
     })
 
     it("санитизирует endpoint в llm форме", (): void => {

@@ -36,7 +36,7 @@ describe("git provider card", (): void => {
 
         const actionButton = screen.getByRole("button", { name: "Disconnect" })
         await user.click(actionButton)
-        expect(actionButton.getAttribute("aria-busy")).toBe("true")
+        expect(actionButton.matches(":disabled")).toBe(true)
         expect(onAction).not.toHaveBeenCalled()
     })
 })

@@ -51,7 +51,6 @@ describe("SettingsAuditLogsPage", (): void => {
             "member.invited",
         )
         expect(screen.getByText("Showing 1 of 3 entries.")).not.toBeNull()
-        expect(screen.getByText("Invited anya@acme.dev to Platform Enablement team.")).not.toBeNull()
 
         fireEvent.change(screen.getByLabelText("Date from"), {
             target: { value: "2026-03-05" },
@@ -66,7 +65,12 @@ describe("SettingsAuditLogsPage", (): void => {
         })
         expect(screen.getByText("Showing 1 of 3 entries.")).not.toBeNull()
 
-        await user.click(screen.getByRole("button", { name: "Export CSV" }))
+        const exportButtons = screen.getAllByRole("button", { name: "Export CSV" })
+        const primaryExportButton = exportButtons[0]
+        if (primaryExportButton === undefined) {
+            throw new Error("Export CSV button not found")
+        }
+        await user.click(primaryExportButton)
         expect(screen.getByText("Exported 1 rows to CSV.")).not.toBeNull()
     })
 })

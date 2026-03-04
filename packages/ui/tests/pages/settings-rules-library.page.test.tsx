@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { fireEvent, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
@@ -13,7 +13,8 @@ describe("SettingsRulesLibraryPage", (): void => {
         expect(screen.getByRole("heading", { level: 1, name: "Rules library" })).not.toBeNull()
 
         await user.type(screen.getByRole("textbox", { name: "Search rules" }), "Unsafe eval")
-        expect(screen.getByText("Unsafe eval guard")).not.toBeNull()
+        const catalogList = screen.getByRole("list", { name: "Rules catalog" })
+        expect(within(catalogList).getByText("Unsafe eval guard")).not.toBeNull()
 
         await user.click(screen.getByRole("button", { name: "Import" }))
         expect(screen.getByRole("button", { name: "Imported" })).not.toBeNull()
@@ -31,10 +32,9 @@ describe("SettingsRulesLibraryPage", (): void => {
 
         expect(screen.getByText("Block console log")).not.toBeNull()
 
-        await user.type(
-            screen.getByRole("textbox", { name: "Sample input" }),
-            "if (debug) { console.log('leak') }",
-        )
+        fireEvent.change(screen.getByRole("textbox", { name: "Sample input" }), {
+            target: { value: "if (debug) { console.log('leak') }" },
+        })
         await user.click(screen.getByRole("button", { name: "Test selected rule" }))
 
         expect(screen.getByText("Rule matched")).not.toBeNull()

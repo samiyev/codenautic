@@ -28,7 +28,7 @@ interface IAuditLogEntry {
 
 interface IAuditFilters {
     /** Фильтр по актору. */
-    readonly actor: "all" | string
+    readonly actor: string
     /** Фильтр по типу действия. */
     readonly action: "all" | TAuditAction
     /** Нижняя граница даты YYYY-MM-DD. */
@@ -362,9 +362,10 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                                 type="date"
                                 value={filters.dateFrom}
                                 onChange={(event): void => {
+                                    const nextDateFrom = event.currentTarget.value
                                     setFilters((previous): IAuditFilters => ({
                                         ...previous,
-                                        dateFrom: event.currentTarget.value,
+                                        dateFrom: nextDateFrom,
                                     }))
                                 }}
                             />
@@ -380,9 +381,10 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                                 type="date"
                                 value={filters.dateTo}
                                 onChange={(event): void => {
+                                    const nextDateTo = event.currentTarget.value
                                     setFilters((previous): IAuditFilters => ({
                                         ...previous,
-                                        dateTo: event.currentTarget.value,
+                                        dateTo: nextDateTo,
                                     }))
                                 }}
                             />

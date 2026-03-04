@@ -14,7 +14,14 @@ describe("SettingsJobsPage", (): void => {
         expect(screen.getByText("Failed/Stuck: 2")).not.toBeNull()
         expect(screen.getByText("JOB-4102 · scan")).not.toBeNull()
 
-        await user.click(screen.getByRole("button", { name: "Retry" }))
+        const retryButtons = screen.getAllByRole("button", { name: "Retry" })
+        const retryButton = retryButtons.find((button): boolean => {
+            return button.getAttribute("disabled") === null
+        })
+        if (retryButton === undefined) {
+            throw new Error("Enabled Retry button not found")
+        }
+        await user.click(retryButton)
         await waitFor(() => {
             expect(screen.getByText("Retry queued with updated attempt counter.")).not.toBeNull()
         })

@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
@@ -30,8 +30,14 @@ describe("SettingsNotificationsPage", (): void => {
             screen.getByRole("combobox", { name: "Filter event type" }),
             "prediction.alert",
         )
-        expect(screen.queryByText("Review completed")).toBeNull()
-        expect(screen.getByText("Prediction alert")).not.toBeNull()
+        const inboxList = screen.getByRole("list", { name: "Notification inbox list" })
+        expect(within(inboxList).queryByText("Review completed")).toBeNull()
+        expect(
+            within(inboxList).queryByRole("button", { name: "Open NTF-1001 context" }),
+        ).toBeNull()
+        expect(
+            within(inboxList).getByRole("button", { name: "Open NTF-1003 context" }),
+        ).not.toBeNull()
 
         const slackSwitch = screen.getByRole("switch", { name: "Enable Slack notifications" })
         await user.click(slackSwitch)
@@ -41,6 +47,7 @@ describe("SettingsNotificationsPage", (): void => {
         await user.click(muteSwitch)
         expect(screen.getByText("Enabled rules: 0")).not.toBeNull()
 
+        await user.selectOptions(screen.getByRole("combobox", { name: "Filter event type" }), "all")
         await user.click(screen.getByRole("checkbox", { name: "Select NTF-1002" }))
         await user.click(screen.getByRole("checkbox", { name: "Select NTF-1004" }))
         await user.click(screen.getByRole("button", { name: "Mark selected as read" }))

@@ -11,7 +11,7 @@ describe("SettingsByokPage", (): void => {
         renderWithProviders(<SettingsByokPage />)
 
         expect(screen.getByRole("heading", { level: 1, name: "BYOK management" })).not.toBeNull()
-        expect(screen.getByText("2")).not.toBeNull()
+        expect(screen.getAllByRole("button", { name: /^Rotate key / }).length).toBe(2)
 
         const secret = "sk-test-super-secret-key-001"
         await user.selectOptions(screen.getByRole("combobox", { name: "Provider" }), "openai")
@@ -22,9 +22,9 @@ describe("SettingsByokPage", (): void => {
         expect(screen.getByText("openai-rotation-test")).not.toBeNull()
         expect(screen.queryByText(secret)).toBeNull()
         expect(screen.getByText("sk-t****001")).not.toBeNull()
-        expect(screen.getByText("3")).not.toBeNull()
+        expect(screen.getAllByRole("button", { name: /^Rotate key / }).length).toBe(3)
 
         await user.click(screen.getByRole("button", { name: "Rotate key openai-rotation-test" }))
-        expect(screen.getByText("Rotation: 2")).not.toBeNull()
+        expect(screen.getAllByText("Rotation: 2").length).toBe(2)
     })
 })

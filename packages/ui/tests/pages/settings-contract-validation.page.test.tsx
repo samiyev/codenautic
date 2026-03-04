@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react"
+import { fireEvent, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
@@ -29,7 +29,9 @@ describe("SettingsContractValidationPage", (): void => {
         renderWithProviders(<SettingsContractValidationPage />)
 
         await user.clear(screen.getByRole("textbox", { name: "Contract json" }))
-        await user.type(screen.getByRole("textbox", { name: "Contract json" }), "{bad json")
+        fireEvent.change(screen.getByRole("textbox", { name: "Contract json" }), {
+            target: { value: "{bad json" },
+        })
         await user.click(screen.getByRole("button", { name: "Validate contract" }))
 
         await waitFor(() => {

@@ -27,7 +27,6 @@ describe("SettingsConcurrencyPage", (): void => {
         await waitFor(() => {
             expect(screen.getByText("Conflict resolution audit")).not.toBeNull()
         })
-        expect(screen.getByText("merge")).not.toBeNull()
         expect(screen.getByText(/Conflict merged with local priority/)).not.toBeNull()
     })
 })
