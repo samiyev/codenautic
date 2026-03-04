@@ -54,4 +54,28 @@ describe("MyWorkPage", (): void => {
         await user.click(within(reviewRow).getByRole("button", { name: "Mark read" }))
         expect(screen.getByText("Marked MW-1001 as read.")).not.toBeNull()
     })
+
+    it("применяет ownership permissions для escalation и пишет audit trail", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<MyWorkPage />)
+        await user.selectOptions(screen.getByRole("combobox", { name: "Triage scope" }), "team")
+        await user.selectOptions(screen.getByRole("combobox", { name: "Reviewer role" }), "viewer")
+
+        const triageList = screen.getByRole("list", { name: "My work triage list" })
+        const criticalIssueItem = within(triageList).getByText(
+            "Tenant boundary regression in auth middleware",
+        )
+        const criticalIssueRow = criticalIssueItem.closest("li")
+        if (criticalIssueRow === null) {
+            throw new Error("Critical issue row not found")
+        }
+
+        expect(within(criticalIssueRow).getByRole("button", { name: "Escalate" })).toBeDisabled()
+
+        await user.selectOptions(screen.getByRole("combobox", { name: "Reviewer role" }), "admin")
+        await user.click(within(criticalIssueRow).getByRole("button", { name: "Escalate" }))
+
+        expect(screen.getByText("Escalated MW-1002 and notified owner channel.")).not.toBeNull()
+        expect(screen.getByText(/MW-1002 escalated at/)).not.toBeNull()
+    })
 })
