@@ -4,6 +4,12 @@ import {
     type ReviewDepthStrategy,
     type IReviewConfigDTO,
     type IReviewPromptOverridesDTO,
+    type IReviewPromptOverrideCategoriesDTO,
+    type IReviewPromptOverrideCategoryDescriptionsDTO,
+    type IReviewPromptOverrideGenerationDTO,
+    type IReviewPromptOverrideSeverityDTO,
+    type IReviewPromptOverrideSeverityFlagsDTO,
+    type IReviewPromptOverridesV2DTO,
     type ValidatedConfig,
 } from "../dto/review/review-config.dto"
 import type {IDirectoryConfig} from "../dto/config/directory-config.dto"
@@ -32,6 +38,7 @@ const REVIEW_CONFIG_KEYS = [
     "reviewDepthStrategy",
     "directories",
     "promptOverrides",
+    "v2PromptOverrides",
 ] as const
 
 /**
@@ -71,6 +78,9 @@ export class ConfigurationValidatorUseCase
             ...this.pickUnknownFields(payload),
             ...normalizedConfig,
             ...(normalizedConfig.promptOverrides === undefined ? {} : {promptOverrides: normalizedConfig.promptOverrides}),
+            ...(normalizedConfig.v2PromptOverrides === undefined ? {} : {
+                v2PromptOverrides: normalizedConfig.v2PromptOverrides,
+            }),
         }
 
         return Promise.resolve(Result.ok<ValidatedConfig, ValidationError>(validatedConfig))
@@ -126,6 +136,7 @@ export class ConfigurationValidatorUseCase
         const reviewDepthStrategy = this.validateReviewDepthStrategy(payload["reviewDepthStrategy"], fields)
         const directories = this.validateDirectories(payload["directories"], fields)
         const promptOverrides = this.validatePromptOverrides(payload["promptOverrides"], fields)
+        const v2PromptOverrides = this.validatePromptOverridesV2(payload["v2PromptOverrides"], fields)
 
         const requiredValues = [
             severityThreshold,
@@ -152,6 +163,7 @@ export class ConfigurationValidatorUseCase
             reviewDepthStrategy: reviewDepthStrategy as ReviewDepthStrategy,
             directories: directories as readonly IDirectoryConfig[],
             ...(promptOverrides === undefined ? {} : {promptOverrides}),
+            ...(v2PromptOverrides === undefined ? {} : {v2PromptOverrides}),
         }
 
         return normalizedConfig
@@ -418,6 +430,7 @@ export class ConfigurationValidatorUseCase
             customRuleIds?: readonly string[]
             reviewDepthStrategy?: ReviewDepthStrategy
             promptOverrides?: IReviewPromptOverridesDTO
+            v2PromptOverrides?: IReviewPromptOverridesV2DTO
         } = {}
 
         this.setOptionalNormalizedValue(
@@ -463,6 +476,11 @@ export class ConfigurationValidatorUseCase
         const promptOverrides = this.validatePromptOverrides(record["promptOverrides"], fields)
         if (promptOverrides !== undefined) {
             result.promptOverrides = promptOverrides
+        }
+
+        const v2PromptOverrides = this.validatePromptOverridesV2(record["v2PromptOverrides"], fields)
+        if (v2PromptOverrides !== undefined) {
+            result.v2PromptOverrides = v2PromptOverrides
         }
 
         return result
@@ -537,6 +555,270 @@ export class ConfigurationValidatorUseCase
             ...(reviewerPrompt === undefined ? {} : {reviewerPrompt}),
             ...(summaryPrompt === undefined ? {} : {summaryPrompt}),
         }
+    }
+
+    /**
+     * Validates optional v2 prompt overrides shape.
+     *
+     * @param value Raw prompt overrides value.
+     * @param fields Error accumulator.
+     * @returns Normalized prompt overrides or undefined.
+     */
+    private validatePromptOverridesV2(
+        value: unknown,
+        fields: IValidationErrorField[],
+    ): IReviewPromptOverridesV2DTO | undefined {
+        if (value === undefined) {
+            return undefined
+        }
+
+        if (value === null || typeof value !== "object" || Array.isArray(value)) {
+            fields.push({
+                field: "v2PromptOverrides",
+                message: "must be an object with optional nested sections",
+            })
+            return undefined
+        }
+
+        const record = value as Readonly<Record<string, unknown>>
+        const categories = this.validatePromptOverrideCategories(record["categories"], fields)
+        const severity = this.validatePromptOverrideSeverity(record["severity"], fields)
+        const generation = this.validatePromptOverrideGeneration(record["generation"], fields)
+
+        return {
+            ...(categories === undefined ? {} : {categories}),
+            ...(severity === undefined ? {} : {severity}),
+            ...(generation === undefined ? {} : {generation}),
+        }
+    }
+
+    /**
+     * Validates optional v2 categories section.
+     *
+     * @param value Raw categories payload.
+     * @param fields Error accumulator.
+     * @returns Normalized categories or undefined.
+     */
+    private validatePromptOverrideCategories(
+        value: unknown,
+        fields: IValidationErrorField[],
+    ): IReviewPromptOverrideCategoriesDTO | undefined {
+        if (value === undefined) {
+            return undefined
+        }
+
+        if (value === null || typeof value !== "object" || Array.isArray(value)) {
+            fields.push({
+                field: "v2PromptOverrides.categories",
+                message: "must be an object with optional descriptions",
+            })
+            return undefined
+        }
+
+        const record = value as Readonly<Record<string, unknown>>
+        const descriptions = this.validatePromptOverrideCategoryDescriptions(
+            record["descriptions"],
+            fields,
+        )
+
+        if (descriptions === undefined) {
+            return undefined
+        }
+
+        return {descriptions}
+    }
+
+    /**
+     * Validates optional v2 category descriptions section.
+     *
+     * @param value Raw descriptions payload.
+     * @param fields Error accumulator.
+     * @returns Normalized descriptions or undefined.
+     */
+    private validatePromptOverrideCategoryDescriptions(
+        value: unknown,
+        fields: IValidationErrorField[],
+    ): IReviewPromptOverrideCategoryDescriptionsDTO | undefined {
+        if (value === undefined) {
+            return undefined
+        }
+
+        if (value === null || typeof value !== "object" || Array.isArray(value)) {
+            fields.push({
+                field: "v2PromptOverrides.categories.descriptions",
+                message: "must be an object with optional string fields",
+            })
+            return undefined
+        }
+
+        const record = value as Readonly<Record<string, unknown>>
+        const bug = this.validateOptionalString(
+            record["bug"],
+            "v2PromptOverrides.categories.descriptions.bug",
+            fields,
+        )
+        const performance = this.validateOptionalString(
+            record["performance"],
+            "v2PromptOverrides.categories.descriptions.performance",
+            fields,
+        )
+        const security = this.validateOptionalString(
+            record["security"],
+            "v2PromptOverrides.categories.descriptions.security",
+            fields,
+        )
+
+        return this.collectSectionValues({
+            bug,
+            performance,
+            security,
+        })
+    }
+
+    /**
+     * Validates optional v2 severity section.
+     *
+     * @param value Raw severity payload.
+     * @param fields Error accumulator.
+     * @returns Normalized severity or undefined.
+     */
+    private validatePromptOverrideSeverity(
+        value: unknown,
+        fields: IValidationErrorField[],
+    ): IReviewPromptOverrideSeverityDTO | undefined {
+        if (value === undefined) {
+            return undefined
+        }
+
+        if (value === null || typeof value !== "object" || Array.isArray(value)) {
+            fields.push({
+                field: "v2PromptOverrides.severity",
+                message: "must be an object with optional flags",
+            })
+            return undefined
+        }
+
+        const record = value as Readonly<Record<string, unknown>>
+        const flags = this.validatePromptOverrideSeverityFlags(record["flags"], fields)
+        if (flags === undefined) {
+            return undefined
+        }
+
+        return {flags}
+    }
+
+    /**
+     * Validates optional v2 severity flags section.
+     *
+     * @param value Raw flags payload.
+     * @param fields Error accumulator.
+     * @returns Normalized flags or undefined.
+     */
+    private validatePromptOverrideSeverityFlags(
+        value: unknown,
+        fields: IValidationErrorField[],
+    ): IReviewPromptOverrideSeverityFlagsDTO | undefined {
+        if (value === undefined) {
+            return undefined
+        }
+
+        if (value === null || typeof value !== "object" || Array.isArray(value)) {
+            fields.push({
+                field: "v2PromptOverrides.severity.flags",
+                message: "must be an object with optional string fields",
+            })
+            return undefined
+        }
+
+        const record = value as Readonly<Record<string, unknown>>
+        const critical = this.validateOptionalString(
+            record["critical"],
+            "v2PromptOverrides.severity.flags.critical",
+            fields,
+        )
+        const high = this.validateOptionalString(
+            record["high"],
+            "v2PromptOverrides.severity.flags.high",
+            fields,
+        )
+        const medium = this.validateOptionalString(
+            record["medium"],
+            "v2PromptOverrides.severity.flags.medium",
+            fields,
+        )
+        const low = this.validateOptionalString(
+            record["low"],
+            "v2PromptOverrides.severity.flags.low",
+            fields,
+        )
+
+        return this.collectSectionValues({
+            critical,
+            high,
+            medium,
+            low,
+        })
+    }
+
+    /**
+     * Validates optional v2 generation section.
+     *
+     * @param value Raw generation payload.
+     * @param fields Error accumulator.
+     * @returns Normalized generation or undefined.
+     */
+    private validatePromptOverrideGeneration(
+        value: unknown,
+        fields: IValidationErrorField[],
+    ): IReviewPromptOverrideGenerationDTO | undefined {
+        if (value === undefined) {
+            return undefined
+        }
+
+        if (value === null || typeof value !== "object" || Array.isArray(value)) {
+            fields.push({
+                field: "v2PromptOverrides.generation",
+                message: "must be an object with optional main field",
+            })
+            return undefined
+        }
+
+        const record = value as Readonly<Record<string, unknown>>
+        const main = this.validateOptionalString(
+            record["main"],
+            "v2PromptOverrides.generation.main",
+            fields,
+        )
+
+        if (main === undefined) {
+            return undefined
+        }
+
+        return {main}
+    }
+
+    /**
+     * Collects optional values into a record or returns undefined when empty.
+     *
+     * @param values Candidate values map.
+     * @returns Record with defined values or undefined.
+     */
+    private collectSectionValues<T extends Record<string, string | undefined>>(
+        values: T,
+    ): T | undefined {
+        const result: Record<string, string> = {}
+
+        for (const [key, value] of Object.entries(values)) {
+            if (value !== undefined) {
+                result[key] = value
+            }
+        }
+
+        if (Object.keys(result).length === 0) {
+            return undefined
+        }
+
+        return result as T
     }
 
     /**

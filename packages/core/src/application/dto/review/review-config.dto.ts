@@ -19,6 +19,55 @@ export interface IReviewPromptOverridesDTO {
 }
 
 /**
+ * V2 category descriptions for review prompt overrides.
+ */
+export interface IReviewPromptOverrideCategoryDescriptionsDTO {
+    readonly bug?: string
+    readonly performance?: string
+    readonly security?: string
+}
+
+/**
+ * V2 categories section for review prompt overrides.
+ */
+export interface IReviewPromptOverrideCategoriesDTO {
+    readonly descriptions?: IReviewPromptOverrideCategoryDescriptionsDTO
+}
+
+/**
+ * V2 severity flags for review prompt overrides.
+ */
+export interface IReviewPromptOverrideSeverityFlagsDTO {
+    readonly critical?: string
+    readonly high?: string
+    readonly medium?: string
+    readonly low?: string
+}
+
+/**
+ * V2 severity section for review prompt overrides.
+ */
+export interface IReviewPromptOverrideSeverityDTO {
+    readonly flags?: IReviewPromptOverrideSeverityFlagsDTO
+}
+
+/**
+ * V2 generation section for review prompt overrides.
+ */
+export interface IReviewPromptOverrideGenerationDTO {
+    readonly main?: string
+}
+
+/**
+ * V2 structured prompt overrides for review pipeline.
+ */
+export interface IReviewPromptOverridesV2DTO {
+    readonly categories?: IReviewPromptOverrideCategoriesDTO
+    readonly severity?: IReviewPromptOverrideSeverityDTO
+    readonly generation?: IReviewPromptOverrideGenerationDTO
+}
+
+/**
  * Fully resolved and validated review config payload.
  *
  * Index signature keeps backward-compatible extensibility for adapter-specific
@@ -43,4 +92,5 @@ export interface IReviewConfigDTO {
     readonly reviewDepthStrategy?: ReviewDepthStrategy
     readonly directories?: readonly IDirectoryConfig[]
     readonly promptOverrides?: IReviewPromptOverridesDTO
+    readonly v2PromptOverrides?: IReviewPromptOverridesV2DTO
 }

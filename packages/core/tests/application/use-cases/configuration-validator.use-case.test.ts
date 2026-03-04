@@ -15,6 +15,22 @@ describe("ConfigurationValidatorUseCase", () => {
             promptOverrides: {
                 systemPrompt: " system prompt ",
             },
+            v2PromptOverrides: {
+                categories: {
+                    descriptions: {
+                        bug: " bug guidance ",
+                        performance: " perf guidance ",
+                    },
+                },
+                severity: {
+                    flags: {
+                        high: " high guidance ",
+                    },
+                },
+                generation: {
+                    main: " main guidance ",
+                },
+            },
         })
 
         expect(result.isOk).toBe(true)
@@ -22,6 +38,22 @@ describe("ConfigurationValidatorUseCase", () => {
         expect(result.value.ignorePaths).toEqual(["src/**", "dist/**"])
         expect(result.value.promptOverrides).toEqual({
             systemPrompt: "system prompt",
+        })
+        expect(result.value.v2PromptOverrides).toEqual({
+            categories: {
+                descriptions: {
+                    bug: "bug guidance",
+                    performance: "perf guidance",
+                },
+            },
+            severity: {
+                flags: {
+                    high: "high guidance",
+                },
+            },
+            generation: {
+                main: "main guidance",
+            },
         })
     })
 
@@ -70,6 +102,19 @@ describe("ConfigurationValidatorUseCase", () => {
             promptOverrides: {
                 systemPrompt: "",
             },
+            v2PromptOverrides: {
+                categories: {
+                    descriptions: {
+                        bug: "",
+                    },
+                },
+                severity: {
+                    flags: {
+                        critical: 1,
+                    },
+                },
+                generation: "invalid",
+            },
         })
 
         expect(result.isFail).toBe(true)
@@ -88,6 +133,18 @@ describe("ConfigurationValidatorUseCase", () => {
         expect(result.error.fields).toContainEqual({
             field: "promptOverrides.systemPrompt",
             message: "must be a non-empty string when provided",
+        })
+        expect(result.error.fields).toContainEqual({
+            field: "v2PromptOverrides.categories.descriptions.bug",
+            message: "must be a non-empty string when provided",
+        })
+        expect(result.error.fields).toContainEqual({
+            field: "v2PromptOverrides.severity.flags.critical",
+            message: "must be a non-empty string when provided",
+        })
+        expect(result.error.fields).toContainEqual({
+            field: "v2PromptOverrides.generation",
+            message: "must be an object with optional main field",
         })
     })
 

@@ -3,6 +3,12 @@ export {
     REVIEW_DEPTH_STRATEGY,
     type IReviewConfigDTO,
     type IReviewPromptOverridesDTO,
+    type IReviewPromptOverrideCategoriesDTO,
+    type IReviewPromptOverrideCategoryDescriptionsDTO,
+    type IReviewPromptOverrideGenerationDTO,
+    type IReviewPromptOverrideSeverityDTO,
+    type IReviewPromptOverrideSeverityFlagsDTO,
+    type IReviewPromptOverridesV2DTO,
     type ReviewDepthStrategy,
     type ValidatedConfig,
 } from "./review-config.dto"
