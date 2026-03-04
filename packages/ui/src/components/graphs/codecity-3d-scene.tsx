@@ -53,6 +53,9 @@ const LazyCodeCity3DSceneRenderer = lazy(
             readonly cameraPreset: TCodeCityCameraPreset
             readonly files: ReadonlyArray<ICodeCity3DSceneFileDescriptor>
             readonly impactedFiles: ReadonlyArray<ICodeCity3DSceneImpactedFileDescriptor>
+            readonly selectedFileId?: string
+            readonly onBuildingHover?: (fileId: string | undefined) => void
+            readonly onBuildingSelect?: (fileId: string | undefined) => void
         }) => ReactElement
     }> => {
         const module = await import("./codecity-3d-scene-renderer")
@@ -88,6 +91,8 @@ const CAMERA_PRESET_OPTIONS: ReadonlyArray<{
  */
 export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
     const [cameraPreset, setCameraPreset] = useState<TCodeCityCameraPreset>("bird-eye")
+    const [hoveredFileId, setHoveredFileId] = useState<string | undefined>(undefined)
+    const [selectedFileId, setSelectedFileId] = useState<string | undefined>(undefined)
     const isWebGlSupported = useMemo((): boolean => {
         if (typeof document === "undefined") {
             return false
@@ -98,6 +103,11 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
         const webGl2Context = canvas.getContext("webgl2")
         return webGlContext !== null || webGl2Context !== null
     }, [])
+    const fileById = useMemo((): ReadonlyMap<string, ICodeCity3DSceneFileDescriptor> => {
+        return new Map(props.files.map((file): readonly [string, ICodeCity3DSceneFileDescriptor] => [file.id, file]))
+    }, [props.files])
+    const hoveredFile = hoveredFileId !== undefined ? fileById.get(hoveredFileId) : undefined
+    const selectedFile = selectedFileId !== undefined ? fileById.get(selectedFileId) : undefined
 
     if (isWebGlSupported === false) {
         return (
@@ -136,6 +146,55 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                     </button>
                 ))}
             </div>
+            {hoveredFile !== undefined ? (
+                <aside className="absolute bottom-3 left-3 z-10 rounded-md border border-cyan-400/50 bg-slate-900/90 px-3 py-2 text-xs text-slate-100 shadow-lg">
+                    <p className="font-semibold text-cyan-200">Hover preview</p>
+                    <p className="mt-1">{hoveredFile.path}</p>
+                    <p className="mt-1 text-slate-300">
+                        LOC {String(hoveredFile.loc ?? 0)} · Complexity{" "}
+                        {String(hoveredFile.complexity ?? 0)} · Coverage{" "}
+                        {String(hoveredFile.coverage ?? 0)}%
+                    </p>
+                </aside>
+            ) : null}
+            {selectedFile !== undefined ? (
+                <aside className="absolute right-3 top-14 z-10 w-72 rounded-lg border border-slate-400/40 bg-slate-900/95 p-3 text-sm text-slate-100 shadow-xl">
+                    <div className="flex items-start justify-between gap-3">
+                        <p className="font-semibold text-cyan-200">File details</p>
+                        <button
+                            aria-label="Close file details panel"
+                            className="rounded border border-slate-500 px-2 py-0.5 text-xs text-slate-200 hover:border-slate-200"
+                            onClick={(): void => {
+                                setSelectedFileId(undefined)
+                            }}
+                            type="button"
+                        >
+                            Close
+                        </button>
+                    </div>
+                    <p className="mt-2 break-all text-xs text-slate-300">{selectedFile.path}</p>
+                    <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                        <div className="rounded border border-slate-700 bg-slate-900/70 p-2">
+                            <dt className="text-slate-400">LOC</dt>
+                            <dd className="mt-1 font-semibold text-slate-100">
+                                {String(selectedFile.loc ?? 0)}
+                            </dd>
+                        </div>
+                        <div className="rounded border border-slate-700 bg-slate-900/70 p-2">
+                            <dt className="text-slate-400">Complexity</dt>
+                            <dd className="mt-1 font-semibold text-slate-100">
+                                {String(selectedFile.complexity ?? 0)}
+                            </dd>
+                        </div>
+                        <div className="col-span-2 rounded border border-slate-700 bg-slate-900/70 p-2">
+                            <dt className="text-slate-400">Coverage</dt>
+                            <dd className="mt-1 font-semibold text-slate-100">
+                                {String(selectedFile.coverage ?? 0)}%
+                            </dd>
+                        </div>
+                    </dl>
+                </aside>
+            ) : null}
             <Suspense
                 fallback={
                     <div className="flex h-full items-center justify-center text-sm text-slate-300">
@@ -147,6 +206,9 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                     cameraPreset={cameraPreset}
                     files={props.files}
                     impactedFiles={props.impactedFiles ?? []}
+                    onBuildingHover={setHoveredFileId}
+                    onBuildingSelect={setSelectedFileId}
+                    selectedFileId={selectedFileId}
                 />
             </Suspense>
         </section>

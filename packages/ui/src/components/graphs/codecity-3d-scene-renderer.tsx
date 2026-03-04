@@ -1,6 +1,6 @@
 import { useMemo, useRef, type ReactElement } from "react"
 import { OrbitControls, Text } from "@react-three/drei"
-import { Canvas, useFrame, useThree } from "@react-three/fiber"
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber"
 import { Mesh, MeshStandardMaterial, Vector3 } from "three"
 
 import type {
@@ -14,6 +14,9 @@ interface ICodeCity3DSceneRendererProps {
     readonly cameraPreset: TCodeCityCameraPreset
     readonly files: ReadonlyArray<ICodeCity3DSceneFileDescriptor>
     readonly impactedFiles: ReadonlyArray<ICodeCity3DSceneImpactedFileDescriptor>
+    readonly selectedFileId?: string
+    readonly onBuildingHover?: (fileId: string | undefined) => void
+    readonly onBuildingSelect?: (fileId: string | undefined) => void
 }
 
 /**
@@ -614,6 +617,9 @@ interface IImpactBuildingMeshProps {
     readonly building: ICodeCityBuildingMesh
     readonly impactState: TCodeCityBuildingImpactState
     readonly phaseSeed: number
+    readonly isSelected: boolean
+    readonly onHover?: (fileId: string | undefined) => void
+    readonly onSelect?: (fileId: string | undefined) => void
 }
 
 /**
@@ -659,12 +665,36 @@ function ImpactBuildingMesh(props: IImpactBuildingMeshProps): ReactElement {
     })
 
     return (
-        <mesh key={props.building.id} position={[props.building.x, baseY, props.building.z]} ref={meshRef}>
-            <boxGeometry args={[props.building.width, props.building.height, props.building.depth]} />
+        <mesh
+            key={props.building.id}
+            onClick={(event: ThreeEvent<MouseEvent>): void => {
+                event.stopPropagation()
+                props.onSelect?.(props.building.id)
+            }}
+            onPointerOut={(event: ThreeEvent<PointerEvent>): void => {
+                event.stopPropagation()
+                props.onHover?.(undefined)
+            }}
+            onPointerOver={(event: ThreeEvent<PointerEvent>): void => {
+                event.stopPropagation()
+                props.onHover?.(props.building.id)
+            }}
+            position={[props.building.x, baseY, props.building.z]}
+            ref={meshRef}
+        >
+            <boxGeometry
+                args={[
+                    props.isSelected ? props.building.width * 1.08 : props.building.width,
+                    props.building.height,
+                    props.isSelected ? props.building.depth * 1.08 : props.building.depth,
+                ]}
+            />
             <meshStandardMaterial
                 color={props.building.color}
                 emissive={impactProfile.emissive}
-                emissiveIntensity={impactProfile.baseIntensity}
+                emissiveIntensity={
+                    props.isSelected ? Math.max(impactProfile.baseIntensity, 0.55) : impactProfile.baseIntensity
+                }
                 metalness={0.1}
                 ref={materialRef}
                 roughness={0.6}
@@ -725,7 +755,10 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                 <ImpactBuildingMesh
                     building={building}
                     impactState={impactMap.get(building.id) ?? "none"}
+                    isSelected={props.selectedFileId === building.id}
                     key={building.id}
+                    onHover={props.onBuildingHover}
+                    onSelect={props.onBuildingSelect}
                     phaseSeed={index * 0.45}
                 />
             ))}

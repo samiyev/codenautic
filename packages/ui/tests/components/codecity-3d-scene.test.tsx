@@ -16,11 +16,31 @@ vi.mock("@/components/graphs/codecity-3d-scene-renderer", () => {
             readonly cameraPreset: TCodeCityCameraPreset
             readonly files: ReadonlyArray<ICodeCity3DSceneFileDescriptor>
             readonly impactedFiles: ReadonlyArray<ICodeCity3DSceneImpactedFileDescriptor>
+            readonly selectedFileId?: string
+            readonly onBuildingHover?: (fileId: string | undefined) => void
+            readonly onBuildingSelect?: (fileId: string | undefined) => void
         }): React.JSX.Element => {
             return (
                 <div>
                     renderer-files:{props.files.length};impacts:{props.impactedFiles.length};preset:
                     {props.cameraPreset}
+                    ;selected:{props.selectedFileId ?? "none"}
+                    <button
+                        onClick={(): void => {
+                            props.onBuildingHover?.(props.files[0]?.id)
+                        }}
+                        type="button"
+                    >
+                        mock hover building
+                    </button>
+                    <button
+                        onClick={(): void => {
+                            props.onBuildingSelect?.(props.files[0]?.id)
+                        }}
+                        type="button"
+                    >
+                        mock select building
+                    </button>
                 </div>
             )
         },
@@ -62,7 +82,9 @@ describe("CodeCity3DScene", (): void => {
 
         renderWithProviders(<CodeCity3DScene files={TEST_FILES} title="3D loaded scene" />)
         await waitFor((): void => {
-            expect(screen.getByText("renderer-files:1;impacts:0;preset:bird-eye")).not.toBeNull()
+            expect(
+                screen.getByText("renderer-files:1;impacts:0;preset:bird-eye;selected:none"),
+            ).not.toBeNull()
         })
         getContextSpy.mockRestore()
     })
@@ -82,20 +104,50 @@ describe("CodeCity3DScene", (): void => {
             />,
         )
         await waitFor((): void => {
-            expect(screen.getByText("renderer-files:1;impacts:1;preset:bird-eye")).not.toBeNull()
+            expect(
+                screen.getByText("renderer-files:1;impacts:1;preset:bird-eye;selected:none"),
+            ).not.toBeNull()
         })
 
         await user.click(screen.getByRole("button", { name: "Camera preset Street level" }))
         await waitFor((): void => {
-            expect(screen.getByText("renderer-files:1;impacts:1;preset:street-level")).not.toBeNull()
+            expect(
+                screen.getByText("renderer-files:1;impacts:1;preset:street-level;selected:none"),
+            ).not.toBeNull()
         })
 
         await user.click(screen.getByRole("button", { name: "Camera preset Focus building" }))
         await waitFor((): void => {
             expect(
-                screen.getByText("renderer-files:1;impacts:1;preset:focus-on-building"),
+                screen.getByText("renderer-files:1;impacts:1;preset:focus-on-building;selected:none"),
             ).not.toBeNull()
         })
+
+        getContextSpy.mockRestore()
+    })
+
+    it("показывает tooltip при hover и side panel при клике по зданию", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const fakeContext = {} as GPUCanvasContext
+        const getContextSpy = vi
+            .spyOn(HTMLCanvasElement.prototype, "getContext")
+            .mockImplementation((): GPUCanvasContext => fakeContext)
+
+        renderWithProviders(
+            <CodeCity3DScene
+                files={TEST_FILES}
+                impactedFiles={TEST_IMPACTED_FILES}
+                title="3D interaction scene"
+            />,
+        )
+
+        await user.click(screen.getByRole("button", { name: "mock hover building" }))
+        expect(screen.getByText("Hover preview")).not.toBeNull()
+        expect(screen.getByText("src/api/repository.ts")).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "mock select building" }))
+        expect(screen.getByText("File details")).not.toBeNull()
+        expect(screen.getByText("Coverage")).not.toBeNull()
 
         getContextSpy.mockRestore()
     })
