@@ -8,6 +8,7 @@ import {
     GitPullRequest,
     LibraryBig,
     Link2,
+    ShieldCheck,
     SlidersHorizontal,
     Users,
     Webhook,
@@ -73,6 +74,11 @@ const DEFAULT_SETTINGS_NAV_ITEMS = [
         icon: <Building2 aria-hidden="true" size={16} />,
         label: "Organization",
         to: "/settings-organization",
+    },
+    {
+        icon: <ShieldCheck aria-hidden="true" size={16} />,
+        label: "SSO",
+        to: "/settings-sso",
     },
     {
         icon: <Users aria-hidden="true" size={16} />,

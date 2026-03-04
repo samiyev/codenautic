@@ -10,6 +10,7 @@ import {
     LibraryBig,
     Link2,
     Settings,
+    ShieldCheck,
     Users,
     Webhook,
 } from "lucide-react"
@@ -77,6 +78,11 @@ const SETTINGS_NAV = [
         icon: <Building2 aria-hidden="true" size={16} />,
         label: "Organization",
         to: "/settings-organization",
+    },
+    {
+        icon: <ShieldCheck aria-hidden="true" size={16} />,
+        label: "SSO",
+        to: "/settings-sso",
     },
     {
         icon: <Users aria-hidden="true" size={16} />,

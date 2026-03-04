@@ -106,6 +106,14 @@ export function SettingsPage(): ReactElement {
                         <li>
                             <Link
                                 className="underline underline-offset-4"
+                                to="/settings-sso"
+                            >
+                                SSO provider management
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                className="underline underline-offset-4"
                                 to="/onboarding"
                             >
                                 Start repository onboarding
