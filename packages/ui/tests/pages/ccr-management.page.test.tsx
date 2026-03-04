@@ -90,4 +90,37 @@ describe("ccr management page filter presets", (): void => {
         expect(readStoredPresets().length).toBe(0)
         expect(onFilterChange).toHaveBeenCalled()
     })
+
+    it("использует virtualized CCR list при расширении набора строк", async (): Promise<void> => {
+        const user = userEvent.setup()
+
+        renderWithProviders(
+            <CcrManagementPage
+                repository="all"
+                search=""
+                status="all"
+                team="all"
+                onFilterChange={(): void => {}}
+            />,
+        )
+
+        const table = screen.getByRole("table", { name: "CCR management table" })
+        expect(table).toHaveAttribute("data-virtualized", "true")
+
+        const initialRowCount = Number.parseInt(table.getAttribute("aria-rowcount") ?? "0", 10)
+        expect(initialRowCount).toBeGreaterThan(0)
+
+        const loadMoreButton = screen.queryByRole("button", { name: "Load more CCR" })
+        if (loadMoreButton !== null) {
+            await user.click(loadMoreButton)
+            const updatedRowCount = Number.parseInt(table.getAttribute("aria-rowcount") ?? "0", 10)
+            expect(updatedRowCount).toBeGreaterThan(initialRowCount)
+        }
+
+        const rowGroups = screen.getAllByRole("rowgroup")
+        const bodyRowGroup = rowGroups.at(1)
+        expect(bodyRowGroup).not.toBeUndefined()
+        expect(bodyRowGroup).toHaveAttribute("data-rendered-row-count")
+        expect(bodyRowGroup).toHaveStyle({ maxHeight: "560px" })
+    })
 })

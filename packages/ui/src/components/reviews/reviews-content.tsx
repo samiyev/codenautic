@@ -149,6 +149,14 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
                 getRowId={(row): string => row.id}
                 id="ccr-management-table"
                 rows={filteredRows}
+                virtualization={{
+                    estimateRowHeight: {
+                        comfortable: 58,
+                        compact: 44,
+                    },
+                    maxBodyHeight: 560,
+                    overscan: 12,
+                }}
             />
             {props.hasMore ? (
                 <div className="flex justify-end">
