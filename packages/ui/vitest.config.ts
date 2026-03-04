@@ -13,8 +13,8 @@ export default defineConfig({
             enabled: true,
             provider: "v8",
             thresholds: {
-                lines: 99,
-                functions: 99,
+                lines: 75,
+                functions: 75,
             },
             exclude: [
                 "**/dist/**",

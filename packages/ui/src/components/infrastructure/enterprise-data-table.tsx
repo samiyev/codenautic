@@ -287,7 +287,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
     const renderedRowOffsets: ReadonlyArray<IRenderedRowOffset> = virtualItems.length > 0
         ? virtualItems.map((item): IRenderedRowOffset => ({
             index: item.index,
-            key: item.key,
+            key: String(item.key),
             start: item.start,
         }))
         : rowModel.map((_, index): IRenderedRowOffset => ({
