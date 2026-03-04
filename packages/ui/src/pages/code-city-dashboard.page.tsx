@@ -26,6 +26,10 @@ import {
     GuidedTourOverlay,
     type IGuidedTourStep,
 } from "@/components/graphs/guided-tour-overlay"
+import {
+    ExploreModeSidebar,
+    type IExploreModePathDescriptor,
+} from "@/components/graphs/explore-mode-sidebar"
 import { ProjectOverviewPanel } from "@/components/graphs/project-overview-panel"
 import { ChurnComplexityScatter } from "@/components/graphs/churn-complexity-scatter"
 import { HealthTrendChart, type IHealthTrendPoint } from "@/components/graphs/health-trend-chart"
@@ -626,6 +630,60 @@ const CODE_CITY_GUIDED_TOUR_STEPS: ReadonlyArray<IGuidedTourStep> = [
     },
 ] as const
 
+interface IExploreNavigationFocusState {
+    readonly title: string
+    readonly chainFileIds: ReadonlyArray<string>
+    readonly activeFileId?: string
+}
+
+/**
+ * Формирует role-aware набор exploration paths на базе scan-файлов.
+ *
+ * @param files Файлы из dashboard profile.
+ * @returns Рекомендованные пути исследования для sidebar.
+ */
+function buildExploreModePaths(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+): ReadonlyArray<IExploreModePathDescriptor> {
+    const topBackendFiles = files
+        .filter((file): boolean => /api|service|worker|backend/i.test(file.path))
+        .slice(0, 3)
+        .map((file): string => file.id)
+    const topFrontendFiles = files
+        .filter((file): boolean => /ui|component|page|frontend/i.test(file.path))
+        .slice(0, 3)
+        .map((file): string => file.id)
+    const topArchitectureFiles = files
+        .filter((file): boolean => /domain|core|graph|architecture/i.test(file.path))
+        .slice(0, 3)
+        .map((file): string => file.id)
+    const defaultChain = files.slice(0, 3).map((file): string => file.id)
+
+    return [
+        {
+            description: "Follow API/service hotspots and worker bottlenecks.",
+            fileChainIds: topBackendFiles.length > 0 ? topBackendFiles : defaultChain,
+            id: "explore-backend-hotspots",
+            role: "backend",
+            title: "Backend hotspots path",
+        },
+        {
+            description: "Inspect UI pages/components and their dependency neighborhoods.",
+            fileChainIds: topFrontendFiles.length > 0 ? topFrontendFiles : defaultChain,
+            id: "explore-frontend-flows",
+            role: "frontend",
+            title: "Frontend interaction path",
+        },
+        {
+            description: "Review architecture-critical modules and shared graph zones.",
+            fileChainIds: topArchitectureFiles.length > 0 ? topArchitectureFiles : defaultChain,
+            id: "explore-architecture-core",
+            role: "architect",
+            title: "Architecture core path",
+        },
+    ]
+}
+
 export function CodeCityDashboardPage(
     props: ICodeCityDashboardPageProps = {},
 ): ReactElement {
@@ -640,6 +698,12 @@ export function CodeCityDashboardPage(
     const [repositoryId, setRepositoryId] = useState<string>(initialRepositoryId)
     const [metric, setMetric] = useState<TCodeCityDashboardMetric>("complexity")
     const [overlayMode, setOverlayMode] = useState<TCausalOverlayMode>("impact")
+    const [exploreNavigationFocus, setExploreNavigationFocus] = useState<IExploreNavigationFocusState>(
+        {
+            chainFileIds: [],
+            title: "",
+        },
+    )
     const [highlightedFileId, setHighlightedFileId] = useState<string | undefined>()
     const [guidedTourStepIndex, setGuidedTourStepIndex] = useState<number>(0)
     const [isGuidedTourActive, setIsGuidedTourActive] = useState<boolean>(true)
@@ -656,6 +720,7 @@ export function CodeCityDashboardPage(
     const currentProfile = resolveDashboardProfile(repositoryId)
     const rootCauseIssues = buildRootCauseIssues(currentProfile.files)
     const causalCouplings = buildCausalCouplings(currentProfile.temporalCouplings)
+    const exploreModePaths = buildExploreModePaths(currentProfile.files)
     const fileLink = createRepositoryFilesLink(currentProfile.id)
     const overlayImpactedFiles =
         overlayMode === "impact" ? currentProfile.impactedFiles : []
@@ -677,6 +742,10 @@ export function CodeCityDashboardPage(
             chainFileIds: [],
             issueId: "",
             issueTitle: "",
+        })
+        setExploreNavigationFocus({
+            chainFileIds: [],
+            title: "",
         })
     }
 
@@ -785,6 +854,24 @@ export function CodeCityDashboardPage(
 
             <Card>
                 <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Explore mode sidebar</p>
+                </CardHeader>
+                <CardBody>
+                    <ExploreModeSidebar
+                        onNavigatePath={(path): void => {
+                            setExploreNavigationFocus({
+                                activeFileId: path.fileChainIds.at(0),
+                                chainFileIds: path.fileChainIds,
+                                title: path.title,
+                            })
+                        }}
+                        paths={exploreModePaths}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
                     <p className="text-sm font-semibold text-slate-900">
                         Cross-repository dependencies
                     </p>
@@ -812,13 +899,17 @@ export function CodeCityDashboardPage(
                         navigationActiveFileId={
                             overlayMode === "root-cause"
                                 ? rootCauseChainFocus.activeFileId
-                                : undefined
+                                : exploreNavigationFocus.activeFileId
                         }
                         navigationChainFileIds={
-                            overlayMode === "root-cause" ? rootCauseChainFocus.chainFileIds : []
+                            overlayMode === "root-cause"
+                                ? rootCauseChainFocus.chainFileIds
+                                : exploreNavigationFocus.chainFileIds
                         }
                         navigationLabel={
-                            overlayMode === "root-cause" ? rootCauseChainFocus.issueTitle : undefined
+                            overlayMode === "root-cause"
+                                ? rootCauseChainFocus.issueTitle
+                                : exploreNavigationFocus.title
                         }
                         impactedFiles={overlayImpactedFiles}
                         title={`${currentProfile.label} 3D scene`}

@@ -138,6 +138,43 @@ const { mockProjectOverviewPanel } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockExploreModeSidebar } = vi.hoisted(() => ({
+    mockExploreModeSidebar: vi.fn(
+        (props: {
+            readonly paths: ReadonlyArray<unknown>
+            readonly onNavigatePath: (path: {
+                readonly id: string
+                readonly title: string
+                readonly role: string
+                readonly description: string
+                readonly fileChainIds: ReadonlyArray<string>
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>explore-paths:{props.paths.length}</p>
+                    <button
+                        onClick={(): void => {
+                            props.onNavigatePath({
+                                description: "Mock exploration path",
+                                fileChainIds: [
+                                    "src/pages/ccr-management.page.tsx",
+                                    "src/components/graphs/codecity-treemap.tsx",
+                                ],
+                                id: "explore-1",
+                                role: "backend",
+                                title: "Mock backend path",
+                            })
+                        }}
+                        type="button"
+                    >
+                        trigger explore navigate
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockRootCauseChainViewer } = vi.hoisted(() => ({
     mockRootCauseChainViewer: vi.fn(
         (props: {
@@ -194,6 +231,9 @@ vi.mock("@/components/graphs/health-trend-chart", () => ({
 vi.mock("@/components/graphs/project-overview-panel", () => ({
     ProjectOverviewPanel: mockProjectOverviewPanel,
 }))
+vi.mock("@/components/graphs/explore-mode-sidebar", () => ({
+    ExploreModeSidebar: mockExploreModeSidebar,
+}))
 vi.mock("@/components/graphs/root-cause-chain-viewer", () => ({
     RootCauseChainViewer: mockRootCauseChainViewer,
 }))
@@ -205,6 +245,7 @@ beforeEach((): void => {
     mockChurnComplexityScatter.mockClear()
     mockHealthTrendChart.mockClear()
     mockProjectOverviewPanel.mockClear()
+    mockExploreModeSidebar.mockClear()
     mockRootCauseChainViewer.mockClear()
 })
 
@@ -288,6 +329,10 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstOverviewCall?.repositoryLabel).toBe("platform-team/api-gateway")
         expect(firstOverviewCall?.files.length).toBeGreaterThan(0)
 
+        const firstExploreCall = mockExploreModeSidebar.mock.calls.at(0)?.[0]
+        expect(firstExploreCall).not.toBeUndefined()
+        expect(firstExploreCall?.paths.length).toBeGreaterThan(0)
+
         const firstRootCauseCall = mockRootCauseChainViewer.mock.calls.at(0)?.[0]
         expect(firstRootCauseCall).not.toBeUndefined()
         expect(firstRootCauseCall?.issues.length).toBe(0)
@@ -301,6 +346,15 @@ describe("CodeCityDashboardPage", (): void => {
         expect(screen.getByText("Step 2 of 3")).not.toBeNull()
         await user.click(screen.getByRole("button", { name: "Skip guided tour" }))
         expect(screen.queryByText("Guided tour")).toBeNull()
+        await user.click(screen.getByRole("button", { name: "trigger explore navigate" }))
+
+        const exploreNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(exploreNavigation3DCall).not.toBeUndefined()
+        expect(exploreNavigation3DCall?.navigationChainFileIds.length).toBeGreaterThan(0)
+        expect(exploreNavigation3DCall?.navigationActiveFileId).toBe(
+            "src/pages/ccr-management.page.tsx",
+        )
+        expect(exploreNavigation3DCall?.navigationLabel).toBe("Mock backend path")
 
         const repositorySelect = screen.getByRole("combobox", { name: "Repository" })
         const metricSelect = screen.getByRole("combobox", { name: "Metric" })
