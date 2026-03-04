@@ -9,6 +9,7 @@ import {
     KeyRound,
     LibraryBig,
     Link2,
+    Paintbrush,
     ShieldCheck,
     SlidersHorizontal,
     Users,
@@ -30,6 +31,11 @@ const DEFAULT_SETTINGS_NAV_ITEMS = [
         icon: <SlidersHorizontal aria-hidden="true" size={16} />,
         label: "General",
         to: "/settings",
+    },
+    {
+        icon: <Paintbrush aria-hidden="true" size={16} />,
+        label: "Appearance",
+        to: "/settings-appearance",
     },
     {
         icon: <GitPullRequest aria-hidden="true" size={16} />,

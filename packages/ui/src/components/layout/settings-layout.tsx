@@ -10,6 +10,7 @@ import {
     KeyRound,
     LibraryBig,
     Link2,
+    Paintbrush,
     Settings,
     ShieldCheck,
     Users,
@@ -34,6 +35,11 @@ const SETTINGS_NAV = [
         icon: <Settings aria-hidden="true" size={16} />,
         label: "Settings",
         to: "/settings",
+    },
+    {
+        icon: <Paintbrush aria-hidden="true" size={16} />,
+        label: "Appearance",
+        to: "/settings-appearance",
     },
     {
         icon: <GitPullRequest aria-hidden="true" size={16} />,
