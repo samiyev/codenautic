@@ -51,6 +51,34 @@ interface IIdeSyncSettings {
     readonly syncOnPush: boolean
 }
 
+interface IMcpToolUsageStat {
+    readonly avgLatencyMs: number
+    readonly calls: number
+    readonly errorCount: number
+    readonly toolId: string
+}
+
+const DEFAULT_MCP_TOOL_USAGE_STATS: ReadonlyArray<IMcpToolUsageStat> = [
+    {
+        toolId: "figma.design-context",
+        calls: 142,
+        avgLatencyMs: 268,
+        errorCount: 4,
+    },
+    {
+        toolId: "repo.context-index",
+        calls: 121,
+        avgLatencyMs: 182,
+        errorCount: 3,
+    },
+    {
+        toolId: "review.diff-insights",
+        calls: 95,
+        avgLatencyMs: 211,
+        errorCount: 6,
+    },
+] as const
+
 function isRepoReviewMode(value: string): value is TRepoReviewMode {
     return (
         value === REPO_REVIEW_MODE.manual ||
@@ -94,6 +122,22 @@ export function SettingsCodeReviewPage(): ReactElement {
         autoOpenDiffOnSync: true,
     })
     const [ideSyncState, setIdeSyncState] = useState<string>("Not saved yet.")
+    const mcpTotalCalls = DEFAULT_MCP_TOOL_USAGE_STATS.reduce(
+        (acc, item): number => acc + item.calls,
+        0,
+    )
+    const mcpTotalErrors = DEFAULT_MCP_TOOL_USAGE_STATS.reduce(
+        (acc, item): number => acc + item.errorCount,
+        0,
+    )
+    const mcpSuccessRate = Math.max(
+        0,
+        Math.round(((mcpTotalCalls - mcpTotalErrors) / mcpTotalCalls) * 100),
+    )
+    const mcpAverageLatencyMs = Math.round(
+        DEFAULT_MCP_TOOL_USAGE_STATS.reduce((acc, item): number => acc + item.avgLatencyMs, 0) /
+            DEFAULT_MCP_TOOL_USAGE_STATS.length,
+    )
     const normalizedRepositoryId = repositoryId.trim()
     const repoConfig = useRepoConfig({
         repositoryId: normalizedRepositoryId,
@@ -451,6 +495,79 @@ export function SettingsCodeReviewPage(): ReactElement {
                 <Button type="button" variant="solid" onPress={handleIdeSyncSave}>
                     Save IDE sync settings
                 </Button>
+            </section>
+            <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+                <h2 className="text-base font-semibold text-slate-900">
+                    MCP server control panel
+                </h2>
+                <p className="text-sm text-slate-600">
+                    Review MCP tool usage and runtime quality to spot unstable tools before they
+                    impact CCR generation.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                    <article className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                            Total tool calls
+                        </p>
+                        <p className="text-xl font-semibold text-slate-900" data-testid="mcp-total-calls">
+                            {mcpTotalCalls}
+                        </p>
+                    </article>
+                    <article className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                            Success rate
+                        </p>
+                        <p
+                            className="text-xl font-semibold text-slate-900"
+                            data-testid="mcp-success-rate"
+                        >
+                            {mcpSuccessRate}%
+                        </p>
+                    </article>
+                    <article className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                            Avg latency
+                        </p>
+                        <p
+                            className="text-xl font-semibold text-slate-900"
+                            data-testid="mcp-avg-latency"
+                        >
+                            {mcpAverageLatencyMs} ms
+                        </p>
+                    </article>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-slate-200 text-sm">
+                        <thead className="bg-slate-50 text-left text-slate-600">
+                            <tr>
+                                <th className="px-3 py-2 font-medium" scope="col">
+                                    MCP tool
+                                </th>
+                                <th className="px-3 py-2 font-medium" scope="col">
+                                    Calls
+                                </th>
+                                <th className="px-3 py-2 font-medium" scope="col">
+                                    Errors
+                                </th>
+                                <th className="px-3 py-2 font-medium" scope="col">
+                                    Avg latency
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200">
+                            {DEFAULT_MCP_TOOL_USAGE_STATS.map((item): ReactElement => (
+                                <tr key={item.toolId} data-testid="mcp-tool-row">
+                                    <td className="px-3 py-2 text-slate-900">{item.toolId}</td>
+                                    <td className="px-3 py-2 text-slate-700">{item.calls}</td>
+                                    <td className="px-3 py-2 text-slate-700">{item.errorCount}</td>
+                                    <td className="px-3 py-2 text-slate-700">
+                                        {item.avgLatencyMs} ms
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </section>
             <DryRunResultViewer
                 isRunning={dryRun.runDryRun.isPending}

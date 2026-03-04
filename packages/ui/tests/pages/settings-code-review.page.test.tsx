@@ -301,4 +301,27 @@ describe("settings code review page", (): void => {
             )
         })
     })
+
+    it("показывает MCP server usage и stats", async (): Promise<void> => {
+        server.use(
+            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+                return HttpResponse.json({
+                    config: {
+                        repositoryId: "repo-1",
+                        configYaml: "version: 1\nreview:\n  mode: MANUAL\n",
+                        ignorePatterns: ["/dist", "/node_modules"],
+                        reviewMode: "MANUAL",
+                    },
+                })
+            }),
+        )
+
+        renderWithProviders(<SettingsCodeReviewPage />)
+
+        expect(screen.getByRole("heading", { name: "MCP server control panel" })).not.toBeNull()
+        expect(screen.getByTestId("mcp-total-calls")).toHaveTextContent("358")
+        expect(screen.getByTestId("mcp-success-rate")).toHaveTextContent("96%")
+        expect(screen.getByTestId("mcp-avg-latency")).toHaveTextContent("220 ms")
+        expect(screen.getAllByTestId("mcp-tool-row")).toHaveLength(3)
+    })
 })
