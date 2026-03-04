@@ -15,6 +15,7 @@ import {
 } from "@/components/graphs/codecity-treemap"
 import { CodeCity3DScene } from "@/components/graphs/codecity-3d-scene"
 import { ChurnComplexityScatter } from "@/components/graphs/churn-complexity-scatter"
+import { HealthTrendChart, type IHealthTrendPoint } from "@/components/graphs/health-trend-chart"
 import { Card, CardBody, CardHeader } from "@/components/ui"
 
 type TCodeCityDashboardMetric = "complexity" | "coverage" | "churn"
@@ -41,6 +42,8 @@ interface ICodeCityDashboardRepositoryProfile {
     readonly compareFiles: ReadonlyArray<ICodeCityTreemapFileDescriptor>
     /** Temporal coupling связи между файлами treemap. */
     readonly temporalCouplings: ReadonlyArray<ICodeCityTreemapTemporalCouplingDescriptor>
+    /** История health score для линейного causal-trend графика. */
+    readonly healthTrend: ReadonlyArray<IHealthTrendPoint>
 }
 
 interface ICodeCityDashboardPageProps {
@@ -91,6 +94,31 @@ const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardReposito
                 sourceFileId: "src/api/repository.ts",
                 targetFileId: "src/worker/index.ts",
                 strength: 0.56,
+            },
+        ],
+        healthTrend: [
+            {
+                timestamp: "2025-10-20T00:00:00.000Z",
+                healthScore: 61,
+                annotation: "Incident",
+            },
+            {
+                timestamp: "2025-11-15T00:00:00.000Z",
+                healthScore: 66,
+            },
+            {
+                timestamp: "2025-12-20T00:00:00.000Z",
+                healthScore: 72,
+                annotation: "Cache tuning",
+            },
+            {
+                timestamp: "2026-01-18T00:00:00.000Z",
+                healthScore: 78,
+            },
+            {
+                timestamp: "2026-02-01T00:00:00.000Z",
+                healthScore: 82,
+                annotation: "Retry refactor",
             },
         ],
         label: "platform-team/api-gateway",
@@ -180,6 +208,30 @@ const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardReposito
                 sourceFileId: "src/components/layout/sidebar.tsx",
                 targetFileId: "src/pages/repositories-list.page.tsx",
                 strength: 0.48,
+            },
+        ],
+        healthTrend: [
+            {
+                timestamp: "2025-10-20T00:00:00.000Z",
+                healthScore: 70,
+            },
+            {
+                timestamp: "2025-11-15T00:00:00.000Z",
+                healthScore: 73,
+                annotation: "UI migration",
+            },
+            {
+                timestamp: "2025-12-20T00:00:00.000Z",
+                healthScore: 76,
+            },
+            {
+                timestamp: "2026-01-18T00:00:00.000Z",
+                healthScore: 81,
+            },
+            {
+                timestamp: "2026-02-01T00:00:00.000Z",
+                healthScore: 85,
+                annotation: "HeroUI rollout",
             },
         ],
         label: "frontend-team/ui-dashboard",
@@ -276,6 +328,30 @@ const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardReposito
                 sourceFileId: "src/services/retry.ts",
                 targetFileId: "src/worker/main.ts",
                 strength: 0.42,
+            },
+        ],
+        healthTrend: [
+            {
+                timestamp: "2025-10-20T00:00:00.000Z",
+                healthScore: 57,
+                annotation: "Queue spike",
+            },
+            {
+                timestamp: "2025-11-15T00:00:00.000Z",
+                healthScore: 60,
+            },
+            {
+                timestamp: "2025-12-20T00:00:00.000Z",
+                healthScore: 65,
+            },
+            {
+                timestamp: "2026-01-18T00:00:00.000Z",
+                healthScore: 69,
+                annotation: "Backpressure patch",
+            },
+            {
+                timestamp: "2026-02-01T00:00:00.000Z",
+                healthScore: 74,
             },
         ],
         label: "backend-core/payment-worker",
@@ -548,6 +624,15 @@ export function CodeCityDashboardPage(
                         onFileSelect={setHighlightedFileId}
                         selectedFileId={highlightedFileId}
                     />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Health trend timeline</p>
+                </CardHeader>
+                <CardBody>
+                    <HealthTrendChart points={currentProfile.healthTrend} />
                 </CardBody>
             </Card>
 

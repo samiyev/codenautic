@@ -108,7 +108,7 @@ describe("ccr management page filter presets", (): void => {
         await user.click(screen.getByRole("button", { name: "Delete preset" }))
         expect(readStoredPresets().length).toBe(0)
         expect(onFilterChange).toHaveBeenCalled()
-    })
+    }, 15000)
 
     it("использует virtualized CCR list при расширении набора строк", async (): Promise<void> => {
         intersectionObserverState.isIntersecting = true

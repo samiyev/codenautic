@@ -103,6 +103,13 @@ const { mockChurnComplexityScatter } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockHealthTrendChart } = vi.hoisted(() => ({
+    mockHealthTrendChart: vi.fn(
+        (props: { readonly points: ReadonlyArray<unknown> }): React.JSX.Element => {
+            return <p>health-points:{props.points.length}</p>
+        },
+    ),
+}))
 
 vi.mock("@/components/graphs/codecity-treemap", () => ({
     CodeCityTreemap: mockCodeCityTreemap,
@@ -116,12 +123,16 @@ vi.mock("@/components/graphs/codecity-3d-scene", () => ({
 vi.mock("@/components/graphs/churn-complexity-scatter", () => ({
     ChurnComplexityScatter: mockChurnComplexityScatter,
 }))
+vi.mock("@/components/graphs/health-trend-chart", () => ({
+    HealthTrendChart: mockHealthTrendChart,
+}))
 
 beforeEach((): void => {
     mockCodeCityTreemap.mockClear()
     mockPackageDependencyGraph.mockClear()
     mockCodeCity3DScene.mockClear()
     mockChurnComplexityScatter.mockClear()
+    mockHealthTrendChart.mockClear()
 })
 
 describe("CodeCityDashboardPage", (): void => {
@@ -164,6 +175,10 @@ describe("CodeCityDashboardPage", (): void => {
         const firstScatterCall = mockChurnComplexityScatter.mock.calls.at(0)?.[0]
         expect(firstScatterCall).not.toBeUndefined()
         expect(firstScatterCall?.selectedFileId).toBeUndefined()
+
+        const firstHealthTrendCall = mockHealthTrendChart.mock.calls.at(0)?.[0]
+        expect(firstHealthTrendCall).not.toBeUndefined()
+        expect(firstHealthTrendCall?.points.length).toBeGreaterThan(0)
     })
 
     it("обновляет treemap при смене репозитория и метрики", async (): Promise<void> => {
