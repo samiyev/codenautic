@@ -63,6 +63,27 @@ describe("ccr review detail page", (): void => {
         ).not.toBeNull()
     })
 
+    it("отправляет reviewer feedback и показывает accepted/rejected статус", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const ccr = MOCK_CCR_ROWS[0]
+
+        renderWithProviders(<CcrReviewDetailPage ccr={ccr} />)
+
+        await user.click(screen.getByRole("button", { name: "Open trace for SG-002" }))
+        await user.click(screen.getByRole("button", { name: "Quick action duplicate" }))
+        await user.click(screen.getByRole("button", { name: "Accept feedback" }))
+
+        expect(screen.getByText(/Feedback status:/)).not.toBeNull()
+        expect(screen.getByText(/Applied outcome:/)).not.toBeNull()
+        expect(screen.getByText("Linked to SG-001 history.")).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "Quick action irrelevant" }))
+        await user.click(screen.getByRole("button", { name: "Reject feedback" }))
+
+        expect(screen.getByText(/Feedback status:/)).not.toBeNull()
+        expect(screen.getByText(/Rejection reason:/)).not.toBeNull()
+    })
+
     it("рендерит SSE viewer при streamSourceUrl", async (): Promise<void> => {
         const user = userEvent.setup()
         const ccr = MOCK_CCR_ROWS[0]

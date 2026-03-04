@@ -20,6 +20,8 @@ type TReviewDecision = "approved" | "pending" | "rejected"
 type TThreadMessagesMap = Readonly<Record<string, ReadonlyArray<IChatPanelMessage>>>
 type TSafeGuardFilterId = "dedup" | "hallucination" | "severity"
 type TSafeGuardStepStatus = "applied" | "filtered_out" | "passed"
+type TReviewerFeedbackReason = "duplicate" | "false_positive" | "irrelevant"
+type TReviewerFeedbackStatus = "accepted" | "rejected"
 
 interface ISafeGuardTraceStep {
     /** Идентификатор фильтра SafeGuard. */
@@ -45,6 +47,23 @@ interface ISafeGuardTraceItem {
     readonly steps: ReadonlyArray<ISafeGuardTraceStep>
 }
 
+interface IReviewerFeedbackRecord {
+    /** Время отправки feedback. */
+    readonly createdAt: string
+    /** Детализированный outcome или причина отказа. */
+    readonly details: string
+    /** Идентификатор feedback события. */
+    readonly id: string
+    /** Связанный remark id, если feedback смержен как duplicate. */
+    readonly linkedTraceId?: string
+    /** Причина из quick action. */
+    readonly reason: TReviewerFeedbackReason
+    /** Статус применения feedback. */
+    readonly status: TReviewerFeedbackStatus
+    /** Trace item, к которому относится feedback. */
+    readonly traceId: string
+}
+
 const SAFEGUARD_FILTER_SEQUENCE: ReadonlyArray<TSafeGuardFilterId> = [
     "dedup",
     "hallucination",
@@ -55,6 +74,18 @@ const SAFEGUARD_FILTER_LABELS: Readonly<Record<TSafeGuardFilterId, string>> = {
     dedup: "dedup",
     hallucination: "hallucination",
     severity: "severity",
+}
+
+const FEEDBACK_REASON_LABELS: Readonly<Record<TReviewerFeedbackReason, string>> = {
+    duplicate: "duplicate",
+    false_positive: "false positive",
+    irrelevant: "irrelevant",
+}
+
+const FEEDBACK_REJECTION_REASONS: Readonly<Record<TReviewerFeedbackReason, string>> = {
+    duplicate: "No canonical finding was eligible for merge in the current safety window.",
+    false_positive: "Evidence bundle confirms the finding and blocks false-positive dismissal.",
+    irrelevant: "Rule is mandatory for the active policy and cannot be ignored.",
 }
 
 /** Свойства страницы диффа CCR. */
@@ -118,6 +149,20 @@ function getSafeGuardStepStatusLabel(status: TSafeGuardStepStatus): string {
         return "filtered out"
     }
     return "passed"
+}
+
+function formatFeedbackTimestamp(rawTimestamp: string): string {
+    const date = new Date(rawTimestamp)
+    if (Number.isNaN(date.getTime())) {
+        return "—"
+    }
+
+    return date.toLocaleString([], {
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        month: "2-digit",
+    })
 }
 
 function buildSafeGuardTraceItems(ccr: ICcrRowData): ReadonlyArray<ISafeGuardTraceItem> {
@@ -214,8 +259,30 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     ])
     const [activeThreadId, setActiveThreadId] = useState<string>(`${ccr.id}-thread-main`)
     const [messagesByThread, setMessagesByThread] = useState<TThreadMessagesMap>({})
+    const [selectedFeedbackReason, setSelectedFeedbackReason] =
+        useState<TReviewerFeedbackReason>("false_positive")
+    const [feedbackHistory, setFeedbackHistory] = useState<ReadonlyArray<IReviewerFeedbackRecord>>([
+        {
+            createdAt: "2026-03-03T10:42:00Z",
+            details: "Feedback accepted and scheduled for continuous-learning update.",
+            id: "FDBK-001",
+            reason: "duplicate",
+            status: "accepted",
+            traceId: "SG-002",
+            linkedTraceId: "SG-001",
+        },
+        {
+            createdAt: "2026-03-03T09:18:00Z",
+            details: "Rule is mandatory for the active policy and cannot be ignored.",
+            id: "FDBK-002",
+            reason: "irrelevant",
+            status: "rejected",
+            traceId: "SG-001",
+        },
+    ])
     const nextMessageId = useRef(0)
     const nextThreadId = useRef(1)
+    const nextFeedbackId = useRef(3)
     const contextItem = useMemo((): IChatPanelContext => {
         return ccrToContextItem(ccr)
     }, [ccr])
@@ -253,6 +320,19 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
         return safeGuardTraceItems.filter((item): boolean => item.finalDecision === "hidden").length
     }, [safeGuardTraceItems])
     const visibleTraceCount = safeGuardTraceItems.length - filteredOutTraceCount
+    const activeTraceFeedbackHistory = useMemo((): ReadonlyArray<IReviewerFeedbackRecord> => {
+        if (activeSafeGuardTraceItem === undefined) {
+            return []
+        }
+
+        return feedbackHistory.filter((feedbackRecord): boolean => {
+            return (
+                feedbackRecord.traceId === activeSafeGuardTraceItem.id
+                || feedbackRecord.linkedTraceId === activeSafeGuardTraceItem.id
+            )
+        })
+    }, [activeSafeGuardTraceItem, feedbackHistory])
+    const latestActiveTraceFeedback = activeTraceFeedbackHistory[0]
 
     const quickActions = useMemo(
         (): ReadonlyArray<{
@@ -337,6 +417,44 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                 }
             }),
         )
+    }
+
+    const handleSubmitReviewerFeedback = (status: TReviewerFeedbackStatus): void => {
+        if (activeSafeGuardTraceItem === undefined) {
+            return
+        }
+
+        const linkedTraceId =
+            selectedFeedbackReason === "duplicate"
+                ? safeGuardTraceItems.find((traceItem): boolean => {
+                      return (
+                          traceItem.finalDecision === "shown"
+                          && traceItem.id !== activeSafeGuardTraceItem.id
+                      )
+                  })?.id
+                : undefined
+
+        const details =
+            status === "accepted"
+                ? linkedTraceId === undefined
+                    ? "Feedback accepted and scheduled for continuous-learning update."
+                    : `Feedback accepted and linked with ${linkedTraceId}.`
+                : FEEDBACK_REJECTION_REASONS[selectedFeedbackReason]
+
+        nextFeedbackId.current += 1
+        const feedbackRecord: IReviewerFeedbackRecord = {
+            createdAt: new Date().toISOString(),
+            details,
+            id: `FDBK-${String(nextFeedbackId.current).padStart(3, "0")}`,
+            linkedTraceId,
+            reason: selectedFeedbackReason,
+            status,
+            traceId: activeSafeGuardTraceItem.id,
+        }
+
+        setFeedbackHistory((previous): ReadonlyArray<IReviewerFeedbackRecord> => {
+            return [feedbackRecord, ...previous]
+        })
     }
 
     return (
@@ -545,6 +663,113 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     </ul>
                                 </div>
                             )}
+                        </CardBody>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <p className="text-sm font-semibold text-slate-900">
+                                Reviewer feedback learning loop
+                            </p>
+                        </CardHeader>
+                        <CardBody className="space-y-3">
+                            <p className="text-sm text-slate-700">
+                                Submit feedback in two clicks and track whether it was accepted or
+                                rejected.
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                {(["false_positive", "irrelevant", "duplicate"] as const).map(
+                                    (reason): ReactElement => {
+                                        const isSelected = selectedFeedbackReason === reason
+                                        return (
+                                            <Button
+                                                key={reason}
+                                                aria-label={`Quick action ${FEEDBACK_REASON_LABELS[reason]}`}
+                                                size="sm"
+                                                type="button"
+                                                variant={isSelected ? "solid" : "flat"}
+                                                onPress={(): void => {
+                                                    setSelectedFeedbackReason(reason)
+                                                }}
+                                            >
+                                                {FEEDBACK_REASON_LABELS[reason]}
+                                            </Button>
+                                        )
+                                    },
+                                )}
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                <Button
+                                    aria-label="Accept feedback"
+                                    color="success"
+                                    size="sm"
+                                    type="button"
+                                    onPress={(): void => {
+                                        handleSubmitReviewerFeedback("accepted")
+                                    }}
+                                >
+                                    Accept feedback
+                                </Button>
+                                <Button
+                                    aria-label="Reject feedback"
+                                    color="danger"
+                                    size="sm"
+                                    type="button"
+                                    onPress={(): void => {
+                                        handleSubmitReviewerFeedback("rejected")
+                                    }}
+                                >
+                                    Reject feedback
+                                </Button>
+                            </div>
+                            {latestActiveTraceFeedback === undefined ? (
+                                <Alert color="warning" title="No feedback yet" variant="flat">
+                                    Select a reason and submit feedback for current SafeGuard trace.
+                                </Alert>
+                            ) : (
+                                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
+                                    <p>
+                                        Feedback status:{" "}
+                                        <strong>{latestActiveTraceFeedback.status}</strong>
+                                    </p>
+                                    <p>
+                                        Latest reason:{" "}
+                                        <strong>
+                                            {FEEDBACK_REASON_LABELS[latestActiveTraceFeedback.reason]}
+                                        </strong>
+                                    </p>
+                                    {latestActiveTraceFeedback.status === "rejected" ? (
+                                        <p>
+                                            Rejection reason: {latestActiveTraceFeedback.details}
+                                        </p>
+                                    ) : (
+                                        <p>Applied outcome: {latestActiveTraceFeedback.details}</p>
+                                    )}
+                                    {latestActiveTraceFeedback.linkedTraceId === undefined ? null : (
+                                        <p>
+                                            Linked to {latestActiveTraceFeedback.linkedTraceId} history.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                            <ul aria-label="Feedback history list" className="space-y-2">
+                                {activeTraceFeedbackHistory.map(
+                                    (feedbackRecord): ReactElement => (
+                                        <li
+                                            className="rounded-md border border-slate-200 bg-white p-2 text-xs text-slate-700"
+                                            key={feedbackRecord.id}
+                                        >
+                                            <p className="font-semibold">
+                                                {feedbackRecord.id} · {feedbackRecord.status}
+                                            </p>
+                                            <p>
+                                                reason: {FEEDBACK_REASON_LABELS[feedbackRecord.reason]}
+                                            </p>
+                                            <p>time: {formatFeedbackTimestamp(feedbackRecord.createdAt)}</p>
+                                            <p>{feedbackRecord.details}</p>
+                                        </li>
+                                    ),
+                                )}
+                            </ul>
                         </CardBody>
                     </Card>
                     <Card>
