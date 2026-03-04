@@ -4,6 +4,7 @@ import { Card, CardBody, CardHeader, Alert } from "@/components/ui"
 import { ActivationChecklist } from "@/components/onboarding/activation-checklist"
 import { DataFreshnessPanel, type IProvenanceContext } from "@/components/infrastructure/data-freshness-panel"
 import { ExplainabilityPanel } from "@/components/infrastructure/explainability-panel"
+import { TeamActivityWidget, type ITeamActivityPoint } from "@/components/dashboard/team-activity-widget"
 import {
     DashboardDateRangeFilter,
     type TDashboardDateRange,
@@ -328,6 +329,45 @@ function getOpsBanner(range: TDashboardDateRange): IOpsBannerProps {
     }
 }
 
+function getTeamActivity(range: TDashboardDateRange): ReadonlyArray<ITeamActivityPoint> {
+    if (range === "1d") {
+        return [
+            { developer: "Ari", ccrMerged: 3 },
+            { developer: "Mila", ccrMerged: 2 },
+            { developer: "Nika", ccrMerged: 2 },
+            { developer: "Sari", ccrMerged: 1 },
+        ]
+    }
+
+    if (range === "30d") {
+        return [
+            { developer: "Ari", ccrMerged: 28 },
+            { developer: "Mila", ccrMerged: 22 },
+            { developer: "Nika", ccrMerged: 18 },
+            { developer: "Sari", ccrMerged: 14 },
+            { developer: "Dan", ccrMerged: 12 },
+        ]
+    }
+
+    if (range === "90d") {
+        return [
+            { developer: "Ari", ccrMerged: 74 },
+            { developer: "Mila", ccrMerged: 61 },
+            { developer: "Nika", ccrMerged: 55 },
+            { developer: "Sari", ccrMerged: 41 },
+            { developer: "Dan", ccrMerged: 33 },
+            { developer: "Cara", ccrMerged: 29 },
+        ]
+    }
+
+    return [
+        { developer: "Ari", ccrMerged: 11 },
+        { developer: "Mila", ccrMerged: 9 },
+        { developer: "Nika", ccrMerged: 7 },
+        { developer: "Sari", ccrMerged: 5 },
+    ]
+}
+
 /**
  * Рендерит список сигналов для dashboard content компонента.
  *
@@ -468,6 +508,7 @@ export function DashboardMissionControlPage(): ReactElement {
     const timelinePayload = useMemo((): ReadonlyArray<IWorkQueuePayload["timeline"][number]> => {
         return getTimelinePayload(dashboardPayload)
     }, [dashboardPayload])
+    const teamActivity = useMemo((): ReadonlyArray<ITeamActivityPoint> => getTeamActivity(range), [range])
     const provenance = useMemo(
         (): IProvenanceContext => ({
             branch: "main",
@@ -739,6 +780,7 @@ export function DashboardMissionControlPage(): ReactElement {
 
             <ActivationChecklist role={checklistRole} />
             <MetricsGrid metrics={metrics} />
+            <TeamActivityWidget points={teamActivity} />
             <div className="grid gap-4 md:grid-cols-2">
                 {renderExploreCard()}
                 {renderSignalsCard()}
