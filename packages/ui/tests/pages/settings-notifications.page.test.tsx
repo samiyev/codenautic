@@ -40,5 +40,20 @@ describe("SettingsNotificationsPage", (): void => {
         const muteSwitch = screen.getByRole("switch", { name: "Mute non-critical alerts in-app" })
         await user.click(muteSwitch)
         expect(screen.getByText("Enabled rules: 0")).not.toBeNull()
+
+        await user.click(screen.getByRole("checkbox", { name: "Select NTF-1002" }))
+        await user.click(screen.getByRole("checkbox", { name: "Select NTF-1004" }))
+        await user.click(screen.getByRole("button", { name: "Mark selected as read" }))
+        await waitFor(() => {
+            expect(screen.getByText("Bulk action pending sync")).not.toBeNull()
+        })
+        expect(screen.getByText("Unread: 0")).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "Undo bulk action" }))
+        await waitFor(() => {
+            expect(screen.getByText("Unread: 2")).not.toBeNull()
+        })
+        expect(screen.getByText("Bulk action audit")).not.toBeNull()
+        expect(screen.getByText("reverted")).not.toBeNull()
     })
 })

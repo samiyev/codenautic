@@ -1,4 +1,4 @@
-import { type ReactElement, useMemo, useState } from "react"
+import { type ReactElement, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "@tanstack/react-router"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input, Switch } from "@/components/ui"
@@ -42,6 +42,28 @@ interface IInAppMuteRules {
     readonly quietHoursStart: string
     /** Окончание quiet hours. */
     readonly quietHoursEnd: string
+}
+
+interface INotificationBulkAuditEntry {
+    /** Идентификатор bulk события. */
+    readonly id: string
+    /** Идентификаторы затронутых уведомлений. */
+    readonly notificationIds: ReadonlyArray<string>
+    /** Текущий lifecycle bulk операции. */
+    readonly status: "pending_sync" | "reverted" | "synced"
+    /** Краткое описание действия. */
+    readonly summary: string
+    /** Время действия. */
+    readonly occurredAt: string
+}
+
+interface INotificationBulkPendingState {
+    /** Идентификатор pending действия. */
+    readonly actionId: string
+    /** Снимок для rollback. */
+    readonly previousNotifications: ReadonlyArray<INotificationItem>
+    /** Затронутые уведомления. */
+    readonly selectedIds: ReadonlyArray<string>
 }
 
 const INITIAL_NOTIFICATIONS: ReadonlyArray<INotificationItem> = [
@@ -164,6 +186,12 @@ export function SettingsNotificationsPage(): ReactElement {
         quietHoursStart: "22:00",
     })
     const [deepLinkGuardNotice, setDeepLinkGuardNotice] = useState<string | undefined>(undefined)
+    const [selectedNotificationIds, setSelectedNotificationIds] = useState<ReadonlyArray<string>>([])
+    const [bulkPendingState, setBulkPendingState] = useState<INotificationBulkPendingState | undefined>(
+        undefined,
+    )
+    const [bulkAudit, setBulkAudit] = useState<ReadonlyArray<INotificationBulkAuditEntry>>([])
+    const bulkPendingTimerRef = useRef<number | undefined>(undefined)
 
     const filteredNotifications = useMemo((): ReadonlyArray<INotificationItem> => {
         const byType = notifications.filter((notification): boolean => {
@@ -262,6 +290,123 @@ export function SettingsNotificationsPage(): ReactElement {
         })
     }
 
+    const clearBulkPendingTimer = (): void => {
+        if (bulkPendingTimerRef.current === undefined) {
+            return
+        }
+
+        window.clearTimeout(bulkPendingTimerRef.current)
+        bulkPendingTimerRef.current = undefined
+    }
+
+    useEffect((): (() => void) => {
+        return (): void => {
+            clearBulkPendingTimer()
+        }
+    }, [])
+
+    const appendBulkAudit = (
+        actionId: string,
+        status: "pending_sync" | "reverted" | "synced",
+        selectedIds: ReadonlyArray<string>,
+        summary: string,
+    ): void => {
+        setBulkAudit((previous): ReadonlyArray<INotificationBulkAuditEntry> => [
+            {
+                id: actionId,
+                notificationIds: selectedIds,
+                occurredAt: new Date().toISOString(),
+                status,
+                summary,
+            },
+            ...previous.filter((entry): boolean => entry.id !== actionId),
+        ])
+    }
+
+    const handleToggleNotificationSelection = (notificationId: string): void => {
+        setSelectedNotificationIds((previous): ReadonlyArray<string> => {
+            if (previous.includes(notificationId)) {
+                return previous.filter((id): boolean => id !== notificationId)
+            }
+
+            return [...previous, notificationId]
+        })
+    }
+
+    const handleBulkMarkRead = (): void => {
+        if (selectedNotificationIds.length === 0) {
+            return
+        }
+
+        clearBulkPendingTimer()
+
+        const actionId = `bulk-${Date.now().toString(36)}`
+        const selectedIds = selectedNotificationIds
+        const previousSnapshot = notifications
+
+        setNotifications((previous): ReadonlyArray<INotificationItem> =>
+            previous.map((notification): INotificationItem => {
+                if (selectedIds.includes(notification.id) !== true) {
+                    return notification
+                }
+
+                return {
+                    ...notification,
+                    isRead: true,
+                }
+            }),
+        )
+        setSelectedNotificationIds([])
+        setBulkPendingState({
+            actionId,
+            previousNotifications: previousSnapshot,
+            selectedIds,
+        })
+        appendBulkAudit(
+            actionId,
+            "pending_sync",
+            selectedIds,
+            "Bulk mark as read applied optimistically.",
+        )
+        showToastInfo("Bulk action queued. Undo is available for 5 seconds.")
+
+        bulkPendingTimerRef.current = window.setTimeout((): void => {
+            setBulkPendingState((pending): INotificationBulkPendingState | undefined => {
+                if (pending?.actionId !== actionId) {
+                    return pending
+                }
+
+                appendBulkAudit(
+                    actionId,
+                    "synced",
+                    selectedIds,
+                    "Bulk action synced with server reconciliation.",
+                )
+                showToastSuccess("Bulk action synchronized.")
+                return undefined
+            })
+            bulkPendingTimerRef.current = undefined
+        }, 5000)
+    }
+
+    const handleUndoBulkAction = (): void => {
+        const pending = bulkPendingState
+        if (pending === undefined) {
+            return
+        }
+
+        clearBulkPendingTimer()
+        setNotifications(pending.previousNotifications)
+        appendBulkAudit(
+            pending.actionId,
+            "reverted",
+            pending.selectedIds,
+            "Bulk action reverted through undo timer.",
+        )
+        setBulkPendingState(undefined)
+        showToastInfo("Bulk action reverted.")
+    }
+
     return (
         <section className="space-y-4">
             <h1 className="text-2xl font-semibold text-[var(--foreground)]">Notification center</h1>
@@ -293,10 +438,42 @@ export function SettingsNotificationsPage(): ReactElement {
                         <Chip size="sm" variant="flat">
                             Active channels: {activeChannelCount}
                         </Chip>
+                        <Chip size="sm" variant="flat">
+                            Selected: {selectedNotificationIds.length}
+                        </Chip>
                     </div>
                     {deepLinkGuardNotice === undefined ? null : (
                         <Alert color="primary" title="Deep-link guard" variant="flat">
                             {deepLinkGuardNotice}
+                        </Alert>
+                    )}
+                    {selectedNotificationIds.length === 0 ? null : (
+                        <Alert color="primary" title="Bulk actions" variant="flat">
+                            {selectedNotificationIds.length} notifications selected.
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                <Button size="sm" variant="flat" onPress={handleBulkMarkRead}>
+                                    Mark selected as read
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="flat"
+                                    onPress={(): void => {
+                                        setSelectedNotificationIds([])
+                                    }}
+                                >
+                                    Clear selection
+                                </Button>
+                            </div>
+                        </Alert>
+                    )}
+                    {bulkPendingState === undefined ? null : (
+                        <Alert color="warning" title="Bulk action pending sync" variant="flat">
+                            Undo is available while reconciliation is pending.
+                            <div className="mt-2">
+                                <Button size="sm" variant="flat" onPress={handleUndoBulkAction}>
+                                    Undo bulk action
+                                </Button>
+                            </div>
                         </Alert>
                     )}
                     <div className="flex flex-col gap-1 md:max-w-[260px]">
@@ -338,6 +515,15 @@ export function SettingsNotificationsPage(): ReactElement {
                                 role="listitem"
                             >
                                 <div className="flex flex-wrap items-center gap-2">
+                                    <input
+                                        aria-label={`Select ${notification.id}`}
+                                        checked={selectedNotificationIds.includes(notification.id)}
+                                        className="h-4 w-4 accent-[var(--primary)]"
+                                        type="checkbox"
+                                        onChange={(): void => {
+                                            handleToggleNotificationSelection(notification.id)
+                                        }}
+                                    />
                                     <p className="text-sm font-semibold text-[var(--foreground)]">
                                         {notification.title}
                                     </p>
@@ -517,6 +703,36 @@ export function SettingsNotificationsPage(): ReactElement {
                             }}
                         />
                     </div>
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-base font-semibold text-[var(--foreground)]">Bulk action audit</p>
+                </CardHeader>
+                <CardBody className="space-y-2">
+                    {bulkAudit.length === 0 ? (
+                        <p className="text-sm text-[var(--foreground)]/70">
+                            No bulk operations executed yet.
+                        </p>
+                    ) : (
+                        <ul aria-label="Bulk action audit list" className="space-y-2">
+                            {bulkAudit.map((entry): ReactElement => (
+                                <li
+                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-xs"
+                                    key={entry.id}
+                                >
+                                    <p className="font-semibold text-[var(--foreground)]">
+                                        {entry.status}
+                                    </p>
+                                    <p className="text-[var(--foreground)]/80">{entry.summary}</p>
+                                    <p className="text-[var(--foreground)]/70">
+                                        Notifications: {entry.notificationIds.join(", ")}
+                                    </p>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </CardBody>
             </Card>
         </section>
