@@ -4,10 +4,12 @@ import {
     createCodeCityCausalArcs,
     createCodeCityBuildingImpactMap,
     createCodeCityBuildingMeshes,
+    createCodeCityDistrictHealthAuras,
     createCodeCityDistrictMeshes,
     resolveCodeCityCausalArcColor,
     resolveCodeCityBugEmissionSettings,
     resolveCodeCityRenderBudget,
+    resolveCodeCityHealthAuraColor,
     resolveCodeCityBuildingImpactProfile,
     resolveCodeCityBuildingColor,
 } from "@/components/graphs/codecity-3d-scene-renderer"
@@ -341,5 +343,47 @@ describe("CodeCity3DSceneRenderer building generation", (): void => {
             particleCount: 2,
             pulseStrength: 0.75,
         })
+    })
+
+    it("формирует district health aura с градиентом green->red и анимационным профилем", (): void => {
+        const files: ReadonlyArray<ICodeCity3DSceneFileDescriptor> = [
+            {
+                bugIntroductions: { "7d": 3, "30d": 5, "90d": 7 },
+                complexity: 34,
+                coverage: 41,
+                id: "src/api/hotspot.ts",
+                loc: 220,
+                path: "src/api/hotspot.ts",
+            },
+            {
+                bugIntroductions: { "7d": 0, "30d": 0, "90d": 1 },
+                complexity: 8,
+                coverage: 92,
+                id: "src/ui/dashboard.tsx",
+                loc: 130,
+                path: "src/ui/dashboard.tsx",
+            },
+        ]
+
+        const districts = createCodeCityDistrictMeshes(files)
+        const buildings = createCodeCityBuildingMeshes(files)
+        const auras = createCodeCityDistrictHealthAuras(districts, buildings)
+
+        expect(auras).toHaveLength(2)
+        const apiAura = auras.find((aura): boolean => aura.districtId === "api")
+        const uiAura = auras.find((aura): boolean => aura.districtId === "ui")
+        expect(apiAura).not.toBeUndefined()
+        expect(uiAura).not.toBeUndefined()
+        expect((apiAura?.healthScore ?? 100)).toBeLessThan(uiAura?.healthScore ?? 0)
+        expect(apiAura?.color).toBe(resolveCodeCityHealthAuraColor(apiAura?.healthScore ?? 0))
+        expect(uiAura?.color).toBe(resolveCodeCityHealthAuraColor(uiAura?.healthScore ?? 0))
+        expect(apiAura?.pulseSpeed).toBeGreaterThan(0)
+        expect(uiAura?.pulseSpeed).toBeGreaterThan(0)
+    })
+
+    it("маппит health score в ожидаемый HSL диапазон от red к green", (): void => {
+        expect(resolveCodeCityHealthAuraColor(0)).toBe("hsl(0 86% 55%)")
+        expect(resolveCodeCityHealthAuraColor(50)).toBe("hsl(60 86% 55%)")
+        expect(resolveCodeCityHealthAuraColor(100)).toBe("hsl(120 86% 55%)")
     })
 })

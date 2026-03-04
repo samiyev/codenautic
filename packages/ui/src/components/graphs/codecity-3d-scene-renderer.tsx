@@ -5,6 +5,7 @@ import {
     Color,
     InstancedMesh,
     Matrix4,
+    MeshBasicMaterial,
     Mesh,
     MeshStandardMaterial,
     Object3D,
@@ -42,6 +43,7 @@ export interface ICodeCityBuildingMesh {
     readonly depth: number
     readonly height: number
     readonly color: string
+    readonly healthScore: number
     readonly recentBugCount: number
     readonly totalBugCount: number
 }
@@ -146,6 +148,17 @@ interface IBugEmissionSettings {
     readonly color: string
     readonly particleCount: number
     readonly pulseStrength: number
+}
+
+interface ICodeCityDistrictHealthAura {
+    readonly districtId: string
+    readonly x: number
+    readonly z: number
+    readonly width: number
+    readonly depth: number
+    readonly healthScore: number
+    readonly color: string
+    readonly pulseSpeed: number
 }
 
 interface ICodeCityLayoutWorkerRequest {
@@ -375,6 +388,69 @@ export function resolveCodeCityBugEmissionSettings(
         particleCount: 2,
         pulseStrength: recentBugCount > 0 ? 0.75 : 0.2,
     }
+}
+
+function resolveFileHealthScore(file: ICodeCity3DSceneFileDescriptor, totalBugCount: number): number {
+    const coverage = file.coverage ?? 62
+    const complexity = file.complexity ?? 8
+    const complexityPenalty = Math.min(28, complexity * 1.05)
+    const bugPenalty = Math.min(25, totalBugCount * 1.4)
+    const rawScore = coverage - complexityPenalty - bugPenalty + 34
+    return Math.max(5, Math.min(100, rawScore))
+}
+
+/**
+ * Нормализует цвет health aura: red (degrading) -> green (healthy).
+ *
+ * @param healthScore Нормализованный health score района.
+ * @returns HSL-цвет для district aura.
+ */
+export function resolveCodeCityHealthAuraColor(healthScore: number): string {
+    const normalized = Math.max(0, Math.min(100, healthScore))
+    const hue = (normalized / 100) * 120
+    return `hsl(${String(Math.round(hue))} 86% 55%)`
+}
+
+/**
+ * Вычисляет health aura профиль для каждого района и готовит данные для animated glow.
+ *
+ * @param districts Районы города.
+ * @param buildings Список зданий с health-метаданными.
+ * @returns Массив district aura descriptors.
+ */
+export function createCodeCityDistrictHealthAuras(
+    districts: ReadonlyArray<ICodeCityDistrictMesh>,
+    buildings: ReadonlyArray<ICodeCityBuildingMesh>,
+): ReadonlyArray<ICodeCityDistrictHealthAura> {
+    const buildingsByDistrict = new Map<string, Array<ICodeCityBuildingMesh>>()
+    for (const building of buildings) {
+        const districtBuildings = buildingsByDistrict.get(building.districtId)
+        if (districtBuildings !== undefined) {
+            districtBuildings.push(building)
+            continue
+        }
+        buildingsByDistrict.set(building.districtId, [building])
+    }
+
+    return districts.map((district): ICodeCityDistrictHealthAura => {
+        const districtBuildings = buildingsByDistrict.get(district.id) ?? []
+        const averageHealth =
+            districtBuildings.length === 0
+                ? 50
+                : districtBuildings.reduce((sum, building): number => {
+                    return sum + building.healthScore
+                }, 0) / districtBuildings.length
+        return {
+            color: resolveCodeCityHealthAuraColor(averageHealth),
+            depth: district.depth,
+            districtId: district.id,
+            healthScore: averageHealth,
+            pulseSpeed: 1.4 + (100 - averageHealth) / 120,
+            width: district.width,
+            x: district.x,
+            z: district.z,
+        }
+    })
 }
 
 /**
@@ -677,11 +753,13 @@ export function createCodeCityBuildingMeshes(
             const mediumBugCount = file.bugIntroductions?.["30d"] ?? 0
             const longTermBugCount = file.bugIntroductions?.["90d"] ?? 0
             const totalBugCount = recentBugCount + mediumBugCount + longTermBugCount
+            const healthScore = resolveFileHealthScore(file, totalBugCount)
 
             return {
                 color: resolveCodeCityBuildingColor(file.coverage),
                 depth,
                 districtId: district.id,
+                healthScore,
                 height,
                 id: file.id,
                 recentBugCount,
@@ -1097,6 +1175,54 @@ function BugEmissionMesh(props: IBugEmissionMeshProps): ReactElement {
     )
 }
 
+interface IDistrictHealthAuraMeshProps {
+    readonly aura: ICodeCityDistrictHealthAura
+    readonly phaseSeed: number
+}
+
+/**
+ * Рендерит district health aura: цвет по score и плавный pulse во времени.
+ *
+ * @param props Параметры aura района.
+ * @returns Полупрозрачный glow-пласт.
+ */
+function DistrictHealthAuraMesh(props: IDistrictHealthAuraMeshProps): ReactElement {
+    const meshRef = useRef<Mesh | null>(null)
+    const materialRef = useRef<MeshBasicMaterial | null>(null)
+    const baseOpacity = 0.1 + (100 - props.aura.healthScore) / 260
+
+    useFrame((state): void => {
+        const wave = (Math.sin(state.clock.getElapsedTime() * props.aura.pulseSpeed + props.phaseSeed) + 1) / 2
+        const mesh = meshRef.current
+        if (mesh !== null) {
+            const scale = 1 + wave * 0.14
+            mesh.scale.set(scale, scale, 1)
+        }
+
+        const material = materialRef.current
+        if (material !== null) {
+            material.opacity = Math.min(0.4, baseOpacity + wave * 0.16)
+        }
+    })
+
+    return (
+        <mesh
+            position={[props.aura.x, 0.03, props.aura.z]}
+            ref={meshRef}
+            rotation={[-Math.PI / 2, 0, 0]}
+        >
+            <planeGeometry args={[props.aura.width * 1.05, props.aura.depth * 1.05]} />
+            <meshBasicMaterial
+                color={props.aura.color}
+                depthWrite={false}
+                opacity={baseOpacity}
+                ref={materialRef}
+                transparent={true}
+            />
+        </mesh>
+    )
+}
+
 interface IImpactBuildingMeshProps {
     readonly building: ICodeCityBuildingMesh
     readonly impactState: TCodeCityBuildingImpactState
@@ -1263,6 +1389,9 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
             renderBudget.quality === "low" ? MAX_CAUSAL_ARCS_LOW_QUALITY : MAX_CAUSAL_ARCS_HIGH_QUALITY
         return causalArcs.slice(0, maxArcs)
     }, [causalArcs, renderBudget.quality])
+    const districtHealthAuras = useMemo((): ReadonlyArray<ICodeCityDistrictHealthAura> => {
+        return createCodeCityDistrictHealthAuras(districts, buildings)
+    }, [buildings, districts])
     const visibleBuildings = useMemo((): ReadonlyArray<ICodeCityBuildingMesh> => {
         return buildings.filter((building): boolean => {
             return Math.hypot(building.x, building.z) <= renderBudget.cullingRadius
@@ -1343,6 +1472,13 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                         {district.label}
                     </Text>
                 </group>
+            ))}
+            {districtHealthAuras.map((aura, index): ReactElement => (
+                <DistrictHealthAuraMesh
+                    aura={aura}
+                    key={`${aura.districtId}-health-aura`}
+                    phaseSeed={index * 0.44}
+                />
             ))}
             {visibleCausalArcs.map((arc, index): ReactElement => (
                 <CausalArcMesh
