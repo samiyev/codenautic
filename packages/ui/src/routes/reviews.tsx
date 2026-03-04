@@ -9,6 +9,8 @@ import { AuthBoundary } from "@/lib/auth/auth-boundary"
 import { DashboardLayout } from "@/components/layout"
 import { type ICcrFilters } from "@/pages/ccr-management.page"
 
+export const REVIEWS_FILTER_PERSISTENCE_KEY = "reviews:filters:v1"
+
 const LazyCcrManagementPage = lazy(
     async (): Promise<{
         default: (
@@ -44,16 +46,80 @@ interface IReviewsSearch {
     readonly repo?: string
 }
 
-function buildSearchFromRoute(input: IReviewsSearch): ICcrFilters {
-    return {
+function hasExplicitRouteFilters(input: IReviewsSearch): boolean {
+    const hasSearch = typeof input.q === "string" && input.q.trim().length > 0
+    const hasStatus = typeof input.status === "string" && input.status.length > 0
+    const hasTeam = typeof input.team === "string" && input.team.length > 0
+    const hasRepository = typeof input.repo === "string" && input.repo.length > 0
+
+    return hasSearch || hasStatus || hasTeam || hasRepository
+}
+
+export function readPersistedReviewsFilters(): ICcrFilters | null {
+    if (typeof window === "undefined") {
+        return null
+    }
+
+    try {
+        const raw = window.localStorage.getItem(REVIEWS_FILTER_PERSISTENCE_KEY)
+        if (raw === null) {
+            return null
+        }
+        const parsed = JSON.parse(raw) as Record<string, unknown>
+
+        const search = typeof parsed.search === "string" ? parsed.search : ""
+        const status =
+            typeof parsed.status === "string" && parsed.status.length > 0 ? parsed.status : "all"
+        const team = typeof parsed.team === "string" && parsed.team.length > 0 ? parsed.team : "all"
+        const repository =
+            typeof parsed.repository === "string" && parsed.repository.length > 0
+                ? parsed.repository
+                : "all"
+
+        return {
+            repository,
+            search,
+            status,
+            team,
+        }
+    } catch (_error: unknown) {
+        return null
+    }
+}
+
+function persistReviewsFilters(next: ICcrFilters): void {
+    if (typeof window === "undefined") {
+        return
+    }
+
+    try {
+        window.localStorage.setItem(REVIEWS_FILTER_PERSISTENCE_KEY, JSON.stringify(next))
+    } catch (_error: unknown) {
+        return
+    }
+}
+
+export function buildSearchFromRoute(input: IReviewsSearch): ICcrFilters {
+    const routeFilters: ICcrFilters = {
         repository: typeof input.repo === "string" && input.repo.length > 0 ? input.repo : "all",
         search: typeof input.q === "string" ? input.q : "",
         status: typeof input.status === "string" ? input.status : "all",
         team: typeof input.team === "string" ? input.team : "all",
     }
+
+    if (hasExplicitRouteFilters(input) === true) {
+        return routeFilters
+    }
+
+    const persistedFilters = readPersistedReviewsFilters()
+    if (persistedFilters === null) {
+        return routeFilters
+    }
+
+    return persistedFilters
 }
 
-function sanitizeForRouter(next: ICcrFilters): IReviewsSearch {
+export function sanitizeForRouter(next: ICcrFilters): IReviewsSearch {
     return {
         q: next.search.length === 0 ? undefined : next.search,
         repo: next.repository === "all" ? undefined : next.repository,
@@ -81,6 +147,7 @@ function ReviewsRouteComponent(): ReactElement {
                         <LazyCcrManagementPage
                             {...initialFilters}
                             onFilterChange={(next): void => {
+                                persistReviewsFilters(next)
                                 void navigate({
                                     to: "/reviews",
                                     search: sanitizeForRouter(next),
