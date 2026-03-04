@@ -1,7 +1,8 @@
-import { useMemo, type ChangeEvent, type ReactElement } from "react"
+import { useEffect, useMemo, useState, type ChangeEvent, type ReactElement } from "react"
 
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
+import { InfiniteScrollContainer } from "@/components/infrastructure/infinite-scroll-container"
 import { useFilterPersistence } from "@/lib/hooks/use-filter-persistence"
 
 type TIssueTrackingAction = "acknowledge" | "fix" | "snooze" | "ignore"
@@ -174,6 +175,7 @@ const EXTRA_ISSUES: ReadonlyArray<IIssueTrackingIssue> = Array.from(Array(26)).m
 
 const ALL_ISSUES: ReadonlyArray<IIssueTrackingIssue> = [...DEFAULT_ISSUES, ...EXTRA_ISSUES]
 const ISSUE_FILTER_PERSISTENCE_KEY = "issues-tracking:filters:v1"
+const ISSUE_PAGE_SIZE = 50
 
 interface IIssueTrackingFilters {
     /** Поиск по тексту/файлу/репозиторию. */
@@ -250,6 +252,7 @@ function estimateIssueRowHeight(issue: IIssueTrackingIssue, density: "comfortabl
  */
 export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactElement {
     const sourceIssues = props.issues ?? ALL_ISSUES
+    const [visibleItems, setVisibleItems] = useState<number>(ISSUE_PAGE_SIZE)
     const persistedFilters = useFilterPersistence<IIssueTrackingFilters>({
         storageKey: ISSUE_FILTER_PERSISTENCE_KEY,
         defaultValue: DEFAULT_ISSUE_FILTERS,
@@ -261,6 +264,20 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
         () => filterIssues(sourceIssues, filters),
         [sourceIssues, filters],
     )
+    const visibleIssues = useMemo((): ReadonlyArray<IIssueTrackingIssue> => {
+        return filteredIssues.slice(0, visibleItems)
+    }, [filteredIssues, visibleItems])
+    const hasMoreIssues = filteredIssues.length > visibleItems
+
+    useEffect((): void => {
+        setVisibleItems(ISSUE_PAGE_SIZE)
+    }, [sourceIssues, filters.search, filters.severity, filters.status])
+
+    const handleLoadMore = (): void => {
+        setVisibleItems((previousValue): number => {
+            return Math.min(previousValue + ISSUE_PAGE_SIZE, filteredIssues.length)
+        })
+    }
 
     const handleFilterChange = (name: IIssueTrackingFilterField, value: string): void => {
         if (name === "severity") {
@@ -394,124 +411,131 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
             <Card>
                 <CardBody className="space-y-2">
                     <h2 className="text-sm font-semibold text-slate-900">Issue list</h2>
-                    <EnterpriseDataTable
-                        ariaLabel="Issue list"
-                        columns={[
-                            {
-                                accessor: (issue): string => issue.id,
-                                header: "Issue ID",
-                                id: "id",
-                                pin: "left",
-                                size: 130,
-                            },
-                            {
-                                accessor: (issue): string => issue.title,
-                                header: "Title",
-                                id: "title",
-                                size: 260,
-                            },
-                            {
-                                accessor: (issue): string => issue.repository,
-                                header: "Repository",
-                                id: "repository",
-                                size: 220,
-                            },
-                            {
-                                accessor: (issue): string => issue.filePath,
-                                header: "File",
-                                id: "filePath",
-                                size: 220,
-                            },
-                            {
-                                accessor: (issue): string => issue.owner,
-                                header: "Owner",
-                                id: "owner",
-                                size: 140,
-                            },
-                            {
-                                accessor: (issue): string => issue.detectedAt,
-                                cell: (issue): string => formatIssueDate(issue.detectedAt),
-                                header: "Detected at",
-                                id: "detectedAt",
-                                size: 170,
-                            },
-                            {
-                                accessor: (issue): string => issue.status,
-                                cell: (issue): ReactElement => (
-                                    <span
-                                        className={`rounded-full px-2 py-0.5 text-xs ${ISSUE_STATUS_STYLES[issue.status]}`}
-                                    >
-                                        {ISSUE_STATUS_LABELS[issue.status]}
-                                    </span>
-                                ),
-                                header: "Status",
-                                id: "status",
-                                size: 160,
-                            },
-                            {
-                                accessor: (issue): string => issue.severity,
-                                cell: (issue): ReactElement => (
-                                    <span
-                                        className={`rounded-full border px-2 py-0.5 text-xs ${ISSUE_SEVERITY_STYLES[issue.severity]}`}
-                                    >
-                                        {ISSUE_SEVERITY_LABELS[issue.severity]}
-                                    </span>
-                                ),
-                                header: "Severity",
-                                id: "severity",
-                                size: 150,
-                            },
-                            {
-                                accessor: (issue): string => issue.message,
-                                header: "Message",
-                                id: "message",
-                                size: 280,
-                            },
-                            {
-                                accessor: (issue): string => ISSUE_ACTIONS_BY_STATUS[issue.status].join(","),
-                                cell: (issue): ReactElement => (
-                                    <div className="flex flex-wrap items-center gap-1">
-                                        {ISSUE_ACTIONS_BY_STATUS[issue.status].map((action): ReactElement => (
-                                            <Button
-                                                aria-label={`${action} issue ${issue.id}`}
-                                                key={`${issue.id}-${action}`}
-                                                size="sm"
-                                                variant="light"
-                                                onPress={(): void => {
-                                                    handleAction(issue, action)
-                                                }}
-                                            >
-                                                {ISSUE_ACTION_LABELS[action]}
-                                            </Button>
-                                        ))}
-                                    </div>
-                                ),
-                                enableGlobalFilter: false,
-                                header: "Actions",
-                                id: "actions",
-                                isHideable: false,
-                                size: 280,
-                            },
-                        ]}
-                        emptyMessage="No issues found for selected filters."
-                        getRowId={(issue): string => issue.id}
-                        id="issues-tracking-table"
-                        rows={filteredIssues}
-                        stickyHeader={{
-                            enabled: true,
-                            topOffset: 0,
-                            withShadow: true,
-                        }}
-                        virtualization={{
-                            estimateRowHeight: {
-                                comfortable: 58,
-                                compact: 44,
-                            },
-                            maxBodyHeight: 560,
-                            overscan: 12,
-                            rowHeightEstimator: estimateIssueRowHeight,
-                        }}
-                    />
+                    <InfiniteScrollContainer
+                        hasMore={hasMoreIssues}
+                        isLoading={false}
+                        loadingText="Loading more issues..."
+                        onLoadMore={handleLoadMore}
+                    >
+                        <EnterpriseDataTable
+                            ariaLabel="Issue list"
+                            columns={[
+                                {
+                                    accessor: (issue): string => issue.id,
+                                    header: "Issue ID",
+                                    id: "id",
+                                    pin: "left",
+                                    size: 130,
+                                },
+                                {
+                                    accessor: (issue): string => issue.title,
+                                    header: "Title",
+                                    id: "title",
+                                    size: 260,
+                                },
+                                {
+                                    accessor: (issue): string => issue.repository,
+                                    header: "Repository",
+                                    id: "repository",
+                                    size: 220,
+                                },
+                                {
+                                    accessor: (issue): string => issue.filePath,
+                                    header: "File",
+                                    id: "filePath",
+                                    size: 220,
+                                },
+                                {
+                                    accessor: (issue): string => issue.owner,
+                                    header: "Owner",
+                                    id: "owner",
+                                    size: 140,
+                                },
+                                {
+                                    accessor: (issue): string => issue.detectedAt,
+                                    cell: (issue): string => formatIssueDate(issue.detectedAt),
+                                    header: "Detected at",
+                                    id: "detectedAt",
+                                    size: 170,
+                                },
+                                {
+                                    accessor: (issue): string => issue.status,
+                                    cell: (issue): ReactElement => (
+                                        <span
+                                            className={`rounded-full px-2 py-0.5 text-xs ${ISSUE_STATUS_STYLES[issue.status]}`}
+                                        >
+                                            {ISSUE_STATUS_LABELS[issue.status]}
+                                        </span>
+                                    ),
+                                    header: "Status",
+                                    id: "status",
+                                    size: 160,
+                                },
+                                {
+                                    accessor: (issue): string => issue.severity,
+                                    cell: (issue): ReactElement => (
+                                        <span
+                                            className={`rounded-full border px-2 py-0.5 text-xs ${ISSUE_SEVERITY_STYLES[issue.severity]}`}
+                                        >
+                                            {ISSUE_SEVERITY_LABELS[issue.severity]}
+                                        </span>
+                                    ),
+                                    header: "Severity",
+                                    id: "severity",
+                                    size: 150,
+                                },
+                                {
+                                    accessor: (issue): string => issue.message,
+                                    header: "Message",
+                                    id: "message",
+                                    size: 280,
+                                },
+                                {
+                                    accessor: (issue): string => ISSUE_ACTIONS_BY_STATUS[issue.status].join(","),
+                                    cell: (issue): ReactElement => (
+                                        <div className="flex flex-wrap items-center gap-1">
+                                            {ISSUE_ACTIONS_BY_STATUS[issue.status].map((action): ReactElement => (
+                                                <Button
+                                                    aria-label={`${action} issue ${issue.id}`}
+                                                    key={`${issue.id}-${action}`}
+                                                    size="sm"
+                                                    variant="light"
+                                                    onPress={(): void => {
+                                                        handleAction(issue, action)
+                                                    }}
+                                                >
+                                                    {ISSUE_ACTION_LABELS[action]}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    ),
+                                    enableGlobalFilter: false,
+                                    header: "Actions",
+                                    id: "actions",
+                                    isHideable: false,
+                                    size: 280,
+                                },
+                            ]}
+                            emptyMessage="No issues found for selected filters."
+                            getRowId={(issue): string => issue.id}
+                            id="issues-tracking-table"
+                            rows={visibleIssues}
+                            stickyHeader={{
+                                enabled: true,
+                                topOffset: 0,
+                                withShadow: true,
+                            }}
+                            virtualization={{
+                                estimateRowHeight: {
+                                    comfortable: 58,
+                                    compact: 44,
+                                },
+                                maxBodyHeight: 560,
+                                overscan: 12,
+                                rowHeightEstimator: estimateIssueRowHeight,
+                            }}
+                        />
+                    </InfiniteScrollContainer>
                 </CardBody>
             </Card>
         </section>

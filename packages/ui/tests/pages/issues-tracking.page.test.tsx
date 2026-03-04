@@ -2,6 +2,24 @@ import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
+const intersectionObserverState = {
+    isIntersecting: false,
+}
+
+vi.mock("@/lib/hooks/use-intersection-observer", () => {
+    return {
+        useIntersectionObserver: (): {
+            readonly isIntersecting: boolean
+            readonly targetRef: { current: HTMLDivElement | null }
+        } => {
+            return {
+                isIntersecting: intersectionObserverState.isIntersecting,
+                targetRef: { current: null },
+            }
+        },
+    }
+})
+
 import { IssuesTrackingPage } from "@/pages/issues-tracking.page"
 import { renderWithProviders } from "../utils/render"
 
@@ -87,6 +105,7 @@ function createLargeIssueSet(total: number): ReadonlyArray<IIssuesTrackingTestIs
 describe("IssuesTrackingPage", (): void => {
     beforeEach((): void => {
         localStorage.removeItem(ISSUE_FILTER_PERSISTENCE_KEY)
+        intersectionObserverState.isIntersecting = false
     })
 
     it("фильтрует списки по поиску, статусу и критичности", async (): Promise<void> => {
@@ -165,6 +184,16 @@ describe("IssuesTrackingPage", (): void => {
 
         expect(headerRowGroup).toHaveAttribute("data-sticky-header", "true")
         expect(headerRowGroup).toHaveStyle({ top: "0px" })
+    })
+
+    it("использует paged issues list для infinite scroll режима", (): void => {
+        const largeIssues = createLargeIssueSet(180)
+        renderWithProviders(<IssuesTrackingPage issues={largeIssues} />)
+
+        const table = screen.getByRole("table", { name: "Issue list" })
+        const rowCount = Number.parseInt(table.getAttribute("aria-rowcount") ?? "0", 10)
+        expect(rowCount).toBe(50)
+        expect(document.querySelector("div[aria-hidden='true'].h-1")).not.toBeNull()
     })
 
     it("загружает persisted filters из localStorage при инициализации", (): void => {
