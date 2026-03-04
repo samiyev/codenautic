@@ -1,4 +1,12 @@
-import { Suspense, lazy, useMemo, useState, type ReactElement } from "react"
+import {
+    Suspense,
+    lazy,
+    useEffect,
+    useMemo,
+    useState,
+    type ChangeEvent,
+    type ReactElement,
+} from "react"
 
 interface ICodeCity3DSceneFileDescriptor {
     /** Уникальный ID файла. */
@@ -83,6 +91,66 @@ const CAMERA_PRESET_OPTIONS: ReadonlyArray<{
     },
 ] as const
 
+interface ICodeCity3DSnapshot {
+    readonly id: string
+    readonly label: string
+    readonly files: ReadonlyArray<ICodeCity3DSceneFileDescriptor>
+}
+
+const TIMELINE_SNAPSHOT_RATIOS: ReadonlyArray<number> = [0.35, 0.55, 0.75, 0.9, 1]
+const TIMELINE_PLAYBACK_INTERVAL_MS = 1200
+
+/**
+ * Создаёт pre-computed snapshots для time-lapse проигрывания роста города.
+ *
+ * @param files Базовый набор файлов репозитория.
+ * @returns Набор последовательных snapshot-срезов.
+ */
+function createCodeCityTimelineSnapshots(
+    files: ReadonlyArray<ICodeCity3DSceneFileDescriptor>,
+): ReadonlyArray<ICodeCity3DSnapshot> {
+    if (files.length === 0) {
+        return [
+            {
+                files: [],
+                id: "snapshot-0",
+                label: "Commit #1",
+            },
+        ]
+    }
+
+    const sortedFiles = [...files].sort((leftFile, rightFile): number => {
+        return leftFile.path.localeCompare(rightFile.path)
+    })
+
+    return TIMELINE_SNAPSHOT_RATIOS.map((ratio, index): ICodeCity3DSnapshot => {
+        const snapshotSize = Math.max(1, Math.ceil(sortedFiles.length * ratio))
+        const snapshotFiles = sortedFiles
+            .slice(0, snapshotSize)
+            .map((file): ICodeCity3DSceneFileDescriptor => {
+                const nextLoc = Math.max(8, Math.round((file.loc ?? 24) * ratio))
+                const nextComplexity = Math.max(1, Math.round((file.complexity ?? 4) * ratio))
+                const nextCoverage =
+                    file.coverage !== undefined
+                        ? Math.min(100, Math.max(20, Math.round(file.coverage * (0.82 + ratio * 0.18))))
+                        : undefined
+
+                return {
+                    ...file,
+                    complexity: nextComplexity,
+                    coverage: nextCoverage,
+                    loc: nextLoc,
+                }
+            })
+
+        return {
+            files: snapshotFiles,
+            id: `snapshot-${String(index)}`,
+            label: `Commit #${String(index + 1)}`,
+        }
+    })
+}
+
 /**
  * Обёртка 3D сцены: проверяет WebGL и лениво подгружает renderer.
  *
@@ -92,7 +160,9 @@ const CAMERA_PRESET_OPTIONS: ReadonlyArray<{
 export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
     const [cameraPreset, setCameraPreset] = useState<TCodeCityCameraPreset>("bird-eye")
     const [hoveredFileId, setHoveredFileId] = useState<string | undefined>(undefined)
+    const [isTimelinePlaying, setIsTimelinePlaying] = useState<boolean>(false)
     const [selectedFileId, setSelectedFileId] = useState<string | undefined>(undefined)
+    const [timelineIndex, setTimelineIndex] = useState<number>(0)
     const isWebGlSupported = useMemo((): boolean => {
         if (typeof document === "undefined") {
             return false
@@ -103,9 +173,47 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
         const webGl2Context = canvas.getContext("webgl2")
         return webGlContext !== null || webGl2Context !== null
     }, [])
-    const fileById = useMemo((): ReadonlyMap<string, ICodeCity3DSceneFileDescriptor> => {
-        return new Map(props.files.map((file): readonly [string, ICodeCity3DSceneFileDescriptor] => [file.id, file]))
+    const snapshots = useMemo((): ReadonlyArray<ICodeCity3DSnapshot> => {
+        return createCodeCityTimelineSnapshots(props.files)
     }, [props.files])
+    const lastTimelineIndex = snapshots.length - 1
+    const currentSnapshot =
+        snapshots[Math.min(timelineIndex, lastTimelineIndex)] ??
+        snapshots[0] ?? {
+            files: [],
+            id: "snapshot-fallback",
+            label: "Commit #1",
+        }
+
+    useEffect((): void => {
+        setTimelineIndex((currentIndex): number => {
+            return Math.min(currentIndex, Math.max(0, snapshots.length - 1))
+        })
+    }, [snapshots.length])
+
+    useEffect((): (() => void) | void => {
+        if (isTimelinePlaying === false || snapshots.length <= 1) {
+            return
+        }
+
+        const intervalId = globalThis.setInterval((): void => {
+            setTimelineIndex((currentIndex): number => {
+                return (currentIndex + 1) % snapshots.length
+            })
+        }, TIMELINE_PLAYBACK_INTERVAL_MS)
+
+        return (): void => {
+            globalThis.clearInterval(intervalId)
+        }
+    }, [isTimelinePlaying, snapshots.length])
+
+    const fileById = useMemo((): ReadonlyMap<string, ICodeCity3DSceneFileDescriptor> => {
+        return new Map(
+            currentSnapshot.files.map(
+                (file): readonly [string, ICodeCity3DSceneFileDescriptor] => [file.id, file],
+            ),
+        )
+    }, [currentSnapshot.files])
     const hoveredFile = hoveredFileId !== undefined ? fileById.get(hoveredFileId) : undefined
     const selectedFile = selectedFileId !== undefined ? fileById.get(selectedFileId) : undefined
 
@@ -145,6 +253,42 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                         {option.label}
                     </button>
                 ))}
+            </div>
+            <div className="absolute right-3 top-3 z-10 w-72 rounded-md border border-slate-500/50 bg-slate-900/90 p-2.5 text-xs text-slate-100 shadow-lg">
+                <div className="flex items-center justify-between">
+                    <p className="font-semibold text-cyan-200">City time-lapse</p>
+                    <button
+                        aria-label={isTimelinePlaying ? "Pause timeline" : "Play timeline"}
+                        className="rounded border border-slate-400 px-2 py-0.5 text-xs text-slate-100 hover:border-cyan-300"
+                        onClick={(): void => {
+                            setIsTimelinePlaying((isPlaying): boolean => !isPlaying)
+                        }}
+                        type="button"
+                    >
+                        {isTimelinePlaying ? "Pause" : "Play"}
+                    </button>
+                </div>
+                <p className="mt-2 text-slate-300">{currentSnapshot?.label ?? "Commit #1"}</p>
+                <input
+                    aria-label="CodeCity timeline"
+                    className="mt-2 w-full accent-cyan-400"
+                    max={Math.max(0, snapshots.length - 1)}
+                    min={0}
+                    onChange={(event: ChangeEvent<HTMLInputElement>): void => {
+                        setIsTimelinePlaying(false)
+                        const nextIndex = event.currentTarget.valueAsNumber
+                        if (Number.isNaN(nextIndex)) {
+                            return
+                        }
+                        setTimelineIndex(nextIndex)
+                    }}
+                    step={1}
+                    type="range"
+                    value={timelineIndex}
+                />
+                <p className="mt-1 text-slate-400">
+                    Files: {String(currentSnapshot?.files.length ?? 0)} / {String(props.files.length)}
+                </p>
             </div>
             {hoveredFile !== undefined ? (
                 <aside className="absolute bottom-3 left-3 z-10 rounded-md border border-cyan-400/50 bg-slate-900/90 px-3 py-2 text-xs text-slate-100 shadow-lg">
@@ -204,7 +348,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
             >
                 <LazyCodeCity3DSceneRenderer
                     cameraPreset={cameraPreset}
-                    files={props.files}
+                    files={currentSnapshot?.files ?? []}
                     impactedFiles={props.impactedFiles ?? []}
                     onBuildingHover={setHoveredFileId}
                     onBuildingSelect={setSelectedFileId}

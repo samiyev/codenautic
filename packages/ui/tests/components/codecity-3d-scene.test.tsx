@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react"
+import { fireEvent, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
@@ -60,6 +60,36 @@ const TEST_IMPACTED_FILES: ReadonlyArray<ICodeCity3DSceneImpactedFileDescriptor>
     {
         fileId: "src/api/repository.ts",
         impactType: "changed",
+    },
+]
+const TEST_TIMELINE_FILES: ReadonlyArray<ICodeCity3DSceneFileDescriptor> = [
+    {
+        complexity: 24,
+        coverage: 82,
+        id: "src/api/repository.ts",
+        loc: 126,
+        path: "src/api/repository.ts",
+    },
+    {
+        complexity: 12,
+        coverage: 76,
+        id: "src/api/router.ts",
+        loc: 98,
+        path: "src/api/router.ts",
+    },
+    {
+        complexity: 17,
+        coverage: 71,
+        id: "src/services/metrics.ts",
+        loc: 144,
+        path: "src/services/metrics.ts",
+    },
+    {
+        complexity: 8,
+        coverage: 88,
+        id: "src/worker/index.ts",
+        loc: 78,
+        path: "src/worker/index.ts",
     },
 ]
 
@@ -148,6 +178,32 @@ describe("CodeCity3DScene", (): void => {
         await user.click(screen.getByRole("button", { name: "mock select building" }))
         expect(screen.getByText("File details")).not.toBeNull()
         expect(screen.getByText("Coverage")).not.toBeNull()
+
+        getContextSpy.mockRestore()
+    })
+
+    it("поддерживает time-lapse play/pause и scrub по pre-computed snapshots", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const fakeContext = {} as GPUCanvasContext
+        const getContextSpy = vi
+            .spyOn(HTMLCanvasElement.prototype, "getContext")
+            .mockImplementation((): GPUCanvasContext => fakeContext)
+
+        renderWithProviders(<CodeCity3DScene files={TEST_TIMELINE_FILES} title="3D timeline scene" />)
+
+        expect(screen.getByText("City time-lapse")).not.toBeNull()
+        expect(screen.getByText("Commit #1")).not.toBeNull()
+        expect(screen.getByRole("button", { name: "Play timeline" })).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "Play timeline" }))
+        expect(screen.getByRole("button", { name: "Pause timeline" })).not.toBeNull()
+        await user.click(screen.getByRole("button", { name: "Pause timeline" }))
+        expect(screen.getByRole("button", { name: "Play timeline" })).not.toBeNull()
+
+        const slider = screen.getByRole("slider", { name: "CodeCity timeline" })
+        fireEvent.change(slider, { target: { value: "4" } })
+        expect(screen.getByText("Commit #5")).not.toBeNull()
+        expect(screen.getByText("Files: 4 / 4")).not.toBeNull()
 
         getContextSpy.mockRestore()
     })
