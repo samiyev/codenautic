@@ -141,6 +141,108 @@ const TEAM_SCOPE_OPTIONS = ["all-teams", "runtime", "frontend", "backend", "data
 type TOrgScope = (typeof ORG_SCOPE_OPTIONS)[number]
 type TRepositoryScope = (typeof REPOSITORY_SCOPE_OPTIONS)[number]
 type TTeamScope = (typeof TEAM_SCOPE_OPTIONS)[number]
+type TWorkspaceLayoutPreset = "balanced" | "focus" | "ops"
+
+interface IWorkspacePersonalization {
+    /** Предпочитаемый org scope. */
+    readonly orgScope: TOrgScope
+    /** Предпочитаемый repo scope. */
+    readonly repositoryScope: TRepositoryScope
+    /** Предпочитаемый team scope. */
+    readonly teamScope: TTeamScope
+    /** Закреплённые shortcuts. */
+    readonly pinnedShortcuts: ReadonlyArray<string>
+    /** Выбранный layout preset. */
+    readonly layoutPreset: TWorkspaceLayoutPreset
+}
+
+const WORKSPACE_SHORTCUT_OPTIONS = ["/reviews", "/issues", "/dashboard/code-city", "/my-work"] as const
+const PERSONALIZATION_STORAGE_KEY = "ui.workspace.personalization.v1"
+
+function readWorkspacePersonalization(): IWorkspacePersonalization {
+    if (typeof window === "undefined") {
+        return {
+            layoutPreset: "balanced",
+            orgScope: "all-orgs",
+            pinnedShortcuts: ["/reviews", "/my-work"],
+            repositoryScope: "all-repos",
+            teamScope: "all-teams",
+        }
+    }
+
+    const raw = window.localStorage.getItem(PERSONALIZATION_STORAGE_KEY)
+    if (raw === null) {
+        return {
+            layoutPreset: "balanced",
+            orgScope: "all-orgs",
+            pinnedShortcuts: ["/reviews", "/my-work"],
+            repositoryScope: "all-repos",
+            teamScope: "all-teams",
+        }
+    }
+
+    try {
+        const parsed = JSON.parse(raw) as Partial<IWorkspacePersonalization>
+        const orgScope = parsed.orgScope
+        const repositoryScope = parsed.repositoryScope
+        const teamScope = parsed.teamScope
+        const pinnedShortcuts = parsed.pinnedShortcuts
+        const layoutPreset = parsed.layoutPreset
+
+        return {
+            layoutPreset:
+                layoutPreset === "balanced" || layoutPreset === "focus" || layoutPreset === "ops"
+                    ? layoutPreset
+                    : "balanced",
+            orgScope:
+                orgScope === "all-orgs" ||
+                orgScope === "platform-team" ||
+                orgScope === "frontend-team" ||
+                orgScope === "runtime-team"
+                    ? orgScope
+                    : "all-orgs",
+            pinnedShortcuts: Array.isArray(pinnedShortcuts)
+                ? pinnedShortcuts.filter((shortcut): shortcut is string => {
+                    return (
+                        typeof shortcut === "string" &&
+                        WORKSPACE_SHORTCUT_OPTIONS.includes(shortcut as (typeof WORKSPACE_SHORTCUT_OPTIONS)[number])
+                    )
+                })
+                : ["/reviews", "/my-work"],
+            repositoryScope:
+                repositoryScope === "all-repos" ||
+                repositoryScope === "repo-core" ||
+                repositoryScope === "repo-ui" ||
+                repositoryScope === "repo-api"
+                    ? repositoryScope
+                    : "all-repos",
+            teamScope:
+                teamScope === "all-teams" ||
+                teamScope === "runtime" ||
+                teamScope === "frontend" ||
+                teamScope === "backend" ||
+                teamScope === "data"
+                    ? teamScope
+                    : "all-teams",
+        }
+    } catch {
+        return {
+            layoutPreset: "balanced",
+            orgScope: "all-orgs",
+            pinnedShortcuts: ["/reviews", "/my-work"],
+            repositoryScope: "all-repos",
+            teamScope: "all-teams",
+        }
+    }
+}
+
+function saveWorkspacePersonalization(payload: IWorkspacePersonalization): void {
+    if (typeof window === "undefined") {
+        return
+    }
+
+    window.localStorage.setItem(PERSONALIZATION_STORAGE_KEY, JSON.stringify(payload))
+}
 
 /**
  * Формирует метрики по выбранному диапазону.
@@ -335,10 +437,20 @@ function renderSignalsCard(): ReactElement {
 export function DashboardMissionControlPage(): ReactElement {
     const uiRole = readUiRoleFromStorage()
     const checklistRole = uiRole === "admin" ? "admin" : "developer"
+    const personalizationDefaults = readWorkspacePersonalization()
     const [range, setRange] = useState<TDashboardDateRange>("7d")
-    const [orgScope, setOrgScope] = useState<TOrgScope>("all-orgs")
-    const [repositoryScope, setRepositoryScope] = useState<TRepositoryScope>("all-repos")
-    const [teamScope, setTeamScope] = useState<TTeamScope>("all-teams")
+    const [orgScope, setOrgScope] = useState<TOrgScope>(personalizationDefaults.orgScope)
+    const [repositoryScope, setRepositoryScope] =
+        useState<TRepositoryScope>(personalizationDefaults.repositoryScope)
+    const [teamScope, setTeamScope] = useState<TTeamScope>(personalizationDefaults.teamScope)
+    const [pinnedShortcuts, setPinnedShortcuts] = useState<ReadonlyArray<string>>(
+        personalizationDefaults.pinnedShortcuts,
+    )
+    const [layoutPreset, setLayoutPreset] = useState<TWorkspaceLayoutPreset>(
+        personalizationDefaults.layoutPreset,
+    )
+    const [personalizationMessage, setPersonalizationMessage] = useState<string>("")
+    const [shareLink, setShareLink] = useState<string>("")
     const [lastUpdatedAt, setLastUpdatedAt] = useState<string>("2026-03-04T10:35:00Z")
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
     const [freshnessActionMessage, setFreshnessActionMessage] = useState<string>("")
@@ -410,6 +522,40 @@ export function DashboardMissionControlPage(): ReactElement {
         setFreshnessActionMessage("Rescan job was queued from mission control.")
     }
 
+    const handleToggleShortcut = (shortcut: string): void => {
+        setPinnedShortcuts((previous): ReadonlyArray<string> => {
+            if (previous.includes(shortcut)) {
+                return previous.filter((item): boolean => item !== shortcut)
+            }
+            return [...previous, shortcut]
+        })
+    }
+
+    const handleSavePersonalization = (): void => {
+        saveWorkspacePersonalization({
+            layoutPreset,
+            orgScope,
+            pinnedShortcuts,
+            repositoryScope,
+            teamScope,
+        })
+        setPersonalizationMessage("Workspace personalization saved.")
+    }
+
+    const handleGenerateShareLink = (): void => {
+        const viewPayload = encodeURIComponent(
+            JSON.stringify({
+                layoutPreset,
+                orgScope,
+                pinnedShortcuts,
+                repositoryScope,
+                teamScope,
+            }),
+        )
+        const origin = typeof window !== "undefined" ? window.location.origin : ""
+        setShareLink(`${origin}/?workspaceView=${viewPayload}`)
+    }
+
     return (
         <section className="space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -474,6 +620,84 @@ export function DashboardMissionControlPage(): ReactElement {
                     />
                 </div>
             </div>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">
+                        Workspace personalization
+                    </p>
+                </CardHeader>
+                <CardBody className="space-y-3">
+                    <label className="flex flex-col gap-1 text-sm text-slate-700">
+                        Layout preset
+                        <select
+                            aria-label="Layout preset"
+                            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                            value={layoutPreset}
+                            onChange={(event): void => {
+                                const nextPreset = event.currentTarget.value
+                                if (
+                                    nextPreset === "balanced" ||
+                                    nextPreset === "focus" ||
+                                    nextPreset === "ops"
+                                ) {
+                                    setLayoutPreset(nextPreset)
+                                }
+                            }}
+                        >
+                            <option value="balanced">balanced</option>
+                            <option value="focus">focus</option>
+                            <option value="ops">ops</option>
+                        </select>
+                    </label>
+
+                    <div className="space-y-1">
+                        <p className="text-sm text-slate-700">Pinned shortcuts</p>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                            {WORKSPACE_SHORTCUT_OPTIONS.map((shortcut): ReactElement => (
+                                <label
+                                    className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                                    key={shortcut}
+                                >
+                                    <input
+                                        aria-label={`Pin ${shortcut}`}
+                                        checked={pinnedShortcuts.includes(shortcut)}
+                                        type="checkbox"
+                                        onChange={(): void => {
+                                            handleToggleShortcut(shortcut)
+                                        }}
+                                    />
+                                    {shortcut}
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        <Button size="sm" variant="flat" onPress={handleSavePersonalization}>
+                            Save personalization
+                        </Button>
+                        <Button size="sm" variant="flat" onPress={handleGenerateShareLink}>
+                            Generate share link
+                        </Button>
+                    </div>
+
+                    {personalizationMessage.length > 0 ? (
+                        <Alert color="primary" title="Workspace personalization" variant="flat">
+                            {personalizationMessage}
+                        </Alert>
+                    ) : null}
+
+                    {shareLink.length > 0 ? (
+                        <input
+                            readOnly
+                            aria-label="Workspace share link"
+                            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs"
+                            value={shareLink}
+                        />
+                    ) : null}
+                </CardBody>
+            </Card>
 
             {opsBanner.isDegraded === true ? (
                 <Alert color="warning" className="space-y-1">

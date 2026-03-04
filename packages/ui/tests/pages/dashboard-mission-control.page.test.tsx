@@ -38,4 +38,18 @@ describe("DashboardMissionControlPage", (): void => {
         await user.click(screen.getByRole("button", { name: "Rescan" }))
         expect(screen.getByText("Rescan job was queued from mission control.")).not.toBeNull()
     })
+
+    it("сохраняет workspace personalization и генерирует share link", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<DashboardMissionControlPage />)
+
+        await user.selectOptions(screen.getByRole("combobox", { name: "Layout preset" }), "ops")
+        await user.click(screen.getByRole("checkbox", { name: "Pin /issues" }))
+        await user.click(screen.getByRole("button", { name: "Save personalization" }))
+
+        expect(screen.getByText("Workspace personalization saved.")).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "Generate share link" }))
+        expect(screen.getByRole("textbox", { name: "Workspace share link" })).not.toBeNull()
+    })
 })
