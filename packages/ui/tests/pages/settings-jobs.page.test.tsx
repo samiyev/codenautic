@@ -41,4 +41,27 @@ describe("SettingsJobsPage", (): void => {
             expect(screen.getByText("Job moved back to queue for safe recovery.")).not.toBeNull()
         })
     })
+
+    it("показывает timezone-aware schedule preview с absolute и relative временем", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsJobsPage />)
+
+        expect(screen.getByText("Timezone + schedule preview")).not.toBeNull()
+        expect(screen.getByText(/Schedule is evaluated on server timezone/)).not.toBeNull()
+
+        await user.selectOptions(
+            screen.getByRole("combobox", { name: "Organization timezone override" }),
+            "America/New_York",
+        )
+        await user.selectOptions(
+            screen.getByRole("combobox", { name: "Schedule frequency" }),
+            "weekly",
+        )
+
+        const previewItems = screen.getAllByRole("listitem")
+        expect(previewItems.length).toBeGreaterThan(4)
+
+        await user.click(screen.getByRole("button", { name: "Save schedule" }))
+        expect(screen.getByText(/Saved rescan runs weekly/)).not.toBeNull()
+    })
 })
