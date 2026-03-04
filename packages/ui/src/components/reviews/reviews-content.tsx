@@ -23,6 +23,15 @@ export interface IReviewsContentProps {
     readonly onLoadMore: () => Promise<void> | void
 }
 
+function estimateCcrRowHeight(row: IReviewRow, density: "comfortable" | "compact"): number {
+    const baseHeight = density === "compact" ? 44 : 58
+    const titleLineCount = Math.max(1, Math.ceil(row.title.length / 62))
+    const repositoryLineCount = Math.max(1, Math.ceil(row.repository.length / 40))
+    const maxLineCount = Math.max(titleLineCount, repositoryLineCount)
+
+    return baseHeight + (maxLineCount - 1) * 16
+}
+
 /**
  * Секция управления CCR в стиле mission control.
  */
@@ -161,6 +170,7 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
                     },
                     maxBodyHeight: 560,
                     overscan: 12,
+                    rowHeightEstimator: estimateCcrRowHeight,
                 }}
             />
             {props.hasMore ? (

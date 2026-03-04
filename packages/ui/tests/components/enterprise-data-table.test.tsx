@@ -1,6 +1,6 @@
 import { fireEvent, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 import { renderWithProviders } from "../utils/render"
@@ -152,5 +152,39 @@ describe("EnterpriseDataTable", (): void => {
 
         fireEvent.scroll(bodyRowGroup, { target: { scrollTop: 120 } })
         expect(headerRowGroup).toHaveAttribute("data-sticky-shadow", "true")
+    })
+
+    it("поддерживает кастомный row height estimator для virtual rows", (): void => {
+        const estimateRowHeight = vi.fn<(row: ITestRow, density: "comfortable" | "compact") => number>()
+        estimateRowHeight.mockImplementation((row, density): number => {
+            if (density === "compact") {
+                return row.status === "open" ? 48 : 44
+            }
+
+            return row.status === "open" ? 70 : 58
+        })
+
+        renderWithProviders(
+            <EnterpriseDataTable
+                ariaLabel="Estimator table"
+                columns={[
+                    { accessor: (row): string => row.id, header: "ID", id: "id" },
+                    { accessor: (row): string => row.name, header: "Name", id: "name" },
+                    { accessor: (row): string => row.status, header: "Status", id: "status" },
+                ]}
+                emptyMessage="No rows"
+                getRowId={(row): string => row.id}
+                id="estimator-table"
+                rows={MANY_ROWS}
+                virtualization={{
+                    maxBodyHeight: 320,
+                    rowHeightEstimator: estimateRowHeight,
+                }}
+            />,
+        )
+
+        const table = screen.getByRole("table", { name: "Estimator table" })
+        expect(table).toHaveAttribute("data-row-height-estimator", "custom")
+        expect(estimateRowHeight).toHaveBeenCalled()
     })
 })

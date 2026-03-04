@@ -106,6 +106,7 @@ describe("ccr management page filter presets", (): void => {
 
         const table = screen.getByRole("table", { name: "CCR management table" })
         expect(table).toHaveAttribute("data-virtualized", "true")
+        expect(table).toHaveAttribute("data-row-height-estimator", "custom")
 
         const initialRowCount = Number.parseInt(table.getAttribute("aria-rowcount") ?? "0", 10)
         expect(initialRowCount).toBeGreaterThan(0)

@@ -152,6 +152,9 @@ describe("IssuesTrackingPage", (): void => {
     it("рендерит sticky header для virtualized issues table", (): void => {
         renderWithProviders(<IssuesTrackingPage issues={issues} />)
 
+        const table = screen.getByRole("table", { name: "Issue list" })
+        expect(table).toHaveAttribute("data-row-height-estimator", "custom")
+
         const rowGroups = screen.getAllByRole("rowgroup")
         const headerRowGroup = rowGroups.at(0)
         expect(headerRowGroup).not.toBeUndefined()

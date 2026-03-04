@@ -60,12 +60,12 @@ interface IEnterpriseDataTableProps<TRow> {
     /** Текст empty state. */
     readonly emptyMessage: string
     /** Конфигурация виртуализации body таблицы. */
-    readonly virtualization?: IEnterpriseDataTableVirtualizationOptions
+    readonly virtualization?: IEnterpriseDataTableVirtualizationOptions<TRow>
     /** Настройки sticky header для virtual table. */
     readonly stickyHeader?: IEnterpriseDataTableStickyHeaderOptions
 }
 
-interface IEnterpriseDataTableVirtualizationOptions {
+interface IEnterpriseDataTableVirtualizationOptions<TRow> {
     /** Оценка высоты строки для разных density режимов. */
     readonly estimateRowHeight?: {
         readonly comfortable: number
@@ -75,6 +75,8 @@ interface IEnterpriseDataTableVirtualizationOptions {
     readonly overscan?: number
     /** Максимальная высота scroll контейнера body. */
     readonly maxBodyHeight?: number
+    /** Динамический estimator высоты строки. */
+    readonly rowHeightEstimator?: (row: TRow, density: TDensity) => number
 }
 
 interface IEnterpriseDataTableStickyHeaderOptions {
@@ -311,13 +313,27 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
             : (props.virtualization?.estimateRowHeight?.comfortable ?? defaultComfortableRowHeight)
     const maxBodyHeight = props.virtualization?.maxBodyHeight ?? 520
     const overscan = props.virtualization?.overscan ?? 8
+    const rowHeightEstimator = props.virtualization?.rowHeightEstimator
+    const resolveEstimatedRowHeight = (index: number): number => {
+        const row = rowModel[index]?.original
+        if (row === undefined || rowHeightEstimator === undefined) {
+            return rowHeight
+        }
+
+        const estimatedHeight = rowHeightEstimator(row, density)
+        if (Number.isFinite(estimatedHeight) === false || estimatedHeight < 28) {
+            return rowHeight
+        }
+
+        return estimatedHeight
+    }
     const rowVirtualizer = useVirtualizer({
         count: rowModel.length,
-        estimateSize: (): number => rowHeight,
+        estimateSize: (index): number => resolveEstimatedRowHeight(index),
         getScrollElement: (): HTMLDivElement | null => parentRef.current,
         overscan,
     })
-    const fallbackRowHeight = rowHeight
+    const fallbackRowHeight = rowModel.length > 0 ? resolveEstimatedRowHeight(0) : rowHeight
     const virtualItems = rowVirtualizer.getVirtualItems()
     const fallbackRenderedRowCount = Math.min(
         rowModel.length,
@@ -592,6 +608,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
             <div
                 aria-label={props.ariaLabel}
                 className="overflow-auto rounded-lg border border-[var(--border)]"
+                data-row-height-estimator={rowHeightEstimator === undefined ? "default" : "custom"}
                 data-virtualized="true"
                 role="table"
                 aria-rowcount={rowModel.length}

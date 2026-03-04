@@ -232,6 +232,16 @@ function formatIssueDate(raw: string): string {
     })
 }
 
+function estimateIssueRowHeight(issue: IIssueTrackingIssue, density: "comfortable" | "compact"): number {
+    const baseHeight = density === "compact" ? 44 : 58
+    const titleLineCount = Math.max(1, Math.ceil(issue.title.length / 56))
+    const messageLineCount = Math.max(1, Math.ceil(issue.message.length / 52))
+    const actionLineCount = ISSUE_ACTIONS_BY_STATUS[issue.status].length > 2 ? 2 : 1
+    const extraLines = Math.max(titleLineCount, messageLineCount, actionLineCount) - 1
+
+    return baseHeight + extraLines * 16
+}
+
 /**
  * Страница issues tracking с фильтрами и virtual-scrolling списком.
  *
@@ -499,6 +509,7 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
                             },
                             maxBodyHeight: 560,
                             overscan: 12,
+                            rowHeightEstimator: estimateIssueRowHeight,
                         }}
                     />
                 </CardBody>
