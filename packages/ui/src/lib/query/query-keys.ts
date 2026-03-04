@@ -40,6 +40,17 @@ export const queryKeys = {
             ] as const
         },
     },
+    externalContext: {
+        all: (): readonly ["external-context"] => ["external-context"] as const,
+        sources: (): readonly ["external-context", "sources"] => {
+            return ["external-context", "sources"] as const
+        },
+        preview: (
+            sourceId: string,
+        ): readonly ["external-context", "preview", string] => {
+            return ["external-context", "preview", sourceId] as const
+        },
+    },
     codeReview: {
         all: (): readonly ["code-review"] => ["code-review"] as const,
         byId: (reviewId: string): readonly ["code-review", "by-id", string] => {
