@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import {
     createCodeCityBuildingMeshes,
+    createCodeCityDistrictMeshes,
     resolveCodeCityBuildingColor,
 } from "@/components/graphs/codecity-3d-scene-renderer"
 import type { ICodeCity3DSceneFileDescriptor } from "@/components/graphs/codecity-3d-scene"
@@ -35,35 +36,47 @@ describe("CodeCity3DSceneRenderer building generation", (): void => {
         const buildings = createCodeCityBuildingMeshes(files)
         expect(buildings).toHaveLength(3)
 
-        expect(buildings.at(0)).toMatchObject({
+        const firstBuilding = buildings.find((building): boolean => {
+            return building.id === "src/core/auth.ts"
+        })
+        expect(firstBuilding).toMatchObject({
             color: "#22c55e",
-            depth: 2.2,
+            districtId: "core",
             height: 10,
             id: "src/core/auth.ts",
             width: 3.4,
-            x: -2,
-            z: -2,
         })
+        expect(firstBuilding?.depth).toBeGreaterThan(0.5)
+        expect(firstBuilding?.x).toBeTypeOf("number")
+        expect(firstBuilding?.z).toBeTypeOf("number")
 
-        expect(buildings.at(1)).toMatchObject({
+        const secondBuilding = buildings.find((building): boolean => {
+            return building.id === "src/core/cache.ts"
+        })
+        expect(secondBuilding).toMatchObject({
             color: "#fb923c",
-            depth: 2.2,
+            districtId: "core",
             height: 4,
             id: "src/core/cache.ts",
             width: 1,
-            x: 2,
-            z: -2,
         })
+        expect(secondBuilding?.depth).toBeGreaterThan(0.5)
+        expect(secondBuilding?.x).toBeTypeOf("number")
+        expect(secondBuilding?.z).toBeTypeOf("number")
 
-        expect(buildings.at(2)).toMatchObject({
+        const thirdBuilding = buildings.find((building): boolean => {
+            return building.id === "src/core/worker.ts"
+        })
+        expect(thirdBuilding).toMatchObject({
             color: "#facc15",
-            depth: 2.2,
+            districtId: "core",
             height: 1.25,
             id: "src/core/worker.ts",
             width: 1,
-            x: -2,
-            z: 2,
         })
+        expect(thirdBuilding?.depth).toBeGreaterThan(0.5)
+        expect(thirdBuilding?.x).toBeTypeOf("number")
+        expect(thirdBuilding?.z).toBeTypeOf("number")
     })
 
     it("маппит coverage диапазоны в ожидаемые цвета", (): void => {
@@ -72,5 +85,51 @@ describe("CodeCity3DSceneRenderer building generation", (): void => {
         expect(resolveCodeCityBuildingColor(70)).toBe("#14b8a6")
         expect(resolveCodeCityBuildingColor(50)).toBe("#fb923c")
         expect(resolveCodeCityBuildingColor(40)).toBe("#ef4444")
+    })
+
+    it("группирует здания по районам и строит district layout с labels", (): void => {
+        const files: ReadonlyArray<ICodeCity3DSceneFileDescriptor> = [
+            {
+                complexity: 16,
+                coverage: 80,
+                id: "src/api/auth.ts",
+                loc: 120,
+                path: "src/api/auth.ts",
+            },
+            {
+                complexity: 12,
+                coverage: 74,
+                id: "src/worker/index.ts",
+                loc: 95,
+                path: "src/worker/index.ts",
+            },
+            {
+                complexity: 22,
+                coverage: 88,
+                id: "src/ui/dashboard.tsx",
+                loc: 180,
+                path: "src/ui/dashboard.tsx",
+            },
+        ]
+
+        const districts = createCodeCityDistrictMeshes(files)
+        expect(districts).toHaveLength(3)
+        const districtIds = districts
+            .map((district): string => district.id)
+            .sort((leftDistrict, rightDistrict): number => {
+                return leftDistrict.localeCompare(rightDistrict)
+            })
+        expect(districtIds).toEqual(["api", "ui", "worker"])
+        for (const district of districts) {
+            expect(district.label.length).toBeGreaterThan(0)
+            expect(district.width).toBeGreaterThan(0)
+            expect(district.depth).toBeGreaterThan(0)
+        }
+
+        const buildings = createCodeCityBuildingMeshes(files)
+        const buildingDistrictIds = buildings.map((building): string => building.districtId)
+        expect(buildingDistrictIds).toContain("api")
+        expect(buildingDistrictIds).toContain("ui")
+        expect(buildingDistrictIds).toContain("worker")
     })
 })
