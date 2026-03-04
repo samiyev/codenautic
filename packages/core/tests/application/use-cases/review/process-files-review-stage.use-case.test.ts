@@ -1,10 +1,6 @@
 import {describe, expect, test} from "bun:test"
 
-import {
-    Result,
-    ReviewPromptAssemblerService,
-    ValidationError,
-} from "../../../../src"
+import {Result, ValidationError} from "../../../../src"
 import type {
     IChatRequestDTO,
     IChatResponseDTO,
@@ -113,12 +109,7 @@ class InMemoryGeneratePromptUseCase
      * Creates prompt use case stub with failure default.
      */
     public constructor() {
-        this.nextResult = Result.fail(
-            new ValidationError("Generate prompt failed", [{
-                field: "name",
-                message: "template missing",
-            }]),
-        )
+        this.nextResult = Result.ok("TEMPLATE_SYSTEM")
     }
 
     public execute(
@@ -151,7 +142,6 @@ function createUseCaseBundle(
         useCase: new ProcessFilesReviewStageUseCase({
             llmProvider,
             generatePromptUseCase,
-            reviewPromptAssemblerService: new ReviewPromptAssemblerService(),
         }),
         generatePromptUseCase,
     }
@@ -507,6 +497,38 @@ describe("ProcessFilesReviewStageUseCase", () => {
         expect(systemPrompt).not.toContain("OVERRIDE_BUG")
     })
 
+    test("fails stage when prompt template is missing", async () => {
+        const llmProvider = new InMemoryLLMProvider()
+        const {useCase, generatePromptUseCase} = createUseCaseBundle(llmProvider)
+        generatePromptUseCase.nextResult = Result.fail(
+            new ValidationError("Generate prompt failed", [{
+                field: "name",
+                message: "Template not found",
+            }]),
+        )
+
+        const state = createState(
+            [
+                {
+                    path: "src/missing.ts",
+                    patch: "@@ -1,1 +1,1 @@\n+import a from \"x\"\n",
+                    status: "modified",
+                },
+            ],
+            {},
+            null,
+        )
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isFail).toBe(true)
+        expect(result.error.recoverable).toBe(false)
+        expect(result.error.message).toContain("Missing prompt template")
+        expect(llmProvider.requests).toHaveLength(0)
+    })
+
     test("applies matching directory overrides for heavy strategy and system prompt", async () => {
         const llmProvider = new InMemoryLLMProvider()
         llmProvider.replies.set(
@@ -535,34 +557,11 @@ describe("ProcessFilesReviewStageUseCase", () => {
             ],
             {
                 reviewDepthStrategy: "always-light",
-                promptOverrides: {
-                    categories: {
-                        descriptions: {
-                            bug: "GLOBAL_BUG",
-                            performance: "GLOBAL_PERF",
-                        },
-                    },
-                    severity: {
-                        flags: {
-                            high: "GLOBAL_HIGH",
-                        },
-                    },
-                },
                 directories: [
                     {
                         path: "src/core",
                         config: {
                             reviewDepthStrategy: "always-heavy",
-                            promptOverrides: {
-                                categories: {
-                                    descriptions: {
-                                        performance: "CORE_PERF",
-                                    },
-                                },
-                                generation: {
-                                    main: "CORE_GEN",
-                                },
-                            },
                         },
                     },
                 ],
@@ -580,16 +579,7 @@ describe("ProcessFilesReviewStageUseCase", () => {
 
         const systemPrompt = requestMessages?.at(0)?.content ?? ""
         const userPrompt = requestMessages?.at(1)?.content ?? ""
-        expect(systemPrompt).toContain("## Categories")
-        expect(systemPrompt).toContain("### Bug")
-        expect(systemPrompt).toContain("GLOBAL_BUG")
-        expect(systemPrompt).toContain("### Performance")
-        expect(systemPrompt).toContain("CORE_PERF")
-        expect(systemPrompt).toContain("## Severity")
-        expect(systemPrompt).toContain("### High")
-        expect(systemPrompt).toContain("GLOBAL_HIGH")
-        expect(systemPrompt).toContain("## Generation")
-        expect(systemPrompt).toContain("CORE_GEN")
+        expect(systemPrompt).toBe("TEMPLATE_SYSTEM")
         expect(userPrompt).toContain("FULL_FILE:")
         expect(userPrompt).toContain("Review this file patch")
     })
@@ -616,31 +606,11 @@ describe("ProcessFilesReviewStageUseCase", () => {
             ],
             {
                 reviewDepthStrategy: "always-light",
-                promptOverrides: {
-                    categories: {
-                        descriptions: {
-                            bug: "GLOBAL_BUG",
-                        },
-                    },
-                    generation: {
-                        main: "GLOBAL_GEN",
-                    },
-                },
                 directories: [
                     {
                         path: "src/core",
                         config: {
                             reviewDepthStrategy: "always-heavy",
-                            promptOverrides: {
-                                categories: {
-                                    descriptions: {
-                                        bug: "CORE_BUG",
-                                    },
-                                },
-                                generation: {
-                                    main: "CORE_GEN",
-                                },
-                            },
                         },
                     },
                 ],
@@ -658,9 +628,7 @@ describe("ProcessFilesReviewStageUseCase", () => {
 
         const systemPrompt = requestMessages?.at(0)?.content ?? ""
         const userPrompt = requestMessages?.at(1)?.content ?? ""
-        expect(systemPrompt).toContain("GLOBAL_BUG")
-        expect(systemPrompt).toContain("GLOBAL_GEN")
-        expect(systemPrompt).not.toContain("CORE_GEN")
+        expect(systemPrompt).toBe("TEMPLATE_SYSTEM")
         expect(userPrompt).toContain("Review this file patch")
         expect(userPrompt).not.toContain("FULL_FILE:")
 
@@ -703,26 +671,12 @@ describe("ProcessFilesReviewStageUseCase", () => {
                         path: "src",
                         config: {
                             reviewDepthStrategy: "always-light",
-                            promptOverrides: {
-                                categories: {
-                                    descriptions: {
-                                        bug: "PARENT_BUG",
-                                    },
-                                },
-                            },
                         },
                     },
                     {
                         path: "src/core",
                         config: {
                             reviewDepthStrategy: "always-heavy",
-                            promptOverrides: {
-                                categories: {
-                                    descriptions: {
-                                        bug: "CHILD_BUG",
-                                    },
-                                },
-                            },
                         },
                     },
                 ],
@@ -745,8 +699,7 @@ describe("ProcessFilesReviewStageUseCase", () => {
             },
         })
         const systemPrompt = llmProvider.requests.at(0)?.messages.at(0)?.content ?? ""
-        expect(systemPrompt).toContain("CHILD_BUG")
-        expect(systemPrompt).not.toContain("PARENT_BUG")
+        expect(systemPrompt).toBe("TEMPLATE_SYSTEM")
     })
 
     test("supports glob pattern override and keeps light mode for non-matching files", async () => {
@@ -804,11 +757,6 @@ describe("ProcessFilesReviewStageUseCase", () => {
                         path: "./src/core/*.ts",
                         config: {
                             reviewDepthStrategy: "always-heavy",
-                            promptOverrides: {
-                                generation: {
-                                    main: "GLOB_GEN",
-                                },
-                            },
                         },
                     },
                 ],
@@ -836,7 +784,7 @@ describe("ProcessFilesReviewStageUseCase", () => {
         expect(nestedRequest).toBeDefined()
 
         const hasGlobalSystem = (messages: string[] | undefined): boolean => {
-            return messages?.at(0)?.includes("GLOB_GEN") ?? false
+            return messages?.at(0)?.includes("TEMPLATE_SYSTEM") ?? false
         }
         const hasFullFile = (messages: string[] | undefined): boolean => {
             return messages?.at(1)?.includes("FULL_FILE:") ?? false
