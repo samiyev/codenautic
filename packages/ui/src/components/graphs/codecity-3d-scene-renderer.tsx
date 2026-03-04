@@ -1,10 +1,15 @@
-import { useMemo, type ReactElement } from "react"
+import { useMemo, useRef, type ReactElement } from "react"
 import { OrbitControls, Text } from "@react-three/drei"
-import { Canvas } from "@react-three/fiber"
+import { Canvas, useFrame, useThree } from "@react-three/fiber"
+import { Vector3 } from "three"
 
-import type { ICodeCity3DSceneFileDescriptor } from "./codecity-3d-scene"
+import type {
+    ICodeCity3DSceneFileDescriptor,
+    TCodeCityCameraPreset,
+} from "./codecity-3d-scene"
 
 interface ICodeCity3DSceneRendererProps {
+    readonly cameraPreset: TCodeCityCameraPreset
     readonly files: ReadonlyArray<ICodeCity3DSceneFileDescriptor>
 }
 
@@ -53,6 +58,11 @@ interface ICodeCityDistrictLayout extends ICodeCityDistrictMesh {
     readonly files: ReadonlyArray<ICodeCity3DSceneFileDescriptor>
 }
 
+interface IOrbitControlsLike {
+    readonly target: Vector3
+    update: () => void
+}
+
 const MIN_BUILDING_WIDTH = 1
 const MAX_BUILDING_WIDTH = 3.4
 const MIN_RENDERABLE_BUILDING_WIDTH = 0.6
@@ -63,6 +73,29 @@ const LOC_TO_HEIGHT_RATIO = 24
 const DISTRICT_PADDING = 1.1
 const BUILDING_FILL_RATIO = 0.72
 const MIN_DISTRICT_SPAN = 24
+const CAMERA_LERP_FACTOR = 0.12
+
+type TVec3 = readonly [number, number, number]
+
+interface ICameraPresetTarget {
+    readonly position: TVec3
+    readonly focus: TVec3
+}
+
+const BASE_CAMERA_PRESETS: Readonly<Record<TCodeCityCameraPreset, ICameraPresetTarget>> = {
+    "bird-eye": {
+        focus: [0, 0, 0],
+        position: [30, 26, 30],
+    },
+    "focus-on-building": {
+        focus: [0, 0, 0],
+        position: [24, 20, 22],
+    },
+    "street-level": {
+        focus: [0, 2, 0],
+        position: [10, 7, 15],
+    },
+}
 
 /**
  * Преобразует coverage файла в цвет здания.
@@ -398,12 +431,72 @@ export function createCodeCityBuildingMeshes(
 }
 
 /**
+ * Рассчитывает целевое положение камеры для выбранного пресета.
+ *
+ * @param preset Выбранный пресет камеры.
+ * @param focusBuilding Опорное здание для focus-режима.
+ * @returns Целевые координаты камеры и фокуса.
+ */
+function resolveCameraPresetTarget(
+    preset: TCodeCityCameraPreset,
+    focusBuilding: ICodeCityBuildingMesh | undefined,
+): ICameraPresetTarget {
+    if (preset !== "focus-on-building" || focusBuilding === undefined) {
+        return BASE_CAMERA_PRESETS[preset]
+    }
+
+    return {
+        focus: [
+            focusBuilding.x,
+            Math.max(1.5, focusBuilding.height / 2),
+            focusBuilding.z,
+        ] as const,
+        position: [
+            focusBuilding.x + 8,
+            Math.max(7, focusBuilding.height + 4),
+            focusBuilding.z + 8,
+        ] as const,
+    }
+}
+
+interface ICameraPresetControllerProps {
+    readonly controlsRef: { current: IOrbitControlsLike | null }
+    readonly target: ICameraPresetTarget
+}
+
+/**
+ * Плавно анимирует камеру и target OrbitControls к выбранному пресету.
+ *
+ * @param props Целевые координаты и ref controls.
+ * @returns null (служебный scene-controller).
+ */
+function CameraPresetController(props: ICameraPresetControllerProps): null {
+    const { camera } = useThree()
+    const targetPosition = useMemo((): Vector3 => new Vector3(...props.target.position), [props.target])
+    const targetFocus = useMemo((): Vector3 => new Vector3(...props.target.focus), [props.target])
+
+    useFrame((): void => {
+        camera.position.lerp(targetPosition, CAMERA_LERP_FACTOR)
+        const controls = props.controlsRef.current
+        if (controls !== null) {
+            controls.target.lerp(targetFocus, CAMERA_LERP_FACTOR)
+            controls.update()
+            return
+        }
+        camera.lookAt(targetFocus)
+    })
+
+    return null
+}
+
+/**
  * 3D renderer для CodeCity: базовая сцена + здания файлов.
  *
  * @param props Данные файлов для генерации города.
  * @returns Canvas с orbit/pan/zoom контролами.
  */
 export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): ReactElement {
+    const controlsRef = useRef<IOrbitControlsLike | null>(null)
     const districts = useMemo(
         (): ReadonlyArray<ICodeCityDistrictMesh> => createCodeCityDistrictMeshes(props.files),
         [props.files],
@@ -412,9 +505,13 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
         (): ReadonlyArray<ICodeCityBuildingMesh> => createCodeCityBuildingMeshes(props.files),
         [props.files],
     )
+    const cameraPresetTarget = useMemo((): ICameraPresetTarget => {
+        return resolveCameraPresetTarget(props.cameraPreset, buildings.at(0))
+    }, [buildings, props.cameraPreset])
 
     return (
-        <Canvas camera={{ fov: 45, position: [24, 22, 26] }} dpr={[1, 1.5]} shadows={false}>
+        <Canvas camera={{ fov: 45, position: [30, 26, 30] }} dpr={[1, 1.5]} shadows={false}>
+            <CameraPresetController controlsRef={controlsRef} target={cameraPresetTarget} />
             <color args={["#020617"]} attach="background" />
             <ambientLight intensity={0.55} />
             <directionalLight intensity={0.9} position={[18, 30, 12]} />
@@ -451,6 +548,9 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                 enableRotate={true}
                 enableZoom={true}
                 makeDefault={true}
+                ref={(controls): void => {
+                    controlsRef.current = controls as unknown as IOrbitControlsLike | null
+                }}
             />
         </Canvas>
     )

@@ -1,8 +1,10 @@
 import { screen, waitFor } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
 import {
     CodeCity3DScene,
+    type TCodeCityCameraPreset,
     type ICodeCity3DSceneFileDescriptor,
 } from "@/components/graphs/codecity-3d-scene"
 import { renderWithProviders } from "../utils/render"
@@ -10,9 +12,14 @@ import { renderWithProviders } from "../utils/render"
 vi.mock("@/components/graphs/codecity-3d-scene-renderer", () => {
     return {
         CodeCity3DSceneRenderer: (props: {
+            readonly cameraPreset: TCodeCityCameraPreset
             readonly files: ReadonlyArray<ICodeCity3DSceneFileDescriptor>
         }): React.JSX.Element => {
-            return <div>renderer-files:{props.files.length}</div>
+            return (
+                <div>
+                    renderer-files:{props.files.length};preset:{props.cameraPreset}
+                </div>
+            )
         },
     }
 })
@@ -46,8 +53,33 @@ describe("CodeCity3DScene", (): void => {
 
         renderWithProviders(<CodeCity3DScene files={TEST_FILES} title="3D loaded scene" />)
         await waitFor((): void => {
-            expect(screen.getByText("renderer-files:1")).not.toBeNull()
+            expect(screen.getByText("renderer-files:1;preset:bird-eye")).not.toBeNull()
         })
+        getContextSpy.mockRestore()
+    })
+
+    it("переключает camera preset между bird eye, street level и focus building", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const fakeContext = {} as GPUCanvasContext
+        const getContextSpy = vi
+            .spyOn(HTMLCanvasElement.prototype, "getContext")
+            .mockImplementation((): GPUCanvasContext => fakeContext)
+
+        renderWithProviders(<CodeCity3DScene files={TEST_FILES} title="3D preset scene" />)
+        await waitFor((): void => {
+            expect(screen.getByText("renderer-files:1;preset:bird-eye")).not.toBeNull()
+        })
+
+        await user.click(screen.getByRole("button", { name: "Camera preset Street level" }))
+        await waitFor((): void => {
+            expect(screen.getByText("renderer-files:1;preset:street-level")).not.toBeNull()
+        })
+
+        await user.click(screen.getByRole("button", { name: "Camera preset Focus building" }))
+        await waitFor((): void => {
+            expect(screen.getByText("renderer-files:1;preset:focus-on-building")).not.toBeNull()
+        })
+
         getContextSpy.mockRestore()
     })
 })
