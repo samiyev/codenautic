@@ -2,8 +2,14 @@ import type { ChangeEvent, ReactElement } from "react"
 import { useState } from "react"
 
 import {
+    type IPackageDependencyNode,
+    type IPackageDependencyRelation,
+    PackageDependencyGraph,
+} from "@/components/graphs/package-dependency-graph"
+import {
     CodeCityTreemap,
     type ICodeCityTreemapFileDescriptor,
+    type ICodeCityTreemapFileLinkResolver,
     type ICodeCityTreemapImpactedFileDescriptor,
 } from "@/components/graphs/codecity-treemap"
 import { Card, CardBody, CardHeader } from "@/components/ui"
@@ -276,7 +282,60 @@ const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardReposito
     },
 ] as const
 
-const DEFAULT_DASHBOARD_REPOSITORY = CODE_CITY_DASHBOARD_REPOSITORIES[0]
+const CODE_CITY_DASHBOARD_REPOSITORY_NODES: ReadonlyArray<IPackageDependencyNode> = [
+    {
+        id: "platform-team/api-gateway",
+        layer: "api",
+        name: "platform-team/api-gateway",
+        size: 22,
+    },
+    {
+        id: "frontend-team/ui-dashboard",
+        layer: "ui",
+        name: "frontend-team/ui-dashboard",
+        size: 18,
+    },
+    {
+        id: "backend-core/payment-worker",
+        layer: "worker",
+        name: "backend-core/payment-worker",
+        size: 20,
+    },
+] as const
+
+const CODE_CITY_DASHBOARD_REPOSITORY_RELATIONS: ReadonlyArray<IPackageDependencyRelation> = [
+    {
+        relationType: "runtime",
+        source: "frontend-team/ui-dashboard",
+        target: "platform-team/api-gateway",
+    },
+    {
+        relationType: "runtime",
+        source: "platform-team/api-gateway",
+        target: "backend-core/payment-worker",
+    },
+    {
+        relationType: "peer",
+        source: "frontend-team/ui-dashboard",
+        target: "backend-core/payment-worker",
+    },
+    {
+        relationType: "build",
+        source: "backend-core/payment-worker",
+        target: "platform-team/api-gateway",
+    },
+] as const
+
+const DEFAULT_DASHBOARD_REPOSITORY = getDefaultDashboardRepository()
+
+function getDefaultDashboardRepository(): ICodeCityDashboardRepositoryProfile {
+    const defaultRepository = CODE_CITY_DASHBOARD_REPOSITORIES[0]
+    if (defaultRepository === undefined) {
+        throw new Error("CodeCity dashboard requires at least one repository profile")
+    }
+
+    return defaultRepository
+}
 
 function resolveDashboardProfile(
     repositoryId: string,
@@ -298,7 +357,7 @@ function resolveRepositoryOptions(
 }
 
 function createRepositoryFilesLink(repositoryId: string):
-    ((file: { readonly id: string; readonly path: string; readonly fileId: string }) => string) {
+    ((file: ICodeCityTreemapFileLinkResolver) => string) {
     const encodedRepo = encodeURIComponent(repositoryId)
 
     return (file): string => {
@@ -391,6 +450,24 @@ export function CodeCityDashboardPage(
                             </select>
                         </label>
                     </div>
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">
+                        Cross-repository dependencies
+                    </p>
+                </CardHeader>
+                <CardBody>
+                    <PackageDependencyGraph
+                        height="360px"
+                        nodes={CODE_CITY_DASHBOARD_REPOSITORY_NODES}
+                        relations={CODE_CITY_DASHBOARD_REPOSITORY_RELATIONS}
+                        showControls={true}
+                        showMiniMap={true}
+                        title="Cross-repository package dependencies"
+                    />
                 </CardBody>
             </Card>
 

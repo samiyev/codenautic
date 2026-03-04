@@ -5,33 +5,69 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { CodeCityDashboardPage } from "@/pages/code-city-dashboard.page"
 import { renderWithProviders } from "../utils/render"
 
-const mockCodeCityTreemap = vi.fn(
-    (props: {
-        readonly comparisonLabel: string
-        readonly compareFiles: ReadonlyArray<unknown>
-        readonly defaultMetric: "complexity" | "coverage" | "churn"
-        readonly fileLink: (file: { readonly fileId: string; readonly path: string }) => string
-        readonly files: ReadonlyArray<unknown>
-        readonly impactedFiles: ReadonlyArray<unknown>
-        readonly title: string
-        readonly key?: string
-    }): JSX.Element => {
-        return (
-            <div>
-                <p>{props.title}</p>
-                <p>{props.defaultMetric}</p>
-                <p>comparison-label:{props.comparisonLabel}</p>
-            </div>
-        )
-    },
-)
+const { mockCodeCityTreemap } = vi.hoisted(() => ({
+    mockCodeCityTreemap: vi.fn(
+        (props: {
+            readonly comparisonLabel: string
+            readonly compareFiles: ReadonlyArray<unknown>
+            readonly defaultMetric: "complexity" | "coverage" | "churn"
+            readonly fileLink: (file: { readonly fileId: string; readonly path: string }) => string
+            readonly files: ReadonlyArray<unknown>
+            readonly impactedFiles: ReadonlyArray<unknown>
+            readonly title: string
+            readonly key?: string
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>{props.title}</p>
+                    <p>{props.defaultMetric}</p>
+                    <p>comparison-label:{props.comparisonLabel}</p>
+                </div>
+            )
+        },
+    ),
+}))
+const { mockPackageDependencyGraph } = vi.hoisted(() => ({
+    mockPackageDependencyGraph: vi.fn(
+        (props: {
+            readonly height: string
+            readonly nodes: ReadonlyArray<{
+                readonly id: string
+                readonly layer: string
+                readonly name: string
+            }>
+            readonly relations: ReadonlyArray<{
+                readonly source: string
+                readonly target: string
+                readonly relationType?: string
+            }>
+            readonly title?: string
+            readonly showControls?: boolean
+            readonly showMiniMap?: boolean
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>{props.title}</p>
+                    <p>nodes:{props.nodes.length}</p>
+                    <p>edges:{props.relations.length}</p>
+                    <p>show-controls:{props.showControls ? "true" : "false"}</p>
+                    <p>show-minimap:{props.showMiniMap ? "true" : "false"}</p>
+                </div>
+            )
+        },
+    ),
+}))
 
 vi.mock("@/components/graphs/codecity-treemap", () => ({
     CodeCityTreemap: mockCodeCityTreemap,
 }))
+vi.mock("@/components/graphs/package-dependency-graph", () => ({
+    PackageDependencyGraph: mockPackageDependencyGraph,
+}))
 
 beforeEach((): void => {
     mockCodeCityTreemap.mockClear()
+    mockPackageDependencyGraph.mockClear()
 })
 
 describe("CodeCityDashboardPage", (): void => {
@@ -52,6 +88,12 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstTreemapCall).not.toBeUndefined()
         expect(firstTreemapCall?.defaultMetric).toBe("complexity")
         expect(firstTreemapCall?.title).toBe("platform-team/api-gateway treemap")
+
+        const firstGraphCall = mockPackageDependencyGraph.mock.calls.at(0)?.[0]
+        expect(firstGraphCall).not.toBeUndefined()
+        expect(firstGraphCall?.title).toBe("Cross-repository package dependencies")
+        expect(firstGraphCall?.nodes.length).toBe(3)
+        expect(firstGraphCall?.relations.length).toBe(4)
     })
 
     it("обновляет treemap при смене репозитория и метрики", async (): Promise<void> => {
