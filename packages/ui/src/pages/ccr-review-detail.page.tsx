@@ -5,7 +5,7 @@ import { ChatPanel, type IChatPanelContext, type IChatPanelMessage } from "@/com
 import { ChatThreadList, type IChatThread } from "@/components/chat/chat-thread-list"
 import { ReviewCommentThread } from "@/components/reviews/review-comment-thread"
 import { CodeDiffViewer } from "@/components/reviews/code-diff-viewer"
-import { Card, CardBody, CardHeader, Button, Alert } from "@/components/ui"
+import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
 import { SseStreamViewer } from "@/components/streaming/sse-stream-viewer"
 import {
     ccrToContextItem,
@@ -18,6 +18,44 @@ import {
 
 type TReviewDecision = "approved" | "pending" | "rejected"
 type TThreadMessagesMap = Readonly<Record<string, ReadonlyArray<IChatPanelMessage>>>
+type TSafeGuardFilterId = "dedup" | "hallucination" | "severity"
+type TSafeGuardStepStatus = "applied" | "filtered_out" | "passed"
+
+interface ISafeGuardTraceStep {
+    /** Идентификатор фильтра SafeGuard. */
+    readonly filterId: TSafeGuardFilterId
+    /** Результат прохождения фильтра. */
+    readonly status: TSafeGuardStepStatus
+    /** Объяснение принятого решения. */
+    readonly reason: string
+}
+
+interface ISafeGuardTraceItem {
+    /** Идентификатор trace-записи. */
+    readonly id: string
+    /** Итоговый статус замечания после SafeGuard pipeline. */
+    readonly finalDecision: "hidden" | "shown"
+    /** Файл, к которому относится замечание. */
+    readonly filePath: string
+    /** Причина скрытия замечания, если применимо. */
+    readonly hiddenReason?: string
+    /** Краткое содержание замечания. */
+    readonly remark: string
+    /** Шаги pipeline по фильтрам. */
+    readonly steps: ReadonlyArray<ISafeGuardTraceStep>
+}
+
+const SAFEGUARD_FILTER_SEQUENCE: ReadonlyArray<TSafeGuardFilterId> = [
+    "dedup",
+    "hallucination",
+    "severity",
+]
+
+const SAFEGUARD_FILTER_LABELS: Readonly<Record<TSafeGuardFilterId, string>> = {
+    dedup: "dedup",
+    hallucination: "hallucination",
+    severity: "severity",
+}
 
 /** Свойства страницы диффа CCR. */
 export interface ICcrReviewDetailPageProps {
@@ -72,6 +110,95 @@ function mapReviewDecisionBadge(reviewDecision: TReviewDecision): {
     }
 }
 
+function getSafeGuardStepStatusLabel(status: TSafeGuardStepStatus): string {
+    if (status === "applied") {
+        return "applied"
+    }
+    if (status === "filtered_out") {
+        return "filtered out"
+    }
+    return "passed"
+}
+
+function buildSafeGuardTraceItems(ccr: ICcrRowData): ReadonlyArray<ISafeGuardTraceItem> {
+    const primaryFile = ccr.attachedFiles[0] ?? "unknown-file.ts"
+    const secondaryFile = ccr.attachedFiles[1] ?? primaryFile
+
+    return [
+        {
+            finalDecision: "shown",
+            filePath: primaryFile,
+            id: "SG-001",
+            remark: "Missing tenant context validation for review deep-link.",
+            steps: [
+                {
+                    filterId: "dedup",
+                    reason: "Unique fingerprint not seen in this CCR.",
+                    status: "passed",
+                },
+                {
+                    filterId: "hallucination",
+                    reason: "Matched with changed lines and file ownership metadata.",
+                    status: "passed",
+                },
+                {
+                    filterId: "severity",
+                    reason: "Severity = high, above policy threshold (medium).",
+                    status: "applied",
+                },
+            ],
+        },
+        {
+            finalDecision: "hidden",
+            filePath: primaryFile,
+            hiddenReason: "Filtered by dedup: same finding already present in SG-001.",
+            id: "SG-002",
+            remark: "Potential tenant mismatch in deep-link fallback branch.",
+            steps: [
+                {
+                    filterId: "dedup",
+                    reason: "Duplicate fingerprint matched SG-001, keeping canonical remark.",
+                    status: "filtered_out",
+                },
+                {
+                    filterId: "hallucination",
+                    reason: "Skipped because item was removed by earlier dedup stage.",
+                    status: "filtered_out",
+                },
+                {
+                    filterId: "severity",
+                    reason: "Skipped because item was removed by earlier dedup stage.",
+                    status: "filtered_out",
+                },
+            ],
+        },
+        {
+            finalDecision: "hidden",
+            filePath: secondaryFile,
+            hiddenReason: "Filtered by severity: low confidence minor style suggestion.",
+            id: "SG-003",
+            remark: "Rename helper to align with naming convention.",
+            steps: [
+                {
+                    filterId: "dedup",
+                    reason: "No duplicates found for this semantic signal.",
+                    status: "passed",
+                },
+                {
+                    filterId: "hallucination",
+                    reason: "Context evidence exists in diff, signal accepted as valid.",
+                    status: "passed",
+                },
+                {
+                    filterId: "severity",
+                    reason: "Severity below configured threshold (low < medium).",
+                    status: "filtered_out",
+                },
+            ],
+        },
+    ]
+}
+
 /** Страница страницы отдельного CCR review с авто-подставленным контекстом чата. */
 export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElement {
     const { ccr } = props
@@ -98,6 +225,10 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     const ccrReviewThreads = useMemo((): ReadonlyArray<IReviewCommentThread> => {
         return getCcrReviewThreadsById(ccr.id)
     }, [ccr.id])
+    const safeGuardTraceItems = useMemo((): ReadonlyArray<ISafeGuardTraceItem> => {
+        return buildSafeGuardTraceItems(ccr)
+    }, [ccr])
+    const [activeSafeGuardTraceId, setActiveSafeGuardTraceId] = useState<string>("")
     const visibleDiffFiles = useMemo((): ReadonlyArray<ICcrDiffFile> => {
         if (activeFilePath === undefined) {
             return ccrDiffFiles
@@ -112,6 +243,16 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     }, [activeFilePath, ccrDiffFiles])
     const activeMessages = activeThreadId.length === 0 ? [] : (messagesByThread[activeThreadId] ?? [])
     const decisionBadge = mapReviewDecisionBadge(reviewDecision)
+    const activeSafeGuardTraceItem = useMemo((): ISafeGuardTraceItem | undefined => {
+        const selectedTrace = safeGuardTraceItems.find((item): boolean => {
+            return item.id === activeSafeGuardTraceId
+        })
+        return selectedTrace ?? safeGuardTraceItems[0]
+    }, [activeSafeGuardTraceId, safeGuardTraceItems])
+    const filteredOutTraceCount = useMemo((): number => {
+        return safeGuardTraceItems.filter((item): boolean => item.finalDecision === "hidden").length
+    }, [safeGuardTraceItems])
+    const visibleTraceCount = safeGuardTraceItems.length - filteredOutTraceCount
 
     const quickActions = useMemo(
         (): ReadonlyArray<{
@@ -321,6 +462,91 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                         Review status: <strong>{decisionBadge.label}</strong>. Use actions in the header
                         to finalize this CCR.
                     </Alert>
+                    <Card>
+                        <CardHeader>
+                            <p className="text-sm font-semibold text-slate-900">SafeGuard decision trace</p>
+                        </CardHeader>
+                        <CardBody className="space-y-3">
+                            <p className="text-sm text-slate-700">
+                                Applied filters:{" "}
+                                {SAFEGUARD_FILTER_SEQUENCE.map((filter): string => {
+                                    return SAFEGUARD_FILTER_LABELS[filter]
+                                }).join(", ")}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                                <Chip size="sm" variant="flat">
+                                    Visible: {visibleTraceCount}
+                                </Chip>
+                                <Chip size="sm" variant="flat">
+                                    Filtered out: {filteredOutTraceCount}
+                                </Chip>
+                            </div>
+                            <ul aria-label="SafeGuard trace list" className="space-y-2">
+                                {safeGuardTraceItems.map((traceItem): ReactElement => {
+                                    const isActive = activeSafeGuardTraceItem?.id === traceItem.id
+                                    return (
+                                        <li key={traceItem.id}>
+                                            <button
+                                                aria-label={`Open trace for ${traceItem.id}`}
+                                                className={`w-full rounded-lg border px-3 py-2 text-left text-xs transition ${
+                                                    isActive
+                                                        ? "border-blue-200 bg-blue-50 text-blue-900"
+                                                        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                                                }`}
+                                                type="button"
+                                                onClick={(): void => {
+                                                    setActiveSafeGuardTraceId(traceItem.id)
+                                                }}
+                                            >
+                                                <p className="font-semibold">{traceItem.id}</p>
+                                                <p className="truncate">{traceItem.remark}</p>
+                                                <p className="mt-1 text-[11px] text-slate-500">
+                                                    {traceItem.filePath}
+                                                </p>
+                                            </button>
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+                            {activeSafeGuardTraceItem === undefined ? null : (
+                                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                                    <p className="text-sm font-semibold text-slate-900">
+                                        {activeSafeGuardTraceItem.id}: {activeSafeGuardTraceItem.remark}
+                                    </p>
+                                    <p className="mt-1 text-xs text-slate-600">
+                                        Decision:{" "}
+                                        {activeSafeGuardTraceItem.finalDecision === "shown"
+                                            ? "shown"
+                                            : "filtered out"}
+                                    </p>
+                                    {activeSafeGuardTraceItem.hiddenReason === undefined ? null : (
+                                        <p className="mt-1 text-xs text-slate-600">
+                                            Hidden reason: {activeSafeGuardTraceItem.hiddenReason}
+                                        </p>
+                                    )}
+                                    <ul
+                                        aria-label="SafeGuard pipeline details"
+                                        className="mt-2 space-y-2 text-xs text-slate-700"
+                                    >
+                                        {activeSafeGuardTraceItem.steps.map(
+                                            (step): ReactElement => (
+                                                <li
+                                                    className="rounded-md border border-slate-200 bg-white p-2"
+                                                    key={`${activeSafeGuardTraceItem.id}-${step.filterId}`}
+                                                >
+                                                    <p className="font-semibold">
+                                                        {SAFEGUARD_FILTER_LABELS[step.filterId]} —{" "}
+                                                        {getSafeGuardStepStatusLabel(step.status)}
+                                                    </p>
+                                                    <p>{step.reason}</p>
+                                                </li>
+                                            ),
+                                        )}
+                                    </ul>
+                                </div>
+                            )}
+                        </CardBody>
+                    </Card>
                     <Card>
                         <CardHeader>
                             <p className="text-sm font-semibold text-slate-900">Conversation threads</p>

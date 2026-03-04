@@ -2,19 +2,12 @@ import { act, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { CcrReviewDetailPage } from "@/pages/ccr-review-detail.page"
 import { MOCK_CCR_ROWS } from "@/pages/ccr-data"
+import { CcrReviewDetailPage } from "@/pages/ccr-review-detail.page"
 import { renderWithProviders } from "../utils/render"
 
 const originalEventSource = globalThis.EventSource
 
-interface IMockEventSource {
-    close: () => void
-    emit: (eventType: string, payload: string) => void
-    url: string
-}
-
-class MockEventSource {
 afterEach((): void => {
     if (originalEventSource === undefined) {
         delete (globalThis as { EventSource?: typeof EventSource }).EventSource
@@ -46,10 +39,33 @@ describe("ccr review detail page", (): void => {
         expect(screen.getByText("You")).not.toBeNull()
     })
 
+    it("показывает SafeGuard trace панель с причинами фильтрации", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const ccr = MOCK_CCR_ROWS[0]
+
+        renderWithProviders(<CcrReviewDetailPage ccr={ccr} />)
+
+        expect(screen.getByRole("heading", { name: "SafeGuard decision trace" })).not.toBeNull()
+        expect(screen.getByText("Applied filters: dedup, hallucination, severity")).not.toBeNull()
+        expect(screen.getByText("Filtered out: 2")).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "Open trace for SG-003" }))
+
+        expect(screen.getByText("Decision: filtered out")).not.toBeNull()
+        expect(
+            screen.getByText(
+                "Hidden reason: Filtered by severity: low confidence minor style suggestion.",
+            ),
+        ).not.toBeNull()
+        expect(screen.getByText("severity — filtered out")).not.toBeNull()
+        expect(
+            screen.getByText("Severity below configured threshold (low < medium)."),
+        ).not.toBeNull()
+    })
+
     it("рендерит SSE viewer при streamSourceUrl", async (): Promise<void> => {
         const user = userEvent.setup()
         const ccr = MOCK_CCR_ROWS[0]
-        const createdSources: Array<{ emit: (eventType: string, payload: string) => void }> = []
 
         class LocalMockEventSource {
             public close: () => void
@@ -60,7 +76,6 @@ describe("ccr review detail page", (): void => {
                 this.url = url
                 this.close = vi.fn()
                 this.listeners = {}
-                createdSources.push(this)
             }
 
             public addEventListener(type: string, listener: (event: MessageEvent<string>) => void): void {
@@ -86,8 +101,16 @@ describe("ccr review detail page", (): void => {
             }
         }
 
+        const createdSources: LocalMockEventSource[] = []
+        const EventSourceProxy = class extends LocalMockEventSource {
+            public constructor(url: string) {
+                super(url)
+                createdSources.push(this)
+            }
+        }
+
         // @ts-expect-error mock EventSource only for test
-        globalThis.EventSource = LocalMockEventSource as IMockEventSource
+        globalThis.EventSource = EventSourceProxy
 
         renderWithProviders(
             <CcrReviewDetailPage
@@ -134,7 +157,10 @@ describe("ccr review detail page", (): void => {
         expect(screen.getByRole("button", { name: "👍 Liked" })).not.toBeNull()
 
         const resolveButtons = screen.getAllByRole("button", { name: "Resolve" })
-        await user.click(resolveButtons[0])
+        const firstResolveButton = resolveButtons[0]
+        if (firstResolveButton !== undefined) {
+            await user.click(firstResolveButton)
+        }
         expect(screen.getAllByText("Resolved").length).toBeGreaterThan(0)
 
         const replyButton = screen.getByRole("button", { name: "Reply to Ari" })
