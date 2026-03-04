@@ -1,9 +1,9 @@
-import { type ReactElement, useEffect, useMemo, useState } from "react"
+import { type ReactElement, useCallback, useEffect, useMemo, useState } from "react"
 
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { Button, Card, CardBody, CardHeader, Chip, Input } from "@/components/ui"
 import { type ThemePresetId, useThemeMode } from "@/lib/theme/theme-provider"
-import { showToastSuccess } from "@/lib/notifications/toast"
+import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TBasePaletteId = "cool" | "neutral" | "warm"
 
@@ -111,6 +111,7 @@ const MIN_RADIUS = 6
 const MAX_RADIUS = 24
 const MIN_FORM_RADIUS = 4
 const MAX_FORM_RADIUS = 20
+const QUICK_PRESET_KEYWORDS: ReadonlyArray<string> = ["default", "sky", "lavender", "mint"]
 
 function isHexColor(value: string): boolean {
     return /^#[0-9a-fA-F]{6}$/.test(value)
@@ -282,6 +283,11 @@ export function SettingsAppearancePage(): ReactElement {
         ),
     )
     const [previewFieldValue, setPreviewFieldValue] = useState("security policy update")
+    const [pendingRandomPresetId, setPendingRandomPresetId] = useState<ThemePresetId | undefined>(undefined)
+    const [lastRandomUndoPresetId, setLastRandomUndoPresetId] = useState<ThemePresetId | undefined>(undefined)
+    const [lastAppliedRandomPresetId, setLastAppliedRandomPresetId] = useState<ThemePresetId | undefined>(
+        undefined,
+    )
 
     const activeBasePalette = useMemo((): IBasePalette => {
         const definition = getPaletteDefinition(basePaletteId)
@@ -299,6 +305,105 @@ export function SettingsAppearancePage(): ReactElement {
     )
 
     const isAccessibleContrast = contrastRatio >= 4.5
+
+    const accessiblePresetIds = useMemo((): ReadonlyArray<ThemePresetId> => {
+        return presets
+            .filter((themePreset): boolean => {
+                const palette = resolvedMode === "dark" ? themePreset.dark : themePreset.light
+                const primaryContrast = getContrastRatio(palette.primary, palette.surface)
+                const accentContrast = getContrastRatio(palette.accent, palette.surface)
+
+                return primaryContrast >= 3 && accentContrast >= 2.6
+            })
+            .map((themePreset): ThemePresetId => themePreset.id as ThemePresetId)
+    }, [presets, resolvedMode])
+
+    const quickPresetOptions = useMemo((): ReadonlyArray<typeof presets[number]> => {
+        const selected: Array<typeof presets[number]> = []
+        const selectedIds = new Set<string>()
+
+        QUICK_PRESET_KEYWORDS.forEach((keyword): void => {
+            const match = presets.find(
+                (themePreset): boolean =>
+                    themePreset.label.toLowerCase().includes(keyword)
+                    || themePreset.id.toLowerCase().includes(keyword),
+            )
+            if (match !== undefined && selectedIds.has(match.id) === false) {
+                selected.push(match)
+                selectedIds.add(match.id)
+            }
+        })
+
+        presets.forEach((themePreset): void => {
+            if (selected.length >= 4) {
+                return
+            }
+            if (selectedIds.has(themePreset.id)) {
+                return
+            }
+            selected.push(themePreset)
+            selectedIds.add(themePreset.id)
+        })
+
+        return selected
+    }, [presets])
+
+    const pendingRandomPreset = useMemo(() => {
+        if (pendingRandomPresetId === undefined) {
+            return undefined
+        }
+        return presets.find((themePreset): boolean => themePreset.id === pendingRandomPresetId)
+    }, [pendingRandomPresetId, presets])
+
+    const lastAppliedRandomPreset = useMemo(() => {
+        if (lastAppliedRandomPresetId === undefined) {
+            return undefined
+        }
+        return presets.find((themePreset): boolean => themePreset.id === lastAppliedRandomPresetId)
+    }, [lastAppliedRandomPresetId, presets])
+
+    const selectRandomPresetPreview = useCallback((): void => {
+        const currentPresetId = preset as ThemePresetId
+        const candidateIds = accessiblePresetIds.filter(
+            (presetId): boolean =>
+                presetId !== currentPresetId && presetId !== pendingRandomPresetId,
+        )
+        if (candidateIds.length === 0) {
+            showToastInfo("No alternative accessible presets available for random preview.")
+            return
+        }
+
+        const randomIndex = Math.floor(Math.random() * candidateIds.length)
+        const randomPresetId = candidateIds[randomIndex]
+        if (randomPresetId === undefined) {
+            return
+        }
+        setPendingRandomPresetId(randomPresetId)
+        showToastInfo("Random preset preview generated.")
+    }, [accessiblePresetIds, pendingRandomPresetId, preset])
+
+    const handleApplyRandomPreset = (): void => {
+        if (pendingRandomPresetId === undefined) {
+            return
+        }
+
+        const currentPresetId = preset as ThemePresetId
+        setLastRandomUndoPresetId(currentPresetId)
+        setLastAppliedRandomPresetId(pendingRandomPresetId)
+        setPreset(pendingRandomPresetId)
+        setPendingRandomPresetId(undefined)
+        showToastSuccess("Random preset applied.")
+    }
+
+    const handleUndoRandomPreset = (): void => {
+        if (lastRandomUndoPresetId === undefined) {
+            return
+        }
+
+        setPreset(lastRandomUndoPresetId)
+        setLastRandomUndoPresetId(undefined)
+        showToastSuccess("Last random preset reverted.")
+    }
 
     useEffect((): void => {
         if (typeof window === "undefined") {
@@ -351,6 +456,26 @@ export function SettingsAppearancePage(): ReactElement {
         preset,
     ])
 
+    useEffect((): (() => void) | void => {
+        if (typeof window === "undefined") {
+            return undefined
+        }
+
+        const onKeyDown = (event: KeyboardEvent): void => {
+            const isRandomHotkey = event.altKey && event.key.toLowerCase() === "r"
+            if (isRandomHotkey !== true) {
+                return
+            }
+            event.preventDefault()
+            selectRandomPresetPreview()
+        }
+
+        window.addEventListener("keydown", onKeyDown)
+        return (): void => {
+            window.removeEventListener("keydown", onKeyDown)
+        }
+    }, [selectRandomPresetPreview])
+
     const handleResetTheme = (): void => {
         const defaultPreset = presets.at(0)?.id
         setMode("system")
@@ -362,6 +487,9 @@ export function SettingsAppearancePage(): ReactElement {
         setBasePaletteId(DEFAULT_BASE_PALETTE)
         setGlobalRadius(DEFAULT_GLOBAL_RADIUS)
         setFormRadius(DEFAULT_FORM_RADIUS)
+        setPendingRandomPresetId(undefined)
+        setLastRandomUndoPresetId(undefined)
+        setLastAppliedRandomPresetId(undefined)
         clearAppearanceStorage()
         showToastSuccess("Theme reset to defaults.")
     }
@@ -398,6 +526,80 @@ export function SettingsAppearancePage(): ReactElement {
                         <Chip size="sm" variant="flat">
                             resolved: {resolvedMode}
                         </Chip>
+                        {lastAppliedRandomPreset !== undefined ? (
+                            <Chip size="sm" variant="flat">
+                                last random: {lastAppliedRandomPreset.label}
+                            </Chip>
+                        ) : null}
+                    </div>
+                    <div className="space-y-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
+                        <p className="text-xs uppercase tracking-[0.12em] text-[var(--foreground)]/60">
+                            Quick presets
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                            {quickPresetOptions.map((themePreset): ReactElement => (
+                                <Button
+                                    key={themePreset.id}
+                                    aria-label={`Quick preset ${themePreset.label}`}
+                                    radius="full"
+                                    size="sm"
+                                    variant={themePreset.id === preset ? "solid" : "flat"}
+                                    onPress={(): void => {
+                                        setPreset(themePreset.id as ThemePresetId)
+                                    }}
+                                >
+                                    {themePreset.label}
+                                </Button>
+                            ))}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                aria-keyshortcuts="Alt+R"
+                                radius="full"
+                                size="sm"
+                                variant="flat"
+                                onPress={selectRandomPresetPreview}
+                            >
+                                Random preset (Alt+R)
+                            </Button>
+                            {lastRandomUndoPresetId !== undefined ? (
+                                <Button
+                                    radius="full"
+                                    size="sm"
+                                    variant="flat"
+                                    onPress={handleUndoRandomPreset}
+                                >
+                                    Undo last random
+                                </Button>
+                            ) : null}
+                        </div>
+                        {pendingRandomPreset !== undefined ? (
+                            <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-3">
+                                <p className="text-sm font-semibold text-[var(--foreground)]">
+                                    Preview preset: {pendingRandomPreset.label}
+                                </p>
+                                <p className="mt-1 text-xs text-[var(--foreground)]/70">
+                                    Apply to switch immediately or cancel to keep current theme.
+                                </p>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    <Button
+                                        size="sm"
+                                        onPress={handleApplyRandomPreset}
+                                    >
+                                        Apply random preset
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="flat"
+                                        onPress={(): void => {
+                                            setPendingRandomPresetId(undefined)
+                                        }}
+                                    >
+                                        Cancel random preview
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
                 </CardBody>
             </Card>
