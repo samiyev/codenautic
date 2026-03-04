@@ -153,4 +153,26 @@ describe("settings code review page", (): void => {
             expect(repositoryConfig.ignorePatterns).toEqual(["/vendor", "**/*.snap"])
         })
     })
+
+    it("показывает dry-run results после запуска", async (): Promise<void> => {
+        const user = userEvent.setup()
+        server.use(
+            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+                return HttpResponse.json({
+                    config: {
+                        repositoryId: "repo-1",
+                        configYaml: "version: 1\nreview:\n  mode: MANUAL\n",
+                        ignorePatterns: ["/dist", "/node_modules"],
+                        reviewMode: "MANUAL",
+                    },
+                })
+            }),
+        )
+
+        renderWithProviders(<SettingsCodeReviewPage />)
+        await user.click(screen.getByRole("button", { name: "Run dry-run" }))
+
+        expect(screen.getByTestId("dry-run-summary")).toHaveTextContent("Mode: MANUAL")
+        expect(screen.getAllByTestId("dry-run-issue-row").length > 0).toBe(true)
+    })
 })

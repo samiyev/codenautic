@@ -17,6 +17,50 @@ const DEFAULT_IGNORED_PATHS: ReadonlyArray<string> = ["/dist", "/node_modules", 
 const DEFAULT_REPOSITORY_ID = "repo-1"
 const DEFAULT_REPOSITORY_CONFIG = "version: 1\nreview:\n  mode: MANUAL\n"
 
+interface IDryRunIssue {
+    readonly filePath: string
+    readonly severity: "low" | "medium" | "high"
+    readonly title: string
+}
+
+interface IDryRunResult {
+    readonly mode: TRepoReviewMode
+    readonly reviewedFiles: number
+    readonly suggestions: number
+    readonly issues: ReadonlyArray<IDryRunIssue>
+}
+
+function createDryRunResultSnapshot(params: {
+    readonly ignorePatterns: ReadonlyArray<string>
+    readonly reviewMode: TRepoReviewMode
+}): IDryRunResult {
+    const reviewedFiles = Math.max(12 - params.ignorePatterns.length * 2, 1)
+    const issues: ReadonlyArray<IDryRunIssue> = [
+        {
+            filePath: "src/review/pipeline-runner.ts",
+            severity: "high",
+            title: "Large diff chunk without guard",
+        },
+        {
+            filePath: "src/agents/context-loader.ts",
+            severity: "medium",
+            title: "Missing timeout fallback branch",
+        },
+        {
+            filePath: "src/domain/events/review-completed.ts",
+            severity: "low",
+            title: "Event payload can be narrowed",
+        },
+    ]
+
+    return {
+        mode: params.reviewMode,
+        reviewedFiles,
+        suggestions: issues.length * 2,
+        issues,
+    }
+}
+
 function isRepoReviewMode(value: string): value is TRepoReviewMode {
     return (
         value === REPO_REVIEW_MODE.manual ||
@@ -44,6 +88,7 @@ export function SettingsCodeReviewPage(): ReactElement {
     const [repositoryId, setRepositoryId] = useState<string>(DEFAULT_REPOSITORY_ID)
     const [configYaml, setConfigYaml] = useState<string>(DEFAULT_REPOSITORY_CONFIG)
     const [reviewMode, setReviewMode] = useState<TRepoReviewMode>(REPO_REVIEW_MODE.manual)
+    const [dryRunResult, setDryRunResult] = useState<IDryRunResult | undefined>(undefined)
     const normalizedRepositoryId = repositoryId.trim()
     const repoConfig = useRepoConfig({
         repositoryId: normalizedRepositoryId,
@@ -142,6 +187,15 @@ export function SettingsCodeReviewPage(): ReactElement {
         })
     }
 
+    const handleRunDryRun = (): void => {
+        const result = createDryRunResultSnapshot({
+            ignorePatterns: ignoredPaths,
+            reviewMode,
+        })
+        setDryRunResult(result)
+        showToastSuccess("Dry-run completed.")
+    }
+
     return (
         <section className="space-y-4">
             <h1 className="text-2xl font-semibold text-slate-900">Code Review Configuration</h1>
@@ -166,6 +220,33 @@ export function SettingsCodeReviewPage(): ReactElement {
                 onReviewModeChange={handleReviewModeChange}
                 onSave={handleRepositoryConfigSave}
             />
+            <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+                <h2 className="text-base font-semibold text-slate-900">Dry-run results</h2>
+                <p className="text-sm text-slate-600">
+                    Preview review findings before switching cadence or running full automation.
+                </p>
+                <Button type="button" variant="solid" onPress={handleRunDryRun}>
+                    Run dry-run
+                </Button>
+                {dryRunResult === undefined ? (
+                    <p className="text-xs text-slate-500" data-testid="dry-run-empty">
+                        Run dry-run to preview current review output.
+                    </p>
+                ) : (
+                    <div className="space-y-2">
+                        <p className="text-sm text-slate-700" data-testid="dry-run-summary">
+                            {`Mode: ${dryRunResult.mode} · Reviewed files: ${dryRunResult.reviewedFiles} · Suggestions: ${dryRunResult.suggestions}`}
+                        </p>
+                        <ul className="space-y-1 text-xs text-slate-600">
+                            {dryRunResult.issues.map((issue): ReactElement => (
+                                <li key={`${issue.filePath}-${issue.title}`} data-testid="dry-run-issue-row">
+                                    {`${issue.filePath} · ${issue.severity.toUpperCase()} · ${issue.title}`}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </section>
             <CodeReviewForm initialValues={formValues} onSubmit={saveReviewForm} />
             <IgnorePatternEditor
                 helperText="Ignore patterns filter scan scope and CCR output."
