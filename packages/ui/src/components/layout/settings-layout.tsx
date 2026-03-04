@@ -17,6 +17,7 @@ import {
     Paintbrush,
     RefreshCcw,
     Settings,
+    Shield,
     ShieldCheck,
     Users,
     Webhook,
@@ -85,6 +86,11 @@ const SETTINGS_NAV = [
         icon: <FileClock aria-hidden="true" size={16} />,
         label: "Audit Logs",
         to: "/settings-audit-logs",
+    },
+    {
+        icon: <Shield aria-hidden="true" size={16} />,
+        label: "Privacy Export",
+        to: "/settings-privacy-redaction",
     },
     {
         icon: <AlertTriangle aria-hidden="true" size={16} />,

@@ -15,6 +15,7 @@ import {
     Link2,
     Paintbrush,
     RefreshCcw,
+    Shield,
     ShieldCheck,
     SlidersHorizontal,
     Users,
@@ -81,6 +82,11 @@ const DEFAULT_SETTINGS_NAV_ITEMS = [
         icon: <FileClock aria-hidden="true" size={16} />,
         label: "Audit Logs",
         to: "/settings-audit-logs",
+    },
+    {
+        icon: <Shield aria-hidden="true" size={16} />,
+        label: "Privacy Export",
+        to: "/settings-privacy-redaction",
     },
     {
         icon: <AlertTriangle aria-hidden="true" size={16} />,

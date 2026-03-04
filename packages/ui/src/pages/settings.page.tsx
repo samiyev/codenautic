@@ -98,6 +98,14 @@ export function SettingsPage(): ReactElement {
                         <li>
                             <Link
                                 className="underline underline-offset-4"
+                                to="/settings-privacy-redaction"
+                            >
+                                Privacy-safe export
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                className="underline underline-offset-4"
                                 to="/settings-provider-degradation"
                             >
                                 Provider degradation mode
