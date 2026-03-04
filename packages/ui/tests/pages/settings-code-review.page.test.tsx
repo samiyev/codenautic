@@ -242,4 +242,35 @@ describe("settings code review page", (): void => {
         })
         expect(screen.getByTestId("review-cadence-current")).toHaveTextContent("AUTO_PAUSE")
     })
+
+    it("конфигурирует и сохраняет CCR summary settings", async (): Promise<void> => {
+        const user = userEvent.setup()
+        server.use(
+            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+                return HttpResponse.json({
+                    config: {
+                        repositoryId: "repo-1",
+                        configYaml: "version: 1\nreview:\n  mode: MANUAL\n",
+                        ignorePatterns: ["/dist", "/node_modules"],
+                        reviewMode: "MANUAL",
+                    },
+                })
+            }),
+        )
+
+        renderWithProviders(<SettingsCodeReviewPage />)
+
+        await user.click(screen.getByRole("checkbox", { name: "Include timeline highlights" }))
+        await user.selectOptions(screen.getByLabelText("Summary detail level"), "DEEP")
+        const maxSuggestionsInput = screen.getByLabelText("Max suggestions in summary")
+        await user.clear(maxSuggestionsInput)
+        await user.type(maxSuggestionsInput, "12")
+        await user.click(screen.getByRole("button", { name: "Save CCR summary settings" }))
+
+        await waitFor((): void => {
+            expect(screen.getByTestId("ccr-summary-state")).toHaveTextContent(
+                "CCR summary settings saved.",
+            )
+        })
+    })
 })

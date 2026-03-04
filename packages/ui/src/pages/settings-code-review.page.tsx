@@ -21,6 +21,22 @@ import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 const DEFAULT_IGNORED_PATHS: ReadonlyArray<string> = ["/dist", "/node_modules", "/coverage"] as const
 const DEFAULT_REPOSITORY_ID = "repo-1"
 const DEFAULT_REPOSITORY_CONFIG = "version: 1\nreview:\n  mode: MANUAL\n"
+const CCR_SUMMARY_DETAIL_LEVEL = {
+    concise: "CONCISE",
+    standard: "STANDARD",
+    deep: "DEEP",
+} as const
+
+type TCcrSummaryDetailLevel =
+    (typeof CCR_SUMMARY_DETAIL_LEVEL)[keyof typeof CCR_SUMMARY_DETAIL_LEVEL]
+
+interface ICcrSummarySettings {
+    readonly detailLevel: TCcrSummaryDetailLevel
+    readonly enabled: boolean
+    readonly includeRiskOverview: boolean
+    readonly includeTimeline: boolean
+    readonly maxSuggestions: number
+}
 
 function isRepoReviewMode(value: string): value is TRepoReviewMode {
     return (
@@ -50,6 +66,14 @@ export function SettingsCodeReviewPage(): ReactElement {
     const [configYaml, setConfigYaml] = useState<string>(DEFAULT_REPOSITORY_CONFIG)
     const [reviewMode, setReviewMode] = useState<TRepoReviewMode>(REPO_REVIEW_MODE.manual)
     const [dryRunResult, setDryRunResult] = useState<IDryRunResultViewerData | undefined>(undefined)
+    const [ccrSummarySettings, setCcrSummarySettings] = useState<ICcrSummarySettings>({
+        enabled: true,
+        includeRiskOverview: true,
+        includeTimeline: true,
+        detailLevel: CCR_SUMMARY_DETAIL_LEVEL.standard,
+        maxSuggestions: 8,
+    })
+    const [ccrSummaryState, setCcrSummaryState] = useState<string>("Not saved yet.")
     const normalizedRepositoryId = repositoryId.trim()
     const repoConfig = useRepoConfig({
         repositoryId: normalizedRepositoryId,
@@ -197,6 +221,14 @@ export function SettingsCodeReviewPage(): ReactElement {
         setReviewMode(mode)
     }
 
+    const handleSummarySettingsSave = (): void => {
+        setCcrSummaryState("Saving CCR summary settings...")
+        setTimeout((): void => {
+            setCcrSummaryState("CCR summary settings saved.")
+            showToastSuccess("CCR summary settings saved.")
+        }, 0)
+    }
+
     return (
         <section className="space-y-4">
             <h1 className="text-2xl font-semibold text-slate-900">Code Review Configuration</h1>
@@ -230,6 +262,98 @@ export function SettingsCodeReviewPage(): ReactElement {
                 onApply={handleCadenceSave}
                 onModeChange={handleCadenceModeChange}
             />
+            <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+                <h2 className="text-base font-semibold text-slate-900">CCR summary settings</h2>
+                <p className="text-sm text-slate-600">
+                    Configure how CCR summary cards are generated and what sections they include.
+                </p>
+                <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                        checked={ccrSummarySettings.enabled}
+                        type="checkbox"
+                        onChange={(event): void => {
+                            setCcrSummarySettings((prev): ICcrSummarySettings => ({
+                                ...prev,
+                                enabled: event.currentTarget.checked,
+                            }))
+                        }}
+                    />
+                    Enable CCR summary generation
+                </label>
+                <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                        checked={ccrSummarySettings.includeRiskOverview}
+                        type="checkbox"
+                        onChange={(event): void => {
+                            setCcrSummarySettings((prev): ICcrSummarySettings => ({
+                                ...prev,
+                                includeRiskOverview: event.currentTarget.checked,
+                            }))
+                        }}
+                    />
+                    Include risk overview section
+                </label>
+                <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                        checked={ccrSummarySettings.includeTimeline}
+                        type="checkbox"
+                        onChange={(event): void => {
+                            setCcrSummarySettings((prev): ICcrSummarySettings => ({
+                                ...prev,
+                                includeTimeline: event.currentTarget.checked,
+                            }))
+                        }}
+                    />
+                    Include timeline highlights
+                </label>
+                <label className="space-y-1 text-sm text-slate-700" htmlFor="ccr-summary-detail-level">
+                    <span className="block font-medium text-slate-900">Summary detail level</span>
+                    <select
+                        id="ccr-summary-detail-level"
+                        className="w-full rounded-md border border-slate-300 px-3 py-2"
+                        value={ccrSummarySettings.detailLevel}
+                        onChange={(event): void => {
+                            const nextLevel = event.currentTarget.value as TCcrSummaryDetailLevel
+                            setCcrSummarySettings((prev): ICcrSummarySettings => ({
+                                ...prev,
+                                detailLevel: nextLevel,
+                            }))
+                        }}
+                    >
+                        <option value={CCR_SUMMARY_DETAIL_LEVEL.concise}>Concise</option>
+                        <option value={CCR_SUMMARY_DETAIL_LEVEL.standard}>Standard</option>
+                        <option value={CCR_SUMMARY_DETAIL_LEVEL.deep}>Deep</option>
+                    </select>
+                </label>
+                <label className="space-y-1 text-sm text-slate-700" htmlFor="ccr-summary-max-suggestions">
+                    <span className="block font-medium text-slate-900">Max suggestions in summary</span>
+                    <input
+                        id="ccr-summary-max-suggestions"
+                        className="w-full rounded-md border border-slate-300 px-3 py-2"
+                        max={20}
+                        min={1}
+                        type="number"
+                        value={ccrSummarySettings.maxSuggestions}
+                        onChange={(event): void => {
+                            const parsedValue = Number(event.currentTarget.value)
+                            if (Number.isNaN(parsedValue) === true) {
+                                return
+                            }
+                            const normalizedValue = Math.min(20, Math.max(1, parsedValue))
+                            setCcrSummarySettings((prev): ICcrSummarySettings => ({
+                                ...prev,
+                                maxSuggestions: normalizedValue,
+                            }))
+                        }}
+                    />
+                </label>
+                <p className="text-xs text-slate-500" data-testid="ccr-summary-state">
+                    {ccrSummaryState}
+                </p>
+                <Button type="button" variant="solid" onPress={handleSummarySettingsSave}>
+                    Save CCR summary settings
+                </Button>
+            </section>
             <DryRunResultViewer
                 isRunning={dryRun.runDryRun.isPending}
                 result={dryRunResult}
