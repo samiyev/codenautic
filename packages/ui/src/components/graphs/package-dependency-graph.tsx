@@ -2,6 +2,7 @@ import { type ReactElement, useEffect, useMemo, useRef, useState } from "react"
 
 import { Button, Card, CardBody, CardHeader, Input } from "@/components/ui"
 import { XyFlowGraph } from "@/components/graphs/xyflow-graph"
+import { exportGraphAsJson } from "@/components/graphs/graph-export"
 import {
     calculateGraphLayout,
     type IGraphEdge,
@@ -75,6 +76,8 @@ interface IPackageDependencyGraphState {
     readonly focusPathOnly: boolean
     /** Идёт ли отложенная подгрузка cluster-details. */
     readonly isClusterDetailLoading: boolean
+    /** Явно показать граф даже в huge-graph fallback режиме. */
+    readonly forceGraphRenderInHugeMode: boolean
 }
 
 interface IPackageRelationStats {
@@ -91,6 +94,29 @@ const MAX_LABEL_LENGTH = 40
 const LAYOUT_STATE_STORAGE_KEY = "ui.package-graph.layout.v1"
 const CLUSTER_NODE_PREFIX = "cluster:layer:"
 const CLUSTER_DETAILS_DELAY_MS = 160
+const HUGE_GRAPH_NODE_THRESHOLD = 260
+const HUGE_GRAPH_EDGE_THRESHOLD = 640
+const MAX_FALLBACK_PATH_ROWS = 24
+const MAX_FALLBACK_HUBS = 10
+
+interface IGraphFallbackPathRow {
+    readonly source: string
+    readonly target: string
+    readonly relationType: string
+}
+
+interface IGraphFallbackHubRow {
+    readonly nodeId: string
+    readonly label: string
+    readonly totalDegree: number
+    readonly incoming: number
+    readonly outgoing: number
+}
+
+interface IHugeGraphFallbackData {
+    readonly topHubs: ReadonlyArray<IGraphFallbackHubRow>
+    readonly pathRows: ReadonlyArray<IGraphFallbackPathRow>
+}
 
 interface ILayerLayoutSnapshot {
     readonly viewMode: "detailed" | "clustered"
@@ -324,6 +350,64 @@ function applyFocusPathFilter(
     }
 }
 
+function isHugeGraph(nodesCount: number, edgesCount: number): boolean {
+    return nodesCount > HUGE_GRAPH_NODE_THRESHOLD || edgesCount > HUGE_GRAPH_EDGE_THRESHOLD
+}
+
+function buildHugeGraphFallbackData(
+    nodes: ReadonlyArray<IPackageDependencyNode>,
+    relations: ReadonlyArray<IPackageDependencyRelation>,
+): IHugeGraphFallbackData {
+    const nodesById = new Map<string, IPackageDependencyNode>()
+    const statsByNodeId = new Map<string, { incoming: number; outgoing: number }>()
+
+    for (const node of nodes) {
+        nodesById.set(node.id, node)
+        statsByNodeId.set(node.id, {
+            incoming: 0,
+            outgoing: 0,
+        })
+    }
+
+    const pathRows: IGraphFallbackPathRow[] = []
+    for (const relation of relations) {
+        const sourceStats = statsByNodeId.get(relation.source)
+        const targetStats = statsByNodeId.get(relation.target)
+        if (sourceStats === undefined || targetStats === undefined) {
+            continue
+        }
+
+        sourceStats.outgoing += 1
+        targetStats.incoming += 1
+        if (pathRows.length < MAX_FALLBACK_PATH_ROWS) {
+            pathRows.push({
+                source: relation.source,
+                target: relation.target,
+                relationType: relation.relationType ?? "dependency",
+            })
+        }
+    }
+
+    const topHubs: IGraphFallbackHubRow[] = Array.from(statsByNodeId.entries())
+        .map(([nodeId, stats]): IGraphFallbackHubRow => {
+            const node = nodesById.get(nodeId)
+            return {
+                nodeId,
+                label: node?.name ?? nodeId,
+                totalDegree: stats.incoming + stats.outgoing,
+                incoming: stats.incoming,
+                outgoing: stats.outgoing,
+            }
+        })
+        .sort((left, right): number => right.totalDegree - left.totalDegree)
+        .slice(0, MAX_FALLBACK_HUBS)
+
+    return {
+        topHubs,
+        pathRows,
+    }
+}
+
 /** Подготавливает label для отображения. */
 function normalizeNodeLabel(label: string): string {
     if (label.length <= MAX_LABEL_LENGTH) {
@@ -539,6 +623,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                 }),
         focusPathOnly: false,
         isClusterDetailLoading: false,
+        forceGraphRenderInHugeMode: false,
     })
     const clusterDetailTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | undefined>(
         undefined,
@@ -569,6 +654,12 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
             filterRelationsByType(props.relations, state.selectedRelationTypes),
         [props.relations, state.selectedRelationTypes],
     )
+    const hugeGraphFallbackMode = isHugeGraph(props.nodes.length, filteredRelations.length)
+    const hugeGraphFallbackData = useMemo(
+        (): IHugeGraphFallbackData => buildHugeGraphFallbackData(props.nodes, filteredRelations),
+        [filteredRelations, props.nodes],
+    )
+    const shouldRenderGraph = hugeGraphFallbackMode !== true || state.forceGraphRenderInHugeMode
     const detailedGraphData = useMemo(
         (): IPackageDependencyGraphData =>
             filterByPackageName(
@@ -602,14 +693,19 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
         [graphDataByViewMode, state.focusPathOnly, state.selectedNodeId],
     )
     const layoutedNodes = useMemo(
-        () =>
-            calculateGraphLayout(visibleGraphData.nodes, visibleGraphData.edges, {
+        (): ReadonlyArray<IGraphNode> => {
+            if (shouldRenderGraph !== true) {
+                return []
+            }
+
+            return calculateGraphLayout(visibleGraphData.nodes, visibleGraphData.edges, {
                 direction: "LR",
                 nodeSpacingX: 120,
                 nodeSpacingY: 90,
                 margin: 20,
-            }),
-        [visibleGraphData],
+            })
+        },
+        [shouldRenderGraph, visibleGraphData],
     )
 
     const summaryText = createSummaryText(visibleGraphData.nodes.length, visibleGraphData.edges.length)
@@ -664,7 +760,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
         })
     }, [state.expandedLayerIds, state.lodMode, state.viewMode])
 
-    if (layoutedNodes.length === 0) {
+    if (shouldRenderGraph === true && layoutedNodes.length === 0) {
         return (
             <Card aria-label={title}>
                 <CardHeader>{title}</CardHeader>
@@ -814,6 +910,22 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                     >
                         {state.lodMode === "details" ? "LOD: details" : "LOD: overview"}
                     </Button>
+                    {hugeGraphFallbackMode ? (
+                        <Button
+                            color={state.forceGraphRenderInHugeMode ? "warning" : "default"}
+                            onPress={(): void => {
+                                setState((previousState): IPackageDependencyGraphState => ({
+                                    ...previousState,
+                                    forceGraphRenderInHugeMode: !previousState.forceGraphRenderInHugeMode,
+                                }))
+                            }}
+                            variant="flat"
+                        >
+                            {state.forceGraphRenderInHugeMode
+                                ? "Use huge-graph fallback"
+                                : "Render budgeted graph"}
+                        </Button>
+                    ) : null}
                     {state.viewMode === "clustered" && selectedClusterLayer !== undefined ? (
                         <Button
                             color="default"
@@ -874,33 +986,85 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         Loading cluster details...
                     </p>
                 ) : null}
-                <XyFlowGraph
-                    graphTitle={title}
-                    ariaLabel={`${title} canvas`}
-                    edges={visibleGraphData.edges}
-                    height={props.height}
-                    nodes={layoutedNodes}
-                    onNodeSelect={(nodeId): void => {
-                        setState((previousState): IPackageDependencyGraphState => ({
-                            ...previousState,
-                            showImpactPaths:
-                                previousState.selectedNodeId === nodeId
-                                    ? false
-                                    : previousState.showImpactPaths,
-                            focusPathOnly:
-                                previousState.selectedNodeId === nodeId
-                                    ? false
-                                    : previousState.focusPathOnly,
-                            selectedNodeId:
-                                previousState.selectedNodeId === nodeId ? undefined : nodeId,
-                        }))
-                    }}
-                    highlightedEdgeIds={impactPathHighlight.edgeIds}
-                    highlightedNodeIds={impactPathHighlight.nodeIds}
-                    selectedNodeId={state.selectedNodeId}
-                    showControls={props.showControls}
-                    showMiniMap={props.showMiniMap}
-                />
+                {hugeGraphFallbackMode && state.forceGraphRenderInHugeMode !== true ? (
+                    <section
+                        aria-live="polite"
+                        className="space-y-3 rounded-xl border border-warning-300 bg-warning-50 p-4"
+                    >
+                        <p className="text-sm text-warning-800">
+                            {`Graph is too large for full render (${props.nodes.length} nodes, ${filteredRelations.length} relations). Using fallback view with sampled paths and top hubs.`}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                color="warning"
+                                onPress={(): void => {
+                                    exportGraphAsJson(`${title} fallback`, {
+                                        relationCount: filteredRelations.length,
+                                        sampledPaths: hugeGraphFallbackData.pathRows,
+                                        topHubs: hugeGraphFallbackData.topHubs,
+                                        totalNodes: props.nodes.length,
+                                    })
+                                }}
+                                size="sm"
+                                variant="flat"
+                            >
+                                Export fallback JSON
+                            </Button>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-2">
+                            <section className="rounded-lg border border-default-200 bg-content1 p-3">
+                                <h5 className="text-sm font-semibold text-foreground">Top hubs</h5>
+                                <ul className="mt-2 space-y-1 text-xs text-foreground-700">
+                                    {hugeGraphFallbackData.topHubs.map((hub): ReactElement => (
+                                        <li key={hub.nodeId}>
+                                            {`${hub.label}: degree ${hub.totalDegree} (in ${hub.incoming}, out ${hub.outgoing})`}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </section>
+                            <section className="rounded-lg border border-default-200 bg-content1 p-3">
+                                <h5 className="text-sm font-semibold text-foreground">
+                                    Sampled paths
+                                </h5>
+                                <ul className="mt-2 space-y-1 text-xs text-foreground-700">
+                                    {hugeGraphFallbackData.pathRows.map((row, index): ReactElement => (
+                                        <li key={`${row.source}-${row.target}-${index}`}>
+                                            {`${row.source} -> ${row.target} (${row.relationType})`}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </section>
+                        </div>
+                    </section>
+                ) : (
+                    <XyFlowGraph
+                        graphTitle={title}
+                        ariaLabel={`${title} canvas`}
+                        edges={visibleGraphData.edges}
+                        height={props.height}
+                        nodes={layoutedNodes}
+                        onNodeSelect={(nodeId): void => {
+                            setState((previousState): IPackageDependencyGraphState => ({
+                                ...previousState,
+                                showImpactPaths:
+                                    previousState.selectedNodeId === nodeId
+                                        ? false
+                                        : previousState.showImpactPaths,
+                                focusPathOnly:
+                                    previousState.selectedNodeId === nodeId
+                                        ? false
+                                        : previousState.focusPathOnly,
+                                selectedNodeId:
+                                    previousState.selectedNodeId === nodeId ? undefined : nodeId,
+                            }))
+                        }}
+                        highlightedEdgeIds={impactPathHighlight.edgeIds}
+                        highlightedNodeIds={impactPathHighlight.nodeIds}
+                        selectedNodeId={state.selectedNodeId}
+                        showControls={props.showControls}
+                        showMiniMap={props.showMiniMap}
+                    />
+                )}
                 <section
                     aria-live="polite"
                     className="rounded-xl border border-default-200 bg-content2 p-4"

@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     buildGraphExportFileName,
     buildGraphSvg,
+    exportGraphAsJson,
     exportGraphAsSvg,
 } from "@/components/graphs/graph-export"
 import type { IGraphLayoutNode } from "@/components/graphs/xyflow-graph-layout"
@@ -65,6 +66,31 @@ describe("graph-export", (): void => {
 
         try {
             exportGraphAsSvg("Graph file", [], [])
+
+            expect(createObjectUrl).toHaveBeenCalledTimes(1)
+            expect(clickSpy).toHaveBeenCalledTimes(1)
+            expect(revokeObjectUrl).toHaveBeenCalledTimes(1)
+        } finally {
+            createObjectUrl.mockRestore()
+            revokeObjectUrl.mockRestore()
+            clickSpy.mockRestore()
+        }
+    })
+
+    it("скачивает JSON-файл для aggregated fallback данных", (): void => {
+        const createObjectUrl = vi
+            .spyOn(URL, "createObjectURL")
+            .mockReturnValue("blob:graph-export-json")
+        const revokeObjectUrl = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {})
+        const clickSpy = vi
+            .spyOn(HTMLAnchorElement.prototype, "click")
+            .mockImplementation(() => {})
+
+        try {
+            exportGraphAsJson("Huge Graph fallback", {
+                sampledPaths: [{ source: "a", target: "b" }],
+                topHubs: [{ id: "a", degree: 8 }],
+            })
 
             expect(createObjectUrl).toHaveBeenCalledTimes(1)
             expect(clickSpy).toHaveBeenCalledTimes(1)

@@ -231,3 +231,18 @@ export async function exportGraphAsPng(
         URL.revokeObjectURL(svgUrl)
     }
 }
+
+/**
+ * Экспортирует агрегированное представление графа как JSON.
+ *
+ * @param title Заголовок графа.
+ * @param payload Данные для сериализации.
+ */
+export function exportGraphAsJson(title: string, payload: unknown): void {
+    const fileName = `${buildGraphExportFileName(title)}.json`
+    const serializedPayload = JSON.stringify(payload, null, 2)
+    const blob = new Blob([serializedPayload], {
+        type: "application/json;charset=utf-8",
+    })
+    downloadBlob(fileName, blob)
+}

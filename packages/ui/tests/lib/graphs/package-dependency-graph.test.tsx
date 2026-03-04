@@ -7,6 +7,14 @@ import {
     buildPackageDependencyGraphData,
 } from "@/components/graphs/package-dependency-graph"
 
+const { mockExportGraphAsJson } = vi.hoisted(() => ({
+    mockExportGraphAsJson: vi.fn((): void => {}),
+}))
+
+vi.mock("@/components/graphs/graph-export", () => ({
+    exportGraphAsJson: mockExportGraphAsJson,
+}))
+
 vi.mock("@/components/graphs/xyflow-graph", () => ({
     XyFlowGraph: ({
         ariaLabel,
@@ -56,7 +64,10 @@ vi.mock("@/components/graphs/xyflow-graph", () => ({
 
 describe("package dependency graph", (): void => {
     beforeEach((): void => {
-        globalThis.localStorage.clear()
+        if (typeof globalThis.localStorage !== "undefined") {
+            globalThis.localStorage.clear()
+        }
+        mockExportGraphAsJson.mockClear()
     })
 
     afterEach((): void => {
@@ -350,5 +361,34 @@ describe("package dependency graph", (): void => {
         await user.click(screen.getByRole("button", { name: "Focus path" }))
 
         expect(screen.getByTestId("xyflow-node-count")).toHaveTextContent("2")
+    })
+
+    it("показывает huge graph fallback и экспортирует aggregated json", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const nodes = Array.from({ length: 270 }, (_item, index) => ({
+            id: `pkg-${index}`,
+            layer: (index % 3 === 0 ? "core" : index % 3 === 1 ? "api" : "ui") as
+                | "core"
+                | "api"
+                | "ui",
+            name: `pkg-${index}`,
+        }))
+        const relations = Array.from({ length: 269 }, (_item, index) => ({
+            relationType: "runtime",
+            source: `pkg-${index}`,
+            target: `pkg-${index + 1}`,
+        }))
+
+        render(
+            <PackageDependencyGraph
+                nodes={nodes}
+                relations={relations}
+                title="Huge graph"
+            />,
+        )
+
+        expect(screen.getByText(/Graph is too large for full render/)).not.toBeNull()
+        await user.click(screen.getByRole("button", { name: "Export fallback JSON" }))
+        expect(mockExportGraphAsJson).toHaveBeenCalledTimes(1)
     })
 })
