@@ -1,8 +1,10 @@
 import { type ReactElement, type ReactNode, useEffect, useState } from "react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
+import { readUiRoleFromStorage, writeUiRoleToStorage, type TUiRole } from "@/lib/permissions/ui-policy"
 
 import { Header } from "./header"
 import type { IHeaderOrganizationOption } from "./header"
+import type { IHeaderRoleOption } from "./header"
 import { Sidebar } from "./sidebar"
 import { MobileSidebar } from "./mobile-sidebar"
 
@@ -38,6 +40,25 @@ const ORGANIZATION_OPTIONS: ReadonlyArray<IHeaderOrganizationOption> = [
 ]
 
 const DEFAULT_ORGANIZATION_ID = ORGANIZATION_OPTIONS[0].id
+
+const ROLE_OPTIONS: ReadonlyArray<IHeaderRoleOption> = [
+    {
+        id: "viewer",
+        label: "Viewer",
+    },
+    {
+        id: "developer",
+        label: "Developer",
+    },
+    {
+        id: "lead",
+        label: "Lead",
+    },
+    {
+        id: "admin",
+        label: "Admin",
+    },
+]
 
 const TENANT_ALLOWED_ROUTES: Readonly<Record<string, ReadonlyArray<string>>> = {
     "frontend-team": [
@@ -119,6 +140,9 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
     const [activeOrganizationId, setActiveOrganizationId] =
         useState<string>(DEFAULT_ORGANIZATION_ID)
+    const [activeRoleId, setActiveRoleId] = useState<TUiRole>(() => {
+        return readUiRoleFromStorage()
+    })
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -154,6 +178,15 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
         setActiveOrganizationId(organizationId)
     }
 
+    const handleRoleChange = (roleId: string): void => {
+        if (roleId !== "viewer" && roleId !== "developer" && roleId !== "lead" && roleId !== "admin") {
+            return
+        }
+
+        setActiveRoleId(roleId)
+        writeUiRoleToStorage(roleId)
+    }
+
     useEffect((): void => {
         if (canTenantAccessPath(activeOrganizationId, location.pathname)) {
             return
@@ -168,14 +201,17 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
         <div className="relative min-h-screen bg-[var(--background)] text-[var(--foreground)]">
             <Header
                 activeOrganizationId={activeOrganizationId}
+                activeRoleId={activeRoleId}
                 onMobileMenuOpen={(): void => {
                     setIsMobileSidebarOpen(true)
                 }}
                 onOrganizationChange={handleOrganizationChange}
+                onRoleChange={handleRoleChange}
                 userEmail={props.userEmail}
                 userName={props.userName}
                 onSignOut={handleSignOut}
                 organizations={ORGANIZATION_OPTIONS}
+                roleOptions={ROLE_OPTIONS}
                 title={props.title}
             />
             <MobileSidebar

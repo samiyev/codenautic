@@ -2,6 +2,7 @@ import { type ReactElement, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input } from "@/components/ui"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
+import { getUiActionPolicy, useUiRole, type IUiActionPolicy } from "@/lib/permissions/ui-policy"
 
 type TTeamMemberRole = "admin" | "developer" | "lead" | "viewer"
 
@@ -170,11 +171,17 @@ function TeamMembersCard(props: {
     readonly team: ITeamState
     readonly inviteEmail: string
     readonly inviteRole: TTeamMemberRole
+    readonly invitePolicy: IUiActionPolicy
     readonly onInviteEmailChange: (value: string) => void
     readonly onInviteRoleChange: (role: TTeamMemberRole) => void
     readonly onInviteMember: () => void
     readonly onRoleUpdate: (memberId: string, role: TTeamMemberRole) => void
+    readonly roleManagementPolicy: IUiActionPolicy
 }): ReactElement {
+    const isInviteDisabled = props.invitePolicy.visibility !== "enabled"
+    const isRoleManagementHidden = props.roleManagementPolicy.visibility === "hidden"
+    const isRoleManagementDisabled = props.roleManagementPolicy.visibility === "disabled"
+
     return (
         <Card>
             <CardHeader>
@@ -216,11 +223,20 @@ function TeamMembersCard(props: {
                         </select>
                     </div>
                     <div className="flex items-end">
-                        <Button className="w-full md:w-auto" onPress={props.onInviteMember}>
+                        <Button
+                            className="w-full md:w-auto"
+                            isDisabled={isInviteDisabled}
+                            onPress={props.onInviteMember}
+                        >
                             Add member
                         </Button>
                     </div>
                 </div>
+                {props.invitePolicy.reason === undefined || isInviteDisabled === false ? null : (
+                    <p className="text-xs text-[var(--foreground)]/70">
+                        Invite policy: {props.invitePolicy.reason}
+                    </p>
+                )}
 
                 <ul aria-label={`Members in ${props.team.name}`} className="space-y-2">
                     {props.team.members.map((member): ReactElement => (
@@ -237,50 +253,63 @@ function TeamMembersCard(props: {
                                     <Chip color={mapRoleChipColor(member.role)} size="sm" variant="flat">
                                         {member.role}
                                     </Chip>
-                                    <label
-                                        className="text-xs text-[var(--foreground)]/70"
-                                        htmlFor={`member-role-${member.id}`}
-                                    >
-                                        Role
-                                    </label>
-                                    <select
-                                        aria-label={`Role for member ${member.email}`}
-                                        className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs"
-                                        id={`member-role-${member.id}`}
-                                        value={member.role}
-                                        onChange={(event): void => {
-                                            const nextRole = event.currentTarget.value
-                                            if (
-                                                nextRole === "viewer"
-                                                || nextRole === "developer"
-                                                || nextRole === "lead"
-                                                || nextRole === "admin"
-                                            ) {
-                                                props.onRoleUpdate(member.id, nextRole)
-                                            }
-                                        }}
-                                    >
-                                        {ROLE_OPTIONS.map((role): ReactElement => (
-                                            <option key={role} value={role}>
-                                                {role}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    {isRoleManagementHidden ? null : (
+                                        <>
+                                            <label
+                                                className="text-xs text-[var(--foreground)]/70"
+                                                htmlFor={`member-role-${member.id}`}
+                                            >
+                                                Role
+                                            </label>
+                                            <select
+                                                aria-label={`Role for member ${member.email}`}
+                                                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs"
+                                                disabled={isRoleManagementDisabled}
+                                                id={`member-role-${member.id}`}
+                                                value={member.role}
+                                                onChange={(event): void => {
+                                                    const nextRole = event.currentTarget.value
+                                                    if (
+                                                        nextRole === "viewer"
+                                                        || nextRole === "developer"
+                                                        || nextRole === "lead"
+                                                        || nextRole === "admin"
+                                                    ) {
+                                                        props.onRoleUpdate(member.id, nextRole)
+                                                    }
+                                                }}
+                                            >
+                                                {ROLE_OPTIONS.map((role): ReactElement => (
+                                                    <option key={role} value={role}>
+                                                        {role}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </li>
                     ))}
                 </ul>
+                {props.roleManagementPolicy.reason === undefined || isRoleManagementHidden ? null : (
+                    <p className="text-xs text-[var(--foreground)]/70">
+                        Role policy: {props.roleManagementPolicy.reason}
+                    </p>
+                )}
             </CardBody>
         </Card>
     )
 }
 
 function TeamRepositoriesCard(props: {
+    readonly assignmentPolicy: IUiActionPolicy
     readonly team: ITeamState
     readonly repositories: ReadonlyArray<string>
     readonly onRepositoryToggle: (repository: string, isSelected: boolean) => void
 }): ReactElement {
+    const isAssignmentDisabled = props.assignmentPolicy.visibility !== "enabled"
+
     return (
         <Card>
             <CardHeader>
@@ -298,6 +327,7 @@ function TeamRepositoriesCard(props: {
                             <input
                                 checked={isSelected}
                                 className="h-4 w-4 accent-[var(--primary)]"
+                                disabled={isAssignmentDisabled}
                                 type="checkbox"
                                 onChange={(event): void => {
                                     props.onRepositoryToggle(repository, event.currentTarget.checked)
@@ -307,6 +337,11 @@ function TeamRepositoriesCard(props: {
                         </label>
                     )
                 })}
+                {props.assignmentPolicy.reason === undefined || isAssignmentDisabled === false ? null : (
+                    <p className="text-xs text-[var(--foreground)]/70">
+                        Repository policy: {props.assignmentPolicy.reason}
+                    </p>
+                )}
             </CardBody>
         </Card>
     )
@@ -318,6 +353,7 @@ function TeamRepositoriesCard(props: {
  * @returns UI для создания команд, назначения участников и репозиториев.
  */
 export function SettingsTeamPage(): ReactElement {
+    const activeUiRole = useUiRole()
     const [teams, setTeams] = useState<ReadonlyArray<ITeamState>>(INITIAL_TEAMS)
     const [activeTeamId, setActiveTeamId] = useState(INITIAL_TEAMS[0]?.id ?? "")
     const [newTeamName, setNewTeamName] = useState("")
@@ -329,8 +365,25 @@ export function SettingsTeamPage(): ReactElement {
         (): ITeamState | undefined => teams.find((team): boolean => team.id === activeTeamId),
         [activeTeamId, teams],
     )
+    const createTeamPolicy = useMemo((): IUiActionPolicy => {
+        return getUiActionPolicy(activeUiRole, "team.create")
+    }, [activeUiRole])
+    const invitePolicy = useMemo((): IUiActionPolicy => {
+        return getUiActionPolicy(activeUiRole, "team.invite")
+    }, [activeUiRole])
+    const roleManagementPolicy = useMemo((): IUiActionPolicy => {
+        return getUiActionPolicy(activeUiRole, "team.role.manage")
+    }, [activeUiRole])
+    const assignmentPolicy = useMemo((): IUiActionPolicy => {
+        return getUiActionPolicy(activeUiRole, "team.repo.assign")
+    }, [activeUiRole])
 
     const handleCreateTeam = (): void => {
+        if (createTeamPolicy.visibility !== "enabled") {
+            showToastError(createTeamPolicy.reason ?? "Team creation is restricted by policy.")
+            return
+        }
+
         const normalizedName = newTeamName.trim()
         if (normalizedName.length < 3) {
             showToastError("Team name should be at least 3 characters.")
@@ -361,6 +414,11 @@ export function SettingsTeamPage(): ReactElement {
     }
 
     const handleInviteMember = (): void => {
+        if (invitePolicy.visibility !== "enabled") {
+            showToastError(invitePolicy.reason ?? "Member invitation is restricted by policy.")
+            return
+        }
+
         if (activeTeam === undefined) {
             showToastError("Select a team before inviting members.")
             return
@@ -394,6 +452,13 @@ export function SettingsTeamPage(): ReactElement {
     }
 
     const handleRoleUpdate = (memberId: string, role: TTeamMemberRole): void => {
+        if (roleManagementPolicy.visibility !== "enabled") {
+            showToastError(
+                roleManagementPolicy.reason ?? "Role update is restricted by current policy.",
+            )
+            return
+        }
+
         if (activeTeam === undefined) {
             return
         }
@@ -416,6 +481,13 @@ export function SettingsTeamPage(): ReactElement {
     }
 
     const handleRepositoryToggle = (repository: string, isSelected: boolean): void => {
+        if (assignmentPolicy.visibility !== "enabled") {
+            showToastError(
+                assignmentPolicy.reason ?? "Repository assignment is restricted by current policy.",
+            )
+            return
+        }
+
         if (activeTeam === undefined) {
             return
         }
@@ -447,6 +519,9 @@ export function SettingsTeamPage(): ReactElement {
             <p className="text-sm text-[var(--foreground)]/70">
                 Create teams, add members, assign repositories and control roles in one place.
             </p>
+            <Alert color="primary" title={`RBAC preview role: ${activeUiRole}`} variant="flat">
+                Restricted actions are hidden or disabled based on active role policy.
+            </Alert>
 
             <Card>
                 <CardHeader>
@@ -465,13 +540,24 @@ export function SettingsTeamPage(): ReactElement {
                         value={newTeamDescription}
                         onValueChange={setNewTeamDescription}
                     />
-                    <div className="flex items-end">
-                        <Button className="w-full md:w-auto" onPress={handleCreateTeam}>
-                            Create team
-                        </Button>
-                    </div>
+                    {createTeamPolicy.visibility === "hidden" ? null : (
+                        <div className="flex items-end">
+                            <Button
+                                className="w-full md:w-auto"
+                                isDisabled={createTeamPolicy.visibility === "disabled"}
+                                onPress={handleCreateTeam}
+                            >
+                                Create team
+                            </Button>
+                        </div>
+                    )}
                 </CardBody>
             </Card>
+            {createTeamPolicy.reason === undefined || createTeamPolicy.visibility === "enabled" ? null : (
+                <p className="text-xs text-[var(--foreground)]/70">
+                    Create team policy: {createTeamPolicy.reason}
+                </p>
+            )}
 
             {activeTeam === undefined ? (
                 <Alert color="warning" title="No active team selected" variant="flat">
@@ -494,13 +580,16 @@ export function SettingsTeamPage(): ReactElement {
                         <TeamMembersCard
                             inviteEmail={inviteEmail}
                             inviteRole={inviteRole}
+                            invitePolicy={invitePolicy}
                             team={activeTeam}
                             onInviteEmailChange={setInviteEmail}
                             onInviteMember={handleInviteMember}
                             onInviteRoleChange={setInviteRole}
                             onRoleUpdate={handleRoleUpdate}
+                            roleManagementPolicy={roleManagementPolicy}
                         />
                         <TeamRepositoriesCard
+                            assignmentPolicy={assignmentPolicy}
                             repositories={AVAILABLE_REPOSITORIES}
                             team={activeTeam}
                             onRepositoryToggle={handleRepositoryToggle}

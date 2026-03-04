@@ -1,6 +1,6 @@
 import { act, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { MOCK_CCR_ROWS } from "@/pages/ccr-data"
 import { CcrReviewDetailPage } from "@/pages/ccr-review-detail.page"
@@ -8,12 +8,17 @@ import { renderWithProviders } from "../utils/render"
 
 const originalEventSource = globalThis.EventSource
 
+beforeEach((): void => {
+    window.localStorage.setItem("codenautic:rbac:role", "admin")
+})
+
 afterEach((): void => {
     if (originalEventSource === undefined) {
         delete (globalThis as { EventSource?: typeof EventSource }).EventSource
     } else {
         globalThis.EventSource = originalEventSource
     }
+    window.localStorage.removeItem("codenautic:rbac:role")
 })
 
 describe("ccr review detail page", (): void => {
@@ -37,6 +42,20 @@ describe("ccr review detail page", (): void => {
 
         expect(screen.getByText(/Please explain the current diff/)).not.toBeNull()
         expect(screen.getByText("You")).not.toBeNull()
+    })
+
+    it("показывает restricted decision states для viewer роли", (): void => {
+        const ccr = MOCK_CCR_ROWS[0]
+        window.localStorage.setItem("codenautic:rbac:role", "viewer")
+
+        renderWithProviders(<CcrReviewDetailPage ccr={ccr} />)
+
+        const approveButton = screen.getByRole("button", { name: "Approve review" })
+        expect(approveButton.getAttribute("aria-disabled")).toBe("true")
+        expect(screen.getByText(/Role-based restriction/)).not.toBeNull()
+        expect(screen.getByText(/Viewer can inspect review/)).not.toBeNull()
+        expect(screen.queryByRole("link", { name: "Finish review" })).toBeNull()
+        expect(screen.getByText(/Finish review unavailable/)).not.toBeNull()
     })
 
     it("показывает SafeGuard trace панель с причинами фильтрации", async (): Promise<void> => {

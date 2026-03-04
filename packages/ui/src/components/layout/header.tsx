@@ -17,6 +17,16 @@ export interface IHeaderOrganizationOption {
 }
 
 /**
+ * Опция роли для RBAC preview.
+ */
+export interface IHeaderRoleOption {
+    /** Технический id роли. */
+    readonly id: string
+    /** Человекочитаемая подпись роли. */
+    readonly label: string
+}
+
+/**
  * Параметры для layout header.
  */
 export interface IHeaderProps {
@@ -38,6 +48,12 @@ export interface IHeaderProps {
     readonly activeOrganizationId?: string
     /** Смена организации/workspace. */
     readonly onOrganizationChange?: (organizationId: string) => void
+    /** Доступные роли для RBAC preview. */
+    readonly roleOptions?: ReadonlyArray<IHeaderRoleOption>
+    /** Активная роль. */
+    readonly activeRoleId?: string
+    /** Смена роли в UI policy preview. */
+    readonly onRoleChange?: (roleId: string) => void
 }
 
 /**
@@ -50,6 +66,9 @@ export function Header(props: IHeaderProps): ReactElement {
     const hasNotifications = props.notificationCount !== undefined && props.notificationCount > 0
     const activeOrganization = props.organizations?.find((organization): boolean => {
         return organization.id === props.activeOrganizationId
+    })
+    const activeRole = props.roleOptions?.find((role): boolean => {
+        return role.id === props.activeRoleId
     })
 
     return (
@@ -72,32 +91,64 @@ export function Header(props: IHeaderProps): ReactElement {
                         <p className="text-sm font-medium text-[var(--foreground)]/80">{props.title}</p>
                     ) : null}
                 </div>
-                {props.organizations === undefined ? null : (
-                    <div className="hidden min-w-[220px] md:flex md:flex-col">
-                        <label
-                            className="text-[11px] uppercase tracking-[0.08em] text-[var(--foreground)]/60"
-                            htmlFor="header-organization-switcher"
-                        >
-                            Workspace
-                        </label>
-                        <select
-                            aria-label="Organization workspace switcher"
-                            className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs text-[var(--foreground)]"
-                            id="header-organization-switcher"
-                            value={props.activeOrganizationId}
-                            onChange={(event): void => {
-                                props.onOrganizationChange?.(event.currentTarget.value)
-                            }}
-                        >
-                            {props.organizations.map((organization): ReactElement => (
-                                <option key={organization.id} value={organization.id}>
-                                    {organization.label}
-                                </option>
-                            ))}
-                        </select>
-                        <p className="text-[11px] text-[var(--foreground)]/60">
-                            Current: {activeOrganization?.label ?? "Unknown workspace"}
-                        </p>
+                {props.organizations === undefined && props.roleOptions === undefined ? null : (
+                    <div className="hidden items-start gap-2 md:flex">
+                        {props.organizations === undefined ? null : (
+                            <div className="min-w-[220px]">
+                                <label
+                                    className="text-[11px] uppercase tracking-[0.08em] text-[var(--foreground)]/60"
+                                    htmlFor="header-organization-switcher"
+                                >
+                                    Workspace
+                                </label>
+                                <select
+                                    aria-label="Organization workspace switcher"
+                                    className="mt-0.5 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs text-[var(--foreground)]"
+                                    id="header-organization-switcher"
+                                    value={props.activeOrganizationId}
+                                    onChange={(event): void => {
+                                        props.onOrganizationChange?.(event.currentTarget.value)
+                                    }}
+                                >
+                                    {props.organizations.map((organization): ReactElement => (
+                                        <option key={organization.id} value={organization.id}>
+                                            {organization.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-[11px] text-[var(--foreground)]/60">
+                                    Current: {activeOrganization?.label ?? "Unknown workspace"}
+                                </p>
+                            </div>
+                        )}
+                        {props.roleOptions === undefined ? null : (
+                            <div className="min-w-[170px]">
+                                <label
+                                    className="text-[11px] uppercase tracking-[0.08em] text-[var(--foreground)]/60"
+                                    htmlFor="header-rbac-role-switcher"
+                                >
+                                    Role preview
+                                </label>
+                                <select
+                                    aria-label="RBAC role switcher"
+                                    className="mt-0.5 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs text-[var(--foreground)]"
+                                    id="header-rbac-role-switcher"
+                                    value={props.activeRoleId}
+                                    onChange={(event): void => {
+                                        props.onRoleChange?.(event.currentTarget.value)
+                                    }}
+                                >
+                                    {props.roleOptions.map((role): ReactElement => (
+                                        <option key={role.id} value={role.id}>
+                                            {role.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-[11px] text-[var(--foreground)]/60">
+                                    Active: {activeRole?.label ?? "Unknown role"}
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
                 <div className="ml-auto flex items-center gap-2">

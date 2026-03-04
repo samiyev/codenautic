@@ -44,14 +44,17 @@ function DashboardLayoutHarness(props: ILayoutHarnessProps): ReactElement {
 describe("layout components", (): void => {
     it("рендерит Header с брендом и темным режимом переключателя", (): void => {
         const onOrganizationChange = vi.fn()
+        const onRoleChange = vi.fn()
         renderWithProviders(
             <Header
                 activeOrganizationId="platform-team"
+                activeRoleId="admin"
                 notificationCount={3}
                 onMobileMenuOpen={(): void => {
                     return undefined
                 }}
                 onOrganizationChange={onOrganizationChange}
+                onRoleChange={onRoleChange}
                 organizations={[
                     {
                         id: "platform-team",
@@ -60,6 +63,16 @@ describe("layout components", (): void => {
                     {
                         id: "frontend-team",
                         label: "Frontend Team",
+                    },
+                ]}
+                roleOptions={[
+                    {
+                        id: "viewer",
+                        label: "Viewer",
+                    },
+                    {
+                        id: "admin",
+                        label: "Admin",
                     },
                 ]}
                 title="Reviews"
@@ -81,7 +94,10 @@ describe("layout components", (): void => {
             screen.getByRole("combobox", { name: "Organization workspace switcher" }),
         ).not.toBeNull()
         expect(screen.getByText("Current: Platform Team")).not.toBeNull()
+        expect(screen.getByRole("combobox", { name: "RBAC role switcher" })).not.toBeNull()
+        expect(screen.getByText("Active: Admin")).not.toBeNull()
         expect(onOrganizationChange).not.toHaveBeenCalled()
+        expect(onRoleChange).not.toHaveBeenCalled()
     })
 
     it("обрабатывает callback для collapse sidebar", async (): Promise<void> => {
@@ -229,6 +245,8 @@ describe("layout components", (): void => {
 
         const switcher = screen.getByRole("combobox", { name: "Organization workspace switcher" })
         await user.selectOptions(switcher, "frontend-team")
+        const roleSwitcher = screen.getByRole("combobox", { name: "RBAC role switcher" })
+        await user.selectOptions(roleSwitcher, "viewer")
 
         expect(confirmSpy).toHaveBeenCalledTimes(1)
         await waitFor(() => {
@@ -237,6 +255,7 @@ describe("layout components", (): void => {
             })
         })
         expect(window.localStorage.getItem("codenautic:tenant:active")).toBe("frontend-team")
+        expect(window.localStorage.getItem("codenautic:rbac:role")).toBe("viewer")
         confirmSpy.mockRestore()
     })
 

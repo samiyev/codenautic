@@ -7,6 +7,7 @@ import { ReviewCommentThread } from "@/components/reviews/review-comment-thread"
 import { CodeDiffViewer } from "@/components/reviews/code-diff-viewer"
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
 import { SseStreamViewer } from "@/components/streaming/sse-stream-viewer"
+import { getUiActionPolicy, useUiRole } from "@/lib/permissions/ui-policy"
 import {
     ccrToContextItem,
     getCcrDiffById,
@@ -247,6 +248,7 @@ function buildSafeGuardTraceItems(ccr: ICcrRowData): ReadonlyArray<ISafeGuardTra
 /** Страница страницы отдельного CCR review с авто-подставленным контекстом чата. */
 export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElement {
     const { ccr } = props
+    const activeUiRole = useUiRole()
     const [reviewDecision, setReviewDecision] = useState<TReviewDecision>("pending")
     const [activeFilePath, setActiveFilePath] = useState<string | undefined>(ccr.attachedFiles[0])
     const [threads, setThreads] = useState<ReadonlyArray<IChatThread>>([
@@ -320,6 +322,12 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
         return safeGuardTraceItems.filter((item): boolean => item.finalDecision === "hidden").length
     }, [safeGuardTraceItems])
     const visibleTraceCount = safeGuardTraceItems.length - filteredOutTraceCount
+    const reviewDecisionPolicy = useMemo(() => {
+        return getUiActionPolicy(activeUiRole, "review.decision")
+    }, [activeUiRole])
+    const reviewFinishPolicy = useMemo(() => {
+        return getUiActionPolicy(activeUiRole, "review.finish")
+    }, [activeUiRole])
     const activeTraceFeedbackHistory = useMemo((): ReadonlyArray<IReviewerFeedbackRecord> => {
         if (activeSafeGuardTraceItem === undefined) {
             return []
@@ -457,6 +465,14 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
         })
     }
 
+    const handleReviewDecisionChange = (nextDecision: TReviewDecision): void => {
+        if (reviewDecisionPolicy.visibility !== "enabled") {
+            return
+        }
+
+        setReviewDecision(nextDecision)
+    }
+
     return (
         <section className="space-y-4">
             <Card>
@@ -473,46 +489,67 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             </p>
                         </div>
                         <div className="flex flex-col items-end gap-2">
-                            <Button
-                                color="success"
-                                onPress={(): void => {
-                                    setReviewDecision("approved")
-                                }}
-                                size="sm"
-                                type="button"
-                                variant={reviewDecision === "approved" ? "solid" : "light"}
-                            >
-                                Approve review
-                            </Button>
-                            <Button
-                                color="danger"
-                                onPress={(): void => {
-                                    setReviewDecision("rejected")
-                                }}
-                                size="sm"
-                                type="button"
-                                variant={reviewDecision === "rejected" ? "solid" : "light"}
-                            >
-                                Request changes
-                            </Button>
-                            <Button
-                                color="primary"
-                                onPress={(): void => {
-                                    setReviewDecision("pending")
-                                }}
-                                size="sm"
-                                type="button"
-                                variant={reviewDecision === "pending" ? "solid" : "light"}
-                            >
-                                Save as in progress
-                            </Button>
-                            <Link className="text-sm underline underline-offset-4" to="/reviews">
-                                Finish review
-                            </Link>
+                            {reviewDecisionPolicy.visibility === "hidden" ? null : (
+                                <>
+                                    <Button
+                                        color="success"
+                                        isDisabled={reviewDecisionPolicy.visibility === "disabled"}
+                                        onPress={(): void => {
+                                            handleReviewDecisionChange("approved")
+                                        }}
+                                        size="sm"
+                                        type="button"
+                                        variant={reviewDecision === "approved" ? "solid" : "light"}
+                                    >
+                                        Approve review
+                                    </Button>
+                                    <Button
+                                        color="danger"
+                                        isDisabled={reviewDecisionPolicy.visibility === "disabled"}
+                                        onPress={(): void => {
+                                            handleReviewDecisionChange("rejected")
+                                        }}
+                                        size="sm"
+                                        type="button"
+                                        variant={reviewDecision === "rejected" ? "solid" : "light"}
+                                    >
+                                        Request changes
+                                    </Button>
+                                    <Button
+                                        color="primary"
+                                        isDisabled={reviewDecisionPolicy.visibility === "disabled"}
+                                        onPress={(): void => {
+                                            handleReviewDecisionChange("pending")
+                                        }}
+                                        size="sm"
+                                        type="button"
+                                        variant={reviewDecision === "pending" ? "solid" : "light"}
+                                    >
+                                        Save as in progress
+                                    </Button>
+                                </>
+                            )}
+                            {reviewFinishPolicy.visibility === "hidden" ? null : reviewFinishPolicy.visibility ===
+                              "disabled" ? (
+                                <p className="text-sm text-slate-500">
+                                    Finish review unavailable:{" "}
+                                    {reviewFinishPolicy.reason ?? "insufficient role permissions"}
+                                </p>
+                            ) : (
+                                <Link className="text-sm underline underline-offset-4" to="/reviews">
+                                    Finish review
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </CardHeader>
                 <CardBody className="space-y-2">
+                    {reviewDecisionPolicy.reason === undefined
+                    || reviewDecisionPolicy.visibility === "enabled" ? null : (
+                        <Alert color="warning" title="Role-based restriction" variant="flat">
+                            {reviewDecisionPolicy.reason}
+                        </Alert>
+                    )}
                     <p className="text-sm text-slate-700">
                         <strong>Assignee:</strong> {ccr.assignee}
                     </p>
