@@ -24,8 +24,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "test": "bun test",
-    "typecheck": "tsc --noEmit",
-    "migrate:seed": "bun src/api/migrations/seed.ts"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@codenautic/core": "workspace:*",

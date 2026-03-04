@@ -68,12 +68,6 @@ export default tseslint.config(
         },
     },
     {
-        files: ["src/api/migrations/**/*.ts"],
-        rules: {
-            "no-console": "off",
-        },
-    },
-    {
         files: ["**/*.mjs"],
         ...tseslint.configs.disableTypeChecked,
     },
