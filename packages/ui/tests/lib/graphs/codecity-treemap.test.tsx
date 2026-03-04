@@ -139,6 +139,7 @@ describe("codecity treemap graph", (): void => {
         {
             id: "src/api/auth.ts",
             issueCount: 2,
+            bugIntroductions: { "7d": 1, "30d": 2, "90d": 4 },
             complexity: 45,
             coverage: 88,
             lastReviewAt: "2026-02-01T10:00:00.000Z",
@@ -148,6 +149,7 @@ describe("codecity treemap graph", (): void => {
         {
             id: "src/api/session.ts",
             issueCount: 0,
+            bugIntroductions: { "7d": 0, "30d": 1, "90d": 3 },
             complexity: 30,
             coverage: 76,
             path: "src/api/session.ts",
@@ -155,6 +157,7 @@ describe("codecity treemap graph", (): void => {
         {
             id: "src/ui/index.ts",
             issueCount: 1,
+            bugIntroductions: { "7d": 2, "30d": 5, "90d": 7 },
             complexity: 10,
             coverage: 55,
             size: 40,
@@ -211,8 +214,12 @@ describe("codecity treemap graph", (): void => {
         expect(graph.issueSummary.totalIssues).toBe(3)
         expect(graph.issueSummary.filesWithIssues).toBe(2)
         expect(graph.issueSummary.maxIssuesPerFile).toBe(2)
+        expect(graph.bugHeatSummary.totalBugIntroductions).toBe(8)
+        expect(graph.bugHeatSummary.filesWithBugIntroductions).toBe(3)
+        expect(graph.bugHeatSummary.maxBugIntroductions).toBe(5)
         expect(graph.packages[0]?.children[0]?.issueCount).toBe(2)
         expect(graph.packages[0]?.children[0]?.issueHeatmapColor).toBeDefined()
+        expect(graph.packages[0]?.children[0]?.bugHeatColor).toBeDefined()
     })
 
     it("формирует метрики цвета для выбранной шкалы", (): void => {
@@ -295,6 +302,30 @@ describe("codecity treemap graph", (): void => {
         expect(screen.getByText("Issues: 3 in 2 files")).not.toBeNull()
         expect(screen.getByText("Max issues: 2")).not.toBeNull()
         expect(mockTreemap).toHaveBeenCalledTimes(1)
+    })
+
+    it("показывает bug heat overlay и фильтр диапазона", (): void => {
+        render(
+            <CodeCityTreemap
+                files={sampleFiles}
+                title="CodeCity treemap"
+            />,
+        )
+
+        const bugHeatLegend = screen.getByLabelText("Bug heat overlay legend")
+        expect(bugHeatLegend).toHaveTextContent("Bug heat overlay (30d)")
+        expect(bugHeatLegend).toHaveTextContent("Max bugs: 5")
+        expect(bugHeatLegend).toHaveTextContent("Bug introductions: 8 in 3 files")
+
+        const bugHeatRangeSelector = screen.getByLabelText("Bug heat range")
+        fireEvent.change(bugHeatRangeSelector, { target: { value: "7d" } })
+
+        expect(screen.getByLabelText("Bug heat overlay legend")).toHaveTextContent(
+            "Bug heat overlay (7d)",
+        )
+        expect(screen.getByLabelText("Bug heat overlay legend")).toHaveTextContent(
+            "Bug introductions: 3 in 2 files",
+        )
     })
 
     it("показывает temporal coupling overlay и позволяет его выключить", (): void => {

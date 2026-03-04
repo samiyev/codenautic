@@ -111,6 +111,12 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstTreemapCall?.defaultMetric).toBe("complexity")
         expect(firstTreemapCall?.title).toBe("platform-team/api-gateway treemap")
         expect(firstTreemapCall?.temporalCouplings.length).toBeGreaterThan(0)
+        const firstTreemapFile = firstTreemapCall?.files.at(0) as
+            | {
+                readonly bugIntroductions?: Readonly<Record<string, number>>
+            }
+            | undefined
+        expect(firstTreemapFile?.bugIntroductions?.["30d"]).toBeGreaterThan(0)
 
         const firstGraphCall = mockPackageDependencyGraph.mock.calls.at(0)?.[0]
         expect(firstGraphCall).not.toBeUndefined()
@@ -140,6 +146,12 @@ describe("CodeCityDashboardPage", (): void => {
         expect(currentTreemapCall?.defaultMetric).toBe("coverage")
         expect(currentTreemapCall?.compareFiles.length).toBeGreaterThan(0)
         expect(currentTreemapCall?.temporalCouplings.length).toBeGreaterThan(0)
+        const currentTreemapFile = currentTreemapCall?.files.at(0) as
+            | {
+                readonly bugIntroductions?: Readonly<Record<string, number>>
+            }
+            | undefined
+        expect(currentTreemapFile?.bugIntroductions?.["30d"]).toBeGreaterThan(0)
 
         const current3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(current3DCall).not.toBeUndefined()
