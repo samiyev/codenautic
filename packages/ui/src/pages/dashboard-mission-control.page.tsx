@@ -2,6 +2,7 @@ import { type ReactElement, Suspense, lazy, useMemo, useState } from "react"
 
 import { Card, CardBody, CardHeader, Alert } from "@/components/ui"
 import { ActivationChecklist } from "@/components/onboarding/activation-checklist"
+import { DataFreshnessPanel, type IProvenanceContext } from "@/components/infrastructure/data-freshness-panel"
 import {
     DashboardDateRangeFilter,
     type TDashboardDateRange,
@@ -337,6 +338,9 @@ export function DashboardMissionControlPage(): ReactElement {
     const [orgScope, setOrgScope] = useState<TOrgScope>("all-orgs")
     const [repositoryScope, setRepositoryScope] = useState<TRepositoryScope>("all-repos")
     const [teamScope, setTeamScope] = useState<TTeamScope>("all-teams")
+    const [lastUpdatedAt, setLastUpdatedAt] = useState<string>("2026-03-04T10:35:00Z")
+    const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
+    const [freshnessActionMessage, setFreshnessActionMessage] = useState<string>("")
 
     const metrics = useMemo(
         (): ReadonlyArray<IMetricGridMetric> => getDashboardMetrics(range),
@@ -351,6 +355,33 @@ export function DashboardMissionControlPage(): ReactElement {
     const timelinePayload = useMemo((): ReadonlyArray<IWorkQueuePayload["timeline"][number]> => {
         return getTimelinePayload(dashboardPayload)
     }, [dashboardPayload])
+    const provenance = useMemo(
+        (): IProvenanceContext => ({
+            branch: "main",
+            commit: "19fca3c",
+            dataWindow: `mission-control:${range}`,
+            diagnosticsHref: "/settings-jobs",
+            hasFailures: opsBanner.isDegraded,
+            isPartial: range === "90d",
+            jobId: `job-ccr-2026-03-04-${range}`,
+            repository: "platform-team/control-plane",
+            source: "review-worker pipeline",
+        }),
+        [opsBanner.isDegraded, range],
+    )
+
+    const handleRefresh = (): void => {
+        setIsRefreshing(true)
+        setLastUpdatedAt(new Date().toISOString())
+        setFreshnessActionMessage("Dashboard refresh requested.")
+        setTimeout((): void => {
+            setIsRefreshing(false)
+        }, 450)
+    }
+
+    const handleRescan = (): void => {
+        setFreshnessActionMessage("Rescan job was queued from mission control.")
+    }
 
     return (
         <section className="space-y-4">
@@ -424,6 +455,21 @@ export function DashboardMissionControlPage(): ReactElement {
                         Provider health degraded in this window. Check settings and review queue for
                         mitigation.
                     </p>
+                </Alert>
+            ) : null}
+
+            <DataFreshnessPanel
+                isRefreshing={isRefreshing}
+                lastUpdatedAt={lastUpdatedAt}
+                provenance={provenance}
+                staleThresholdMinutes={45}
+                title="Dashboard data freshness"
+                onRefresh={handleRefresh}
+                onRescan={handleRescan}
+            />
+            {freshnessActionMessage.length > 0 ? (
+                <Alert color="primary" title="Freshness action" variant="flat">
+                    {freshnessActionMessage}
                 </Alert>
             ) : null}
 

@@ -1,8 +1,9 @@
 import { type ReactElement, useMemo, useState } from "react"
 
+import { DataFreshnessPanel, type IProvenanceContext } from "@/components/infrastructure/data-freshness-panel"
 import { DashboardDateRangeFilter, type TDashboardDateRange } from "@/components/dashboard/dashboard-date-range-filter"
 import { type IMetricGridMetric, MetricsGrid } from "@/components/dashboard/metrics-grid"
-import { Card, CardBody, CardHeader, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs } from "@/components/ui"
+import { Alert, Card, CardBody, CardHeader, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs } from "@/components/ui"
 
 type TUsageTab = "by-ccr" | "by-developer" | "by-model"
 type TModelName = "claude-3-7-sonnet" | "gpt-4.1-mini" | "gpt-4o-mini" | "mistral-small-latest"
@@ -246,6 +247,19 @@ function buildKpiMetrics(
     ]
 }
 
+function getDataWindowLabel(range: TDashboardDateRange): string {
+    if (range === "1d") {
+        return "Last 24 hours"
+    }
+    if (range === "30d") {
+        return "Last 30 days"
+    }
+    if (range === "90d") {
+        return "Last 90 days"
+    }
+    return "Last 7 days"
+}
+
 function UsageTable(props: {
     readonly title: string
     readonly rows: ReadonlyArray<IAggregatedUsageRow>
@@ -291,6 +305,9 @@ function UsageTable(props: {
 export function SettingsTokenUsagePage(): ReactElement {
     const [range, setRange] = useState<TDashboardDateRange>("7d")
     const [selectedTab, setSelectedTab] = useState<TUsageTab>("by-model")
+    const [lastUpdatedAt, setLastUpdatedAt] = useState<string>("2026-03-04T10:25:00Z")
+    const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
+    const [freshnessActionMessage, setFreshnessActionMessage] = useState<string>("")
 
     const scaledRecords = useMemo(
         (): ReadonlyArray<ITokenUsageRecord> => toScaledUsageRecords(BASE_USAGE_RECORDS, range),
@@ -315,6 +332,33 @@ export function SettingsTokenUsagePage(): ReactElement {
         (): ReadonlyArray<IMetricGridMetric> => buildKpiMetrics(scaledRecords),
         [scaledRecords],
     )
+    const provenance = useMemo(
+        (): IProvenanceContext => ({
+            branch: "main",
+            commit: "7ed8c4a",
+            dataWindow: `token-usage-range:${range}`,
+            diagnosticsHref: "/settings-jobs",
+            hasFailures: false,
+            isPartial: range === "90d",
+            jobId: `usage-agg-2026-03-04-${range}`,
+            repository: "platform-team/usage-analytics",
+            source: "analytics-worker aggregates",
+        }),
+        [range],
+    )
+
+    const handleRefresh = (): void => {
+        setIsRefreshing(true)
+        setLastUpdatedAt(new Date().toISOString())
+        setFreshnessActionMessage("Token usage refresh requested.")
+        setTimeout((): void => {
+            setIsRefreshing(false)
+        }, 450)
+    }
+
+    const handleRescan = (): void => {
+        setFreshnessActionMessage("Token usage rescan queued from settings.")
+    }
 
     return (
         <section className="space-y-4">
@@ -333,6 +377,24 @@ export function SettingsTokenUsagePage(): ReactElement {
                     }}
                 />
             </div>
+
+            <DataFreshnessPanel
+                isRefreshing={isRefreshing}
+                lastUpdatedAt={lastUpdatedAt}
+                provenance={{
+                    ...provenance,
+                    dataWindow: `${provenance.dataWindow} (${getDataWindowLabel(range)})`,
+                }}
+                staleThresholdMinutes={30}
+                title="Usage freshness"
+                onRefresh={handleRefresh}
+                onRescan={handleRescan}
+            />
+            {freshnessActionMessage.length > 0 ? (
+                <Alert color="primary" title="Freshness action" variant="flat">
+                    {freshnessActionMessage}
+                </Alert>
+            ) : null}
 
             <MetricsGrid metrics={metrics} />
 
