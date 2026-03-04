@@ -1,6 +1,12 @@
-import { type ReactElement, type ReactNode, useEffect, useState } from "react"
+import { type ReactElement, type ReactNode, useEffect, useMemo, useState } from "react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
 import { readUiRoleFromStorage, writeUiRoleToStorage, type TUiRole } from "@/lib/permissions/ui-policy"
+import {
+    getBreadcrumbs,
+    isRouteAccessible,
+    searchAccessibleRoutes,
+    type TTenantId,
+} from "@/lib/navigation/route-guard-map"
 
 import { Header } from "./header"
 import type { IHeaderOrganizationOption } from "./header"
@@ -39,7 +45,7 @@ const ORGANIZATION_OPTIONS: ReadonlyArray<IHeaderOrganizationOption> = [
     },
 ]
 
-const DEFAULT_ORGANIZATION_ID = ORGANIZATION_OPTIONS[0].id
+const DEFAULT_ORGANIZATION_ID = ORGANIZATION_OPTIONS[0].id as TTenantId
 
 const ROLE_OPTIONS: ReadonlyArray<IHeaderRoleOption> = [
     {
@@ -59,52 +65,6 @@ const ROLE_OPTIONS: ReadonlyArray<IHeaderRoleOption> = [
         label: "Admin",
     },
 ]
-
-const TENANT_ALLOWED_ROUTES: Readonly<Record<string, ReadonlyArray<string>>> = {
-    "frontend-team": [
-        "/",
-        "/dashboard",
-        "/reviews",
-        "/settings",
-        "/settings-appearance",
-        "/settings-code-review",
-        "/settings-notifications",
-        "/settings-rules-library",
-    ],
-    "platform-team": [
-        "/",
-        "/dashboard",
-        "/reviews",
-        "/settings",
-        "/settings-audit-logs",
-        "/settings-byok",
-        "/settings-organization",
-        "/settings-sso",
-        "/settings-team",
-    ],
-    "runtime-team": [
-        "/",
-        "/dashboard",
-        "/reviews",
-        "/settings",
-        "/settings-git-providers",
-        "/settings-integrations",
-        "/settings-llm-providers",
-        "/settings-token-usage",
-        "/settings-webhooks",
-    ],
-}
-
-function canTenantAccessPath(tenantId: string, pathname: string): boolean {
-    const allowedRoutes = TENANT_ALLOWED_ROUTES[tenantId]
-    if (allowedRoutes === undefined) {
-        return false
-    }
-
-    return allowedRoutes.some((allowedRoute): boolean => {
-        return pathname === allowedRoute || pathname.startsWith(`${allowedRoute}/`)
-    })
-}
 
 function clearTenantScopedStorage(previousTenantId: string, nextTenantId: string): void {
     if (typeof window === "undefined") {
@@ -139,12 +99,29 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
     const [activeOrganizationId, setActiveOrganizationId] =
-        useState<string>(DEFAULT_ORGANIZATION_ID)
+        useState<TTenantId>(DEFAULT_ORGANIZATION_ID)
     const [activeRoleId, setActiveRoleId] = useState<TUiRole>(() => {
         return readUiRoleFromStorage()
     })
     const navigate = useNavigate()
     const location = useLocation()
+    const routeGuardContext = useMemo(
+        () => ({
+            isAuthenticated: true,
+            role: activeRoleId,
+            tenantId: activeOrganizationId,
+        }),
+        [activeOrganizationId, activeRoleId],
+    )
+    const breadcrumbs = useMemo((): ReadonlyArray<string> => {
+        return getBreadcrumbs(location.pathname)
+    }, [location.pathname])
+    const searchableRoutes = useMemo(() => {
+        return searchAccessibleRoutes("", routeGuardContext).map((route) => ({
+            label: route.label,
+            path: route.path,
+        }))
+    }, [routeGuardContext])
 
     const handleSignOut = (): void => {
         if (props.onSignOut === undefined) {
@@ -155,6 +132,14 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
     }
 
     const handleOrganizationChange = (organizationId: string): void => {
+        if (
+            organizationId !== "platform-team"
+            && organizationId !== "frontend-team"
+            && organizationId !== "runtime-team"
+        ) {
+            return
+        }
+
         if (organizationId === activeOrganizationId) {
             return
         }
@@ -188,30 +173,39 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
     }
 
     useEffect((): void => {
-        if (canTenantAccessPath(activeOrganizationId, location.pathname)) {
+        if (isRouteAccessible(location.pathname, routeGuardContext)) {
             return
         }
 
         void navigate({
             to: "/settings",
         })
-    }, [activeOrganizationId, location.pathname, navigate])
+    }, [location.pathname, navigate, routeGuardContext])
+
+    const handleSearchRouteNavigate = (to: string): void => {
+        void navigate({
+            to,
+        })
+    }
 
     return (
         <div className="relative min-h-screen bg-[var(--background)] text-[var(--foreground)]">
             <Header
                 activeOrganizationId={activeOrganizationId}
                 activeRoleId={activeRoleId}
+                breadcrumbs={breadcrumbs}
                 onMobileMenuOpen={(): void => {
                     setIsMobileSidebarOpen(true)
                 }}
                 onOrganizationChange={handleOrganizationChange}
                 onRoleChange={handleRoleChange}
+                onSearchRouteNavigate={handleSearchRouteNavigate}
                 userEmail={props.userEmail}
                 userName={props.userName}
                 onSignOut={handleSignOut}
                 organizations={ORGANIZATION_OPTIONS}
                 roleOptions={ROLE_OPTIONS}
+                searchRoutes={searchableRoutes}
                 title={props.title}
             />
             <MobileSidebar

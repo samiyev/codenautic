@@ -1,4 +1,4 @@
-import type { ReactElement } from "react"
+import { type ReactElement, useEffect, useMemo, useRef, useState } from "react"
 import { Bell, Menu } from "lucide-react"
 
 import { Button } from "@/components/ui"
@@ -24,6 +24,13 @@ export interface IHeaderRoleOption {
     readonly id: string
     /** Человекочитаемая подпись роли. */
     readonly label: string
+}
+
+export interface IHeaderSearchRouteOption {
+    /** Подпись маршрута. */
+    readonly label: string
+    /** Путь маршрута. */
+    readonly path: string
 }
 
 /**
@@ -54,6 +61,12 @@ export interface IHeaderProps {
     readonly activeRoleId?: string
     /** Смена роли в UI policy preview. */
     readonly onRoleChange?: (roleId: string) => void
+    /** Breadcrumb trail активного экрана. */
+    readonly breadcrumbs?: ReadonlyArray<string>
+    /** Доступные маршруты для global search shortcut. */
+    readonly searchRoutes?: ReadonlyArray<IHeaderSearchRouteOption>
+    /** Навигация по выбранному маршруту из global search. */
+    readonly onSearchRouteNavigate?: (path: string) => void
 }
 
 /**
@@ -63,6 +76,8 @@ export interface IHeaderProps {
  * @returns Navbar c переключателем темы и блоком пользователя.
  */
 export function Header(props: IHeaderProps): ReactElement {
+    const [searchQuery, setSearchQuery] = useState("")
+    const searchInputRef = useRef<HTMLInputElement | null>(null)
     const hasNotifications = props.notificationCount !== undefined && props.notificationCount > 0
     const activeOrganization = props.organizations?.find((organization): boolean => {
         return organization.id === props.activeOrganizationId
@@ -70,6 +85,42 @@ export function Header(props: IHeaderProps): ReactElement {
     const activeRole = props.roleOptions?.find((role): boolean => {
         return role.id === props.activeRoleId
     })
+    const filteredSearchRoutes = useMemo((): ReadonlyArray<IHeaderSearchRouteOption> => {
+        if (props.searchRoutes === undefined) {
+            return []
+        }
+
+        const normalizedQuery = searchQuery.trim().toLowerCase()
+        if (normalizedQuery.length === 0) {
+            return props.searchRoutes
+        }
+
+        return props.searchRoutes.filter((route): boolean => {
+            return `${route.label} ${route.path}`.toLowerCase().includes(normalizedQuery)
+        })
+    }, [props.searchRoutes, searchQuery])
+
+    useEffect((): (() => void) | void => {
+        if (typeof window === "undefined") {
+            return
+        }
+
+        const handleKeyboardShortcut = (event: KeyboardEvent): void => {
+            if ((event.ctrlKey !== true && event.metaKey !== true) || event.key.toLowerCase() !== "k") {
+                return
+            }
+
+            event.preventDefault()
+            searchInputRef.current?.focus()
+            searchInputRef.current?.select()
+        }
+
+        window.addEventListener("keydown", handleKeyboardShortcut)
+
+        return (): void => {
+            window.removeEventListener("keydown", handleKeyboardShortcut)
+        }
+    }, [])
 
     return (
         <div className="border-b border-[var(--border)] bg-[color:color-mix(in_oklab,var(--surface)_88%,transparent)] backdrop-blur">
@@ -88,9 +139,50 @@ export function Header(props: IHeaderProps): ReactElement {
                 <p className="text-sm font-semibold tracking-wide text-[var(--foreground)]">CodeNautic</p>
                 <div className="mx-auto hidden md:block">
                     {props.title !== undefined ? (
-                        <p className="text-sm font-medium text-[var(--foreground)]/80">{props.title}</p>
+                        <div className="space-y-0.5">
+                            <p className="text-sm font-medium text-[var(--foreground)]/80">{props.title}</p>
+                            {props.breadcrumbs === undefined ? null : (
+                                <p className="text-[11px] text-[var(--foreground)]/60">
+                                    {props.breadcrumbs.join(" / ")}
+                                </p>
+                            )}
+                        </div>
                     ) : null}
                 </div>
+                {props.searchRoutes === undefined ? null : (
+                    <div className="hidden min-w-[230px] md:block">
+                        <input
+                            aria-label="Global route search"
+                            className="w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs text-[var(--foreground)]"
+                            list="header-global-route-search"
+                            placeholder="Global search (Ctrl+K)"
+                            ref={searchInputRef}
+                            type="text"
+                            value={searchQuery}
+                            onChange={(event): void => {
+                                setSearchQuery(event.currentTarget.value)
+                            }}
+                            onKeyDown={(event): void => {
+                                if (event.key !== "Enter") {
+                                    return
+                                }
+
+                                const targetRoute = filteredSearchRoutes[0]
+                                if (targetRoute === undefined) {
+                                    return
+                                }
+
+                                props.onSearchRouteNavigate?.(targetRoute.path)
+                                setSearchQuery("")
+                            }}
+                        />
+                        <datalist id="header-global-route-search">
+                            {filteredSearchRoutes.map((route): ReactElement => (
+                                <option key={route.path} value={`${route.label} (${route.path})`} />
+                            ))}
+                        </datalist>
+                    </div>
+                )}
                 {props.organizations === undefined && props.roleOptions === undefined ? null : (
                     <div className="hidden items-start gap-2 md:flex">
                         {props.organizations === undefined ? null : (

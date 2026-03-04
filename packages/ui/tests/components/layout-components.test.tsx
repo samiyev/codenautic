@@ -45,6 +45,7 @@ describe("layout components", (): void => {
     it("рендерит Header с брендом и темным режимом переключателя", (): void => {
         const onOrganizationChange = vi.fn()
         const onRoleChange = vi.fn()
+        const onSearchRouteNavigate = vi.fn()
         renderWithProviders(
             <Header
                 activeOrganizationId="platform-team"
@@ -55,6 +56,7 @@ describe("layout components", (): void => {
                 }}
                 onOrganizationChange={onOrganizationChange}
                 onRoleChange={onRoleChange}
+                onSearchRouteNavigate={onSearchRouteNavigate}
                 organizations={[
                     {
                         id: "platform-team",
@@ -73,6 +75,16 @@ describe("layout components", (): void => {
                     {
                         id: "admin",
                         label: "Admin",
+                    },
+                ]}
+                searchRoutes={[
+                    {
+                        label: "Dashboard",
+                        path: "/",
+                    },
+                    {
+                        label: "Settings home",
+                        path: "/settings",
                     },
                 ]}
                 title="Reviews"
@@ -96,8 +108,36 @@ describe("layout components", (): void => {
         expect(screen.getByText("Current: Platform Team")).not.toBeNull()
         expect(screen.getByRole("combobox", { name: "RBAC role switcher" })).not.toBeNull()
         expect(screen.getByText("Active: Admin")).not.toBeNull()
+        expect(screen.getByRole("textbox", { name: "Global route search" })).not.toBeNull()
         expect(onOrganizationChange).not.toHaveBeenCalled()
         expect(onRoleChange).not.toHaveBeenCalled()
+        expect(onSearchRouteNavigate).not.toHaveBeenCalled()
+    })
+
+    it("выполняет global search submit и вызывает route navigate callback", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const onSearchRouteNavigate = vi.fn()
+
+        renderWithProviders(
+            <Header
+                onSearchRouteNavigate={onSearchRouteNavigate}
+                searchRoutes={[
+                    {
+                        label: "Dashboard",
+                        path: "/",
+                    },
+                    {
+                        label: "Settings home",
+                        path: "/settings",
+                    },
+                ]}
+            />,
+        )
+
+        const searchInput = screen.getByRole("textbox", { name: "Global route search" })
+        await user.type(searchInput, "settings{enter}")
+
+        expect(onSearchRouteNavigate).toHaveBeenCalledWith("/settings")
     })
 
     it("обрабатывает callback для collapse sidebar", async (): Promise<void> => {
@@ -232,7 +272,7 @@ describe("layout components", (): void => {
         const user = userEvent.setup()
         const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true)
         mockNavigate.mockClear()
-        currentRoute = "/settings-byok"
+        currentRoute = "/settings-team"
 
         renderWithProviders(
             <DashboardLayoutHarness>
