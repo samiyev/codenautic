@@ -19,7 +19,16 @@ describe("ConfigurationMergerUseCase", () => {
                 },
                 ignorePaths: ["dist/**"],
                 promptOverrides: {
-                    systemPrompt: "default",
+                    categories: {
+                        descriptions: {
+                            bug: "default",
+                        },
+                    },
+                    severity: {
+                        flags: {
+                            low: "default-low",
+                        },
+                    },
                     runtime: {
                         mode: "default",
                     },
@@ -35,7 +44,11 @@ describe("ConfigurationMergerUseCase", () => {
                 },
                 ignorePaths: ["vendor/**"],
                 promptOverrides: {
-                    reviewerPrompt: "org",
+                    categories: {
+                        descriptions: {
+                            performance: "org-performance",
+                        },
+                    },
                     runtime: {
                         mode: "org",
                     },
@@ -49,8 +62,14 @@ describe("ConfigurationMergerUseCase", () => {
                 },
                 ignorePaths: ["src/**"],
                 promptOverrides: {
-                    reviewerPrompt: "repo",
-                    summaryPrompt: "repo-summary",
+                    severity: {
+                        flags: {
+                            high: "repo-high",
+                        },
+                    },
+                    generation: {
+                        main: "repo-generation",
+                    },
                     runtime: {
                         max: 3,
                     },
@@ -73,9 +92,21 @@ describe("ConfigurationMergerUseCase", () => {
         })
         expect(result.value.ignorePaths).toEqual(["src/**"])
         expect(result.value.promptOverrides).toEqual({
-            systemPrompt: "default",
-            reviewerPrompt: "repo",
-            summaryPrompt: "repo-summary",
+            categories: {
+                descriptions: {
+                    bug: "default",
+                    performance: "org-performance",
+                },
+            },
+            severity: {
+                flags: {
+                    low: "default-low",
+                    high: "repo-high",
+                },
+            },
+            generation: {
+                main: "repo-generation",
+            },
             runtime: {
                 mode: "org",
                 max: 3,

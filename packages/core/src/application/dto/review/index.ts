@@ -8,7 +8,6 @@ export {
     type IReviewPromptOverrideGenerationDTO,
     type IReviewPromptOverrideSeverityDTO,
     type IReviewPromptOverrideSeverityFlagsDTO,
-    type IReviewPromptOverridesV2DTO,
     type ReviewDepthStrategy,
     type ValidatedConfig,
 } from "./review-config.dto"

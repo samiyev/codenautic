@@ -76,14 +76,23 @@ describe("ResolveConfigStageUseCase", () => {
             maxSuggestionsPerCCR: 40,
             customRuleIds: ["org-rule"],
             promptOverrides: {
-                systemPrompt: "org-system",
+                categories: {
+                    descriptions: {
+                        bug: "org-bug",
+                        performance: "org-performance",
+                    },
+                },
             },
         }
         loader.repositoryLayer = {
             severityThreshold: "HIGH",
             cadence: "strict",
             promptOverrides: {
-                reviewerPrompt: "repo-reviewer",
+                severity: {
+                    flags: {
+                        high: "repo-high",
+                    },
+                },
             },
         }
 
@@ -107,8 +116,17 @@ describe("ResolveConfigStageUseCase", () => {
         expect(config["cadence"]).toBe("strict")
         expect(config["customRuleIds"]).toEqual(["org-rule"])
         expect(config["promptOverrides"]).toEqual({
-            systemPrompt: "org-system",
-            reviewerPrompt: "repo-reviewer",
+            categories: {
+                descriptions: {
+                    bug: "org-bug",
+                    performance: "org-performance",
+                },
+            },
+            severity: {
+                flags: {
+                    high: "repo-high",
+                },
+            },
         })
     })
 

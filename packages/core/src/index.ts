@@ -260,7 +260,6 @@ export {
     type IReviewPromptOverrideGenerationDTO,
     type IReviewPromptOverrideSeverityDTO,
     type IReviewPromptOverrideSeverityFlagsDTO,
-    type IReviewPromptOverridesV2DTO,
     type ValidatedConfig,
     type ExternalContextSource,
     type IExternalContext,

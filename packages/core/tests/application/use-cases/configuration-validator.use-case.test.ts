@@ -13,9 +13,6 @@ describe("ConfigurationValidatorUseCase", () => {
             cadence: " standard ",
             customRuleIds: [" rule-1 ", "rule-2 "],
             promptOverrides: {
-                systemPrompt: " system prompt ",
-            },
-            v2PromptOverrides: {
                 categories: {
                     descriptions: {
                         bug: " bug guidance ",
@@ -37,9 +34,6 @@ describe("ConfigurationValidatorUseCase", () => {
         expect(result.value.severityThreshold).toBe("HIGH")
         expect(result.value.ignorePaths).toEqual(["src/**", "dist/**"])
         expect(result.value.promptOverrides).toEqual({
-            systemPrompt: "system prompt",
-        })
-        expect(result.value.v2PromptOverrides).toEqual({
             categories: {
                 descriptions: {
                     bug: "bug guidance",
@@ -100,9 +94,6 @@ describe("ConfigurationValidatorUseCase", () => {
             cadence: " ",
             customRuleIds: [""],
             promptOverrides: {
-                systemPrompt: "",
-            },
-            v2PromptOverrides: {
                 categories: {
                     descriptions: {
                         bug: "",
@@ -131,19 +122,15 @@ describe("ConfigurationValidatorUseCase", () => {
             message: "must be an integer greater than or equal to 1",
         })
         expect(result.error.fields).toContainEqual({
-            field: "promptOverrides.systemPrompt",
+            field: "promptOverrides.categories.descriptions.bug",
             message: "must be a non-empty string when provided",
         })
         expect(result.error.fields).toContainEqual({
-            field: "v2PromptOverrides.categories.descriptions.bug",
+            field: "promptOverrides.severity.flags.critical",
             message: "must be a non-empty string when provided",
         })
         expect(result.error.fields).toContainEqual({
-            field: "v2PromptOverrides.severity.flags.critical",
-            message: "must be a non-empty string when provided",
-        })
-        expect(result.error.fields).toContainEqual({
-            field: "v2PromptOverrides.generation",
+            field: "promptOverrides.generation",
             message: "must be an object with optional main field",
         })
     })

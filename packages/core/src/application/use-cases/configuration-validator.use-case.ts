@@ -9,7 +9,6 @@ import {
     type IReviewPromptOverrideGenerationDTO,
     type IReviewPromptOverrideSeverityDTO,
     type IReviewPromptOverrideSeverityFlagsDTO,
-    type IReviewPromptOverridesV2DTO,
     type ValidatedConfig,
 } from "../dto/review/review-config.dto"
 import type {IDirectoryConfig} from "../dto/config/directory-config.dto"
@@ -38,7 +37,6 @@ const REVIEW_CONFIG_KEYS = [
     "reviewDepthStrategy",
     "directories",
     "promptOverrides",
-    "v2PromptOverrides",
 ] as const
 
 /**
@@ -78,9 +76,6 @@ export class ConfigurationValidatorUseCase
             ...this.pickUnknownFields(payload),
             ...normalizedConfig,
             ...(normalizedConfig.promptOverrides === undefined ? {} : {promptOverrides: normalizedConfig.promptOverrides}),
-            ...(normalizedConfig.v2PromptOverrides === undefined ? {} : {
-                v2PromptOverrides: normalizedConfig.v2PromptOverrides,
-            }),
         }
 
         return Promise.resolve(Result.ok<ValidatedConfig, ValidationError>(validatedConfig))
@@ -136,7 +131,6 @@ export class ConfigurationValidatorUseCase
         const reviewDepthStrategy = this.validateReviewDepthStrategy(payload["reviewDepthStrategy"], fields)
         const directories = this.validateDirectories(payload["directories"], fields)
         const promptOverrides = this.validatePromptOverrides(payload["promptOverrides"], fields)
-        const v2PromptOverrides = this.validatePromptOverridesV2(payload["v2PromptOverrides"], fields)
 
         const requiredValues = [
             severityThreshold,
@@ -163,7 +157,6 @@ export class ConfigurationValidatorUseCase
             reviewDepthStrategy: reviewDepthStrategy as ReviewDepthStrategy,
             directories: directories as readonly IDirectoryConfig[],
             ...(promptOverrides === undefined ? {} : {promptOverrides}),
-            ...(v2PromptOverrides === undefined ? {} : {v2PromptOverrides}),
         }
 
         return normalizedConfig
@@ -430,7 +423,6 @@ export class ConfigurationValidatorUseCase
             customRuleIds?: readonly string[]
             reviewDepthStrategy?: ReviewDepthStrategy
             promptOverrides?: IReviewPromptOverridesDTO
-            v2PromptOverrides?: IReviewPromptOverridesV2DTO
         } = {}
 
         this.setOptionalNormalizedValue(
@@ -476,11 +468,6 @@ export class ConfigurationValidatorUseCase
         const promptOverrides = this.validatePromptOverrides(record["promptOverrides"], fields)
         if (promptOverrides !== undefined) {
             result.promptOverrides = promptOverrides
-        }
-
-        const v2PromptOverrides = this.validatePromptOverridesV2(record["v2PromptOverrides"], fields)
-        if (v2PromptOverrides !== undefined) {
-            result.v2PromptOverrides = v2PromptOverrides
         }
 
         return result
@@ -532,49 +519,6 @@ export class ConfigurationValidatorUseCase
         if (value === null || typeof value !== "object" || Array.isArray(value)) {
             fields.push({
                 field: "promptOverrides",
-                message: "must be an object with optional string fields",
-            })
-            return undefined
-        }
-
-        const record = value as Readonly<Record<string, unknown>>
-        const systemPrompt = this.validateOptionalString(record["systemPrompt"], "promptOverrides.systemPrompt", fields)
-        const reviewerPrompt = this.validateOptionalString(
-            record["reviewerPrompt"],
-            "promptOverrides.reviewerPrompt",
-            fields,
-        )
-        const summaryPrompt = this.validateOptionalString(
-            record["summaryPrompt"],
-            "promptOverrides.summaryPrompt",
-            fields,
-        )
-
-        return {
-            ...(systemPrompt === undefined ? {} : {systemPrompt}),
-            ...(reviewerPrompt === undefined ? {} : {reviewerPrompt}),
-            ...(summaryPrompt === undefined ? {} : {summaryPrompt}),
-        }
-    }
-
-    /**
-     * Validates optional v2 prompt overrides shape.
-     *
-     * @param value Raw prompt overrides value.
-     * @param fields Error accumulator.
-     * @returns Normalized prompt overrides or undefined.
-     */
-    private validatePromptOverridesV2(
-        value: unknown,
-        fields: IValidationErrorField[],
-    ): IReviewPromptOverridesV2DTO | undefined {
-        if (value === undefined) {
-            return undefined
-        }
-
-        if (value === null || typeof value !== "object" || Array.isArray(value)) {
-            fields.push({
-                field: "v2PromptOverrides",
                 message: "must be an object with optional nested sections",
             })
             return undefined
@@ -609,7 +553,7 @@ export class ConfigurationValidatorUseCase
 
         if (value === null || typeof value !== "object" || Array.isArray(value)) {
             fields.push({
-                field: "v2PromptOverrides.categories",
+                field: "promptOverrides.categories",
                 message: "must be an object with optional descriptions",
             })
             return undefined
@@ -645,7 +589,7 @@ export class ConfigurationValidatorUseCase
 
         if (value === null || typeof value !== "object" || Array.isArray(value)) {
             fields.push({
-                field: "v2PromptOverrides.categories.descriptions",
+                field: "promptOverrides.categories.descriptions",
                 message: "must be an object with optional string fields",
             })
             return undefined
@@ -654,17 +598,17 @@ export class ConfigurationValidatorUseCase
         const record = value as Readonly<Record<string, unknown>>
         const bug = this.validateOptionalString(
             record["bug"],
-            "v2PromptOverrides.categories.descriptions.bug",
+            "promptOverrides.categories.descriptions.bug",
             fields,
         )
         const performance = this.validateOptionalString(
             record["performance"],
-            "v2PromptOverrides.categories.descriptions.performance",
+            "promptOverrides.categories.descriptions.performance",
             fields,
         )
         const security = this.validateOptionalString(
             record["security"],
-            "v2PromptOverrides.categories.descriptions.security",
+            "promptOverrides.categories.descriptions.security",
             fields,
         )
 
@@ -692,7 +636,7 @@ export class ConfigurationValidatorUseCase
 
         if (value === null || typeof value !== "object" || Array.isArray(value)) {
             fields.push({
-                field: "v2PromptOverrides.severity",
+                field: "promptOverrides.severity",
                 message: "must be an object with optional flags",
             })
             return undefined
@@ -724,7 +668,7 @@ export class ConfigurationValidatorUseCase
 
         if (value === null || typeof value !== "object" || Array.isArray(value)) {
             fields.push({
-                field: "v2PromptOverrides.severity.flags",
+                field: "promptOverrides.severity.flags",
                 message: "must be an object with optional string fields",
             })
             return undefined
@@ -733,22 +677,22 @@ export class ConfigurationValidatorUseCase
         const record = value as Readonly<Record<string, unknown>>
         const critical = this.validateOptionalString(
             record["critical"],
-            "v2PromptOverrides.severity.flags.critical",
+            "promptOverrides.severity.flags.critical",
             fields,
         )
         const high = this.validateOptionalString(
             record["high"],
-            "v2PromptOverrides.severity.flags.high",
+            "promptOverrides.severity.flags.high",
             fields,
         )
         const medium = this.validateOptionalString(
             record["medium"],
-            "v2PromptOverrides.severity.flags.medium",
+            "promptOverrides.severity.flags.medium",
             fields,
         )
         const low = this.validateOptionalString(
             record["low"],
-            "v2PromptOverrides.severity.flags.low",
+            "promptOverrides.severity.flags.low",
             fields,
         )
 
@@ -777,7 +721,7 @@ export class ConfigurationValidatorUseCase
 
         if (value === null || typeof value !== "object" || Array.isArray(value)) {
             fields.push({
-                field: "v2PromptOverrides.generation",
+                field: "promptOverrides.generation",
                 message: "must be an object with optional main field",
             })
             return undefined
@@ -786,7 +730,7 @@ export class ConfigurationValidatorUseCase
         const record = value as Readonly<Record<string, unknown>>
         const main = this.validateOptionalString(
             record["main"],
-            "v2PromptOverrides.generation.main",
+            "promptOverrides.generation.main",
             fields,
         )
 

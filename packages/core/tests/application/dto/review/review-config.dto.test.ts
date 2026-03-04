@@ -8,9 +8,24 @@ import type {
 describe("IReviewConfigDTO", () => {
     test("supports full config payload with prompt overrides", () => {
         const promptOverrides: IReviewPromptOverridesDTO = {
-            systemPrompt: "system prompt",
-            reviewerPrompt: "reviewer prompt",
-            summaryPrompt: "summary prompt",
+            categories: {
+                descriptions: {
+                    bug: "bug description",
+                    performance: "performance description",
+                    security: "security description",
+                },
+            },
+            severity: {
+                flags: {
+                    critical: "critical guidance",
+                    high: "high guidance",
+                    medium: "medium guidance",
+                    low: "low guidance",
+                },
+            },
+            generation: {
+                main: "generation guidance",
+            },
         }
 
         const config: IReviewConfigDTO = {
@@ -26,7 +41,7 @@ describe("IReviewConfigDTO", () => {
         expect(config.severityThreshold).toBe("HIGH")
         expect(config.ignorePaths).toEqual(["dist/**", "vendor/**"])
         expect(config.customRuleIds).toEqual(["rule-1", "rule-2"])
-        expect(config.promptOverrides?.reviewerPrompt).toBe("reviewer prompt")
+        expect(config.promptOverrides?.severity?.flags?.high).toBe("high guidance")
     })
 
     test("supports config payload without prompt overrides", () => {

@@ -35,7 +35,11 @@ describe("ValidateConfigStageUseCase", () => {
             cadence: " balanced ",
             customRuleIds: [" rule-1 ", "rule-2"],
             promptOverrides: {
-                systemPrompt: " system ",
+                categories: {
+                    descriptions: {
+                        bug: " bug guidance ",
+                    },
+                },
             },
         })
 
@@ -55,7 +59,11 @@ describe("ValidateConfigStageUseCase", () => {
             reviewDepthStrategy: "auto",
             directories: [],
             promptOverrides: {
-                systemPrompt: "system",
+                categories: {
+                    descriptions: {
+                        bug: "bug guidance",
+                    },
+                },
             },
         })
     })
@@ -90,7 +98,11 @@ describe("ValidateConfigStageUseCase", () => {
             cadence: "standard",
             customRuleIds: [],
             promptOverrides: {
-                summaryPrompt: "",
+                categories: {
+                    descriptions: {
+                        bug: "",
+                    },
+                },
             },
         })
 

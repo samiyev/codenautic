@@ -10,16 +10,7 @@ export type ReviewDepthStrategy =
     (typeof REVIEW_DEPTH_STRATEGY)[keyof typeof REVIEW_DEPTH_STRATEGY]
 
 /**
- * Optional prompt overrides for review pipeline stages.
- */
-export interface IReviewPromptOverridesDTO {
-    readonly systemPrompt?: string
-    readonly reviewerPrompt?: string
-    readonly summaryPrompt?: string
-}
-
-/**
- * V2 category descriptions for review prompt overrides.
+ * Category descriptions for review prompt overrides.
  */
 export interface IReviewPromptOverrideCategoryDescriptionsDTO {
     readonly bug?: string
@@ -28,14 +19,14 @@ export interface IReviewPromptOverrideCategoryDescriptionsDTO {
 }
 
 /**
- * V2 categories section for review prompt overrides.
+ * Categories section for review prompt overrides.
  */
 export interface IReviewPromptOverrideCategoriesDTO {
     readonly descriptions?: IReviewPromptOverrideCategoryDescriptionsDTO
 }
 
 /**
- * V2 severity flags for review prompt overrides.
+ * Severity flags for review prompt overrides.
  */
 export interface IReviewPromptOverrideSeverityFlagsDTO {
     readonly critical?: string
@@ -45,23 +36,23 @@ export interface IReviewPromptOverrideSeverityFlagsDTO {
 }
 
 /**
- * V2 severity section for review prompt overrides.
+ * Severity section for review prompt overrides.
  */
 export interface IReviewPromptOverrideSeverityDTO {
     readonly flags?: IReviewPromptOverrideSeverityFlagsDTO
 }
 
 /**
- * V2 generation section for review prompt overrides.
+ * Generation section for review prompt overrides.
  */
 export interface IReviewPromptOverrideGenerationDTO {
     readonly main?: string
 }
 
 /**
- * V2 structured prompt overrides for review pipeline.
+ * Structured prompt overrides for review pipeline.
  */
-export interface IReviewPromptOverridesV2DTO {
+export interface IReviewPromptOverridesDTO {
     readonly categories?: IReviewPromptOverrideCategoriesDTO
     readonly severity?: IReviewPromptOverrideSeverityDTO
     readonly generation?: IReviewPromptOverrideGenerationDTO
@@ -92,5 +83,4 @@ export interface IReviewConfigDTO {
     readonly reviewDepthStrategy?: ReviewDepthStrategy
     readonly directories?: readonly IDirectoryConfig[]
     readonly promptOverrides?: IReviewPromptOverridesDTO
-    readonly v2PromptOverrides?: IReviewPromptOverridesV2DTO
 }
