@@ -1,6 +1,12 @@
 import { type ReactElement, type ReactNode, useEffect, useMemo, useState } from "react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
+import { useQueryClient } from "@tanstack/react-query"
 import { readUiRoleFromStorage, writeUiRoleToStorage, type TUiRole } from "@/lib/permissions/ui-policy"
+import {
+    POLICY_DRIFT_EVENT_NAME,
+    isPolicyDriftEventDetail,
+} from "@/lib/permissions/policy-drift"
+import { queryKeys } from "@/lib/query/query-keys"
 import {
     buildDraftFieldKey,
     clearSessionPendingIntent,
@@ -116,8 +122,10 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
     const [isSessionRecoveryOpen, setIsSessionRecoveryOpen] = useState(false)
     const [sessionFailureCode, setSessionFailureCode] = useState<401 | 419>(401)
     const [restoredDraftMessage, setRestoredDraftMessage] = useState<string | undefined>(undefined)
+    const [policyDriftNotice, setPolicyDriftNotice] = useState<string | undefined>(undefined)
     const navigate = useNavigate()
     const location = useLocation()
+    const queryClient = useQueryClient()
     const routeGuardContext = useMemo(
         () => ({
             isAuthenticated: true,
@@ -258,6 +266,33 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
         }
     }, [location.pathname])
 
+    useEffect((): (() => void) | void => {
+        if (typeof window === "undefined") {
+            return
+        }
+
+        const handlePolicyDrift = (event: Event): void => {
+            const customEvent = event as CustomEvent<unknown>
+            const detail = customEvent.detail
+            if (isPolicyDriftEventDetail(detail) !== true) {
+                return
+            }
+
+            setActiveRoleId(detail.nextRole)
+            writeUiRoleToStorage(detail.nextRole)
+            setPolicyDriftNotice(
+                `Policy changed to ${detail.nextRole}: ${detail.reason}. UI permissions were refreshed.`,
+            )
+            void queryClient.invalidateQueries({ queryKey: queryKeys.permissions.all() })
+        }
+
+        window.addEventListener(POLICY_DRIFT_EVENT_NAME, handlePolicyDrift as EventListener)
+
+        return (): void => {
+            window.removeEventListener(POLICY_DRIFT_EVENT_NAME, handlePolicyDrift as EventListener)
+        }
+    }, [queryClient])
+
     const handleSearchRouteNavigate = (to: string): void => {
         void navigate({
             to,
@@ -326,6 +361,11 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
                     />
                 </div>
                 <div className="min-h-0 flex-1 rounded-lg border border-[var(--border)] bg-[color:color-mix(in_oklab,var(--surface)_88%,transparent)] p-4 shadow-sm">
+                    {policyDriftNotice === undefined ? null : (
+                        <Alert color="warning" title="Runtime policy drift detected" variant="flat">
+                            {policyDriftNotice}
+                        </Alert>
+                    )}
                     {restoredDraftMessage === undefined ? null : (
                         <Alert color="success" title="Session recovered" variant="flat">
                             {restoredDraftMessage}

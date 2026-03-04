@@ -338,6 +338,37 @@ describe("layout components", (): void => {
         expect(screen.getByText(/Recovered draft from/)).not.toBeNull()
     })
 
+    it("реагирует на runtime policy drift и уводит на safe fallback route", async (): Promise<void> => {
+        mockNavigate.mockClear()
+        currentRoute = "/settings-organization"
+
+        renderWithProviders(
+            <DashboardLayoutHarness>
+                <p>Protected admin content</p>
+            </DashboardLayoutHarness>,
+            {
+                defaultThemeMode: "light" as ThemeMode,
+            },
+        )
+
+        window.dispatchEvent(
+            new CustomEvent("codenautic:policy-drift", {
+                detail: {
+                    nextRole: "viewer",
+                    reason: "Admin access revoked by security policy update.",
+                },
+            }),
+        )
+
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith({
+                to: "/settings",
+            })
+        })
+        expect(screen.getByText("Runtime policy drift detected")).not.toBeNull()
+        expect(screen.getByText(/Policy changed to viewer/)).not.toBeNull()
+    })
+
     it("рендерит секции настроек", (): void => {
         renderWithProviders(<SettingsNav />)
 
