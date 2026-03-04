@@ -4,6 +4,7 @@ import {
     Bot,
     Building2,
     Coins,
+    FileClock,
     GitBranch,
     GitPullRequest,
     LibraryBig,
@@ -61,6 +62,11 @@ const SETTINGS_NAV = [
         icon: <LibraryBig aria-hidden="true" size={16} />,
         label: "Rules Library",
         to: "/settings-rules-library",
+    },
+    {
+        icon: <FileClock aria-hidden="true" size={16} />,
+        label: "Audit Logs",
+        to: "/settings-audit-logs",
     },
     {
         icon: <Coins aria-hidden="true" size={16} />,
