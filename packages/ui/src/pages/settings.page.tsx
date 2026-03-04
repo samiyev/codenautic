@@ -98,6 +98,14 @@ export function SettingsPage(): ReactElement {
                         <li>
                             <Link
                                 className="underline underline-offset-4"
+                                to="/settings-concurrency"
+                            >
+                                Concurrent config resolver
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                className="underline underline-offset-4"
                                 to="/settings-jobs"
                             >
                                 Operations jobs monitor

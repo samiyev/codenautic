@@ -14,6 +14,7 @@ import {
     LibraryBig,
     Link2,
     Paintbrush,
+    RefreshCcw,
     Settings,
     ShieldCheck,
     Users,
@@ -83,6 +84,11 @@ const SETTINGS_NAV = [
         icon: <FileClock aria-hidden="true" size={16} />,
         label: "Audit Logs",
         to: "/settings-audit-logs",
+    },
+    {
+        icon: <RefreshCcw aria-hidden="true" size={16} />,
+        label: "Concurrency",
+        to: "/settings-concurrency",
     },
     {
         icon: <Activity aria-hidden="true" size={16} />,

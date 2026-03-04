@@ -13,6 +13,7 @@ import {
     LibraryBig,
     Link2,
     Paintbrush,
+    RefreshCcw,
     ShieldCheck,
     SlidersHorizontal,
     Users,
@@ -79,6 +80,11 @@ const DEFAULT_SETTINGS_NAV_ITEMS = [
         icon: <FileClock aria-hidden="true" size={16} />,
         label: "Audit Logs",
         to: "/settings-audit-logs",
+    },
+    {
+        icon: <RefreshCcw aria-hidden="true" size={16} />,
+        label: "Concurrency",
+        to: "/settings-concurrency",
     },
     {
         icon: <Activity aria-hidden="true" size={16} />,
