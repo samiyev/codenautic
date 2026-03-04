@@ -11,6 +11,7 @@ import {
     type ICodeCityTreemapFileDescriptor,
     type ICodeCityTreemapFileLinkResolver,
     type ICodeCityTreemapImpactedFileDescriptor,
+    type ICodeCityTreemapTemporalCouplingDescriptor,
 } from "@/components/graphs/codecity-treemap"
 import { CodeCity3DScene } from "@/components/graphs/codecity-3d-scene"
 import { Card, CardBody, CardHeader } from "@/components/ui"
@@ -37,6 +38,8 @@ interface ICodeCityDashboardRepositoryProfile {
     readonly impactedFiles: ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor>
     /** Базовый срез для temporal comparison. */
     readonly compareFiles: ReadonlyArray<ICodeCityTreemapFileDescriptor>
+    /** Temporal coupling связи между файлами treemap. */
+    readonly temporalCouplings: ReadonlyArray<ICodeCityTreemapTemporalCouplingDescriptor>
 }
 
 interface ICodeCityDashboardPageProps {
@@ -75,6 +78,18 @@ const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardReposito
             {
                 fileId: "src/services/metrics.ts",
                 impactType: "ripple",
+            },
+        ],
+        temporalCouplings: [
+            {
+                sourceFileId: "src/api/auth.ts",
+                targetFileId: "src/api/repository.ts",
+                strength: 0.82,
+            },
+            {
+                sourceFileId: "src/api/repository.ts",
+                targetFileId: "src/worker/index.ts",
+                strength: 0.56,
             },
         ],
         label: "platform-team/api-gateway",
@@ -149,6 +164,18 @@ const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardReposito
             {
                 fileId: "src/components/graphs/codecity-treemap.tsx",
                 impactType: "impacted",
+            },
+        ],
+        temporalCouplings: [
+            {
+                sourceFileId: "src/pages/ccr-management.page.tsx",
+                targetFileId: "src/components/graphs/codecity-treemap.tsx",
+                strength: 0.74,
+            },
+            {
+                sourceFileId: "src/components/layout/sidebar.tsx",
+                targetFileId: "src/pages/repositories-list.page.tsx",
+                strength: 0.48,
             },
         ],
         label: "frontend-team/ui-dashboard",
@@ -229,6 +256,18 @@ const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardReposito
             {
                 fileId: "src/services/retry.ts",
                 impactType: "impacted",
+            },
+        ],
+        temporalCouplings: [
+            {
+                sourceFileId: "src/adapters/queue.ts",
+                targetFileId: "src/services/retry.ts",
+                strength: 0.91,
+            },
+            {
+                sourceFileId: "src/services/retry.ts",
+                targetFileId: "src/worker/main.ts",
+                strength: 0.42,
             },
         ],
         label: "backend-core/payment-worker",
@@ -494,6 +533,7 @@ export function CodeCityDashboardPage(
                         fileLink={fileLink}
                         files={currentProfile.files}
                         impactedFiles={currentProfile.impactedFiles}
+                        temporalCouplings={currentProfile.temporalCouplings}
                         title={`${currentProfile.label} treemap`}
                     />
                 </CardBody>

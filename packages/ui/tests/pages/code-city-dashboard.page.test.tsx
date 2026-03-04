@@ -14,6 +14,7 @@ const { mockCodeCityTreemap } = vi.hoisted(() => ({
             readonly fileLink: (file: { readonly fileId: string; readonly path: string }) => string
             readonly files: ReadonlyArray<unknown>
             readonly impactedFiles: ReadonlyArray<unknown>
+            readonly temporalCouplings: ReadonlyArray<unknown>
             readonly title: string
             readonly key?: string
         }): React.JSX.Element => {
@@ -22,6 +23,7 @@ const { mockCodeCityTreemap } = vi.hoisted(() => ({
                     <p>{props.title}</p>
                     <p>{props.defaultMetric}</p>
                     <p>comparison-label:{props.comparisonLabel}</p>
+                    <p>temporal-couplings:{props.temporalCouplings.length}</p>
                 </div>
             )
         },
@@ -108,6 +110,7 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstTreemapCall).not.toBeUndefined()
         expect(firstTreemapCall?.defaultMetric).toBe("complexity")
         expect(firstTreemapCall?.title).toBe("platform-team/api-gateway treemap")
+        expect(firstTreemapCall?.temporalCouplings.length).toBeGreaterThan(0)
 
         const firstGraphCall = mockPackageDependencyGraph.mock.calls.at(0)?.[0]
         expect(firstGraphCall).not.toBeUndefined()
@@ -136,6 +139,7 @@ describe("CodeCityDashboardPage", (): void => {
         expect(currentTreemapCall?.title).toBe("frontend-team/ui-dashboard treemap")
         expect(currentTreemapCall?.defaultMetric).toBe("coverage")
         expect(currentTreemapCall?.compareFiles.length).toBeGreaterThan(0)
+        expect(currentTreemapCall?.temporalCouplings.length).toBeGreaterThan(0)
 
         const current3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(current3DCall).not.toBeUndefined()

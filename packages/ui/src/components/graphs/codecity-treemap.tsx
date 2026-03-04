@@ -14,6 +14,7 @@ const DEFAULT_METRIC: ICodeCityTreemapMetric = "complexity"
 const DEFAULT_EMPTY_LABEL = "No file data for CodeCity treemap yet."
 const DEFAULT_METRIC_SELECTOR_ID = "codecity-metric-selector"
 const DEFAULT_COMPARISON_LABEL = "previous snapshot"
+const DEFAULT_TEMPORAL_COUPLING_OVERLAY_ENABLED = true
 const CODE_CITY_COMPARISON_MARKER_HEIGHT = 4
 
 const CODE_CITY_METRICS = ["complexity", "coverage", "churn"] as const
@@ -53,6 +54,15 @@ export interface ICodeCityTreemapImpactedFileDescriptor {
     readonly fileId: string
     /** Степень влияния CCR на файл. */
     readonly impactType: ICodeCityTreemapImpactLevel
+}
+
+export interface ICodeCityTreemapTemporalCouplingDescriptor {
+    /** Источник temporal coupling связи. */
+    readonly sourceFileId: string
+    /** Целевой файл temporal coupling связи. */
+    readonly targetFileId: string
+    /** Сила связи (чем выше, тем толще линия). */
+    readonly strength: number
 }
 
 interface ICodeCityTreemapImpactSummary {
@@ -116,6 +126,11 @@ interface ICodeCityTreemapMetricRange {
     readonly max: number
 }
 
+interface ICodeCityTreemapOverlayPoint {
+    readonly x: number
+    readonly y: number
+}
+
 interface ICodeCityTreemapTreemapNodePayload {
     readonly children?: ReadonlyArray<unknown>
     readonly complexity?: number
@@ -147,6 +162,15 @@ interface ICodeCityTreemapTreemapContentProps {
     readonly y?: number
     readonly width?: number
     readonly height?: number
+}
+
+interface ICodeCityTreemapTemporalCouplingLine {
+    readonly id: string
+    readonly sourceFileId: string
+    readonly targetFileId: string
+    readonly sourcePoint: ICodeCityTreemapOverlayPoint
+    readonly targetPoint: ICodeCityTreemapOverlayPoint
+    readonly strength: number
 }
 
 function resolveIssueCount(value?: number): number {
@@ -234,6 +258,99 @@ function resolveNumberLabel(value: number | undefined): string {
     }
 
     return String(Math.round(value * 10) / 10)
+}
+
+function resolveTemporalCouplingStrength(value: number): number {
+    if (Number.isFinite(value) === false || value <= 0) {
+        return 0
+    }
+
+    return Math.max(0, value)
+}
+
+function buildFileOverlayPoints(
+    packages: ReadonlyArray<ICodeCityTreemapPackageNode>,
+): Map<string, ICodeCityTreemapOverlayPoint> {
+    const files = packages.flatMap(
+        (packageNode): ReadonlyArray<ICodeCityTreemapFileNode> => packageNode.children,
+    )
+    const pointByFileId = new Map<string, ICodeCityTreemapOverlayPoint>()
+    if (files.length === 0) {
+        return pointByFileId
+    }
+
+    const columns = Math.min(4, files.length)
+    const rows = Math.max(1, Math.ceil(files.length / columns))
+
+    for (const [index, file] of files.entries()) {
+        const column = index % columns
+        const row = Math.floor(index / columns)
+        const x = ((column + 0.5) / columns) * 100
+        const y = ((row + 0.5) / rows) * 100
+        pointByFileId.set(file.id, { x, y })
+    }
+
+    return pointByFileId
+}
+
+function buildTemporalCouplingLines(
+    couplings: ReadonlyArray<ICodeCityTreemapTemporalCouplingDescriptor>,
+    pointByFileId: Map<string, ICodeCityTreemapOverlayPoint>,
+): ReadonlyArray<ICodeCityTreemapTemporalCouplingLine> {
+    if (couplings.length === 0 || pointByFileId.size === 0) {
+        return []
+    }
+
+    const lines: ICodeCityTreemapTemporalCouplingLine[] = []
+    const processedEdges = new Set<string>()
+    let maxStrength = 0
+
+    for (const coupling of couplings) {
+        const sourceId = coupling.sourceFileId.trim()
+        const targetId = coupling.targetFileId.trim()
+        if (sourceId.length === 0 || targetId.length === 0 || sourceId === targetId) {
+            continue
+        }
+
+        const edgeKey = sourceId < targetId ? `${sourceId}::${targetId}` : `${targetId}::${sourceId}`
+        if (processedEdges.has(edgeKey) === true) {
+            continue
+        }
+
+        const sourcePoint = pointByFileId.get(sourceId)
+        const targetPoint = pointByFileId.get(targetId)
+        if (sourcePoint === undefined || targetPoint === undefined) {
+            continue
+        }
+
+        const strength = resolveTemporalCouplingStrength(coupling.strength)
+        if (strength <= 0) {
+            continue
+        }
+
+        if (strength > maxStrength) {
+            maxStrength = strength
+        }
+
+        processedEdges.add(edgeKey)
+        lines.push({
+            id: edgeKey,
+            sourceFileId: sourceId,
+            targetFileId: targetId,
+            sourcePoint,
+            targetPoint,
+            strength,
+        })
+    }
+
+    if (maxStrength <= 0) {
+        return []
+    }
+
+    return lines.map((line): ICodeCityTreemapTemporalCouplingLine => ({
+        ...line,
+        strength: line.strength / maxStrength,
+    }))
 }
 
 function buildImpactedFileIndex(
@@ -734,6 +851,8 @@ export interface ICodeCityTreemapProps {
     readonly compareFiles?: ReadonlyArray<ICodeCityTreemapFileDescriptor>
     /** Генератор quick link-URL к файлу по наведению. */
     readonly fileLink?: (file: ICodeCityTreemapFileLinkResolver) => string
+    /** Temporal coupling связи для отрисовки overlay-линий. */
+    readonly temporalCouplings?: ReadonlyArray<ICodeCityTreemapTemporalCouplingDescriptor>
 }
 
 function normalizePath(rawPath: string): string {
@@ -931,6 +1050,8 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     )
     const [selectedPackage, setSelectedPackage] = useState<string | undefined>()
     const [hoveredFile, setHoveredFile] = useState<ICodeCityTreemapFileTooltip | undefined>()
+    const [isTemporalCouplingOverlayEnabled, setTemporalCouplingOverlayEnabled] =
+        useState<boolean>(DEFAULT_TEMPORAL_COUPLING_OVERLAY_ENABLED)
     const treemapData = useMemo(
         () =>
             buildCodeCityTreemapData(
@@ -954,6 +1075,15 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         (): ICodeCityTreemapViewSummary => resolveViewSummary(visiblePackages),
         [visiblePackages],
     )
+    const fileOverlayPoints = useMemo(
+        (): Map<string, ICodeCityTreemapOverlayPoint> => buildFileOverlayPoints(visiblePackages),
+        [visiblePackages],
+    )
+    const temporalCouplingLines = useMemo(
+        (): ReadonlyArray<ICodeCityTreemapTemporalCouplingLine> =>
+            buildTemporalCouplingLines(props.temporalCouplings ?? [], fileOverlayPoints),
+        [fileOverlayPoints, props.temporalCouplings],
+    )
     const issueSummary = summary.issueSummary
     const issueSummaryText = `Issues: ${issueSummary.totalIssues} in ${issueSummary.filesWithIssues} files`
     const metricLabel = resolveMetricLabel(metric)
@@ -971,6 +1101,13 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     const breadcrumbText = selectedPackage === undefined
         ? "All packages"
         : `All packages / ${selectedPackage}`
+    const hasTemporalCouplings = temporalCouplingLines.length > 0
+    const temporalCouplingToggleLabel = isTemporalCouplingOverlayEnabled
+        ? "Hide temporal coupling overlay"
+        : "Show temporal coupling overlay"
+    const temporalCouplingSummaryText = hasTemporalCouplings
+        ? `Temporal couplings: ${temporalCouplingLines.length} links`
+        : "No temporal couplings for current package selection."
     const tooltipTitle = hoveredFile === undefined
         ? "Hover a file for quick metrics and quick link."
         : `File details for ${hoveredFile.fileName}`
@@ -995,6 +1132,11 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     }
     const handleFileHover = (payload?: ICodeCityTreemapFileTooltip): void => {
         setHoveredFile(payload)
+    }
+    const handleTemporalCouplingOverlayToggle = (): void => {
+        setTemporalCouplingOverlayEnabled((currentValue): boolean => {
+            return currentValue === false
+        })
     }
     const metricRangeText = `Min ${treemapData.metricRange.min} — Max ${treemapData.metricRange.max}`
 
@@ -1129,10 +1271,30 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                             <span>{impactSummaryText}</span>
                         </div>
                     ) : null}
+                    {(props.temporalCouplings?.length ?? 0) > 0 ? (
+                        <div
+                            aria-label="Temporal coupling controls"
+                            className="flex flex-wrap items-center gap-3 text-xs text-foreground-500"
+                        >
+                            <Button
+                                aria-pressed={isTemporalCouplingOverlayEnabled}
+                                onPress={handleTemporalCouplingOverlayToggle}
+                                size="sm"
+                                variant="flat"
+                            >
+                                {temporalCouplingToggleLabel}
+                            </Button>
+                            <span>{temporalCouplingSummaryText}</span>
+                        </div>
+                    ) : null}
                 </div>
             </CardHeader>
             <CardBody>
-                <div aria-label="Code city treemap" style={{ height, width: "100%" }}>
+                <div
+                    aria-label="Code city treemap"
+                    className="relative"
+                    style={{ height, width: "100%" }}
+                >
                     <ResponsiveContainer height="100%" width="100%">
                         <Treemap
                             data={visiblePackages as unknown as ReadonlyArray<Record<string, unknown>>}
@@ -1155,6 +1317,31 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                             }}
                         />
                     </ResponsiveContainer>
+                    {hasTemporalCouplings && isTemporalCouplingOverlayEnabled ? (
+                        <svg
+                            aria-label="Temporal coupling overlay lines"
+                            className="pointer-events-none absolute inset-0"
+                            preserveAspectRatio="none"
+                            viewBox="0 0 100 100"
+                        >
+                            {temporalCouplingLines.map(
+                                (line): ReactElement => (
+                                    <line
+                                        data-testid="temporal-coupling-line"
+                                        key={line.id}
+                                        stroke="hsl(12, 92%, 56%)"
+                                        strokeLinecap="round"
+                                        strokeOpacity={0.75}
+                                        strokeWidth={1 + line.strength * 4}
+                                        x1={line.sourcePoint.x}
+                                        x2={line.targetPoint.x}
+                                        y1={line.sourcePoint.y}
+                                        y2={line.targetPoint.y}
+                                    />
+                                ),
+                            )}
+                        </svg>
+                    ) : null}
                 </div>
                 <div
                     aria-label="Code city file tooltip"

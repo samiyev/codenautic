@@ -6,6 +6,7 @@ import {
     buildCodeCityTreemapData,
     type ICodeCityTreemapFileDescriptor,
     type ICodeCityTreemapImpactedFileDescriptor,
+    type ICodeCityTreemapTemporalCouplingDescriptor,
 } from "@/components/graphs/codecity-treemap"
 
 interface ICodeCityTreemapNodeData {
@@ -181,6 +182,18 @@ describe("codecity treemap graph", (): void => {
         { fileId: "src/api/auth.ts", impactType: "changed" },
         { fileId: "src/ui/index.ts", impactType: "ripple" },
     ]
+    const sampleTemporalCouplings: ReadonlyArray<ICodeCityTreemapTemporalCouplingDescriptor> = [
+        {
+            sourceFileId: "src/api/auth.ts",
+            targetFileId: "src/api/session.ts",
+            strength: 0.83,
+        },
+        {
+            sourceFileId: "src/api/session.ts",
+            targetFileId: "src/ui/index.ts",
+            strength: 0.46,
+        },
+    ]
 
     it("формирует иерархию package->files и считает LOC", (): void => {
         const graph = buildCodeCityTreemapData(sampleFiles)
@@ -282,6 +295,31 @@ describe("codecity treemap graph", (): void => {
         expect(screen.getByText("Issues: 3 in 2 files")).not.toBeNull()
         expect(screen.getByText("Max issues: 2")).not.toBeNull()
         expect(mockTreemap).toHaveBeenCalledTimes(1)
+    })
+
+    it("показывает temporal coupling overlay и позволяет его выключить", (): void => {
+        render(
+            <CodeCityTreemap
+                files={sampleFiles}
+                temporalCouplings={sampleTemporalCouplings}
+                title="CodeCity treemap"
+            />,
+        )
+
+        expect(screen.getByLabelText("Temporal coupling controls")).not.toBeNull()
+        expect(screen.getByText("Temporal couplings: 2 links")).not.toBeNull()
+        expect(screen.getByLabelText("Temporal coupling overlay lines")).not.toBeNull()
+        expect(screen.getAllByTestId("temporal-coupling-line")).toHaveLength(2)
+
+        const hideOverlayButton = screen.getByRole("button", {
+            name: "Hide temporal coupling overlay",
+        })
+        fireEvent.click(hideOverlayButton)
+
+        expect(screen.queryByLabelText("Temporal coupling overlay lines")).toBeNull()
+        expect(
+            screen.getByRole("button", { name: "Show temporal coupling overlay" }),
+        ).not.toBeNull()
     })
 
     it("показывает comparison summary в header при переданном baseline", (): void => {
