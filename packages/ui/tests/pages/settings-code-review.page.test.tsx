@@ -264,6 +264,8 @@ describe("settings code review page", (): void => {
         await user.selectOptions(screen.getByLabelText("Summary detail level"), "DEEP")
         const maxSuggestionsInput = screen.getByLabelText("Max suggestions in summary")
         fireEvent.change(maxSuggestionsInput, { target: { value: "12" } })
+        const promptOverrideInput = screen.getByLabelText("CCR summary prompt override")
+        await user.type(promptOverrideInput, "\n- Focus on rollback safety.")
         await user.click(screen.getByRole("button", { name: "Save CCR summary settings" }))
 
         await waitFor((): void => {
@@ -277,6 +279,11 @@ describe("settings code review page", (): void => {
         expect(screen.getByTestId("ccr-summary-preview-max-suggestions")).toHaveTextContent(
             "Max suggestions: 12",
         )
+        expect(
+            (promptOverrideInput as HTMLTextAreaElement).value.includes(
+                "- Focus on rollback safety.",
+            ),
+        ).toBe(true)
     })
 
     it("конфигурирует и сохраняет IDE sync settings", async (): Promise<void> => {

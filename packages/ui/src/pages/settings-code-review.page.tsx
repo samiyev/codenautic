@@ -9,6 +9,7 @@ import {
     type IDryRunResultViewerData,
 } from "@/components/settings/dry-run-result-viewer"
 import { IgnorePatternEditor } from "@/components/settings/ignore-pattern-editor"
+import { PromptOverrideEditor } from "@/components/settings/prompt-override-editor"
 import { ReviewCadenceSelector } from "@/components/settings/review-cadence-selector"
 import { RuleEditor } from "@/components/settings/rule-editor"
 import { SuggestionLimitConfig } from "@/components/settings/suggestion-limit-config"
@@ -23,6 +24,10 @@ import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 const DEFAULT_IGNORED_PATHS: ReadonlyArray<string> = ["/dist", "/node_modules", "/coverage"] as const
 const DEFAULT_REPOSITORY_ID = "repo-1"
 const DEFAULT_REPOSITORY_CONFIG = "version: 1\nreview:\n  mode: MANUAL\n"
+const DEFAULT_CCR_PROMPT_OVERRIDE = [
+    "Generate CCR summary with a clear risk-first structure.",
+    "Keep action items implementation-ready and grouped by priority.",
+].join("\n")
 const CCR_SUMMARY_DETAIL_LEVEL = {
     concise: "CONCISE",
     standard: "STANDARD",
@@ -117,6 +122,7 @@ export function SettingsCodeReviewPage(): ReactElement {
         maxSuggestions: 8,
     })
     const [ccrSummaryState, setCcrSummaryState] = useState<string>("Not saved yet.")
+    const [promptOverride, setPromptOverride] = useState<string>(DEFAULT_CCR_PROMPT_OVERRIDE)
     const [ideSyncSettings, setIdeSyncSettings] = useState<IIdeSyncSettings>({
         enabled: true,
         provider: IDE_SYNC_PROVIDER.both,
@@ -415,6 +421,13 @@ export function SettingsCodeReviewPage(): ReactElement {
                     Save CCR summary settings
                 </Button>
                 <CCRSummaryPreview settings={ccrSummarySettings} />
+                <PromptOverrideEditor
+                    value={promptOverride}
+                    onChange={setPromptOverride}
+                    onReset={(): void => {
+                        setPromptOverride(DEFAULT_CCR_PROMPT_OVERRIDE)
+                    }}
+                />
             </section>
             <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
                 <h2 className="text-base font-semibold text-slate-900">IDE sync settings</h2>
