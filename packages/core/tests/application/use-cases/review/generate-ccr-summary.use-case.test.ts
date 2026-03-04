@@ -3,6 +3,7 @@ import {describe, expect, test} from "bun:test"
 import type {IChatResponseDTO, IChatRequestDTO} from "../../../../src/application/dto/llm"
 import type {ILLMProvider} from "../../../../src/application/ports/outbound/llm/llm-provider.port"
 import {ValidationError} from "../../../../src/domain/errors/validation.error"
+import {Result} from "../../../../src/shared/result"
 import {
     CCR_SUMMARY_EXISTING_DESCRIPTION_MODES,
     CCR_SUMMARY_NEW_COMMITS_DESCRIPTION_MODES,
@@ -11,6 +12,7 @@ import type {
     CCROldSummaryMode,
     CCRNewCommitsSummaryMode,
 } from "../../../../src/application/dto/review/ccr-summary.dto"
+import type {IGeneratePromptInput} from "../../../../src/application/use-cases/generate-prompt.use-case"
 import {
     GenerateCCRSummaryUseCase,
     type IGenerateCCRSummaryUseCaseDependencies,
@@ -55,6 +57,22 @@ class TestLLMProvider implements ILLMProvider {
     }
 }
 
+class TestPromptUseCase {
+    public readonly inputs: IGeneratePromptInput[] = []
+    private readonly response: string
+
+    public constructor(response: string) {
+        this.response = response
+    }
+
+    public execute(
+        input: IGeneratePromptInput,
+    ): Promise<Result<string, ValidationError>> {
+        this.inputs.push(input)
+        return Promise.resolve(Result.ok<string, ValidationError>(this.response))
+    }
+}
+
 function findErrorFields(code: ValidationError): string[] {
     return code.fields.map((field) => `${field.field}:${field.message}`)
 }
@@ -69,10 +87,12 @@ function hasModeInPrompt(
 describe("GenerateCCRSummaryUseCase", () => {
     test("generates summary with fallback modes and sends deterministic prompt", async () => {
         const provider = new TestLLMProvider(["Generated CCR summary"])
+        const promptUseCase = new TestPromptUseCase("CCR summary system prompt")
         const useCase = new GenerateCCRSummaryUseCase({
             llmProvider: provider,
             model: "gpt-4.1",
             maxTokens: 600,
+            generatePromptUseCase: promptUseCase,
         } as IGenerateCCRSummaryUseCaseDependencies)
 
         const result = await useCase.execute({
@@ -97,12 +117,15 @@ describe("GenerateCCRSummaryUseCase", () => {
         expect(hasModeInPrompt(request, "CONCATENATE")).toBe(true)
         expect(request.model).toBe("gpt-4.1")
         expect(request.maxTokens).toBe(600)
+        expect(promptUseCase.inputs.at(0)?.name).toBe("ccr-summary-complement-system")
     })
 
     test("uses fallback summary when provider returns blank content", async () => {
         const provider = new TestLLMProvider(["   "])
+        const promptUseCase = new TestPromptUseCase("CCR summary system prompt")
         const useCase = new GenerateCCRSummaryUseCase({
             llmProvider: provider,
+            generatePromptUseCase: promptUseCase,
         })
 
         const result = await useCase.execute({
@@ -121,7 +144,11 @@ describe("GenerateCCRSummaryUseCase", () => {
 
     test("returns validation error for invalid modes", async () => {
         const provider = new TestLLMProvider(["irrelevant"])
-        const useCase = new GenerateCCRSummaryUseCase({llmProvider: provider})
+        const promptUseCase = new TestPromptUseCase("CCR summary system prompt")
+        const useCase = new GenerateCCRSummaryUseCase({
+            llmProvider: provider,
+            generatePromptUseCase: promptUseCase,
+        })
 
         const result = await useCase.execute({
             existingDescriptionMode: "UNKNOWN" as CCROldSummaryMode,
@@ -142,7 +169,11 @@ describe("GenerateCCRSummaryUseCase", () => {
 
     test("returns validation error when new commits summary required", async () => {
         const provider = new TestLLMProvider(["irrelevant"])
-        const useCase = new GenerateCCRSummaryUseCase({llmProvider: provider})
+        const promptUseCase = new TestPromptUseCase("CCR summary system prompt")
+        const useCase = new GenerateCCRSummaryUseCase({
+            llmProvider: provider,
+            generatePromptUseCase: promptUseCase,
+        })
 
         const result = await useCase.execute({
             newCommitsDescriptionMode: "REPLACE",
@@ -168,7 +199,11 @@ describe("GenerateCCRSummaryUseCase", () => {
             },
             embed: (_texts: readonly string[]): Promise<readonly number[][]> => Promise.resolve([]),
         } as ILLMProvider
-        const useCase = new GenerateCCRSummaryUseCase({llmProvider: provider})
+        const promptUseCase = new TestPromptUseCase("CCR summary system prompt")
+        const useCase = new GenerateCCRSummaryUseCase({
+            llmProvider: provider,
+            generatePromptUseCase: promptUseCase,
+        })
 
         const result = await useCase.execute({
             existingDescriptionMode: "REPLACE",
@@ -186,7 +221,11 @@ describe("GenerateCCRSummaryUseCase", () => {
 
     test("supports new commits mode NONE without new summary", async () => {
         const provider = new TestLLMProvider(["Generated without changes"])
-        const useCase = new GenerateCCRSummaryUseCase({llmProvider: provider})
+        const promptUseCase = new TestPromptUseCase("CCR summary system prompt")
+        const useCase = new GenerateCCRSummaryUseCase({
+            llmProvider: provider,
+            generatePromptUseCase: promptUseCase,
+        })
 
         const result = await useCase.execute({
             existingSummary: "Existing summary.",

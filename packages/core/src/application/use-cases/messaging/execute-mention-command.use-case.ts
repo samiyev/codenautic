@@ -5,10 +5,11 @@ import {
     type IMentionCommand,
     type IRawMentionCommandInput,
     type CommandType,
-    COMMAND_TYPES,
+    DEFAULT_COMMAND_TYPES,
 } from "./mention-command.types"
 import {ValidationError, type IValidationErrorField} from "../../../domain/errors/validation.error"
 import {Result} from "../../../shared/result"
+import type {ISystemSettingsProvider} from "../../ports/outbound/common/system-settings-provider.port"
 
 /** Mention prefix used for detection and parsing. */
 const MENTION_PREFIX = "@codenautic"
@@ -38,6 +39,8 @@ interface IParsedMentionCommand {
 export interface IExecuteMentionCommandUseCaseDependencies {
     /** Available command handlers by command type. */
     readonly handlers: readonly ICommandHandler[]
+    /** Optional system settings provider for command allowlist. */
+    readonly systemSettingsProvider?: ISystemSettingsProvider
 }
 
 /**
@@ -47,6 +50,7 @@ export class ExecuteMentionCommandUseCase
     implements IUseCase<IRawMentionCommandInput, ICommandResult, ValidationError>
 {
     private readonly handlers: ReadonlyMap<CommandType, ICommandHandler>
+    private readonly systemSettingsProvider?: ISystemSettingsProvider
 
     /**
      * Creates execute mention command use case.
@@ -55,6 +59,7 @@ export class ExecuteMentionCommandUseCase
      */
     public constructor(dependencies: IExecuteMentionCommandUseCaseDependencies) {
         this.handlers = this.createHandlerIndex(dependencies.handlers)
+        this.systemSettingsProvider = dependencies.systemSettingsProvider
     }
 
     /**
@@ -71,7 +76,8 @@ export class ExecuteMentionCommandUseCase
             )
         }
 
-        const parsed = this.parseCommand(input.sourceComment)
+        const allowedCommands = await this.resolveAllowedCommands()
+        const parsed = this.parseCommand(input.sourceComment, allowedCommands)
         if (parsed === undefined) {
             return Result.fail<ICommandResult, ValidationError>(
                 new ValidationError(
@@ -88,7 +94,7 @@ export class ExecuteMentionCommandUseCase
 
         if (parsed.commandType === "help") {
             return Result.ok<ICommandResult, ValidationError>(
-                this.buildHelpResponse(parsed.unknownCommand),
+                this.buildHelpResponse(parsed.unknownCommand, allowedCommands),
             )
         }
 
@@ -97,7 +103,7 @@ export class ExecuteMentionCommandUseCase
         if (handler === undefined) {
             return Result.ok<ICommandResult, ValidationError>({
                 success: false,
-                response: this.buildMissingHandlerHelpResponse(command.commandType),
+                response: this.buildMissingHandlerHelpResponse(command.commandType, allowedCommands),
             })
         }
 
@@ -124,7 +130,10 @@ export class ExecuteMentionCommandUseCase
      * @param sourceComment Source comment text.
      * @returns Parsed command or undefined.
      */
-    private parseCommand(sourceComment: string): IParsedMentionCommand | undefined {
+    private parseCommand(
+        sourceComment: string,
+        allowedCommands: readonly CommandType[],
+    ): IParsedMentionCommand | undefined {
         const match = sourceComment.match(MENTION_PREFIX_PATTERN)
         if (match === null || match.index === undefined) {
             return undefined
@@ -147,7 +156,7 @@ export class ExecuteMentionCommandUseCase
             return undefined
         }
 
-        if (this.isKnownCommandType(commandType) === false) {
+        if (this.isKnownCommandType(commandType, allowedCommands) === false) {
             return {
                 commandType: "help",
                 args: ["help", commandType],
@@ -187,7 +196,10 @@ export class ExecuteMentionCommandUseCase
      * @param unknownCommand Unknown command, if any.
      * @returns Help response for user.
      */
-    private buildHelpResponse(unknownCommand?: string): ICommandResult {
+    private buildHelpResponse(
+        unknownCommand: string | undefined,
+        allowedCommands: readonly CommandType[],
+    ): ICommandResult {
         const unknownNotice =
             unknownCommand === undefined
                 ? ""
@@ -195,7 +207,7 @@ export class ExecuteMentionCommandUseCase
 
         return {
             success: true,
-            response: `${unknownNotice}Доступные команды: ${COMMAND_TYPES.join(", ")}.`,
+            response: `${unknownNotice}Доступные команды: ${allowedCommands.join(", ")}.`,
         }
     }
 
@@ -205,9 +217,12 @@ export class ExecuteMentionCommandUseCase
      * @param commandType Command type without handler.
      * @returns Suggestion with help text.
      */
-    private buildMissingHandlerHelpResponse(commandType: CommandType): string {
+    private buildMissingHandlerHelpResponse(
+        commandType: CommandType,
+        allowedCommands: readonly CommandType[],
+    ): string {
         return `Команда ${commandType} пока не подключена. ${
-            this.buildHelpResponse().response
+            this.buildHelpResponse(undefined, allowedCommands).response
         }`
     }
 
@@ -265,8 +280,36 @@ export class ExecuteMentionCommandUseCase
      * @param commandType Candidate command type.
      * @returns True if command type is known.
      */
-    private isKnownCommandType(commandType: string): commandType is CommandType {
-        return COMMAND_TYPES.includes(commandType as CommandType)
+    private isKnownCommandType(
+        commandType: string,
+        allowedCommands: readonly CommandType[],
+    ): commandType is CommandType {
+        return allowedCommands.includes(commandType as CommandType)
+    }
+
+    private async resolveAllowedCommands(): Promise<readonly CommandType[]> {
+        const defaults = DEFAULT_COMMAND_TYPES
+        if (this.systemSettingsProvider === undefined) {
+            return defaults
+        }
+
+        try {
+            const configured = await this.systemSettingsProvider.get<readonly string[]>(
+                "mention.available_commands",
+            )
+            if (configured === undefined || configured.length === 0) {
+                return defaults
+            }
+
+            const normalized = configured
+                .map((value) => value.trim().toLowerCase())
+                .filter((value) => value.length > 0)
+                .filter((value): value is CommandType => defaults.includes(value as CommandType))
+
+            return normalized.length > 0 ? normalized : defaults
+        } catch {
+            return defaults
+        }
     }
 
     /**

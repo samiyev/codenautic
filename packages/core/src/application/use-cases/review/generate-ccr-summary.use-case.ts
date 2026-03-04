@@ -1,6 +1,7 @@
 import type {IChatRequestDTO} from "../../dto/llm/chat.dto"
 import type {ILLMProvider} from "../../ports/outbound/llm/llm-provider.port"
 import type {IUseCase} from "../../ports/inbound/use-case.port"
+import type {IGeneratePromptInput} from "../generate-prompt.use-case"
 import type {
     CCROldSummaryMode,
     CCRNewCommitsSummaryMode,
@@ -32,6 +33,11 @@ export interface IGenerateCCRSummaryUseCaseDependencies {
      * Optional default max tokens override.
      */
     maxTokens?: number
+
+    /**
+     * Prompt generator use case.
+     */
+    generatePromptUseCase: IUseCase<IGeneratePromptInput, string, ValidationError>
 }
 
 interface INormalizedGenerateCCRSummaryInput {
@@ -45,6 +51,8 @@ interface INormalizedGenerateCCRSummaryInput {
 
 const DEFAULT_MODEL = "gpt-4o-mini"
 const DEFAULT_MAX_TOKENS = 700
+const DEFAULT_SYSTEM_PROMPT_NAME = "ccr-summary-default-system"
+const COMPLEMENT_SYSTEM_PROMPT_NAME = "ccr-summary-complement-system"
 
 /**
  * Use case to generate CCR summary with mode-based composition rules.
@@ -56,6 +64,7 @@ export class GenerateCCRSummaryUseCase
     private readonly llmProvider: ILLMProvider
     private readonly model: string
     private readonly maxTokens: number
+    private readonly generatePromptUseCase: IUseCase<IGeneratePromptInput, string, ValidationError>
 
     /**
      * Creates use case for CCR summary generation.
@@ -66,10 +75,11 @@ export class GenerateCCRSummaryUseCase
         this.llmProvider = dependencies.llmProvider
         this.model = dependencies.model ?? DEFAULT_MODEL
         this.maxTokens = dependencies.maxTokens ?? DEFAULT_MAX_TOKENS
+        this.generatePromptUseCase = dependencies.generatePromptUseCase
     }
 
     /**
-     * Generates deterministic-seeded final CCR summary.
+     * Generates deterministic config-seeded final CCR summary.
      *
      * @param input Use case input.
      * @returns Generated summary result.
@@ -85,7 +95,12 @@ export class GenerateCCRSummaryUseCase
         }
 
         const normalized = normalizedInputResult.value
-        const request = this.buildRequest(normalized)
+        const systemPromptResult = await this.resolveSystemPrompt(normalized.existingDescriptionMode)
+        if (systemPromptResult.isFail) {
+            return Result.fail<IGenerateCCRSummaryOutput, ValidationError>(systemPromptResult.error)
+        }
+
+        const request = this.buildRequest(normalized, systemPromptResult.value)
 
         try {
             const response = await this.llmProvider.chat(request)
@@ -169,10 +184,10 @@ export class GenerateCCRSummaryUseCase
      * @param input Normalized input.
      * @returns LLM request.
      */
-    private buildRequest(input: INormalizedGenerateCCRSummaryInput): IChatRequestDTO {
-        const systemPrompt =
-            "You are a senior engineering reviewer composing concise CCR summary."
-
+    private buildRequest(
+        input: INormalizedGenerateCCRSummaryInput,
+        systemPrompt: string,
+    ): IChatRequestDTO {
         const userPrompt = [
             "Apply requested composition modes and return one markdown summary.",
             `Existing description mode: ${input.existingDescriptionMode}`,
@@ -198,10 +213,10 @@ export class GenerateCCRSummaryUseCase
     }
 
     /**
-     * Creates deterministic seed summary for fallback.
+     * Creates deterministic config seed summary for fallback.
      *
      * @param input Normalized input.
-     * @returns Composed deterministic seed summary.
+     * @returns Composed deterministic config seed summary.
      */
     private composeSeedSummary(input: INormalizedGenerateCCRSummaryInput): string {
         const existingContribution = this.applyExistingMode(
@@ -384,6 +399,21 @@ export class GenerateCCRSummaryUseCase
         }
 
         return normalized
+    }
+
+    private async resolveSystemPrompt(
+        existingDescriptionMode: CCROldSummaryMode,
+    ): Promise<Result<string, ValidationError>> {
+        const promptName =
+            existingDescriptionMode === "COMPLEMENT"
+                ? COMPLEMENT_SYSTEM_PROMPT_NAME
+                : DEFAULT_SYSTEM_PROMPT_NAME
+
+        return this.generatePromptUseCase.execute({
+            name: promptName,
+            organizationId: null,
+            runtimeVariables: {},
+        })
     }
 }
 

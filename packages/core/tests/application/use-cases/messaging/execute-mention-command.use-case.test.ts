@@ -7,6 +7,7 @@ import type {
     CommandType,
     IRawMentionCommandInput,
 } from "../../../../src/application/use-cases/messaging/mention-command.types"
+import type {ISystemSettingsProvider} from "../../../../src/application/ports/outbound/common/system-settings-provider.port"
 import {
     ExecuteMentionCommandUseCase,
     type IExecuteMentionCommandUseCaseDependencies,
@@ -66,6 +67,17 @@ function createInput(overrides: Partial<IRawMentionCommandInput> = {}): IRawMent
 }
 
 describe("ExecuteMentionCommandUseCase", () => {
+    const buildSettingsProvider = (
+        value?: readonly string[],
+    ): ISystemSettingsProvider => ({
+        get: <T>(key: string): Promise<T | undefined> => {
+            if (key !== "mention.available_commands") {
+                return Promise.resolve(undefined)
+            }
+            return Promise.resolve(value as T | undefined)
+        },
+        getMany: <T>(): Promise<ReadonlyMap<string, T>> => Promise.resolve(new Map()),
+    })
     test("маршрутизирует известную команду к handler и прокидывает контекст", async () => {
         const handler = new FakeCommandHandler(
             () => Promise.resolve({
@@ -234,5 +246,42 @@ describe("ExecuteMentionCommandUseCase", () => {
             success: false,
             response: "chat failed",
         })
+    })
+
+    test("возвращает help для команды вне allowlist", async () => {
+        const useCase = new ExecuteMentionCommandUseCase({
+            handlers: [],
+            systemSettingsProvider: buildSettingsProvider(["review", "help"]),
+        } satisfies IExecuteMentionCommandUseCaseDependencies)
+
+        const result = await useCase.execute(createInput({
+            sourceComment: "@codenautic fix пропущенные тесты",
+        }))
+
+        expect(result.isOk).toBe(true)
+        expect(result.value).toEqual({
+            success: true,
+            response: "Команда fix не поддерживается. Доступные команды: review, help.",
+        })
+    })
+
+    test("использует дефолтные команды при ошибке провайдера", async () => {
+        const provider: ISystemSettingsProvider = {
+            get: <T>(): Promise<T | undefined> =>
+                Promise.reject<T | undefined>(new Error("boom")),
+            getMany: <T>(): Promise<ReadonlyMap<string, T>> =>
+                Promise.resolve(new Map<string, T>()),
+        }
+
+        const useCase = new ExecuteMentionCommandUseCase({
+            handlers: [],
+            systemSettingsProvider: provider,
+        } satisfies IExecuteMentionCommandUseCaseDependencies)
+
+        const result = await useCase.execute(createInput({
+            sourceComment: "@codenautic chat Привет",
+        }))
+
+        expect(result.isOk).toBe(true)
     })
 })

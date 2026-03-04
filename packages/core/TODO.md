@@ -48,7 +48,7 @@
 | M02 — Review Domain & Pipeline Architecture | [todo/m02-review-domain-pipeline-architecture.md](todo/m02-review-domain-pipeline-architecture.md) |
 | M03 — 20-Stage Pipeline & SafeGuard | [todo/m03-20-stage-pipeline-safeguard.md](todo/m03-20-stage-pipeline-safeguard.md) |
 | M04 — Business Domain | [todo/m04-business-domain.md](todo/m04-business-domain.md) |
-| M05 — Seeds, Admin, Expert Panel | [todo/m05-seeds-admin-expert-panel.md](todo/m05-seeds-admin-expert-panel.md) |
+| M05 — Config Defaults, Admin, Expert Panel | [todo/m05-config-defaults-admin-expert-panel.md](todo/m05-config-defaults-admin-expert-panel.md) |
 | M11 — Agent Worker & Chat | [todo/m11-agent-worker-chat.md](todo/m11-agent-worker-chat.md) |
 | M12 — AST, Scan, Onboarding | [todo/m12-ast-scan-onboarding.md](todo/m12-ast-scan-onboarding.md) |
 | M15 — Advanced Core Features | [todo/m15-advanced-core-features.md](todo/m15-advanced-core-features.md) |

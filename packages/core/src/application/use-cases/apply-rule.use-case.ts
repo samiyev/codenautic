@@ -70,7 +70,7 @@ const GLOBAL_FILE_PATH = "GLOBAL"
  */
 export interface IApplyRuleUseCaseInput {
     /**
-     * Custom rules list from repository and seed data.
+     * Custom rules list from repository and config defaults.
      */
     readonly rules: readonly CustomRule[]
 

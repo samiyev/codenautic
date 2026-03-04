@@ -11,6 +11,7 @@ import {
 import {PromptEngineService} from "../../../src/domain/services/prompt-engine.service"
 import type {IPromptConfigurationRepository} from "../../../src/application/ports/outbound/prompt-configuration-repository.port"
 import type {IPromptTemplateRepository} from "../../../src/application/ports/outbound/prompt-template-repository.port"
+import type {ISystemSettingsProvider} from "../../../src/application/ports/outbound/common/system-settings-provider.port"
 import {OrganizationId} from "../../../src/domain/value-objects/organization-id.value-object"
 import {UniqueId} from "../../../src/domain/value-objects/unique-id.value-object"
 
@@ -300,4 +301,117 @@ describe("GeneratePromptUseCase", () => {
 
         expect(result.value).toBe("Scoped acme")
     })
+
+    test("uses review override defaults when configuration is missing", async () => {
+        const templateRepository = new InMemoryPromptTemplateRepository()
+        const configurationRepository = new InMemoryPromptConfigurationRepository()
+        const useCase = new GeneratePromptUseCase({
+            promptTemplateRepository: templateRepository,
+            promptConfigurationRepository: configurationRepository,
+            promptEngineService: new PromptEngineService(),
+            systemSettingsProvider: createSystemSettingsProvider(),
+        })
+
+        const template = new PromptTemplate(UniqueId.create("template-5"), {
+            name: "code-review-system",
+            category: PROMPT_TEMPLATE_CATEGORY.ANALYSIS,
+            type: PROMPT_TEMPLATE_TYPE.SYSTEM,
+            content: "Bug:{{bugText}}|Critical:{{criticalText}}|Main:{{mainGenText}}",
+            variables: [],
+            version: 1,
+            isGlobal: true,
+        })
+
+        templateRepository.add(template.name, template)
+
+        const result = await useCase.execute({
+            name: "code-review-system",
+        })
+
+        expect(result.isOk).toBe(true)
+        if (result.isFail) {
+            throw new Error("Expected prompt generation success")
+        }
+
+        expect(result.value).toBe(
+            "Bug:Bug description|Critical:Critical description|Main:Generation instructions",
+        )
+    })
+
+    test("prefers configuration defaults over review overrides", async () => {
+        const templateRepository = new InMemoryPromptTemplateRepository()
+        const configurationRepository = new InMemoryPromptConfigurationRepository()
+        const useCase = new GeneratePromptUseCase({
+            promptTemplateRepository: templateRepository,
+            promptConfigurationRepository: configurationRepository,
+            promptEngineService: new PromptEngineService(),
+            systemSettingsProvider: createSystemSettingsProvider(),
+        })
+
+        const template = new PromptTemplate(UniqueId.create("template-6"), {
+            name: "code-review-system",
+            category: PROMPT_TEMPLATE_CATEGORY.ANALYSIS,
+            type: PROMPT_TEMPLATE_TYPE.SYSTEM,
+            content: "Bug:{{bugText}}|Critical:{{criticalText}}",
+            variables: [],
+            version: 1,
+            isGlobal: true,
+        })
+        const configuration = new PromptConfiguration(UniqueId.create("configuration-2"), {
+            templateId: template.id,
+            name: "code-review-system",
+            defaults: {
+                criticalText: "Config critical",
+            },
+            overrides: {},
+            isGlobal: true,
+        })
+
+        templateRepository.add(template.name, template)
+        configurationRepository.add(configuration.name, configuration)
+
+        const result = await useCase.execute({
+            name: "code-review-system",
+        })
+
+        expect(result.isOk).toBe(true)
+        if (result.isFail) {
+            throw new Error("Expected prompt generation success")
+        }
+
+        expect(result.value).toBe("Bug:Bug description|Critical:Config critical")
+    })
 })
+
+function createSystemSettingsProvider(): ISystemSettingsProvider {
+    return {
+        get: <T>(key: string): Promise<T | undefined> => {
+            if (key !== "review.overrides") {
+                return Promise.resolve(undefined)
+            }
+
+            return Promise.resolve({
+                name: "default-review-overrides",
+                categories: {
+                    descriptions: {
+                        bug: "Bug description",
+                        performance: "Performance description",
+                        security: "Security description",
+                    },
+                },
+                severity: {
+                    flags: {
+                        critical: "Critical description",
+                        high: "High description",
+                        medium: "Medium description",
+                        low: "Low description",
+                    },
+                },
+                generation: {
+                    main: "Generation instructions",
+                },
+            } as T)
+        },
+        getMany: <T>(): Promise<ReadonlyMap<string, T>> => Promise.resolve(new Map<string, T>()),
+    }
+}

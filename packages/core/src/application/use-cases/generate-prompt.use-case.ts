@@ -5,7 +5,13 @@ import {PromptEngineService} from "../../domain/services/prompt-engine.service"
 import type {PromptTemplate} from "../../domain/entities/prompt-template.entity"
 import type {IPromptTemplateRepository} from "../ports/outbound/prompt-template-repository.port"
 import type {IPromptConfigurationRepository} from "../ports/outbound/prompt-configuration-repository.port"
+import type {ISystemSettingsProvider} from "../ports/outbound/common/system-settings-provider.port"
 import {Result} from "../../shared/result"
+import {
+    buildReviewOverridePromptConfigurations,
+    parseReviewOverridesConfig,
+    REVIEW_OVERRIDE_PROMPT_NAMES,
+} from "../dto/config/review-overrides-config.dto"
 
 /** Input payload for prompt generation. */
 export interface IGeneratePromptInput {
@@ -41,6 +47,11 @@ export interface IGeneratePromptUseCaseDependencies {
      * Prompt render/validation service.
      */
     readonly promptEngineService: PromptEngineService
+
+    /**
+     * Optional system settings provider for review prompt defaults.
+     */
+    readonly systemSettingsProvider?: ISystemSettingsProvider
 }
 
 interface INormalizedGeneratePromptInput {
@@ -58,6 +69,7 @@ export class GeneratePromptUseCase
     private readonly promptTemplateRepository: IPromptTemplateRepository
     private readonly promptConfigurationRepository: IPromptConfigurationRepository
     private readonly promptEngineService: PromptEngineService
+    private readonly systemSettingsProvider?: ISystemSettingsProvider
 
     /**
      * Creates use case.
@@ -68,6 +80,7 @@ export class GeneratePromptUseCase
         this.promptTemplateRepository = dependencies.promptTemplateRepository
         this.promptConfigurationRepository = dependencies.promptConfigurationRepository
         this.promptEngineService = dependencies.promptEngineService
+        this.systemSettingsProvider = dependencies.systemSettingsProvider
     }
 
     /**
@@ -103,8 +116,10 @@ export class GeneratePromptUseCase
         }
 
         const configuration = await this.promptConfigurationRepository.findByName(name, organizationId)
+        const reviewOverrideDefaults = await this.resolveReviewOverrideDefaults(name)
+        const mergedDefaults = this.mergeDefaults(reviewOverrideDefaults, configuration?.defaults ?? {})
         const merged = this.mergeVariables(
-            configuration?.defaults ?? {},
+            mergedDefaults,
             configuration?.overrides ?? {},
             runtimeVariables,
         )
@@ -163,6 +178,64 @@ export class GeneratePromptUseCase
         this.deepMerge(merged, overrides)
         this.deepMerge(merged, runtime)
         return merged
+    }
+
+    /**
+     * Merges base defaults with configuration defaults (configuration wins).
+     *
+     * @param baseDefaults Defaults from system settings.
+     * @param configDefaults Defaults from prompt configuration.
+     * @returns Combined defaults map.
+     */
+    private mergeDefaults(
+        baseDefaults: Record<string, unknown>,
+        configDefaults: Record<string, unknown>,
+    ): Record<string, unknown> {
+        const merged: Record<string, unknown> = {}
+        this.deepMerge(merged, baseDefaults)
+        this.deepMerge(merged, configDefaults)
+        return merged
+    }
+
+    /**
+     * Resolves review override defaults for prompt templates.
+     *
+     * @param name Prompt template name.
+     * @returns Defaults map or empty when not applicable.
+     */
+    private async resolveReviewOverrideDefaults(name: string): Promise<Record<string, unknown>> {
+        if (this.systemSettingsProvider === undefined) {
+            return {}
+        }
+
+        if (this.isReviewOverridePromptName(name) === false) {
+            return {}
+        }
+
+        try {
+            const rawOverrides = await this.systemSettingsProvider.get<unknown>("review.overrides")
+            const parsed = parseReviewOverridesConfig(rawOverrides)
+            if (parsed === undefined) {
+                return {}
+            }
+
+            const configs = buildReviewOverridePromptConfigurations(parsed)
+            const matched = configs.find((config) => config.name === name)
+            return matched?.defaults ?? {}
+        } catch {
+            return {}
+        }
+    }
+
+    /**
+     * Checks if prompt template name expects review override defaults.
+     *
+     * @param name Prompt template name.
+     * @returns True when review overrides apply.
+     */
+    private isReviewOverridePromptName(name: string): boolean {
+        return name === REVIEW_OVERRIDE_PROMPT_NAMES.CODE_REVIEW_SYSTEM
+            || name === REVIEW_OVERRIDE_PROMPT_NAMES.CROSS_FILE_ANALYSIS_SYSTEM
     }
 
     /**
