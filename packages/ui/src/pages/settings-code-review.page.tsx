@@ -9,6 +9,7 @@ import {
     type IDryRunResultViewerIssue,
 } from "@/components/settings/dry-run-result-viewer"
 import { IgnorePatternEditor } from "@/components/settings/ignore-pattern-editor"
+import { ReviewCadenceSelector } from "@/components/settings/review-cadence-selector"
 import { RuleEditor } from "@/components/settings/rule-editor"
 import type { ICodeReviewFormValues } from "@/components/settings/settings-form-schemas"
 import {
@@ -21,30 +22,6 @@ import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 const DEFAULT_IGNORED_PATHS: ReadonlyArray<string> = ["/dist", "/node_modules", "/coverage"] as const
 const DEFAULT_REPOSITORY_ID = "repo-1"
 const DEFAULT_REPOSITORY_CONFIG = "version: 1\nreview:\n  mode: MANUAL\n"
-
-interface IReviewCadenceOption {
-    readonly description: string
-    readonly key: TRepoReviewMode
-    readonly label: string
-}
-
-const REVIEW_CADENCE_OPTIONS: ReadonlyArray<IReviewCadenceOption> = [
-    {
-        key: REPO_REVIEW_MODE.manual,
-        label: "Manual",
-        description: "Run code review only when explicitly triggered by developer.",
-    },
-    {
-        key: REPO_REVIEW_MODE.auto,
-        label: "Auto",
-        description: "Run code review automatically for every repository update.",
-    },
-    {
-        key: REPO_REVIEW_MODE.autoPause,
-        label: "Auto-pause",
-        description: "Auto review with safety pause when degradation signals are detected.",
-    },
-] as const
 
 function createDryRunResultSnapshot(params: {
     readonly ignorePatterns: ReadonlyArray<string>
@@ -83,16 +60,6 @@ function isRepoReviewMode(value: string): value is TRepoReviewMode {
         value === REPO_REVIEW_MODE.auto ||
         value === REPO_REVIEW_MODE.autoPause
     )
-}
-
-function mapReviewModeToLabel(mode: TRepoReviewMode): string {
-    const modeLabel = REVIEW_CADENCE_OPTIONS.find(
-        (option): boolean => option.key === mode,
-    )?.label
-    if (modeLabel === undefined) {
-        return "Unknown"
-    }
-    return modeLabel
 }
 
 /**
@@ -233,6 +200,10 @@ export function SettingsCodeReviewPage(): ReactElement {
         })
     }
 
+    const handleCadenceModeChange = (mode: TRepoReviewMode): void => {
+        setReviewMode(mode)
+    }
+
     return (
         <section className="space-y-4">
             <h1 className="text-2xl font-semibold text-slate-900">Code Review Configuration</h1>
@@ -257,53 +228,15 @@ export function SettingsCodeReviewPage(): ReactElement {
                 onReviewModeChange={handleReviewModeChange}
                 onSave={handleRepositoryConfigSave}
             />
-            <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
-                <h2 className="text-base font-semibold text-slate-900">Review cadence settings</h2>
-                <p className="text-sm text-slate-600">
-                    Choose how code review is executed for repository updates.
-                </p>
-                <fieldset aria-label="Review cadence mode" className="space-y-2">
-                    {REVIEW_CADENCE_OPTIONS.map(
-                        (option): ReactElement => (
-                            <label
-                                key={option.key}
-                                className="flex cursor-pointer items-start gap-2 rounded-md border border-slate-200 p-3 text-sm text-slate-700"
-                            >
-                                <input
-                                    checked={reviewMode === option.key}
-                                    className="mt-1"
-                                    name="review-cadence-mode"
-                                    type="radio"
-                                    value={option.key}
-                                    onChange={handleReviewModeChange}
-                                />
-                                <span className="space-y-1">
-                                    <span className="block font-medium text-slate-900">
-                                        {option.label}
-                                    </span>
-                                    <span className="block text-xs text-slate-600">
-                                        {option.description}
-                                    </span>
-                                </span>
-                            </label>
-                        ),
-                    )}
-                </fieldset>
-                <p className="text-xs text-slate-500" data-testid="review-cadence-current">
-                    {`Current mode: ${mapReviewModeToLabel(reviewMode)} (${reviewMode})`}
-                </p>
-                <Button
-                    isDisabled={
-                        normalizedRepositoryId.length === 0 ||
-                        repoConfig.saveRepoConfig.isPending === true
-                    }
-                    type="button"
-                    variant="solid"
-                    onPress={handleCadenceSave}
-                >
-                    Apply cadence mode
-                </Button>
-            </section>
+            <ReviewCadenceSelector
+                isApplyDisabled={
+                    normalizedRepositoryId.length === 0 ||
+                    repoConfig.saveRepoConfig.isPending === true
+                }
+                mode={reviewMode}
+                onApply={handleCadenceSave}
+                onModeChange={handleCadenceModeChange}
+            />
             <DryRunResultViewer result={dryRunResult} onRunDryRun={handleRunDryRun} />
             <CodeReviewForm initialValues={formValues} onSubmit={saveReviewForm} />
             <IgnorePatternEditor
