@@ -9,6 +9,7 @@ import {
     type IDryRunResultViewerData,
 } from "@/components/settings/dry-run-result-viewer"
 import { IgnorePatternEditor } from "@/components/settings/ignore-pattern-editor"
+import { MCPToolList, type IMcpToolListItem } from "@/components/settings/mcp-tool-list"
 import { PromptOverrideEditor } from "@/components/settings/prompt-override-editor"
 import { ReviewCadenceSelector } from "@/components/settings/review-cadence-selector"
 import { RuleEditor } from "@/components/settings/rule-editor"
@@ -58,14 +59,7 @@ interface IIdeSyncSettings {
     readonly syncOnPush: boolean
 }
 
-interface IMcpToolUsageStat {
-    readonly avgLatencyMs: number
-    readonly calls: number
-    readonly errorCount: number
-    readonly toolId: string
-}
-
-const DEFAULT_MCP_TOOL_USAGE_STATS: ReadonlyArray<IMcpToolUsageStat> = [
+const DEFAULT_MCP_TOOL_USAGE_STATS: ReadonlyArray<IMcpToolListItem> = [
     {
         toolId: "figma.design-context",
         calls: 142,
@@ -539,38 +533,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                         </p>
                     </article>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-200 text-sm">
-                        <thead className="bg-slate-50 text-left text-slate-600">
-                            <tr>
-                                <th className="px-3 py-2 font-medium" scope="col">
-                                    MCP tool
-                                </th>
-                                <th className="px-3 py-2 font-medium" scope="col">
-                                    Calls
-                                </th>
-                                <th className="px-3 py-2 font-medium" scope="col">
-                                    Errors
-                                </th>
-                                <th className="px-3 py-2 font-medium" scope="col">
-                                    Avg latency
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200">
-                            {DEFAULT_MCP_TOOL_USAGE_STATS.map((item): ReactElement => (
-                                <tr key={item.toolId} data-testid="mcp-tool-row">
-                                    <td className="px-3 py-2 text-slate-900">{item.toolId}</td>
-                                    <td className="px-3 py-2 text-slate-700">{item.calls}</td>
-                                    <td className="px-3 py-2 text-slate-700">{item.errorCount}</td>
-                                    <td className="px-3 py-2 text-slate-700">
-                                        {item.avgLatencyMs} ms
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <MCPToolList items={DEFAULT_MCP_TOOL_USAGE_STATS} />
             </section>
             <DryRunResultViewer
                 isRunning={dryRun.runDryRun.isPending}
