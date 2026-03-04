@@ -6,6 +6,7 @@ import { DataFreshnessPanel, type IProvenanceContext } from "@/components/infras
 import { ExplainabilityPanel } from "@/components/infrastructure/explainability-panel"
 import { FlowMetricsWidget, type IFlowMetricsPoint } from "@/components/dashboard/flow-metrics-widget"
 import { TeamActivityWidget, type ITeamActivityPoint } from "@/components/dashboard/team-activity-widget"
+import { ArchitectureHealthWidget } from "@/components/dashboard/architecture-health-widget"
 import {
     TokenUsageDashboardWidget,
     type ITokenUsageModelPoint,
@@ -486,6 +487,42 @@ function getTokenUsageTrend(range: TDashboardDateRange): ReadonlyArray<ITokenUsa
     ]
 }
 
+function getArchitectureHealth(range: TDashboardDateRange): {
+    readonly dddCompliance: number
+    readonly healthScore: number
+    readonly layerViolations: number
+} {
+    if (range === "1d") {
+        return {
+            dddCompliance: 86,
+            healthScore: 78,
+            layerViolations: 3,
+        }
+    }
+
+    if (range === "30d") {
+        return {
+            dddCompliance: 83,
+            healthScore: 74,
+            layerViolations: 6,
+        }
+    }
+
+    if (range === "90d") {
+        return {
+            dddCompliance: 79,
+            healthScore: 69,
+            layerViolations: 9,
+        }
+    }
+
+    return {
+        dddCompliance: 85,
+        healthScore: 76,
+        layerViolations: 5,
+    }
+}
+
 /**
  * Рендерит список сигналов для dashboard content компонента.
  *
@@ -634,6 +671,7 @@ export function DashboardMissionControlPage(): ReactElement {
     const tokenUsageTrend = useMemo((): ReadonlyArray<ITokenUsageTrendPoint> => {
         return getTokenUsageTrend(range)
     }, [range])
+    const architectureHealth = useMemo(() => getArchitectureHealth(range), [range])
     const provenance = useMemo(
         (): IProvenanceContext => ({
             branch: "main",
@@ -912,6 +950,11 @@ export function DashboardMissionControlPage(): ReactElement {
             />
             <TeamActivityWidget points={teamActivity} />
             <TokenUsageDashboardWidget byModel={tokenUsageByModel} costTrend={tokenUsageTrend} />
+            <ArchitectureHealthWidget
+                dddCompliance={architectureHealth.dddCompliance}
+                healthScore={architectureHealth.healthScore}
+                layerViolations={architectureHealth.layerViolations}
+            />
             <div className="grid gap-4 md:grid-cols-2">
                 {renderExploreCard()}
                 {renderSignalsCard()}

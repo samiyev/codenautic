@@ -23,6 +23,8 @@ describe("DashboardMissionControlPage", (): void => {
         expect(screen.getByText("CCRs merged by developer in selected date range.")).not.toBeNull()
         expect(screen.getByText("Token usage dashboard")).not.toBeNull()
         expect(screen.getByText("Usage by model, cost breakdown and trend chart for selected range.")).not.toBeNull()
+        expect(screen.getByText("Architecture health")).not.toBeNull()
+        expect(screen.getByText("Health score, layer violations and DDD compliance in one architecture widget.")).not.toBeNull()
 
         await user.click(screen.getByRole("button", { name: "Open provenance" }))
         expect(screen.getByText("Source data provenance")).not.toBeNull()
