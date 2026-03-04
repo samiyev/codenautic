@@ -6,8 +6,9 @@ import {UniqueId} from "../../../src/domain/value-objects/unique-id.value-object
 
 describe("PromptConfiguration", () => {
     test("normalizes map keys and trims name", () => {
+        const templateId = UniqueId.create("template-1")
         const configuration = new PromptConfiguration(UniqueId.create("configuration-1"), {
-            templateId: UniqueId.create("template-1"),
+            templateId,
             name: "  Review config  ",
             defaults: {
                 " user ": "global",
@@ -21,6 +22,7 @@ describe("PromptConfiguration", () => {
         })
 
         expect(configuration.name).toBe("Review config")
+        expect(configuration.templateId.value).toBe("template-1")
         expect(configuration.defaults).toEqual({
             user: "global",
             severity: "medium",

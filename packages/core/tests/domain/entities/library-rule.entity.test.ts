@@ -45,6 +45,12 @@ describe("LibraryRule", () => {
         expect(rule.plugAndPlay).toBe(true)
         expect(rule.isGlobal).toBe(true)
         expect(rule.organizationId).toBeUndefined()
+        expect(rule.examples).toEqual([
+            {
+                snippet: "const value = 1",
+                isCorrect: true,
+            },
+        ])
     })
 
     test("требует уникальный UUID", () => {

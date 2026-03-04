@@ -28,6 +28,11 @@ export interface IReconstituteTaskProps {
  */
 export class TaskFactory implements IEntityFactory<Task, ICreateTaskProps, IReconstituteTaskProps> {
     /**
+     * Creates factory instance.
+     */
+    public constructor() {}
+
+    /**
      * Creates new task entity.
      *
      * @param input Creation input.

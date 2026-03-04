@@ -34,6 +34,11 @@ export interface IReconstituteProjectProps {
  */
 export class ProjectFactory implements IEntityFactory<Project, ICreateProjectProps, IReconstituteProjectProps> {
     /**
+     * Creates factory instance.
+     */
+    public constructor() {}
+
+    /**
      * Creates new project.
      *
      * @param input Input payload.
