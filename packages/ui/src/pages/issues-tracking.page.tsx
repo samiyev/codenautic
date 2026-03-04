@@ -1,7 +1,7 @@
 import { useMemo, useState, type ChangeEvent, type ReactElement } from "react"
 
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
-import { useVirtualizedList } from "@/lib/hooks/use-virtualized-list"
+import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 
 type TIssueTrackingAction = "acknowledge" | "fix" | "snooze" | "ignore"
 type TIssueTrackingSeverity = "critical" | "high" | "medium" | "low"
@@ -240,12 +240,6 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
         [sourceIssues, filters],
     )
 
-    const virtualizer = useVirtualizedList({
-        count: filteredIssues.length,
-        estimateSize: (): number => 96,
-        overscan: 6,
-    })
-
     const handleFilterChange = (name: IIssueTrackingFilterField, value: string): void => {
         if (name === "severity") {
             setFilters((previousValue): IIssueTrackingFilters => {
@@ -378,71 +372,110 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
             <Card>
                 <CardBody className="space-y-2">
                     <h2 className="text-sm font-semibold text-slate-900">Issue list</h2>
-                    {filteredIssues.length === 0 ? (
-                        <p className="rounded-lg border border-slate-200 p-3 text-sm text-slate-600">
-                            No issues found for selected filters.
-                        </p>
-                    ) : (
-                        <div
-                            aria-label="Issue list"
-                            role="list"
-                            className="relative h-96 overflow-auto border border-slate-200 rounded-md"
-                            ref={virtualizer.parentRef}
-                        >
-                            <div style={{ height: `${virtualizer.totalSize}px` }} className="relative">
-                                {virtualizer.virtualItems.map((virtualItem): ReactElement => {
-                                    const issue = filteredIssues.at(virtualItem.index)
-                                    if (issue === undefined) {
-                                        return <></>
-                                    }
-
-                                    return (
-                                        <article
-                                            aria-label={`Issue ${issue.id}`}
-                                            key={issue.id}
-                                            role="listitem"
-                                            style={virtualizer.getItemStyle(virtualItem)}
-                                            className="border-b border-slate-100 px-3 py-2"
-                                        >
-                                            <p className="text-sm font-semibold text-slate-900">
-                                                {issue.id} — {issue.title}
-                                            </p>
-                                            <p className="text-xs text-slate-600">{issue.message}</p>
-                                            <p className="text-xs text-slate-600">
-                                                {issue.repository} · {issue.filePath} · owner: {issue.owner} ·{" "}
-                                                {formatIssueDate(issue.detectedAt)}
-                                            </p>
-                                            <div className="mt-2 flex flex-wrap items-center gap-2">
-                                                <span
-                                                    className={`rounded-full px-2 py-0.5 text-xs ${ISSUE_STATUS_STYLES[issue.status]}`}
-                                                >
-                                                    {ISSUE_STATUS_LABELS[issue.status]}
-                                                </span>
-                                                <span
-                                                    className={`rounded-full border px-2 py-0.5 text-xs ${ISSUE_SEVERITY_STYLES[issue.severity]}`}
-                                                >
-                                                    {ISSUE_SEVERITY_LABELS[issue.severity]}
-                                                </span>
-                                                {ISSUE_ACTIONS_BY_STATUS[issue.status].map((action): ReactElement => (
-                                                    <Button
-                                                        aria-label={`${action} issue ${issue.id}`}
-                                                        key={`${issue.id}-${action}`}
-                                                        size="sm"
-                                                        variant="light"
-                                                        onPress={(): void => {
-                                                            handleAction(issue, action)
-                                                        }}
-                                                    >
-                                                        {ISSUE_ACTION_LABELS[action]}
-                                                    </Button>
-                                                ))}
-                                            </div>
-                                        </article>
-                                    )
-                                })}
-                            </div>
-                        </div>
-                    )}
+                    <EnterpriseDataTable
+                        ariaLabel="Issue list"
+                        columns={[
+                            {
+                                accessor: (issue): string => issue.id,
+                                header: "Issue ID",
+                                id: "id",
+                                pin: "left",
+                                size: 130,
+                            },
+                            {
+                                accessor: (issue): string => issue.title,
+                                header: "Title",
+                                id: "title",
+                                size: 260,
+                            },
+                            {
+                                accessor: (issue): string => issue.repository,
+                                header: "Repository",
+                                id: "repository",
+                                size: 220,
+                            },
+                            {
+                                accessor: (issue): string => issue.filePath,
+                                header: "File",
+                                id: "filePath",
+                                size: 220,
+                            },
+                            {
+                                accessor: (issue): string => issue.owner,
+                                header: "Owner",
+                                id: "owner",
+                                size: 140,
+                            },
+                            {
+                                accessor: (issue): string => issue.detectedAt,
+                                cell: (issue): string => formatIssueDate(issue.detectedAt),
+                                header: "Detected at",
+                                id: "detectedAt",
+                                size: 170,
+                            },
+                            {
+                                accessor: (issue): string => issue.status,
+                                cell: (issue): ReactElement => (
+                                    <span
+                                        className={`rounded-full px-2 py-0.5 text-xs ${ISSUE_STATUS_STYLES[issue.status]}`}
+                                    >
+                                        {ISSUE_STATUS_LABELS[issue.status]}
+                                    </span>
+                                ),
+                                header: "Status",
+                                id: "status",
+                                size: 160,
+                            },
+                            {
+                                accessor: (issue): string => issue.severity,
+                                cell: (issue): ReactElement => (
+                                    <span
+                                        className={`rounded-full border px-2 py-0.5 text-xs ${ISSUE_SEVERITY_STYLES[issue.severity]}`}
+                                    >
+                                        {ISSUE_SEVERITY_LABELS[issue.severity]}
+                                    </span>
+                                ),
+                                header: "Severity",
+                                id: "severity",
+                                size: 150,
+                            },
+                            {
+                                accessor: (issue): string => issue.message,
+                                header: "Message",
+                                id: "message",
+                                size: 280,
+                            },
+                            {
+                                accessor: (issue): string => ISSUE_ACTIONS_BY_STATUS[issue.status].join(","),
+                                cell: (issue): ReactElement => (
+                                    <div className="flex flex-wrap items-center gap-1">
+                                        {ISSUE_ACTIONS_BY_STATUS[issue.status].map((action): ReactElement => (
+                                            <Button
+                                                aria-label={`${action} issue ${issue.id}`}
+                                                key={`${issue.id}-${action}`}
+                                                size="sm"
+                                                variant="light"
+                                                onPress={(): void => {
+                                                    handleAction(issue, action)
+                                                }}
+                                            >
+                                                {ISSUE_ACTION_LABELS[action]}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                ),
+                                enableGlobalFilter: false,
+                                header: "Actions",
+                                id: "actions",
+                                isHideable: false,
+                                size: 280,
+                            },
+                        ]}
+                        emptyMessage="No issues found for selected filters."
+                        getRowId={(issue): string => issue.id}
+                        id="issues-tracking-table"
+                        rows={filteredIssues}
+                    />
                 </CardBody>
             </Card>
         </section>

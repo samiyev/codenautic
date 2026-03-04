@@ -1,9 +1,9 @@
-import { type ReactElement, useMemo, useRef, useState } from "react"
+import { type ReactElement, useMemo, useState } from "react"
 import { Link } from "@tanstack/react-router"
-import { useVirtualizer } from "@tanstack/react-virtual"
 
+import { Button } from "@/components/ui"
 import { useDebounce } from "@/lib/hooks/use-debounce"
-import { InfiniteScrollContainer } from "@/components/infrastructure/infinite-scroll-container"
+import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 import { ReviewsFilters } from "./reviews-filters"
 import { type IReviewRow } from "./reviews-table"
 import { ReviewStatusBadge } from "./review-status-badge"
@@ -30,7 +30,6 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
     const [search, setSearch] = useState("")
     const [statusFilter, setStatusFilter] = useState<string>("all")
     const [assigneeFilter, setAssigneeFilter] = useState<string>("all")
-    const listRef = useRef<HTMLDivElement | null>(null)
     const debouncedSearch = useDebounce(search, 220)
 
     const statusOptions = useMemo((): string[] => {
@@ -65,13 +64,6 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
 
     const hasActiveFilter =
         statusFilter !== "all" || assigneeFilter !== "all" || debouncedSearch.trim().length > 0
-    const rowVirtualizer = useVirtualizer({
-        count: filteredRows.length,
-        getScrollElement: (): HTMLDivElement | null => listRef.current,
-        estimateSize: (): number => 84,
-        overscan: 8,
-    })
-    const virtualRows = rowVirtualizer.getVirtualItems()
 
     return (
         <section className="space-y-4">
@@ -96,56 +88,79 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
                     Showing {filteredRows.length} from {props.rows.length} CCR entries.
                 </p>
             ) : null}
-            <InfiniteScrollContainer
-                hasMore={props.hasMore}
-                isLoading={props.isLoadingMore}
-                loadingText="Подгружаем дополнительные CCR..."
-                onLoadMore={props.onLoadMore}
-                rootRef={listRef}
-            >
-                <div
-                    ref={listRef}
-                    className="max-h-[560px] overflow-auto rounded-lg border border-slate-200 bg-white"
-                >
-                    <div
-                        className="relative"
-                        style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+            <EnterpriseDataTable
+                ariaLabel="CCR management table"
+                columns={[
+                    {
+                        accessor: (row): string => row.id,
+                        cell: (row): ReactElement => (
+                            <Link
+                                className="text-sm font-semibold text-slate-900 underline underline-offset-4"
+                                to={`/reviews/${row.id}`}
+                            >
+                                {row.id}
+                            </Link>
+                        ),
+                        header: "CCR ID",
+                        id: "id",
+                        pin: "left",
+                        size: 140,
+                    },
+                    {
+                        accessor: (row): string => row.title,
+                        header: "Title",
+                        id: "title",
+                        size: 280,
+                    },
+                    {
+                        accessor: (row): string => row.repository,
+                        header: "Repository",
+                        id: "repository",
+                        size: 200,
+                    },
+                    {
+                        accessor: (row): string => row.assignee,
+                        header: "Assignee",
+                        id: "assignee",
+                        size: 180,
+                    },
+                    {
+                        accessor: (row): number => row.comments,
+                        header: "Comments",
+                        id: "comments",
+                        size: 120,
+                    },
+                    {
+                        accessor: (row): string => row.updatedAt,
+                        header: "Updated at",
+                        id: "updatedAt",
+                        size: 180,
+                    },
+                    {
+                        accessor: (row): string => row.status,
+                        cell: (row): ReactElement => <ReviewStatusBadge status={row.status} />,
+                        header: "Status",
+                        id: "status",
+                        size: 180,
+                    },
+                ]}
+                emptyMessage="No CCR entries for current filters."
+                getRowId={(row): string => row.id}
+                id="ccr-management-table"
+                rows={filteredRows}
+            />
+            {props.hasMore ? (
+                <div className="flex justify-end">
+                    <Button
+                        isDisabled={props.isLoadingMore}
+                        size="sm"
+                        variant="flat"
+                        onPress={props.onLoadMore}
                     >
-                        {virtualRows.map((virtualRow): ReactElement | null => {
-                            const row = filteredRows[virtualRow.index]
-                            if (row === undefined) {
-                                return null
-                            }
-
-                            return (
-                                <article
-                                    className="absolute left-0 top-0 w-full border-b border-slate-100 px-4 py-3"
-                                    key={row.id}
-                                    style={{
-                                        height: `${virtualRow.size}px`,
-                                        transform: `translateY(${virtualRow.start}px)`,
-                                    }}
-                                >
-                                    <div className="grid gap-2 md:grid-cols-[120px_1.8fr_1fr_1fr_80px_110px_110px] md:items-center">
-                                        <Link
-                                            className="text-sm font-semibold text-slate-900 underline underline-offset-4"
-                                            to={`/reviews/${row.id}`}
-                                        >
-                                            {row.id}
-                                        </Link>
-                                        <p className="text-sm text-slate-800">{row.title}</p>
-                                        <p className="text-sm text-slate-700">{row.repository}</p>
-                                        <p className="text-sm text-slate-700">{row.assignee}</p>
-                                        <p className="text-sm text-slate-700">{row.comments}</p>
-                                        <p className="text-sm text-slate-700">{row.updatedAt}</p>
-                                        <ReviewStatusBadge status={row.status} />
-                                    </div>
-                                </article>
-                            )
-                        })}
-                    </div>
+                        {props.isLoadingMore ? "Loading..." : "Load more CCR"}
+                    </Button>
                 </div>
-            </InfiniteScrollContainer>
+            ) : null}
         </section>
     )
 }

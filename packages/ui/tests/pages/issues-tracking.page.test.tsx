@@ -87,10 +87,10 @@ describe("IssuesTrackingPage", (): void => {
         expect(handleAction).toHaveBeenCalledWith("ISS-101", "fix")
     })
 
-    it("рендерит виртуализованный список с ролями list/listitem", async (): Promise<void> => {
+    it("рендерит enterprise table с доступными строками", async (): Promise<void> => {
         renderWithProviders(<IssuesTrackingPage issues={issues} />)
 
-        expect(screen.getByRole("list", { name: "Issue list" })).not.toBeNull()
-        expect(screen.getAllByRole("listitem").length).toBeGreaterThan(0)
+        expect(screen.getByRole("table", { name: "Issue list" })).not.toBeNull()
+        expect(screen.getAllByRole("row").length).toBeGreaterThan(1)
     })
 })

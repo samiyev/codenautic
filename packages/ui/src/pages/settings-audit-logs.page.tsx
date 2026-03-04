@@ -1,8 +1,7 @@
-import { type ReactElement, useMemo, useRef, useState } from "react"
-
-import { useVirtualizer } from "@tanstack/react-virtual"
+import { type ReactElement, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 import { showToastSuccess } from "@/lib/notifications/toast"
 
 type TAuditAction =
@@ -256,7 +255,6 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
         dateTo: "",
     })
     const [exportMessage, setExportMessage] = useState<string>("")
-    const listRef = useRef<HTMLDivElement | null>(null)
 
     const actorOptions = useMemo((): ReadonlyArray<string> => {
         const actorSet = new Set<string>()
@@ -270,13 +268,6 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
         (): ReadonlyArray<IAuditLogEntry> => filterAuditLogs(sourceLogs, filters),
         [sourceLogs, filters],
     )
-
-    const virtualizer = useVirtualizer({
-        count: filteredLogs.length,
-        estimateSize: (): number => 92,
-        getScrollElement: (): HTMLDivElement | null => listRef.current,
-        overscan: 8,
-    })
 
     const handleExport = (): void => {
         const payload = buildAuditCsv(filteredLogs)
@@ -425,64 +416,61 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                     </Chip>
                 </CardHeader>
                 <CardBody>
-                    {filteredLogs.length === 0 ? (
-                        <Alert color="warning" title="No audit logs found" variant="flat">
-                            Adjust actor, action, or date range filters.
-                        </Alert>
-                    ) : (
-                        <div
-                            ref={listRef}
-                            aria-label="Audit log list"
-                            className="max-h-[520px] overflow-auto rounded-lg border border-[var(--border)]"
-                            role="list"
-                        >
-                            <div
-                                className="relative w-full"
-                                style={{ height: `${virtualizer.getTotalSize()}px` }}
-                            >
-                                {virtualizer.getVirtualItems().map((virtualItem): ReactElement => {
-                                    const entry = filteredLogs[virtualItem.index]
-                                    if (entry === undefined) {
-                                        return <div key={virtualItem.key} />
-                                    }
-
-                                    return (
-                                        <article
-                                            key={virtualItem.key}
-                                            className="absolute left-0 top-0 w-full border-b border-[var(--border)] bg-[var(--surface)] p-3"
-                                            role="listitem"
-                                            style={{
-                                                height: `${virtualItem.size}px`,
-                                                transform: `translateY(${virtualItem.start}px)`,
-                                            }}
-                                        >
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <p className="text-sm font-semibold text-[var(--foreground)]">
-                                                    {entry.actor}
-                                                </p>
-                                                <Chip
-                                                    color={mapActionChipColor(entry.action)}
-                                                    size="sm"
-                                                    variant="flat"
-                                                >
-                                                    {formatActionLabel(entry.action)}
-                                                </Chip>
-                                                <p className="text-xs text-[var(--foreground)]/70">
-                                                    {formatOccurredAt(entry.occurredAt)}
-                                                </p>
-                                            </div>
-                                            <p className="mt-1 text-sm text-[var(--foreground)]">
-                                                {entry.details}
-                                            </p>
-                                            <p className="mt-1 text-xs font-mono text-[var(--foreground)]/70">
-                                                {entry.target}
-                                            </p>
-                                        </article>
-                                    )
-                                })}
-                            </div>
-                        </div>
-                    )}
+                    <EnterpriseDataTable
+                        ariaLabel="Audit log list"
+                        columns={[
+                            {
+                                accessor: (entry): string => entry.id,
+                                header: "ID",
+                                id: "id",
+                                pin: "left",
+                                size: 180,
+                            },
+                            {
+                                accessor: (entry): string => entry.actor,
+                                header: "Actor",
+                                id: "actor",
+                                size: 180,
+                            },
+                            {
+                                accessor: (entry): string => entry.action,
+                                cell: (entry): ReactElement => (
+                                    <Chip
+                                        color={mapActionChipColor(entry.action)}
+                                        size="sm"
+                                        variant="flat"
+                                    >
+                                        {formatActionLabel(entry.action)}
+                                    </Chip>
+                                ),
+                                header: "Action",
+                                id: "action",
+                                size: 190,
+                            },
+                            {
+                                accessor: (entry): string => formatOccurredAt(entry.occurredAt),
+                                header: "Occurred at",
+                                id: "occurredAt",
+                                size: 180,
+                            },
+                            {
+                                accessor: (entry): string => entry.details,
+                                header: "Details",
+                                id: "details",
+                                size: 340,
+                            },
+                            {
+                                accessor: (entry): string => entry.target,
+                                header: "Target",
+                                id: "target",
+                                size: 260,
+                            },
+                        ]}
+                        emptyMessage="No audit logs found for current filters."
+                        getRowId={(entry): string => entry.id}
+                        id="settings-audit-logs-table"
+                        rows={filteredLogs}
+                    />
                 </CardBody>
             </Card>
 

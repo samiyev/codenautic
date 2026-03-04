@@ -2,6 +2,7 @@ import { type ChangeEvent, type ReactElement, useMemo, useState } from "react"
 import { Link } from "@tanstack/react-router"
 
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 
 type TRepositoryStatus = "error" | "ready" | "scanning"
 
@@ -408,54 +409,87 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
                         <RepositoryCountSummary label="Сканирование" value={repoScanningCount} />
                         <RepositoryCountSummary label="Ошибка" value={repoErrorCount} />
                     </div>
-
-                    <div className="overflow-hidden rounded-lg border border-slate-200">
-                        <div className="grid grid-cols-[1.8fr_1fr_1fr_1fr_1fr] bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-600">
-                            <span>Repository</span>
-                            <span>Owner</span>
-                            <span>Branch</span>
-                            <span>Last scan</span>
-                            <span>Status</span>
-                        </div>
-                        {visible.map(
-                            (item): ReactElement => {
-                                const repositoryId = getRepositoryId(item)
-                                return (
-                                    <div
-                                        className="border-t border-slate-200 px-3 py-2 text-sm"
-                                        key={repositoryId}
-                                    >
-                                        <div className="grid grid-cols-[1.8fr_1fr_1fr_1fr_1fr]">
-                                            <Link
-                                                aria-label={`Открыть обзор репозитория ${item.owner}/${item.name}`}
-                                                className="font-medium text-slate-900 underline-offset-4 hover:underline"
-                                                to="/repositories/$repositoryId"
-                                                params={{ repositoryId }}
-                                            >
-                                                {item.name}
-                                            </Link>
-                                            <p>{item.owner}</p>
-                                            <p>{item.branch}</p>
-                                            <p>{formatScanDate(item.lastScanAt)}</p>
-                                            <RepositoryStatusBadge status={item.status} />
-                                        </div>
-                                        {item.status !== "error" || item.scanError === undefined ? null : (
-                                            <RepositoryScanErrorRecovery
-                                                onRetryScan={props.onRetryScan}
-                                                repositoryId={repositoryId}
-                                                scanError={item.scanError}
-                                            />
-                                        )}
-                                    </div>
-                                )
+                    <EnterpriseDataTable
+                        ariaLabel="Repositories list table"
+                        columns={[
+                            {
+                                accessor: (item): string => item.name,
+                                cell: (item): ReactElement => {
+                                    const repositoryId = getRepositoryId(item)
+                                    return (
+                                        <Link
+                                            aria-label={`Открыть обзор репозитория ${item.owner}/${item.name}`}
+                                            className="font-medium text-slate-900 underline-offset-4 hover:underline"
+                                            params={{ repositoryId }}
+                                            to="/repositories/$repositoryId"
+                                        >
+                                            {item.name}
+                                        </Link>
+                                    )
+                                },
+                                header: "Repository",
+                                id: "repository",
+                                pin: "left",
+                                size: 220,
                             },
-                        )}
-                        {visible.length === 0 ? (
-                            <p className="px-3 py-4 text-sm text-slate-500">
-                                Результатов по заданным фильтрам не найдено.
-                            </p>
-                        ) : null}
-                    </div>
+                            {
+                                accessor: (item): string => item.owner,
+                                header: "Owner",
+                                id: "owner",
+                                size: 170,
+                            },
+                            {
+                                accessor: (item): string => item.branch,
+                                header: "Branch",
+                                id: "branch",
+                                size: 150,
+                            },
+                            {
+                                accessor: (item): string => formatScanDate(item.lastScanAt),
+                                header: "Last scan",
+                                id: "lastScan",
+                                size: 190,
+                            },
+                            {
+                                accessor: (item): string => mapStatusToLabel(item.status),
+                                cell: (item): ReactElement => <RepositoryStatusBadge status={item.status} />,
+                                header: "Status",
+                                id: "status",
+                                size: 150,
+                            },
+                            {
+                                accessor: (item): number => item.issueCount,
+                                header: "Issues",
+                                id: "issueCount",
+                                size: 120,
+                            },
+                            {
+                                accessor: (item): string =>
+                                    item.scanError === undefined ? "healthy" : item.scanError.message,
+                                cell: (item): ReactElement => {
+                                    if (item.scanError === undefined || item.status !== "error") {
+                                        return <span className="text-xs text-slate-500">—</span>
+                                    }
+
+                                    return (
+                                        <RepositoryScanErrorRecovery
+                                            onRetryScan={props.onRetryScan}
+                                            repositoryId={getRepositoryId(item)}
+                                            scanError={item.scanError}
+                                        />
+                                    )
+                                },
+                                enableGlobalFilter: false,
+                                header: "Recovery",
+                                id: "recovery",
+                                size: 360,
+                            },
+                        ]}
+                        emptyMessage="Результатов по заданным фильтрам не найдено."
+                        getRowId={(item): string => getRepositoryId(item)}
+                        id="repositories-list-table"
+                        rows={visible}
+                    />
                 </CardBody>
             </Card>
         </section>

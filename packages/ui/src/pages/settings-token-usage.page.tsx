@@ -1,10 +1,11 @@
 import { type ReactElement, useMemo, useState } from "react"
 
 import { DataFreshnessPanel, type IProvenanceContext } from "@/components/infrastructure/data-freshness-panel"
+import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 import { ExplainabilityPanel } from "@/components/infrastructure/explainability-panel"
 import { DashboardDateRangeFilter, type TDashboardDateRange } from "@/components/dashboard/dashboard-date-range-filter"
 import { type IMetricGridMetric, MetricsGrid } from "@/components/dashboard/metrics-grid"
-import { Alert, Card, CardBody, CardHeader, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs } from "@/components/ui"
+import { Alert, Card, CardBody, CardHeader, Tab, Tabs } from "@/components/ui"
 
 type TUsageTab = "by-ccr" | "by-developer" | "by-model"
 type TModelName = "claude-3-7-sonnet" | "gpt-4.1-mini" | "gpt-4o-mini" | "mistral-small-latest"
@@ -271,28 +272,46 @@ function UsageTable(props: {
                 <p className="text-base font-semibold text-slate-900">{props.title}</p>
             </CardHeader>
             <CardBody>
-                <Table aria-label={`${props.title} token usage`}>
-                    <TableHeader>
-                        <TableColumn>Group</TableColumn>
-                        <TableColumn>Prompt tokens</TableColumn>
-                        <TableColumn>Completion tokens</TableColumn>
-                        <TableColumn>Total tokens</TableColumn>
-                        <TableColumn>Estimated cost</TableColumn>
-                    </TableHeader>
-                    <TableBody emptyContent="No usage data for this range">
-                        {props.rows.map(
-                            (row): ReactElement => (
-                                <TableRow key={row.key}>
-                                    <TableCell>{row.key}</TableCell>
-                                    <TableCell>{formatTokens(row.promptTokens)}</TableCell>
-                                    <TableCell>{formatTokens(row.completionTokens)}</TableCell>
-                                    <TableCell>{formatTokens(row.totalTokens)}</TableCell>
-                                    <TableCell>{formatCostUsd(row.estimatedCostUsd)}</TableCell>
-                                </TableRow>
-                            ),
-                        )}
-                    </TableBody>
-                </Table>
+                <EnterpriseDataTable
+                    ariaLabel={`${props.title} token usage`}
+                    columns={[
+                        {
+                            accessor: (row): string => row.key,
+                            header: "Group",
+                            id: "group",
+                            pin: "left",
+                            size: 220,
+                        },
+                        {
+                            accessor: (row): string => formatTokens(row.promptTokens),
+                            header: "Prompt tokens",
+                            id: "promptTokens",
+                            size: 170,
+                        },
+                        {
+                            accessor: (row): string => formatTokens(row.completionTokens),
+                            header: "Completion tokens",
+                            id: "completionTokens",
+                            size: 180,
+                        },
+                        {
+                            accessor: (row): string => formatTokens(row.totalTokens),
+                            header: "Total tokens",
+                            id: "totalTokens",
+                            size: 170,
+                        },
+                        {
+                            accessor: (row): string => formatCostUsd(row.estimatedCostUsd),
+                            header: "Estimated cost",
+                            id: "estimatedCost",
+                            size: 180,
+                        },
+                    ]}
+                    emptyMessage="No usage data for this range"
+                    getRowId={(row): string => row.key}
+                    id={`token-usage-${props.title.toLowerCase().replace(/\s+/g, "-")}`}
+                    rows={props.rows}
+                />
             </CardBody>
         </Card>
     )
