@@ -189,7 +189,7 @@ describe("CodeCity3DScene", (): void => {
         await waitFor((): void => {
             expect(
                 screen.getByText(
-                    /renderer-files:1;impacts:1;couplings:2;preset:bird-eye;selected:none/,
+                    /renderer-files:1;impacts:1;couplings:1;preset:bird-eye;selected:none/,
                 ),
             ).not.toBeNull()
         })
@@ -198,7 +198,7 @@ describe("CodeCity3DScene", (): void => {
         await waitFor((): void => {
             expect(
                 screen.getByText(
-                    /renderer-files:1;impacts:1;couplings:2;preset:street-level;selected:none/,
+                    /renderer-files:1;impacts:1;couplings:1;preset:street-level;selected:none/,
                 ),
             ).not.toBeNull()
         })
@@ -207,7 +207,7 @@ describe("CodeCity3DScene", (): void => {
         await waitFor((): void => {
             expect(
                 screen.getByText(
-                    /renderer-files:1;impacts:1;couplings:2;preset:focus-on-building;selected:none/,
+                    /renderer-files:1;impacts:1;couplings:1;preset:focus-on-building;selected:none/,
                 ),
             ).not.toBeNull()
         })
@@ -264,6 +264,55 @@ describe("CodeCity3DScene", (): void => {
         fireEvent.change(slider, { target: { value: "4" } })
         expect(screen.getByText("Commit #5")).not.toBeNull()
         expect(screen.getByText("Files: 4 / 4")).not.toBeNull()
+
+        getContextSpy.mockRestore()
+    })
+
+    it("реплеит causal timeline через slider, play/pause и speed control", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const fakeContext = {} as GPUCanvasContext
+        const getContextSpy = vi
+            .spyOn(HTMLCanvasElement.prototype, "getContext")
+            .mockImplementation((): GPUCanvasContext => fakeContext)
+
+        renderWithProviders(
+            <CodeCity3DScene
+                causalCouplings={TEST_CAUSAL_COUPLINGS}
+                files={TEST_TIMELINE_FILES}
+                title="3D causal replay scene"
+            />,
+        )
+
+        expect(screen.getByText("Causal replay")).not.toBeNull()
+        expect(screen.getByText("Event #1: src/api/repository.ts -> src/api/router.ts")).not.toBeNull()
+        expect(screen.getByRole("button", { name: "Play causal replay" })).not.toBeNull()
+        expect(screen.getByRole("button", { name: "Causal replay speed 1x" })).toHaveAttribute(
+            "aria-pressed",
+            "true",
+        )
+        expect(screen.getByText(/couplings:1;preset:bird-eye;selected:none/)).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "Causal replay speed 2x" }))
+        expect(screen.getByRole("button", { name: "Causal replay speed 2x" })).toHaveAttribute(
+            "aria-pressed",
+            "true",
+        )
+
+        fireEvent.change(screen.getByLabelText("Causal timeline"), {
+            target: {
+                value: "1",
+            },
+        })
+        await waitFor((): void => {
+            expect(screen.getByText("Event #2: src/api/router.ts -> src/services/metrics.ts"))
+                .not.toBeNull()
+        })
+        expect(screen.getByText(/couplings:2;preset:bird-eye;selected:none/)).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "Play causal replay" }))
+        expect(screen.getByRole("button", { name: "Pause causal replay" })).not.toBeNull()
+        await user.click(screen.getByRole("button", { name: "Pause causal replay" }))
+        expect(screen.getByRole("button", { name: "Play causal replay" })).not.toBeNull()
 
         getContextSpy.mockRestore()
     })

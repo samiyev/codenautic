@@ -131,12 +131,15 @@ interface ICodeCity3DSnapshot {
 
 const TIMELINE_SNAPSHOT_RATIOS: ReadonlyArray<number> = [0.35, 0.55, 0.75, 0.9, 1]
 const TIMELINE_PLAYBACK_INTERVAL_MS = 1200
+const CAUSAL_REPLAY_BASE_INTERVAL_MS = 1500
+const CAUSAL_REPLAY_SPEED_OPTIONS = [0.5, 1, 2] as const
 const CHAIN_NAVIGATION_INTERVAL_MS = 900
 const GPU_MEMORY_BUDGET_MB = 220
 const ESTIMATED_GPU_COST_PER_BUILDING_MB = 1.1
 const WEAK_DEVICE_MAX_CORES = 4
 const WEAK_DEVICE_MAX_MEMORY_GB = 4
 const WEAK_DEVICE_MIN_TEXTURE_SIZE = 4096
+type TCausalReplaySpeed = (typeof CAUSAL_REPLAY_SPEED_OPTIONS)[number]
 
 interface ICodeCity3DRenderCapability {
     readonly isWebGlSupported: boolean
@@ -274,7 +277,10 @@ function resolveCodeCityRenderCapability(
  */
 export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
     const [cameraPreset, setCameraPreset] = useState<TCodeCityCameraPreset>("bird-eye")
+    const [causalReplayIndex, setCausalReplayIndex] = useState<number>(0)
+    const [causalReplaySpeed, setCausalReplaySpeed] = useState<TCausalReplaySpeed>(1)
     const [hoveredFileId, setHoveredFileId] = useState<string | undefined>(undefined)
+    const [isCausalReplayPlaying, setIsCausalReplayPlaying] = useState<boolean>(false)
     const [isTimelinePlaying, setIsTimelinePlaying] = useState<boolean>(false)
     const [chainNavigationIndex, setChainNavigationIndex] = useState<number>(0)
     const [selectedFileId, setSelectedFileId] = useState<string | undefined>(undefined)
@@ -315,6 +321,78 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
             globalThis.clearInterval(intervalId)
         }
     }, [isTimelinePlaying, snapshots.length])
+
+    const repositoryFilePathById = useMemo((): ReadonlyMap<string, string> => {
+        return new Map(
+            props.files.map((file): readonly [string, string] => {
+                return [file.id, file.path]
+            }),
+        )
+    }, [props.files])
+    const causalTimelineEvents = useMemo((): ReadonlyArray<string> => {
+        return props.causalCouplings?.map((coupling, index): string => {
+            const sourcePath =
+                repositoryFilePathById.get(coupling.sourceFileId) ?? coupling.sourceFileId
+            const targetPath =
+                repositoryFilePathById.get(coupling.targetFileId) ?? coupling.targetFileId
+
+            return `Event #${String(index + 1)}: ${sourcePath} -> ${targetPath}`
+        }) ?? []
+    }, [props.causalCouplings, repositoryFilePathById])
+    const currentCausalEventLabel = useMemo((): string => {
+        if (causalTimelineEvents.length === 0) {
+            return "Event #1"
+        }
+
+        const maxIndex = causalTimelineEvents.length - 1
+        const normalizedIndex = Math.max(0, Math.min(causalReplayIndex, maxIndex))
+        return causalTimelineEvents[normalizedIndex] ?? "Event #1"
+    }, [causalReplayIndex, causalTimelineEvents])
+    const displayedCausalCouplings = useMemo(
+        (): ReadonlyArray<ICodeCity3DCausalCouplingDescriptor> => {
+            const causalCouplings = props.causalCouplings ?? []
+            if (causalCouplings.length === 0) {
+                return []
+            }
+
+            const maxIndex = causalCouplings.length - 1
+            const normalizedIndex = Math.max(0, Math.min(causalReplayIndex, maxIndex))
+            return causalCouplings.slice(0, normalizedIndex + 1)
+        },
+        [causalReplayIndex, props.causalCouplings],
+    )
+
+    useEffect((): void => {
+        setCausalReplayIndex((currentIndex): number => {
+            return Math.min(currentIndex, Math.max(0, causalTimelineEvents.length - 1))
+        })
+    }, [causalTimelineEvents.length])
+
+    useEffect((): void => {
+        if (causalTimelineEvents.length <= 1) {
+            setIsCausalReplayPlaying(false)
+        }
+    }, [causalTimelineEvents.length])
+
+    useEffect((): (() => void) | void => {
+        if (isCausalReplayPlaying === false || causalTimelineEvents.length <= 1) {
+            return
+        }
+
+        const intervalMs = Math.max(
+            250,
+            Math.round(CAUSAL_REPLAY_BASE_INTERVAL_MS / causalReplaySpeed),
+        )
+        const intervalId = globalThis.setInterval((): void => {
+            setCausalReplayIndex((currentIndex): number => {
+                return (currentIndex + 1) % causalTimelineEvents.length
+            })
+        }, intervalMs)
+
+        return (): void => {
+            globalThis.clearInterval(intervalId)
+        }
+    }, [causalReplaySpeed, causalTimelineEvents.length, isCausalReplayPlaying])
 
     const fileById = useMemo((): ReadonlyMap<string, ICodeCity3DSceneFileDescriptor> => {
         return new Map(
@@ -493,6 +571,69 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                 <p className="mt-1 text-slate-400">
                     Files: {String(currentSnapshot?.files.length ?? 0)} / {String(props.files.length)}
                 </p>
+                {causalTimelineEvents.length > 0 ? (
+                    <div className="mt-3 border-t border-slate-700/70 pt-2">
+                        <div className="flex items-center justify-between">
+                            <p className="font-semibold text-cyan-200">Causal replay</p>
+                            <button
+                                aria-label={
+                                    isCausalReplayPlaying
+                                        ? "Pause causal replay"
+                                        : "Play causal replay"
+                                }
+                                className="rounded border border-slate-400 px-2 py-0.5 text-xs text-slate-100 hover:border-cyan-300"
+                                onClick={(): void => {
+                                    setIsCausalReplayPlaying((isPlaying): boolean => !isPlaying)
+                                }}
+                                type="button"
+                            >
+                                {isCausalReplayPlaying ? "Pause" : "Play"}
+                            </button>
+                        </div>
+                        <p className="mt-2 break-all text-slate-300">{currentCausalEventLabel}</p>
+                        <input
+                            aria-label="Causal timeline"
+                            className="mt-2 w-full accent-cyan-400"
+                            max={Math.max(0, causalTimelineEvents.length - 1)}
+                            min={0}
+                            onChange={(event: ChangeEvent<HTMLInputElement>): void => {
+                                setIsCausalReplayPlaying(false)
+                                const nextIndex = event.currentTarget.valueAsNumber
+                                if (Number.isNaN(nextIndex)) {
+                                    return
+                                }
+                                setCausalReplayIndex(nextIndex)
+                            }}
+                            step={1}
+                            type="range"
+                            value={causalReplayIndex}
+                        />
+                        <div className="mt-2 flex items-center gap-1.5">
+                            {CAUSAL_REPLAY_SPEED_OPTIONS.map((speed): ReactElement => (
+                                <button
+                                    aria-label={`Causal replay speed ${String(speed)}x`}
+                                    aria-pressed={causalReplaySpeed === speed}
+                                    className={`rounded border px-2 py-0.5 text-[11px] transition ${
+                                        causalReplaySpeed === speed
+                                            ? "border-cyan-300 bg-cyan-500/20 text-cyan-100"
+                                            : "border-slate-500 bg-slate-900/70 text-slate-300 hover:border-slate-300 hover:text-slate-100"
+                                    }`}
+                                    key={speed}
+                                    onClick={(): void => {
+                                        setCausalReplaySpeed(speed)
+                                    }}
+                                    type="button"
+                                >
+                                    {String(speed)}x
+                                </button>
+                            ))}
+                        </div>
+                        <p className="mt-1 text-slate-400">
+                            Events: {String(Math.min(causalReplayIndex + 1, causalTimelineEvents.length))} /{" "}
+                            {String(causalTimelineEvents.length)}
+                        </p>
+                    </div>
+                ) : null}
             </div>
             {hoveredFile !== undefined ? (
                 <aside className="absolute bottom-3 left-3 z-10 rounded-md border border-cyan-400/50 bg-slate-900/90 px-3 py-2 text-xs text-slate-100 shadow-lg">
@@ -552,7 +693,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
             >
                 <LazyCodeCity3DSceneRenderer
                     cameraPreset={cameraPreset}
-                    causalCouplings={props.causalCouplings ?? []}
+                    causalCouplings={displayedCausalCouplings}
                     files={currentSnapshot?.files ?? []}
                     impactedFiles={props.impactedFiles ?? []}
                     navigationActiveFileId={props.navigationActiveFileId}
