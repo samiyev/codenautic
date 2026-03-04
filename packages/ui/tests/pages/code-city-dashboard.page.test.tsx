@@ -121,6 +121,23 @@ const { mockHealthTrendChart } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockProjectOverviewPanel } = vi.hoisted(() => ({
+    mockProjectOverviewPanel: vi.fn(
+        (props: {
+            readonly files: ReadonlyArray<unknown>
+            readonly repositoryId: string
+            readonly repositoryLabel: string
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>overview-repository:{props.repositoryId}</p>
+                    <p>overview-label:{props.repositoryLabel}</p>
+                    <p>overview-files:{props.files.length}</p>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockRootCauseChainViewer } = vi.hoisted(() => ({
     mockRootCauseChainViewer: vi.fn(
         (props: {
@@ -174,6 +191,9 @@ vi.mock("@/components/graphs/churn-complexity-scatter", () => ({
 vi.mock("@/components/graphs/health-trend-chart", () => ({
     HealthTrendChart: mockHealthTrendChart,
 }))
+vi.mock("@/components/graphs/project-overview-panel", () => ({
+    ProjectOverviewPanel: mockProjectOverviewPanel,
+}))
 vi.mock("@/components/graphs/root-cause-chain-viewer", () => ({
     RootCauseChainViewer: mockRootCauseChainViewer,
 }))
@@ -184,6 +204,7 @@ beforeEach((): void => {
     mockCodeCity3DScene.mockClear()
     mockChurnComplexityScatter.mockClear()
     mockHealthTrendChart.mockClear()
+    mockProjectOverviewPanel.mockClear()
     mockRootCauseChainViewer.mockClear()
 })
 
@@ -261,6 +282,12 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstHealthTrendCall).not.toBeUndefined()
         expect(firstHealthTrendCall?.points.length).toBeGreaterThan(0)
 
+        const firstOverviewCall = mockProjectOverviewPanel.mock.calls.at(0)?.[0]
+        expect(firstOverviewCall).not.toBeUndefined()
+        expect(firstOverviewCall?.repositoryId).toBe("platform-team/api-gateway")
+        expect(firstOverviewCall?.repositoryLabel).toBe("platform-team/api-gateway")
+        expect(firstOverviewCall?.files.length).toBeGreaterThan(0)
+
         const firstRootCauseCall = mockRootCauseChainViewer.mock.calls.at(0)?.[0]
         expect(firstRootCauseCall).not.toBeUndefined()
         expect(firstRootCauseCall?.issues.length).toBe(0)
@@ -301,6 +328,11 @@ describe("CodeCityDashboardPage", (): void => {
         expect(current3DCall?.impactedFiles.length).toBeGreaterThan(0)
         expect(current3DCall?.causalCouplings.length).toBe(0)
         expect(current3DCall?.navigationChainFileIds.length).toBe(0)
+
+        const currentOverviewCall = mockProjectOverviewPanel.mock.calls.at(-1)?.[0]
+        expect(currentOverviewCall).not.toBeUndefined()
+        expect(currentOverviewCall?.repositoryId).toBe("frontend-team/ui-dashboard")
+        expect(currentOverviewCall?.repositoryLabel).toBe("frontend-team/ui-dashboard")
 
         const overlaySelect = screen.getByRole("combobox", { name: "Causal overlay" })
         await user.selectOptions(overlaySelect, "root-cause")

@@ -26,6 +26,7 @@ import {
     GuidedTourOverlay,
     type IGuidedTourStep,
 } from "@/components/graphs/guided-tour-overlay"
+import { ProjectOverviewPanel } from "@/components/graphs/project-overview-panel"
 import { ChurnComplexityScatter } from "@/components/graphs/churn-complexity-scatter"
 import { HealthTrendChart, type IHealthTrendPoint } from "@/components/graphs/health-trend-chart"
 import {
@@ -766,6 +767,19 @@ export function CodeCityDashboardPage(
                         </label>
                     </div>
                     <CausalOverlaySelector value={overlayMode} onChange={setOverlayMode} />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Project overview panel</p>
+                </CardHeader>
+                <CardBody>
+                    <ProjectOverviewPanel
+                        files={currentProfile.files}
+                        repositoryId={currentProfile.id}
+                        repositoryLabel={currentProfile.label}
+                    />
                 </CardBody>
             </Card>
 
