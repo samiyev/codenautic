@@ -1,10 +1,17 @@
 import {describe, expect, test} from "bun:test"
 
+import {
+    Result,
+    RuleContextFormatterService,
+    ValidationError,
+} from "../../../../src"
 import type {
     IChatRequestDTO,
     IChatResponseDTO,
+    IGeneratePromptInput,
     ILLMProvider,
     IStreamingChatResponseDTO,
+    IUseCase,
 } from "../../../../src"
 import {ReviewPipelineState} from "../../../../src/application/types/review/review-pipeline-state"
 import {ProcessCcrLevelReviewStageUseCase} from "../../../../src/application/use-cases/review/process-ccr-level-review-stage.use-case"
@@ -53,6 +60,90 @@ class InMemoryLLMProvider implements ILLMProvider {
 }
 
 /**
+ * Asserts request capture.
+ *
+ * @param request Captured request.
+ * @returns Non-null request.
+ */
+function assertRequest(request: IChatRequestDTO | null): IChatRequestDTO {
+    expect(request).not.toBeNull()
+    if (request === null) {
+        throw new Error("LLM request was not captured")
+    }
+
+    return request
+}
+
+/**
+ * Asserts runtime variables presence.
+ *
+ * @param runtimeVariables Runtime variables payload.
+ * @returns Runtime variables map.
+ */
+function assertRuntimeVariables(
+    runtimeVariables: Record<string, unknown> | undefined,
+): Record<string, unknown> {
+    expect(runtimeVariables).toBeDefined()
+    if (runtimeVariables === undefined) {
+        throw new Error("Runtime variables were not set")
+    }
+
+    return runtimeVariables
+}
+
+/**
+ * In-memory prompt generator stub for CCR stage tests.
+ */
+class InMemoryGeneratePromptUseCase
+    implements IUseCase<IGeneratePromptInput, string, ValidationError>
+{
+    public readonly calls: IGeneratePromptInput[] = []
+    public nextResult: Result<string, ValidationError>
+
+    /**
+     * Creates prompt use case stub with success default.
+     */
+    public constructor() {
+        this.nextResult = Result.ok("TEMPLATE_SYSTEM")
+    }
+
+    public execute(
+        input: IGeneratePromptInput,
+    ): Promise<Result<string, ValidationError>> {
+        this.calls.push(input)
+        return Promise.resolve(this.nextResult)
+    }
+}
+
+interface IUseCaseBundle {
+    readonly useCase: ProcessCcrLevelReviewStageUseCase
+    readonly generatePromptUseCase: InMemoryGeneratePromptUseCase
+}
+
+/**
+ * Creates process-ccr-level-review use case with prompt generator stub.
+ *
+ * @param llmProvider LLM provider stub.
+ * @param promptUseCase Optional prompt use case override.
+ * @returns Use case bundle with prompt stub for customization.
+ */
+function createUseCaseBundle(
+    llmProvider: ILLMProvider,
+    promptUseCase?: InMemoryGeneratePromptUseCase,
+): IUseCaseBundle {
+    const generatePromptUseCase = promptUseCase ?? new InMemoryGeneratePromptUseCase()
+
+    return {
+        useCase: new ProcessCcrLevelReviewStageUseCase({
+            llmProvider,
+            generatePromptUseCase,
+            ruleContextFormatterService: new RuleContextFormatterService(),
+        }),
+        generatePromptUseCase,
+    }
+}
+
+/**
  * Creates state for CCR-level review stage tests.
  *
  * @param files Files payload.
@@ -91,10 +182,7 @@ describe("ProcessCcrLevelReviewStageUseCase", () => {
                 },
             ],
         })
-        const useCase = new ProcessCcrLevelReviewStageUseCase({
-            llmProvider,
-            model: "custom-model",
-        })
+        const {useCase, generatePromptUseCase} = createUseCaseBundle(llmProvider)
         const state = createState(
             [
                 {
@@ -102,12 +190,7 @@ describe("ProcessCcrLevelReviewStageUseCase", () => {
                     patch: "@@ -1,1 +1,2 @@",
                 },
             ],
-            {
-                promptOverrides: {
-                    systemPrompt: "  custom system  ",
-                    reviewerPrompt: " custom reviewer ",
-                },
-            },
+            {},
         )
 
         const result = await useCase.execute({
@@ -126,24 +209,54 @@ describe("ProcessCcrLevelReviewStageUseCase", () => {
         expect(ccrSuggestions).toHaveLength(1)
         expect(ccrSuggestions[0]?.["category"]).toBe("architecture")
 
-        const request = llmProvider.lastRequest
-        expect(request).not.toBeNull()
-        if (request === null) {
-            throw new Error("LLM request was not captured")
-        }
+        const request = assertRequest(llmProvider.lastRequest)
+        expect(generatePromptUseCase.calls).toHaveLength(1)
+        const promptCall = generatePromptUseCase.calls[0]
+        expect(promptCall?.name).toBe("ccr-level-review")
+        const runtimeVariables = assertRuntimeVariables(promptCall?.runtimeVariables)
+        expect(typeof runtimeVariables["files"]).toBe("string")
+        expect(runtimeVariables["files"]).toContain("FILE: src/main.ts")
+        expect(runtimeVariables["rules"]).toBe("[]")
+        expect(request.model).toBe("gpt-4o-mini")
+        expect(request.messages[0]?.content).toBe("TEMPLATE_SYSTEM")
+        expect(request.messages[1]?.content.includes("FILE: src/main.ts")).toBe(true)
+    })
 
-        expect(request.model).toBe("custom-model")
-        expect(request.messages[0]?.content).toBe("custom system")
-        expect(request.messages[1]?.content.includes("custom reviewer")).toBe(true)
+    test("fails stage when prompt template is missing", async () => {
+        const llmProvider = new InMemoryLLMProvider()
+        const {useCase, generatePromptUseCase} = createUseCaseBundle(llmProvider)
+        generatePromptUseCase.nextResult = Result.fail(
+            new ValidationError("Generate prompt failed", [{
+                field: "name",
+                message: "Template not found",
+            }]),
+        )
+
+        const state = createState(
+            [
+                {
+                    path: "src/missing.ts",
+                    patch: "@@ -1,1 +1,2 @@",
+                },
+            ],
+            {},
+        )
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isFail).toBe(true)
+        expect(result.error.recoverable).toBe(false)
+        expect(result.error.message).toContain("Missing prompt template")
+        expect(llmProvider.lastRequest).toBeNull()
     })
 
     test("falls back to single suggestion when response is non-json text", async () => {
         const llmProvider = new InMemoryLLMProvider()
         llmProvider.responseContent = "Consider adding integration tests for this flow."
 
-        const useCase = new ProcessCcrLevelReviewStageUseCase({
-            llmProvider,
-        })
+        const {useCase} = createUseCaseBundle(llmProvider)
         const state = createState([], {})
 
         const result = await useCase.execute({
@@ -185,9 +298,7 @@ describe("ProcessCcrLevelReviewStageUseCase", () => {
             },
         ])
 
-        const useCase = new ProcessCcrLevelReviewStageUseCase({
-            llmProvider,
-        })
+        const {useCase} = createUseCaseBundle(llmProvider)
         const state = createState([], {})
 
         const result = await useCase.execute({
@@ -207,9 +318,7 @@ describe("ProcessCcrLevelReviewStageUseCase", () => {
         const llmProvider = new InMemoryLLMProvider()
         llmProvider.shouldThrow = true
 
-        const useCase = new ProcessCcrLevelReviewStageUseCase({
-            llmProvider,
-        })
+        const {useCase} = createUseCaseBundle(llmProvider)
         const state = createState([], {})
 
         const result = await useCase.execute({

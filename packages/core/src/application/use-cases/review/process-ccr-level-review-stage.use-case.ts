@@ -1,22 +1,27 @@
 import type {IChatRequestDTO} from "../../dto/llm/chat.dto"
 import type {ISuggestionDTO} from "../../dto/review/suggestion.dto"
+import type {IGeneratePromptInput} from "../generate-prompt.use-case"
+import type {IUseCase} from "../../ports/inbound/use-case.port"
 import type {ILLMProvider} from "../../ports/outbound/llm/llm-provider.port"
 import type {
     IPipelineStageUseCase,
     IStageCommand,
     IStageTransition,
 } from "../../types/review/pipeline-stage.contract"
+import type {ValidationError} from "../../../domain/errors/validation.error"
+import {RuleContextFormatterService} from "../../../domain/services/rule-context-formatter.service"
 import {StageError} from "../../../domain/errors/stage.error"
 import {hash} from "../../../shared/utils/hash"
 import {Result} from "../../../shared/result"
 import {
     INITIAL_STAGE_ATTEMPT,
     mergeExternalContext,
-    readObjectField,
+    readStringField,
 } from "./pipeline-stage-state.utils"
 
 const DEFAULT_CCR_MODEL = "gpt-4o-mini"
 const DEFAULT_CCR_MAX_TOKENS = 1200
+const DEFAULT_CCR_PROMPT_NAME = "ccr-level-review"
 
 type ParsedJsonPayload = unknown[] | Readonly<Record<string, unknown>>
 
@@ -25,6 +30,8 @@ type ParsedJsonPayload = unknown[] | Readonly<Record<string, unknown>>
  */
 export interface IProcessCcrLevelReviewStageDependencies {
     llmProvider: ILLMProvider
+    generatePromptUseCase: IUseCase<IGeneratePromptInput, string, ValidationError>
+    ruleContextFormatterService: RuleContextFormatterService
     model?: string
 }
 
@@ -36,6 +43,8 @@ export class ProcessCcrLevelReviewStageUseCase implements IPipelineStageUseCase 
     public readonly stageName: string
 
     private readonly llmProvider: ILLMProvider
+    private readonly generatePromptUseCase: IUseCase<IGeneratePromptInput, string, ValidationError>
+    private readonly ruleContextFormatterService: RuleContextFormatterService
     private readonly model: string
 
     /**
@@ -47,6 +56,8 @@ export class ProcessCcrLevelReviewStageUseCase implements IPipelineStageUseCase 
         this.stageId = "process-ccr-level-review"
         this.stageName = "Process CCR Level Review"
         this.llmProvider = dependencies.llmProvider
+        this.generatePromptUseCase = dependencies.generatePromptUseCase
+        this.ruleContextFormatterService = dependencies.ruleContextFormatterService
         this.model = dependencies.model ?? DEFAULT_CCR_MODEL
     }
 
@@ -57,7 +68,18 @@ export class ProcessCcrLevelReviewStageUseCase implements IPipelineStageUseCase 
      * @returns Updated stage transition or stage error.
      */
     public async execute(input: IStageCommand): Promise<Result<IStageTransition, StageError>> {
-        const request = this.buildChatRequest(input)
+        const fileSummaries = this.buildFileSummaries(input.state.files)
+        const systemPromptResult = await this.resolveTemplateSystemPrompt(
+            input.state.runId,
+            input.state.definitionVersion,
+            input.state.mergeRequest,
+            fileSummaries,
+        )
+        if (systemPromptResult.isFail) {
+            return Result.fail<IStageTransition, StageError>(systemPromptResult.error)
+        }
+
+        const request = this.buildChatRequest(systemPromptResult.value, fileSummaries)
 
         try {
             const response = await this.llmProvider.chat(request)
@@ -94,23 +116,103 @@ export class ProcessCcrLevelReviewStageUseCase implements IPipelineStageUseCase 
     /**
      * Builds LLM chat request for CCR-level review.
      *
-     * @param input Stage command payload.
+     * @param systemPrompt System prompt from template.
+     * @param fileSummaries File summaries payload.
      * @returns Chat request.
      */
-    private buildChatRequest(input: IStageCommand): IChatRequestDTO {
-        const promptOverrides = readObjectField(input.state.config, "promptOverrides")
-        const systemPromptRaw = promptOverrides?.["systemPrompt"]
-        const reviewerPromptRaw = promptOverrides?.["reviewerPrompt"]
-        const systemPrompt =
-            typeof systemPromptRaw === "string" && systemPromptRaw.trim().length > 0
-                ? systemPromptRaw.trim()
-                : "You are a senior code reviewer. Return JSON with CCR suggestions."
-        const reviewerPrompt =
-            typeof reviewerPromptRaw === "string" && reviewerPromptRaw.trim().length > 0
-                ? reviewerPromptRaw.trim()
-                : "Analyze architecture, tests, and potential breaking changes."
+    private buildChatRequest(
+        systemPrompt: string,
+        fileSummaries: string,
+    ): IChatRequestDTO {
+        return {
+            model: this.model,
+            maxTokens: DEFAULT_CCR_MAX_TOKENS,
+            messages: [
+                {
+                    role: "system",
+                    content: systemPrompt,
+                },
+                {
+                    role: "user",
+                    content: fileSummaries,
+                },
+            ],
+        }
+    }
 
-        const fileSummaries = input.state.files
+    /**
+     * Resolves template-based system prompt for CCR-level review.
+     *
+     * @param runId Pipeline run id.
+     * @param definitionVersion Pipeline definition version.
+     * @param mergeRequest Merge request payload.
+     * @param fileSummaries File summaries payload.
+     * @returns Rendered system prompt or stage error.
+     */
+    private async resolveTemplateSystemPrompt(
+        runId: string,
+        definitionVersion: string,
+        mergeRequest: Readonly<Record<string, unknown>>,
+        fileSummaries: string,
+    ): Promise<Result<string, StageError>> {
+        const organizationId = readStringField(mergeRequest, "organizationId")
+        const rulesContext = this.ruleContextFormatterService.formatForPrompt([])
+
+        try {
+            const result = await this.generatePromptUseCase.execute({
+                name: DEFAULT_CCR_PROMPT_NAME,
+                organizationId: organizationId ?? null,
+                runtimeVariables: {
+                    files: fileSummaries,
+                    rules: rulesContext,
+                },
+            })
+            if (result.isFail) {
+                return Result.fail<string, StageError>(
+                    this.createStageError(
+                        runId,
+                        definitionVersion,
+                        `Missing prompt template '${DEFAULT_CCR_PROMPT_NAME}' for CCR review stage`,
+                        false,
+                        result.error,
+                    ),
+                )
+            }
+
+            const normalized = result.value.trim()
+            if (normalized.length === 0) {
+                return Result.fail<string, StageError>(
+                    this.createStageError(
+                        runId,
+                        definitionVersion,
+                        `Empty prompt template '${DEFAULT_CCR_PROMPT_NAME}' for CCR review stage`,
+                        false,
+                    ),
+                )
+            }
+
+            return Result.ok<string, StageError>(normalized)
+        } catch (error: unknown) {
+            return Result.fail<string, StageError>(
+                this.createStageError(
+                    runId,
+                    definitionVersion,
+                    "Failed to resolve prompt template for CCR review stage",
+                    true,
+                    error instanceof Error ? error : undefined,
+                ),
+            )
+        }
+    }
+
+    /**
+     * Builds CCR-level file summaries payload for prompt context.
+     *
+     * @param files File payload list.
+     * @returns Joined file summaries string.
+     */
+    private buildFileSummaries(files: readonly Readonly<Record<string, unknown>>[]): string {
+        return files
             .map((file) => {
                 const path = file["path"]
                 const patch = file["patch"]
@@ -124,21 +226,6 @@ export class ProcessCcrLevelReviewStageUseCase implements IPipelineStageUseCase 
                 return value !== null
             })
             .join("\n\n")
-
-        return {
-            model: this.model,
-            maxTokens: DEFAULT_CCR_MAX_TOKENS,
-            messages: [
-                {
-                    role: "system",
-                    content: systemPrompt,
-                },
-                {
-                    role: "user",
-                    content: `${reviewerPrompt}\n\n${fileSummaries}`,
-                },
-            ],
-        }
     }
 
     /**
