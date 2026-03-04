@@ -82,14 +82,24 @@ function ErrorFallback(props: IErrorFallbackProps): ReactElement {
                 <p className="mt-4 text-base text-amber-700">
                     Доступ запрещён для текущего пользователя.
                 </p>
-                <Button
-                    className="mt-6 rounded-full bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
-                    onPress={(): void => {
-                        window.location.assign("/")
-                    }}
-                >
-                    Вернуться на главную
-                </Button>
+                <div className="mt-6 flex flex-wrap items-center gap-2">
+                    <Button
+                        className="rounded-full bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                        onPress={(): void => {
+                            window.location.assign("/")
+                        }}
+                    >
+                        Вернуться на главную
+                    </Button>
+                    <Button
+                        variant="flat"
+                        onPress={(): void => {
+                            window.location.assign("/help-diagnostics?from=error-fallback")
+                        }}
+                    >
+                        Открыть диагностику
+                    </Button>
+                </div>
             </section>
         )
     }
@@ -102,12 +112,22 @@ function ErrorFallback(props: IErrorFallbackProps): ReactElement {
             <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
                 <h1 className="text-3xl font-semibold tracking-tight">{props.scopeLabel}</h1>
                 <p className="mt-4 text-base text-rose-700">{resolvedError.message}</p>
-                <Button
-                    className="mt-6 rounded-full bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
-                    onPress={props.reset}
-                >
-                    Повторить
-                </Button>
+                <div className="mt-6 flex flex-wrap items-center gap-2">
+                    <Button
+                        className="rounded-full bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                        onPress={props.reset}
+                    >
+                        Повторить
+                    </Button>
+                    <Button
+                        variant="flat"
+                        onPress={(): void => {
+                            window.location.assign("/help-diagnostics?from=error-fallback")
+                        }}
+                    >
+                        Открыть диагностику
+                    </Button>
+                </div>
             </section>
         )
     }

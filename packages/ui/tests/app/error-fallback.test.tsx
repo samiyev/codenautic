@@ -61,12 +61,17 @@ describe("error fallback ui", (): void => {
 
         expect(assignSpy).toHaveBeenCalledWith("/")
 
+        const diagnosticsButton = screen.getByRole("button", { name: "Открыть диагностику" })
+        await user.click(diagnosticsButton)
+        expect(assignSpy).toHaveBeenCalledWith("/help-diagnostics?from=error-fallback")
+
         assignSpy.mockRestore()
     })
 
     it("показывает retry для server error и вызывает reset", async (): Promise<void> => {
         const user = userEvent.setup()
         const resetMock = vi.fn()
+        const assignSpy = vi.spyOn(window.location, "assign").mockImplementation((): void => {})
 
         renderWithProviders(
             <RouteErrorFallback
@@ -80,6 +85,12 @@ describe("error fallback ui", (): void => {
         await user.click(retryButton)
 
         expect(resetMock).toHaveBeenCalledTimes(1)
+
+        const diagnosticsButton = screen.getByRole("button", { name: "Открыть диагностику" })
+        await user.click(diagnosticsButton)
+        expect(assignSpy).toHaveBeenCalledWith("/help-diagnostics?from=error-fallback")
+
+        assignSpy.mockRestore()
     })
 
     it("показывает not-found fallback", (): void => {

@@ -8,6 +8,7 @@ import {
     GitPullRequest,
     House,
     Inbox,
+    LifeBuoy,
     Rocket,
     Settings,
 } from "lucide-react"
@@ -82,6 +83,11 @@ const DEFAULT_SIDEBAR_ITEMS: readonly ISidebarItem[] = [
         icon: <Settings aria-hidden="true" size={16} />,
         label: "Settings",
         to: "/settings",
+    },
+    {
+        icon: <LifeBuoy aria-hidden="true" size={16} />,
+        label: "Help",
+        to: "/help-diagnostics",
     },
 ] as const
 

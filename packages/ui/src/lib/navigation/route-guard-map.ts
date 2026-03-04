@@ -74,6 +74,18 @@ export const ROUTE_GUARD_MAP: ReadonlyArray<INavigationRouteEntry> = [
         section: "workflows",
     },
     {
+        breadcrumbs: ["Dashboard", "Help & diagnostics"],
+        guards: {
+            requiresAuth: true,
+            roles: BASE_ROLES,
+            tenants: BASE_TENANTS,
+        },
+        label: "Help and diagnostics",
+        path: "/help-diagnostics",
+        searchKeywords: ["help", "diagnostics", "support", "runbook"],
+        section: "settings",
+    },
+    {
         breadcrumbs: ["Dashboard", "Code City"],
         guards: {
             requiresAuth: true,
