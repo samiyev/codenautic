@@ -75,5 +75,62 @@ describe("SettingsAppearancePage", (): void => {
         await waitFor(() => {
             expect(systemModeButton.getAttribute("aria-pressed")).toBe("true")
         })
+
+        await user.click(screen.getByRole("button", { name: "Pin current preset" }))
+        expect(screen.getByText(/pinned:/)).not.toBeNull()
+
+        await user.type(screen.getByRole("textbox", { name: "Theme name" }), "Security Focus Theme")
+        await user.click(screen.getByRole("button", { name: "Save current theme" }))
+        await waitFor(() => {
+            expect(
+                screen.getByRole("combobox", { name: "Theme library selection" }),
+            ).not.toBeNull()
+            expect(screen.getByRole("option", { name: "Security Focus Theme" })).not.toBeNull()
+        })
+
+        await user.click(screen.getByRole("button", { name: "Duplicate selected" }))
+        await waitFor(() => {
+            expect(screen.getByRole("option", { name: "Security Focus Theme Copy" })).not.toBeNull()
+        })
+
+        await user.clear(screen.getByRole("textbox", { name: "Theme name" }))
+        await user.type(screen.getByRole("textbox", { name: "Theme name" }), "Security Focus Theme")
+        await user.click(screen.getByRole("button", { name: "Rename selected" }))
+        await waitFor(() => {
+            expect(screen.getByRole("option", { name: "Security Focus Theme (2)" })).not.toBeNull()
+        })
+
+        await user.click(screen.getByRole("button", { name: "Export library JSON" }))
+        const jsonTextarea = screen.getByRole("textbox", { name: "Theme library json" })
+        expect((jsonTextarea as HTMLTextAreaElement).value).toContain("\"version\": 1")
+
+        const importPayload = JSON.stringify(
+            {
+                favoritePresetId: THEME_PRESETS.at(0)?.id,
+                themes: [
+                    {
+                        accentColor: "#22cc88",
+                        accentIntensity: 64,
+                        basePaletteId: "warm",
+                        formRadius: 12,
+                        globalRadius: 16,
+                        id: "import-theme-1",
+                        mode: "system",
+                        name: "Security Focus Theme",
+                        presetId: THEME_PRESETS.at(0)?.id,
+                    },
+                ],
+                version: 1,
+            },
+            null,
+            2,
+        )
+        fireEvent.change(jsonTextarea, {
+            target: { value: importPayload },
+        })
+        await user.click(screen.getByRole("button", { name: "Import library JSON" }))
+        await waitFor(() => {
+            expect(screen.getByRole("option", { name: "Security Focus Theme (3)" })).not.toBeNull()
+        })
     })
 })

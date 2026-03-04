@@ -2,7 +2,12 @@ import { type ReactElement, useCallback, useEffect, useMemo, useState } from "re
 
 import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { Button, Card, CardBody, CardHeader, Chip, Input } from "@/components/ui"
-import { type ThemePresetId, useThemeMode } from "@/lib/theme/theme-provider"
+import {
+    readThemeLibraryProfileState,
+    writeThemeLibraryProfileState,
+    type IThemeLibraryProfileTheme,
+} from "@/lib/theme/theme-library-profile-sync"
+import { type ThemeMode, type ThemePresetId, useThemeMode } from "@/lib/theme/theme-provider"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TBasePaletteId = "cool" | "neutral" | "warm"
@@ -99,6 +104,8 @@ const APPEARANCE_INTENSITY_STORAGE_KEY = `${APPEARANCE_STORAGE_PREFIX}:intensity
 const APPEARANCE_BASE_PALETTE_STORAGE_KEY = `${APPEARANCE_STORAGE_PREFIX}:base-palette`
 const APPEARANCE_RADIUS_STORAGE_KEY = `${APPEARANCE_STORAGE_PREFIX}:radius-global`
 const APPEARANCE_FORM_RADIUS_STORAGE_KEY = `${APPEARANCE_STORAGE_PREFIX}:radius-form`
+const APPEARANCE_LIBRARY_STORAGE_KEY = `${APPEARANCE_STORAGE_PREFIX}:library`
+const APPEARANCE_LIBRARY_FAVORITE_PRESET_STORAGE_KEY = `${APPEARANCE_STORAGE_PREFIX}:favorite-preset`
 
 const DEFAULT_ACCENT_COLOR = "#5f6dff"
 const DEFAULT_ACCENT_INTENSITY = 76
@@ -112,6 +119,36 @@ const MAX_RADIUS = 24
 const MIN_FORM_RADIUS = 4
 const MAX_FORM_RADIUS = 20
 const QUICK_PRESET_KEYWORDS: ReadonlyArray<string> = ["default", "sky", "lavender", "mint"]
+
+interface IUserThemeLibraryItem {
+    /** Идентификатор пользовательской темы. */
+    readonly id: string
+    /** Название пользовательской темы. */
+    readonly name: string
+    /** Режим темы. */
+    readonly mode: ThemeMode
+    /** Пресет темы. */
+    readonly presetId: ThemePresetId
+    /** Базовый accent цвет. */
+    readonly accentColor: string
+    /** Интенсивность accent цвета. */
+    readonly accentIntensity: number
+    /** Базовая палитра. */
+    readonly basePaletteId: TBasePaletteId
+    /** Глобальный радиус. */
+    readonly globalRadius: number
+    /** Радиус form-контролов. */
+    readonly formRadius: number
+}
+
+interface IThemeLibraryImportEnvelope {
+    /** Версия структуры payload. */
+    readonly version: number
+    /** Набор тем для импорта. */
+    readonly themes: ReadonlyArray<IUserThemeLibraryItem>
+    /** Опциональный favorite preset. */
+    readonly favoritePresetId?: ThemePresetId
+}
 
 function isHexColor(value: string): boolean {
     return /^#[0-9a-fA-F]{6}$/.test(value)
@@ -245,6 +282,279 @@ function clearAppearanceStorage(): void {
     window.localStorage.removeItem(APPEARANCE_FORM_RADIUS_STORAGE_KEY)
 }
 
+function createThemeLibraryId(prefix: string): string {
+    return `${prefix.toLowerCase().replace(/\s+/g, "-")}-${Date.now().toString(36)}`
+}
+
+function normalizeThemeName(value: string): string {
+    const trimmed = value.trim()
+    if (trimmed.length === 0) {
+        return "Custom Theme"
+    }
+    return trimmed
+}
+
+function resolveThemeNameConflict(
+    baseName: string,
+    existingNames: ReadonlyArray<string>,
+): string {
+    const normalizedBaseName = normalizeThemeName(baseName)
+    const lowerCaseNameSet = new Set<string>(existingNames.map((name): string => name.toLowerCase()))
+    if (lowerCaseNameSet.has(normalizedBaseName.toLowerCase()) === false) {
+        return normalizedBaseName
+    }
+
+    let suffix = 2
+    while (suffix < 1000) {
+        const candidate = `${normalizedBaseName} (${suffix})`
+        if (lowerCaseNameSet.has(candidate.toLowerCase()) === false) {
+            return candidate
+        }
+        suffix += 1
+    }
+
+    return `${normalizedBaseName} (${Date.now().toString(36)})`
+}
+
+function isThemeModeValue(value: unknown): value is ThemeMode {
+    return value === "dark" || value === "light" || value === "system"
+}
+
+function isThemePresetIdValue(
+    value: unknown,
+    availablePresetIds: ReadonlyArray<ThemePresetId>,
+): value is ThemePresetId {
+    if (typeof value !== "string") {
+        return false
+    }
+    return availablePresetIds.includes(value as ThemePresetId)
+}
+
+function isBasePaletteValue(value: unknown): value is TBasePaletteId {
+    return value === "cool" || value === "neutral" || value === "warm"
+}
+
+function parseThemeLibraryItem(
+    value: unknown,
+    availablePresetIds: ReadonlyArray<ThemePresetId>,
+): IUserThemeLibraryItem | undefined {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+        return undefined
+    }
+
+    const rawValue = value as Record<string, unknown>
+    if (typeof rawValue.id !== "string" || rawValue.id.trim().length === 0) {
+        return undefined
+    }
+    if (typeof rawValue.name !== "string" || rawValue.name.trim().length === 0) {
+        return undefined
+    }
+    if (typeof rawValue.accentColor !== "string" || isHexColor(rawValue.accentColor) === false) {
+        return undefined
+    }
+    if (
+        typeof rawValue.accentIntensity !== "number"
+        || rawValue.accentIntensity < MIN_INTENSITY
+        || rawValue.accentIntensity > MAX_INTENSITY
+    ) {
+        return undefined
+    }
+    if (
+        typeof rawValue.globalRadius !== "number"
+        || rawValue.globalRadius < MIN_RADIUS
+        || rawValue.globalRadius > MAX_RADIUS
+    ) {
+        return undefined
+    }
+    if (
+        typeof rawValue.formRadius !== "number"
+        || rawValue.formRadius < MIN_FORM_RADIUS
+        || rawValue.formRadius > MAX_FORM_RADIUS
+    ) {
+        return undefined
+    }
+
+    if (isThemeModeValue(rawValue.mode) !== true) {
+        return undefined
+    }
+    if (isBasePaletteValue(rawValue.basePaletteId) !== true) {
+        return undefined
+    }
+    if (isThemePresetIdValue(rawValue.presetId, availablePresetIds) !== true) {
+        return undefined
+    }
+
+    return {
+        accentColor: rawValue.accentColor.toLowerCase(),
+        accentIntensity: rawValue.accentIntensity,
+        basePaletteId: rawValue.basePaletteId,
+        formRadius: rawValue.formRadius,
+        globalRadius: rawValue.globalRadius,
+        id: rawValue.id,
+        mode: rawValue.mode,
+        name: normalizeThemeName(rawValue.name),
+        presetId: rawValue.presetId,
+    }
+}
+
+function readStoredThemeLibrary(availablePresetIds: ReadonlyArray<ThemePresetId>): ReadonlyArray<IUserThemeLibraryItem> {
+    if (typeof window === "undefined") {
+        return []
+    }
+
+    const rawValue = window.localStorage.getItem(APPEARANCE_LIBRARY_STORAGE_KEY)
+    if (rawValue === null) {
+        return []
+    }
+
+    try {
+        const parsed = JSON.parse(rawValue) as unknown
+        if (Array.isArray(parsed) === false) {
+            return []
+        }
+
+        const normalized: Array<IUserThemeLibraryItem> = []
+        parsed.forEach((entry): void => {
+            const parsedItem = parseThemeLibraryItem(entry, availablePresetIds)
+            if (parsedItem !== undefined) {
+                normalized.push(parsedItem)
+            }
+        })
+
+        return normalized
+    } catch {
+        return []
+    }
+}
+
+function readStoredFavoritePreset(
+    availablePresetIds: ReadonlyArray<ThemePresetId>,
+): ThemePresetId | undefined {
+    if (typeof window === "undefined") {
+        return undefined
+    }
+
+    const rawValue = window.localStorage.getItem(APPEARANCE_LIBRARY_FAVORITE_PRESET_STORAGE_KEY)
+    if (rawValue === null) {
+        return undefined
+    }
+
+    if (availablePresetIds.includes(rawValue as ThemePresetId)) {
+        return rawValue as ThemePresetId
+    }
+
+    return undefined
+}
+
+function toProfileTheme(theme: IUserThemeLibraryItem): IThemeLibraryProfileTheme {
+    return {
+        accentColor: theme.accentColor,
+        accentIntensity: theme.accentIntensity,
+        basePaletteId: theme.basePaletteId,
+        formRadius: theme.formRadius,
+        globalRadius: theme.globalRadius,
+        id: theme.id,
+        mode: theme.mode,
+        name: theme.name,
+        presetId: theme.presetId,
+    }
+}
+
+function fromProfileTheme(
+    theme: IThemeLibraryProfileTheme,
+    availablePresetIds: ReadonlyArray<ThemePresetId>,
+): IUserThemeLibraryItem | undefined {
+    if (availablePresetIds.includes(theme.presetId as ThemePresetId) === false) {
+        return undefined
+    }
+
+    return {
+        accentColor: theme.accentColor,
+        accentIntensity: theme.accentIntensity,
+        basePaletteId: theme.basePaletteId,
+        formRadius: theme.formRadius,
+        globalRadius: theme.globalRadius,
+        id: theme.id,
+        mode: theme.mode,
+        name: theme.name,
+        presetId: theme.presetId as ThemePresetId,
+    }
+}
+
+function buildThemeLibraryExportPayload(
+    themes: ReadonlyArray<IUserThemeLibraryItem>,
+    favoritePresetId: ThemePresetId | undefined,
+): IThemeLibraryImportEnvelope {
+    return {
+        favoritePresetId,
+        themes,
+        version: 1,
+    }
+}
+
+function parseThemeLibraryImportPayload(
+    rawJson: string,
+    availablePresetIds: ReadonlyArray<ThemePresetId>,
+): IThemeLibraryImportEnvelope | undefined {
+    try {
+        const parsed = JSON.parse(rawJson) as unknown
+        if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+            return undefined
+        }
+
+        const record = parsed as Record<string, unknown>
+        if (record.version !== 1) {
+            return undefined
+        }
+        if (Array.isArray(record.themes) === false) {
+            return undefined
+        }
+
+        const themes: Array<IUserThemeLibraryItem> = []
+        record.themes.forEach((entry): void => {
+            const parsedTheme = parseThemeLibraryItem(entry, availablePresetIds)
+            if (parsedTheme !== undefined) {
+                themes.push(parsedTheme)
+            }
+        })
+
+        const favoritePresetId =
+            typeof record.favoritePresetId === "string"
+            && availablePresetIds.includes(record.favoritePresetId as ThemePresetId)
+                ? (record.favoritePresetId as ThemePresetId)
+                : undefined
+
+        return {
+            favoritePresetId,
+            themes,
+            version: 1,
+        }
+    } catch {
+        return undefined
+    }
+}
+
+function triggerJsonDownload(fileName: string, jsonPayload: string): void {
+    if (typeof window === "undefined" || typeof document === "undefined") {
+        return
+    }
+    if (typeof URL.createObjectURL !== "function") {
+        return
+    }
+
+    const blob = new Blob([jsonPayload], { type: "application/json;charset=utf-8;" })
+    const objectUrl = URL.createObjectURL(blob)
+    const anchor = document.createElement("a")
+
+    anchor.href = objectUrl
+    anchor.download = fileName
+    anchor.style.display = "none"
+    document.body.append(anchor)
+    anchor.click()
+    anchor.remove()
+    URL.revokeObjectURL(objectUrl)
+}
+
 /**
  * Страница управления темой интерфейса.
  *
@@ -252,6 +562,10 @@ function clearAppearanceStorage(): void {
  */
 export function SettingsAppearancePage(): ReactElement {
     const { mode, preset, presets, resolvedMode, setMode, setPreset } = useThemeMode()
+    const availablePresetIds = useMemo(
+        (): ReadonlyArray<ThemePresetId> => presets.map((themePreset): ThemePresetId => themePreset.id as ThemePresetId),
+        [presets],
+    )
     const [accentColor, setAccentColor] = useState<string>(() =>
         readStoredHexColor(APPEARANCE_ACCENT_STORAGE_KEY, DEFAULT_ACCENT_COLOR),
     )
@@ -283,6 +597,16 @@ export function SettingsAppearancePage(): ReactElement {
         ),
     )
     const [previewFieldValue, setPreviewFieldValue] = useState("security policy update")
+    const [themeLibrary, setThemeLibrary] = useState<ReadonlyArray<IUserThemeLibraryItem>>(() =>
+        readStoredThemeLibrary(availablePresetIds),
+    )
+    const [selectedThemeId, setSelectedThemeId] = useState<string>("")
+    const [themeDraftName, setThemeDraftName] = useState<string>("")
+    const [themeImportValue, setThemeImportValue] = useState<string>("")
+    const [favoritePresetId, setFavoritePresetId] = useState<ThemePresetId | undefined>(() =>
+        readStoredFavoritePreset(availablePresetIds),
+    )
+    const [librarySyncStatus, setLibrarySyncStatus] = useState<"error" | "idle" | "synced" | "syncing">("idle")
     const [pendingRandomPresetId, setPendingRandomPresetId] = useState<ThemePresetId | undefined>(undefined)
     const [lastRandomUndoPresetId, setLastRandomUndoPresetId] = useState<ThemePresetId | undefined>(undefined)
     const [lastAppliedRandomPresetId, setLastAppliedRandomPresetId] = useState<ThemePresetId | undefined>(
@@ -362,6 +686,26 @@ export function SettingsAppearancePage(): ReactElement {
         return presets.find((themePreset): boolean => themePreset.id === lastAppliedRandomPresetId)
     }, [lastAppliedRandomPresetId, presets])
 
+    const selectedTheme = useMemo((): IUserThemeLibraryItem | undefined => {
+        if (selectedThemeId.length === 0) {
+            return undefined
+        }
+        return themeLibrary.find((themeItem): boolean => themeItem.id === selectedThemeId)
+    }, [selectedThemeId, themeLibrary])
+
+    const favoritePresetLabel = useMemo((): string => {
+        if (favoritePresetId === undefined) {
+            return "none"
+        }
+        const presetDefinition = presets.find(
+            (themePreset): boolean => themePreset.id === favoritePresetId,
+        )
+        if (presetDefinition === undefined) {
+            return favoritePresetId
+        }
+        return presetDefinition.label
+    }, [favoritePresetId, presets])
+
     const selectRandomPresetPreview = useCallback((): void => {
         const currentPresetId = preset as ThemePresetId
         const candidateIds = accessiblePresetIds.filter(
@@ -403,6 +747,161 @@ export function SettingsAppearancePage(): ReactElement {
         setPreset(lastRandomUndoPresetId)
         setLastRandomUndoPresetId(undefined)
         showToastSuccess("Last random preset reverted.")
+    }
+
+    const createThemeSnapshot = (nextName: string): IUserThemeLibraryItem => {
+        return {
+            accentColor,
+            accentIntensity,
+            basePaletteId,
+            formRadius,
+            globalRadius,
+            id: createThemeLibraryId(nextName),
+            mode,
+            name: nextName,
+            presetId: preset as ThemePresetId,
+        }
+    }
+
+    const handleCreateLibraryTheme = (): void => {
+        const resolvedName = resolveThemeNameConflict(
+            themeDraftName,
+            themeLibrary.map((themeItem): string => themeItem.name),
+        )
+        const snapshot = createThemeSnapshot(resolvedName)
+
+        setThemeLibrary((previous): ReadonlyArray<IUserThemeLibraryItem> => [snapshot, ...previous])
+        setSelectedThemeId(snapshot.id)
+        setThemeDraftName("")
+        showToastSuccess(`Theme "${snapshot.name}" saved to library.`)
+    }
+
+    const handleRenameLibraryTheme = (): void => {
+        if (selectedTheme === undefined) {
+            return
+        }
+
+        const resolvedName = resolveThemeNameConflict(
+            themeDraftName,
+            themeLibrary
+                .filter((themeItem): boolean => themeItem.id !== selectedTheme.id)
+                .map((themeItem): string => themeItem.name),
+        )
+        setThemeLibrary((previous): ReadonlyArray<IUserThemeLibraryItem> =>
+            previous.map((themeItem): IUserThemeLibraryItem => {
+                if (themeItem.id !== selectedTheme.id) {
+                    return themeItem
+                }
+                return {
+                    ...themeItem,
+                    name: resolvedName,
+                }
+            }),
+        )
+        setThemeDraftName("")
+        showToastSuccess("Theme renamed.")
+    }
+
+    const handleDuplicateLibraryTheme = (): void => {
+        if (selectedTheme === undefined) {
+            return
+        }
+
+        const baseName = `${selectedTheme.name} Copy`
+        const resolvedName = resolveThemeNameConflict(
+            baseName,
+            themeLibrary.map((themeItem): string => themeItem.name),
+        )
+        const duplicate: IUserThemeLibraryItem = {
+            ...selectedTheme,
+            id: createThemeLibraryId(resolvedName),
+            name: resolvedName,
+        }
+        setThemeLibrary((previous): ReadonlyArray<IUserThemeLibraryItem> => [duplicate, ...previous])
+        setSelectedThemeId(duplicate.id)
+        showToastSuccess("Theme duplicated.")
+    }
+
+    const handleDeleteLibraryTheme = (): void => {
+        if (selectedTheme === undefined) {
+            return
+        }
+
+        setThemeLibrary((previous): ReadonlyArray<IUserThemeLibraryItem> =>
+            previous.filter((themeItem): boolean => themeItem.id !== selectedTheme.id),
+        )
+        setSelectedThemeId("")
+        showToastSuccess("Theme removed from library.")
+    }
+
+    const handleApplyLibraryTheme = (): void => {
+        if (selectedTheme === undefined) {
+            return
+        }
+
+        setMode(selectedTheme.mode)
+        setPreset(selectedTheme.presetId)
+        setAccentColor(selectedTheme.accentColor)
+        setAccentIntensity(selectedTheme.accentIntensity)
+        setBasePaletteId(selectedTheme.basePaletteId)
+        setGlobalRadius(selectedTheme.globalRadius)
+        setFormRadius(selectedTheme.formRadius)
+        setPendingRandomPresetId(undefined)
+        setLastRandomUndoPresetId(undefined)
+        setLastAppliedRandomPresetId(undefined)
+        showToastSuccess(`Theme "${selectedTheme.name}" applied.`)
+    }
+
+    const handleExportThemeLibrary = (): void => {
+        const payload = buildThemeLibraryExportPayload(themeLibrary, favoritePresetId)
+        const jsonPayload = JSON.stringify(payload, null, 2)
+        setThemeImportValue(jsonPayload)
+        triggerJsonDownload(
+            `theme-library-${new Date().toISOString().slice(0, 10)}.json`,
+            jsonPayload,
+        )
+        showToastSuccess("Theme library exported.")
+    }
+
+    const handleImportThemeLibrary = (): void => {
+        const parsedPayload = parseThemeLibraryImportPayload(themeImportValue, availablePresetIds)
+        if (parsedPayload === undefined) {
+            showToastInfo("Import skipped. JSON payload does not match theme library schema.")
+            return
+        }
+
+        setThemeLibrary((previous): ReadonlyArray<IUserThemeLibraryItem> => {
+            const existingNames = previous.map((themeItem): string => themeItem.name)
+            const importedThemes = parsedPayload.themes.map((themeItem): IUserThemeLibraryItem => {
+                const resolvedName = resolveThemeNameConflict(themeItem.name, existingNames)
+                existingNames.push(resolvedName)
+                return {
+                    ...themeItem,
+                    id: createThemeLibraryId(resolvedName),
+                    name: resolvedName,
+                }
+            })
+            return [...importedThemes, ...previous]
+        })
+        if (parsedPayload.favoritePresetId !== undefined) {
+            setFavoritePresetId(parsedPayload.favoritePresetId)
+        }
+        setThemeImportValue("")
+        showToastSuccess("Theme library imported.")
+    }
+
+    const handlePinCurrentPreset = (): void => {
+        const currentPresetId = preset as ThemePresetId
+        setFavoritePresetId(currentPresetId)
+        showToastSuccess("Favorite preset pinned.")
+    }
+
+    const handleApplyFavoritePreset = (): void => {
+        if (favoritePresetId === undefined) {
+            return
+        }
+        setPreset(favoritePresetId)
+        showToastSuccess("Favorite preset applied.")
     }
 
     useEffect((): void => {
@@ -476,6 +975,98 @@ export function SettingsAppearancePage(): ReactElement {
         }
     }, [selectRandomPresetPreview])
 
+    useEffect((): void => {
+        if (selectedThemeId.length === 0) {
+            return
+        }
+        const exists = themeLibrary.some((themeItem): boolean => themeItem.id === selectedThemeId)
+        if (exists !== true) {
+            setSelectedThemeId("")
+        }
+    }, [selectedThemeId, themeLibrary])
+
+    useEffect((): void => {
+        if (favoritePresetId === undefined) {
+            return
+        }
+        if (availablePresetIds.includes(favoritePresetId) === false) {
+            setFavoritePresetId(undefined)
+        }
+    }, [availablePresetIds, favoritePresetId])
+
+    useEffect((): (() => void) | void => {
+        let isMounted = true
+
+        void (async (): Promise<void> => {
+            setLibrarySyncStatus("syncing")
+            const profileState = await readThemeLibraryProfileState()
+            if (isMounted !== true) {
+                return
+            }
+
+            if (profileState === undefined) {
+                setLibrarySyncStatus("idle")
+                return
+            }
+
+            const parsedThemes = profileState.themes
+                .map((themeItem): IUserThemeLibraryItem | undefined =>
+                    fromProfileTheme(themeItem, availablePresetIds),
+                )
+                .filter((themeItem): themeItem is IUserThemeLibraryItem => themeItem !== undefined)
+
+            if (parsedThemes.length > 0) {
+                setThemeLibrary(parsedThemes)
+                setSelectedThemeId(parsedThemes[0]?.id ?? "")
+            }
+            if (
+                profileState.favoritePresetId !== undefined
+                && availablePresetIds.includes(profileState.favoritePresetId as ThemePresetId)
+            ) {
+                setFavoritePresetId(profileState.favoritePresetId as ThemePresetId)
+            }
+            setLibrarySyncStatus("synced")
+        })()
+
+        return (): void => {
+            isMounted = false
+        }
+    }, [availablePresetIds])
+
+    useEffect((): (() => void) | void => {
+        if (typeof window === "undefined") {
+            return undefined
+        }
+
+        window.localStorage.setItem(APPEARANCE_LIBRARY_STORAGE_KEY, JSON.stringify(themeLibrary))
+        if (favoritePresetId !== undefined) {
+            window.localStorage.setItem(
+                APPEARANCE_LIBRARY_FAVORITE_PRESET_STORAGE_KEY,
+                favoritePresetId,
+            )
+        } else {
+            window.localStorage.removeItem(APPEARANCE_LIBRARY_FAVORITE_PRESET_STORAGE_KEY)
+        }
+
+        const timer = window.setTimeout((): void => {
+            void (async (): Promise<void> => {
+                setLibrarySyncStatus("syncing")
+                const updated = await writeThemeLibraryProfileState({
+                    favoritePresetId,
+                    themes: themeLibrary.map((themeItem): IThemeLibraryProfileTheme =>
+                        toProfileTheme(themeItem),
+                    ),
+                    updatedAtMs: Date.now(),
+                })
+                setLibrarySyncStatus(updated ? "synced" : "error")
+            })()
+        }, 350)
+
+        return (): void => {
+            window.clearTimeout(timer)
+        }
+    }, [favoritePresetId, themeLibrary])
+
     const handleResetTheme = (): void => {
         const defaultPreset = presets.at(0)?.id
         setMode("system")
@@ -487,10 +1078,19 @@ export function SettingsAppearancePage(): ReactElement {
         setBasePaletteId(DEFAULT_BASE_PALETTE)
         setGlobalRadius(DEFAULT_GLOBAL_RADIUS)
         setFormRadius(DEFAULT_FORM_RADIUS)
+        setFavoritePresetId(undefined)
+        setThemeLibrary([])
+        setThemeImportValue("")
+        setThemeDraftName("")
+        setSelectedThemeId("")
         setPendingRandomPresetId(undefined)
         setLastRandomUndoPresetId(undefined)
         setLastAppliedRandomPresetId(undefined)
         clearAppearanceStorage()
+        if (typeof window !== "undefined") {
+            window.localStorage.removeItem(APPEARANCE_LIBRARY_STORAGE_KEY)
+            window.localStorage.removeItem(APPEARANCE_LIBRARY_FAVORITE_PRESET_STORAGE_KEY)
+        }
         showToastSuccess("Theme reset to defaults.")
     }
 
@@ -740,6 +1340,155 @@ export function SettingsAppearancePage(): ReactElement {
                         >
                             contrast: {contrastRatio.toFixed(2)} ({isAccessibleContrast ? "AA" : "check"})
                         </Chip>
+                    </div>
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-base font-semibold text-[var(--foreground)]">Theme library</p>
+                    <Chip
+                        color={
+                            librarySyncStatus === "synced"
+                                ? "success"
+                                : librarySyncStatus === "error"
+                                  ? "warning"
+                                  : "default"
+                        }
+                        size="sm"
+                        variant="flat"
+                    >
+                        sync: {librarySyncStatus}
+                    </Chip>
+                </CardHeader>
+                <CardBody className="space-y-4">
+                    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
+                        <p className="text-sm font-semibold text-[var(--foreground)]">Favorite preset</p>
+                        <p className="mt-1 text-xs text-[var(--foreground)]/70">
+                            pinned: {favoritePresetLabel}
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            <Button
+                                size="sm"
+                                variant="flat"
+                                onPress={handlePinCurrentPreset}
+                            >
+                                Pin current preset
+                            </Button>
+                            <Button
+                                isDisabled={favoritePresetId === undefined}
+                                size="sm"
+                                variant="flat"
+                                onPress={handleApplyFavoritePreset}
+                            >
+                                Apply favorite preset
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="grid gap-3 md:grid-cols-[1.5fr_1fr_auto]">
+                        <Input
+                            label="Theme name"
+                            placeholder="Security Focus Theme"
+                            value={themeDraftName}
+                            onValueChange={setThemeDraftName}
+                        />
+                        <div className="flex flex-col gap-1">
+                            <label
+                                className="text-sm text-[var(--foreground)]/80"
+                                htmlFor="theme-library-selected"
+                            >
+                                Library themes
+                            </label>
+                            <select
+                                aria-label="Theme library selection"
+                                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm"
+                                id="theme-library-selected"
+                                value={selectedThemeId}
+                                onChange={(event): void => {
+                                    setSelectedThemeId(event.currentTarget.value)
+                                }}
+                            >
+                                <option value="">Select theme</option>
+                                {themeLibrary.map((themeItem): ReactElement => (
+                                    <option key={themeItem.id} value={themeItem.id}>
+                                        {themeItem.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex items-end">
+                            <Button onPress={handleCreateLibraryTheme}>
+                                Save current theme
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        <Button
+                            isDisabled={selectedTheme === undefined}
+                            size="sm"
+                            variant="flat"
+                            onPress={handleApplyLibraryTheme}
+                        >
+                            Apply selected
+                        </Button>
+                        <Button
+                            isDisabled={selectedTheme === undefined}
+                            size="sm"
+                            variant="flat"
+                            onPress={handleRenameLibraryTheme}
+                        >
+                            Rename selected
+                        </Button>
+                        <Button
+                            isDisabled={selectedTheme === undefined}
+                            size="sm"
+                            variant="flat"
+                            onPress={handleDuplicateLibraryTheme}
+                        >
+                            Duplicate selected
+                        </Button>
+                        <Button
+                            color="danger"
+                            isDisabled={selectedTheme === undefined}
+                            size="sm"
+                            variant="ghost"
+                            onPress={handleDeleteLibraryTheme}
+                        >
+                            Delete selected
+                        </Button>
+                    </div>
+
+                    <div className="space-y-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
+                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                            Import / Export JSON
+                        </p>
+                        <textarea
+                            aria-label="Theme library json"
+                            className="min-h-28 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-3 text-xs"
+                            placeholder='{"version":1,"themes":[...]}'
+                            value={themeImportValue}
+                            onChange={(event): void => {
+                                setThemeImportValue(event.currentTarget.value)
+                            }}
+                        />
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                size="sm"
+                                variant="flat"
+                                onPress={handleExportThemeLibrary}
+                            >
+                                Export library JSON
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="flat"
+                                onPress={handleImportThemeLibrary}
+                            >
+                                Import library JSON
+                            </Button>
+                        </div>
                     </div>
                 </CardBody>
             </Card>
