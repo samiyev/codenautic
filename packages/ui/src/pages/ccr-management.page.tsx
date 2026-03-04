@@ -26,7 +26,26 @@ export interface ICcrManagementPageProps extends ICcrFilters {
 
 const PAGE_SIZE = 8
 const CCR_SORT_ORDER = ["new", "queued", "in_progress", "approved", "rejected"] as const
+export const CCR_FILTER_PRESETS_STORAGE_KEY = "codenautic:ui:ccr-filter-presets:v1"
 type TCcrFilterField = keyof ICcrFilters
+type TCcrFilterPresetField = "name" | "selected"
+
+interface ICcrFilterPreset {
+    readonly id: string
+    readonly name: string
+    readonly filters: ICcrFilters
+}
+
+interface ICcrFilterPresetsState {
+    readonly presetName: string
+    readonly selectedPresetId: string
+    readonly presets: ReadonlyArray<ICcrFilterPreset>
+    readonly setField: (field: TCcrFilterPresetField, value: string) => void
+    readonly savePreset: () => void
+    readonly applyPreset: () => void
+    readonly updatePreset: () => void
+    readonly deletePreset: () => void
+}
 
 function isCcrFilterField(value: string): value is TCcrFilterField {
     return value === "search" || value === "status" || value === "team" || value === "repository"
@@ -42,6 +61,104 @@ function toFilterMatch(fieldValue: string, filterValue: string): boolean {
 
 function createSortedOptions(values: ReadonlyArray<string>): ReadonlyArray<string> {
     return Array.from(new Set(values)).sort()
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null
+}
+
+function parseStoredCcrFilters(value: unknown): ICcrFilters | null {
+    if (isRecord(value) === false) {
+        return null
+    }
+
+    if (
+        typeof value.search !== "string" ||
+        typeof value.status !== "string" ||
+        typeof value.team !== "string" ||
+        typeof value.repository !== "string"
+    ) {
+        return null
+    }
+
+    return {
+        repository: value.repository,
+        search: value.search,
+        status: value.status,
+        team: value.team,
+    }
+}
+
+function parseStoredPreset(value: unknown): ICcrFilterPreset | null {
+    if (isRecord(value) === false) {
+        return null
+    }
+
+    if (typeof value.id !== "string" || value.id.trim().length === 0) {
+        return null
+    }
+
+    if (typeof value.name !== "string" || value.name.trim().length === 0) {
+        return null
+    }
+
+    const filters = parseStoredCcrFilters(value.filters)
+    if (filters === null) {
+        return null
+    }
+
+    return {
+        filters,
+        id: value.id,
+        name: value.name,
+    }
+}
+
+function readStoredFilterPresets(): ReadonlyArray<ICcrFilterPreset> {
+    if (typeof window === "undefined") {
+        return []
+    }
+
+    try {
+        const raw = window.localStorage.getItem(CCR_FILTER_PRESETS_STORAGE_KEY)
+        if (raw === null) {
+            return []
+        }
+        const parsed = JSON.parse(raw) as unknown
+        if (Array.isArray(parsed) === false) {
+            return []
+        }
+
+        return parsed.reduce<ICcrFilterPreset[]>((accumulator, item): ICcrFilterPreset[] => {
+            const preset = parseStoredPreset(item)
+            if (preset !== null) {
+                accumulator.push(preset)
+            }
+            return accumulator
+        }, [])
+    } catch (_error: unknown) {
+        return []
+    }
+}
+
+function writeStoredFilterPresets(presets: ReadonlyArray<ICcrFilterPreset>): void {
+    if (typeof window === "undefined") {
+        return
+    }
+
+    try {
+        window.localStorage.setItem(CCR_FILTER_PRESETS_STORAGE_KEY, JSON.stringify(presets))
+    } catch (_error: unknown) {
+        return
+    }
+}
+
+function createFilterPresetId(): string {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        return crypto.randomUUID()
+    }
+
+    return `preset-${String(Date.now())}`
 }
 
 function findFilterOptions(rows: ReadonlyArray<ICcrRow>): {
@@ -104,6 +221,17 @@ interface ICcrFiltersPanelProps {
     readonly teamOptions: ReadonlyArray<string>
     readonly repositoryOptions: ReadonlyArray<string>
     readonly onFilterChange: (next: ICcrFilters) => void
+}
+
+interface ICcrFilterPresetsPanelProps {
+    readonly presetName: string
+    readonly presets: ReadonlyArray<ICcrFilterPreset>
+    readonly selectedPresetId: string
+    readonly onFieldChange: (field: TCcrFilterPresetField, value: string) => void
+    readonly onSavePreset: () => void
+    readonly onApplyPreset: () => void
+    readonly onUpdatePreset: () => void
+    readonly onDeletePreset: () => void
 }
 
 function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
@@ -189,6 +317,173 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
     )
 }
 
+function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement {
+    const hasSelectedPreset = props.selectedPresetId.length > 0
+
+    return (
+        <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-3 md:grid-cols-6">
+            <input
+                aria-label="Filter preset name"
+                className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none md:col-span-2"
+                placeholder="Preset name"
+                value={props.presetName}
+                onChange={(event): void => {
+                    props.onFieldChange("name", event.currentTarget.value)
+                }}
+            />
+            <select
+                aria-label="Saved filter presets"
+                className="rounded-lg border border-slate-200 px-3 py-2 text-sm md:col-span-2"
+                value={props.selectedPresetId}
+                onChange={(event): void => {
+                    props.onFieldChange("selected", event.currentTarget.value)
+                }}
+            >
+                <option value="">Select preset</option>
+                {props.presets.map(
+                    (preset): ReactElement => (
+                        <option key={preset.id} value={preset.id}>
+                            {preset.name}
+                        </option>
+                    ),
+                )}
+            </select>
+            <button
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700"
+                type="button"
+                onClick={props.onSavePreset}
+            >
+                Save preset
+            </button>
+            <div className="grid grid-cols-3 gap-2 md:col-span-6">
+                <button
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={hasSelectedPreset === false}
+                    type="button"
+                    onClick={props.onApplyPreset}
+                >
+                    Apply preset
+                </button>
+                <button
+                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={hasSelectedPreset === false}
+                    type="button"
+                    onClick={props.onUpdatePreset}
+                >
+                    Update preset
+                </button>
+                <button
+                    className="rounded-lg border border-rose-300 px-3 py-2 text-sm font-medium text-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={hasSelectedPreset === false}
+                    type="button"
+                    onClick={props.onDeletePreset}
+                >
+                    Delete preset
+                </button>
+            </div>
+        </div>
+    )
+}
+
+function useCcrFilterPresets(
+    currentFilters: ICcrFilters,
+    onApplyFilters: (next: ICcrFilters) => void,
+): ICcrFilterPresetsState {
+    const [presetName, setPresetName] = useState<string>("")
+    const [selectedPresetId, setSelectedPresetId] = useState<string>("")
+    const [presets, setPresets] = useState<ReadonlyArray<ICcrFilterPreset>>(() => {
+        return readStoredFilterPresets()
+    })
+
+    const setField = (field: TCcrFilterPresetField, value: string): void => {
+        if (field === "name") {
+            setPresetName(value)
+            return
+        }
+
+        const selected = presets.find((preset): boolean => preset.id === value)
+        setSelectedPresetId(value)
+        if (selected !== undefined) {
+            setPresetName(selected.name)
+        }
+    }
+
+    const savePreset = (): void => {
+        const normalizedName = presetName.trim()
+        if (normalizedName.length === 0) {
+            return
+        }
+
+        const preset: ICcrFilterPreset = {
+            filters: currentFilters,
+            id: createFilterPresetId(),
+            name: normalizedName,
+        }
+
+        const nextPresets = [ ...presets, preset ]
+        setPresets(nextPresets)
+        writeStoredFilterPresets(nextPresets)
+        setSelectedPresetId(preset.id)
+        setPresetName(preset.name)
+    }
+
+    const applyPreset = (): void => {
+        const selected = presets.find((preset): boolean => preset.id === selectedPresetId)
+        if (selected === undefined) {
+            return
+        }
+
+        onApplyFilters(selected.filters)
+    }
+
+    const updatePreset = (): void => {
+        const selected = presets.find((preset): boolean => preset.id === selectedPresetId)
+        if (selected === undefined) {
+            return
+        }
+
+        const normalizedName = presetName.trim()
+        const nextPresets = presets.map((preset): ICcrFilterPreset => {
+            if (preset.id !== selected.id) {
+                return preset
+            }
+
+            return {
+                ...preset,
+                filters: currentFilters,
+                name: normalizedName.length > 0 ? normalizedName : preset.name,
+            }
+        })
+
+        setPresets(nextPresets)
+        writeStoredFilterPresets(nextPresets)
+    }
+
+    const deletePreset = (): void => {
+        if (selectedPresetId.length === 0) {
+            return
+        }
+
+        const nextPresets = presets.filter((preset): boolean => preset.id !== selectedPresetId)
+        const nextSelectedPreset = nextPresets.at(0)
+        setPresets(nextPresets)
+        writeStoredFilterPresets(nextPresets)
+        setSelectedPresetId(nextSelectedPreset?.id ?? "")
+        setPresetName(nextSelectedPreset?.name ?? "")
+    }
+
+    return {
+        applyPreset,
+        deletePreset,
+        presetName,
+        presets,
+        savePreset,
+        selectedPresetId,
+        setField,
+        updatePreset,
+    }
+}
+
 function useCcrFilters(): {
     readonly initialRows: ReadonlyArray<ICcrRow>
     readonly filterOptions: {
@@ -256,6 +551,7 @@ export function CcrManagementPage(props: ICcrManagementPageProps): ReactElement 
         setSearchState(nextFilters)
         props.onFilterChange(nextFilters)
     }
+    const filterPresets = useCcrFilterPresets(searchState, updateFilters)
 
     return (
         <section className="space-y-4">
@@ -270,6 +566,16 @@ export function CcrManagementPage(props: ICcrManagementPageProps): ReactElement 
                 repositoryOptions={filterOptions.repositoryOptions}
                 statusOptions={filterOptions.statusOptions}
                 teamOptions={filterOptions.teamOptions}
+            />
+            <CcrFilterPresetsPanel
+                onApplyPreset={filterPresets.applyPreset}
+                onDeletePreset={filterPresets.deletePreset}
+                onFieldChange={filterPresets.setField}
+                onSavePreset={filterPresets.savePreset}
+                onUpdatePreset={filterPresets.updatePreset}
+                presetName={filterPresets.presetName}
+                presets={filterPresets.presets}
+                selectedPresetId={filterPresets.selectedPresetId}
             />
             <ReviewsContent
                 hasMore={hasMore}
