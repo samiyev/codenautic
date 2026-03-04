@@ -1,6 +1,7 @@
 import { type ChangeEvent, type FormEvent, type ReactElement, useEffect, useState } from "react"
 
 import { Button } from "@/components/ui"
+import { CCRSummaryPreview } from "@/components/settings/ccr-summary-preview"
 import { CodeReviewForm } from "@/components/settings/code-review-form"
 import { ConfigurationEditor } from "@/components/settings/configuration-editor"
 import {
@@ -425,6 +426,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                 <Button type="button" variant="solid" onPress={handleSummarySettingsSave}>
                     Save CCR summary settings
                 </Button>
+                <CCRSummaryPreview settings={ccrSummarySettings} />
             </section>
             <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
                 <h2 className="text-base font-semibold text-slate-900">IDE sync settings</h2>

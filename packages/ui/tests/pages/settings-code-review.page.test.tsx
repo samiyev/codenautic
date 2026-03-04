@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react"
+import { fireEvent, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { http, HttpResponse } from "msw"
 import { describe, expect, it } from "vitest"
@@ -263,8 +263,7 @@ describe("settings code review page", (): void => {
         await user.click(screen.getByRole("checkbox", { name: "Include timeline highlights" }))
         await user.selectOptions(screen.getByLabelText("Summary detail level"), "DEEP")
         const maxSuggestionsInput = screen.getByLabelText("Max suggestions in summary")
-        await user.clear(maxSuggestionsInput)
-        await user.type(maxSuggestionsInput, "12")
+        fireEvent.change(maxSuggestionsInput, { target: { value: "12" } })
         await user.click(screen.getByRole("button", { name: "Save CCR summary settings" }))
 
         await waitFor((): void => {
@@ -272,6 +271,12 @@ describe("settings code review page", (): void => {
                 "CCR summary settings saved.",
             )
         })
+        expect(screen.getByTestId("ccr-summary-preview-detail-level")).toHaveTextContent(
+            "Detail level: Deep",
+        )
+        expect(screen.getByTestId("ccr-summary-preview-max-suggestions")).toHaveTextContent(
+            "Max suggestions: 12",
+        )
     })
 
     it("конфигурирует и сохраняет IDE sync settings", async (): Promise<void> => {
