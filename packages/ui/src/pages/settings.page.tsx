@@ -98,6 +98,14 @@ export function SettingsPage(): ReactElement {
                         <li>
                             <Link
                                 className="underline underline-offset-4"
+                                to="/settings-contract-validation"
+                            >
+                                Import/export contract validation
+                            </Link>
+                        </li>
+                        <li>
+                            <Link
+                                className="underline underline-offset-4"
                                 to="/settings-privacy-redaction"
                             >
                                 Privacy-safe export

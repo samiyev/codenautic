@@ -88,6 +88,11 @@ const SETTINGS_NAV = [
         to: "/settings-audit-logs",
     },
     {
+        icon: <Settings aria-hidden="true" size={16} />,
+        label: "Contract Validation",
+        to: "/settings-contract-validation",
+    },
+    {
         icon: <Shield aria-hidden="true" size={16} />,
         label: "Privacy Export",
         to: "/settings-privacy-redaction",
