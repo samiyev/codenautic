@@ -1,6 +1,24 @@
-import { screen } from "@testing-library/react"
+import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+
+const intersectionObserverState = {
+    isIntersecting: false,
+}
+
+vi.mock("@/lib/hooks/use-intersection-observer", () => {
+    return {
+        useIntersectionObserver: (): {
+            readonly isIntersecting: boolean
+            readonly targetRef: { current: HTMLDivElement | null }
+        } => {
+            return {
+                isIntersecting: intersectionObserverState.isIntersecting,
+                targetRef: { current: null },
+            }
+        },
+    }
+})
 
 import {
     CCR_FILTER_PRESETS_STORAGE_KEY,
@@ -36,6 +54,7 @@ function readStoredPresets(): ReadonlyArray<IStoredPresetShape> {
 describe("ccr management page filter presets", (): void => {
     beforeEach((): void => {
         window.localStorage.removeItem(CCR_FILTER_PRESETS_STORAGE_KEY)
+        intersectionObserverState.isIntersecting = false
     })
 
     it("поддерживает CRUD для saved filter presets", async (): Promise<void> => {
@@ -92,7 +111,7 @@ describe("ccr management page filter presets", (): void => {
     })
 
     it("использует virtualized CCR list при расширении набора строк", async (): Promise<void> => {
-        const user = userEvent.setup()
+        intersectionObserverState.isIntersecting = true
 
         renderWithProviders(
             <CcrManagementPage
@@ -108,15 +127,10 @@ describe("ccr management page filter presets", (): void => {
         expect(table).toHaveAttribute("data-virtualized", "true")
         expect(table).toHaveAttribute("data-row-height-estimator", "custom")
 
-        const initialRowCount = Number.parseInt(table.getAttribute("aria-rowcount") ?? "0", 10)
-        expect(initialRowCount).toBeGreaterThan(0)
-
-        const loadMoreButton = screen.queryByRole("button", { name: "Load more CCR" })
-        if (loadMoreButton !== null) {
-            await user.click(loadMoreButton)
+        await waitFor((): void => {
             const updatedRowCount = Number.parseInt(table.getAttribute("aria-rowcount") ?? "0", 10)
-            expect(updatedRowCount).toBeGreaterThan(initialRowCount)
-        }
+            expect(updatedRowCount).toBeGreaterThan(8)
+        })
 
         const rowGroups = screen.getAllByRole("rowgroup")
         const bodyRowGroup = rowGroups.at(1)

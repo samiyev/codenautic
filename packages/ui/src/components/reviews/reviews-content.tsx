@@ -1,9 +1,9 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { Link } from "@tanstack/react-router"
 
-import { Button } from "@/components/ui"
 import { useDebounce } from "@/lib/hooks/use-debounce"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
+import { InfiniteScrollContainer } from "@/components/infrastructure/infinite-scroll-container"
 import { ReviewsFilters } from "./reviews-filters"
 import { type IReviewRow } from "./reviews-table"
 import { ReviewStatusBadge } from "./review-status-badge"
@@ -97,96 +97,89 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
                     Showing {filteredRows.length} from {props.rows.length} CCR entries.
                 </p>
             ) : null}
-            <EnterpriseDataTable
-                ariaLabel="CCR management table"
-                columns={[
-                    {
-                        accessor: (row): string => row.id,
-                        cell: (row): ReactElement => (
-                            <Link
-                                className="text-sm font-semibold text-slate-900 underline underline-offset-4"
-                                params={{ reviewId: row.id }}
-                                to="/reviews/$reviewId"
-                            >
-                                {row.id}
-                            </Link>
-                        ),
-                        header: "CCR ID",
-                        id: "id",
-                        pin: "left",
-                        size: 140,
-                    },
-                    {
-                        accessor: (row): string => row.title,
-                        header: "Title",
-                        id: "title",
-                        size: 280,
-                    },
-                    {
-                        accessor: (row): string => row.repository,
-                        header: "Repository",
-                        id: "repository",
-                        size: 200,
-                    },
-                    {
-                        accessor: (row): string => row.assignee,
-                        header: "Assignee",
-                        id: "assignee",
-                        size: 180,
-                    },
-                    {
-                        accessor: (row): number => row.comments,
-                        header: "Comments",
-                        id: "comments",
-                        size: 120,
-                    },
-                    {
-                        accessor: (row): string => row.updatedAt,
-                        header: "Updated at",
-                        id: "updatedAt",
-                        size: 180,
-                    },
-                    {
-                        accessor: (row): string => row.status,
-                        cell: (row): ReactElement => <ReviewStatusBadge status={row.status} />,
-                        header: "Status",
-                        id: "status",
-                        size: 180,
-                    },
-                ]}
-                emptyMessage="No CCR entries for current filters."
-                getRowId={(row): string => row.id}
-                id="ccr-management-table"
-                rows={filteredRows}
-                stickyHeader={{
-                    enabled: true,
-                    topOffset: 0,
-                    withShadow: true,
-                }}
-                virtualization={{
-                    estimateRowHeight: {
-                        comfortable: 58,
-                        compact: 44,
-                    },
-                    maxBodyHeight: 560,
-                    overscan: 12,
-                    rowHeightEstimator: estimateCcrRowHeight,
-                }}
-            />
-            {props.hasMore ? (
-                <div className="flex justify-end">
-                    <Button
-                        isDisabled={props.isLoadingMore}
-                        size="sm"
-                        variant="flat"
-                        onPress={(): void => {
-                            void props.onLoadMore()
-                        }}
-                    >
-                        {props.isLoadingMore ? "Loading..." : "Load more CCR"}
-                    </Button>
-                </div>
-            ) : null}
+            <InfiniteScrollContainer
+                hasMore={props.hasMore}
+                isLoading={props.isLoadingMore}
+                loadingText="Loading more CCR..."
+                onLoadMore={props.onLoadMore}
+            >
+                <EnterpriseDataTable
+                    ariaLabel="CCR management table"
+                    columns={[
+                        {
+                            accessor: (row): string => row.id,
+                            cell: (row): ReactElement => (
+                                <Link
+                                    className="text-sm font-semibold text-slate-900 underline underline-offset-4"
+                                    params={{ reviewId: row.id }}
+                                    to="/reviews/$reviewId"
+                                >
+                                    {row.id}
+                                </Link>
+                            ),
+                            header: "CCR ID",
+                            id: "id",
+                            pin: "left",
+                            size: 140,
+                        },
+                        {
+                            accessor: (row): string => row.title,
+                            header: "Title",
+                            id: "title",
+                            size: 280,
+                        },
+                        {
+                            accessor: (row): string => row.repository,
+                            header: "Repository",
+                            id: "repository",
+                            size: 200,
+                        },
+                        {
+                            accessor: (row): string => row.assignee,
+                            header: "Assignee",
+                            id: "assignee",
+                            size: 180,
+                        },
+                        {
+                            accessor: (row): number => row.comments,
+                            header: "Comments",
+                            id: "comments",
+                            size: 120,
+                        },
+                        {
+                            accessor: (row): string => row.updatedAt,
+                            header: "Updated at",
+                            id: "updatedAt",
+                            size: 180,
+                        },
+                        {
+                            accessor: (row): string => row.status,
+                            cell: (row): ReactElement => <ReviewStatusBadge status={row.status} />,
+                            header: "Status",
+                            id: "status",
+                            size: 180,
+                        },
+                    ]}
+                    emptyMessage="No CCR entries for current filters."
+                    getRowId={(row): string => row.id}
+                    id="ccr-management-table"
+                    rows={filteredRows}
+                    stickyHeader={{
+                        enabled: true,
+                        topOffset: 0,
+                        withShadow: true,
+                    }}
+                    virtualization={{
+                        estimateRowHeight: {
+                            comfortable: 58,
+                            compact: 44,
+                        },
+                        maxBodyHeight: 560,
+                        overscan: 12,
+                        rowHeightEstimator: estimateCcrRowHeight,
+                    }}
+                />
+            </InfiniteScrollContainer>
         </section>
     )
 }
