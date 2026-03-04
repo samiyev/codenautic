@@ -1,7 +1,8 @@
-import { useMemo, useState, type ChangeEvent, type ReactElement } from "react"
+import { useMemo, type ChangeEvent, type ReactElement } from "react"
 
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
+import { useFilterPersistence } from "@/lib/hooks/use-filter-persistence"
 
 type TIssueTrackingAction = "acknowledge" | "fix" | "snooze" | "ignore"
 type TIssueTrackingSeverity = "critical" | "high" | "medium" | "low"
@@ -172,6 +173,7 @@ const EXTRA_ISSUES: ReadonlyArray<IIssueTrackingIssue> = Array.from(Array(26)).m
 )
 
 const ALL_ISSUES: ReadonlyArray<IIssueTrackingIssue> = [...DEFAULT_ISSUES, ...EXTRA_ISSUES]
+const ISSUE_FILTER_PERSISTENCE_KEY = "issues-tracking:filters:v1"
 
 interface IIssueTrackingFilters {
     /** Поиск по тексту/файлу/репозиторию. */
@@ -180,6 +182,12 @@ interface IIssueTrackingFilters {
     readonly status: "all" | TIssueTrackingStatus
     /** Фильтр по критичности. */
     readonly severity: "all" | TIssueTrackingSeverity
+}
+
+const DEFAULT_ISSUE_FILTERS: IIssueTrackingFilters = {
+    search: "",
+    severity: "all",
+    status: "all",
 }
 
 function normalize(value: string): string {
@@ -232,11 +240,12 @@ function formatIssueDate(raw: string): string {
  */
 export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactElement {
     const sourceIssues = props.issues ?? ALL_ISSUES
-    const [filters, setFilters] = useState<IIssueTrackingFilters>({
-        search: "",
-        severity: "all",
-        status: "all",
+    const persistedFilters = useFilterPersistence<IIssueTrackingFilters>({
+        storageKey: ISSUE_FILTER_PERSISTENCE_KEY,
+        defaultValue: DEFAULT_ISSUE_FILTERS,
     })
+    const filters = persistedFilters.value
+    const setFilters = persistedFilters.setValue
 
     const filteredIssues = useMemo(
         () => filterIssues(sourceIssues, filters),

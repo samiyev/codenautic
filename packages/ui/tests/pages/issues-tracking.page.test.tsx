@@ -1,9 +1,11 @@
 import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { IssuesTrackingPage } from "@/pages/issues-tracking.page"
 import { renderWithProviders } from "../utils/render"
+
+const ISSUE_FILTER_PERSISTENCE_KEY = "issues-tracking:filters:v1"
 
 const issues = [
     {
@@ -53,6 +55,10 @@ const issues = [
 ]
 
 describe("IssuesTrackingPage", (): void => {
+    beforeEach((): void => {
+        localStorage.removeItem(ISSUE_FILTER_PERSISTENCE_KEY)
+    })
+
     it("фильтрует списки по поиску, статусу и критичности", async (): Promise<void> => {
         const user = userEvent.setup()
 
@@ -96,5 +102,21 @@ describe("IssuesTrackingPage", (): void => {
 
         expect(screen.getByRole("table", { name: "Issue list" })).not.toBeNull()
         expect(screen.getAllByRole("columnheader").length).toBeGreaterThan(0)
+    })
+
+    it("загружает persisted filters из localStorage при инициализации", (): void => {
+        localStorage.setItem(
+            ISSUE_FILTER_PERSISTENCE_KEY,
+            JSON.stringify({
+                search: "ISS-101",
+                severity: "critical",
+                status: "open",
+            }),
+        )
+
+        renderWithProviders(<IssuesTrackingPage issues={issues} />)
+
+        expect(screen.getByText("1 of 4 issues")).not.toBeNull()
+        expect(screen.getByText("Possible unguarded parse fallback")).not.toBeNull()
     })
 })
