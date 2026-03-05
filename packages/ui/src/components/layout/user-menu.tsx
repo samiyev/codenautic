@@ -12,12 +12,16 @@ export interface IUserMenuProps {
     readonly userEmail?: string
     /** Коллбэк для выхода из системы. */
     readonly onSignOut?: () => Promise<void> | void
+    /** Открыть Settings. */
+    readonly onOpenSettings?: () => void
+    /** Открыть Billing. */
+    readonly onOpenBilling?: () => void
+    /** Открыть Help & Diagnostics. */
+    readonly onOpenHelp?: () => void
 }
 
 /**
- * Минимальный user-menu без выпадающих слоёв.
- *
- * Служит placeholder, пока не введена полноценная навигация в settings/profile.
+ * Пользовательское меню с быстрыми переходами по ключевым экранам.
  *
  * @param props Параметры пользовательского меню.
  * @returns Блок с avatar и кнопкой sign out.
@@ -44,6 +48,30 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
             <DropdownMenu aria-label="User menu">
                 <DropdownItem key="name">{props.userName ?? "User"}</DropdownItem>
                 <DropdownItem key="email">{props.userEmail ?? "user@example.com"}</DropdownItem>
+                <DropdownItem
+                    key="settings"
+                    onPress={(): void => {
+                        props.onOpenSettings?.()
+                    }}
+                >
+                    Open settings
+                </DropdownItem>
+                <DropdownItem
+                    key="billing"
+                    onPress={(): void => {
+                        props.onOpenBilling?.()
+                    }}
+                >
+                    Open billing
+                </DropdownItem>
+                <DropdownItem
+                    key="help"
+                    onPress={(): void => {
+                        props.onOpenHelp?.()
+                    }}
+                >
+                    Help & diagnostics
+                </DropdownItem>
                 {props.onSignOut === undefined ? null : (
                     <DropdownItem
                         key="logout"

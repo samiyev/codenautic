@@ -25,7 +25,6 @@ import {
 } from "lucide-react"
 
 import { SidebarNav } from "./sidebar-nav"
-import { SettingsNav } from "./settings-nav"
 
 /**
  * Пропсы для layout страницы настроек.
@@ -163,7 +162,6 @@ export function SettingsLayout(props: ISettingsLayoutProps): ReactElement {
                     {title}
                 </p>
                 <SidebarNav items={SETTINGS_NAV} />
-                <SettingsNav />
             </aside>
             <main className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm">
                 {props.children === undefined ? <Outlet /> : props.children}

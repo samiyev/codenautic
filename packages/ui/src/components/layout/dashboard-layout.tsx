@@ -558,6 +558,24 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
         })
     }
 
+    const handleOpenSettings = (): void => {
+        void navigate({
+            to: "/settings",
+        })
+    }
+
+    const handleOpenBilling = (): void => {
+        void navigate({
+            to: "/settings-billing",
+        })
+    }
+
+    const handleOpenHelpDiagnostics = (): void => {
+        void navigate({
+            to: "/help-diagnostics",
+        })
+    }
+
     const handleReAuthenticate = (): void => {
         const pendingIntent = readSessionPendingIntent()
         const draftSnapshot = readSessionDraftSnapshot()
@@ -591,6 +609,9 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
                     setIsMobileSidebarOpen(true)
                 }}
                 onOrganizationChange={handleOrganizationChange}
+                onOpenBilling={handleOpenBilling}
+                onOpenHelp={handleOpenHelpDiagnostics}
+                onOpenSettings={handleOpenSettings}
                 onRoleChange={handleRoleChange}
                 onSearchRouteNavigate={handleSearchRouteNavigate}
                 userEmail={props.userEmail}
