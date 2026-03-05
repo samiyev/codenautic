@@ -54,6 +54,10 @@ import {
     type IPredictionExplainPanelEntry,
 } from "@/components/graphs/prediction-explain-panel"
 import {
+    TrendForecastChart,
+    type ITrendForecastChartPoint,
+} from "@/components/graphs/trend-forecast-chart"
+import {
     CityOwnershipOverlay,
     type ICityOwnershipOverlayOwnerEntry,
 } from "@/components/graphs/city-ownership-overlay"
@@ -1372,6 +1376,34 @@ function buildPredictionQualityTrendPoints(
 }
 
 /**
+ * Формирует точки trend forecast chart с confidence interval.
+ *
+ * @param healthTrend Исторический health trend.
+ * @param overlayEntries Prediction overlay entries.
+ * @returns Точки для forecast chart.
+ */
+function buildTrendForecastChartPoints(
+    healthTrend: ReadonlyArray<IHealthTrendPoint>,
+    overlayEntries: ReadonlyArray<ICityPredictionOverlayEntry>,
+): ReadonlyArray<ITrendForecastChartPoint> {
+    return healthTrend.slice(-6).map((point, index): ITrendForecastChartPoint => {
+        const forecastScore = Math.max(1, Math.round(point.healthScore - (index + 1) * 2))
+        const confidenceRadius = 4 + index
+        const linkedFileId =
+            overlayEntries.length === 0 ? undefined : overlayEntries[index % overlayEntries.length]?.fileId
+        return {
+            confidenceHigh: Math.min(100, forecastScore + confidenceRadius),
+            confidenceLow: Math.max(1, forecastScore - confidenceRadius),
+            fileId: linkedFileId,
+            forecastScore,
+            historicalScore: Math.max(1, Math.round(point.healthScore)),
+            id: `trend-forecast-${String(index)}-${point.timestamp}`,
+            timestamp: resolvePredictionTrendTimestampLabel(point.timestamp),
+        }
+    })
+}
+
+/**
  * Формирует список bug-prone файлов для prediction dashboard.
  *
  * @param files Файлы текущего профиля.
@@ -2135,6 +2167,7 @@ export function CodeCityDashboardPage(
     const [activeBusFactorTrendModuleId, setActiveBusFactorTrendModuleId] = useState<string | undefined>()
     const [activePredictionFileId, setActivePredictionFileId] = useState<string | undefined>()
     const [activePredictionHotspotId, setActivePredictionHotspotId] = useState<string | undefined>()
+    const [activeTrendForecastPointId, setActiveTrendForecastPointId] = useState<string | undefined>()
     const [activeKnowledgeSiloId, setActiveKnowledgeSiloId] = useState<string | undefined>()
     const [activeContributorId, setActiveContributorId] = useState<string | undefined>()
     const [activeOwnershipTransitionId, setActiveOwnershipTransitionId] = useState<string | undefined>()
@@ -2172,6 +2205,10 @@ export function CodeCityDashboardPage(
     )
     const predictionQualityTrendPoints = buildPredictionQualityTrendPoints(
         currentProfile.healthTrend,
+    )
+    const trendForecastPoints = buildTrendForecastChartPoints(
+        currentProfile.healthTrend,
+        predictionOverlayEntries,
     )
     const predictionBugProneFiles = buildPredictionBugProneFiles(
         currentProfile.files,
@@ -2256,6 +2293,7 @@ export function CodeCityDashboardPage(
         setActiveBusFactorTrendModuleId(undefined)
         setActivePredictionFileId(undefined)
         setActivePredictionHotspotId(undefined)
+        setActiveTrendForecastPointId(undefined)
         setActiveKnowledgeSiloId(undefined)
         setActiveContributorId(undefined)
         setActiveOwnershipTransitionId(undefined)
@@ -2720,6 +2758,34 @@ export function CodeCityDashboardPage(
                             markAreaExplored("controls")
                             markAreaExplored("city-3d")
                         }}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Trend forecast chart</p>
+                </CardHeader>
+                <CardBody>
+                    <TrendForecastChart
+                        activePointId={activeTrendForecastPointId}
+                        onSelectPoint={(point): void => {
+                            setActiveTrendForecastPointId(point.id)
+                            setActivePredictionHotspotId(undefined)
+                            setActivePredictionFileId(point.fileId)
+                            if (point.fileId !== undefined) {
+                                setHighlightedFileId(point.fileId)
+                            }
+                            setExploreNavigationFocus({
+                                activeFileId: point.fileId,
+                                chainFileIds:
+                                    point.fileId === undefined ? [] : [point.fileId],
+                                title: `Trend forecast: ${point.timestamp}`,
+                            })
+                            markAreaExplored("controls")
+                            markAreaExplored("city-3d")
+                        }}
+                        points={trendForecastPoints}
                     />
                 </CardBody>
             </Card>

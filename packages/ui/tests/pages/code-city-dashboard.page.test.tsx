@@ -716,6 +716,49 @@ const { mockPredictionExplainPanel } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockTrendForecastChart } = vi.hoisted(() => ({
+    mockTrendForecastChart: vi.fn(
+        (props: {
+            readonly points: ReadonlyArray<{
+                readonly id: string
+                readonly timestamp: string
+                readonly historicalScore: number
+                readonly forecastScore: number
+                readonly confidenceLow: number
+                readonly confidenceHigh: number
+                readonly fileId?: string
+            }>
+            readonly activePointId?: string
+            readonly onSelectPoint?: (point: {
+                readonly id: string
+                readonly timestamp: string
+                readonly historicalScore: number
+                readonly forecastScore: number
+                readonly confidenceLow: number
+                readonly confidenceHigh: number
+                readonly fileId?: string
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>trend-forecast-points:{props.points.length}</p>
+                    <p>trend-forecast-active:{props.activePointId ?? "none"}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstPoint = props.points.at(0)
+                            if (firstPoint !== undefined) {
+                                props.onSelectPoint?.(firstPoint)
+                            }
+                        }}
+                        type="button"
+                    >
+                        inspect trend forecast point
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockCityBusFactorOverlay } = vi.hoisted(() => ({
     mockCityBusFactorOverlay: vi.fn(
         (props: {
@@ -1250,6 +1293,9 @@ vi.mock("@/components/graphs/prediction-dashboard", () => ({
 vi.mock("@/components/graphs/prediction-explain-panel", () => ({
     PredictionExplainPanel: mockPredictionExplainPanel,
 }))
+vi.mock("@/components/graphs/trend-forecast-chart", () => ({
+    TrendForecastChart: mockTrendForecastChart,
+}))
 vi.mock("@/components/graphs/city-bus-factor-overlay", () => ({
     CityBusFactorOverlay: mockCityBusFactorOverlay,
 }))
@@ -1306,6 +1352,7 @@ beforeEach((): void => {
     mockCityPredictionOverlay.mockClear()
     mockPredictionDashboard.mockClear()
     mockPredictionExplainPanel.mockClear()
+    mockTrendForecastChart.mockClear()
     mockCityBusFactorOverlay.mockClear()
     mockBusFactorTrendChart.mockClear()
     mockKnowledgeSiloPanel.mockClear()
@@ -1473,6 +1520,10 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstPredictionExplainCall).not.toBeUndefined()
         expect(firstPredictionExplainCall?.entries.length).toBeGreaterThan(0)
 
+        const firstTrendForecastCall = mockTrendForecastChart.mock.calls.at(0)?.[0]
+        expect(firstTrendForecastCall).not.toBeUndefined()
+        expect(firstTrendForecastCall?.points.length).toBeGreaterThan(0)
+
         const firstBusFactorCall = mockCityBusFactorOverlay.mock.calls.at(0)?.[0]
         expect(firstBusFactorCall).not.toBeUndefined()
         expect(firstBusFactorCall?.entries.length).toBeGreaterThan(0)
@@ -1617,6 +1668,14 @@ describe("CodeCityDashboardPage", (): void => {
         const predictionExplain3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(predictionExplain3DCall).not.toBeUndefined()
         expect(predictionExplain3DCall?.navigationLabel).toContain("Prediction explanation:")
+
+        await user.click(screen.getByRole("button", { name: "inspect trend forecast point" }))
+        const trendForecastTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(trendForecastTreemapCall).not.toBeUndefined()
+        expect(trendForecastTreemapCall?.highlightedFileId).toBe("src/api/auth.ts")
+        const trendForecast3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(trendForecast3DCall).not.toBeUndefined()
+        expect(trendForecast3DCall?.navigationLabel).toContain("Trend forecast:")
 
         await user.click(screen.getByRole("button", { name: "inspect change risk point" }))
         const riskNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
