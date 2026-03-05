@@ -812,6 +812,47 @@ const { mockPredictionAccuracyWidget } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockAlertConfigDialog } = vi.hoisted(() => ({
+    mockAlertConfigDialog: vi.fn(
+        (props: {
+            readonly modules: ReadonlyArray<{
+                readonly moduleId: string
+                readonly label: string
+                readonly enabledByDefault: boolean
+            }>
+            readonly onSave?: (value: {
+                readonly confidenceThreshold: number
+                readonly issueIncreaseThreshold: number
+                readonly channels: ReadonlyArray<"slack" | "email" | "webhook">
+                readonly frequency: "realtime" | "daily" | "weekly"
+                readonly moduleIds: ReadonlyArray<string>
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>alert-config-modules:{props.modules.length}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstModule = props.modules.at(0)
+                            if (firstModule !== undefined) {
+                                props.onSave?.({
+                                    channels: ["slack", "email"],
+                                    confidenceThreshold: 80,
+                                    frequency: "daily",
+                                    issueIncreaseThreshold: 3,
+                                    moduleIds: [firstModule.moduleId],
+                                })
+                            }
+                        }}
+                        type="button"
+                    >
+                        save prediction alert config
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockCityBusFactorOverlay } = vi.hoisted(() => ({
     mockCityBusFactorOverlay: vi.fn(
         (props: {
@@ -1352,6 +1393,9 @@ vi.mock("@/components/graphs/trend-forecast-chart", () => ({
 vi.mock("@/components/graphs/prediction-accuracy-widget", () => ({
     PredictionAccuracyWidget: mockPredictionAccuracyWidget,
 }))
+vi.mock("@/components/graphs/alert-config-dialog", () => ({
+    AlertConfigDialog: mockAlertConfigDialog,
+}))
 vi.mock("@/components/graphs/city-bus-factor-overlay", () => ({
     CityBusFactorOverlay: mockCityBusFactorOverlay,
 }))
@@ -1410,6 +1454,7 @@ beforeEach((): void => {
     mockPredictionExplainPanel.mockClear()
     mockTrendForecastChart.mockClear()
     mockPredictionAccuracyWidget.mockClear()
+    mockAlertConfigDialog.mockClear()
     mockCityBusFactorOverlay.mockClear()
     mockBusFactorTrendChart.mockClear()
     mockKnowledgeSiloPanel.mockClear()
@@ -1586,6 +1631,10 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstPredictionAccuracyCall?.points.length).toBeGreaterThan(0)
         expect(firstPredictionAccuracyCall?.cases.length).toBeGreaterThan(0)
 
+        const firstAlertConfigCall = mockAlertConfigDialog.mock.calls.at(0)?.[0]
+        expect(firstAlertConfigCall).not.toBeUndefined()
+        expect(firstAlertConfigCall?.modules.length).toBeGreaterThan(0)
+
         const firstBusFactorCall = mockCityBusFactorOverlay.mock.calls.at(0)?.[0]
         expect(firstBusFactorCall).not.toBeUndefined()
         expect(firstBusFactorCall?.entries.length).toBeGreaterThan(0)
@@ -1746,6 +1795,14 @@ describe("CodeCityDashboardPage", (): void => {
         const accuracy3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(accuracy3DCall).not.toBeUndefined()
         expect(accuracy3DCall?.navigationLabel).toContain("Prediction accuracy:")
+
+        await user.click(screen.getByRole("button", { name: "save prediction alert config" }))
+        const alertConfigTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(alertConfigTreemapCall).not.toBeUndefined()
+        expect(alertConfigTreemapCall?.highlightedFileId).toBe("src/api/auth.ts")
+        const alertConfig3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(alertConfig3DCall).not.toBeUndefined()
+        expect(alertConfig3DCall?.navigationLabel).toContain("Alert config:")
 
         await user.click(screen.getByRole("button", { name: "inspect change risk point" }))
         const riskNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]

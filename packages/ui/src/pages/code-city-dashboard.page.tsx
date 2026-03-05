@@ -64,6 +64,11 @@ import {
     type IPredictionConfusionMatrix,
 } from "@/components/graphs/prediction-accuracy-widget"
 import {
+    AlertConfigDialog,
+    type IAlertConfigDialogModule,
+    type IAlertConfigDialogValue,
+} from "@/components/graphs/alert-config-dialog"
+import {
     CityOwnershipOverlay,
     type ICityOwnershipOverlayOwnerEntry,
 } from "@/components/graphs/city-ownership-overlay"
@@ -1510,6 +1515,64 @@ function buildPredictionAccuracyCases(
     })
 }
 
+function resolvePredictionAlertModuleId(file: ICodeCityTreemapFileDescriptor): string {
+    const descriptor = file as {
+        readonly packageName?: unknown
+        readonly path: string
+    }
+    const packageName = descriptor.packageName
+    if (typeof packageName === "string" && packageName.length > 0) {
+        return packageName
+    }
+
+    const pathSegments = descriptor.path.split("/")
+    return pathSegments[1] ?? descriptor.path
+}
+
+/**
+ * Формирует список модулей для per-module alert configuration.
+ *
+ * @param files Файлы текущего профиля.
+ * @returns Уникальные модульные сегменты.
+ */
+function buildPredictionAlertModules(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+): ReadonlyArray<IAlertConfigDialogModule> {
+    const moduleIds = new Set<string>()
+    files.forEach((file): void => {
+        moduleIds.add(resolvePredictionAlertModuleId(file))
+    })
+
+    return Array.from(moduleIds)
+        .slice(0, 8)
+        .map((moduleId, index): IAlertConfigDialogModule => {
+            return {
+                enabledByDefault: index < 3,
+                label: moduleId,
+                moduleId,
+            }
+        })
+}
+
+/**
+ * Подбирает фокус-файл по выбранным alert modules.
+ *
+ * @param moduleIds Выбранные модули.
+ * @param files Файлы текущего профиля.
+ * @returns file id для фокуса.
+ */
+function resolvePredictionAlertFocusFileId(
+    moduleIds: ReadonlyArray<string>,
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+): string | undefined {
+    if (moduleIds.length === 0) {
+        return undefined
+    }
+    return files.find((file): boolean => {
+        return moduleIds.includes(resolvePredictionAlertModuleId(file))
+    })?.id
+}
+
 /**
  * Формирует список bug-prone файлов для prediction dashboard.
  *
@@ -2326,6 +2389,7 @@ export function CodeCityDashboardPage(
         currentProfile.files,
         predictionOverlayEntries,
     )
+    const predictionAlertModules = buildPredictionAlertModules(currentProfile.files)
     const predictionBugProneFiles = buildPredictionBugProneFiles(
         currentProfile.files,
         predictionOverlayEntries,
@@ -2932,6 +2996,36 @@ export function CodeCityDashboardPage(
                             markAreaExplored("city-3d")
                         }}
                         points={predictionAccuracyPoints}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Alert config dialog</p>
+                </CardHeader>
+                <CardBody>
+                    <AlertConfigDialog
+                        key={`prediction-alert-${currentProfile.id}`}
+                        modules={predictionAlertModules}
+                        onSave={(value: IAlertConfigDialogValue): void => {
+                            const focusFileId = resolvePredictionAlertFocusFileId(
+                                value.moduleIds,
+                                currentProfile.files,
+                            )
+                            setActivePredictionHotspotId(undefined)
+                            setActivePredictionFileId(focusFileId)
+                            if (focusFileId !== undefined) {
+                                setHighlightedFileId(focusFileId)
+                            }
+                            setExploreNavigationFocus({
+                                activeFileId: focusFileId,
+                                chainFileIds: focusFileId === undefined ? [] : [focusFileId],
+                                title: `Alert config: ${value.frequency}`,
+                            })
+                            markAreaExplored("controls")
+                            markAreaExplored("city-3d")
+                        }}
                     />
                 </CardBody>
             </Card>
