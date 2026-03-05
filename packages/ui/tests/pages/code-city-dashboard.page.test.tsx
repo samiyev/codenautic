@@ -13,6 +13,7 @@ const { mockCodeCityTreemap } = vi.hoisted(() => ({
             readonly defaultMetric: "complexity" | "coverage" | "churn"
             readonly fileLink: (file: { readonly fileId: string; readonly path: string }) => string
             readonly fileColorById?: Readonly<Record<string, string>>
+            readonly predictedRiskByFileId?: Readonly<Record<string, "low" | "medium" | "high">>
             readonly packageColorByName?: Readonly<Record<string, string>>
             readonly files: ReadonlyArray<unknown>
             readonly highlightedFileId?: string
@@ -29,6 +30,7 @@ const { mockCodeCityTreemap } = vi.hoisted(() => ({
                     <p>temporal-couplings:{props.temporalCouplings.length}</p>
                     <p>impacted-files:{props.impactedFiles.length}</p>
                     <p>ownership-colors:{Object.keys(props.fileColorById ?? {}).length}</p>
+                    <p>prediction-outlines:{Object.keys(props.predictedRiskByFileId ?? {}).length}</p>
                     <p>bus-factor-colors:{Object.keys(props.packageColorByName ?? {}).length}</p>
                     <p>highlighted-file:{props.highlightedFileId ?? "none"}</p>
                 </div>
@@ -580,6 +582,45 @@ const { mockCityImpactOverlay } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockCityPredictionOverlay } = vi.hoisted(() => ({
+    mockCityPredictionOverlay: vi.fn(
+        (props: {
+            readonly entries: ReadonlyArray<{
+                readonly fileId: string
+                readonly label: string
+                readonly riskLevel: "low" | "medium" | "high"
+                readonly confidenceScore: number
+                readonly reason: string
+            }>
+            readonly activeFileId?: string
+            readonly onSelectEntry?: (entry: {
+                readonly fileId: string
+                readonly label: string
+                readonly riskLevel: "low" | "medium" | "high"
+                readonly confidenceScore: number
+                readonly reason: string
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>prediction-entries:{props.entries.length}</p>
+                    <p>prediction-active:{props.activeFileId ?? "none"}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstEntry = props.entries.at(0)
+                            if (firstEntry !== undefined) {
+                                props.onSelectEntry?.(firstEntry)
+                            }
+                        }}
+                        type="button"
+                    >
+                        inspect prediction hotspot
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockCityBusFactorOverlay } = vi.hoisted(() => ({
     mockCityBusFactorOverlay: vi.fn(
         (props: {
@@ -1105,6 +1146,9 @@ vi.mock("@/components/graphs/impact-analysis-panel", () => ({
 vi.mock("@/components/graphs/city-impact-overlay", () => ({
     CityImpactOverlay: mockCityImpactOverlay,
 }))
+vi.mock("@/components/graphs/city-prediction-overlay", () => ({
+    CityPredictionOverlay: mockCityPredictionOverlay,
+}))
 vi.mock("@/components/graphs/city-bus-factor-overlay", () => ({
     CityBusFactorOverlay: mockCityBusFactorOverlay,
 }))
@@ -1158,6 +1202,7 @@ beforeEach((): void => {
     mockRefactoringExportDialog.mockClear()
     mockImpactAnalysisPanel.mockClear()
     mockCityImpactOverlay.mockClear()
+    mockCityPredictionOverlay.mockClear()
     mockCityBusFactorOverlay.mockClear()
     mockBusFactorTrendChart.mockClear()
     mockKnowledgeSiloPanel.mockClear()
@@ -1195,6 +1240,7 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstTreemapCall?.temporalCouplings.length).toBe(0)
         expect(firstTreemapCall?.impactedFiles.length).toBeGreaterThan(0)
         expect(Object.keys(firstTreemapCall?.fileColorById ?? {})).not.toHaveLength(0)
+        expect(Object.keys(firstTreemapCall?.predictedRiskByFileId ?? {})).not.toHaveLength(0)
         expect(Object.keys(firstTreemapCall?.packageColorByName ?? {})).not.toHaveLength(0)
         const firstTreemapFile = firstTreemapCall?.files.at(0) as
             | {
@@ -1309,6 +1355,10 @@ describe("CodeCityDashboardPage", (): void => {
         const firstCityImpactCall = mockCityImpactOverlay.mock.calls.at(0)?.[0]
         expect(firstCityImpactCall).not.toBeUndefined()
         expect(firstCityImpactCall?.entries.length).toBeGreaterThan(0)
+
+        const firstPredictionCall = mockCityPredictionOverlay.mock.calls.at(0)?.[0]
+        expect(firstPredictionCall).not.toBeUndefined()
+        expect(firstPredictionCall?.entries.length).toBeGreaterThan(0)
 
         const firstBusFactorCall = mockCityBusFactorOverlay.mock.calls.at(0)?.[0]
         expect(firstBusFactorCall).not.toBeUndefined()
@@ -1429,6 +1479,15 @@ describe("CodeCityDashboardPage", (): void => {
         const cityImpactNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(cityImpactNavigation3DCall).not.toBeUndefined()
         expect(cityImpactNavigation3DCall?.navigationLabel).toContain("Impact overlay:")
+
+        await user.click(screen.getByRole("button", { name: "inspect prediction hotspot" }))
+        const predictionTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(predictionTreemapCall).not.toBeUndefined()
+        expect(predictionTreemapCall?.highlightedFileId).toBe("src/api/auth.ts")
+        expect(Object.keys(predictionTreemapCall?.predictedRiskByFileId ?? {})).not.toHaveLength(0)
+        const prediction3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(prediction3DCall).not.toBeUndefined()
+        expect(prediction3DCall?.navigationLabel).toContain("Prediction overlay:")
 
         await user.click(screen.getByRole("button", { name: "inspect change risk point" }))
         const riskNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]

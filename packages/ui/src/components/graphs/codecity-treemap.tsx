@@ -29,6 +29,7 @@ const CODE_CITY_IMPACT_LEVELS = ["changed", "impacted", "ripple"] as const
 type ICodeCityTreemapMetric = (typeof CODE_CITY_METRICS)[number]
 type ICodeCityBugHeatRange = (typeof CODE_CITY_BUG_HEAT_RANGES)[number]
 type ICodeCityTreemapImpactLevel = (typeof CODE_CITY_IMPACT_LEVELS)[number]
+export type TCodeCityTreemapPredictionRiskLevel = "low" | "medium" | "high"
 
 const CODE_CITY_METRIC_LABELS: Record<ICodeCityTreemapMetric, string> = {
     complexity: "Complexity",
@@ -172,6 +173,7 @@ interface ICodeCityTreemapTreemapContentProps {
     readonly onFileHover?: (payload?: ICodeCityTreemapFileTooltip) => void
     readonly fileLink?: (file: ICodeCityTreemapFileLinkResolver) => string
     readonly highlightedFileId?: string
+    readonly predictedRiskByFileId?: ReadonlyMap<string, TCodeCityTreemapPredictionRiskLevel>
     readonly fill?: string
     readonly onPackageSelect?: (packageName: string) => void
     readonly payload?: ICodeCityTreemapTreemapNodePayload
@@ -546,6 +548,42 @@ function resolveImpactStyle(
     }
 }
 
+function resolvePredictionStyle(
+    riskLevel: TCodeCityTreemapPredictionRiskLevel | undefined,
+): { readonly stroke: string; readonly strokeWidth: number; readonly strokeDasharray?: string } | undefined {
+    if (riskLevel === "high") {
+        return {
+            stroke: "hsl(348, 83%, 58%)",
+            strokeWidth: 2.8,
+            strokeDasharray: "6 3",
+        }
+    }
+    if (riskLevel === "medium") {
+        return {
+            stroke: "hsl(35, 96%, 59%)",
+            strokeWidth: 2.4,
+        }
+    }
+    if (riskLevel === "low") {
+        return {
+            stroke: "hsl(212, 86%, 57%)",
+            strokeWidth: 2,
+        }
+    }
+    return undefined
+}
+
+function resolveOutlineStyle(
+    props: ICodeCityTreemapTreemapContentProps,
+    predictionRiskLevel: TCodeCityTreemapPredictionRiskLevel | undefined,
+): { readonly stroke: string; readonly strokeWidth: number; readonly strokeDasharray?: string } {
+    const predictionStyle = resolvePredictionStyle(predictionRiskLevel)
+    if (predictionStyle !== undefined) {
+        return predictionStyle
+    }
+    return resolveImpactStyle(props)
+}
+
 function resolveMetricByValue(value: string): ICodeCityTreemapMetric {
     if (value === "coverage" || value === "churn") {
         return value
@@ -687,13 +725,15 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
     const comparisonDelta =
         typeof node?.comparisonDelta === "number" ? node.comparisonDelta : undefined
     const comparisonDeltaColor = resolveComparisonDeltaColor(comparisonDelta)
-    const strokeStyle = resolveImpactStyle(props)
     const nodeName = typeof node?.name === "string" ? node.name : ""
     const isPackage = (node?.children?.length ?? 0) > 0
     const canShowText = width > 42 && height > 16
     const isLeaf = (node?.children?.length ?? 0) === 0
     const fileId = typeof node?.id === "string" && node.id.length > 0 ? node.id : nodeName
     const filePath = typeof node?.path === "string" && node.path.length > 0 ? node.path : nodeName
+    const predictedRiskLevel =
+        isLeaf === false ? undefined : props.predictedRiskByFileId?.get(fileId)
+    const strokeStyle = resolveOutlineStyle(props, predictedRiskLevel)
     const isHighlightedFile = isLeaf && props.highlightedFileId === fileId
 
     const handlePackageSelect = (): void => {
@@ -935,6 +975,10 @@ export interface ICodeCityTreemapProps {
     readonly highlightedFileId?: string
     /** Принудительная раскраска зданий по file id (например ownership overlay). */
     readonly fileColorById?: Readonly<Record<string, string>>
+    /** Принудительная обводка зданий по file id для prediction overlays. */
+    readonly predictedRiskByFileId?: Readonly<
+        Record<string, TCodeCityTreemapPredictionRiskLevel>
+    >
     /** Принудительная раскраска district/package по package name (например bus factor). */
     readonly packageColorByName?: Readonly<Record<string, string>>
 }
@@ -1181,6 +1225,17 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
             return new Map<string, string>(Object.entries(props.packageColorByName))
         },
         [props.packageColorByName],
+    )
+    const predictedRiskByFileId = useMemo(
+        (): ReadonlyMap<string, TCodeCityTreemapPredictionRiskLevel> => {
+            if (props.predictedRiskByFileId === undefined) {
+                return new Map<string, TCodeCityTreemapPredictionRiskLevel>()
+            }
+            return new Map<string, TCodeCityTreemapPredictionRiskLevel>(
+                Object.entries(props.predictedRiskByFileId),
+            )
+        },
+        [props.predictedRiskByFileId],
     )
     const treemapData = useMemo(
         () =>
@@ -1507,6 +1562,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                     onFileHover: handleFileHover,
                                     fileLink: props.fileLink,
                                     highlightedFileId: props.highlightedFileId,
+                                    predictedRiskByFileId,
                                 })
                             }}
                             onClick={(node): void => {

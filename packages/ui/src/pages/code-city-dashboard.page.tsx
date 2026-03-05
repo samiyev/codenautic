@@ -12,6 +12,7 @@ import {
     type ICodeCityTreemapFileLinkResolver,
     type ICodeCityTreemapImpactedFileDescriptor,
     type ICodeCityTreemapTemporalCouplingDescriptor,
+    type TCodeCityTreemapPredictionRiskLevel,
 } from "@/components/graphs/codecity-treemap"
 import {
     CodeCity3DScene,
@@ -38,6 +39,10 @@ import {
     CityImpactOverlay,
     type ICityImpactOverlayEntry,
 } from "@/components/graphs/city-impact-overlay"
+import {
+    CityPredictionOverlay,
+    type ICityPredictionOverlayEntry,
+} from "@/components/graphs/city-prediction-overlay"
 import {
     CityOwnershipOverlay,
     type ICityOwnershipOverlayOwnerEntry,
@@ -1201,6 +1206,110 @@ function buildCityImpactOverlayEntries(
     })
 }
 
+function resolvePredictionRiskLevel(
+    file: ICodeCityTreemapFileDescriptor,
+): TCodeCityTreemapPredictionRiskLevel {
+    const bugIntroductions30d = file.bugIntroductions?.["30d"] ?? 0
+    const complexity = file.complexity ?? 0
+    const churn = file.churn ?? 0
+
+    if (bugIntroductions30d >= 4 || complexity >= 24 || churn >= 8) {
+        return "high"
+    }
+    if (bugIntroductions30d >= 2 || complexity >= 16 || churn >= 4) {
+        return "medium"
+    }
+    return "low"
+}
+
+function resolvePredictionReason(
+    file: ICodeCityTreemapFileDescriptor,
+    riskLevel: TCodeCityTreemapPredictionRiskLevel,
+): string {
+    const bugIntroductions30d = file.bugIntroductions?.["30d"] ?? 0
+    const churn = file.churn ?? 0
+    if (riskLevel === "high") {
+        return `Bug introductions ${String(bugIntroductions30d)} / 30d with churn ${String(churn)}`
+    }
+    if (riskLevel === "medium") {
+        return "Recent volatility and ownership transitions require monitoring"
+    }
+    return "Low volatility baseline in the current trend window"
+}
+
+function resolvePredictionConfidence(file: ICodeCityTreemapFileDescriptor): number {
+    const bugIntroductions30d = file.bugIntroductions?.["30d"] ?? 0
+    const complexity = file.complexity ?? 0
+    const churn = file.churn ?? 0
+    const confidence = Math.round(45 + bugIntroductions30d * 9 + churn * 3 + complexity * 0.55)
+    return Math.max(45, Math.min(96, confidence))
+}
+
+function resolvePredictionRiskPriority(
+    riskLevel: TCodeCityTreemapPredictionRiskLevel,
+): number {
+    if (riskLevel === "high") {
+        return 3
+    }
+    if (riskLevel === "medium") {
+        return 2
+    }
+    return 1
+}
+
+/**
+ * Формирует prediction overlay entries для прогнозных hotspot-ов.
+ *
+ * @param files Файлы текущего профиля.
+ * @returns Список прогнозов, отсортированный по риску.
+ */
+function buildPredictionOverlayEntries(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+): ReadonlyArray<ICityPredictionOverlayEntry> {
+    return files
+        .map((file): ICityPredictionOverlayEntry => {
+            const riskLevel = resolvePredictionRiskLevel(file)
+            return {
+                confidenceScore: resolvePredictionConfidence(file),
+                fileId: file.id,
+                label: file.path,
+                reason: resolvePredictionReason(file, riskLevel),
+                riskLevel,
+            }
+        })
+        .sort((leftEntry, rightEntry): number => {
+            const riskPriorityDiff =
+                resolvePredictionRiskPriority(rightEntry.riskLevel)
+                - resolvePredictionRiskPriority(leftEntry.riskLevel)
+            if (riskPriorityDiff !== 0) {
+                return riskPriorityDiff
+            }
+            return rightEntry.confidenceScore - leftEntry.confidenceScore
+        })
+        .slice(0, 8)
+}
+
+/**
+ * Формирует маппинг file -> prediction risk для визуальных outline в treemap.
+ *
+ * @param entries Prediction overlay entries.
+ * @returns Маппинг рисков для зданий.
+ */
+function buildPredictedRiskByFileId(
+    entries: ReadonlyArray<ICityPredictionOverlayEntry>,
+): Readonly<Record<string, TCodeCityTreemapPredictionRiskLevel>> | undefined {
+    if (entries.length === 0) {
+        return undefined
+    }
+
+    const predictedRiskByFileId: Record<string, TCodeCityTreemapPredictionRiskLevel> = {}
+    for (const entry of entries) {
+        predictedRiskByFileId[entry.fileId] = entry.riskLevel
+    }
+
+    return Object.keys(predictedRiskByFileId).length === 0 ? undefined : predictedRiskByFileId
+}
+
 /**
  * Формирует ownership legend entries для overlay по данным профиля.
  *
@@ -1873,6 +1982,7 @@ export function CodeCityDashboardPage(
     const [highlightedFileId, setHighlightedFileId] = useState<string | undefined>()
     const [activeBusFactorDistrictId, setActiveBusFactorDistrictId] = useState<string | undefined>()
     const [activeBusFactorTrendModuleId, setActiveBusFactorTrendModuleId] = useState<string | undefined>()
+    const [activePredictionFileId, setActivePredictionFileId] = useState<string | undefined>()
     const [activeKnowledgeSiloId, setActiveKnowledgeSiloId] = useState<string | undefined>()
     const [activeContributorId, setActiveContributorId] = useState<string | undefined>()
     const [activeOwnershipTransitionId, setActiveOwnershipTransitionId] = useState<string | undefined>()
@@ -1903,6 +2013,8 @@ export function CodeCityDashboardPage(
     const refactoringTimelineTasks = buildRefactoringTimelineTasks(refactoringTargets)
     const impactAnalysisSeeds = buildImpactAnalysisSeeds(currentProfile.files)
     const cityImpactOverlayEntries = buildCityImpactOverlayEntries(impactAnalysisSeeds)
+    const predictionOverlayEntries = buildPredictionOverlayEntries(currentProfile.files)
+    const predictedRiskByFileId = buildPredictedRiskByFileId(predictionOverlayEntries)
     const busFactorOverlayEntries = buildBusFactorOverlayEntries(
         currentProfile.files,
         currentProfile.ownership,
@@ -1975,6 +2087,7 @@ export function CodeCityDashboardPage(
         setHighlightedFileId(undefined)
         setActiveBusFactorDistrictId(undefined)
         setActiveBusFactorTrendModuleId(undefined)
+        setActivePredictionFileId(undefined)
         setActiveKnowledgeSiloId(undefined)
         setActiveContributorId(undefined)
         setActiveOwnershipTransitionId(undefined)
@@ -2371,6 +2484,29 @@ export function CodeCityDashboardPage(
 
             <Card>
                 <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Prediction overlay</p>
+                </CardHeader>
+                <CardBody>
+                    <CityPredictionOverlay
+                        activeFileId={activePredictionFileId}
+                        entries={predictionOverlayEntries}
+                        onSelectEntry={(entry): void => {
+                            setActivePredictionFileId(entry.fileId)
+                            setHighlightedFileId(entry.fileId)
+                            setExploreNavigationFocus({
+                                activeFileId: entry.fileId,
+                                chainFileIds: [entry.fileId],
+                                title: `Prediction overlay: ${entry.label}`,
+                            })
+                            markAreaExplored("controls")
+                            markAreaExplored("city-3d")
+                        }}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
                     <p className="text-sm font-semibold text-slate-900">Ownership overlay</p>
                 </CardHeader>
                 <CardBody>
@@ -2724,6 +2860,7 @@ export function CodeCityDashboardPage(
                         highlightedFileId={highlightedFileId}
                         impactedFiles={overlayImpactedFiles}
                         fileColorById={ownershipFileColorById}
+                        predictedRiskByFileId={predictedRiskByFileId}
                         packageColorByName={busFactorPackageColorByName}
                         temporalCouplings={overlayTemporalCouplings}
                         title={`${currentProfile.label} treemap`}

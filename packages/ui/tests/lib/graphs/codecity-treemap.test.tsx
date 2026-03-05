@@ -397,6 +397,30 @@ describe("codecity treemap graph", (): void => {
         expect(screen.getAllByTestId("highlighted-treemap-file")).toHaveLength(1)
     })
 
+    it("применяет prediction outline для прогнозных рисков", (): void => {
+        render(
+            <CodeCityTreemap
+                files={sampleFiles}
+                predictedRiskByFileId={{
+                    "src/api/auth.ts": "high",
+                    "src/api/session.ts": "medium",
+                }}
+                title="CodeCity treemap"
+            />,
+        )
+
+        const highRiskCell = screen.getByLabelText("File auth.ts")
+        const highRiskOutline = highRiskCell.querySelector("rect[stroke]")
+        expect(highRiskOutline).not.toBeNull()
+        expect(highRiskOutline).toHaveAttribute("stroke-dasharray", "6 3")
+
+        const mediumRiskCell = screen.getByLabelText("File session.ts")
+        const mediumRiskOutline = mediumRiskCell.querySelector("rect[stroke]")
+        expect(mediumRiskOutline).not.toBeNull()
+        expect(mediumRiskOutline).not.toHaveAttribute("stroke-dasharray")
+        expect(mediumRiskOutline).toHaveAttribute("stroke-width", "2.4")
+    })
+
     it("показывает comparison summary в header при переданном baseline", (): void => {
         render(
             <CodeCityTreemap
