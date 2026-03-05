@@ -1,5 +1,6 @@
 import { type ChangeEvent, type ReactElement, useMemo, useState } from "react"
 
+import { ReportScheduleDialog } from "@/components/reports/report-schedule-dialog"
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
@@ -256,6 +257,8 @@ export function ReportGeneratorPage(): ReactElement {
                     </div>
                 </CardBody>
             </Card>
+
+            <ReportScheduleDialog />
 
             <Card>
                 <CardHeader>
