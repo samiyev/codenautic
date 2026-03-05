@@ -16,13 +16,17 @@ import type {
 import type {ILibraryRuleRepository} from "../../ports/outbound/rule/library-rule-repository.port"
 import {enrichSuggestions} from "../../shared/suggestion-enrichment"
 import {
+    appendRuleContext,
+    resolveRuleContext,
+    resolveSystemPrompt,
+} from "../../shared/prompt-resolution"
+import {
     extractJsonArray,
     parseFromContent,
     type ParsedJsonPayload,
 } from "../../shared/suggestion-parsing"
 import {RuleContextFormatterService} from "../../../domain/services/rule-context-formatter.service"
 import {StageError} from "../../../domain/errors/stage.error"
-import type {LibraryRule} from "../../../domain/entities/library-rule.entity"
 import {hash} from "../../../shared/utils/hash"
 import {Result} from "../../../shared/result"
 import {
@@ -173,44 +177,56 @@ export class ProcessCcrLevelReviewStageUseCase implements IPipelineStageUseCase 
         config: Readonly<Record<string, unknown>>,
     ): Promise<Result<string, StageError>> {
         const organizationId = readStringField(mergeRequest, "organizationId")
-        const rulesContextResult = await this.resolveRulesContext(
-            runId,
-            definitionVersion,
-            mergeRequest,
-            config,
-        )
+        const teamId = readStringField(mergeRequest, "teamId")
+        const rulesContextResult = await resolveRuleContext({
+            organizationId,
+            teamId,
+            globalRuleIds: config["globalRuleIds"] as readonly string[] | undefined,
+            organizationRuleIds: config["organizationRuleIds"] as readonly string[] | undefined,
+            getEnabledRulesUseCase: this.getEnabledRulesUseCase,
+            libraryRuleRepository: this.libraryRuleRepository,
+            ruleContextFormatterService: this.ruleContextFormatterService,
+        })
         if (rulesContextResult.isFail) {
-            return Result.fail<string, StageError>(rulesContextResult.error)
+            const reason = rulesContextResult.error.reason
+            const message = reason === "enabled-rules"
+                ? "Failed to resolve enabled rules for CCR review stage"
+                : "Failed to resolve rules for CCR review stage"
+            return Result.fail<string, StageError>(
+                this.createStageError(
+                    runId,
+                    definitionVersion,
+                    message,
+                    reason !== "enabled-rules",
+                    rulesContextResult.error.originalError,
+                ),
+            )
         }
-        const rulesContext = rulesContextResult.value
 
-        try {
-            const runtimeVariables: Record<string, unknown> = {
-                files: fileSummaries,
-            }
-            if (rulesContext !== undefined) {
-                runtimeVariables.rules = rulesContext
-            }
-
-            const result = await this.generatePromptUseCase.execute({
-                name: this.defaults.promptName,
-                organizationId: organizationId ?? null,
-                runtimeVariables,
-            })
-            if (result.isFail) {
+        const runtimeVariables = appendRuleContext({
+            files: fileSummaries,
+        }, rulesContextResult.value)
+        const promptResult = await resolveSystemPrompt({
+            generatePromptUseCase: this.generatePromptUseCase,
+            promptName: this.defaults.promptName,
+            organizationId: organizationId ?? null,
+            runtimeVariables,
+        })
+        if (promptResult.isFail) {
+            const reason = promptResult.error.reason
+            if (reason === "missing") {
                 return Result.fail<string, StageError>(
                     this.createStageError(
                         runId,
                         definitionVersion,
                         `Missing prompt template '${this.defaults.promptName}' for CCR review stage`,
                         false,
-                        result.error,
+                        promptResult.error.originalError,
                     ),
                 )
             }
 
-            const normalized = result.value.trim()
-            if (normalized.length === 0) {
+            if (reason === "empty") {
                 return Result.fail<string, StageError>(
                     this.createStageError(
                         runId,
@@ -221,18 +237,18 @@ export class ProcessCcrLevelReviewStageUseCase implements IPipelineStageUseCase 
                 )
             }
 
-            return Result.ok<string, StageError>(normalized)
-        } catch (error: unknown) {
             return Result.fail<string, StageError>(
                 this.createStageError(
                     runId,
                     definitionVersion,
                     "Failed to resolve prompt template for CCR review stage",
                     true,
-                    error instanceof Error ? error : undefined,
+                    promptResult.error.originalError,
                 ),
             )
         }
+
+        return Result.ok<string, StageError>(promptResult.value)
     }
 
     /**
@@ -337,83 +353,4 @@ export class ProcessCcrLevelReviewStageUseCase implements IPipelineStageUseCase 
         })
     }
 
-    /**
-     * Resolves rules context payload for prompt injection.
-     *
-     * @param runId Pipeline run id.
-     * @param definitionVersion Pipeline definition version.
-     * @param mergeRequest Merge request payload.
-     * @param config Review config payload.
-     * @returns JSON rules payload or undefined.
-     */
-    private async resolveRulesContext(
-        runId: string,
-        definitionVersion: string,
-        mergeRequest: Readonly<Record<string, unknown>>,
-        config: Readonly<Record<string, unknown>>,
-    ): Promise<Result<string | undefined, StageError>> {
-        const organizationId = readStringField(mergeRequest, "organizationId")
-        if (organizationId === undefined) {
-            return Result.ok<string | undefined, StageError>(undefined)
-        }
-
-        try {
-            const enabledRulesResult = await this.getEnabledRulesUseCase.execute({
-                organizationId,
-                globalRuleIds: config["globalRuleIds"] as readonly string[] | undefined,
-                organizationRuleIds: config["organizationRuleIds"] as readonly string[] | undefined,
-                teamId: readStringField(mergeRequest, "teamId"),
-            })
-            if (enabledRulesResult.isFail) {
-                return Result.fail<string | undefined, StageError>(
-                    this.createStageError(
-                        runId,
-                        definitionVersion,
-                        "Failed to resolve enabled rules for CCR review stage",
-                        false,
-                        enabledRulesResult.error,
-                    ),
-                )
-            }
-
-            const rules = await this.loadRulesByIds(enabledRulesResult.value.ruleIds)
-            if (rules.length === 0) {
-                return Result.ok<string | undefined, StageError>(undefined)
-            }
-
-            return Result.ok<string | undefined, StageError>(
-                this.ruleContextFormatterService.formatForPrompt(rules),
-            )
-        } catch (error: unknown) {
-            return Result.fail<string | undefined, StageError>(
-                this.createStageError(
-                    runId,
-                    definitionVersion,
-                    "Failed to resolve rules for CCR review stage",
-                    true,
-                    error instanceof Error ? error : undefined,
-                ),
-            )
-        }
-    }
-
-    /**
-     * Loads library rules by identifiers.
-     *
-     * @param ruleIds Rule identifiers.
-     * @returns Resolved library rules.
-     */
-    private async loadRulesByIds(ruleIds: readonly string[]): Promise<readonly LibraryRule[]> {
-        if (ruleIds.length === 0) {
-            return []
-        }
-
-        const rules = await Promise.all(
-            ruleIds.map(async (ruleId): Promise<LibraryRule | null> => {
-                return this.libraryRuleRepository.findByUuid(ruleId)
-            }),
-        )
-
-        return rules.filter((rule): rule is LibraryRule => rule !== null)
-    }
 }
