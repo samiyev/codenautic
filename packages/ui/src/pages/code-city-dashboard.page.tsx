@@ -50,6 +50,10 @@ import {
     type IPredictionDashboardQualityTrendPoint,
 } from "@/components/graphs/prediction-dashboard"
 import {
+    PredictionExplainPanel,
+    type IPredictionExplainPanelEntry,
+} from "@/components/graphs/prediction-explain-panel"
+import {
     CityOwnershipOverlay,
     type ICityOwnershipOverlayOwnerEntry,
 } from "@/components/graphs/city-ownership-overlay"
@@ -1403,6 +1407,40 @@ function buildPredictionBugProneFiles(
 }
 
 /**
+ * Формирует explain entries для prediction explain panel.
+ *
+ * @param files Файлы текущего профиля.
+ * @param overlayEntries Prediction overlay entries.
+ * @returns Набор объяснений для hotspot-предсказаний.
+ */
+function buildPredictionExplainEntries(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+    overlayEntries: ReadonlyArray<ICityPredictionOverlayEntry>,
+): ReadonlyArray<IPredictionExplainPanelEntry> {
+    const fileById = new Map<string, ICodeCityTreemapFileDescriptor>(
+        files.map((file): readonly [string, ICodeCityTreemapFileDescriptor] => [file.id, file]),
+    )
+
+    return overlayEntries.slice(0, 6).map((entry): IPredictionExplainPanelEntry => {
+        const file = fileById.get(entry.fileId)
+        const complexity = Math.round(file?.complexity ?? 0)
+        const churn = file?.churn ?? 0
+        const bugIntroductions30d = file?.bugIntroductions?.["30d"] ?? 0
+        return {
+            confidenceScore: entry.confidenceScore,
+            explanation:
+                `LLM forecast: ${entry.label} has complexity ${String(complexity)}, `
+                + `churn ${String(churn)}, and ${String(bugIntroductions30d)} `
+                + "bug introductions in 30d, so this area is likely to evolve into a hotspot.",
+            fileId: entry.fileId,
+            label: entry.label,
+            reason: entry.reason,
+            riskLevel: entry.riskLevel,
+        }
+    })
+}
+
+/**
  * Формирует маппинг file -> prediction risk для визуальных outline в treemap.
  *
  * @param entries Prediction overlay entries.
@@ -2139,6 +2177,10 @@ export function CodeCityDashboardPage(
         currentProfile.files,
         predictionOverlayEntries,
     )
+    const predictionExplainEntries = buildPredictionExplainEntries(
+        currentProfile.files,
+        predictionOverlayEntries,
+    )
     const predictedRiskByFileId = buildPredictedRiskByFileId(predictionOverlayEntries)
     const busFactorOverlayEntries = buildBusFactorOverlayEntries(
         currentProfile.files,
@@ -2654,6 +2696,30 @@ export function CodeCityDashboardPage(
                             markAreaExplored("city-3d")
                         }}
                         qualityTrendPoints={predictionQualityTrendPoints}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Prediction explain panel</p>
+                </CardHeader>
+                <CardBody>
+                    <PredictionExplainPanel
+                        activeFileId={activePredictionFileId}
+                        entries={predictionExplainEntries}
+                        onSelectEntry={(entry): void => {
+                            setActivePredictionHotspotId(undefined)
+                            setActivePredictionFileId(entry.fileId)
+                            setHighlightedFileId(entry.fileId)
+                            setExploreNavigationFocus({
+                                activeFileId: entry.fileId,
+                                chainFileIds: [entry.fileId],
+                                title: `Prediction explanation: ${entry.label}`,
+                            })
+                            markAreaExplored("controls")
+                            markAreaExplored("city-3d")
+                        }}
                     />
                 </CardBody>
             </Card>

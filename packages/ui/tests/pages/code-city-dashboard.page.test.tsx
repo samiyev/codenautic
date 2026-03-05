@@ -675,6 +675,47 @@ const { mockPredictionDashboard } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockPredictionExplainPanel } = vi.hoisted(() => ({
+    mockPredictionExplainPanel: vi.fn(
+        (props: {
+            readonly entries: ReadonlyArray<{
+                readonly fileId: string
+                readonly label: string
+                readonly riskLevel: "low" | "medium" | "high"
+                readonly confidenceScore: number
+                readonly reason: string
+                readonly explanation: string
+            }>
+            readonly activeFileId?: string
+            readonly onSelectEntry?: (entry: {
+                readonly fileId: string
+                readonly label: string
+                readonly riskLevel: "low" | "medium" | "high"
+                readonly confidenceScore: number
+                readonly reason: string
+                readonly explanation: string
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>prediction-explain-entries:{props.entries.length}</p>
+                    <p>prediction-explain-active:{props.activeFileId ?? "none"}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstEntry = props.entries.at(0)
+                            if (firstEntry !== undefined) {
+                                props.onSelectEntry?.(firstEntry)
+                            }
+                        }}
+                        type="button"
+                    >
+                        inspect prediction explanation
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockCityBusFactorOverlay } = vi.hoisted(() => ({
     mockCityBusFactorOverlay: vi.fn(
         (props: {
@@ -1206,6 +1247,9 @@ vi.mock("@/components/graphs/city-prediction-overlay", () => ({
 vi.mock("@/components/graphs/prediction-dashboard", () => ({
     PredictionDashboard: mockPredictionDashboard,
 }))
+vi.mock("@/components/graphs/prediction-explain-panel", () => ({
+    PredictionExplainPanel: mockPredictionExplainPanel,
+}))
 vi.mock("@/components/graphs/city-bus-factor-overlay", () => ({
     CityBusFactorOverlay: mockCityBusFactorOverlay,
 }))
@@ -1261,6 +1305,7 @@ beforeEach((): void => {
     mockCityImpactOverlay.mockClear()
     mockCityPredictionOverlay.mockClear()
     mockPredictionDashboard.mockClear()
+    mockPredictionExplainPanel.mockClear()
     mockCityBusFactorOverlay.mockClear()
     mockBusFactorTrendChart.mockClear()
     mockKnowledgeSiloPanel.mockClear()
@@ -1424,6 +1469,10 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstPredictionDashboardCall?.qualityTrendPoints.length).toBeGreaterThan(0)
         expect(firstPredictionDashboardCall?.bugProneFiles.length).toBeGreaterThan(0)
 
+        const firstPredictionExplainCall = mockPredictionExplainPanel.mock.calls.at(0)?.[0]
+        expect(firstPredictionExplainCall).not.toBeUndefined()
+        expect(firstPredictionExplainCall?.entries.length).toBeGreaterThan(0)
+
         const firstBusFactorCall = mockCityBusFactorOverlay.mock.calls.at(0)?.[0]
         expect(firstBusFactorCall).not.toBeUndefined()
         expect(firstBusFactorCall?.entries.length).toBeGreaterThan(0)
@@ -1560,6 +1609,14 @@ describe("CodeCityDashboardPage", (): void => {
         const predictionDashboard3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(predictionDashboard3DCall).not.toBeUndefined()
         expect(predictionDashboard3DCall?.navigationLabel).toContain("Prediction dashboard:")
+
+        await user.click(screen.getByRole("button", { name: "inspect prediction explanation" }))
+        const predictionExplainTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(predictionExplainTreemapCall).not.toBeUndefined()
+        expect(predictionExplainTreemapCall?.highlightedFileId).toBe("src/api/auth.ts")
+        const predictionExplain3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(predictionExplain3DCall).not.toBeUndefined()
+        expect(predictionExplain3DCall?.navigationLabel).toContain("Prediction explanation:")
 
         await user.click(screen.getByRole("button", { name: "inspect change risk point" }))
         const riskNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
