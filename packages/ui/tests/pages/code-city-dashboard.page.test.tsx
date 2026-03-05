@@ -266,6 +266,45 @@ const { mockTourCustomizer } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockRefactoringDashboard } = vi.hoisted(() => ({
+    mockRefactoringDashboard: vi.fn(
+        (props: {
+            readonly targets: ReadonlyArray<{
+                readonly fileId: string
+                readonly title: string
+                readonly module: string
+                readonly roiScore: number
+                readonly riskScore: number
+                readonly effortScore: number
+            }>
+            readonly onSelectTarget?: (target: {
+                readonly fileId: string
+                readonly title: string
+                readonly module: string
+                readonly roiScore: number
+                readonly riskScore: number
+                readonly effortScore: number
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>refactor-targets:{props.targets.length}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstTarget = props.targets.at(0)
+                            if (firstTarget !== undefined) {
+                                props.onSelectTarget?.(firstTarget)
+                            }
+                        }}
+                        type="button"
+                    >
+                        inspect refactor target
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockRootCauseChainViewer } = vi.hoisted(() => ({
     mockRootCauseChainViewer: vi.fn(
         (props: {
@@ -334,6 +373,9 @@ vi.mock("@/components/graphs/onboarding-progress-tracker", () => ({
 vi.mock("@/components/graphs/tour-customizer", () => ({
     TourCustomizer: mockTourCustomizer,
 }))
+vi.mock("@/components/graphs/refactoring-dashboard", () => ({
+    RefactoringDashboard: mockRefactoringDashboard,
+}))
 vi.mock("@/components/graphs/root-cause-chain-viewer", () => ({
     RootCauseChainViewer: mockRootCauseChainViewer,
 }))
@@ -349,6 +391,7 @@ beforeEach((): void => {
     mockHotAreaHighlights.mockClear()
     mockOnboardingProgressTracker.mockClear()
     mockTourCustomizer.mockClear()
+    mockRefactoringDashboard.mockClear()
     mockRootCauseChainViewer.mockClear()
 })
 
@@ -456,6 +499,10 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstTourCustomizerCall).not.toBeUndefined()
         expect(firstTourCustomizerCall?.isAdmin).toBe(true)
         expect(firstTourCustomizerCall?.steps.length).toBe(3)
+
+        const firstRefactoringCall = mockRefactoringDashboard.mock.calls.at(0)?.[0]
+        expect(firstRefactoringCall).not.toBeUndefined()
+        expect(firstRefactoringCall?.targets.length).toBeGreaterThan(0)
     })
 
     it("обновляет treemap при смене репозитория и метрики", async (): Promise<void> => {
@@ -485,6 +532,11 @@ describe("CodeCityDashboardPage", (): void => {
             "src/pages/ccr-management.page.tsx",
         )
         expect(hotAreaNavigation3DCall?.navigationLabel).toContain("Hot area:")
+
+        await user.click(screen.getByRole("button", { name: "inspect refactor target" }))
+        const refactorNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(refactorNavigation3DCall).not.toBeUndefined()
+        expect(refactorNavigation3DCall?.navigationLabel).toContain("Refactor target:")
 
         const repositorySelect = screen.getByRole("combobox", { name: "Repository" })
         const metricSelect = screen.getByRole("combobox", { name: "Metric" })

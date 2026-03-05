@@ -38,6 +38,10 @@ import {
     OnboardingProgressTracker,
     type IOnboardingProgressModuleDescriptor,
 } from "@/components/graphs/onboarding-progress-tracker"
+import {
+    RefactoringDashboard,
+    type IRefactoringTargetDescriptor,
+} from "@/components/graphs/refactoring-dashboard"
 import { TourCustomizer } from "@/components/graphs/tour-customizer"
 import { ProjectOverviewPanel } from "@/components/graphs/project-overview-panel"
 import { ChurnComplexityScatter } from "@/components/graphs/churn-complexity-scatter"
@@ -798,6 +802,40 @@ function buildHotAreaHighlights(
     })
 }
 
+/**
+ * Формирует список refactoring targets с приоритетами ROI/risk/effort.
+ *
+ * @param files Файлы текущего профиля.
+ * @returns Список приоритетных таргетов для dashboard.
+ */
+function buildRefactoringTargets(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+): ReadonlyArray<IRefactoringTargetDescriptor> {
+    const targets = files.map((file): IRefactoringTargetDescriptor => {
+        const bugCount = file.bugIntroductions?.["30d"] ?? 0
+        const complexity = file.complexity ?? 0
+        const churn = file.churn ?? 0
+        const loc = file.loc ?? 0
+        const moduleName = file.path.split("/")[1] ?? "core"
+
+        return {
+            description:
+                `Complexity ${String(complexity)}, churn ${String(churn)}, bugs(30d) ${String(bugCount)}`,
+            effortScore: Math.max(1, Math.round((loc / 40) + (complexity / 8))),
+            fileId: file.id,
+            id: `refactor-${file.id}`,
+            module: moduleName,
+            riskScore: Math.max(1, Math.min(99, Math.round((bugCount * 12) + (churn * 6)))),
+            roiScore: Math.max(1, Math.round((complexity * 1.2) + (bugCount * 10))),
+            title: file.path,
+        }
+    })
+
+    return [...targets]
+        .sort((leftTarget, rightTarget): number => rightTarget.roiScore - leftTarget.roiScore)
+        .slice(0, 6)
+}
+
 export function CodeCityDashboardPage(
     props: ICodeCityDashboardPageProps = {},
 ): ReactElement {
@@ -839,6 +877,7 @@ export function CodeCityDashboardPage(
     const causalCouplings = buildCausalCouplings(currentProfile.temporalCouplings)
     const exploreModePaths = buildExploreModePaths(currentProfile.files)
     const hotAreaHighlights = buildHotAreaHighlights(currentProfile.files)
+    const refactoringTargets = buildRefactoringTargets(currentProfile.files)
     const onboardingProgressModules = buildOnboardingProgressModules(exploredAreaIds)
     const fileLink = createRepositoryFilesLink(currentProfile.id)
     const overlayImpactedFiles =
@@ -1074,6 +1113,26 @@ export function CodeCityDashboardPage(
                 </CardHeader>
                 <CardBody>
                     <OnboardingProgressTracker modules={onboardingProgressModules} />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Refactoring dashboard</p>
+                </CardHeader>
+                <CardBody>
+                    <RefactoringDashboard
+                        onSelectTarget={(target): void => {
+                            setHighlightedFileId(target.fileId)
+                            setExploreNavigationFocus({
+                                activeFileId: target.fileId,
+                                chainFileIds: [target.fileId],
+                                title: `Refactor target: ${target.title}`,
+                            })
+                            markAreaExplored("city-3d")
+                        }}
+                        targets={refactoringTargets}
+                    />
                 </CardBody>
             </Card>
 
