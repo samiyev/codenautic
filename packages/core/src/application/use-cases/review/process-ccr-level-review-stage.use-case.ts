@@ -14,6 +14,11 @@ import type {
     IGetEnabledRulesOutput,
 } from "../../dto/rules/get-enabled-rules.dto"
 import type {ILibraryRuleRepository} from "../../ports/outbound/rule/library-rule-repository.port"
+import {
+    extractJsonArray,
+    parseFromContent,
+    type ParsedJsonPayload,
+} from "../../shared/suggestion-parsing"
 import {RuleContextFormatterService} from "../../../domain/services/rule-context-formatter.service"
 import {StageError} from "../../../domain/errors/stage.error"
 import type {LibraryRule} from "../../../domain/entities/library-rule.entity"
@@ -25,8 +30,6 @@ import {
     readStringField,
 } from "./pipeline-stage-state.utils"
 import type {IReviewCcrDefaults} from "../../dto/config/system-defaults.dto"
-
-type ParsedJsonPayload = unknown[] | Readonly<Record<string, unknown>>
 
 /**
  * Dependencies for process-ccr-level-review stage use case.
@@ -261,7 +264,7 @@ export class ProcessCcrLevelReviewStageUseCase implements IPipelineStageUseCase 
      * @returns Structured suggestions.
      */
     private parseCcrSuggestions(content: string): readonly ISuggestionDTO[] {
-        const parsedJson = this.tryParseJson(content)
+        const parsedJson = parseFromContent(content)
         if (parsedJson !== null) {
             const suggestions = this.mapJsonSuggestions(parsedJson)
             if (suggestions.length > 0) {
@@ -285,51 +288,13 @@ export class ProcessCcrLevelReviewStageUseCase implements IPipelineStageUseCase 
     }
 
     /**
-     * Parses JSON content safely.
-     *
-     * @param content Input content.
-     * @returns Parsed payload or null.
-     */
-    private tryParseJson(content: string): ParsedJsonPayload | null {
-        const trimmed = content.trim()
-        if (trimmed.length === 0) {
-            return null
-        }
-
-        try {
-            const parsed: unknown = JSON.parse(trimmed)
-            if (!this.isParsedJsonPayload(parsed)) {
-                return null
-            }
-
-            return parsed
-        } catch {
-            return null
-        }
-    }
-
-    /**
-     * Checks that parsed JSON payload can be mapped to suggestions.
-     *
-     * @param value Candidate payload.
-     * @returns True when payload is object or array.
-     */
-    private isParsedJsonPayload(value: unknown): value is ParsedJsonPayload {
-        if (Array.isArray(value)) {
-            return true
-        }
-
-        return value !== null && typeof value === "object"
-    }
-
-    /**
      * Maps parsed JSON payload to suggestion DTO list.
      *
      * @param payload Parsed payload.
      * @returns Mapped suggestions.
      */
-    private mapJsonSuggestions(payload: unknown): readonly ISuggestionDTO[] {
-        const sourceArray = this.resolveSuggestionArray(payload)
+    private mapJsonSuggestions(payload: ParsedJsonPayload): readonly ISuggestionDTO[] {
+        const sourceArray = extractJsonArray(payload)
         const suggestions: ISuggestionDTO[] = []
 
         for (const item of sourceArray) {
@@ -371,30 +336,6 @@ export class ProcessCcrLevelReviewStageUseCase implements IPipelineStageUseCase 
         }
 
         return suggestions
-    }
-
-    /**
-     * Resolves suggestion array from parsed payload.
-     *
-     * @param payload Parsed payload.
-     * @returns Suggestion-like array.
-     */
-    private resolveSuggestionArray(payload: unknown): readonly unknown[] {
-        if (Array.isArray(payload)) {
-            return payload
-        }
-
-        if (payload === null || typeof payload !== "object") {
-            return []
-        }
-
-        const record = payload as Readonly<Record<string, unknown>>
-        const rawSuggestions = record["suggestions"]
-        if (!Array.isArray(rawSuggestions)) {
-            return []
-        }
-
-        return rawSuggestions
     }
 
     /**

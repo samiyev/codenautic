@@ -24,8 +24,20 @@ describe("review override config dto", () => {
         expect(parseReviewOverridesConfig({})).toBeUndefined()
         expect(parseReviewOverridesConfig({name: "missing"})).toBeUndefined()
         expect(parseReviewOverridesConfig({
+            name: 123,
+            categories: createOverrides().categories,
+            severity: createOverrides().severity,
+            generation: createOverrides().generation,
+        })).toBeUndefined()
+        expect(parseReviewOverridesConfig({
             name: "bad-categories",
             categories: {},
+            severity: createOverrides().severity,
+            generation: createOverrides().generation,
+        })).toBeUndefined()
+        expect(parseReviewOverridesConfig({
+            name: "bad-categories-type",
+            categories: "bad",
             severity: createOverrides().severity,
             generation: createOverrides().generation,
         })).toBeUndefined()
@@ -48,6 +60,14 @@ describe("review override config dto", () => {
             generation: createOverrides().generation,
         })).toBeUndefined()
         expect(parseReviewOverridesConfig({
+            name: "bad-severity-flags-type",
+            categories: createOverrides().categories,
+            severity: {
+                flags: "bad",
+            },
+            generation: createOverrides().generation,
+        })).toBeUndefined()
+        expect(parseReviewOverridesConfig({
             name: "missing-severity-flag",
             categories: createOverrides().categories,
             severity: {
@@ -62,6 +82,14 @@ describe("review override config dto", () => {
             categories: createOverrides().categories,
             severity: createOverrides().severity,
             generation: {},
+        })).toBeUndefined()
+        expect(parseReviewOverridesConfig({
+            name: "bad-generation",
+            categories: createOverrides().categories,
+            severity: createOverrides().severity,
+            generation: {
+                main: 123,
+            },
         })).toBeUndefined()
     })
 

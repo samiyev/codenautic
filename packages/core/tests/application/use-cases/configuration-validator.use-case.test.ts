@@ -570,6 +570,40 @@ describe("ConfigurationValidatorUseCase", () => {
         }
     })
 
+    test("returns errors for invalid prompt override field values", async () => {
+        const useCase = new ConfigurationValidatorUseCase()
+        const result = await useCase.execute({
+            severityThreshold: "LOW",
+            ignorePaths: [],
+            maxSuggestionsPerFile: 1,
+            maxSuggestionsPerCCR: 2,
+            cadence: "standard",
+            customRuleIds: [],
+            promptOverrides: {
+                categories: {
+                    descriptions: {
+                        bug: " ",
+                    },
+                },
+                generation: {
+                    main: 123,
+                },
+            },
+        })
+
+        expect(result.isFail).toBe(true)
+        if (result.isFail) {
+            expect(result.error.fields).toContainEqual({
+                field: "promptOverrides.categories.descriptions.bug",
+                message: "must be a non-empty string when provided",
+            })
+            expect(result.error.fields).toContainEqual({
+                field: "promptOverrides.generation.main",
+                message: "must be a non-empty string when provided",
+            })
+        }
+    })
+
     test("ignores non-string optional directory overrides", async () => {
         const useCase = new ConfigurationValidatorUseCase()
         const result = await useCase.execute({
@@ -673,6 +707,32 @@ describe("ConfigurationValidatorUseCase", () => {
         expect(config.cadence).toBeUndefined()
         expect(config.customRuleIds).toBeUndefined()
         expect(config.reviewDepthStrategy).toBeUndefined()
+    })
+
+    test("returns error when directory config is explicitly undefined", async () => {
+        const useCase = new ConfigurationValidatorUseCase()
+        const result = await useCase.execute({
+            severityThreshold: "LOW",
+            ignorePaths: [],
+            maxSuggestionsPerFile: 1,
+            maxSuggestionsPerCCR: 2,
+            cadence: "standard",
+            customRuleIds: [],
+            directories: [
+                {
+                    path: "src",
+                    config: undefined,
+                },
+            ],
+        })
+
+        expect(result.isFail).toBe(true)
+        if (result.isFail) {
+            expect(result.error.fields).toContainEqual({
+                field: "directories[].config",
+                message: "must be an object",
+            })
+        }
     })
 })
 

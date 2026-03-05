@@ -91,6 +91,19 @@ describe("MCP use cases", () => {
         expect(result.error).toBeInstanceOf(ValidationError)
     })
 
+    test("fails discover when input is not an object", async () => {
+        const useCase = new DiscoverMCPToolsUseCase()
+        const result = await useCase.execute("invalid" as unknown as IDiscoverMCPToolsInput)
+
+        expect(result.isFail).toBe(true)
+        if (result.isFail) {
+            expect(result.error.fields).toContainEqual({
+                field: "server",
+                message: "server is required",
+            })
+        }
+    })
+
     test("fails discover when server returns error response", async () => {
         const server = {
             handleRequest: () => {
@@ -248,6 +261,28 @@ describe("MCP use cases", () => {
                 },
             },
         } as unknown as IRegisterMCPToolInput)
+
+        expect(result.isFail).toBe(true)
+        if (result.isFail) {
+            expect(result.error.fields[0]?.message).toContain("server, tool and handler are required")
+        }
+    })
+
+    test("fails register when handler is invalid", async () => {
+        const server = new MCPServer(MCP_DEFAULTS)
+        const useCase = new RegisterMCPToolUseCase()
+        const result = await useCase.execute({
+            server,
+            tool: {
+                name: "handler-test",
+                description: "Handler must be function",
+                inputSchema: {
+                    type: "object",
+                    properties: {},
+                },
+            },
+            handler: "invalid" as unknown as () => string,
+        })
 
         expect(result.isFail).toBe(true)
         if (result.isFail) {

@@ -242,6 +242,24 @@ describe("LibraryRule", () => {
         }).toThrow("Unknown rule scope")
     })
 
+    test("throws when scope is unsupported string", () => {
+        expect(() => {
+            return new LibraryRule(UniqueId.create("r5e"), {
+                uuid: "rule-5e",
+                title: "Bad scope",
+                rule: "Rule body",
+                whyIsThisImportant: "Why",
+                severity: Severity.create("low"),
+                examples: BASE_EXAMPLES,
+                language: "ts",
+                buckets: ["a"],
+                scope: "GLOBAL" as unknown as LibraryRuleScope,
+                plugAndPlay: false,
+                isGlobal: true,
+            })
+        }).toThrow("Unknown rule scope: GLOBAL")
+    })
+
     test("нормализует допустимую область и язык", () => {
         const rule = new LibraryRule(UniqueId.create("r5"), {
             uuid: "rule-5",

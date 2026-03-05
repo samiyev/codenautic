@@ -29,10 +29,12 @@ describe("prompt template config dto", () => {
 
     test("returns undefined for invalid payloads", () => {
         expect(parsePromptTemplateConfigList("invalid")).toBeUndefined()
+        expect(parsePromptTemplateConfigList(null)).toBeUndefined()
         expect(parsePromptTemplateConfigList([])).toBeUndefined()
         expect(parsePromptTemplateConfigList({})).toBeUndefined()
         expect(parsePromptTemplateConfigList({items: [{}]})).toBeUndefined()
         expect(parsePromptTemplateConfigList({items: ["bad"]})).toBeUndefined()
+        expect(parsePromptTemplateConfigList({items: [null]})).toBeUndefined()
         expect(parsePromptTemplateConfigList({
             items: [
                 {
@@ -88,6 +90,29 @@ describe("prompt template config dto", () => {
                 },
             ],
         })).toBeUndefined()
+    })
+
+    test("parses templates with omitted variables as empty list", () => {
+        const parsed = parsePromptTemplateConfigList({
+            items: [
+                {
+                    name: "review-template",
+                    category: "analysis",
+                    type: "system",
+                    content: "content",
+                },
+            ],
+        })
+
+        expect(parsed).toEqual([
+            {
+                name: "review-template",
+                category: "analysis",
+                type: "system",
+                content: "content",
+                variables: [],
+            },
+        ])
     })
 
     test("returns undefined on duplicate template names", () => {

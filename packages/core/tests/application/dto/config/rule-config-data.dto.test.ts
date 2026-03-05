@@ -59,12 +59,28 @@ describe("rule config dto", () => {
 
     test("returns undefined for invalid rule payload", () => {
         expect(parseRuleConfigList("invalid")).toBeUndefined()
+        expect(parseRuleConfigList(null)).toBeUndefined()
         expect(parseRuleConfigList([])).toBeUndefined()
         expect(parseRuleConfigList({})).toBeUndefined()
         expect(parseRuleConfigList({items: []})).toEqual([])
         expect(parseRuleConfigList({items: [{uuid: ""}]})).toBeUndefined()
         expect(parseRuleConfigList({items: ["bad"]})).toBeUndefined()
         expect(parseRuleConfigList({items: [null]})).toBeUndefined()
+        expect(parseRuleConfigList({
+            items: [
+                {
+                    uuid: "rule-missing-examples",
+                    title: "Rule title",
+                    rule: "Rule body",
+                    whyIsThisImportant: "Because",
+                    severity: "LOW",
+                    language: "ts",
+                    buckets: ["bucket"],
+                    scope: "FILE",
+                    plugAndPlay: false,
+                },
+            ],
+        })).toBeUndefined()
     })
 
     test("returns undefined when examples or buckets payload is malformed", () => {
@@ -160,6 +176,27 @@ describe("rule config dto", () => {
                         },
                     ],
                     language: 123,
+                    buckets: ["bucket"],
+                    scope: "FILE",
+                    plugAndPlay: false,
+                },
+            ],
+        })).toBeUndefined()
+        expect(parseRuleConfigList({
+            items: [
+                {
+                    uuid: "rule-11b",
+                    title: "Rule title",
+                    rule: "Rule body",
+                    whyIsThisImportant: "Because",
+                    severity: "LOW",
+                    examples: [
+                        {
+                            snippet: "ok",
+                            isCorrect: true,
+                        },
+                    ],
+                    language: null,
                     buckets: ["bucket"],
                     scope: "FILE",
                     plugAndPlay: false,
@@ -370,5 +407,31 @@ describe("rule config dto", () => {
                 },
             ],
         })).toBeUndefined()
+    })
+
+    test("returns undefined when bucket entry is undefined", () => {
+        const raw: unknown = {
+            items: [
+                {
+                    uuid: "rule-undef-bucket",
+                    title: "Rule title",
+                    rule: "Rule body",
+                    whyIsThisImportant: "Because",
+                    severity: "LOW",
+                    examples: [
+                        {
+                            snippet: "ok",
+                            isCorrect: true,
+                        },
+                    ],
+                    language: "ts",
+                    buckets: [undefined],
+                    scope: "FILE",
+                    plugAndPlay: false,
+                },
+            ],
+        }
+
+        expect(parseRuleConfigList(raw)).toBeUndefined()
     })
 })

@@ -41,6 +41,11 @@ import {deduplicate} from "../../../shared/utils/deduplicate"
 import {hash} from "../../../shared/utils/hash"
 import {Result} from "../../../shared/result"
 import {
+    extractJsonArray,
+    parseFromContent,
+    type ParsedJsonPayload,
+} from "../../shared/suggestion-parsing"
+import {
     INITIAL_STAGE_ATTEMPT,
     mergeExternalContext,
     readObjectField,
@@ -50,8 +55,6 @@ import type {IReviewFileDefaults} from "../../dto/config/system-defaults.dto"
 import {RuleContextFormatterService} from "../../../domain/services/rule-context-formatter.service"
 
 const FILE_CONTENT_LIMIT = 5000
-
-type ParsedJsonPayload = unknown[] | Readonly<Record<string, unknown>>
 
 /**
  * Dependencies for process-files-review stage use case.
@@ -1260,7 +1263,7 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
      * @returns Suggestion list.
      */
     private parseFileSuggestions(filePath: string, content: string): readonly ISuggestionDTO[] {
-        const parsed = this.tryParseJson(content)
+        const parsed = parseFromContent(content)
         if (parsed !== null) {
             const suggestions = this.mapParsedSuggestions(filePath, parsed)
             if (suggestions.length > 0) {
@@ -1289,44 +1292,6 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
     }
 
     /**
-     * Parses JSON content safely.
-     *
-     * @param content Raw content.
-     * @returns Parsed payload or null.
-     */
-    private tryParseJson(content: string): ParsedJsonPayload | null {
-        const trimmed = content.trim()
-        if (trimmed.length === 0) {
-            return null
-        }
-
-        try {
-            const parsed: unknown = JSON.parse(trimmed)
-            if (!this.isParsedJsonPayload(parsed)) {
-                return null
-            }
-
-            return parsed
-        } catch {
-            return null
-        }
-    }
-
-    /**
-     * Checks whether parsed JSON can be mapped to per-file suggestions.
-     *
-     * @param value Candidate payload.
-     * @returns True when payload is object or array.
-     */
-    private isParsedJsonPayload(value: unknown): value is ParsedJsonPayload {
-        if (Array.isArray(value)) {
-            return true
-        }
-
-        return value !== null && typeof value === "object"
-    }
-
-    /**
      * Maps parsed payload to per-file suggestions.
      *
      * @param filePath File path.
@@ -1334,7 +1299,7 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
      * @returns Suggestion list.
      */
     private mapParsedSuggestions(filePath: string, payload: ParsedJsonPayload): readonly ISuggestionDTO[] {
-        const items = this.resolveSuggestionItems(payload)
+        const items = extractJsonArray(payload)
         const suggestions: ISuggestionDTO[] = []
 
         for (const item of items) {
@@ -1354,25 +1319,6 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
         }
 
         return suggestions
-    }
-
-    /**
-     * Resolves candidate suggestion items from parsed payload.
-     *
-     * @param payload Parsed JSON payload.
-     * @returns Suggestion candidate items.
-     */
-    private resolveSuggestionItems(payload: ParsedJsonPayload): readonly unknown[] {
-        if (Array.isArray(payload)) {
-            return payload
-        }
-
-        const nestedSuggestions = payload["suggestions"]
-        if (!Array.isArray(nestedSuggestions)) {
-            return []
-        }
-
-        return nestedSuggestions
     }
 
     /**

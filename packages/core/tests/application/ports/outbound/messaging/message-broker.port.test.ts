@@ -43,4 +43,18 @@ describe("message broker port", () => {
             toMessageBrokerEnvelope(message)
         }).toThrow("Outbox payload must be JSON object")
     })
+
+    test("throws when payload is null", () => {
+        const message = new OutboxMessage(UniqueId.create("msg-3"), {
+            eventType: "review.completed",
+            payload: JSON.stringify(null),
+            status: OUTBOX_MESSAGE_STATUS.PENDING,
+            retryCount: 0,
+            maxRetries: 1,
+        })
+
+        expect(() => {
+            toMessageBrokerEnvelope(message)
+        }).toThrow("Outbox payload must be JSON object")
+    })
 })

@@ -81,6 +81,22 @@ describe("CustomRule", () => {
         }).toThrow("Cannot activate rule in status ACTIVE")
     })
 
+    test("throws when activating from rejected status", () => {
+        const rule = new CustomRule(UniqueId.create(), {
+            title: "Rejected rule",
+            rule: "x",
+            type: "REGEX",
+            scope: "FILE",
+            status: "REJECTED",
+            severity: Severity.create("LOW"),
+            examples: [],
+        })
+
+        expect(() => {
+            rule.activate()
+        }).toThrow("Cannot activate rule in status REJECTED")
+    })
+
     test("throws when rejecting deleted rule", () => {
         const rule = createPendingRule()
         rule.softDelete()
@@ -183,6 +199,20 @@ describe("CustomRule", () => {
                 examples: [],
             })
         }).toThrow("Rule title cannot be empty")
+    })
+
+    test("normalizes scope values", () => {
+        const rule = new CustomRule(UniqueId.create(), {
+            title: "Scope normalize",
+            rule: "x",
+            type: "REGEX",
+            scope: " ccr " as unknown as CustomRuleScope,
+            status: "PENDING",
+            severity: Severity.create("LOW"),
+            examples: [],
+        })
+
+        expect(rule.scope).toBe("CCR")
     })
 })
 
