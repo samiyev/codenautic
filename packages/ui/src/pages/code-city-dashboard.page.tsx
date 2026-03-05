@@ -79,6 +79,7 @@ import {
     type IRootCauseChainFocusPayload,
     type IRootCauseIssueDescriptor,
 } from "@/components/graphs/root-cause-chain-viewer"
+import { WhatIfPanel, type IWhatIfOption } from "@/components/graphs/what-if-panel"
 import { Card, CardBody, CardHeader } from "@/components/ui"
 
 type TCodeCityDashboardMetric = "complexity" | "coverage" | "churn"
@@ -1049,6 +1050,25 @@ function buildImpactGraphModel(seeds: ReadonlyArray<IImpactAnalysisSeed>): {
     }
 }
 
+/**
+ * Формирует what-if options на основе impact seeds.
+ *
+ * @param seeds Impact seeds текущего профиля.
+ * @returns Опции multi-file сценария.
+ */
+function buildWhatIfOptions(seeds: ReadonlyArray<IImpactAnalysisSeed>): ReadonlyArray<IWhatIfOption> {
+    return seeds.slice(0, 6).map((seed): IWhatIfOption => {
+        return {
+            affectedCount:
+                seed.affectedFiles.length + seed.affectedTests.length + seed.affectedConsumers.length,
+            fileId: seed.fileId,
+            id: `what-if-${seed.id}`,
+            impactScore: seed.riskScore,
+            label: seed.label,
+        }
+    })
+}
+
 export function CodeCityDashboardPage(
     props: ICodeCityDashboardPageProps = {},
 ): ReactElement {
@@ -1100,6 +1120,7 @@ export function CodeCityDashboardPage(
         currentProfile.healthTrend,
     )
     const impactGraphModel = buildImpactGraphModel(impactAnalysisSeeds)
+    const whatIfOptions = buildWhatIfOptions(impactAnalysisSeeds)
     const onboardingProgressModules = buildOnboardingProgressModules(exploredAreaIds)
     const fileLink = createRepositoryFilesLink(currentProfile.id)
     const overlayImpactedFiles =
@@ -1560,6 +1581,29 @@ export function CodeCityDashboardPage(
                             })
                             markAreaExplored("city-3d")
                         }}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">What-if panel</p>
+                </CardHeader>
+                <CardBody>
+                    <WhatIfPanel
+                        onRunScenario={(selection): void => {
+                            const primaryFileId = selection.fileIds[0]
+                            if (primaryFileId !== undefined) {
+                                setHighlightedFileId(primaryFileId)
+                            }
+                            setExploreNavigationFocus({
+                                activeFileId: primaryFileId,
+                                chainFileIds: selection.fileIds,
+                                title: `What-if: ${String(selection.fileIds.length)} files`,
+                            })
+                            markAreaExplored("city-3d")
+                        }}
+                        options={whatIfOptions}
                     />
                 </CardBody>
             </Card>

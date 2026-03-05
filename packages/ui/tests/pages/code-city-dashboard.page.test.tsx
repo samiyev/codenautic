@@ -650,6 +650,50 @@ const { mockImpactGraphView } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockWhatIfPanel } = vi.hoisted(() => ({
+    mockWhatIfPanel: vi.fn(
+        (props: {
+            readonly options: ReadonlyArray<{
+                readonly id: string
+                readonly fileId: string
+                readonly label: string
+                readonly impactScore: number
+                readonly affectedCount: number
+            }>
+            readonly onRunScenario?: (selection: {
+                readonly fileIds: ReadonlyArray<string>
+                readonly aggregatedScore: number
+                readonly totalAffectedCount: number
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>what-if-options:{props.options.length}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstOption = props.options.at(0)
+                            const secondOption = props.options.at(1)
+                            if (firstOption === undefined || secondOption === undefined) {
+                                return
+                            }
+                            props.onRunScenario?.({
+                                aggregatedScore: Math.round(
+                                    (firstOption.impactScore + secondOption.impactScore) / 2,
+                                ),
+                                fileIds: [firstOption.fileId, secondOption.fileId],
+                                totalAffectedCount:
+                                    firstOption.affectedCount + secondOption.affectedCount,
+                            })
+                        }}
+                        type="button"
+                    >
+                        run what-if scenario
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockRootCauseChainViewer } = vi.hoisted(() => ({
     mockRootCauseChainViewer: vi.fn(
         (props: {
@@ -748,6 +792,9 @@ vi.mock("@/components/graphs/change-risk-gauge", () => ({
 vi.mock("@/components/graphs/impact-graph-view", () => ({
     ImpactGraphView: mockImpactGraphView,
 }))
+vi.mock("@/components/graphs/what-if-panel", () => ({
+    WhatIfPanel: mockWhatIfPanel,
+}))
 vi.mock("@/components/graphs/root-cause-chain-viewer", () => ({
     RootCauseChainViewer: mockRootCauseChainViewer,
 }))
@@ -773,6 +820,7 @@ beforeEach((): void => {
     mockCityImpactOverlay.mockClear()
     mockChangeRiskGauge.mockClear()
     mockImpactGraphView.mockClear()
+    mockWhatIfPanel.mockClear()
     mockRootCauseChainViewer.mockClear()
 })
 
@@ -921,6 +969,10 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstImpactGraphCall).not.toBeUndefined()
         expect(firstImpactGraphCall?.nodes.length).toBeGreaterThan(0)
         expect(firstImpactGraphCall?.edges.length).toBeGreaterThan(0)
+
+        const firstWhatIfCall = mockWhatIfPanel.mock.calls.at(0)?.[0]
+        expect(firstWhatIfCall).not.toBeUndefined()
+        expect(firstWhatIfCall?.options.length).toBeGreaterThan(0)
     })
 
     it("обновляет treemap при смене репозитория и метрики", async (): Promise<void> => {
@@ -1003,6 +1055,12 @@ describe("CodeCityDashboardPage", (): void => {
         const graphNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(graphNavigation3DCall).not.toBeUndefined()
         expect(graphNavigation3DCall?.navigationLabel).toContain("Impact graph:")
+
+        await user.click(screen.getByRole("button", { name: "run what-if scenario" }))
+        const whatIfNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(whatIfNavigation3DCall).not.toBeUndefined()
+        expect(whatIfNavigation3DCall?.navigationLabel).toContain("What-if:")
+        expect(whatIfNavigation3DCall?.navigationChainFileIds.length).toBeGreaterThan(1)
 
         const repositorySelect = screen.getByRole("combobox", { name: "Repository" })
         const metricSelect = screen.getByRole("combobox", { name: "Metric" })
