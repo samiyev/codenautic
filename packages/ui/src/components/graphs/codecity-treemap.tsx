@@ -171,6 +171,7 @@ interface ICodeCityTreemapTreemapNodePayload {
 
 interface ICodeCityTreemapTreemapContentProps {
     readonly onFileHover?: (payload?: ICodeCityTreemapFileTooltip) => void
+    readonly onFileSelect?: (fileId: string) => void
     readonly fileLink?: (file: ICodeCityTreemapFileLinkResolver) => string
     readonly highlightedFileId?: string
     readonly predictedRiskByFileId?: ReadonlyMap<string, TCodeCityTreemapPredictionRiskLevel>
@@ -774,7 +775,22 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
     const handlePackageKeyDown = (event: KeyboardEvent<SVGGElement>): void => {
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault()
+            if (isPackage === true) {
+                handlePackageSelect()
+                return
+            }
+            if (isLeaf === true && fileId.length > 0) {
+                props.onFileSelect?.(fileId)
+            }
+        }
+    }
+    const handleNodeClick = (): void => {
+        if (isPackage === true) {
             handlePackageSelect()
+            return
+        }
+        if (isLeaf === true && fileId.length > 0) {
+            props.onFileSelect?.(fileId)
         }
     }
 
@@ -792,8 +808,8 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
             onFocus={isPackage === false ? handleFileMouseEnter : undefined}
             onMouseEnter={isPackage === false ? handleFileMouseEnter : undefined}
             onMouseLeave={isPackage === false ? handleFileMouseLeave : undefined}
-            onKeyDown={isPackage === true ? handlePackageKeyDown : undefined}
-            onClick={isPackage === true ? handlePackageSelect : undefined}
+            onKeyDown={handlePackageKeyDown}
+            onClick={handleNodeClick}
             role="button"
             tabIndex={0}
         >
@@ -973,6 +989,8 @@ export interface ICodeCityTreemapProps {
     readonly temporalCouplings?: ReadonlyArray<ICodeCityTreemapTemporalCouplingDescriptor>
     /** Идентификатор файла для визуальной подсветки в treemap. */
     readonly highlightedFileId?: string
+    /** Обработчик выбора файла по клику в treemap. */
+    readonly onFileSelect?: (fileId: string) => void
     /** Принудительная раскраска зданий по file id (например ownership overlay). */
     readonly fileColorById?: Readonly<Record<string, string>>
     /** Принудительная обводка зданий по file id для prediction overlays. */
@@ -1560,6 +1578,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                     ...contentProps,
                                     onPackageSelect: handlePackageSelect,
                                     onFileHover: handleFileHover,
+                                    onFileSelect: props.onFileSelect,
                                     fileLink: props.fileLink,
                                     highlightedFileId: props.highlightedFileId,
                                     predictedRiskByFileId,

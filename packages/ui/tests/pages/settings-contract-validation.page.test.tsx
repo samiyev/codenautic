@@ -109,4 +109,21 @@ describe("SettingsContractValidationPage", (): void => {
             "\"totalViolations\": 1",
         )
     })
+
+    it("показывает детали нарушения после клика по файлу в drift overlay treemap", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsContractValidationPage />)
+
+        expect(screen.getByText("Drift overlay CodeCity")).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "src/infrastructure/http/review.controller.ts" }))
+        await waitFor(() => {
+            expect(screen.getByLabelText("Selected drift file violations")).not.toBeNull()
+        })
+        expect(screen.getAllByText("src/infrastructure/http/review.controller.ts").length).toBeGreaterThan(0)
+        expect(screen.getByLabelText("Selected drift file violations")).not.toBeNull()
+        expect(
+            screen.getByText("Layer violation: infrastructure imports domain directly"),
+        ).not.toBeNull()
+    })
 })

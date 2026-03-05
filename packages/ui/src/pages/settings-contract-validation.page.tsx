@@ -1,5 +1,10 @@
 import { type ChangeEvent, type ReactElement, useMemo, useState } from "react"
 
+import {
+    CodeCityTreemap,
+    type ICodeCityTreemapFileDescriptor,
+    type ICodeCityTreemapImpactedFileDescriptor,
+} from "@/components/graphs/codecity-treemap"
 import { Alert, Button, Card, CardBody, CardHeader, Textarea } from "@/components/ui"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
@@ -108,6 +113,84 @@ const DEFAULT_DRIFT_VIOLATIONS: ReadonlyArray<IDriftViolation> = [
         rationale: "Adapter naming is inconsistent with anti-corruption layer naming convention.",
         rule: "Naming drift in adapter boundary",
         severity: "low",
+    },
+]
+
+const DRIFT_FILE_ID_BY_PATH: Readonly<Record<string, string>> = {
+    "src/infrastructure/http/review.controller.ts": "drift-file-review-controller",
+    "src/domain/review.aggregate.ts": "drift-file-review-aggregate",
+    "src/application/use-cases/review-merge-request.use-case.ts": "drift-file-review-usecase",
+    "src/infrastructure/repository/review.repository.ts": "drift-file-review-repository",
+    "src/infrastructure/messaging/review.events.ts": "drift-file-review-events",
+    "src/domain/entities/review.ts": "drift-file-review-entity",
+    "src/domain/value-objects/risk-score.ts": "drift-file-risk-score",
+    "src/adapters/git/gitlab-client.ts": "drift-file-gitlab-client",
+}
+
+const DRIFT_CODE_CITY_FILES: ReadonlyArray<ICodeCityTreemapFileDescriptor> = [
+    {
+        complexity: 28,
+        coverage: 62,
+        id: "drift-file-review-controller",
+        issueCount: 5,
+        loc: 240,
+        path: "src/infrastructure/http/review.controller.ts",
+    },
+    {
+        complexity: 31,
+        coverage: 71,
+        id: "drift-file-review-aggregate",
+        issueCount: 4,
+        loc: 212,
+        path: "src/domain/review.aggregate.ts",
+    },
+    {
+        complexity: 37,
+        coverage: 58,
+        id: "drift-file-review-usecase",
+        issueCount: 6,
+        loc: 298,
+        path: "src/application/use-cases/review-merge-request.use-case.ts",
+    },
+    {
+        complexity: 29,
+        coverage: 64,
+        id: "drift-file-review-repository",
+        issueCount: 5,
+        loc: 250,
+        path: "src/infrastructure/repository/review.repository.ts",
+    },
+    {
+        complexity: 24,
+        coverage: 66,
+        id: "drift-file-review-events",
+        issueCount: 4,
+        loc: 172,
+        path: "src/infrastructure/messaging/review.events.ts",
+    },
+    {
+        complexity: 22,
+        coverage: 78,
+        id: "drift-file-review-entity",
+        issueCount: 3,
+        loc: 166,
+        path: "src/domain/entities/review.ts",
+    },
+    {
+        complexity: 16,
+        coverage: 84,
+        id: "drift-file-risk-score",
+        issueCount: 2,
+        loc: 118,
+        path: "src/domain/value-objects/risk-score.ts",
+    },
+    {
+        complexity: 18,
+        coverage: 74,
+        id: "drift-file-gitlab-client",
+        issueCount: 1,
+        loc: 186,
+        path: "src/adapters/git/gitlab-client.ts",
     },
 ]
 
@@ -263,6 +346,14 @@ function compareDriftViolations(
     return left.affectedFiles.length - right.affectedFiles.length
 }
 
+function resolveDriftViolationFileIds(violation: IDriftViolation): ReadonlyArray<string> {
+    return violation.affectedFiles
+        .map((filePath): string | undefined => {
+            return DRIFT_FILE_ID_BY_PATH[filePath]
+        })
+        .filter((fileId): fileId is string => fileId !== undefined)
+}
+
 function parseContractEnvelope(rawValue: string): IValidationResult {
     let parsedValue: unknown
     try {
@@ -381,6 +472,7 @@ export function SettingsContractValidationPage(): ReactElement {
         "No drift report exported yet.",
     )
     const [driftExportStatus, setDriftExportStatus] = useState<string>("No drift report exported yet.")
+    const [selectedDriftOverlayFileId, setSelectedDriftOverlayFileId] = useState<string | undefined>()
 
     const previewSummary = useMemo((): string => {
         const envelope = validationResult.normalizedEnvelope
@@ -415,6 +507,49 @@ export function SettingsContractValidationPage(): ReactElement {
                 return compareDriftViolations(left, right, driftSortMode)
             })
     }, [driftSearchQuery, driftSeverityFilter, driftSortMode])
+    const driftOverlayImpactedFiles = useMemo(
+        (): ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor> => {
+            const impactedByFileId = new Map<string, ICodeCityTreemapImpactedFileDescriptor>()
+            for (const violation of DEFAULT_DRIFT_VIOLATIONS) {
+                const affectedFileIds = resolveDriftViolationFileIds(violation)
+                for (const fileId of affectedFileIds) {
+                    impactedByFileId.set(fileId, {
+                        fileId,
+                        impactType: "changed",
+                    })
+                }
+            }
+            return Array.from(impactedByFileId.values())
+        },
+        [],
+    )
+    const driftViolationsByFileId = useMemo((): ReadonlyMap<string, ReadonlyArray<IDriftViolation>> => {
+        const violationsByFileId = new Map<string, IDriftViolation[]>()
+        for (const violation of DEFAULT_DRIFT_VIOLATIONS) {
+            const affectedFileIds = resolveDriftViolationFileIds(violation)
+            for (const fileId of affectedFileIds) {
+                const currentViolations = violationsByFileId.get(fileId)
+                if (currentViolations === undefined) {
+                    violationsByFileId.set(fileId, [violation])
+                    continue
+                }
+                currentViolations.push(violation)
+            }
+        }
+        return violationsByFileId
+    }, [])
+    const selectedDriftOverlayFile = useMemo((): ICodeCityTreemapFileDescriptor | undefined => {
+        if (selectedDriftOverlayFileId === undefined) {
+            return undefined
+        }
+        return DRIFT_CODE_CITY_FILES.find((file): boolean => file.id === selectedDriftOverlayFileId)
+    }, [selectedDriftOverlayFileId])
+    const selectedDriftOverlayViolations = useMemo((): ReadonlyArray<IDriftViolation> => {
+        if (selectedDriftOverlayFileId === undefined) {
+            return []
+        }
+        return driftViolationsByFileId.get(selectedDriftOverlayFileId) ?? []
+    }, [driftViolationsByFileId, selectedDriftOverlayFileId])
 
     const handleValidateContract = (): void => {
         const nextResult = parseContractEnvelope(rawContract)
@@ -795,6 +930,70 @@ export function SettingsContractValidationPage(): ReactElement {
                     >
                         {driftExportPayload}
                     </pre>
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Drift overlay CodeCity
+                    </p>
+                </CardHeader>
+                <CardBody className="space-y-3">
+                    <p className="text-sm text-[var(--foreground)]/70">
+                        Files violating architecture blueprint are highlighted in red. Click any
+                        highlighted file to inspect related drift violations.
+                    </p>
+                    <CodeCityTreemap
+                        files={DRIFT_CODE_CITY_FILES}
+                        height="360px"
+                        highlightedFileId={selectedDriftOverlayFileId}
+                        impactedFiles={driftOverlayImpactedFiles}
+                        onFileSelect={setSelectedDriftOverlayFileId}
+                        title="Architecture drift overlay treemap"
+                    />
+                    <div
+                        aria-label="Drift overlay file shortcuts"
+                        className="flex flex-wrap gap-2"
+                    >
+                        {DRIFT_CODE_CITY_FILES.map((file): ReactElement => (
+                            <Button
+                                key={file.id}
+                                size="sm"
+                                variant={
+                                    selectedDriftOverlayFileId === file.id ? "solid" : "flat"
+                                }
+                                onPress={(): void => {
+                                    setSelectedDriftOverlayFileId(file.id)
+                                }}
+                            >
+                                {file.path}
+                            </Button>
+                        ))}
+                    </div>
+                    {selectedDriftOverlayFile === undefined ? (
+                        <Alert color="primary" title="Drift violation details" variant="flat">
+                            Select a highlighted file in the treemap to view violation details.
+                        </Alert>
+                    ) : (
+                        <Alert color="danger" title="Drift violation details" variant="flat">
+                            <p className="mb-2 text-sm">
+                                File: <span className="font-semibold">{selectedDriftOverlayFile.path}</span>
+                            </p>
+                            {selectedDriftOverlayViolations.length === 0 ? (
+                                <p className="text-sm">No mapped drift violations for selected file.</p>
+                            ) : (
+                                <ul aria-label="Selected drift file violations" className="space-y-1">
+                                    {selectedDriftOverlayViolations.map((violation): ReactElement => (
+                                        <li key={`${selectedDriftOverlayFile.id}-${violation.id}`}>
+                                            <span className="font-semibold">{violation.severity}</span>:{" "}
+                                            {violation.rule}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </Alert>
+                    )}
                 </CardBody>
             </Card>
         </section>
