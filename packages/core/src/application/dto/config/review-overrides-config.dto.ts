@@ -1,4 +1,8 @@
 import type {IPromptConfigurationConfigData} from "./prompt-configuration-config.dto"
+import {
+    mapOverridesToVariables,
+    type ReviewOverrideVariable,
+} from "../../shared/prompt-override-variables"
 
 export const REVIEW_OVERRIDE_PROMPT_NAMES = {
     CODE_REVIEW_SYSTEM: "code-review-system",
@@ -112,6 +116,25 @@ export function buildReviewOverridePromptConfigurations(
     ])
 }
 
+const BASE_OVERRIDE_VARIABLES: readonly ReviewOverrideVariable[] = [
+    "bugText",
+    "perfText",
+    "secText",
+    "criticalText",
+    "highText",
+    "mediumText",
+    "lowText",
+    "mainGenText",
+]
+
+const CROSS_FILE_OVERRIDE_VARIABLES: readonly ReviewOverrideVariable[] = [
+    "criticalText",
+    "highText",
+    "mediumText",
+    "lowText",
+    "mainGenText",
+]
+
 /**
  * Resolves config override defaults for code review prompt templates.
  *
@@ -119,16 +142,7 @@ export function buildReviewOverridePromptConfigurations(
  * @returns Defaults map for review templates.
  */
 function buildBaseDefaults(overrides: IReviewOverridesConfigData): Record<string, unknown> {
-    return {
-        bugText: overrides.categories.descriptions.bug,
-        perfText: overrides.categories.descriptions.performance,
-        secText: overrides.categories.descriptions.security,
-        criticalText: overrides.severity.flags.critical,
-        highText: overrides.severity.flags.high,
-        mediumText: overrides.severity.flags.medium,
-        lowText: overrides.severity.flags.low,
-        mainGenText: overrides.generation.main,
-    }
+    return mapOverridesToVariables(overrides, BASE_OVERRIDE_VARIABLES)
 }
 
 /**
@@ -138,13 +152,7 @@ function buildBaseDefaults(overrides: IReviewOverridesConfigData): Record<string
  * @returns Defaults map for cross-file template.
  */
 function buildCrossFileDefaults(overrides: IReviewOverridesConfigData): Record<string, unknown> {
-    return {
-        criticalText: overrides.severity.flags.critical,
-        highText: overrides.severity.flags.high,
-        mediumText: overrides.severity.flags.medium,
-        lowText: overrides.severity.flags.low,
-        mainGenText: overrides.generation.main,
-    }
+    return mapOverridesToVariables(overrides, CROSS_FILE_OVERRIDE_VARIABLES)
 }
 
 /**
