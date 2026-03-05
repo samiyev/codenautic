@@ -31,6 +31,10 @@ import {
     type IGuidedTourStep,
 } from "@/components/graphs/guided-tour-overlay"
 import {
+    ImpactAnalysisPanel,
+    type IImpactAnalysisSeed,
+} from "@/components/graphs/impact-analysis-panel"
+import {
     ExploreModeSidebar,
     type IExploreModePathDescriptor,
 } from "@/components/graphs/explore-mode-sidebar"
@@ -901,6 +905,42 @@ function buildRefactoringTimelineTasks(
     })
 }
 
+/**
+ * Формирует seeds для impact analysis панели.
+ *
+ * @param files Файлы текущего профиля.
+ * @returns Набор seed-элементов для blast radius.
+ */
+function buildImpactAnalysisSeeds(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+): ReadonlyArray<IImpactAnalysisSeed> {
+    return files.slice(0, 6).map((file, index, sourceFiles): IImpactAnalysisSeed => {
+        const nextFile = sourceFiles[index + 1] ?? sourceFiles[0]
+        const secondNextFile = sourceFiles[index + 2] ?? sourceFiles[1] ?? nextFile
+        const bugCount = file.bugIntroductions?.["30d"] ?? 0
+        const complexity = file.complexity ?? 0
+
+        return {
+            affectedConsumers: [
+                `${file.path.split("/")[1] ?? "core"}-consumer`,
+                `${file.path.split("/")[2] ?? "runtime"}-worker`,
+            ],
+            affectedFiles: [
+                nextFile?.path ?? file.path,
+                secondNextFile?.path ?? file.path,
+            ].filter((path): boolean => path.length > 0),
+            affectedTests: [
+                `tests/${file.path.split("/").slice(-1)[0] ?? "module"}.test.ts`,
+                `tests/${nextFile?.path.split("/").slice(-1)[0] ?? "module"}.test.ts`,
+            ],
+            fileId: file.id,
+            id: `impact-${file.id}`,
+            label: file.path,
+            riskScore: Math.max(1, Math.min(99, Math.round((complexity * 1.5) + (bugCount * 9)))),
+        }
+    })
+}
+
 export function CodeCityDashboardPage(
     props: ICodeCityDashboardPageProps = {},
 ): ReactElement {
@@ -945,6 +985,7 @@ export function CodeCityDashboardPage(
     const refactoringTargets = buildRefactoringTargets(currentProfile.files)
     const cityRefactoringOverlayEntries = buildCityRefactoringOverlayEntries(refactoringTargets)
     const refactoringTimelineTasks = buildRefactoringTimelineTasks(refactoringTargets)
+    const impactAnalysisSeeds = buildImpactAnalysisSeeds(currentProfile.files)
     const onboardingProgressModules = buildOnboardingProgressModules(exploredAreaIds)
     const fileLink = createRepositoryFilesLink(currentProfile.id)
     const overlayImpactedFiles =
@@ -1313,6 +1354,31 @@ export function CodeCityDashboardPage(
                             markAreaExplored("city-3d")
                         }}
                         targets={refactoringTargets}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Impact analysis panel</p>
+                </CardHeader>
+                <CardBody>
+                    <ImpactAnalysisPanel
+                        onApplyImpact={(selection): void => {
+                            setHighlightedFileId(selection.fileId)
+                            setExploreNavigationFocus({
+                                activeFileId: selection.fileId,
+                                chainFileIds: [
+                                    selection.fileId,
+                                    ...selection.affectedFiles.filter((fileId): boolean => {
+                                        return fileId !== selection.fileId
+                                    }),
+                                ],
+                                title: `Impact analysis: ${selection.label}`,
+                            })
+                            markAreaExplored("city-3d")
+                        }}
+                        seeds={impactAnalysisSeeds}
                     />
                 </CardBody>
             </Card>

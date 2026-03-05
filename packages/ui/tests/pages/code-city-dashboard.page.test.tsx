@@ -497,6 +497,50 @@ const { mockRefactoringExportDialog } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockImpactAnalysisPanel } = vi.hoisted(() => ({
+    mockImpactAnalysisPanel: vi.fn(
+        (props: {
+            readonly seeds: ReadonlyArray<{
+                readonly id: string
+                readonly fileId: string
+                readonly label: string
+                readonly affectedFiles: ReadonlyArray<string>
+                readonly affectedTests: ReadonlyArray<string>
+                readonly affectedConsumers: ReadonlyArray<string>
+                readonly riskScore: number
+            }>
+            readonly onApplyImpact?: (selection: {
+                readonly fileId: string
+                readonly label: string
+                readonly riskScore: number
+                readonly affectedFiles: ReadonlyArray<string>
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>impact-seeds:{props.seeds.length}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstSeed = props.seeds.at(0)
+                            if (firstSeed === undefined) {
+                                return
+                            }
+                            props.onApplyImpact?.({
+                                affectedFiles: firstSeed.affectedFiles,
+                                fileId: firstSeed.fileId,
+                                label: firstSeed.label,
+                                riskScore: firstSeed.riskScore,
+                            })
+                        }}
+                        type="button"
+                    >
+                        apply impact analysis
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockRootCauseChainViewer } = vi.hoisted(() => ({
     mockRootCauseChainViewer: vi.fn(
         (props: {
@@ -583,6 +627,9 @@ vi.mock("@/components/graphs/refactoring-timeline", () => ({
 vi.mock("@/components/graphs/refactoring-export-dialog", () => ({
     RefactoringExportDialog: mockRefactoringExportDialog,
 }))
+vi.mock("@/components/graphs/impact-analysis-panel", () => ({
+    ImpactAnalysisPanel: mockImpactAnalysisPanel,
+}))
 vi.mock("@/components/graphs/root-cause-chain-viewer", () => ({
     RootCauseChainViewer: mockRootCauseChainViewer,
 }))
@@ -604,6 +651,7 @@ beforeEach((): void => {
     mockSimulationPanel.mockClear()
     mockRefactoringTimeline.mockClear()
     mockRefactoringExportDialog.mockClear()
+    mockImpactAnalysisPanel.mockClear()
     mockRootCauseChainViewer.mockClear()
 })
 
@@ -735,6 +783,10 @@ describe("CodeCityDashboardPage", (): void => {
         const firstExportCall = mockRefactoringExportDialog.mock.calls.at(0)?.[0]
         expect(firstExportCall).not.toBeUndefined()
         expect(firstExportCall?.targets.length).toBeGreaterThan(0)
+
+        const firstImpactCall = mockImpactAnalysisPanel.mock.calls.at(0)?.[0]
+        expect(firstImpactCall).not.toBeUndefined()
+        expect(firstImpactCall?.seeds.length).toBeGreaterThan(0)
     })
 
     it("обновляет treemap при смене репозитория и метрики", async (): Promise<void> => {
@@ -797,6 +849,11 @@ describe("CodeCityDashboardPage", (): void => {
         expect(exportNavigation3DCall).not.toBeUndefined()
         expect(exportNavigation3DCall?.navigationLabel).toBe("Export plan: jira")
         expect(exportNavigation3DCall?.navigationChainFileIds.length).toBeGreaterThan(1)
+
+        await user.click(screen.getByRole("button", { name: "apply impact analysis" }))
+        const impactNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(impactNavigation3DCall).not.toBeUndefined()
+        expect(impactNavigation3DCall?.navigationLabel).toContain("Impact analysis:")
 
         const repositorySelect = screen.getByRole("combobox", { name: "Repository" })
         const metricSelect = screen.getByRole("combobox", { name: "Metric" })
