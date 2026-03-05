@@ -96,6 +96,22 @@ describe("ccr review detail page", (): void => {
         expect(screen.getByRole("list", { name: "Active file neighborhood list" })).not.toBeNull()
     })
 
+    it("включает review history heatmap и переключает окно активности", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const ccr = getMockCcrRow(0)
+
+        renderWithProviders(<CcrReviewDetailPage ccr={ccr} />)
+
+        expect(screen.getByText("Review history heatmap is disabled.")).not.toBeNull()
+        await user.click(screen.getByRole("button", { name: "Show review history heatmap" }))
+
+        expect(screen.getByText("Review history heatmap is enabled. Window 30d.")).not.toBeNull()
+        await user.selectOptions(screen.getByLabelText("Review history window"), "90d")
+
+        expect(screen.getByText("Review history heatmap is enabled. Window 90d.")).not.toBeNull()
+        expect(screen.getByRole("list", { name: "Review history heatmap list" })).not.toBeNull()
+    })
+
     it("показывает restricted decision states для viewer роли", (): void => {
         const ccr = getMockCcrRow(0)
         window.localStorage.setItem("codenautic:rbac:role", "viewer")

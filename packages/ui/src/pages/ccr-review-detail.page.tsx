@@ -33,6 +33,12 @@ type TSafeGuardFilterId = "dedup" | "hallucination" | "severity"
 type TSafeGuardStepStatus = "applied" | "filtered_out" | "passed"
 type TReviewerFeedbackReason = "duplicate" | "false_positive" | "irrelevant"
 type TReviewerFeedbackStatus = "accepted" | "rejected"
+type TReviewHistoryWindow = "7d" | "30d" | "90d"
+
+interface IReviewHistoryHeatEntry {
+    readonly filePath: string
+    readonly reviewsByWindow: Readonly<Record<TReviewHistoryWindow, number>>
+}
 
 interface ISafeGuardTraceStep {
     /** Идентификатор фильтра SafeGuard. */
@@ -235,6 +241,44 @@ function buildReviewNeighborhoodByPath(
     )
 }
 
+function buildReviewHistoryHeatEntries(
+    diffFiles: ReadonlyArray<ICcrDiffFile>,
+): ReadonlyArray<IReviewHistoryHeatEntry> {
+    return diffFiles.map((file): IReviewHistoryHeatEntry => {
+        const changedLineCount = resolveDiffChangedLineCount(file)
+        const issueCount = resolveDiffIssueCount(file)
+        const shortWindowReviews = Math.max(1, Math.floor(changedLineCount / 2) + issueCount)
+        const mediumWindowReviews = Math.max(
+            shortWindowReviews,
+            shortWindowReviews + Math.floor(changedLineCount / 3),
+        )
+        const longWindowReviews = Math.max(
+            mediumWindowReviews,
+            mediumWindowReviews + Math.floor(changedLineCount / 2) + 1,
+        )
+
+        return {
+            filePath: file.filePath,
+            reviewsByWindow: {
+                "30d": mediumWindowReviews,
+                "7d": shortWindowReviews,
+                "90d": longWindowReviews,
+            },
+        }
+    })
+}
+
+function resolveReviewHistoryHeatColor(activityCount: number, maxActivityCount: number): string {
+    if (maxActivityCount <= 0) {
+        return "hsl(210, 40%, 92%)"
+    }
+    const clampedRatio = Math.min(1, Math.max(0, activityCount / maxActivityCount))
+    const hue = 42 - Math.round(clampedRatio * 42)
+    const saturation = 76
+    const lightness = 78 - Math.round(clampedRatio * 36)
+    return `hsl(${String(hue)}, ${String(saturation)}%, ${String(lightness)}%)`
+}
+
 function mapReviewDecisionBadge(reviewDecision: TReviewDecision): {
     readonly color: "danger" | "primary" | "success"
     readonly label: string
@@ -381,6 +425,9 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     const [messagesByThread, setMessagesByThread] = useState<TThreadMessagesMap>({})
     const [selectedFeedbackReason, setSelectedFeedbackReason] =
         useState<TReviewerFeedbackReason>("false_positive")
+    const [selectedReviewHistoryWindow, setSelectedReviewHistoryWindow] =
+        useState<TReviewHistoryWindow>("30d")
+    const [isReviewHistoryHeatmapEnabled, setReviewHistoryHeatmapEnabled] = useState<boolean>(false)
     const [impactFocusStatus, setImpactFocusStatus] = useState<string>(
         "No blast radius focus applied yet.",
     )
@@ -484,6 +531,49 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     const reviewNeighborhoodByPath = useMemo((): Readonly<Record<string, ReadonlyArray<string>>> => {
         return buildReviewNeighborhoodByPath(ccrDiffFiles)
     }, [ccrDiffFiles])
+    const reviewHistoryHeatEntries = useMemo((): ReadonlyArray<IReviewHistoryHeatEntry> => {
+        return buildReviewHistoryHeatEntries(ccrDiffFiles)
+    }, [ccrDiffFiles])
+    const maxReviewHistoryActivity = useMemo((): number => {
+        return reviewHistoryHeatEntries.reduce((maxValue, entry): number => {
+            return Math.max(maxValue, entry.reviewsByWindow[selectedReviewHistoryWindow])
+        }, 0)
+    }, [reviewHistoryHeatEntries, selectedReviewHistoryWindow])
+    const reviewHistoryColorByFileId = useMemo((): Readonly<Record<string, string>> => {
+        if (isReviewHistoryHeatmapEnabled === false) {
+            return {}
+        }
+
+        return reviewHistoryHeatEntries.reduce((mapping, entry): Record<string, string> => {
+            const fileId = reviewContextFileIdByPath[entry.filePath]
+            if (fileId === undefined) {
+                return mapping
+            }
+            return {
+                ...mapping,
+                [fileId]: resolveReviewHistoryHeatColor(
+                    entry.reviewsByWindow[selectedReviewHistoryWindow],
+                    maxReviewHistoryActivity,
+                ),
+            }
+        }, {})
+    }, [
+        isReviewHistoryHeatmapEnabled,
+        maxReviewHistoryActivity,
+        reviewContextFileIdByPath,
+        reviewHistoryHeatEntries,
+        selectedReviewHistoryWindow,
+    ])
+    const hottestReviewHistoryEntries = useMemo((): ReadonlyArray<IReviewHistoryHeatEntry> => {
+        return [...reviewHistoryHeatEntries]
+            .sort((leftEntry, rightEntry): number => {
+                return (
+                    rightEntry.reviewsByWindow[selectedReviewHistoryWindow]
+                    - leftEntry.reviewsByWindow[selectedReviewHistoryWindow]
+                )
+            })
+            .slice(0, 4)
+    }, [reviewHistoryHeatEntries, selectedReviewHistoryWindow])
     const activeNeighborhoodFiles = useMemo((): ReadonlyArray<string> => {
         if (activeFilePath === undefined) {
             return []
@@ -879,6 +969,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 and neighborhood context for focused navigation.
                             </p>
                             <CodeCityTreemap
+                                fileColorById={reviewHistoryColorByFileId}
                                 files={reviewContextTreemapFiles}
                                 height="420px"
                                 highlightedFileId={reviewContextHighlightedFileId}
@@ -886,6 +977,71 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 onFileSelect={handleReviewContextMiniMapSelect}
                                 title="CCR impact CodeCity view"
                             />
+                            <div className="flex flex-wrap items-end gap-2">
+                                <Button
+                                    aria-label={
+                                        isReviewHistoryHeatmapEnabled
+                                            ? "Hide review history heatmap"
+                                            : "Show review history heatmap"
+                                    }
+                                    size="sm"
+                                    type="button"
+                                    variant="flat"
+                                    onPress={(): void => {
+                                        setReviewHistoryHeatmapEnabled(
+                                            isReviewHistoryHeatmapEnabled === false,
+                                        )
+                                    }}
+                                >
+                                    {isReviewHistoryHeatmapEnabled
+                                        ? "Hide review history heatmap"
+                                        : "Show review history heatmap"}
+                                </Button>
+                                <label className="text-xs text-slate-700" htmlFor="review-history-window">
+                                    Review history window
+                                </label>
+                                <select
+                                    aria-label="Review history window"
+                                    className="rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900"
+                                    id="review-history-window"
+                                    value={selectedReviewHistoryWindow}
+                                    onChange={(event): void => {
+                                        const nextWindow = event.currentTarget.value
+                                        if (
+                                            nextWindow === "7d"
+                                            || nextWindow === "30d"
+                                            || nextWindow === "90d"
+                                        ) {
+                                            setSelectedReviewHistoryWindow(nextWindow)
+                                        }
+                                    }}
+                                >
+                                    <option value="7d">7d</option>
+                                    <option value="30d">30d</option>
+                                    <option value="90d">90d</option>
+                                </select>
+                            </div>
+                            <Alert
+                                color={isReviewHistoryHeatmapEnabled ? "success" : "primary"}
+                                title="Review history heatmap"
+                                variant="flat"
+                            >
+                                {isReviewHistoryHeatmapEnabled
+                                    ? `Review history heatmap is enabled. Window ${selectedReviewHistoryWindow}.`
+                                    : "Review history heatmap is disabled."}
+                            </Alert>
+                            <ul aria-label="Review history heatmap list" className="space-y-1">
+                                {hottestReviewHistoryEntries.map((entry): ReactElement => (
+                                    <li
+                                        className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700"
+                                        key={`review-history-${entry.filePath}`}
+                                    >
+                                        <span className="font-semibold">{entry.filePath}</span> · reviews{" "}
+                                        {String(entry.reviewsByWindow[selectedReviewHistoryWindow])}
+                                        {entry.filePath === activeFilePath ? " · focused" : ""}
+                                    </li>
+                                ))}
+                            </ul>
                             <ImpactAnalysisPanel
                                 onApplyImpact={handleApplyImpactFocus}
                                 seeds={reviewImpactSeeds}
