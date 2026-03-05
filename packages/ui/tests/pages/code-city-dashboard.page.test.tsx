@@ -701,6 +701,55 @@ const { mockContributorCollaborationGraph } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockOwnershipTransitionWidget } = vi.hoisted(() => ({
+    mockOwnershipTransitionWidget: vi.fn(
+        (props: {
+            readonly events: ReadonlyArray<{
+                readonly id: string
+                readonly fileId: string
+                readonly scopeType: "file" | "module"
+                readonly scopeLabel: string
+                readonly changedAt: string
+                readonly fromOwnerName: string
+                readonly toOwnerName: string
+                readonly toOwnerId: string
+                readonly handoffSeverity: "smooth" | "watch" | "critical"
+                readonly reason: string
+            }>
+            readonly activeEventId?: string
+            readonly onSelectEvent?: (event: {
+                readonly id: string
+                readonly fileId: string
+                readonly scopeType: "file" | "module"
+                readonly scopeLabel: string
+                readonly changedAt: string
+                readonly fromOwnerName: string
+                readonly toOwnerName: string
+                readonly toOwnerId: string
+                readonly handoffSeverity: "smooth" | "watch" | "critical"
+                readonly reason: string
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>ownership-transition-events:{props.events.length}</p>
+                    <p>ownership-transition-active:{props.activeEventId ?? "none"}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstEvent = props.events.at(0)
+                            if (firstEvent !== undefined) {
+                                props.onSelectEvent?.(firstEvent)
+                            }
+                        }}
+                        type="button"
+                    >
+                        inspect ownership transition
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockCityOwnershipOverlay } = vi.hoisted(() => ({
     mockCityOwnershipOverlay: vi.fn(
         (props: {
@@ -970,6 +1019,9 @@ vi.mock("@/components/graphs/knowledge-silo-panel", () => ({
 vi.mock("@/components/graphs/contributor-collaboration-graph", () => ({
     ContributorCollaborationGraph: mockContributorCollaborationGraph,
 }))
+vi.mock("@/components/graphs/ownership-transition-widget", () => ({
+    OwnershipTransitionWidget: mockOwnershipTransitionWidget,
+}))
 vi.mock("@/components/graphs/city-ownership-overlay", () => ({
     CityOwnershipOverlay: mockCityOwnershipOverlay,
 }))
@@ -1008,6 +1060,7 @@ beforeEach((): void => {
     mockCityBusFactorOverlay.mockClear()
     mockKnowledgeSiloPanel.mockClear()
     mockContributorCollaborationGraph.mockClear()
+    mockOwnershipTransitionWidget.mockClear()
     mockCityOwnershipOverlay.mockClear()
     mockChangeRiskGauge.mockClear()
     mockImpactGraphView.mockClear()
@@ -1167,6 +1220,10 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstContributorGraphCall?.contributors.length).toBeGreaterThan(0)
         expect(firstContributorGraphCall?.collaborations.length).toBeGreaterThan(0)
 
+        const firstOwnershipTransitionCall = mockOwnershipTransitionWidget.mock.calls.at(0)?.[0]
+        expect(firstOwnershipTransitionCall).not.toBeUndefined()
+        expect(firstOwnershipTransitionCall?.events.length).toBeGreaterThan(0)
+
         const firstOwnershipCall = mockCityOwnershipOverlay.mock.calls.at(0)?.[0]
         expect(firstOwnershipCall).not.toBeUndefined()
         expect(firstOwnershipCall?.owners.length).toBeGreaterThan(0)
@@ -1297,6 +1354,18 @@ describe("CodeCityDashboardPage", (): void => {
         const contributor3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(contributor3DCall).not.toBeUndefined()
         expect(contributor3DCall?.navigationLabel).toContain("Contributor graph:")
+
+        await user.click(screen.getByRole("button", { name: "inspect ownership transition" }))
+        const ownershipTransitionEvent = mockOwnershipTransitionWidget.mock.calls.at(-1)?.[0]
+            ?.events.at(0)
+        const ownershipTransitionTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(ownershipTransitionTreemapCall).not.toBeUndefined()
+        expect(ownershipTransitionTreemapCall?.highlightedFileId).toBe(
+            ownershipTransitionEvent?.fileId,
+        )
+        const ownershipTransition3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(ownershipTransition3DCall).not.toBeUndefined()
+        expect(ownershipTransition3DCall?.navigationLabel).toContain("Ownership transition:")
 
         await user.click(screen.getByRole("button", { name: "toggle ownership colors" }))
         const ownershipDisabledTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]

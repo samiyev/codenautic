@@ -86,6 +86,11 @@ import {
     type IContributorCollaborationEdge,
     type IContributorCollaborationNode,
 } from "@/components/graphs/contributor-collaboration-graph"
+import {
+    OwnershipTransitionWidget,
+    type IOwnershipTransitionEvent,
+    type TOwnershipTransitionHandoffSeverity,
+} from "@/components/graphs/ownership-transition-widget"
 import { HealthTrendChart, type IHealthTrendPoint } from "@/components/graphs/health-trend-chart"
 import {
     KnowledgeSiloPanel,
@@ -1481,6 +1486,128 @@ function buildContributorGraphEdges(
     })
 }
 
+function resolveOwnershipTransitionSeverity(
+    file: ICodeCityTreemapFileDescriptor,
+): TOwnershipTransitionHandoffSeverity {
+    const bugCount = file.bugIntroductions?.["30d"] ?? 0
+    const complexity = file.complexity ?? 0
+
+    if (bugCount >= 5 || complexity >= 30) {
+        return "critical"
+    }
+    if (bugCount >= 2 || complexity >= 18) {
+        return "watch"
+    }
+    return "smooth"
+}
+
+function resolveOwnershipTransitionReason(
+    severity: TOwnershipTransitionHandoffSeverity,
+    scopeType: IOwnershipTransitionEvent["scopeType"],
+): string {
+    if (severity === "critical") {
+        return scopeType === "module"
+            ? "Module transfer with high regression exposure. Schedule pair handoff."
+            : "High-risk file transfer. Add shadow review for first follow-up CCR."
+    }
+    if (severity === "watch") {
+        return "Moderate handoff risk. Keep checklist and reviewer rotation active."
+    }
+    return "Low-friction transition completed after planned knowledge sync."
+}
+
+function resolveOwnershipTransitionFromOwnerId(
+    contributors: ReadonlyArray<ICodeCityDashboardContributorDescriptor>,
+    currentOwnerId: string,
+    index: number,
+): string {
+    if (contributors.length === 0) {
+        return currentOwnerId
+    }
+
+    const firstCandidate = contributors[(index + 1) % contributors.length]?.ownerId
+    if (firstCandidate !== undefined && firstCandidate !== currentOwnerId) {
+        return firstCandidate
+    }
+
+    const secondCandidate = contributors[(index + 2) % contributors.length]?.ownerId
+    if (secondCandidate !== undefined) {
+        return secondCandidate
+    }
+
+    return currentOwnerId
+}
+
+function resolveOwnershipTransitionDate(index: number): string {
+    const month = 10 + index
+    const day = 6 + (index * 5)
+    return new Date(Date.UTC(2025, month, day)).toISOString()
+}
+
+/**
+ * Формирует timeline переходов ownership для файлов/модулей.
+ *
+ * @param files Файлы текущего профиля.
+ * @param contributors Справочник владельцев.
+ * @param ownership Маппинг владения файлами.
+ * @returns Отсортированный список handoff-событий.
+ */
+function buildOwnershipTransitionEvents(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+    contributors: ReadonlyArray<ICodeCityDashboardContributorDescriptor>,
+    ownership: ReadonlyArray<ICodeCityDashboardOwnershipDescriptor>,
+): ReadonlyArray<IOwnershipTransitionEvent> {
+    const fileById = new Map<string, ICodeCityTreemapFileDescriptor>(
+        files.map((file): readonly [string, ICodeCityTreemapFileDescriptor] => [file.id, file]),
+    )
+    const contributorById = new Map<string, ICodeCityDashboardContributorDescriptor>(
+        contributors.map(
+            (contributor): readonly [string, ICodeCityDashboardContributorDescriptor] => [
+                contributor.ownerId,
+                contributor,
+            ],
+        ),
+    )
+
+    return ownership
+        .slice(0, 6)
+        .map((entry, index): IOwnershipTransitionEvent | undefined => {
+            const file = fileById.get(entry.fileId)
+            if (file === undefined) {
+                return undefined
+            }
+
+            const scopeType: IOwnershipTransitionEvent["scopeType"] =
+                index % 2 === 0 ? "file" : "module"
+            const scopeLabel = scopeType === "module" ? resolveDistrictName(file.path) : file.path
+            const toOwner = contributorById.get(entry.ownerId)
+            const fromOwnerId = resolveOwnershipTransitionFromOwnerId(
+                contributors,
+                entry.ownerId,
+                index,
+            )
+            const fromOwner = contributorById.get(fromOwnerId)
+            const handoffSeverity = resolveOwnershipTransitionSeverity(file)
+
+            return {
+                changedAt: resolveOwnershipTransitionDate(index),
+                fileId: file.id,
+                fromOwnerName: fromOwner?.ownerName ?? fromOwnerId,
+                handoffSeverity,
+                id: `ownership-transition-${file.id}-${String(index)}`,
+                reason: resolveOwnershipTransitionReason(handoffSeverity, scopeType),
+                scopeLabel,
+                scopeType,
+                toOwnerId: entry.ownerId,
+                toOwnerName: toOwner?.ownerName ?? entry.ownerId,
+            }
+        })
+        .filter((event): event is IOwnershipTransitionEvent => event !== undefined)
+        .sort((leftEvent, rightEvent): number => {
+            return rightEvent.changedAt.localeCompare(leftEvent.changedAt)
+        })
+}
+
 /**
  * Формирует модель для change risk gauge.
  *
@@ -1599,6 +1726,7 @@ export function CodeCityDashboardPage(
     const [activeBusFactorDistrictId, setActiveBusFactorDistrictId] = useState<string | undefined>()
     const [activeKnowledgeSiloId, setActiveKnowledgeSiloId] = useState<string | undefined>()
     const [activeContributorId, setActiveContributorId] = useState<string | undefined>()
+    const [activeOwnershipTransitionId, setActiveOwnershipTransitionId] = useState<string | undefined>()
     const [isOwnershipOverlayEnabled, setOwnershipOverlayEnabled] = useState<boolean>(true)
     const [activeOwnershipOwnerId, setActiveOwnershipOwnerId] = useState<string | undefined>()
     const [exploredAreaIds, setExploredAreaIds] = useState<ReadonlyArray<string>>(["controls"])
@@ -1640,6 +1768,11 @@ export function CodeCityDashboardPage(
     const contributorGraphNodes = buildContributorGraphNodes(currentProfile.contributors)
     const contributorGraphEdges = buildContributorGraphEdges(
         currentProfile.contributorCollaborations,
+    )
+    const ownershipTransitionEvents = buildOwnershipTransitionEvents(
+        currentProfile.files,
+        currentProfile.contributors,
+        currentProfile.ownership,
     )
     const ownershipOverlayEntries = buildOwnershipOverlayEntries(
         currentProfile.files,
@@ -1686,6 +1819,7 @@ export function CodeCityDashboardPage(
         setActiveBusFactorDistrictId(undefined)
         setActiveKnowledgeSiloId(undefined)
         setActiveContributorId(undefined)
+        setActiveOwnershipTransitionId(undefined)
         setActiveOwnershipOwnerId(undefined)
         setRootCauseChainFocus({
             chainFileIds: [],
@@ -2182,6 +2316,34 @@ export function CodeCityDashboardPage(
                                 activeFileId,
                                 chainFileIds: ownerOverlayEntry?.fileIds ?? [],
                                 title: `Contributor graph: ${ownerOverlayEntry?.ownerName ?? contributorId}`,
+                            })
+                            markAreaExplored("controls")
+                            markAreaExplored("city-3d")
+                        }}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">
+                        Ownership transition widget
+                    </p>
+                </CardHeader>
+                <CardBody>
+                    <OwnershipTransitionWidget
+                        activeEventId={activeOwnershipTransitionId}
+                        events={ownershipTransitionEvents}
+                        onSelectEvent={(event): void => {
+                            setActiveOwnershipTransitionId(event.id)
+                            setActiveContributorId(event.toOwnerId)
+                            setActiveOwnershipOwnerId(event.toOwnerId)
+                            setOwnershipOverlayEnabled(true)
+                            setHighlightedFileId(event.fileId)
+                            setExploreNavigationFocus({
+                                activeFileId: event.fileId,
+                                chainFileIds: [event.fileId],
+                                title: `Ownership transition: ${event.scopeLabel}`,
                             })
                             markAreaExplored("controls")
                             markAreaExplored("city-3d")
