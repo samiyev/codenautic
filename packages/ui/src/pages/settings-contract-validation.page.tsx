@@ -97,6 +97,20 @@ interface IDriftAlertChannelOption {
     readonly label: string
 }
 
+type TGuardrailMode = "allow" | "forbid"
+
+interface IGuardrailRule {
+    readonly id: string
+    readonly source: string
+    readonly target: string
+    readonly mode: TGuardrailMode
+}
+
+interface IGuardrailValidationResult {
+    readonly errors: ReadonlyArray<string>
+    readonly rules: ReadonlyArray<IGuardrailRule>
+}
+
 const DEFAULT_BLUEPRINT_YAML = [
     "version: 1",
     "layers:",
@@ -329,6 +343,19 @@ const DRIFT_ALERT_CHANNEL_OPTIONS: ReadonlyArray<IDriftAlertChannelOption> = [
         label: "Webhook",
     },
 ]
+
+const DEFAULT_GUARDRAILS_YAML = [
+    "rules:",
+    "  - source: domain",
+    "    target: infrastructure",
+    "    mode: forbid",
+    "  - source: application",
+    "    target: infrastructure",
+    "    mode: allow",
+    "  - source: infrastructure",
+    "    target: domain",
+    "    mode: forbid",
+].join("\n")
 
 function resolveBlueprintNodeKind(key: string): IBlueprintNode["kind"] {
     if (key === "layers" || key === "name" || key === "layer") {
@@ -636,6 +663,95 @@ function parseContractEnvelope(rawValue: string): IValidationResult {
 }
 
 /**
+ * Валидирует YAML-конфигурацию architecture guardrails и извлекает import rules.
+ *
+ * @param rawYaml YAML с guardrail rules.
+ * @returns Ошибки валидации и список правил.
+ */
+function parseGuardrailsYaml(rawYaml: string): IGuardrailValidationResult {
+    const errors: Array<string> = []
+    const rules: Array<IGuardrailRule> = []
+
+    const lines = rawYaml.replaceAll("\r\n", "\n").split("\n")
+    let currentSource: string | undefined
+    let currentTarget: string | undefined
+
+    for (const [lineIndex, rawLine] of lines.entries()) {
+        if (rawLine.includes("\t")) {
+            errors.push(`Line ${String(lineIndex + 1)}: tabs are not allowed, use spaces.`)
+            continue
+        }
+
+        const trimmedLine = rawLine.trim()
+        if (trimmedLine.length === 0 || trimmedLine.startsWith("#") || trimmedLine === "rules:") {
+            continue
+        }
+
+        const normalizedLine = trimmedLine.startsWith("- ")
+            ? trimmedLine.slice(2).trim()
+            : trimmedLine
+
+        if (normalizedLine.startsWith("source:")) {
+            const parsedSource = normalizedLine.slice("source:".length).trim()
+            if (parsedSource.length === 0) {
+                errors.push(`Line ${String(lineIndex + 1)}: source is required.`)
+                continue
+            }
+            currentSource = parsedSource
+            continue
+        }
+
+        if (normalizedLine.startsWith("target:")) {
+            const parsedTarget = normalizedLine.slice("target:".length).trim()
+            if (parsedTarget.length === 0) {
+                errors.push(`Line ${String(lineIndex + 1)}: target is required.`)
+                continue
+            }
+            currentTarget = parsedTarget
+            continue
+        }
+
+        if (normalizedLine.startsWith("mode:")) {
+            const parsedMode = normalizedLine.slice("mode:".length).trim()
+            if (parsedMode !== "allow" && parsedMode !== "forbid") {
+                errors.push(`Line ${String(lineIndex + 1)}: mode must be allow or forbid.`)
+                continue
+            }
+
+            if (currentSource === undefined || currentTarget === undefined) {
+                errors.push(
+                    `Line ${String(
+                        lineIndex + 1,
+                    )}: guardrail rule must include source and target before mode.`,
+                )
+                continue
+            }
+
+            rules.push({
+                id: `guardrail-rule-${String(lineIndex)}`,
+                mode: parsedMode,
+                source: currentSource,
+                target: currentTarget,
+            })
+            currentSource = undefined
+            currentTarget = undefined
+            continue
+        }
+
+        errors.push(`Line ${String(lineIndex + 1)}: unsupported guardrail field.`)
+    }
+
+    if (rules.length === 0) {
+        errors.push("Guardrails must include at least one rule.")
+    }
+
+    return {
+        errors,
+        rules,
+    }
+}
+
+/**
  * Экран import/export contract validation.
  *
  * @returns Validation, migration hints и preview before apply.
@@ -687,6 +803,12 @@ export function SettingsContractValidationPage(): ReactElement {
     )
     const [driftAlertSaveStatus, setDriftAlertSaveStatus] = useState<string>(
         "No drift alert configuration saved yet.",
+    )
+    const [guardrailsYaml, setGuardrailsYaml] = useState<string>(DEFAULT_GUARDRAILS_YAML)
+    const [guardrailsValidationResult, setGuardrailsValidationResult] =
+        useState<IGuardrailValidationResult>(() => parseGuardrailsYaml(DEFAULT_GUARDRAILS_YAML))
+    const [guardrailsApplyStatus, setGuardrailsApplyStatus] = useState<string>(
+        "No architecture guardrails applied yet.",
     )
 
     const previewSummary = useMemo((): string => {
@@ -930,6 +1052,31 @@ export function SettingsContractValidationPage(): ReactElement {
             )}, channels: ${channelsLabel}.`,
         )
         showToastSuccess("Drift alerts configuration saved.")
+    }
+    const handleValidateGuardrails = (): void => {
+        const nextValidationResult = parseGuardrailsYaml(guardrailsYaml)
+        setGuardrailsValidationResult(nextValidationResult)
+
+        if (nextValidationResult.errors.length > 0) {
+            showToastError("Architecture guardrails validation failed.")
+            return
+        }
+
+        showToastSuccess("Architecture guardrails validation passed.")
+    }
+    const handleApplyGuardrails = (): void => {
+        if (guardrailsValidationResult.errors.length > 0) {
+            setGuardrailsApplyStatus("Apply blocked: fix guardrails validation issues first.")
+            showToastError("Architecture guardrails apply blocked.")
+            return
+        }
+
+        setGuardrailsApplyStatus(
+            `Applied architecture guardrails with ${String(
+                guardrailsValidationResult.rules.length,
+            )} rules.`,
+        )
+        showToastInfo("Architecture guardrails applied.")
     }
 
     return (
@@ -1513,6 +1660,76 @@ export function SettingsContractValidationPage(): ReactElement {
                     <Button onPress={handleSaveDriftAlertConfig}>Save drift alert config</Button>
                     <Alert color="primary" title="Drift alert save status" variant="flat">
                         {driftAlertSaveStatus}
+                    </Alert>
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Architecture guardrails
+                    </p>
+                </CardHeader>
+                <CardBody className="space-y-3">
+                    <p className="text-sm text-[var(--foreground)]/70">
+                        Configure allowed and forbidden import rules with YAML and visual rule
+                        preview.
+                    </p>
+                    <Textarea
+                        aria-label="Architecture guardrails yaml"
+                        minRows={10}
+                        value={guardrailsYaml}
+                        onValueChange={setGuardrailsYaml}
+                    />
+                    <div className="flex gap-2">
+                        <Button onPress={handleValidateGuardrails}>Validate guardrails</Button>
+                        <Button variant="flat" onPress={handleApplyGuardrails}>
+                            Apply guardrails
+                        </Button>
+                    </div>
+                    {guardrailsValidationResult.errors.length === 0 ? (
+                        <Alert color="success" title="Guardrails are valid" variant="flat">
+                            {`Parsed ${String(guardrailsValidationResult.rules.length)} guardrail rules.`}
+                        </Alert>
+                    ) : (
+                        <Alert color="danger" title="Guardrails validation errors" variant="flat">
+                            <ul aria-label="Guardrails errors list" className="space-y-1">
+                                {guardrailsValidationResult.errors.map((error): ReactElement => (
+                                    <li key={error}>{error}</li>
+                                ))}
+                            </ul>
+                        </Alert>
+                    )}
+                    <ul aria-label="Guardrail visual rules list" className="space-y-2">
+                        {guardrailsValidationResult.rules.map((rule): ReactElement => (
+                            <li
+                                className="rounded border border-slate-200 bg-slate-50 p-2 text-xs"
+                                key={rule.id}
+                            >
+                                <div className="mb-1 flex flex-wrap items-center gap-2">
+                                    <span className="font-semibold text-slate-900">
+                                        {rule.source} → {rule.target}
+                                    </span>
+                                    <span
+                                        className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                                            rule.mode === "allow"
+                                                ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                                                : "border-rose-300 bg-rose-50 text-rose-700"
+                                        }`}
+                                    >
+                                        {rule.mode}
+                                    </span>
+                                </div>
+                                <p className="text-slate-700">
+                                    {rule.mode === "allow"
+                                        ? "Import direction is explicitly allowed."
+                                        : "Import direction is explicitly forbidden."}
+                                </p>
+                            </li>
+                        ))}
+                    </ul>
+                    <Alert color="primary" title="Guardrails apply status" variant="flat">
+                        {guardrailsApplyStatus}
                     </Alert>
                 </CardBody>
             </Card>

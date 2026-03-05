@@ -168,4 +168,20 @@ describe("SettingsContractValidationPage", (): void => {
         })
         expect(screen.getByText(/channels: slack, email\./)).not.toBeNull()
     })
+
+    it("валидирует и применяет architecture guardrails из YAML с visual rules preview", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsContractValidationPage />)
+
+        await user.click(screen.getByRole("button", { name: "Validate guardrails" }))
+        await waitFor(() => {
+            expect(screen.getByText("Guardrails are valid")).not.toBeNull()
+        })
+        expect(screen.getByLabelText("Guardrail visual rules list")).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "Apply guardrails" }))
+        await waitFor(() => {
+            expect(screen.getByText(/Applied architecture guardrails with 3 rules\./)).not.toBeNull()
+        })
+    })
 })
