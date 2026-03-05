@@ -90,6 +90,11 @@ import {
     type ITeamLeaderboardEntry,
 } from "@/components/graphs/team-leaderboard"
 import {
+    SprintSummaryCard,
+    type ISprintSummaryCardModel,
+    type ISprintSummaryMetric,
+} from "@/components/graphs/sprint-summary-card"
+import {
     CityOwnershipOverlay,
     type ICityOwnershipOverlayOwnerEntry,
 } from "@/components/graphs/city-ownership-overlay"
@@ -1978,6 +1983,105 @@ function buildTeamLeaderboardEntries(
         })
 }
 
+function calculateSprintMetricDelta(
+    snapshots: ReadonlyArray<ISprintComparisonSnapshot>,
+    label: ISprintComparisonMetric["label"],
+): number {
+    const deltas = snapshots
+        .map((snapshot): number | undefined => {
+            const metric = snapshot.metrics.find((entry): boolean => entry.label === label)
+            if (metric === undefined) {
+                return undefined
+            }
+            const denominator = Math.max(metric.beforeValue, 1)
+            if (label === "Coverage") {
+                return Math.round(((metric.afterValue - metric.beforeValue) / denominator) * 100)
+            }
+            return Math.round(((metric.beforeValue - metric.afterValue) / denominator) * 100)
+        })
+        .filter((entry): entry is number => entry !== undefined)
+    if (deltas.length === 0) {
+        return 0
+    }
+    return Math.round(deltas.reduce((sum, value): number => sum + value, 0) / deltas.length)
+}
+
+/**
+ * Формирует sprint summary card модель для gamification карточки.
+ *
+ * @param files Файлы текущего профиля.
+ * @param snapshots Sprint comparison snapshots.
+ * @param achievements Sprint achievements.
+ * @param districtTrends District trend indicators.
+ * @returns Сводная карточка спринта.
+ */
+function buildSprintSummaryCardModel(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+    snapshots: ReadonlyArray<ISprintComparisonSnapshot>,
+    achievements: ReadonlyArray<IAchievementPanelEntry>,
+    districtTrends: ReadonlyArray<IDistrictTrendIndicatorEntry>,
+): ISprintSummaryCardModel {
+    const complexityAverage =
+        files.length === 0
+            ? 0
+            : files.reduce((sum, file): number => sum + (file.complexity ?? 0), 0) / files.length
+    const churnTotal = files.reduce((sum, file): number => sum + (file.churn ?? 0), 0)
+    const complexityDelta = calculateSprintMetricDelta(snapshots, "Complexity")
+    const churnDelta = calculateSprintMetricDelta(snapshots, "Churn")
+    const coverageDelta = calculateSprintMetricDelta(snapshots, "Coverage")
+    const districtTrendDelta =
+        districtTrends.length === 0
+            ? 0
+            : Math.round(
+                  districtTrends.reduce((sum, entry): number => sum + entry.deltaPercentage, 0)
+                      / districtTrends.length,
+              )
+    const baseScore =
+        complexityDelta * 0.35 +
+        churnDelta * 0.25 +
+        coverageDelta * 0.25 +
+        districtTrendDelta * 0.15 +
+        achievements.length * 2
+    const overallImprovementScore = Math.max(1, Math.min(99, Math.round(baseScore)))
+    const primarySnapshot = snapshots[0]
+    const focusFileId = primarySnapshot?.fileId ?? files[0]?.id
+    const topImprovingDistricts = districtTrends.filter((entry): boolean => entry.deltaPercentage > 0)
+    const focusedDistrict = topImprovingDistricts[0]
+    const metrics: ReadonlyArray<ISprintSummaryMetric> = [
+        {
+            deltaPercent: complexityDelta,
+            focusFileId,
+            focusFileIds: focusFileId === undefined ? [] : [focusFileId],
+            id: "complexity",
+            label: "Complexity",
+            value: `Avg complexity ${complexityAverage.toFixed(1)}`,
+        },
+        {
+            deltaPercent: churnDelta,
+            focusFileId,
+            focusFileIds: focusFileId === undefined ? [] : [focusFileId],
+            id: "churn",
+            label: "Churn",
+            value: `Churn volume ${String(churnTotal)}`,
+        },
+        {
+            deltaPercent: coverageDelta,
+            focusFileId: focusedDistrict?.primaryFileId,
+            focusFileIds: focusedDistrict?.affectedFileIds ?? [],
+            id: "coverage",
+            label: "Coverage",
+            value: `${String(topImprovingDistricts.length)} districts improving`,
+        },
+    ]
+
+    return {
+        achievementsCount: achievements.length,
+        metrics,
+        overallImprovementScore,
+        sprintLabel: primarySnapshot?.title ?? "Sprint summary",
+    }
+}
+
 /**
  * Формирует список bug-prone файлов для prediction dashboard.
  *
@@ -2755,6 +2859,9 @@ export function CodeCityDashboardPage(
     const [activeTeamLeaderboardOwnerId, setActiveTeamLeaderboardOwnerId] = useState<
         string | undefined
     >()
+    const [activeSprintSummaryMetricId, setActiveSprintSummaryMetricId] = useState<
+        string | undefined
+    >()
     const [activeKnowledgeSiloId, setActiveKnowledgeSiloId] = useState<string | undefined>()
     const [activeContributorId, setActiveContributorId] = useState<string | undefined>()
     const [activeOwnershipTransitionId, setActiveOwnershipTransitionId] = useState<string | undefined>()
@@ -2815,6 +2922,12 @@ export function CodeCityDashboardPage(
         currentProfile.files,
         currentProfile.contributors,
         currentProfile.ownership,
+    )
+    const sprintSummaryModel = buildSprintSummaryCardModel(
+        currentProfile.files,
+        sprintComparisonSnapshots,
+        sprintAchievements,
+        districtTrendIndicators,
     )
     const predictionBugProneFiles = buildPredictionBugProneFiles(
         currentProfile.files,
@@ -2906,6 +3019,7 @@ export function CodeCityDashboardPage(
         setActiveDistrictTrendId(undefined)
         setActiveAchievementId(undefined)
         setActiveTeamLeaderboardOwnerId(undefined)
+        setActiveSprintSummaryMetricId(undefined)
         setActiveKnowledgeSiloId(undefined)
         setActiveContributorId(undefined)
         setActiveOwnershipTransitionId(undefined)
@@ -3588,6 +3702,33 @@ export function CodeCityDashboardPage(
                                 activeFileId: entry.primaryFileId,
                                 chainFileIds: entry.fileIds,
                                 title: `Leaderboard: ${entry.ownerName}`,
+                            })
+                            markAreaExplored("controls")
+                            markAreaExplored("city-3d")
+                        }}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Sprint summary card</p>
+                </CardHeader>
+                <CardBody>
+                    <SprintSummaryCard
+                        activeMetricId={activeSprintSummaryMetricId}
+                        model={sprintSummaryModel}
+                        onSelectMetric={(metric): void => {
+                            setActiveSprintSummaryMetricId(metric.id)
+                            setActivePredictionHotspotId(undefined)
+                            setActivePredictionFileId(metric.focusFileId)
+                            if (metric.focusFileId !== undefined) {
+                                setHighlightedFileId(metric.focusFileId)
+                            }
+                            setExploreNavigationFocus({
+                                activeFileId: metric.focusFileId,
+                                chainFileIds: metric.focusFileIds,
+                                title: `Sprint summary: ${metric.label}`,
                             })
                             markAreaExplored("controls")
                             markAreaExplored("city-3d")

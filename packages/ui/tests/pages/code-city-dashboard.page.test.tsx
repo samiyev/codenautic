@@ -1096,6 +1096,52 @@ const { mockTeamLeaderboard } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockSprintSummaryCard } = vi.hoisted(() => ({
+    mockSprintSummaryCard: vi.fn(
+        (props: {
+            readonly model: {
+                readonly sprintLabel: string
+                readonly achievementsCount: number
+                readonly overallImprovementScore: number
+                readonly metrics: ReadonlyArray<{
+                    readonly id: string
+                    readonly label: string
+                    readonly value: string
+                    readonly deltaPercent: number
+                    readonly focusFileId?: string
+                    readonly focusFileIds: ReadonlyArray<string>
+                }>
+            }
+            readonly activeMetricId?: string
+            readonly onSelectMetric?: (metric: {
+                readonly id: string
+                readonly label: string
+                readonly value: string
+                readonly deltaPercent: number
+                readonly focusFileId?: string
+                readonly focusFileIds: ReadonlyArray<string>
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>sprint-summary-metrics:{props.model.metrics.length}</p>
+                    <p>sprint-summary-active:{props.activeMetricId ?? "none"}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstMetric = props.model.metrics.at(0)
+                            if (firstMetric !== undefined) {
+                                props.onSelectMetric?.(firstMetric)
+                            }
+                        }}
+                        type="button"
+                    >
+                        inspect sprint summary metric
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockCityBusFactorOverlay } = vi.hoisted(() => ({
     mockCityBusFactorOverlay: vi.fn(
         (props: {
@@ -1654,6 +1700,9 @@ vi.mock("@/components/graphs/achievements-panel", () => ({
 vi.mock("@/components/graphs/team-leaderboard", () => ({
     TeamLeaderboard: mockTeamLeaderboard,
 }))
+vi.mock("@/components/graphs/sprint-summary-card", () => ({
+    SprintSummaryCard: mockSprintSummaryCard,
+}))
 vi.mock("@/components/graphs/city-bus-factor-overlay", () => ({
     CityBusFactorOverlay: mockCityBusFactorOverlay,
 }))
@@ -1718,6 +1767,7 @@ beforeEach((): void => {
     mockDistrictTrendIndicators.mockClear()
     mockAchievementsPanel.mockClear()
     mockTeamLeaderboard.mockClear()
+    mockSprintSummaryCard.mockClear()
     mockCityBusFactorOverlay.mockClear()
     mockBusFactorTrendChart.mockClear()
     mockKnowledgeSiloPanel.mockClear()
@@ -1917,6 +1967,10 @@ describe("CodeCityDashboardPage", (): void => {
         const firstTeamLeaderboardCall = mockTeamLeaderboard.mock.calls.at(0)?.[0]
         expect(firstTeamLeaderboardCall).not.toBeUndefined()
         expect(firstTeamLeaderboardCall?.entries.length).toBeGreaterThan(0)
+
+        const firstSprintSummaryCall = mockSprintSummaryCard.mock.calls.at(0)?.[0]
+        expect(firstSprintSummaryCall).not.toBeUndefined()
+        expect(firstSprintSummaryCall?.model.metrics.length).toBeGreaterThan(0)
 
         const firstBusFactorCall = mockCityBusFactorOverlay.mock.calls.at(0)?.[0]
         expect(firstBusFactorCall).not.toBeUndefined()
@@ -2128,6 +2182,14 @@ describe("CodeCityDashboardPage", (): void => {
         const leaderboard3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(leaderboard3DCall).not.toBeUndefined()
         expect(leaderboard3DCall?.navigationLabel).toContain("Leaderboard:")
+
+        await user.click(screen.getByRole("button", { name: "inspect sprint summary metric" }))
+        const sprintSummaryTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(sprintSummaryTreemapCall).not.toBeUndefined()
+        expect(sprintSummaryTreemapCall?.highlightedFileId).toBeDefined()
+        const sprintSummary3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(sprintSummary3DCall).not.toBeUndefined()
+        expect(sprintSummary3DCall?.navigationLabel).toContain("Sprint summary:")
 
         await user.click(screen.getByRole("button", { name: "inspect change risk point" }))
         const riskNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
