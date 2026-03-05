@@ -414,6 +414,45 @@ const { mockSimulationPanel } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockRefactoringTimeline } = vi.hoisted(() => ({
+    mockRefactoringTimeline: vi.fn(
+        (props: {
+            readonly tasks: ReadonlyArray<{
+                readonly id: string
+                readonly fileId: string
+                readonly title: string
+                readonly startWeek: number
+                readonly durationWeeks: number
+                readonly dependencies: ReadonlyArray<string>
+            }>
+            readonly onSelectTask?: (task: {
+                readonly id: string
+                readonly fileId: string
+                readonly title: string
+                readonly startWeek: number
+                readonly durationWeeks: number
+                readonly dependencies: ReadonlyArray<string>
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>timeline-tasks:{props.tasks.length}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstTask = props.tasks.at(0)
+                            if (firstTask !== undefined) {
+                                props.onSelectTask?.(firstTask)
+                            }
+                        }}
+                        type="button"
+                    >
+                        inspect timeline task
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockRootCauseChainViewer } = vi.hoisted(() => ({
     mockRootCauseChainViewer: vi.fn(
         (props: {
@@ -494,6 +533,9 @@ vi.mock("@/components/graphs/city-refactoring-overlay", () => ({
 vi.mock("@/components/graphs/simulation-panel", () => ({
     SimulationPanel: mockSimulationPanel,
 }))
+vi.mock("@/components/graphs/refactoring-timeline", () => ({
+    RefactoringTimeline: mockRefactoringTimeline,
+}))
 vi.mock("@/components/graphs/root-cause-chain-viewer", () => ({
     RootCauseChainViewer: mockRootCauseChainViewer,
 }))
@@ -513,6 +555,7 @@ beforeEach((): void => {
     mockROICalculatorWidget.mockClear()
     mockCityRefactoringOverlay.mockClear()
     mockSimulationPanel.mockClear()
+    mockRefactoringTimeline.mockClear()
     mockRootCauseChainViewer.mockClear()
 })
 
@@ -636,6 +679,10 @@ describe("CodeCityDashboardPage", (): void => {
         const firstSimulationCall = mockSimulationPanel.mock.calls.at(0)?.[0]
         expect(firstSimulationCall).not.toBeUndefined()
         expect(firstSimulationCall?.targets.length).toBeGreaterThan(0)
+
+        const firstTimelineCall = mockRefactoringTimeline.mock.calls.at(0)?.[0]
+        expect(firstTimelineCall).not.toBeUndefined()
+        expect(firstTimelineCall?.tasks.length).toBeGreaterThan(0)
     })
 
     it("обновляет treemap при смене репозитория и метрики", async (): Promise<void> => {
@@ -687,6 +734,11 @@ describe("CodeCityDashboardPage", (): void => {
         expect(simulationNavigation3DCall).not.toBeUndefined()
         expect(simulationNavigation3DCall?.navigationLabel).toBe("Simulation after refactoring")
         expect(simulationNavigation3DCall?.navigationChainFileIds.length).toBeGreaterThan(1)
+
+        await user.click(screen.getByRole("button", { name: "inspect timeline task" }))
+        const timelineNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(timelineNavigation3DCall).not.toBeUndefined()
+        expect(timelineNavigation3DCall?.navigationLabel).toContain("Refactoring timeline:")
 
         const repositorySelect = screen.getByRole("combobox", { name: "Repository" })
         const metricSelect = screen.getByRole("combobox", { name: "Metric" })

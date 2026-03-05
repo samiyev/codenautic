@@ -46,6 +46,10 @@ import {
     RefactoringDashboard,
     type IRefactoringTargetDescriptor,
 } from "@/components/graphs/refactoring-dashboard"
+import {
+    RefactoringTimeline,
+    type IRefactoringTimelineTask,
+} from "@/components/graphs/refactoring-timeline"
 import { ROICalculatorWidget } from "@/components/graphs/roi-calculator-widget"
 import { SimulationPanel } from "@/components/graphs/simulation-panel"
 import { TourCustomizer } from "@/components/graphs/tour-customizer"
@@ -864,6 +868,38 @@ function buildCityRefactoringOverlayEntries(
     })
 }
 
+/**
+ * Формирует timeline задачи для плана рефакторинга.
+ *
+ * @param targets Приоритизированные refactoring targets.
+ * @returns Список задач с зависимостями.
+ */
+function buildRefactoringTimelineTasks(
+    targets: ReadonlyArray<IRefactoringTargetDescriptor>,
+): ReadonlyArray<IRefactoringTimelineTask> {
+    return targets.slice(0, 5).map((target, index, sourceTargets): IRefactoringTimelineTask => {
+        const previousTarget = sourceTargets[index - 1]
+        const previousPreviousTarget = sourceTargets[index - 2]
+        const dependencies: Array<string> = []
+
+        if (previousTarget !== undefined) {
+            dependencies.push(previousTarget.title)
+        }
+        if (index >= 3 && previousPreviousTarget !== undefined) {
+            dependencies.push(previousPreviousTarget.title)
+        }
+
+        return {
+            dependencies,
+            durationWeeks: Math.max(1, Math.min(6, Math.round(target.effortScore / 2))),
+            fileId: target.fileId,
+            id: `timeline-${target.id}`,
+            startWeek: (index * 2) + 1,
+            title: target.title,
+        }
+    })
+}
+
 export function CodeCityDashboardPage(
     props: ICodeCityDashboardPageProps = {},
 ): ReactElement {
@@ -907,6 +943,7 @@ export function CodeCityDashboardPage(
     const hotAreaHighlights = buildHotAreaHighlights(currentProfile.files)
     const refactoringTargets = buildRefactoringTargets(currentProfile.files)
     const cityRefactoringOverlayEntries = buildCityRefactoringOverlayEntries(refactoringTargets)
+    const refactoringTimelineTasks = buildRefactoringTimelineTasks(refactoringTargets)
     const onboardingProgressModules = buildOnboardingProgressModules(exploredAreaIds)
     const fileLink = createRepositoryFilesLink(currentProfile.id)
     const overlayImpactedFiles =
@@ -1230,6 +1267,26 @@ export function CodeCityDashboardPage(
                             markAreaExplored("city-3d")
                         }}
                         targets={refactoringTargets}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Refactoring timeline</p>
+                </CardHeader>
+                <CardBody>
+                    <RefactoringTimeline
+                        onSelectTask={(task): void => {
+                            setHighlightedFileId(task.fileId)
+                            setExploreNavigationFocus({
+                                activeFileId: task.fileId,
+                                chainFileIds: [task.fileId],
+                                title: `Refactoring timeline: ${task.title}`,
+                            })
+                            markAreaExplored("city-3d")
+                        }}
+                        tasks={refactoringTimelineTasks}
                     />
                 </CardBody>
             </Card>
