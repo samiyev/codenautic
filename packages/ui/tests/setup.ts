@@ -9,6 +9,7 @@ import { server } from "./mocks/server"
 const originalFetch = globalThis.fetch
 const originalConsoleWarn = globalThis.console.warn
 const originalConsoleError = globalThis.console.error
+const processRef = globalThis.process
 const DEFAULT_TEST_ELEMENT_WIDTH = 1024
 const DEFAULT_TEST_ELEMENT_HEIGHT = 768
 const RECHARTS_SIZE_WARNING = "of chart should be greater than 0"
@@ -22,6 +23,8 @@ const BENIGN_API_ERROR_MESSAGES = [
     "GET http://localhost:3000/api/v1/health",
     "GET http://localhost:3000/api/v1/feature-flags",
 ]
+const BENIGN_SOCKET_ERROR_CODES = new Set<string>(["ECONNRESET", "ECONNREFUSED"])
+let unhandledRejectionCleanup: (() => void) | undefined
 
 class TestResizeObserver implements ResizeObserver {
     private readonly callback: ResizeObserverCallback
@@ -129,19 +132,55 @@ function shouldSuppressTestConsoleNoise(args: ReadonlyArray<unknown>): boolean {
     return BENIGN_API_ERROR_MESSAGES.some((prefix): boolean => message.startsWith(prefix))
 }
 
-beforeAll(async (): Promise<void> => {
-    defineReadonlyDimension(HTMLElement.prototype, "offsetWidth", DEFAULT_TEST_ELEMENT_WIDTH)
-    defineReadonlyDimension(HTMLElement.prototype, "offsetHeight", DEFAULT_TEST_ELEMENT_HEIGHT)
-    defineReadonlyDimension(HTMLElement.prototype, "clientWidth", DEFAULT_TEST_ELEMENT_WIDTH)
-    defineReadonlyDimension(HTMLElement.prototype, "clientHeight", DEFAULT_TEST_ELEMENT_HEIGHT)
-    defineTestBoundingClientRect(HTMLElement.prototype)
-    defineGlobalResizeObserver(TestResizeObserver)
-    Object.defineProperty(window, "confirm", {
-        configurable: true,
-        writable: true,
-        value: (): boolean => true,
-    })
+function readErrorCode(value: unknown): string | undefined {
+    if (typeof value !== "object" || value === null) {
+        return undefined
+    }
 
+    const code = (value as { code?: unknown }).code
+    return typeof code === "string" ? code : undefined
+}
+
+function shouldSuppressUnhandledRejection(reason: unknown): boolean {
+    const code = readErrorCode(reason)
+    if (code !== undefined && BENIGN_SOCKET_ERROR_CODES.has(code)) {
+        return true
+    }
+
+    if (reason instanceof Error) {
+        const message = reason.message.toLowerCase()
+        if (message.includes("socket hang up")) {
+            return true
+        }
+
+        if (message.includes("econnrefused")) {
+            return true
+        }
+    }
+
+    return false
+}
+
+function installUnhandledRejectionFilter(): void {
+    if (processRef === undefined) {
+        return
+    }
+
+    const onUnhandledRejection = (reason: unknown): void => {
+        if (shouldSuppressUnhandledRejection(reason)) {
+            return
+        }
+
+        originalConsoleError(reason)
+    }
+
+    processRef.on("unhandledRejection", onUnhandledRejection)
+    unhandledRejectionCleanup = (): void => {
+        processRef.off("unhandledRejection", onUnhandledRejection)
+    }
+}
+
+function installTestConsoleNoiseFilter(): void {
     globalThis.console.warn = (...args: unknown[]): void => {
         if (shouldSuppressTestConsoleNoise(args)) {
             return
@@ -157,6 +196,23 @@ beforeAll(async (): Promise<void> => {
 
         originalConsoleError(...args)
     }
+}
+
+installTestConsoleNoiseFilter()
+installUnhandledRejectionFilter()
+
+beforeAll(async (): Promise<void> => {
+    defineReadonlyDimension(HTMLElement.prototype, "offsetWidth", DEFAULT_TEST_ELEMENT_WIDTH)
+    defineReadonlyDimension(HTMLElement.prototype, "offsetHeight", DEFAULT_TEST_ELEMENT_HEIGHT)
+    defineReadonlyDimension(HTMLElement.prototype, "clientWidth", DEFAULT_TEST_ELEMENT_WIDTH)
+    defineReadonlyDimension(HTMLElement.prototype, "clientHeight", DEFAULT_TEST_ELEMENT_HEIGHT)
+    defineTestBoundingClientRect(HTMLElement.prototype)
+    defineGlobalResizeObserver(TestResizeObserver)
+    Object.defineProperty(window, "confirm", {
+        configurable: true,
+        writable: true,
+        value: (): boolean => true,
+    })
 
     sessionStorage.clear()
     localStorage.setItem(LOCALE_STORAGE_KEY, DEFAULT_LOCALE)
@@ -179,5 +235,6 @@ afterEach(async (): Promise<void> => {
 afterAll((): void => {
     globalThis.console.warn = originalConsoleWarn
     globalThis.console.error = originalConsoleError
+    unhandledRejectionCleanup?.()
     server.close()
 })
