@@ -20,6 +20,8 @@ const RECHARTS_SIZE_WARNING = "of chart should be greater than 0"
 const CONTROLLED_STATE_WARNING = "WARN: A component changed from uncontrolled to controlled."
 const HEROUI_WARNING_PREFIX = "[HeroUI]"
 const PRESS_RESPONDER_WARNING = "A PressResponder was rendered without a pressable child."
+const UNRECOGNIZED_TAG_WARNING = "is unrecognized in this browser."
+const THREE_DUPLICATE_INSTANCE_WARNING = "THREE.WARNING: Multiple instances of Three.js being imported."
 const SOCKET_HANG_UP_MESSAGE = "socket hang up"
 const LOCIZE_SUPPORT_MESSAGE = "i18next is maintained with support from Locize"
 const BENIGN_API_ERROR_MESSAGES = [
@@ -211,6 +213,14 @@ function shouldSuppressTestConsoleNoise(args: ReadonlyArray<unknown>): boolean {
     }
 
     if (message.includes(PRESS_RESPONDER_WARNING)) {
+        return true
+    }
+
+    if (message.includes(UNRECOGNIZED_TAG_WARNING)) {
+        return true
+    }
+
+    if (message.includes(THREE_DUPLICATE_INSTANCE_WARNING)) {
         return true
     }
 
