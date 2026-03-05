@@ -9,6 +9,8 @@ import {
 describe("route guard map", (): void => {
     it("строит breadcrumbs для известных маршрутов", (): void => {
         expect(getBreadcrumbs("/my-work")).toEqual(["Dashboard", "My Work"])
+        expect(getBreadcrumbs("/scan-error-recovery")).toEqual(["Dashboard", "Scan error recovery"])
+        expect(getBreadcrumbs("/session-recovery")).toEqual(["Dashboard", "Session recovery"])
         expect(getBreadcrumbs("/help-diagnostics")).toEqual(["Dashboard", "Help & diagnostics"])
         expect(getBreadcrumbs("/settings-adoption-analytics")).toEqual([
             "Settings",

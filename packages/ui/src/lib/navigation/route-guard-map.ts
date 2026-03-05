@@ -110,6 +110,18 @@ export const ROUTE_GUARD_MAP: ReadonlyArray<INavigationRouteEntry> = [
         section: "workflows",
     },
     {
+        breadcrumbs: ["Dashboard", "Scan error recovery"],
+        guards: {
+            requiresAuth: true,
+            roles: BASE_ROLES,
+            tenants: BASE_TENANTS,
+        },
+        label: "Scan error recovery",
+        path: "/scan-error-recovery",
+        searchKeywords: ["scan", "recovery", "retry", "failure"],
+        section: "workflows",
+    },
+    {
         breadcrumbs: ["Dashboard", "Repositories"],
         guards: {
             requiresAuth: true,
@@ -155,6 +167,18 @@ export const ROUTE_GUARD_MAP: ReadonlyArray<INavigationRouteEntry> = [
         label: "Help and diagnostics",
         path: "/help-diagnostics",
         searchKeywords: ["help", "diagnostics", "support", "runbook"],
+        section: "settings",
+    },
+    {
+        breadcrumbs: ["Dashboard", "Session recovery"],
+        guards: {
+            requiresAuth: true,
+            roles: BASE_ROLES,
+            tenants: BASE_TENANTS,
+        },
+        label: "Session recovery flow",
+        path: "/session-recovery",
+        searchKeywords: ["session", "recovery", "auth", "re-login"],
         section: "settings",
     },
     {
