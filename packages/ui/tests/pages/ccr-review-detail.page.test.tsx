@@ -53,6 +53,31 @@ describe("ccr review detail page", (): void => {
         expect(screen.getByText("You")).not.toBeNull()
     })
 
+    it("рендерит review context mini-map и переключает expanded режим", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const ccr = getMockCcrRow(0)
+
+        renderWithProviders(<CcrReviewDetailPage ccr={ccr} />)
+
+        expect(
+            screen.getByRole("heading", { name: "CCR context CodeCity mini-map" }),
+        ).not.toBeNull()
+        expect(screen.getByText("Mini-map mode is active. Click expand for detailed context.")).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "Expand review context mini-map" }))
+
+        expect(
+            screen.getByRole("heading", { name: "CCR context CodeCity map (expanded)" }),
+        ).not.toBeNull()
+        expect(screen.getByText("Expanded CodeCity context map is active.")).not.toBeNull()
+
+        await user.click(screen.getByRole("button", { name: "Collapse review context mini-map" }))
+
+        expect(
+            screen.getByRole("heading", { name: "CCR context CodeCity mini-map" }),
+        ).not.toBeNull()
+    })
+
     it("показывает restricted decision states для viewer роли", (): void => {
         const ccr = getMockCcrRow(0)
         window.localStorage.setItem("codenautic:rbac:role", "viewer")

@@ -3,6 +3,11 @@ import { Link } from "@tanstack/react-router"
 
 import { ChatPanel, type IChatPanelContext, type IChatPanelMessage } from "@/components/chat/chat-panel"
 import { ChatThreadList, type IChatThread } from "@/components/chat/chat-thread-list"
+import {
+    CodeCityTreemap,
+    type ICodeCityTreemapFileDescriptor,
+    type ICodeCityTreemapImpactedFileDescriptor,
+} from "@/components/graphs/codecity-treemap"
 import { ReviewCommentThread } from "@/components/reviews/review-comment-thread"
 import { CodeDiffViewer } from "@/components/reviews/code-diff-viewer"
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
@@ -116,6 +121,45 @@ function buildAttachedFilesText(files: ReadonlyArray<string>): string {
     }
 
     return files.join(", ")
+}
+
+function resolveDiffIssueCount(file: ICcrDiffFile): number {
+    return file.lines.reduce((issueCount, line): number => {
+        return issueCount + (line.comments?.length ?? 0)
+    }, 0)
+}
+
+function resolveDiffChangedLineCount(file: ICcrDiffFile): number {
+    return file.lines.reduce((changedLineCount, line): number => {
+        if (line.type === "context") {
+            return changedLineCount
+        }
+        return changedLineCount + 1
+    }, 0)
+}
+
+function buildReviewContextTreemapFiles(
+    diffFiles: ReadonlyArray<ICcrDiffFile>,
+    lastReviewAt: string,
+): ReadonlyArray<ICodeCityTreemapFileDescriptor> {
+    return diffFiles.map((file, index): ICodeCityTreemapFileDescriptor => {
+        const changedLineCount = resolveDiffChangedLineCount(file)
+        const issueCount = resolveDiffIssueCount(file)
+        const normalizedLoc = Math.max(file.lines.length, 24)
+        const normalizedComplexity = Math.min(40, Math.max(8, 6 + Math.round(changedLineCount * 1.4)))
+        const normalizedCoverage = Math.min(95, Math.max(45, 90 - changedLineCount))
+
+        return {
+            churn: Math.max(1, changedLineCount * 2),
+            complexity: normalizedComplexity,
+            coverage: normalizedCoverage,
+            id: `review-context-${String(index + 1).padStart(2, "0")}`,
+            issueCount,
+            lastReviewAt,
+            loc: normalizedLoc,
+            path: file.filePath,
+        }
+    })
 }
 
 function mapReviewDecisionBadge(reviewDecision: TReviewDecision): {
@@ -251,6 +295,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     const activeUiRole = useUiRole()
     const [reviewDecision, setReviewDecision] = useState<TReviewDecision>("pending")
     const [activeFilePath, setActiveFilePath] = useState<string | undefined>(ccr.attachedFiles[0])
+    const [isReviewContextMiniMapExpanded, setReviewContextMiniMapExpanded] = useState<boolean>(false)
     const [threads, setThreads] = useState<ReadonlyArray<IChatThread>>([
         {
             ccr: ccr.id.replace("ccr-", ""),
@@ -294,6 +339,69 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     const ccrReviewThreads = useMemo((): ReadonlyArray<IReviewCommentThread> => {
         return getCcrReviewThreadsById(ccr.id)
     }, [ccr.id])
+    const reviewContextTreemapFiles = useMemo((): ReadonlyArray<ICodeCityTreemapFileDescriptor> => {
+        return buildReviewContextTreemapFiles(ccrDiffFiles, ccr.updatedAt)
+    }, [ccr.updatedAt, ccrDiffFiles])
+    const reviewContextFileIdByPath = useMemo((): Readonly<Record<string, string>> => {
+        const mapping: Record<string, string> = {}
+        reviewContextTreemapFiles.forEach((file): void => {
+            mapping[file.path] = file.id
+        })
+        return mapping
+    }, [reviewContextTreemapFiles])
+    const reviewContextFilePathById = useMemo((): Readonly<Record<string, string>> => {
+        const mapping: Record<string, string> = {}
+        reviewContextTreemapFiles.forEach((file): void => {
+            mapping[file.id] = file.path
+        })
+        return mapping
+    }, [reviewContextTreemapFiles])
+    const reviewContextHighlightedFileId = useMemo((): string | undefined => {
+        if (activeFilePath === undefined) {
+            return undefined
+        }
+        return reviewContextFileIdByPath[activeFilePath]
+    }, [activeFilePath, reviewContextFileIdByPath])
+    const reviewContextImpactedFiles = useMemo(
+        (): ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor> => {
+            return ccr.attachedFiles
+                .map(
+                    (
+                        attachedFilePath,
+                        attachedIndex,
+                    ): ICodeCityTreemapImpactedFileDescriptor | undefined => {
+                        const fileId = reviewContextFileIdByPath[attachedFilePath]
+                        if (fileId === undefined) {
+                            return undefined
+                        }
+
+                        if (attachedIndex === 0) {
+                            return {
+                                fileId,
+                                impactType: "changed",
+                            }
+                        }
+                        if (attachedIndex === 1) {
+                            return {
+                                fileId,
+                                impactType: "impacted",
+                            }
+                        }
+                        return {
+                            fileId,
+                            impactType: "ripple",
+                        }
+                    },
+                )
+                .filter(
+                    (
+                        descriptor,
+                    ): descriptor is ICodeCityTreemapImpactedFileDescriptor =>
+                        descriptor !== undefined,
+                )
+        },
+        [ccr.attachedFiles, reviewContextFileIdByPath],
+    )
     const safeGuardTraceItems = useMemo((): ReadonlyArray<ISafeGuardTraceItem> => {
         return buildSafeGuardTraceItems(ccr)
     }, [ccr])
@@ -472,6 +580,13 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
 
         setReviewDecision(nextDecision)
     }
+    const handleReviewContextMiniMapSelect = (fileId: string): void => {
+        const selectedFilePath = reviewContextFilePathById[fileId]
+        if (selectedFilePath === undefined) {
+            return
+        }
+        setActiveFilePath(selectedFilePath)
+    }
 
     return (
         <section className="space-y-4">
@@ -595,6 +710,59 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     )
                                 })
                             )}
+                        </CardBody>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <div className="flex w-full flex-wrap items-center justify-between gap-2">
+                                <p className="text-sm font-semibold text-slate-900">
+                                    Review context sidebar
+                                </p>
+                                <Button
+                                    aria-expanded={isReviewContextMiniMapExpanded}
+                                    aria-label={
+                                        isReviewContextMiniMapExpanded
+                                            ? "Collapse review context mini-map"
+                                            : "Expand review context mini-map"
+                                    }
+                                    size="sm"
+                                    type="button"
+                                    variant="flat"
+                                    onPress={(): void => {
+                                        setReviewContextMiniMapExpanded(
+                                            isReviewContextMiniMapExpanded === false,
+                                        )
+                                    }}
+                                >
+                                    {isReviewContextMiniMapExpanded ? "Collapse" : "Expand"}
+                                </Button>
+                            </div>
+                        </CardHeader>
+                        <CardBody className="space-y-3">
+                            <p className="text-xs text-slate-600">
+                                CodeCity mini-map highlights CCR context and syncs with active diff
+                                file.
+                            </p>
+                            <CodeCityTreemap
+                                files={reviewContextTreemapFiles}
+                                height={isReviewContextMiniMapExpanded ? "320px" : "180px"}
+                                highlightedFileId={reviewContextHighlightedFileId}
+                                impactedFiles={reviewContextImpactedFiles}
+                                onFileSelect={handleReviewContextMiniMapSelect}
+                                title={
+                                    isReviewContextMiniMapExpanded
+                                        ? "CCR context CodeCity map (expanded)"
+                                        : "CCR context CodeCity mini-map"
+                                }
+                            />
+                            <p
+                                aria-label="Review context map status"
+                                className="text-xs text-slate-600"
+                            >
+                                {isReviewContextMiniMapExpanded
+                                    ? "Expanded CodeCity context map is active."
+                                    : "Mini-map mode is active. Click expand for detailed context."}
+                            </p>
                         </CardBody>
                     </Card>
                 </aside>
