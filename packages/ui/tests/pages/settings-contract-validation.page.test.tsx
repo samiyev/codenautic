@@ -126,4 +126,17 @@ describe("SettingsContractValidationPage", (): void => {
             screen.getByText("Layer violation: infrastructure imports domain directly"),
         ).not.toBeNull()
     })
+
+    it("показывает side-by-side blueprint vs reality с color-coded differences", (): void => {
+        renderWithProviders(<SettingsContractValidationPage />)
+
+        expect(screen.getByText("Blueprint vs reality view")).not.toBeNull()
+        expect(screen.getByLabelText("Blueprint intended architecture list")).not.toBeNull()
+        expect(screen.getByLabelText("Reality architecture list")).not.toBeNull()
+        expect(screen.getByText(/Matches: 3 · Missing: 0 · Unexpected: 1/)).not.toBeNull()
+        expect(screen.getByLabelText("Architecture differences list")).not.toBeNull()
+        expect(
+            screen.getAllByText("Dependency direction mismatch for aggregate access path.").length,
+        ).toBeGreaterThan(0)
+    })
 })

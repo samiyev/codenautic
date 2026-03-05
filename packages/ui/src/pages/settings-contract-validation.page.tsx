@@ -58,6 +58,23 @@ interface IDriftViolation {
     readonly rationale: string
 }
 
+type TArchitectureDiffStatus = "match" | "missing" | "unexpected"
+
+interface IArchitectureStructureNode {
+    readonly id: string
+    readonly layer: string
+    readonly module: string
+    readonly dependsOn: ReadonlyArray<string>
+}
+
+interface IArchitectureDifference {
+    readonly id: string
+    readonly layer: string
+    readonly module: string
+    readonly status: TArchitectureDiffStatus
+    readonly description: string
+}
+
 const DEFAULT_BLUEPRINT_YAML = [
     "version: 1",
     "layers:",
@@ -191,6 +208,54 @@ const DRIFT_CODE_CITY_FILES: ReadonlyArray<ICodeCityTreemapFileDescriptor> = [
         issueCount: 1,
         loc: 186,
         path: "src/adapters/git/gitlab-client.ts",
+    },
+]
+
+const BLUEPRINT_STRUCTURE_NODES: ReadonlyArray<IArchitectureStructureNode> = [
+    {
+        dependsOn: [],
+        id: "blueprint-domain-review-aggregate",
+        layer: "domain",
+        module: "review.aggregate",
+    },
+    {
+        dependsOn: ["domain/review.aggregate"],
+        id: "blueprint-application-review-usecase",
+        layer: "application",
+        module: "review-merge-request.use-case",
+    },
+    {
+        dependsOn: ["application/review-merge-request.use-case"],
+        id: "blueprint-infrastructure-review-controller",
+        layer: "infrastructure",
+        module: "review.controller",
+    },
+]
+
+const REALITY_STRUCTURE_NODES: ReadonlyArray<IArchitectureStructureNode> = [
+    {
+        dependsOn: ["infrastructure/review.events"],
+        id: "reality-domain-review-aggregate",
+        layer: "domain",
+        module: "review.aggregate",
+    },
+    {
+        dependsOn: ["domain/review.aggregate"],
+        id: "reality-application-review-usecase",
+        layer: "application",
+        module: "review-merge-request.use-case",
+    },
+    {
+        dependsOn: ["domain/review.aggregate"],
+        id: "reality-infrastructure-review-controller",
+        layer: "infrastructure",
+        module: "review.controller",
+    },
+    {
+        dependsOn: ["domain/review.aggregate"],
+        id: "reality-infrastructure-review-events",
+        layer: "infrastructure",
+        module: "review.events",
     },
 ]
 
@@ -352,6 +417,76 @@ function resolveDriftViolationFileIds(violation: IDriftViolation): ReadonlyArray
             return DRIFT_FILE_ID_BY_PATH[filePath]
         })
         .filter((fileId): fileId is string => fileId !== undefined)
+}
+
+function buildArchitectureDifferences(
+    blueprintNodes: ReadonlyArray<IArchitectureStructureNode>,
+    realityNodes: ReadonlyArray<IArchitectureStructureNode>,
+): ReadonlyArray<IArchitectureDifference> {
+    const realityByKey = new Map<string, IArchitectureStructureNode>()
+    const blueprintByKey = new Map<string, IArchitectureStructureNode>()
+    const differences: IArchitectureDifference[] = []
+
+    for (const node of realityNodes) {
+        realityByKey.set(`${node.layer}/${node.module}`, node)
+    }
+    for (const node of blueprintNodes) {
+        blueprintByKey.set(`${node.layer}/${node.module}`, node)
+    }
+
+    for (const blueprintNode of blueprintNodes) {
+        const nodeKey = `${blueprintNode.layer}/${blueprintNode.module}`
+        const realityNode = realityByKey.get(nodeKey)
+        if (realityNode === undefined) {
+            differences.push({
+                description: "Module is declared in blueprint but missing in runtime structure.",
+                id: `architecture-diff-missing-${nodeKey}`,
+                layer: blueprintNode.layer,
+                module: blueprintNode.module,
+                status: "missing",
+            })
+            continue
+        }
+
+        const blueprintDependsOn = blueprintNode.dependsOn.join(",")
+        const realityDependsOn = realityNode.dependsOn.join(",")
+        differences.push({
+            description:
+                blueprintDependsOn === realityDependsOn
+                    ? "Module dependency direction matches blueprint."
+                    : "Dependency direction mismatch for aggregate access path.",
+            id: `architecture-diff-match-${nodeKey}`,
+            layer: blueprintNode.layer,
+            module: blueprintNode.module,
+            status: "match",
+        })
+    }
+
+    for (const realityNode of realityNodes) {
+        const nodeKey = `${realityNode.layer}/${realityNode.module}`
+        if (blueprintByKey.has(nodeKey) === true) {
+            continue
+        }
+        differences.push({
+            description: "Module exists in runtime structure but not defined in blueprint.",
+            id: `architecture-diff-unexpected-${nodeKey}`,
+            layer: realityNode.layer,
+            module: realityNode.module,
+            status: "unexpected",
+        })
+    }
+
+    return differences
+}
+
+function resolveArchitectureDifferenceBadgeClass(status: TArchitectureDiffStatus): string {
+    if (status === "match") {
+        return "border-emerald-300 bg-emerald-50 text-emerald-700"
+    }
+    if (status === "missing") {
+        return "border-amber-300 bg-amber-50 text-amber-700"
+    }
+    return "border-rose-300 bg-rose-50 text-rose-700"
 }
 
 function parseContractEnvelope(rawValue: string): IValidationResult {
@@ -550,6 +685,21 @@ export function SettingsContractValidationPage(): ReactElement {
         }
         return driftViolationsByFileId.get(selectedDriftOverlayFileId) ?? []
     }, [driftViolationsByFileId, selectedDriftOverlayFileId])
+    const architectureDifferences = useMemo((): ReadonlyArray<IArchitectureDifference> => {
+        return buildArchitectureDifferences(BLUEPRINT_STRUCTURE_NODES, REALITY_STRUCTURE_NODES)
+    }, [])
+    const architectureDifferenceSummary = useMemo((): string => {
+        const matchCount = architectureDifferences.filter((entry): boolean => entry.status === "match").length
+        const missingCount = architectureDifferences.filter(
+            (entry): boolean => entry.status === "missing",
+        ).length
+        const unexpectedCount = architectureDifferences.filter(
+            (entry): boolean => entry.status === "unexpected",
+        ).length
+        return `Matches: ${String(matchCount)} · Missing: ${String(
+            missingCount,
+        )} · Unexpected: ${String(unexpectedCount)}`
+    }, [architectureDifferences])
 
     const handleValidateContract = (): void => {
         const nextResult = parseContractEnvelope(rawContract)
@@ -994,6 +1144,92 @@ export function SettingsContractValidationPage(): ReactElement {
                             )}
                         </Alert>
                     )}
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Blueprint vs reality view
+                    </p>
+                </CardHeader>
+                <CardBody className="space-y-3">
+                    <p className="text-sm text-[var(--foreground)]/70">
+                        Compare intended architecture from blueprint with actual runtime structure.
+                        Differences are color-coded to highlight missing and unexpected modules.
+                    </p>
+                    <div className="grid gap-3 lg:grid-cols-2">
+                        <div>
+                            <p className="mb-2 text-sm font-semibold text-slate-900">
+                                Intended architecture
+                            </p>
+                            <ul
+                                aria-label="Blueprint intended architecture list"
+                                className="space-y-2"
+                            >
+                                {BLUEPRINT_STRUCTURE_NODES.map((node): ReactElement => (
+                                    <li
+                                        className="rounded border border-slate-200 bg-slate-50 p-2 text-xs"
+                                        key={node.id}
+                                    >
+                                        <p className="font-semibold text-slate-900">
+                                            {node.layer} / {node.module}
+                                        </p>
+                                        <p className="text-slate-600">
+                                            Depends on:{" "}
+                                            {node.dependsOn.length === 0 ? "—" : node.dependsOn.join(", ")}
+                                        </p>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div>
+                            <p className="mb-2 text-sm font-semibold text-slate-900">
+                                Runtime structure
+                            </p>
+                            <ul aria-label="Reality architecture list" className="space-y-2">
+                                {REALITY_STRUCTURE_NODES.map((node): ReactElement => (
+                                    <li
+                                        className="rounded border border-slate-200 bg-slate-50 p-2 text-xs"
+                                        key={node.id}
+                                    >
+                                        <p className="font-semibold text-slate-900">
+                                            {node.layer} / {node.module}
+                                        </p>
+                                        <p className="text-slate-600">
+                                            Depends on:{" "}
+                                            {node.dependsOn.length === 0 ? "—" : node.dependsOn.join(", ")}
+                                        </p>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                    <Alert color="primary" title="Difference summary" variant="flat">
+                        {architectureDifferenceSummary}
+                    </Alert>
+                    <ul aria-label="Architecture differences list" className="space-y-2">
+                        {architectureDifferences.map((difference): ReactElement => (
+                            <li
+                                className="rounded border border-slate-200 bg-white p-2 text-xs"
+                                key={difference.id}
+                            >
+                                <div className="mb-1 flex flex-wrap items-center gap-2">
+                                    <span className="font-semibold text-slate-900">
+                                        {difference.layer} / {difference.module}
+                                    </span>
+                                    <span
+                                        className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${resolveArchitectureDifferenceBadgeClass(
+                                            difference.status,
+                                        )}`}
+                                    >
+                                        {difference.status}
+                                    </span>
+                                </div>
+                                <p className="text-slate-700">{difference.description}</p>
+                            </li>
+                        ))}
+                    </ul>
                 </CardBody>
             </Card>
         </section>
