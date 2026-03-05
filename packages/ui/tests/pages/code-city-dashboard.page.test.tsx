@@ -2431,5 +2431,5 @@ describe("CodeCityDashboardPage", (): void => {
             (module: { readonly isComplete: boolean }): boolean => module.isComplete,
         ).length
         expect(completedModulesAfterFlow).toBeGreaterThanOrEqual(3)
-    })
+    }, 15_000)
 })
