@@ -9,7 +9,8 @@ import {createDiscardedSuggestion, isCodeBlockInFile} from "./safeguard-filter.u
 import type {IHallucinationSafeguardDefaults} from "../../../dto/config/system-defaults.dto"
 import type {IGeneratePromptInput} from "../../generate-prompt.use-case"
 import {ValidationError} from "../../../../domain/errors/validation.error"
-import {readStringField} from "../pipeline-stage-state.utils"
+import {resolveSystemPrompt as resolveSharedSystemPrompt} from "../../../shared/prompt-resolution"
+import {readObjectField, readStringField} from "../pipeline-stage-state.utils"
 
 const FILTER_NAME = "hallucination"
 const DISCARD_REASON = "hallucination"
@@ -202,26 +203,42 @@ export class HallucinationSafeguardFilter implements ISafeGuardFilter {
 
     private async resolveSystemPrompt(context: ReviewPipelineState): Promise<string> {
         const organizationId = readStringField(context.mergeRequest, "organizationId")
-
-        try {
-            const result = await this.generatePromptUseCase.execute({
-                name: PROMPT_TEMPLATE_NAME,
-                organizationId: organizationId ?? null,
-                runtimeVariables: {},
-            })
-            if (result.isFail) {
-                return DEFAULT_SYSTEM_PROMPT
-            }
-
-            const normalized = result.value.trim()
-            if (normalized.length === 0) {
-                return DEFAULT_SYSTEM_PROMPT
-            }
-
-            return normalized
-        } catch {
-            return DEFAULT_SYSTEM_PROMPT
+        const promptResult = await resolveSharedSystemPrompt({
+            generatePromptUseCase: this.generatePromptUseCase,
+            promptName: PROMPT_TEMPLATE_NAME,
+            organizationId: organizationId ?? null,
+            runtimeVariables: {},
+        })
+        if (promptResult.isOk) {
+            return promptResult.value
         }
+
+        const override = this.resolveConfigPromptOverride(context)
+        if (override !== undefined) {
+            return override
+        }
+
+        return DEFAULT_SYSTEM_PROMPT
+    }
+
+    /**
+     * Resolves config-level hallucination check override.
+     *
+     * @param context Pipeline context.
+     * @returns Override prompt or undefined.
+     */
+    private resolveConfigPromptOverride(context: ReviewPipelineState): string | undefined {
+        const promptOverrides = readObjectField(context.config, "promptOverrides")
+        if (promptOverrides === undefined) {
+            return undefined
+        }
+
+        const templates = readObjectField(promptOverrides, "templates")
+        if (templates === undefined) {
+            return undefined
+        }
+
+        return readStringField(templates, "hallucinationCheck")
     }
 
     /**

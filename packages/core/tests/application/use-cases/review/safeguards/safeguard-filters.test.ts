@@ -354,6 +354,45 @@ describe("Safeguard filters", () => {
         expect(provider.requests[0]?.messages[0]?.content).toContain("strict static review validator")
     })
 
+    test("falls back to config override when template resolution fails", async () => {
+        const provider = new InMemoryLLMProvider()
+        provider.responses.push({content: '{"isSupported": true}'})
+        const generatePromptUseCase = new InMemoryGeneratePromptUseCase()
+        generatePromptUseCase.nextResult = Result.fail<string, ValidationError>(
+            new ValidationError("Generate prompt failed", [{
+                field: "name",
+                message: "Template not found",
+            }]),
+        )
+        const filter = new HallucinationSafeguardFilter({
+            llmProvider: provider,
+            generatePromptUseCase,
+            defaults: hallucinationDefaults,
+        })
+        const state = createStateWithFiles({
+            promptOverrides: {
+                templates: {
+                    hallucinationCheck: "CONFIG_OVERRIDE_PROMPT",
+                },
+            },
+        }, [
+            {
+                path: "src/app.ts",
+                patch: "+function y() {}\\n",
+            },
+        ])
+        const suggestion = createSuggestion({
+            id: "override",
+            codeBlock: "function x() {}",
+        })
+
+        const result = await filter.filter([suggestion], state)
+
+        expect(result.passed).toHaveLength(1)
+        expect(provider.requests).toHaveLength(1)
+        expect(provider.requests[0]?.messages[0]?.content).toBe("CONFIG_OVERRIDE_PROMPT")
+    })
+
     test("includes hunk text when building hallucination prompt", async () => {
         const provider = new InMemoryLLMProvider()
         provider.responses.push({content: '{"isSupported": true}'})
