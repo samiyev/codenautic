@@ -1142,6 +1142,55 @@ const { mockSprintSummaryCard } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockTrendTimelineWidget } = vi.hoisted(() => ({
+    mockTrendTimelineWidget: vi.fn(
+        (props: {
+            readonly entries: ReadonlyArray<{
+                readonly id: string
+                readonly sprintLabel: string
+                readonly startedAt: string
+                readonly summary: string
+                readonly metrics: ReadonlyArray<{
+                    readonly label: string
+                    readonly points: ReadonlyArray<number>
+                }>
+                readonly focusFileId?: string
+                readonly focusFileIds: ReadonlyArray<string>
+            }>
+            readonly activeEntryId?: string
+            readonly onSelectEntry?: (entry: {
+                readonly id: string
+                readonly sprintLabel: string
+                readonly startedAt: string
+                readonly summary: string
+                readonly metrics: ReadonlyArray<{
+                    readonly label: string
+                    readonly points: ReadonlyArray<number>
+                }>
+                readonly focusFileId?: string
+                readonly focusFileIds: ReadonlyArray<string>
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>trend-timeline-entries:{props.entries.length}</p>
+                    <p>trend-timeline-active:{props.activeEntryId ?? "none"}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstEntry = props.entries.at(0)
+                            if (firstEntry !== undefined) {
+                                props.onSelectEntry?.(firstEntry)
+                            }
+                        }}
+                        type="button"
+                    >
+                        inspect trend timeline entry
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockCityBusFactorOverlay } = vi.hoisted(() => ({
     mockCityBusFactorOverlay: vi.fn(
         (props: {
@@ -1703,6 +1752,9 @@ vi.mock("@/components/graphs/team-leaderboard", () => ({
 vi.mock("@/components/graphs/sprint-summary-card", () => ({
     SprintSummaryCard: mockSprintSummaryCard,
 }))
+vi.mock("@/components/graphs/trend-timeline-widget", () => ({
+    TrendTimelineWidget: mockTrendTimelineWidget,
+}))
 vi.mock("@/components/graphs/city-bus-factor-overlay", () => ({
     CityBusFactorOverlay: mockCityBusFactorOverlay,
 }))
@@ -1768,6 +1820,7 @@ beforeEach((): void => {
     mockAchievementsPanel.mockClear()
     mockTeamLeaderboard.mockClear()
     mockSprintSummaryCard.mockClear()
+    mockTrendTimelineWidget.mockClear()
     mockCityBusFactorOverlay.mockClear()
     mockBusFactorTrendChart.mockClear()
     mockKnowledgeSiloPanel.mockClear()
@@ -1971,6 +2024,10 @@ describe("CodeCityDashboardPage", (): void => {
         const firstSprintSummaryCall = mockSprintSummaryCard.mock.calls.at(0)?.[0]
         expect(firstSprintSummaryCall).not.toBeUndefined()
         expect(firstSprintSummaryCall?.model.metrics.length).toBeGreaterThan(0)
+
+        const firstTrendTimelineCall = mockTrendTimelineWidget.mock.calls.at(0)?.[0]
+        expect(firstTrendTimelineCall).not.toBeUndefined()
+        expect(firstTrendTimelineCall?.entries.length).toBeGreaterThan(0)
 
         const firstBusFactorCall = mockCityBusFactorOverlay.mock.calls.at(0)?.[0]
         expect(firstBusFactorCall).not.toBeUndefined()
@@ -2190,6 +2247,14 @@ describe("CodeCityDashboardPage", (): void => {
         const sprintSummary3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(sprintSummary3DCall).not.toBeUndefined()
         expect(sprintSummary3DCall?.navigationLabel).toContain("Sprint summary:")
+
+        await user.click(screen.getByRole("button", { name: "inspect trend timeline entry" }))
+        const trendTimelineTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(trendTimelineTreemapCall).not.toBeUndefined()
+        expect(trendTimelineTreemapCall?.highlightedFileId).toBeDefined()
+        const trendTimeline3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(trendTimeline3DCall).not.toBeUndefined()
+        expect(trendTimeline3DCall?.navigationLabel).toContain("Trend timeline:")
 
         await user.click(screen.getByRole("button", { name: "inspect change risk point" }))
         const riskNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]

@@ -95,6 +95,10 @@ import {
     type ISprintSummaryMetric,
 } from "@/components/graphs/sprint-summary-card"
 import {
+    TrendTimelineWidget,
+    type ITrendTimelineEntry,
+} from "@/components/graphs/trend-timeline-widget"
+import {
     CityOwnershipOverlay,
     type ICityOwnershipOverlayOwnerEntry,
 } from "@/components/graphs/city-ownership-overlay"
@@ -2083,6 +2087,85 @@ function buildSprintSummaryCardModel(
 }
 
 /**
+ * Формирует sprint-over-sprint timeline с sparkline метриками.
+ *
+ * @param files Файлы текущего профиля.
+ * @param healthTrend История health score.
+ * @param snapshots Sprint comparison snapshots.
+ * @returns Timeline entries для виджета трендов.
+ */
+function buildTrendTimelineEntries(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+    healthTrend: ReadonlyArray<IHealthTrendPoint>,
+    snapshots: ReadonlyArray<ISprintComparisonSnapshot>,
+): ReadonlyArray<ITrendTimelineEntry> {
+    const entryCount = Math.min(4, Math.max(healthTrend.length - 2, 1))
+    return Array.from({ length: entryCount }, (_, index): ITrendTimelineEntry | undefined => {
+        const sliceStart = Math.max(0, healthTrend.length - (index + 4))
+        const pointsSlice = healthTrend.slice(sliceStart, sliceStart + 4)
+        if (pointsSlice.length === 0) {
+            return undefined
+        }
+        const firstPoint = pointsSlice[0]
+        const lastPoint = pointsSlice[pointsSlice.length - 1]
+        const previousScore = firstPoint?.healthScore ?? lastPoint?.healthScore ?? 0
+        const currentScore = lastPoint?.healthScore ?? previousScore
+        const scoreDelta = Math.round(currentScore - previousScore)
+        const snapshot = snapshots[index]
+        const focusFileId = snapshot?.fileId ?? files[index]?.id
+        const focusDistrictName =
+            focusFileId === undefined
+                ? undefined
+                : resolveDistrictName(
+                      files.find((file): boolean => file.id === focusFileId)?.path ?? "",
+                  )
+        const focusFileIds =
+            focusDistrictName === undefined
+                ? []
+                : files
+                      .filter((candidateFile): boolean => {
+                          return resolveDistrictName(candidateFile.path) === focusDistrictName
+                      })
+                      .slice(0, 3)
+                      .map((candidateFile): string => candidateFile.id)
+        const normalizedFocusFileIds =
+            focusFileIds.length > 0 ? focusFileIds : focusFileId === undefined ? [] : [focusFileId]
+
+        return {
+            focusFileId,
+            focusFileIds: normalizedFocusFileIds,
+            id: `trend-timeline-${String(index)}`,
+            metrics: [
+                {
+                    label: "Complexity",
+                    points: pointsSlice.map((point, pointIndex): number => {
+                        return Math.max(1, Math.round((100 - point.healthScore) / 3 + pointIndex))
+                    }),
+                },
+                {
+                    label: "Coverage",
+                    points: pointsSlice.map((point): number => {
+                        return Math.max(1, Math.round(point.healthScore * 0.9))
+                    }),
+                },
+                {
+                    label: "Churn",
+                    points: pointsSlice.map((point, pointIndex): number => {
+                        return Math.max(1, Math.round((120 - point.healthScore) / 4 + pointIndex * 2))
+                    }),
+                },
+            ],
+            sprintLabel: snapshot?.title ?? `Sprint ${String(12 - index)}`,
+            startedAt: (lastPoint?.timestamp ?? "").slice(0, 10),
+            summary:
+                scoreDelta >= 0
+                    ? `Quality improved by ${String(scoreDelta)} points since the start of this sprint window.`
+                    : `Quality dropped by ${String(Math.abs(scoreDelta))} points and requires deeper comparison.`,
+        }
+    }).filter((entry): entry is ITrendTimelineEntry => entry !== undefined)
+}
+
+/**
  * Формирует список bug-prone файлов для prediction dashboard.
  *
  * @param files Файлы текущего профиля.
@@ -2862,6 +2945,9 @@ export function CodeCityDashboardPage(
     const [activeSprintSummaryMetricId, setActiveSprintSummaryMetricId] = useState<
         string | undefined
     >()
+    const [activeTrendTimelineEntryId, setActiveTrendTimelineEntryId] = useState<
+        string | undefined
+    >()
     const [activeKnowledgeSiloId, setActiveKnowledgeSiloId] = useState<string | undefined>()
     const [activeContributorId, setActiveContributorId] = useState<string | undefined>()
     const [activeOwnershipTransitionId, setActiveOwnershipTransitionId] = useState<string | undefined>()
@@ -2928,6 +3014,11 @@ export function CodeCityDashboardPage(
         sprintComparisonSnapshots,
         sprintAchievements,
         districtTrendIndicators,
+    )
+    const trendTimelineEntries = buildTrendTimelineEntries(
+        currentProfile.files,
+        currentProfile.healthTrend,
+        sprintComparisonSnapshots,
     )
     const predictionBugProneFiles = buildPredictionBugProneFiles(
         currentProfile.files,
@@ -3020,6 +3111,7 @@ export function CodeCityDashboardPage(
         setActiveAchievementId(undefined)
         setActiveTeamLeaderboardOwnerId(undefined)
         setActiveSprintSummaryMetricId(undefined)
+        setActiveTrendTimelineEntryId(undefined)
         setActiveKnowledgeSiloId(undefined)
         setActiveContributorId(undefined)
         setActiveOwnershipTransitionId(undefined)
@@ -3729,6 +3821,33 @@ export function CodeCityDashboardPage(
                                 activeFileId: metric.focusFileId,
                                 chainFileIds: metric.focusFileIds,
                                 title: `Sprint summary: ${metric.label}`,
+                            })
+                            markAreaExplored("controls")
+                            markAreaExplored("city-3d")
+                        }}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Trend timeline widget</p>
+                </CardHeader>
+                <CardBody>
+                    <TrendTimelineWidget
+                        activeEntryId={activeTrendTimelineEntryId}
+                        entries={trendTimelineEntries}
+                        onSelectEntry={(entry): void => {
+                            setActiveTrendTimelineEntryId(entry.id)
+                            setActivePredictionHotspotId(undefined)
+                            setActivePredictionFileId(entry.focusFileId)
+                            if (entry.focusFileId !== undefined) {
+                                setHighlightedFileId(entry.focusFileId)
+                            }
+                            setExploreNavigationFocus({
+                                activeFileId: entry.focusFileId,
+                                chainFileIds: entry.focusFileIds,
+                                title: `Trend timeline: ${entry.sprintLabel}`,
                             })
                             markAreaExplored("controls")
                             markAreaExplored("city-3d")
