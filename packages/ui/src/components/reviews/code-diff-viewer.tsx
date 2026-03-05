@@ -10,7 +10,7 @@ import type {
 } from "@/pages/ccr-data"
 
 const DIFF_TOKEN_PATTERN =
-    /("([^"\\]|\\.)*"|'([^'\\]|\\.)*'|`([^`\\]|\\.)*`|\/\/.*$|\b\d+\b|\b(?:async|await|break|case|const|continue|else|export|for|function|if|import|let|return|switch|try|type|throw|class|const|while|yield)\b)/g
+    /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`|\/\/.*$|\b\d+\b|\b(?:async|await|break|case|const|continue|else|export|for|function|if|import|let|return|switch|try|type|throw|class|const|while|yield)\b)/g
 
 const DIFF_KEYWORDS = new Set([
     "async",
