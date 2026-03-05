@@ -56,6 +56,7 @@ export function FormSwitchField<
                 const errorMessage = fieldState.error?.message
                 const hasError = errorMessage !== undefined
                 const helperId = `${String(props.name)}-helper`
+                const accessibilityLabel = props.label ?? String(props.name)
 
                 return (
                     <div className="flex flex-col gap-1">
@@ -63,6 +64,7 @@ export function FormSwitchField<
                             aria-describedby={
                                 hasError || props.helperText !== undefined ? helperId : undefined
                             }
+                            aria-label={accessibilityLabel}
                             aria-invalid={hasError}
                             name={field.name}
                             isInvalid={hasError}

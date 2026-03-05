@@ -62,6 +62,7 @@ export function FormPasswordField<
                 const errorMessage = fieldState.error?.message
                 const hasError = errorMessage !== undefined
                 const value = field.value === undefined ? "" : field.value
+                const accessibilityLabel = props.label ?? String(props.name)
 
                 return (
                     <div className="flex flex-col gap-1.5">
@@ -76,6 +77,7 @@ export function FormPasswordField<
                                     ? `${fieldId}-helper`
                                     : undefined
                             }
+                            aria-label={accessibilityLabel}
                             aria-invalid={hasError}
                             endContent={
                                 <Button

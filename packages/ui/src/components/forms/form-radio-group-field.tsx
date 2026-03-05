@@ -71,6 +71,7 @@ export function FormRadioGroupField<
                 const hasError = errorMessage !== undefined
                 const helperId = `${String(props.name)}-helper`
                 const hasRequiredMarker = props.rules?.required !== undefined
+                const accessibilityLabel = props.label ?? String(props.name)
 
                 return (
                     <div className="flex flex-col gap-1.5">
@@ -84,6 +85,7 @@ export function FormRadioGroupField<
                             aria-describedby={
                                 hasError || props.helperText !== undefined ? helperId : undefined
                             }
+                            aria-label={accessibilityLabel}
                             aria-invalid={hasError}
                             isInvalid={hasError}
                             name={field.name}

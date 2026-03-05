@@ -71,6 +71,7 @@ export function FormTextField<
                     typeof rawErrorMessage === "string" ? rawErrorMessage : undefined
                 const hasError = errorMessage !== undefined
                 const value = typeof field.value === "string" ? field.value : ""
+                const accessibilityLabel = props.label ?? String(props.name)
 
                 return (
                     <div className="flex flex-col gap-1.5">
@@ -86,6 +87,7 @@ export function FormTextField<
                                     ? `${fieldId}-helper`
                                     : undefined
                             }
+                            aria-label={accessibilityLabel}
                             aria-invalid={hasError}
                             id={fieldId}
                             disabled={isInputDisabled}

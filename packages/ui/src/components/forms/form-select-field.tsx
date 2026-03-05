@@ -102,6 +102,7 @@ export function FormSelectField<
                 const selectedKeys =
                     selectedKey === undefined ? new Set<string>() : new Set([selectedKey])
                 const hasRequiredMarker = props.rules?.required !== undefined
+                const accessibilityLabel = props.label ?? String(props.name)
 
                 return (
                     <div className="flex flex-col gap-1.5">
@@ -117,6 +118,7 @@ export function FormSelectField<
                                     ? `${fieldId}-helper`
                                     : undefined
                             }
+                            aria-label={accessibilityLabel}
                             aria-invalid={hasError}
                             name={field.name}
                             id={fieldId}
