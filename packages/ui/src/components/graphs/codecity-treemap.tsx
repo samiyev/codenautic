@@ -935,6 +935,8 @@ export interface ICodeCityTreemapProps {
     readonly highlightedFileId?: string
     /** Принудительная раскраска зданий по file id (например ownership overlay). */
     readonly fileColorById?: Readonly<Record<string, string>>
+    /** Принудительная раскраска district/package по package name (например bus factor). */
+    readonly packageColorByName?: Readonly<Record<string, string>>
 }
 
 function normalizePath(rawPath: string): string {
@@ -983,6 +985,7 @@ export function buildCodeCityTreemapData(
     compareFiles: ReadonlyArray<ICodeCityTreemapFileDescriptor> = [],
     bugHeatRange: ICodeCityBugHeatRange = DEFAULT_BUG_HEAT_RANGE,
     fileColorById: ReadonlyMap<string, string> = new Map(),
+    packageColorByName: ReadonlyMap<string, string> = new Map(),
 ): ICodeCityTreemapData {
     const packageMap = new Map<string, ICodeCityTreemapFileNode[]>()
     const fileIds = new Set<string>()
@@ -1090,7 +1093,8 @@ export function buildCodeCityTreemapData(
                     0,
                 ) / sortedChildren.length
 
-            const packageColor = resolveMetricColor(metricRange, packageMetricValue)
+            const packageColor = packageColorByName.get(name) ??
+                resolveMetricColor(metricRange, packageMetricValue)
 
             return {
                 children: sortedChildren,
@@ -1169,6 +1173,15 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         },
         [props.fileColorById],
     )
+    const packageColorByName = useMemo(
+        (): ReadonlyMap<string, string> => {
+            if (props.packageColorByName === undefined) {
+                return new Map<string, string>()
+            }
+            return new Map<string, string>(Object.entries(props.packageColorByName))
+        },
+        [props.packageColorByName],
+    )
     const treemapData = useMemo(
         () =>
             buildCodeCityTreemapData(
@@ -1178,8 +1191,17 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                 props.compareFiles ?? [],
                 bugHeatRange,
                 fileColorById,
+                packageColorByName,
             ),
-        [bugHeatRange, fileColorById, props.files, props.compareFiles, props.impactedFiles, metric],
+        [
+            bugHeatRange,
+            fileColorById,
+            packageColorByName,
+            props.files,
+            props.compareFiles,
+            props.impactedFiles,
+            metric,
+        ],
     )
     const visiblePackages = useMemo(
         () =>

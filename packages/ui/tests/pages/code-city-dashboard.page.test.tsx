@@ -13,6 +13,7 @@ const { mockCodeCityTreemap } = vi.hoisted(() => ({
             readonly defaultMetric: "complexity" | "coverage" | "churn"
             readonly fileLink: (file: { readonly fileId: string; readonly path: string }) => string
             readonly fileColorById?: Readonly<Record<string, string>>
+            readonly packageColorByName?: Readonly<Record<string, string>>
             readonly files: ReadonlyArray<unknown>
             readonly highlightedFileId?: string
             readonly impactedFiles: ReadonlyArray<unknown>
@@ -28,6 +29,7 @@ const { mockCodeCityTreemap } = vi.hoisted(() => ({
                     <p>temporal-couplings:{props.temporalCouplings.length}</p>
                     <p>impacted-files:{props.impactedFiles.length}</p>
                     <p>ownership-colors:{Object.keys(props.fileColorById ?? {}).length}</p>
+                    <p>bus-factor-colors:{Object.keys(props.packageColorByName ?? {}).length}</p>
                     <p>highlighted-file:{props.highlightedFileId ?? "none"}</p>
                 </div>
             )
@@ -578,6 +580,47 @@ const { mockCityImpactOverlay } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockCityBusFactorOverlay } = vi.hoisted(() => ({
+    mockCityBusFactorOverlay: vi.fn(
+        (props: {
+            readonly entries: ReadonlyArray<{
+                readonly districtId: string
+                readonly districtLabel: string
+                readonly busFactor: number
+                readonly fileCount: number
+                readonly fileIds: ReadonlyArray<string>
+                readonly primaryFileId: string
+            }>
+            readonly activeDistrictId?: string
+            readonly onSelectEntry?: (entry: {
+                readonly districtId: string
+                readonly districtLabel: string
+                readonly busFactor: number
+                readonly fileCount: number
+                readonly fileIds: ReadonlyArray<string>
+                readonly primaryFileId: string
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>bus-factor-entries:{props.entries.length}</p>
+                    <p>bus-factor-active:{props.activeDistrictId ?? "none"}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstEntry = props.entries.at(0)
+                            if (firstEntry !== undefined) {
+                                props.onSelectEntry?.(firstEntry)
+                            }
+                        }}
+                        type="button"
+                    >
+                        inspect bus factor district
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockCityOwnershipOverlay } = vi.hoisted(() => ({
     mockCityOwnershipOverlay: vi.fn(
         (props: {
@@ -838,6 +881,9 @@ vi.mock("@/components/graphs/impact-analysis-panel", () => ({
 vi.mock("@/components/graphs/city-impact-overlay", () => ({
     CityImpactOverlay: mockCityImpactOverlay,
 }))
+vi.mock("@/components/graphs/city-bus-factor-overlay", () => ({
+    CityBusFactorOverlay: mockCityBusFactorOverlay,
+}))
 vi.mock("@/components/graphs/city-ownership-overlay", () => ({
     CityOwnershipOverlay: mockCityOwnershipOverlay,
 }))
@@ -873,6 +919,7 @@ beforeEach((): void => {
     mockRefactoringExportDialog.mockClear()
     mockImpactAnalysisPanel.mockClear()
     mockCityImpactOverlay.mockClear()
+    mockCityBusFactorOverlay.mockClear()
     mockCityOwnershipOverlay.mockClear()
     mockChangeRiskGauge.mockClear()
     mockImpactGraphView.mockClear()
@@ -904,6 +951,7 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstTreemapCall?.temporalCouplings.length).toBe(0)
         expect(firstTreemapCall?.impactedFiles.length).toBeGreaterThan(0)
         expect(Object.keys(firstTreemapCall?.fileColorById ?? {})).not.toHaveLength(0)
+        expect(Object.keys(firstTreemapCall?.packageColorByName ?? {})).not.toHaveLength(0)
         const firstTreemapFile = firstTreemapCall?.files.at(0) as
             | {
                 readonly bugIntroductions?: Readonly<Record<string, number>>
@@ -1018,6 +1066,10 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstCityImpactCall).not.toBeUndefined()
         expect(firstCityImpactCall?.entries.length).toBeGreaterThan(0)
 
+        const firstBusFactorCall = mockCityBusFactorOverlay.mock.calls.at(0)?.[0]
+        expect(firstBusFactorCall).not.toBeUndefined()
+        expect(firstBusFactorCall?.entries.length).toBeGreaterThan(0)
+
         const firstOwnershipCall = mockCityOwnershipOverlay.mock.calls.at(0)?.[0]
         expect(firstOwnershipCall).not.toBeUndefined()
         expect(firstOwnershipCall?.owners.length).toBeGreaterThan(0)
@@ -1123,6 +1175,15 @@ describe("CodeCityDashboardPage", (): void => {
         expect(whatIfNavigation3DCall).not.toBeUndefined()
         expect(whatIfNavigation3DCall?.navigationLabel).toContain("What-if:")
         expect(whatIfNavigation3DCall?.navigationChainFileIds.length).toBeGreaterThan(1)
+
+        await user.click(screen.getByRole("button", { name: "inspect bus factor district" }))
+        const busFactorTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(busFactorTreemapCall).not.toBeUndefined()
+        expect(busFactorTreemapCall?.highlightedFileId).toBe("src/api/auth.ts")
+        expect(Object.keys(busFactorTreemapCall?.packageColorByName ?? {})).not.toHaveLength(0)
+        const busFactor3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(busFactor3DCall).not.toBeUndefined()
+        expect(busFactor3DCall?.navigationLabel).toContain("Bus factor:")
 
         await user.click(screen.getByRole("button", { name: "toggle ownership colors" }))
         const ownershipDisabledTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]

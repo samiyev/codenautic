@@ -256,6 +256,22 @@ describe("codecity treemap graph", (): void => {
         expect(authFile?.color).toBe(ownershipColor)
     })
 
+    it("применяет packageColorByName override для district bus factor раскраски", (): void => {
+        const districtColor = "#dc2626"
+        const colorByBusFactor = buildCodeCityTreemapData(
+            sampleFiles,
+            "complexity",
+            [],
+            [],
+            "30d",
+            new Map<string, string>(),
+            new Map<string, string>([["src/api", districtColor]]),
+        )
+        const apiPackage = colorByBusFactor.packages.find((entry) => entry.name === "src/api")
+
+        expect(apiPackage?.color).toBe(districtColor)
+    })
+
     it("передаёт уровни CCR-импакта в treemap данные", (): void => {
         const impactData = buildCodeCityTreemapData(
             sampleFiles,

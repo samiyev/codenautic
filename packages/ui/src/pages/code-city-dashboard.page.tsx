@@ -27,6 +27,10 @@ import {
     type IChangeRiskGaugePoint,
 } from "@/components/graphs/change-risk-gauge"
 import {
+    CityBusFactorOverlay,
+    type ICityBusFactorOverlayEntry,
+} from "@/components/graphs/city-bus-factor-overlay"
+import {
     CityImpactOverlay,
     type ICityImpactOverlayEntry,
 } from "@/components/graphs/city-impact-overlay"
@@ -1182,6 +1186,111 @@ function buildOwnershipFileColorById(
     return Object.keys(colorByFileId).length === 0 ? undefined : colorByFileId
 }
 
+function resolveBusFactorDistrictColor(
+    busFactor: number,
+): string {
+    if (busFactor <= 1) {
+        return "#dc2626"
+    }
+    if (busFactor === 2) {
+        return "#d97706"
+    }
+    return "#15803d"
+}
+
+function resolveDistrictName(
+    filePath: string,
+): string {
+    const normalizedPath = filePath.trim().replaceAll("\\", "/")
+    const separatorIndex = normalizedPath.lastIndexOf("/")
+    if (separatorIndex <= 0) {
+        return "root"
+    }
+    return normalizedPath.slice(0, separatorIndex)
+}
+
+/**
+ * Формирует district-level bus factor модель для CodeCity overlay.
+ *
+ * @param files Файлы текущего профиля.
+ * @param ownership Маппинг владения файлами.
+ * @returns Список district entries с риском bus factor.
+ */
+function buildBusFactorOverlayEntries(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+    ownership: ReadonlyArray<ICodeCityDashboardOwnershipDescriptor>,
+): ReadonlyArray<ICityBusFactorOverlayEntry> {
+    const fileById = new Map<string, ICodeCityTreemapFileDescriptor>(
+        files.map((file): readonly [string, ICodeCityTreemapFileDescriptor] => [file.id, file]),
+    )
+    const fileIdsByDistrict = new Map<string, string[]>()
+    const ownerIdsByDistrict = new Map<string, Set<string>>()
+
+    for (const relation of ownership) {
+        const file = fileById.get(relation.fileId)
+        if (file === undefined) {
+            continue
+        }
+
+        const districtId = resolveDistrictName(file.path)
+        const districtFileIds = fileIdsByDistrict.get(districtId)
+        if (districtFileIds === undefined) {
+            fileIdsByDistrict.set(districtId, [file.id])
+        } else if (districtFileIds.includes(file.id) === false) {
+            districtFileIds.push(file.id)
+        }
+
+        const districtOwnerIds = ownerIdsByDistrict.get(districtId)
+        if (districtOwnerIds === undefined) {
+            ownerIdsByDistrict.set(districtId, new Set<string>([relation.ownerId]))
+        } else {
+            districtOwnerIds.add(relation.ownerId)
+        }
+    }
+
+    return Array.from(fileIdsByDistrict.entries())
+        .map(([districtId, fileIds]): ICityBusFactorOverlayEntry | undefined => {
+            const primaryFileId = fileIds[0]
+            if (primaryFileId === undefined) {
+                return undefined
+            }
+            const contributorCount = ownerIdsByDistrict.get(districtId)?.size ?? 0
+            const busFactor = Math.max(1, contributorCount)
+
+            return {
+                busFactor,
+                districtId,
+                districtLabel: districtId,
+                fileCount: fileIds.length,
+                fileIds,
+                primaryFileId,
+            }
+        })
+        .filter((entry): entry is ICityBusFactorOverlayEntry => entry !== undefined)
+        .sort((leftEntry, rightEntry): number => {
+            if (leftEntry.busFactor !== rightEntry.busFactor) {
+                return leftEntry.busFactor - rightEntry.busFactor
+            }
+            return rightEntry.fileCount - leftEntry.fileCount
+        })
+}
+
+/**
+ * Формирует цветовую карту district -> color для bus factor overlay.
+ *
+ * @param entries District bus factor entries.
+ * @returns Color map для package-level раскраски.
+ */
+function buildBusFactorPackageColorByName(
+    entries: ReadonlyArray<ICityBusFactorOverlayEntry>,
+): Readonly<Record<string, string>> | undefined {
+    const packageColorByName: Record<string, string> = {}
+    for (const entry of entries) {
+        packageColorByName[entry.districtId] = resolveBusFactorDistrictColor(entry.busFactor)
+    }
+    return Object.keys(packageColorByName).length === 0 ? undefined : packageColorByName
+}
+
 /**
  * Формирует модель для change risk gauge.
  *
@@ -1297,6 +1406,7 @@ export function CodeCityDashboardPage(
         },
     )
     const [highlightedFileId, setHighlightedFileId] = useState<string | undefined>()
+    const [activeBusFactorDistrictId, setActiveBusFactorDistrictId] = useState<string | undefined>()
     const [isOwnershipOverlayEnabled, setOwnershipOverlayEnabled] = useState<boolean>(true)
     const [activeOwnershipOwnerId, setActiveOwnershipOwnerId] = useState<string | undefined>()
     const [exploredAreaIds, setExploredAreaIds] = useState<ReadonlyArray<string>>(["controls"])
@@ -1324,6 +1434,13 @@ export function CodeCityDashboardPage(
     const refactoringTimelineTasks = buildRefactoringTimelineTasks(refactoringTargets)
     const impactAnalysisSeeds = buildImpactAnalysisSeeds(currentProfile.files)
     const cityImpactOverlayEntries = buildCityImpactOverlayEntries(impactAnalysisSeeds)
+    const busFactorOverlayEntries = buildBusFactorOverlayEntries(
+        currentProfile.files,
+        currentProfile.ownership,
+    )
+    const busFactorPackageColorByName = buildBusFactorPackageColorByName(
+        busFactorOverlayEntries,
+    )
     const ownershipOverlayEntries = buildOwnershipOverlayEntries(
         currentProfile.files,
         currentProfile.contributors,
@@ -1366,6 +1483,7 @@ export function CodeCityDashboardPage(
 
         setRepositoryId(nextRepositoryId)
         setHighlightedFileId(undefined)
+        setActiveBusFactorDistrictId(undefined)
         setActiveOwnershipOwnerId(undefined)
         setRootCauseChainFocus({
             chainFileIds: [],
@@ -1791,6 +1909,29 @@ export function CodeCityDashboardPage(
 
             <Card>
                 <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Bus factor overlay</p>
+                </CardHeader>
+                <CardBody>
+                    <CityBusFactorOverlay
+                        activeDistrictId={activeBusFactorDistrictId}
+                        entries={busFactorOverlayEntries}
+                        onSelectEntry={(entry): void => {
+                            setActiveBusFactorDistrictId(entry.districtId)
+                            setHighlightedFileId(entry.primaryFileId)
+                            setExploreNavigationFocus({
+                                activeFileId: entry.primaryFileId,
+                                chainFileIds: entry.fileIds,
+                                title: `Bus factor: ${entry.districtLabel}`,
+                            })
+                            markAreaExplored("controls")
+                            markAreaExplored("city-3d")
+                        }}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
                     <p className="text-sm font-semibold text-slate-900">Change risk gauge</p>
                 </CardHeader>
                 <CardBody>
@@ -1954,6 +2095,7 @@ export function CodeCityDashboardPage(
                         highlightedFileId={highlightedFileId}
                         impactedFiles={overlayImpactedFiles}
                         fileColorById={ownershipFileColorById}
+                        packageColorByName={busFactorPackageColorByName}
                         temporalCouplings={overlayTemporalCouplings}
                         title={`${currentProfile.label} treemap`}
                     />
