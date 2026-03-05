@@ -240,6 +240,22 @@ describe("codecity treemap graph", (): void => {
         expect(colorByCoverage.packages[0]?.children[0]?.metricValue).toBe(95)
     })
 
+    it("применяет fileColorById override для ownership раскраски", (): void => {
+        const ownershipColor = "#0f766e"
+        const colorByOwnership = buildCodeCityTreemapData(
+            sampleFiles,
+            "complexity",
+            [],
+            [],
+            "30d",
+            new Map<string, string>([["src/api/auth.ts", ownershipColor]]),
+        )
+        const apiPackage = colorByOwnership.packages.find((entry) => entry.name === "src/api")
+        const authFile = apiPackage?.children.find((entry) => entry.id === "src/api/auth.ts")
+
+        expect(authFile?.color).toBe(ownershipColor)
+    })
+
     it("передаёт уровни CCR-импакта в treemap данные", (): void => {
         const impactData = buildCodeCityTreemapData(
             sampleFiles,

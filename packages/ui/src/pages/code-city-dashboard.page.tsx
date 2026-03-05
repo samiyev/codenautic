@@ -31,6 +31,10 @@ import {
     type ICityImpactOverlayEntry,
 } from "@/components/graphs/city-impact-overlay"
 import {
+    CityOwnershipOverlay,
+    type ICityOwnershipOverlayOwnerEntry,
+} from "@/components/graphs/city-ownership-overlay"
+import {
     CityRefactoringOverlay,
     type ICityRefactoringOverlayEntry,
 } from "@/components/graphs/city-refactoring-overlay"
@@ -108,6 +112,28 @@ interface ICodeCityDashboardRepositoryProfile {
     readonly temporalCouplings: ReadonlyArray<ICodeCityTreemapTemporalCouplingDescriptor>
     /** История health score для линейного causal-trend графика. */
     readonly healthTrend: ReadonlyArray<IHealthTrendPoint>
+    /** Владельцы с цветами и avatar для ownership overlay. */
+    readonly contributors: ReadonlyArray<ICodeCityDashboardContributorDescriptor>
+    /** Маппинг файл -> owner для ownership overlay. */
+    readonly ownership: ReadonlyArray<ICodeCityDashboardOwnershipDescriptor>
+}
+
+interface ICodeCityDashboardContributorDescriptor {
+    /** Идентификатор владельца. */
+    readonly ownerId: string
+    /** Отображаемое имя владельца. */
+    readonly ownerName: string
+    /** Цвет владельца в city overlay. */
+    readonly color: string
+    /** Ссылка на avatar. */
+    readonly ownerAvatarUrl?: string
+}
+
+interface ICodeCityDashboardOwnershipDescriptor {
+    /** Идентификатор файла. */
+    readonly fileId: string
+    /** Владелец файла. */
+    readonly ownerId: string
 }
 
 interface ICodeCityDashboardPageProps {
@@ -276,6 +302,37 @@ const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardReposito
                 annotation: "Retry refactor",
             },
         ],
+        contributors: [
+            {
+                ownerId: "alice-rivera",
+                ownerName: "Alice Rivera",
+                color: "#0f766e",
+            },
+            {
+                ownerId: "max-h",
+                ownerName: "Max H.",
+                color: "#2563eb",
+            },
+            {
+                ownerId: "luna-kim",
+                ownerName: "Luna Kim",
+                color: "#be123c",
+            },
+        ],
+        ownership: [
+            {
+                fileId: "src/api/auth.ts",
+                ownerId: "alice-rivera",
+            },
+            {
+                fileId: "src/api/repository.ts",
+                ownerId: "alice-rivera",
+            },
+            {
+                fileId: "src/worker/index.ts",
+                ownerId: "max-h",
+            },
+        ],
         label: "platform-team/api-gateway",
         files: [
             {
@@ -387,6 +444,41 @@ const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardReposito
                 timestamp: "2026-02-01T00:00:00.000Z",
                 healthScore: 85,
                 annotation: "HeroUI rollout",
+            },
+        ],
+        contributors: [
+            {
+                ownerId: "nora-s",
+                ownerName: "Nora S.",
+                color: "#0f766e",
+            },
+            {
+                ownerId: "samir-i",
+                ownerName: "Samir I.",
+                color: "#2563eb",
+            },
+            {
+                ownerId: "dina-k",
+                ownerName: "Dina K.",
+                color: "#ca8a04",
+            },
+        ],
+        ownership: [
+            {
+                fileId: "src/pages/ccr-management.page.tsx",
+                ownerId: "nora-s",
+            },
+            {
+                fileId: "src/components/graphs/codecity-treemap.tsx",
+                ownerId: "samir-i",
+            },
+            {
+                fileId: "src/components/layout/sidebar.tsx",
+                ownerId: "dina-k",
+            },
+            {
+                fileId: "src/pages/repositories-list.page.tsx",
+                ownerId: "nora-s",
             },
         ],
         label: "frontend-team/ui-dashboard",
@@ -507,6 +599,37 @@ const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardReposito
             {
                 timestamp: "2026-02-01T00:00:00.000Z",
                 healthScore: 74,
+            },
+        ],
+        contributors: [
+            {
+                ownerId: "ryan-p",
+                ownerName: "Ryan P.",
+                color: "#be123c",
+            },
+            {
+                ownerId: "mira-v",
+                ownerName: "Mira V.",
+                color: "#2563eb",
+            },
+            {
+                ownerId: "igor-t",
+                ownerName: "Igor T.",
+                color: "#0f766e",
+            },
+        ],
+        ownership: [
+            {
+                fileId: "src/adapters/queue.ts",
+                ownerId: "ryan-p",
+            },
+            {
+                fileId: "src/services/retry.ts",
+                ownerId: "mira-v",
+            },
+            {
+                fileId: "src/worker/main.ts",
+                ownerId: "igor-t",
             },
         ],
         label: "backend-core/payment-worker",
@@ -976,6 +1099,90 @@ function buildCityImpactOverlayEntries(
 }
 
 /**
+ * Формирует ownership legend entries для overlay по данным профиля.
+ *
+ * @param files Файлы текущего профиля.
+ * @param contributors Справочник владельцев.
+ * @param ownership Маппинг файлов на владельцев.
+ * @returns Готовые ownership entries для UI.
+ */
+function buildOwnershipOverlayEntries(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+    contributors: ReadonlyArray<ICodeCityDashboardContributorDescriptor>,
+    ownership: ReadonlyArray<ICodeCityDashboardOwnershipDescriptor>,
+): ReadonlyArray<ICityOwnershipOverlayOwnerEntry> {
+    const fileById = new Map<string, ICodeCityTreemapFileDescriptor>(
+        files.map((file): readonly [string, ICodeCityTreemapFileDescriptor] => [file.id, file]),
+    )
+    const contributorById = new Map<string, ICodeCityDashboardContributorDescriptor>(
+        contributors.map(
+            (contributor): readonly [string, ICodeCityDashboardContributorDescriptor] => [
+                contributor.ownerId,
+                contributor,
+            ],
+        ),
+    )
+    const fileIdsByOwner = new Map<string, string[]>()
+
+    for (const relation of ownership) {
+        if (fileById.has(relation.fileId) === false) {
+            continue
+        }
+        const ownerFiles = fileIdsByOwner.get(relation.ownerId)
+        if (ownerFiles === undefined) {
+            fileIdsByOwner.set(relation.ownerId, [relation.fileId])
+            continue
+        }
+        ownerFiles.push(relation.fileId)
+    }
+
+    return Array.from(fileIdsByOwner.entries())
+        .map(([ownerId, fileIds]): ICityOwnershipOverlayOwnerEntry | undefined => {
+            const primaryFileId = fileIds[0]
+            if (primaryFileId === undefined) {
+                return undefined
+            }
+            const contributor = contributorById.get(ownerId)
+
+            return {
+                color: contributor?.color ?? "#334155",
+                fileIds,
+                ownerAvatarUrl: contributor?.ownerAvatarUrl,
+                ownerId,
+                ownerName: contributor?.ownerName ?? ownerId,
+                primaryFileId,
+            }
+        })
+        .filter((entry): entry is ICityOwnershipOverlayOwnerEntry => entry !== undefined)
+        .sort((leftOwner, rightOwner): number => rightOwner.fileIds.length - leftOwner.fileIds.length)
+}
+
+/**
+ * Формирует мапу цветов для раскраски зданий по owner.
+ *
+ * @param ownershipEntries Элементы ownership overlay.
+ * @param isEnabled Флаг активности ownership режима.
+ * @returns Record fileId -> color для treemap или undefined.
+ */
+function buildOwnershipFileColorById(
+    ownershipEntries: ReadonlyArray<ICityOwnershipOverlayOwnerEntry>,
+    isEnabled: boolean,
+): Readonly<Record<string, string>> | undefined {
+    if (isEnabled === false) {
+        return undefined
+    }
+
+    const colorByFileId: Record<string, string> = {}
+    for (const owner of ownershipEntries) {
+        for (const fileId of owner.fileIds) {
+            colorByFileId[fileId] = owner.color
+        }
+    }
+
+    return Object.keys(colorByFileId).length === 0 ? undefined : colorByFileId
+}
+
+/**
  * Формирует модель для change risk gauge.
  *
  * @param seeds Impact seeds текущего профиля.
@@ -1090,6 +1297,8 @@ export function CodeCityDashboardPage(
         },
     )
     const [highlightedFileId, setHighlightedFileId] = useState<string | undefined>()
+    const [isOwnershipOverlayEnabled, setOwnershipOverlayEnabled] = useState<boolean>(true)
+    const [activeOwnershipOwnerId, setActiveOwnershipOwnerId] = useState<string | undefined>()
     const [exploredAreaIds, setExploredAreaIds] = useState<ReadonlyArray<string>>(["controls"])
     const [guidedTourStepIndex, setGuidedTourStepIndex] = useState<number>(0)
     const [isGuidedTourActive, setIsGuidedTourActive] = useState<boolean>(true)
@@ -1115,6 +1324,15 @@ export function CodeCityDashboardPage(
     const refactoringTimelineTasks = buildRefactoringTimelineTasks(refactoringTargets)
     const impactAnalysisSeeds = buildImpactAnalysisSeeds(currentProfile.files)
     const cityImpactOverlayEntries = buildCityImpactOverlayEntries(impactAnalysisSeeds)
+    const ownershipOverlayEntries = buildOwnershipOverlayEntries(
+        currentProfile.files,
+        currentProfile.contributors,
+        currentProfile.ownership,
+    )
+    const ownershipFileColorById = buildOwnershipFileColorById(
+        ownershipOverlayEntries,
+        isOwnershipOverlayEnabled,
+    )
     const changeRiskGaugeModel = buildChangeRiskGaugeModel(
         impactAnalysisSeeds,
         currentProfile.healthTrend,
@@ -1148,6 +1366,7 @@ export function CodeCityDashboardPage(
 
         setRepositoryId(nextRepositoryId)
         setHighlightedFileId(undefined)
+        setActiveOwnershipOwnerId(undefined)
         setRootCauseChainFocus({
             chainFileIds: [],
             issueId: "",
@@ -1540,6 +1759,38 @@ export function CodeCityDashboardPage(
 
             <Card>
                 <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Ownership overlay</p>
+                </CardHeader>
+                <CardBody>
+                    <CityOwnershipOverlay
+                        activeOwnerId={activeOwnershipOwnerId}
+                        isEnabled={isOwnershipOverlayEnabled}
+                        onSelectOwner={(owner): void => {
+                            setOwnershipOverlayEnabled(true)
+                            setActiveOwnershipOwnerId(owner.ownerId)
+                            setHighlightedFileId(owner.primaryFileId)
+                            setExploreNavigationFocus({
+                                activeFileId: owner.primaryFileId,
+                                chainFileIds: owner.fileIds,
+                                title: `Ownership: ${owner.ownerName}`,
+                            })
+                            markAreaExplored("controls")
+                            markAreaExplored("city-3d")
+                        }}
+                        onToggleEnabled={(nextEnabled): void => {
+                            setOwnershipOverlayEnabled(nextEnabled)
+                            if (nextEnabled === false) {
+                                setActiveOwnershipOwnerId(undefined)
+                            }
+                            markAreaExplored("controls")
+                        }}
+                        owners={ownershipOverlayEntries}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
                     <p className="text-sm font-semibold text-slate-900">Change risk gauge</p>
                 </CardHeader>
                 <CardBody>
@@ -1702,6 +1953,7 @@ export function CodeCityDashboardPage(
                         files={currentProfile.files}
                         highlightedFileId={highlightedFileId}
                         impactedFiles={overlayImpactedFiles}
+                        fileColorById={ownershipFileColorById}
                         temporalCouplings={overlayTemporalCouplings}
                         title={`${currentProfile.label} treemap`}
                     />

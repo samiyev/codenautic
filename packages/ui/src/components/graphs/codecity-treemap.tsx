@@ -933,6 +933,8 @@ export interface ICodeCityTreemapProps {
     readonly temporalCouplings?: ReadonlyArray<ICodeCityTreemapTemporalCouplingDescriptor>
     /** Идентификатор файла для визуальной подсветки в treemap. */
     readonly highlightedFileId?: string
+    /** Принудительная раскраска зданий по file id (например ownership overlay). */
+    readonly fileColorById?: Readonly<Record<string, string>>
 }
 
 function normalizePath(rawPath: string): string {
@@ -980,6 +982,7 @@ export function buildCodeCityTreemapData(
     impactedFiles: ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor> = [],
     compareFiles: ReadonlyArray<ICodeCityTreemapFileDescriptor> = [],
     bugHeatRange: ICodeCityBugHeatRange = DEFAULT_BUG_HEAT_RANGE,
+    fileColorById: ReadonlyMap<string, string> = new Map(),
 ): ICodeCityTreemapData {
     const packageMap = new Map<string, ICodeCityTreemapFileNode[]>()
     const fileIds = new Set<string>()
@@ -1059,9 +1062,10 @@ export function buildCodeCityTreemapData(
     const packages: ICodeCityTreemapPackageNode[] = Array.from(packageMap.entries())
         .map(([name, children]): ICodeCityTreemapPackageNode => {
             const coloredChildren = [...children].map((fileNode): ICodeCityTreemapFileNode => {
+                const ownershipColor = fileColorById.get(fileNode.id)
                 return {
                     ...fileNode,
-                    color: resolveMetricColor(metricRange, fileNode.metricValue),
+                    color: ownershipColor ?? resolveMetricColor(metricRange, fileNode.metricValue),
                     issueHeatmapColor: resolveIssueHeatmapColor(
                         fileNode.issueCount,
                         maxIssueCount,
@@ -1156,6 +1160,15 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         useState<ICodeCityBugHeatRange>(DEFAULT_BUG_HEAT_RANGE)
     const [isTemporalCouplingOverlayEnabled, setTemporalCouplingOverlayEnabled] =
         useState<boolean>(DEFAULT_TEMPORAL_COUPLING_OVERLAY_ENABLED)
+    const fileColorById = useMemo(
+        (): ReadonlyMap<string, string> => {
+            if (props.fileColorById === undefined) {
+                return new Map<string, string>()
+            }
+            return new Map<string, string>(Object.entries(props.fileColorById))
+        },
+        [props.fileColorById],
+    )
     const treemapData = useMemo(
         () =>
             buildCodeCityTreemapData(
@@ -1164,8 +1177,9 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                 props.impactedFiles ?? [],
                 props.compareFiles ?? [],
                 bugHeatRange,
+                fileColorById,
             ),
-        [bugHeatRange, props.files, props.compareFiles, props.impactedFiles, metric],
+        [bugHeatRange, fileColorById, props.files, props.compareFiles, props.impactedFiles, metric],
     )
     const visiblePackages = useMemo(
         () =>

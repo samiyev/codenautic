@@ -12,6 +12,7 @@ const { mockCodeCityTreemap } = vi.hoisted(() => ({
             readonly compareFiles: ReadonlyArray<unknown>
             readonly defaultMetric: "complexity" | "coverage" | "churn"
             readonly fileLink: (file: { readonly fileId: string; readonly path: string }) => string
+            readonly fileColorById?: Readonly<Record<string, string>>
             readonly files: ReadonlyArray<unknown>
             readonly highlightedFileId?: string
             readonly impactedFiles: ReadonlyArray<unknown>
@@ -26,6 +27,7 @@ const { mockCodeCityTreemap } = vi.hoisted(() => ({
                     <p>comparison-label:{props.comparisonLabel}</p>
                     <p>temporal-couplings:{props.temporalCouplings.length}</p>
                     <p>impacted-files:{props.impactedFiles.length}</p>
+                    <p>ownership-colors:{Object.keys(props.fileColorById ?? {}).length}</p>
                     <p>highlighted-file:{props.highlightedFileId ?? "none"}</p>
                 </div>
             )
@@ -576,6 +578,56 @@ const { mockCityImpactOverlay } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockCityOwnershipOverlay } = vi.hoisted(() => ({
+    mockCityOwnershipOverlay: vi.fn(
+        (props: {
+            readonly owners: ReadonlyArray<{
+                readonly ownerId: string
+                readonly ownerName: string
+                readonly color: string
+                readonly fileIds: ReadonlyArray<string>
+                readonly primaryFileId: string
+            }>
+            readonly isEnabled: boolean
+            readonly activeOwnerId?: string
+            readonly onToggleEnabled?: (nextEnabled: boolean) => void
+            readonly onSelectOwner?: (owner: {
+                readonly ownerId: string
+                readonly ownerName: string
+                readonly color: string
+                readonly fileIds: ReadonlyArray<string>
+                readonly primaryFileId: string
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>ownership-owners:{props.owners.length}</p>
+                    <p>ownership-enabled:{props.isEnabled ? "yes" : "no"}</p>
+                    <p>ownership-active:{props.activeOwnerId ?? "none"}</p>
+                    <button
+                        onClick={(): void => {
+                            props.onToggleEnabled?.(props.isEnabled === false)
+                        }}
+                        type="button"
+                    >
+                        toggle ownership colors
+                    </button>
+                    <button
+                        onClick={(): void => {
+                            const firstOwner = props.owners.at(0)
+                            if (firstOwner !== undefined) {
+                                props.onSelectOwner?.(firstOwner)
+                            }
+                        }}
+                        type="button"
+                    >
+                        focus ownership owner
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockChangeRiskGauge } = vi.hoisted(() => ({
     mockChangeRiskGauge: vi.fn(
         (props: {
@@ -786,6 +838,9 @@ vi.mock("@/components/graphs/impact-analysis-panel", () => ({
 vi.mock("@/components/graphs/city-impact-overlay", () => ({
     CityImpactOverlay: mockCityImpactOverlay,
 }))
+vi.mock("@/components/graphs/city-ownership-overlay", () => ({
+    CityOwnershipOverlay: mockCityOwnershipOverlay,
+}))
 vi.mock("@/components/graphs/change-risk-gauge", () => ({
     ChangeRiskGauge: mockChangeRiskGauge,
 }))
@@ -818,6 +873,7 @@ beforeEach((): void => {
     mockRefactoringExportDialog.mockClear()
     mockImpactAnalysisPanel.mockClear()
     mockCityImpactOverlay.mockClear()
+    mockCityOwnershipOverlay.mockClear()
     mockChangeRiskGauge.mockClear()
     mockImpactGraphView.mockClear()
     mockWhatIfPanel.mockClear()
@@ -847,6 +903,7 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstTreemapCall?.title).toBe("platform-team/api-gateway treemap")
         expect(firstTreemapCall?.temporalCouplings.length).toBe(0)
         expect(firstTreemapCall?.impactedFiles.length).toBeGreaterThan(0)
+        expect(Object.keys(firstTreemapCall?.fileColorById ?? {})).not.toHaveLength(0)
         const firstTreemapFile = firstTreemapCall?.files.at(0) as
             | {
                 readonly bugIntroductions?: Readonly<Record<string, number>>
@@ -961,6 +1018,11 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstCityImpactCall).not.toBeUndefined()
         expect(firstCityImpactCall?.entries.length).toBeGreaterThan(0)
 
+        const firstOwnershipCall = mockCityOwnershipOverlay.mock.calls.at(0)?.[0]
+        expect(firstOwnershipCall).not.toBeUndefined()
+        expect(firstOwnershipCall?.owners.length).toBeGreaterThan(0)
+        expect(firstOwnershipCall?.isEnabled).toBe(true)
+
         const firstRiskGaugeCall = mockChangeRiskGauge.mock.calls.at(0)?.[0]
         expect(firstRiskGaugeCall).not.toBeUndefined()
         expect(firstRiskGaugeCall?.historicalPoints.length).toBeGreaterThan(0)
@@ -1061,6 +1123,23 @@ describe("CodeCityDashboardPage", (): void => {
         expect(whatIfNavigation3DCall).not.toBeUndefined()
         expect(whatIfNavigation3DCall?.navigationLabel).toContain("What-if:")
         expect(whatIfNavigation3DCall?.navigationChainFileIds.length).toBeGreaterThan(1)
+
+        await user.click(screen.getByRole("button", { name: "toggle ownership colors" }))
+        const ownershipDisabledTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(ownershipDisabledTreemapCall).not.toBeUndefined()
+        expect(Object.keys(ownershipDisabledTreemapCall?.fileColorById ?? {})).toHaveLength(0)
+        const ownershipDisabledOverlayCall = mockCityOwnershipOverlay.mock.calls.at(-1)?.[0]
+        expect(ownershipDisabledOverlayCall).not.toBeUndefined()
+        expect(ownershipDisabledOverlayCall?.isEnabled).toBe(false)
+
+        await user.click(screen.getByRole("button", { name: "focus ownership owner" }))
+        const ownershipFocusedTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(ownershipFocusedTreemapCall).not.toBeUndefined()
+        expect(ownershipFocusedTreemapCall?.highlightedFileId).toBe("src/api/auth.ts")
+        expect(Object.keys(ownershipFocusedTreemapCall?.fileColorById ?? {})).not.toHaveLength(0)
+        const ownershipFocused3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(ownershipFocused3DCall).not.toBeUndefined()
+        expect(ownershipFocused3DCall?.navigationLabel).toContain("Ownership:")
 
         const repositorySelect = screen.getByRole("combobox", { name: "Repository" })
         const metricSelect = screen.getByRole("combobox", { name: "Metric" })
