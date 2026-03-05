@@ -100,6 +100,13 @@ import {
     KnowledgeSiloPanel,
     type IKnowledgeSiloPanelEntry,
 } from "@/components/graphs/knowledge-silo-panel"
+import type {
+    IKnowledgeMapExportDistrictRiskEntry,
+    IKnowledgeMapExportModel,
+    IKnowledgeMapExportOwnerLegendEntry,
+    IKnowledgeMapExportSiloEntry,
+} from "@/components/graphs/knowledge-map-export"
+import { KnowledgeMapExportWidget } from "@/components/graphs/knowledge-map-export-widget"
 import {
     RootCauseChainViewer,
     type IRootCauseChainFocusPayload,
@@ -1520,6 +1527,77 @@ function buildKnowledgeSiloPanelEntries(
         .sort((leftEntry, rightEntry): number => rightEntry.riskScore - leftEntry.riskScore)
 }
 
+function resolveDashboardMetricLabel(metric: TCodeCityDashboardMetric): string {
+    if (metric === "complexity") {
+        return "Complexity"
+    }
+    if (metric === "coverage") {
+        return "Coverage"
+    }
+    return "Churn"
+}
+
+function resolveKnowledgeMapBusFactorRiskLabel(busFactor: number): string {
+    if (busFactor <= 1) {
+        return "Critical"
+    }
+    if (busFactor === 2) {
+        return "Elevated"
+    }
+    return "Healthy"
+}
+
+/**
+ * Формирует модель knowledge map export (legend + metadata).
+ *
+ * @param profile Текущий профиль репозитория.
+ * @param metric Активная метрика dashboard.
+ * @param ownershipEntries Ownership legend entries.
+ * @param busFactorEntries District bus factor entries.
+ * @param knowledgeSiloEntries Knowledge silo summary entries.
+ * @returns Snapshot модель экспорта.
+ */
+function buildKnowledgeMapExportModel(
+    profile: ICodeCityDashboardRepositoryProfile,
+    metric: TCodeCityDashboardMetric,
+    ownershipEntries: ReadonlyArray<ICityOwnershipOverlayOwnerEntry>,
+    busFactorEntries: ReadonlyArray<ICityBusFactorOverlayEntry>,
+    knowledgeSiloEntries: ReadonlyArray<IKnowledgeSiloPanelEntry>,
+): IKnowledgeMapExportModel {
+    return {
+        metadata: {
+            generatedAt: new Date().toISOString(),
+            metricLabel: resolveDashboardMetricLabel(metric),
+            repositoryId: profile.id,
+            repositoryLabel: profile.label,
+            totalContributors: profile.contributors.length,
+            totalFiles: profile.files.length,
+        },
+        districts: busFactorEntries.map((entry): IKnowledgeMapExportDistrictRiskEntry => {
+            return {
+                busFactor: entry.busFactor,
+                districtLabel: entry.districtLabel,
+                riskLabel: resolveKnowledgeMapBusFactorRiskLabel(entry.busFactor),
+            }
+        }),
+        owners: ownershipEntries.map((entry): IKnowledgeMapExportOwnerLegendEntry => {
+            return {
+                color: entry.color,
+                fileCount: entry.fileIds.length,
+                ownerName: entry.ownerName,
+            }
+        }),
+        silos: knowledgeSiloEntries.map((entry): IKnowledgeMapExportSiloEntry => {
+            return {
+                contributorCount: entry.contributorCount,
+                fileCount: entry.fileCount,
+                riskScore: entry.riskScore,
+                siloLabel: entry.siloLabel,
+            }
+        }),
+    }
+}
+
 /**
  * Формирует узлы графа контрибьюторов для contributor collaboration view.
  *
@@ -1850,6 +1928,13 @@ export function CodeCityDashboardPage(
         currentProfile.files,
         currentProfile.contributors,
         currentProfile.ownership,
+    )
+    const knowledgeMapExportModel = buildKnowledgeMapExportModel(
+        currentProfile,
+        metric,
+        ownershipOverlayEntries,
+        busFactorOverlayEntries,
+        knowledgeSiloEntries,
     )
     const ownershipFileColorById = buildOwnershipFileColorById(
         ownershipOverlayEntries,
@@ -2378,6 +2463,31 @@ export function CodeCityDashboardPage(
                                 activeFileId: entry.primaryFileId,
                                 chainFileIds: entry.fileIds,
                                 title: `Knowledge silo: ${entry.siloLabel}`,
+                            })
+                            markAreaExplored("controls")
+                            markAreaExplored("city-3d")
+                        }}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Knowledge map export</p>
+                </CardHeader>
+                <CardBody>
+                    <KnowledgeMapExportWidget
+                        model={knowledgeMapExportModel}
+                        onExport={(format): void => {
+                            const primarySiloEntry = knowledgeSiloEntries[0]
+                            const activeFileId = primarySiloEntry?.primaryFileId
+                            if (activeFileId !== undefined) {
+                                setHighlightedFileId(activeFileId)
+                            }
+                            setExploreNavigationFocus({
+                                activeFileId,
+                                chainFileIds: primarySiloEntry?.fileIds ?? [],
+                                title: `Knowledge map export: ${format.toUpperCase()}`,
                             })
                             markAreaExplored("controls")
                             markAreaExplored("city-3d")

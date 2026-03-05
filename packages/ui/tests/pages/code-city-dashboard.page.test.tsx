@@ -709,6 +709,56 @@ const { mockKnowledgeSiloPanel } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockKnowledgeMapExportWidget } = vi.hoisted(() => ({
+    mockKnowledgeMapExportWidget: vi.fn(
+        (props: {
+            readonly model: {
+                readonly metadata: {
+                    readonly repositoryId: string
+                    readonly repositoryLabel: string
+                    readonly metricLabel: string
+                    readonly generatedAt: string
+                    readonly totalFiles: number
+                    readonly totalContributors: number
+                }
+                readonly owners: ReadonlyArray<{
+                    readonly ownerName: string
+                    readonly color: string
+                    readonly fileCount: number
+                }>
+                readonly districts: ReadonlyArray<{
+                    readonly districtLabel: string
+                    readonly busFactor: number
+                    readonly riskLabel: string
+                }>
+                readonly silos: ReadonlyArray<{
+                    readonly siloLabel: string
+                    readonly riskScore: number
+                    readonly contributorCount: number
+                    readonly fileCount: number
+                }>
+            }
+            readonly onExport?: (format: "svg" | "png") => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>knowledge-map-export-owners:{props.model.owners.length}</p>
+                    <p>knowledge-map-export-districts:{props.model.districts.length}</p>
+                    <p>knowledge-map-export-silos:{props.model.silos.length}</p>
+                    <p>knowledge-map-export-repository:{props.model.metadata.repositoryId}</p>
+                    <button
+                        onClick={(): void => {
+                            props.onExport?.("png")
+                        }}
+                        type="button"
+                    >
+                        export knowledge map snapshot
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockContributorCollaborationGraph } = vi.hoisted(() => ({
     mockContributorCollaborationGraph: vi.fn(
         (props: {
@@ -1064,6 +1114,9 @@ vi.mock("@/components/graphs/bus-factor-trend-chart", () => ({
 vi.mock("@/components/graphs/knowledge-silo-panel", () => ({
     KnowledgeSiloPanel: mockKnowledgeSiloPanel,
 }))
+vi.mock("@/components/graphs/knowledge-map-export-widget", () => ({
+    KnowledgeMapExportWidget: mockKnowledgeMapExportWidget,
+}))
 vi.mock("@/components/graphs/contributor-collaboration-graph", () => ({
     ContributorCollaborationGraph: mockContributorCollaborationGraph,
 }))
@@ -1108,6 +1161,7 @@ beforeEach((): void => {
     mockCityBusFactorOverlay.mockClear()
     mockBusFactorTrendChart.mockClear()
     mockKnowledgeSiloPanel.mockClear()
+    mockKnowledgeMapExportWidget.mockClear()
     mockContributorCollaborationGraph.mockClear()
     mockOwnershipTransitionWidget.mockClear()
     mockCityOwnershipOverlay.mockClear()
@@ -1268,6 +1322,15 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstKnowledgeSiloCall).not.toBeUndefined()
         expect(firstKnowledgeSiloCall?.entries.length).toBeGreaterThan(0)
 
+        const firstKnowledgeMapExportCall = mockKnowledgeMapExportWidget.mock.calls.at(0)?.[0]
+        expect(firstKnowledgeMapExportCall).not.toBeUndefined()
+        expect(firstKnowledgeMapExportCall?.model.owners.length).toBeGreaterThan(0)
+        expect(firstKnowledgeMapExportCall?.model.districts.length).toBeGreaterThan(0)
+        expect(firstKnowledgeMapExportCall?.model.silos.length).toBeGreaterThan(0)
+        expect(firstKnowledgeMapExportCall?.model.metadata.repositoryId).toBe(
+            "platform-team/api-gateway",
+        )
+
         const firstContributorGraphCall = mockContributorCollaborationGraph.mock.calls.at(0)?.[0]
         expect(firstContributorGraphCall).not.toBeUndefined()
         expect(firstContributorGraphCall?.contributors.length).toBeGreaterThan(0)
@@ -1408,6 +1471,15 @@ describe("CodeCityDashboardPage", (): void => {
         const knowledgeSilo3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(knowledgeSilo3DCall).not.toBeUndefined()
         expect(knowledgeSilo3DCall?.navigationLabel).toContain("Knowledge silo:")
+
+        await user.click(screen.getByRole("button", { name: "export knowledge map snapshot" }))
+        const knowledgeMapExportTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(knowledgeMapExportTreemapCall).not.toBeUndefined()
+        expect(knowledgeMapExportTreemapCall?.highlightedFileId).toBe("src/api/auth.ts")
+        const knowledgeMapExport3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(knowledgeMapExport3DCall).not.toBeUndefined()
+        expect(knowledgeMapExport3DCall?.navigationLabel).toBe("Knowledge map export: PNG")
+        expect(knowledgeMapExport3DCall?.navigationChainFileIds.length).toBeGreaterThan(0)
 
         await user.click(screen.getByRole("button", { name: "inspect contributor graph" }))
         const contributorTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
