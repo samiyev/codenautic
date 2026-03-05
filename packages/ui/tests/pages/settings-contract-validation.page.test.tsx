@@ -139,4 +139,17 @@ describe("SettingsContractValidationPage", (): void => {
             screen.getAllByText("Dependency direction mismatch for aggregate access path.").length,
         ).toBeGreaterThan(0)
     })
+
+    it("показывает drift trend chart с аннотациями архитектурных изменений", (): void => {
+        renderWithProviders(<SettingsContractValidationPage />)
+
+        expect(screen.getByText("Drift trend chart")).not.toBeNull()
+        expect(screen.getByLabelText("Drift score trend chart")).not.toBeNull()
+        expect(screen.getByLabelText("Architecture change annotations list")).not.toBeNull()
+        expect(
+            screen.getByText(
+                /ADR-021: Introduced anti-corruption layer for provider boundaries\./,
+            ),
+        ).not.toBeNull()
+    })
 })

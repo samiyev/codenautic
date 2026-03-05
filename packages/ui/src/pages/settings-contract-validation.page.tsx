@@ -1,4 +1,14 @@
 import { type ChangeEvent, type ReactElement, useMemo, useState } from "react"
+import {
+    CartesianGrid,
+    Line,
+    LineChart,
+    ReferenceDot,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from "recharts"
 
 import {
     CodeCityTreemap,
@@ -73,6 +83,12 @@ interface IArchitectureDifference {
     readonly module: string
     readonly status: TArchitectureDiffStatus
     readonly description: string
+}
+
+interface IDriftTrendPoint {
+    readonly period: string
+    readonly driftScore: number
+    readonly architectureChange?: string
 }
 
 const DEFAULT_BLUEPRINT_YAML = [
@@ -256,6 +272,36 @@ const REALITY_STRUCTURE_NODES: ReadonlyArray<IArchitectureStructureNode> = [
         id: "reality-infrastructure-review-events",
         layer: "infrastructure",
         module: "review.events",
+    },
+]
+
+const DRIFT_TREND_POINTS: ReadonlyArray<IDriftTrendPoint> = [
+    {
+        driftScore: 78,
+        period: "Jan",
+    },
+    {
+        architectureChange: "ADR-018: Introduced import boundaries for application layer.",
+        driftScore: 69,
+        period: "Feb",
+    },
+    {
+        driftScore: 64,
+        period: "Mar",
+    },
+    {
+        architectureChange: "ADR-021: Introduced anti-corruption layer for provider boundaries.",
+        driftScore: 55,
+        period: "Apr",
+    },
+    {
+        driftScore: 48,
+        period: "May",
+    },
+    {
+        architectureChange: "ADR-024: Isolated domain events from infrastructure handlers.",
+        driftScore: 41,
+        period: "Jun",
     },
 ]
 
@@ -700,6 +746,26 @@ export function SettingsContractValidationPage(): ReactElement {
             missingCount,
         )} · Unexpected: ${String(unexpectedCount)}`
     }, [architectureDifferences])
+    const driftTrendAnnotations = useMemo((): ReadonlyArray<IDriftTrendPoint> => {
+        return DRIFT_TREND_POINTS.filter((point): boolean => point.architectureChange !== undefined)
+    }, [])
+    const driftTrendSummary = useMemo((): string => {
+        const baselinePoint = DRIFT_TREND_POINTS.at(0)
+        const latestPoint = DRIFT_TREND_POINTS.at(-1)
+        if (baselinePoint === undefined || latestPoint === undefined) {
+            return "No drift trend data available."
+        }
+
+        const delta = latestPoint.driftScore - baselinePoint.driftScore
+        if (delta === 0) {
+            return `Current drift score: ${String(latestPoint.driftScore)} (no change vs baseline).`
+        }
+
+        const direction = delta < 0 ? "improvement" : "regression"
+        return `Current drift score: ${String(latestPoint.driftScore)} (${String(
+            Math.abs(delta),
+        )} points ${direction} vs baseline).`
+    }, [])
 
     const handleValidateContract = (): void => {
         const nextResult = parseContractEnvelope(rawContract)
@@ -1227,6 +1293,62 @@ export function SettingsContractValidationPage(): ReactElement {
                                     </span>
                                 </div>
                                 <p className="text-slate-700">{difference.description}</p>
+                            </li>
+                        ))}
+                    </ul>
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-base font-semibold text-[var(--foreground)]">Drift trend chart</p>
+                </CardHeader>
+                <CardBody className="space-y-3">
+                    <p className="text-sm text-[var(--foreground)]/70">
+                        Drift score trend over time with architecture change annotations.
+                    </p>
+                    <div aria-label="Drift score trend chart" className="h-72 w-full">
+                        <ResponsiveContainer height="100%" width="100%">
+                            <LineChart data={DRIFT_TREND_POINTS} margin={{ bottom: 8, left: 8, right: 12, top: 12 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="period" />
+                                <YAxis domain={[0, 100]} />
+                                <Tooltip />
+                                <Line
+                                    activeDot={{ r: 6 }}
+                                    dataKey="driftScore"
+                                    dot={{
+                                        fill: "#2563eb",
+                                        r: 3,
+                                        stroke: "#ffffff",
+                                        strokeWidth: 1,
+                                    }}
+                                    stroke="#2563eb"
+                                    strokeWidth={2.5}
+                                    type="monotone"
+                                />
+                                {driftTrendAnnotations.map((point): ReactElement => (
+                                    <ReferenceDot
+                                        fill="#dc2626"
+                                        key={`${point.period}-annotation`}
+                                        r={5}
+                                        stroke="#ffffff"
+                                        strokeWidth={1}
+                                        x={point.period}
+                                        y={point.driftScore}
+                                    />
+                                ))}
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <Alert color="primary" title="Trend summary" variant="flat">
+                        {driftTrendSummary}
+                    </Alert>
+                    <ul aria-label="Architecture change annotations list" className="space-y-1 text-sm">
+                        {driftTrendAnnotations.map((point): ReactElement => (
+                            <li key={`${point.period}-${String(point.driftScore)}`}>
+                                <span className="font-semibold">{point.period}</span>:{" "}
+                                {point.architectureChange}
                             </li>
                         ))}
                     </ul>
