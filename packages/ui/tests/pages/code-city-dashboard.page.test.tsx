@@ -759,6 +759,59 @@ const { mockTrendForecastChart } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockPredictionAccuracyWidget } = vi.hoisted(() => ({
+    mockPredictionAccuracyWidget: vi.fn(
+        (props: {
+            readonly points: ReadonlyArray<{
+                readonly timestamp: string
+                readonly predictedIncidents: number
+                readonly actualIncidents: number
+                readonly accuracyScore: number
+            }>
+            readonly matrix: {
+                readonly truePositive: number
+                readonly trueNegative: number
+                readonly falsePositive: number
+                readonly falseNegative: number
+            }
+            readonly cases: ReadonlyArray<{
+                readonly id: string
+                readonly fileId: string
+                readonly label: string
+                readonly predictedRiskLevel: "low" | "medium" | "high"
+                readonly actualOutcome: "incident" | "stable"
+            }>
+            readonly activeCaseId?: string
+            readonly onSelectCase?: (entry: {
+                readonly id: string
+                readonly fileId: string
+                readonly label: string
+                readonly predictedRiskLevel: "low" | "medium" | "high"
+                readonly actualOutcome: "incident" | "stable"
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>prediction-accuracy-points:{props.points.length}</p>
+                    <p>prediction-accuracy-true-positive:{props.matrix.truePositive}</p>
+                    <p>prediction-accuracy-cases:{props.cases.length}</p>
+                    <p>prediction-accuracy-active:{props.activeCaseId ?? "none"}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstCase = props.cases.at(0)
+                            if (firstCase !== undefined) {
+                                props.onSelectCase?.(firstCase)
+                            }
+                        }}
+                        type="button"
+                    >
+                        inspect prediction accuracy case
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockCityBusFactorOverlay } = vi.hoisted(() => ({
     mockCityBusFactorOverlay: vi.fn(
         (props: {
@@ -1296,6 +1349,9 @@ vi.mock("@/components/graphs/prediction-explain-panel", () => ({
 vi.mock("@/components/graphs/trend-forecast-chart", () => ({
     TrendForecastChart: mockTrendForecastChart,
 }))
+vi.mock("@/components/graphs/prediction-accuracy-widget", () => ({
+    PredictionAccuracyWidget: mockPredictionAccuracyWidget,
+}))
 vi.mock("@/components/graphs/city-bus-factor-overlay", () => ({
     CityBusFactorOverlay: mockCityBusFactorOverlay,
 }))
@@ -1353,6 +1409,7 @@ beforeEach((): void => {
     mockPredictionDashboard.mockClear()
     mockPredictionExplainPanel.mockClear()
     mockTrendForecastChart.mockClear()
+    mockPredictionAccuracyWidget.mockClear()
     mockCityBusFactorOverlay.mockClear()
     mockBusFactorTrendChart.mockClear()
     mockKnowledgeSiloPanel.mockClear()
@@ -1524,6 +1581,11 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstTrendForecastCall).not.toBeUndefined()
         expect(firstTrendForecastCall?.points.length).toBeGreaterThan(0)
 
+        const firstPredictionAccuracyCall = mockPredictionAccuracyWidget.mock.calls.at(0)?.[0]
+        expect(firstPredictionAccuracyCall).not.toBeUndefined()
+        expect(firstPredictionAccuracyCall?.points.length).toBeGreaterThan(0)
+        expect(firstPredictionAccuracyCall?.cases.length).toBeGreaterThan(0)
+
         const firstBusFactorCall = mockCityBusFactorOverlay.mock.calls.at(0)?.[0]
         expect(firstBusFactorCall).not.toBeUndefined()
         expect(firstBusFactorCall?.entries.length).toBeGreaterThan(0)
@@ -1676,6 +1738,14 @@ describe("CodeCityDashboardPage", (): void => {
         const trendForecast3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(trendForecast3DCall).not.toBeUndefined()
         expect(trendForecast3DCall?.navigationLabel).toContain("Trend forecast:")
+
+        await user.click(screen.getByRole("button", { name: "inspect prediction accuracy case" }))
+        const accuracyTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(accuracyTreemapCall).not.toBeUndefined()
+        expect(accuracyTreemapCall?.highlightedFileId).toBe("src/api/auth.ts")
+        const accuracy3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(accuracy3DCall).not.toBeUndefined()
+        expect(accuracy3DCall?.navigationLabel).toContain("Prediction accuracy:")
 
         await user.click(screen.getByRole("button", { name: "inspect change risk point" }))
         const riskNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]

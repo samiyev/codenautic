@@ -58,6 +58,12 @@ import {
     type ITrendForecastChartPoint,
 } from "@/components/graphs/trend-forecast-chart"
 import {
+    PredictionAccuracyWidget,
+    type IPredictionAccuracyCase,
+    type IPredictionAccuracyPoint,
+    type IPredictionConfusionMatrix,
+} from "@/components/graphs/prediction-accuracy-widget"
+import {
     CityOwnershipOverlay,
     type ICityOwnershipOverlayOwnerEntry,
 } from "@/components/graphs/city-ownership-overlay"
@@ -1404,6 +1410,107 @@ function buildTrendForecastChartPoints(
 }
 
 /**
+ * Формирует accuracy trend для prediction-модуля.
+ *
+ * @param healthTrend Исторический health trend.
+ * @returns Точки accuracy trend.
+ */
+function buildPredictionAccuracyPoints(
+    healthTrend: ReadonlyArray<IHealthTrendPoint>,
+): ReadonlyArray<IPredictionAccuracyPoint> {
+    return healthTrend.slice(-4).map((point, index): IPredictionAccuracyPoint => {
+        const predictedIncidents = Math.max(1, Math.round((100 - point.healthScore) / 8) + index)
+        const actualIncidents = Math.max(
+            0,
+            predictedIncidents + (index % 2 === 0 ? -1 : 1),
+        )
+        const denominator = Math.max(predictedIncidents, actualIncidents, 1)
+        const accuracyScore = Math.max(
+            0,
+            Math.min(
+                100,
+                Math.round(100 - (Math.abs(predictedIncidents - actualIncidents) / denominator) * 100),
+            ),
+        )
+        return {
+            accuracyScore,
+            actualIncidents,
+            predictedIncidents,
+            timestamp: resolvePredictionTrendTimestampLabel(point.timestamp),
+        }
+    })
+}
+
+/**
+ * Формирует confusion matrix для prediction accuracy widget.
+ *
+ * @param entries Prediction overlay entries.
+ * @returns TP/TN/FP/FN агрегаты.
+ */
+function buildPredictionConfusionMatrix(
+    entries: ReadonlyArray<ICityPredictionOverlayEntry>,
+): IPredictionConfusionMatrix {
+    let truePositive = 0
+    let trueNegative = 0
+    let falsePositive = 0
+    let falseNegative = 0
+
+    entries.slice(0, 8).forEach((entry, index): void => {
+        const predictedIncident = entry.riskLevel === "high" || entry.riskLevel === "medium"
+        const actualIncident = index % 3 !== 0
+        if (predictedIncident && actualIncident) {
+            truePositive += 1
+            return
+        }
+        if (predictedIncident && actualIncident === false) {
+            falsePositive += 1
+            return
+        }
+        if (predictedIncident === false && actualIncident) {
+            falseNegative += 1
+            return
+        }
+        trueNegative += 1
+    })
+
+    return {
+        falseNegative,
+        falsePositive,
+        trueNegative,
+        truePositive,
+    }
+}
+
+/**
+ * Формирует кейсы "we predicted X, Y happened" для accuracy виджета.
+ *
+ * @param files Файлы текущего профиля.
+ * @param entries Prediction overlay entries.
+ * @returns Список кейсов по hotspot-файлам.
+ */
+function buildPredictionAccuracyCases(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+    entries: ReadonlyArray<ICityPredictionOverlayEntry>,
+): ReadonlyArray<IPredictionAccuracyCase> {
+    const fileById = new Map<string, ICodeCityTreemapFileDescriptor>(
+        files.map((file): readonly [string, ICodeCityTreemapFileDescriptor] => [file.id, file]),
+    )
+
+    return entries.slice(0, 6).map((entry, index): IPredictionAccuracyCase => {
+        const file = fileById.get(entry.fileId)
+        const bugIntroductions30d = file?.bugIntroductions?.["30d"] ?? 0
+        const actualOutcome = bugIntroductions30d > 1 || index % 2 === 0 ? "incident" : "stable"
+        return {
+            actualOutcome,
+            fileId: entry.fileId,
+            id: `prediction-accuracy-${entry.fileId}`,
+            label: entry.label,
+            predictedRiskLevel: entry.riskLevel,
+        }
+    })
+}
+
+/**
  * Формирует список bug-prone файлов для prediction dashboard.
  *
  * @param files Файлы текущего профиля.
@@ -2168,6 +2275,9 @@ export function CodeCityDashboardPage(
     const [activePredictionFileId, setActivePredictionFileId] = useState<string | undefined>()
     const [activePredictionHotspotId, setActivePredictionHotspotId] = useState<string | undefined>()
     const [activeTrendForecastPointId, setActiveTrendForecastPointId] = useState<string | undefined>()
+    const [activePredictionAccuracyCaseId, setActivePredictionAccuracyCaseId] = useState<
+        string | undefined
+    >()
     const [activeKnowledgeSiloId, setActiveKnowledgeSiloId] = useState<string | undefined>()
     const [activeContributorId, setActiveContributorId] = useState<string | undefined>()
     const [activeOwnershipTransitionId, setActiveOwnershipTransitionId] = useState<string | undefined>()
@@ -2208,6 +2318,12 @@ export function CodeCityDashboardPage(
     )
     const trendForecastPoints = buildTrendForecastChartPoints(
         currentProfile.healthTrend,
+        predictionOverlayEntries,
+    )
+    const predictionAccuracyPoints = buildPredictionAccuracyPoints(currentProfile.healthTrend)
+    const predictionConfusionMatrix = buildPredictionConfusionMatrix(predictionOverlayEntries)
+    const predictionAccuracyCases = buildPredictionAccuracyCases(
+        currentProfile.files,
         predictionOverlayEntries,
     )
     const predictionBugProneFiles = buildPredictionBugProneFiles(
@@ -2294,6 +2410,7 @@ export function CodeCityDashboardPage(
         setActivePredictionFileId(undefined)
         setActivePredictionHotspotId(undefined)
         setActiveTrendForecastPointId(undefined)
+        setActivePredictionAccuracyCaseId(undefined)
         setActiveKnowledgeSiloId(undefined)
         setActiveContributorId(undefined)
         setActiveOwnershipTransitionId(undefined)
@@ -2786,6 +2903,35 @@ export function CodeCityDashboardPage(
                             markAreaExplored("city-3d")
                         }}
                         points={trendForecastPoints}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">
+                        Prediction accuracy widget
+                    </p>
+                </CardHeader>
+                <CardBody>
+                    <PredictionAccuracyWidget
+                        activeCaseId={activePredictionAccuracyCaseId}
+                        cases={predictionAccuracyCases}
+                        matrix={predictionConfusionMatrix}
+                        onSelectCase={(entry): void => {
+                            setActivePredictionAccuracyCaseId(entry.id)
+                            setActivePredictionHotspotId(undefined)
+                            setActivePredictionFileId(entry.fileId)
+                            setHighlightedFileId(entry.fileId)
+                            setExploreNavigationFocus({
+                                activeFileId: entry.fileId,
+                                chainFileIds: [entry.fileId],
+                                title: `Prediction accuracy: ${entry.label}`,
+                            })
+                            markAreaExplored("controls")
+                            markAreaExplored("city-3d")
+                        }}
+                        points={predictionAccuracyPoints}
                     />
                 </CardBody>
             </Card>
