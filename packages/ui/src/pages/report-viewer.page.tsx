@@ -12,6 +12,7 @@ import {
     YAxis,
 } from "recharts"
 
+import { AiSummaryWidget } from "@/components/reports/ai-summary-widget"
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
@@ -200,6 +201,8 @@ export function ReportViewerPage(): ReactElement {
                     </Alert>
                 </CardBody>
             </Card>
+
+            <AiSummaryWidget initialSummary="Delivery velocity improved while report risk score trended down across the selected period." />
         </section>
     )
 }
