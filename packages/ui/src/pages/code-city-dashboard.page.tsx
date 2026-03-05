@@ -38,6 +38,7 @@ import {
     OnboardingProgressTracker,
     type IOnboardingProgressModuleDescriptor,
 } from "@/components/graphs/onboarding-progress-tracker"
+import { TourCustomizer } from "@/components/graphs/tour-customizer"
 import { ProjectOverviewPanel } from "@/components/graphs/project-overview-panel"
 import { ChurnComplexityScatter } from "@/components/graphs/churn-complexity-scatter"
 import { HealthTrendChart, type IHealthTrendPoint } from "@/components/graphs/health-trend-chart"
@@ -821,15 +822,17 @@ export function CodeCityDashboardPage(
     const [exploredAreaIds, setExploredAreaIds] = useState<ReadonlyArray<string>>(["controls"])
     const [guidedTourStepIndex, setGuidedTourStepIndex] = useState<number>(0)
     const [isGuidedTourActive, setIsGuidedTourActive] = useState<boolean>(true)
+    const [customTourSteps, setCustomTourSteps] = useState<ReadonlyArray<IGuidedTourStep>>([])
     const [rootCauseChainFocus, setRootCauseChainFocus] = useState<IRootCauseChainFocusPayload>({
         chainFileIds: [],
         issueId: "",
         issueTitle: "",
     })
+    const guidedTourSteps =
+        customTourSteps.length > 0 ? customTourSteps : CODE_CITY_GUIDED_TOUR_STEPS
     const activeGuidedTourStep =
-        CODE_CITY_GUIDED_TOUR_STEPS[
-            Math.max(0, Math.min(guidedTourStepIndex, CODE_CITY_GUIDED_TOUR_STEPS.length - 1))
-        ] ?? CODE_CITY_GUIDED_TOUR_STEPS[0]
+        guidedTourSteps[Math.max(0, Math.min(guidedTourStepIndex, guidedTourSteps.length - 1))] ??
+        guidedTourSteps[0]
 
     const currentProfile = resolveDashboardProfile(repositoryId)
     const rootCauseIssues = buildRootCauseIssues(currentProfile.files)
@@ -899,6 +902,16 @@ export function CodeCityDashboardPage(
         markAreaExplored("city-3d")
     }
 
+    const handleTourStepsChange = (nextSteps: ReadonlyArray<IGuidedTourStep>): void => {
+        if (nextSteps.length === 0) {
+            return
+        }
+        setCustomTourSteps(nextSteps)
+        setGuidedTourStepIndex((currentStepIndex): number => {
+            return Math.min(currentStepIndex, nextSteps.length - 1)
+        })
+    }
+
     const resolveTourCardClassName = (stepId: string): string | undefined => {
         if (isGuidedTourActive === false || activeGuidedTourStep?.id !== stepId) {
             return undefined
@@ -921,7 +934,7 @@ export function CodeCityDashboardPage(
                         }
                     }
                     setGuidedTourStepIndex((currentStepIndex): number => {
-                        const lastStepIndex = CODE_CITY_GUIDED_TOUR_STEPS.length - 1
+                        const lastStepIndex = guidedTourSteps.length - 1
                         if (currentStepIndex >= lastStepIndex) {
                             setIsGuidedTourActive(false)
                             return currentStepIndex
@@ -937,8 +950,20 @@ export function CodeCityDashboardPage(
                 onSkip={(): void => {
                     setIsGuidedTourActive(false)
                 }}
-                steps={CODE_CITY_GUIDED_TOUR_STEPS}
+                steps={guidedTourSteps}
             />
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Tour customizer</p>
+                </CardHeader>
+                <CardBody>
+                    <TourCustomizer
+                        isAdmin={true}
+                        onStepsChange={handleTourStepsChange}
+                        steps={guidedTourSteps}
+                    />
+                </CardBody>
+            </Card>
             <Card className={resolveTourCardClassName("controls")}>
                 <CardHeader>
                     <p className="text-sm font-semibold text-slate-900">CodeCity dashboard</p>

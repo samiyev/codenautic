@@ -227,6 +227,45 @@ const { mockOnboardingProgressTracker } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockTourCustomizer } = vi.hoisted(() => ({
+    mockTourCustomizer: vi.fn(
+        (props: {
+            readonly isAdmin: boolean
+            readonly steps: ReadonlyArray<{
+                readonly id: string
+                readonly title: string
+                readonly description: string
+            }>
+            readonly onStepsChange: (steps: ReadonlyArray<{
+                readonly id: string
+                readonly title: string
+                readonly description: string
+            }>) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>tour-customizer-steps:{props.steps.length}</p>
+                    <p>tour-customizer-admin:{props.isAdmin ? "yes" : "no"}</p>
+                    <button
+                        onClick={(): void => {
+                            props.onStepsChange([
+                                ...props.steps,
+                                {
+                                    description: "Custom stop injected by test",
+                                    id: "custom-stop",
+                                    title: "Custom stop",
+                                },
+                            ])
+                        }}
+                        type="button"
+                    >
+                        apply custom tour
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockRootCauseChainViewer } = vi.hoisted(() => ({
     mockRootCauseChainViewer: vi.fn(
         (props: {
@@ -292,6 +331,9 @@ vi.mock("@/components/graphs/hot-area-highlights", () => ({
 vi.mock("@/components/graphs/onboarding-progress-tracker", () => ({
     OnboardingProgressTracker: mockOnboardingProgressTracker,
 }))
+vi.mock("@/components/graphs/tour-customizer", () => ({
+    TourCustomizer: mockTourCustomizer,
+}))
 vi.mock("@/components/graphs/root-cause-chain-viewer", () => ({
     RootCauseChainViewer: mockRootCauseChainViewer,
 }))
@@ -306,6 +348,7 @@ beforeEach((): void => {
     mockExploreModeSidebar.mockClear()
     mockHotAreaHighlights.mockClear()
     mockOnboardingProgressTracker.mockClear()
+    mockTourCustomizer.mockClear()
     mockRootCauseChainViewer.mockClear()
 })
 
@@ -408,14 +451,21 @@ describe("CodeCityDashboardPage", (): void => {
         const firstRootCauseCall = mockRootCauseChainViewer.mock.calls.at(0)?.[0]
         expect(firstRootCauseCall).not.toBeUndefined()
         expect(firstRootCauseCall?.issues.length).toBe(0)
+
+        const firstTourCustomizerCall = mockTourCustomizer.mock.calls.at(0)?.[0]
+        expect(firstTourCustomizerCall).not.toBeUndefined()
+        expect(firstTourCustomizerCall?.isAdmin).toBe(true)
+        expect(firstTourCustomizerCall?.steps.length).toBe(3)
     })
 
     it("обновляет treemap при смене репозитория и метрики", async (): Promise<void> => {
         const user = userEvent.setup()
         renderWithProviders(<CodeCityDashboardPage />)
 
+        await user.click(screen.getByRole("button", { name: "apply custom tour" }))
+        expect(screen.getByText("Step 1 of 4")).not.toBeNull()
         await user.click(screen.getByRole("button", { name: "Next tour step" }))
-        expect(screen.getByText("Step 2 of 3")).not.toBeNull()
+        expect(screen.getByText("Step 2 of 4")).not.toBeNull()
         await user.click(screen.getByRole("button", { name: "Skip guided tour" }))
         expect(screen.queryByText("Guided tour")).toBeNull()
         await user.click(screen.getByRole("button", { name: "trigger explore navigate" }))
