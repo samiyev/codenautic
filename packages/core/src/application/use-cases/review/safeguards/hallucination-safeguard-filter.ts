@@ -9,6 +9,7 @@ import {createDiscardedSuggestion, isCodeBlockInFile} from "./safeguard-filter.u
 import type {IHallucinationSafeguardDefaults} from "../../../dto/config/system-defaults.dto"
 import type {IGeneratePromptInput} from "../../generate-prompt.use-case"
 import {ValidationError} from "../../../../domain/errors/validation.error"
+import type {PromptResolutionError} from "../../../shared/prompt-resolution"
 import {resolveSystemPrompt as resolveSharedSystemPrompt} from "../../../shared/prompt-resolution"
 import {readObjectField, readStringField} from "../pipeline-stage-state.utils"
 
@@ -16,10 +17,6 @@ const FILTER_NAME = "hallucination"
 const DISCARD_REASON = "hallucination"
 const LLM_VALIDATION_CACHE_PREFIX = "hallucination-validation"
 const PROMPT_TEMPLATE_NAME = "hallucination-check"
-const DEFAULT_SYSTEM_PROMPT =
-    "You are a strict static review validator. Return only compact JSON: " +
-    '{"isSupported": true|false}. ' +
-    "isSupported must be true when suggestion is clearly grounded in patch."
 
 interface IHallucinationPromptContext {
     readonly filePath: string
@@ -218,7 +215,42 @@ export class HallucinationSafeguardFilter implements ISafeGuardFilter {
             return override
         }
 
-        return DEFAULT_SYSTEM_PROMPT
+        throw this.createPromptResolutionError(promptResult.error)
+    }
+
+    private createPromptResolutionError(error: PromptResolutionError): Error {
+        const message = this.buildPromptResolutionMessage(error.reason)
+        const failure = new Error(message)
+        if (error.originalError !== undefined) {
+            ;(failure as {cause?: Error}).cause = error.originalError
+        }
+
+        return failure
+    }
+
+    private buildPromptResolutionMessage(reason: PromptResolutionError["reason"]): string {
+        switch (reason) {
+            case "missing":
+                return (
+                    `Missing prompt template '${PROMPT_TEMPLATE_NAME}' ` +
+                    "for hallucination safeguard"
+                )
+            case "empty":
+                return (
+                    `Empty prompt template '${PROMPT_TEMPLATE_NAME}' ` +
+                    "for hallucination safeguard"
+                )
+            case "exception":
+                return (
+                    `Failed to resolve prompt template '${PROMPT_TEMPLATE_NAME}' ` +
+                    "for hallucination safeguard"
+                )
+            default:
+                return (
+                    `Failed to resolve prompt template '${PROMPT_TEMPLATE_NAME}' ` +
+                    "for hallucination safeguard"
+                )
+        }
     }
 
     /**

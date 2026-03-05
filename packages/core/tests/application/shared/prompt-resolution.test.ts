@@ -77,6 +77,28 @@ describe("prompt resolution", () => {
         expect(result.error.reason).toBe("missing")
     })
 
+    test("resolveSystemPrompt uses default prompt when template is missing", async () => {
+        const generatePromptUseCase: IUseCase<IGeneratePromptInput, string, ValidationError> = {
+            execute(): Promise<Result<string, ValidationError>> {
+                return Promise.resolve(Result.fail<string, ValidationError>(
+                    new ValidationError("Missing", [{
+                        field: "name",
+                        message: "Template not found",
+                    }]),
+                ))
+            },
+        }
+
+        const result = await resolveSystemPrompt({
+            ...DEFAULT_PROMPT_INPUT,
+            generatePromptUseCase,
+            defaultPrompt: "  Default prompt  ",
+        })
+
+        expect(result.isOk).toBe(true)
+        expect(result.value).toBe("Default prompt")
+    })
+
     test("resolveSystemPrompt reports empty prompt", async () => {
         const generatePromptUseCase: IUseCase<IGeneratePromptInput, string, ValidationError> = {
             execute(): Promise<Result<string, ValidationError>> {

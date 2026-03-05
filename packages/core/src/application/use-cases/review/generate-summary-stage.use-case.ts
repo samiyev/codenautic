@@ -104,8 +104,43 @@ export class GenerateSummaryStageUseCase implements IPipelineStageUseCase {
             organizationId: organizationId ?? null,
             runtimeVariables: {},
         })
-        const systemPrompt = promptResult.isOk ? promptResult.value : this.defaults.systemPrompt
-        const request = this.buildSummaryRequest(input, systemPrompt)
+        if (promptResult.isFail) {
+            const reason = promptResult.error.reason
+            if (reason === "missing") {
+                return Result.fail<IStageTransition, StageError>(
+                    this.createStageError(
+                        input.state.runId,
+                        input.state.definitionVersion,
+                        `Missing prompt template '${PROMPT_OVERRIDE_KEY}' for summary stage`,
+                        false,
+                        promptResult.error.originalError,
+                    ),
+                )
+            }
+
+            if (reason === "empty") {
+                return Result.fail<IStageTransition, StageError>(
+                    this.createStageError(
+                        input.state.runId,
+                        input.state.definitionVersion,
+                        `Empty prompt template '${PROMPT_OVERRIDE_KEY}' for summary stage`,
+                        false,
+                    ),
+                )
+            }
+
+            return Result.fail<IStageTransition, StageError>(
+                this.createStageError(
+                    input.state.runId,
+                    input.state.definitionVersion,
+                    "Failed to resolve prompt template for summary stage",
+                    true,
+                    promptResult.error.originalError,
+                ),
+            )
+        }
+
+        const request = this.buildSummaryRequest(input, promptResult.value)
 
         try {
             const response = await this.llmProvider.chat(request)

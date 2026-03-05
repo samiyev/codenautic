@@ -321,7 +321,7 @@ describe("Safeguard filters", () => {
         expect(provider.requests[0]?.messages[0]?.content).toBe("HALLUCINATION_TEMPLATE")
     })
 
-    test("falls back to default prompt when template resolution fails", async () => {
+    test("throws when template resolution fails without override", () => {
         const provider = new InMemoryLLMProvider()
         provider.responses.push({content: '{"isSupported": true}'})
         const generatePromptUseCase = new InMemoryGeneratePromptUseCase()
@@ -347,11 +347,9 @@ describe("Safeguard filters", () => {
             codeBlock: "function x() {}",
         })
 
-        const result = await filter.filter([suggestion], state)
-
-        expect(result.passed).toHaveLength(1)
-        expect(provider.requests).toHaveLength(1)
-        expect(provider.requests[0]?.messages[0]?.content).toContain("strict static review validator")
+        return expect(filter.filter([suggestion], state)).rejects.toThrow(
+            "Missing prompt template 'hallucination-check'",
+        )
     })
 
     test("falls back to config override when template resolution fails", async () => {

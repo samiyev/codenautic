@@ -278,7 +278,7 @@ describe("GenerateSummaryStageUseCase", () => {
         expect(result.error.message).toContain("generate or publish review summary")
     })
 
-    test("falls back to defaults when summary template is missing", async () => {
+    test("returns stage error when summary template is missing", async () => {
         const llmProvider = new InMemoryLLMProvider()
         llmProvider.responseText = "Fallback summary"
         const gitProvider = new InMemoryGitProvider()
@@ -303,7 +303,8 @@ describe("GenerateSummaryStageUseCase", () => {
             state,
         })
 
-        expect(result.isOk).toBe(true)
-        expect(llmProvider.lastRequest?.messages[0]?.content).toBe(summaryDefaults.systemPrompt)
+        expect(result.isFail).toBe(true)
+        expect(result.error.recoverable).toBe(false)
+        expect(result.error.message).toContain("Missing prompt template 'summary'")
     })
 })

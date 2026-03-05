@@ -41,11 +41,12 @@ export class PromptResolutionError extends Error {
 /**
  * Input for resolving system prompt via template use case.
  */
-export interface IResolveSystemPromptInput {
+export interface IPromptResolutionConfig {
     readonly generatePromptUseCase: IUseCase<IGeneratePromptInput, string, ValidationError>
     readonly promptName: string
     readonly organizationId?: string | null
     readonly runtimeVariables?: Record<string, unknown>
+    readonly defaultPrompt?: string
 }
 
 /**
@@ -94,7 +95,7 @@ export interface IResolveRuleContextInput {
  * @returns Prompt resolution result.
  */
 export async function resolveSystemPrompt(
-    input: IResolveSystemPromptInput,
+    input: IPromptResolutionConfig,
 ): Promise<Result<string, PromptResolutionError>> {
     try {
         const result = await input.generatePromptUseCase.execute({
@@ -103,21 +104,24 @@ export async function resolveSystemPrompt(
             runtimeVariables: input.runtimeVariables ?? {},
         })
         if (result.isFail) {
-            return Result.fail<string, PromptResolutionError>(
+            return resolveFallbackPrompt(
+                input.defaultPrompt,
                 new PromptResolutionError("missing", result.error),
             )
         }
 
         const normalized = result.value.trim()
         if (normalized.length === 0) {
-            return Result.fail<string, PromptResolutionError>(
+            return resolveFallbackPrompt(
+                input.defaultPrompt,
                 new PromptResolutionError("empty"),
             )
         }
 
         return Result.ok<string, PromptResolutionError>(normalized)
     } catch (error: unknown) {
-        return Result.fail<string, PromptResolutionError>(
+        return resolveFallbackPrompt(
+            input.defaultPrompt,
             new PromptResolutionError(
                 "exception",
                 error instanceof Error ? error : undefined,
@@ -255,4 +259,29 @@ function buildRuleContextResolutionMessage(reason: RuleContextResolutionFailureR
         default:
             return "Rule context resolution failed"
     }
+}
+
+/**
+ * Resolves fallback prompt when supplied.
+ *
+ * @param defaultPrompt Optional default prompt.
+ * @param baseError Original prompt resolution error.
+ * @returns Default prompt result or original error.
+ */
+function resolveFallbackPrompt(
+    defaultPrompt: string | undefined,
+    baseError: PromptResolutionError,
+): Result<string, PromptResolutionError> {
+    if (defaultPrompt === undefined) {
+        return Result.fail<string, PromptResolutionError>(baseError)
+    }
+
+    const normalized = defaultPrompt.trim()
+    if (normalized.length === 0) {
+        return Result.fail<string, PromptResolutionError>(
+            new PromptResolutionError("empty"),
+        )
+    }
+
+    return Result.ok<string, PromptResolutionError>(normalized)
 }
