@@ -621,6 +621,60 @@ const { mockCityPredictionOverlay } = vi.hoisted(() => ({
         },
     ),
 }))
+const { mockPredictionDashboard } = vi.hoisted(() => ({
+    mockPredictionDashboard: vi.fn(
+        (props: {
+            readonly hotspots: ReadonlyArray<{
+                readonly id: string
+                readonly fileId: string
+                readonly label: string
+                readonly riskLevel: "low" | "medium" | "high"
+                readonly confidenceScore: number
+                readonly predictedIssueIncrease: number
+            }>
+            readonly qualityTrendPoints: ReadonlyArray<{
+                readonly timestamp: string
+                readonly qualityScore: number
+                readonly forecastQualityScore: number
+            }>
+            readonly bugProneFiles: ReadonlyArray<{
+                readonly fileId: string
+                readonly label: string
+                readonly bugIntroductions30d: number
+                readonly confidenceScore: number
+            }>
+            readonly activeHotspotId?: string
+            readonly onSelectHotspot?: (entry: {
+                readonly id: string
+                readonly fileId: string
+                readonly label: string
+                readonly riskLevel: "low" | "medium" | "high"
+                readonly confidenceScore: number
+                readonly predictedIssueIncrease: number
+            }) => void
+        }): React.JSX.Element => {
+            return (
+                <div>
+                    <p>prediction-hotspots:{props.hotspots.length}</p>
+                    <p>prediction-quality-trend:{props.qualityTrendPoints.length}</p>
+                    <p>prediction-bug-prone:{props.bugProneFiles.length}</p>
+                    <p>prediction-hotspot-active:{props.activeHotspotId ?? "none"}</p>
+                    <button
+                        onClick={(): void => {
+                            const firstHotspot = props.hotspots.at(0)
+                            if (firstHotspot !== undefined) {
+                                props.onSelectHotspot?.(firstHotspot)
+                            }
+                        }}
+                        type="button"
+                    >
+                        inspect prediction dashboard hotspot
+                    </button>
+                </div>
+            )
+        },
+    ),
+}))
 const { mockCityBusFactorOverlay } = vi.hoisted(() => ({
     mockCityBusFactorOverlay: vi.fn(
         (props: {
@@ -1149,6 +1203,9 @@ vi.mock("@/components/graphs/city-impact-overlay", () => ({
 vi.mock("@/components/graphs/city-prediction-overlay", () => ({
     CityPredictionOverlay: mockCityPredictionOverlay,
 }))
+vi.mock("@/components/graphs/prediction-dashboard", () => ({
+    PredictionDashboard: mockPredictionDashboard,
+}))
 vi.mock("@/components/graphs/city-bus-factor-overlay", () => ({
     CityBusFactorOverlay: mockCityBusFactorOverlay,
 }))
@@ -1203,6 +1260,7 @@ beforeEach((): void => {
     mockImpactAnalysisPanel.mockClear()
     mockCityImpactOverlay.mockClear()
     mockCityPredictionOverlay.mockClear()
+    mockPredictionDashboard.mockClear()
     mockCityBusFactorOverlay.mockClear()
     mockBusFactorTrendChart.mockClear()
     mockKnowledgeSiloPanel.mockClear()
@@ -1360,6 +1418,12 @@ describe("CodeCityDashboardPage", (): void => {
         expect(firstPredictionCall).not.toBeUndefined()
         expect(firstPredictionCall?.entries.length).toBeGreaterThan(0)
 
+        const firstPredictionDashboardCall = mockPredictionDashboard.mock.calls.at(0)?.[0]
+        expect(firstPredictionDashboardCall).not.toBeUndefined()
+        expect(firstPredictionDashboardCall?.hotspots.length).toBeGreaterThan(0)
+        expect(firstPredictionDashboardCall?.qualityTrendPoints.length).toBeGreaterThan(0)
+        expect(firstPredictionDashboardCall?.bugProneFiles.length).toBeGreaterThan(0)
+
         const firstBusFactorCall = mockCityBusFactorOverlay.mock.calls.at(0)?.[0]
         expect(firstBusFactorCall).not.toBeUndefined()
         expect(firstBusFactorCall?.entries.length).toBeGreaterThan(0)
@@ -1488,6 +1552,14 @@ describe("CodeCityDashboardPage", (): void => {
         const prediction3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(prediction3DCall).not.toBeUndefined()
         expect(prediction3DCall?.navigationLabel).toContain("Prediction overlay:")
+
+        await user.click(screen.getByRole("button", { name: "inspect prediction dashboard hotspot" }))
+        const predictionDashboardTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
+        expect(predictionDashboardTreemapCall).not.toBeUndefined()
+        expect(predictionDashboardTreemapCall?.highlightedFileId).toBe("src/api/auth.ts")
+        const predictionDashboard3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
+        expect(predictionDashboard3DCall).not.toBeUndefined()
+        expect(predictionDashboard3DCall?.navigationLabel).toContain("Prediction dashboard:")
 
         await user.click(screen.getByRole("button", { name: "inspect change risk point" }))
         const riskNavigation3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]

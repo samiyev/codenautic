@@ -44,6 +44,12 @@ import {
     type ICityPredictionOverlayEntry,
 } from "@/components/graphs/city-prediction-overlay"
 import {
+    PredictionDashboard,
+    type IPredictionDashboardBugProneFile,
+    type IPredictionDashboardHotspotEntry,
+    type IPredictionDashboardQualityTrendPoint,
+} from "@/components/graphs/prediction-dashboard"
+import {
     CityOwnershipOverlay,
     type ICityOwnershipOverlayOwnerEntry,
 } from "@/components/graphs/city-ownership-overlay"
@@ -1289,6 +1295,113 @@ function buildPredictionOverlayEntries(
         .slice(0, 8)
 }
 
+function resolvePredictionIssueIncrease(
+    file: ICodeCityTreemapFileDescriptor | undefined,
+    riskLevel: TCodeCityTreemapPredictionRiskLevel,
+): number {
+    const bugIntroductions30d = file?.bugIntroductions?.["30d"] ?? 0
+    if (riskLevel === "high") {
+        return Math.max(3, bugIntroductions30d + 1)
+    }
+    if (riskLevel === "medium") {
+        return Math.max(2, Math.ceil(bugIntroductions30d / 2))
+    }
+    return 1
+}
+
+/**
+ * Формирует hotspot-модель для prediction dashboard.
+ *
+ * @param files Файлы текущего профиля.
+ * @param overlayEntries Prediction overlay entries.
+ * @returns Набор hotspot-элементов с прогнозом роста issues.
+ */
+function buildPredictionDashboardHotspots(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+    overlayEntries: ReadonlyArray<ICityPredictionOverlayEntry>,
+): ReadonlyArray<IPredictionDashboardHotspotEntry> {
+    const fileById = new Map<string, ICodeCityTreemapFileDescriptor>(
+        files.map((file): readonly [string, ICodeCityTreemapFileDescriptor] => [file.id, file]),
+    )
+
+    return overlayEntries.slice(0, 6).map((entry): IPredictionDashboardHotspotEntry => {
+        const file = fileById.get(entry.fileId)
+        return {
+            confidenceScore: entry.confidenceScore,
+            fileId: entry.fileId,
+            id: `prediction-hotspot-${entry.fileId}`,
+            label: entry.label,
+            predictedIssueIncrease: resolvePredictionIssueIncrease(file, entry.riskLevel),
+            riskLevel: entry.riskLevel,
+        }
+    })
+}
+
+function resolvePredictionTrendTimestampLabel(timestamp: string): string {
+    const date = new Date(timestamp)
+    if (Number.isNaN(date.getTime())) {
+        return timestamp
+    }
+    return new Intl.DateTimeFormat("en", {
+        day: "2-digit",
+        month: "short",
+    }).format(date)
+}
+
+/**
+ * Формирует quality trend + forecast точки для prediction dashboard.
+ *
+ * @param healthTrend Исторический health trend.
+ * @returns Точки качества с прогнозом.
+ */
+function buildPredictionQualityTrendPoints(
+    healthTrend: ReadonlyArray<IHealthTrendPoint>,
+): ReadonlyArray<IPredictionDashboardQualityTrendPoint> {
+    return healthTrend.slice(-4).map((point, index): IPredictionDashboardQualityTrendPoint => {
+        const driftPenalty = (index + 1) * 2
+        return {
+            forecastQualityScore: Math.max(1, Math.round(point.healthScore - driftPenalty)),
+            qualityScore: Math.max(1, Math.round(point.healthScore)),
+            timestamp: resolvePredictionTrendTimestampLabel(point.timestamp),
+        }
+    })
+}
+
+/**
+ * Формирует список bug-prone файлов для prediction dashboard.
+ *
+ * @param files Файлы текущего профиля.
+ * @param overlayEntries Prediction overlay entries.
+ * @returns Список bug-prone файлов с confidence.
+ */
+function buildPredictionBugProneFiles(
+    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
+    overlayEntries: ReadonlyArray<ICityPredictionOverlayEntry>,
+): ReadonlyArray<IPredictionDashboardBugProneFile> {
+    const confidenceByFileId = new Map<string, number>(
+        overlayEntries.map(
+            (entry): readonly [string, number] => [entry.fileId, entry.confidenceScore],
+        ),
+    )
+
+    return files
+        .map((file): IPredictionDashboardBugProneFile => {
+            return {
+                bugIntroductions30d: file.bugIntroductions?.["30d"] ?? 0,
+                confidenceScore: confidenceByFileId.get(file.id) ?? resolvePredictionConfidence(file),
+                fileId: file.id,
+                label: file.path,
+            }
+        })
+        .sort((leftFile, rightFile): number => {
+            if (rightFile.bugIntroductions30d !== leftFile.bugIntroductions30d) {
+                return rightFile.bugIntroductions30d - leftFile.bugIntroductions30d
+            }
+            return rightFile.confidenceScore - leftFile.confidenceScore
+        })
+        .slice(0, 6)
+}
+
 /**
  * Формирует маппинг file -> prediction risk для визуальных outline в treemap.
  *
@@ -1983,6 +2096,7 @@ export function CodeCityDashboardPage(
     const [activeBusFactorDistrictId, setActiveBusFactorDistrictId] = useState<string | undefined>()
     const [activeBusFactorTrendModuleId, setActiveBusFactorTrendModuleId] = useState<string | undefined>()
     const [activePredictionFileId, setActivePredictionFileId] = useState<string | undefined>()
+    const [activePredictionHotspotId, setActivePredictionHotspotId] = useState<string | undefined>()
     const [activeKnowledgeSiloId, setActiveKnowledgeSiloId] = useState<string | undefined>()
     const [activeContributorId, setActiveContributorId] = useState<string | undefined>()
     const [activeOwnershipTransitionId, setActiveOwnershipTransitionId] = useState<string | undefined>()
@@ -2014,6 +2128,17 @@ export function CodeCityDashboardPage(
     const impactAnalysisSeeds = buildImpactAnalysisSeeds(currentProfile.files)
     const cityImpactOverlayEntries = buildCityImpactOverlayEntries(impactAnalysisSeeds)
     const predictionOverlayEntries = buildPredictionOverlayEntries(currentProfile.files)
+    const predictionDashboardHotspots = buildPredictionDashboardHotspots(
+        currentProfile.files,
+        predictionOverlayEntries,
+    )
+    const predictionQualityTrendPoints = buildPredictionQualityTrendPoints(
+        currentProfile.healthTrend,
+    )
+    const predictionBugProneFiles = buildPredictionBugProneFiles(
+        currentProfile.files,
+        predictionOverlayEntries,
+    )
     const predictedRiskByFileId = buildPredictedRiskByFileId(predictionOverlayEntries)
     const busFactorOverlayEntries = buildBusFactorOverlayEntries(
         currentProfile.files,
@@ -2088,6 +2213,7 @@ export function CodeCityDashboardPage(
         setActiveBusFactorDistrictId(undefined)
         setActiveBusFactorTrendModuleId(undefined)
         setActivePredictionFileId(undefined)
+        setActivePredictionHotspotId(undefined)
         setActiveKnowledgeSiloId(undefined)
         setActiveContributorId(undefined)
         setActiveOwnershipTransitionId(undefined)
@@ -2492,6 +2618,7 @@ export function CodeCityDashboardPage(
                         entries={predictionOverlayEntries}
                         onSelectEntry={(entry): void => {
                             setActivePredictionFileId(entry.fileId)
+                            setActivePredictionHotspotId(undefined)
                             setHighlightedFileId(entry.fileId)
                             setExploreNavigationFocus({
                                 activeFileId: entry.fileId,
@@ -2501,6 +2628,32 @@ export function CodeCityDashboardPage(
                             markAreaExplored("controls")
                             markAreaExplored("city-3d")
                         }}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-slate-900">Prediction dashboard</p>
+                </CardHeader>
+                <CardBody>
+                    <PredictionDashboard
+                        activeHotspotId={activePredictionHotspotId}
+                        bugProneFiles={predictionBugProneFiles}
+                        hotspots={predictionDashboardHotspots}
+                        onSelectHotspot={(entry): void => {
+                            setActivePredictionHotspotId(entry.id)
+                            setActivePredictionFileId(entry.fileId)
+                            setHighlightedFileId(entry.fileId)
+                            setExploreNavigationFocus({
+                                activeFileId: entry.fileId,
+                                chainFileIds: [entry.fileId],
+                                title: `Prediction dashboard: ${entry.label}`,
+                            })
+                            markAreaExplored("controls")
+                            markAreaExplored("city-3d")
+                        }}
+                        qualityTrendPoints={predictionQualityTrendPoints}
                     />
                 </CardBody>
             </Card>
