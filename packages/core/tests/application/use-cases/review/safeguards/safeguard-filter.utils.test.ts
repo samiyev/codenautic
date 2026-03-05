@@ -40,7 +40,8 @@ describe("safeguard-filter utils", () => {
         expect(resolveSeverityWeight("HIGH")).toBe(Severity.create("HIGH").weight)
         expect(resolveSeverityWeight("unknown")).toBe(Severity.create(SEVERITY_LEVEL.INFO).weight)
         expect(resolveSeverityLevel("unknown")).toBe(SEVERITY_LEVEL.INFO)
-        expect(resolveCategoryWeight("Code Quality")).toBe(20)
+        expect(resolveCategoryWeight("Security")).toBe(20)
+        expect(resolveCategoryWeight("Style & Conventions")).toBe(3)
         expect(resolveCategoryWeight("unknown")).toBe(0)
     })
 

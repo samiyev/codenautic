@@ -1,26 +1,8 @@
-import {ISSUE_CATEGORY} from "../../../../domain/entities/review-issue.entity"
 import {Severity, SEVERITY_LEVEL} from "../../../../domain/value-objects/severity.value-object"
 import type {ISuggestionDTO} from "../../../dto/review/suggestion.dto"
 import type {IDiscardedSuggestionDTO} from "../../../dto/review/discarded-suggestion.dto"
 import {hash} from "../../../../shared/utils/hash"
-
-const CATEGORY_WEIGHT_BY_CATEGORY: Readonly<Record<string, number>> = {
-    [ISSUE_CATEGORY.BUG]: 40,
-    [ISSUE_CATEGORY.SECURITY]: 50,
-    [ISSUE_CATEGORY.PERFORMANCE]: 30,
-    [ISSUE_CATEGORY.MAINTAINABILITY]: 20,
-    [ISSUE_CATEGORY.STYLE]: 10,
-    [ISSUE_CATEGORY.OTHER]: 0,
-    architecture: 35,
-    code_quality: 20,
-    architecture_review: 35,
-    code_quality_review: 20,
-    tests: 25,
-    test: 25,
-    quality: 20,
-    breaking_change: 45,
-    breaking: 45,
-}
+import {CATEGORY_WEIGHTS} from "../../../shared/category-weights"
 
 /**
  * Filters and helpers for SafeGuard filter implementations.
@@ -81,7 +63,7 @@ export function resolveSeverityLevel(severity: string): string {
  */
 export function resolveCategoryWeight(category: string): number {
     const normalized = normalizeCategoryKey(category)
-    return CATEGORY_WEIGHT_BY_CATEGORY[normalized] ?? 0
+    return CATEGORY_WEIGHTS[normalized] ?? 0
 }
 
 /**
