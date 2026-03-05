@@ -78,6 +78,24 @@ describe("ccr review detail page", (): void => {
         ).not.toBeNull()
     })
 
+    it("рендерит CCR impact city view с blast radius и neighborhood context", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const ccr = getMockCcrRow(0)
+
+        renderWithProviders(<CcrReviewDetailPage ccr={ccr} />)
+
+        expect(screen.getByRole("heading", { name: "CCR impact CodeCity view" })).not.toBeNull()
+        expect(screen.getByText("Neighborhood context")).not.toBeNull()
+
+        await user.click(
+            screen.getByRole("checkbox", { name: "Select impact file src/auth/middleware.ts" }),
+        )
+        await user.click(screen.getByRole("button", { name: "Apply impact focus" }))
+
+        expect(screen.getByText(/Focused impact:/)).not.toBeNull()
+        expect(screen.getByRole("list", { name: "Active file neighborhood list" })).not.toBeNull()
+    })
+
     it("показывает restricted decision states для viewer роли", (): void => {
         const ccr = getMockCcrRow(0)
         window.localStorage.setItem("codenautic:rbac:role", "viewer")

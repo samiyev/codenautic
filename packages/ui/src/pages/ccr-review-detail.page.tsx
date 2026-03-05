@@ -8,6 +8,11 @@ import {
     type ICodeCityTreemapFileDescriptor,
     type ICodeCityTreemapImpactedFileDescriptor,
 } from "@/components/graphs/codecity-treemap"
+import {
+    ImpactAnalysisPanel,
+    type IImpactAnalysisSeed,
+    type IImpactAnalysisSelection,
+} from "@/components/graphs/impact-analysis-panel"
 import { ReviewCommentThread } from "@/components/reviews/review-comment-thread"
 import { CodeDiffViewer } from "@/components/reviews/code-diff-viewer"
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
@@ -162,6 +167,74 @@ function buildReviewContextTreemapFiles(
     })
 }
 
+function resolvePathDirectory(filePath: string): string {
+    const separatorIndex = filePath.lastIndexOf("/")
+    if (separatorIndex < 1) {
+        return "root"
+    }
+    return filePath.slice(0, separatorIndex)
+}
+
+function buildReviewImpactSeeds(
+    diffFiles: ReadonlyArray<ICcrDiffFile>,
+    fileIdByPath: Readonly<Record<string, string>>,
+): ReadonlyArray<IImpactAnalysisSeed> {
+    return diffFiles.map((file, index): IImpactAnalysisSeed => {
+        const changedLineCount = resolveDiffChangedLineCount(file)
+        const issueCount = resolveDiffIssueCount(file)
+        const relatedFiles = diffFiles
+            .map((entry): string => entry.filePath)
+            .filter((path): boolean => path !== file.filePath)
+            .slice(0, 3)
+
+        return {
+            affectedConsumers: relatedFiles.map((filePath): string => {
+                return `${resolvePathDirectory(filePath)} consumer`
+            }),
+            affectedFiles: relatedFiles,
+            affectedTests: relatedFiles.map((filePath): string => {
+                const normalizedPath = filePath.replace(/^src\//, "").replace(/\.tsx?$/, "")
+                return `tests/${normalizedPath}.test.ts`
+            }),
+            fileId: fileIdByPath[file.filePath] ?? `review-context-${String(index + 1).padStart(2, "0")}`,
+            id: `impact-seed-${String(index + 1).padStart(2, "0")}`,
+            label: file.filePath,
+            riskScore: Math.min(95, Math.max(20, changedLineCount * 8 + issueCount * 12)),
+        }
+    })
+}
+
+function buildReviewNeighborhoodByPath(
+    diffFiles: ReadonlyArray<ICcrDiffFile>,
+): Readonly<Record<string, ReadonlyArray<string>>> {
+    const allPaths = diffFiles.map((file): string => file.filePath)
+
+    return diffFiles.reduce(
+        (mapping, file, index): Record<string, ReadonlyArray<string>> => {
+            const currentDirectory = resolvePathDirectory(file.filePath)
+            const directoryNeighbors = allPaths.filter((candidatePath): boolean => {
+                if (candidatePath === file.filePath) {
+                    return false
+                }
+                return resolvePathDirectory(candidatePath) === currentDirectory
+            })
+            const positionalNeighbors = [allPaths[index - 1], allPaths[index + 1]].filter(
+                (candidate): candidate is string => candidate !== undefined && candidate !== file.filePath,
+            )
+            const orderedNeighbors = [...directoryNeighbors, ...positionalNeighbors].filter(
+                (candidatePath, candidateIndex, candidates): boolean =>
+                    candidates.indexOf(candidatePath) === candidateIndex,
+            )
+
+            return {
+                ...mapping,
+                [file.filePath]: orderedNeighbors.slice(0, 4),
+            }
+        },
+        {},
+    )
+}
+
 function mapReviewDecisionBadge(reviewDecision: TReviewDecision): {
     readonly color: "danger" | "primary" | "success"
     readonly label: string
@@ -308,6 +381,9 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     const [messagesByThread, setMessagesByThread] = useState<TThreadMessagesMap>({})
     const [selectedFeedbackReason, setSelectedFeedbackReason] =
         useState<TReviewerFeedbackReason>("false_positive")
+    const [impactFocusStatus, setImpactFocusStatus] = useState<string>(
+        "No blast radius focus applied yet.",
+    )
     const [feedbackHistory, setFeedbackHistory] = useState<ReadonlyArray<IReviewerFeedbackRecord>>([
         {
             createdAt: "2026-03-03T10:42:00Z",
@@ -402,6 +478,18 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
         },
         [ccr.attachedFiles, reviewContextFileIdByPath],
     )
+    const reviewImpactSeeds = useMemo((): ReadonlyArray<IImpactAnalysisSeed> => {
+        return buildReviewImpactSeeds(ccrDiffFiles, reviewContextFileIdByPath)
+    }, [ccrDiffFiles, reviewContextFileIdByPath])
+    const reviewNeighborhoodByPath = useMemo((): Readonly<Record<string, ReadonlyArray<string>>> => {
+        return buildReviewNeighborhoodByPath(ccrDiffFiles)
+    }, [ccrDiffFiles])
+    const activeNeighborhoodFiles = useMemo((): ReadonlyArray<string> => {
+        if (activeFilePath === undefined) {
+            return []
+        }
+        return reviewNeighborhoodByPath[activeFilePath] ?? []
+    }, [activeFilePath, reviewNeighborhoodByPath])
     const safeGuardTraceItems = useMemo((): ReadonlyArray<ISafeGuardTraceItem> => {
         return buildSafeGuardTraceItems(ccr)
     }, [ccr])
@@ -587,6 +675,16 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
         }
         setActiveFilePath(selectedFilePath)
     }
+    const handleApplyImpactFocus = (selection: IImpactAnalysisSelection): void => {
+        setImpactFocusStatus(
+            `Focused impact: ${selection.label} · risk ${String(selection.riskScore)} · blast radius ${String(selection.affectedFiles.length)} files.`,
+        )
+        const firstAffectedFile = selection.affectedFiles[0]
+        if (firstAffectedFile === undefined) {
+            return
+        }
+        setActiveFilePath(firstAffectedFile)
+    }
 
     return (
         <section className="space-y-4">
@@ -769,6 +867,67 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
 
                 <div className="min-w-0 space-y-4">
                     <CodeDiffViewer files={visibleDiffFiles} />
+                    <Card>
+                        <CardHeader>
+                            <p className="text-sm font-semibold text-slate-900">
+                                CCR impact city view
+                            </p>
+                        </CardHeader>
+                        <CardBody className="space-y-3">
+                            <p className="text-xs text-slate-600">
+                                Full CodeCity view with highlighted CCR files, blast radius controls,
+                                and neighborhood context for focused navigation.
+                            </p>
+                            <CodeCityTreemap
+                                files={reviewContextTreemapFiles}
+                                height="420px"
+                                highlightedFileId={reviewContextHighlightedFileId}
+                                impactedFiles={reviewContextImpactedFiles}
+                                onFileSelect={handleReviewContextMiniMapSelect}
+                                title="CCR impact CodeCity view"
+                            />
+                            <ImpactAnalysisPanel
+                                onApplyImpact={handleApplyImpactFocus}
+                                seeds={reviewImpactSeeds}
+                            />
+                            <Alert color="primary" title="Blast radius status" variant="flat">
+                                {impactFocusStatus}
+                            </Alert>
+                            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                                <p className="text-sm font-semibold text-slate-900">
+                                    Neighborhood context
+                                </p>
+                                <p className="text-xs text-slate-600">
+                                    Focused file: {activeFilePath ?? "none selected"}
+                                </p>
+                                {activeNeighborhoodFiles.length === 0 ? (
+                                    <p className="mt-2 text-xs text-slate-600">
+                                        No neighboring files resolved for current selection.
+                                    </p>
+                                ) : (
+                                    <ul
+                                        aria-label="Active file neighborhood list"
+                                        className="mt-2 space-y-1"
+                                    >
+                                        {activeNeighborhoodFiles.map((filePath): ReactElement => (
+                                            <li key={filePath}>
+                                                <button
+                                                    aria-label={`Open neighborhood file ${filePath}`}
+                                                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-left text-xs text-slate-700 hover:bg-slate-100"
+                                                    type="button"
+                                                    onClick={(): void => {
+                                                        setActiveFilePath(filePath)
+                                                    }}
+                                                >
+                                                    {filePath}
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        </CardBody>
+                    </Card>
                     {props.streamSourceUrl === undefined ? null : (
                         <SseStreamViewer
                             autoStart={false}
