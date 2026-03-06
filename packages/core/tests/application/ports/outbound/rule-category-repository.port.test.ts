@@ -65,6 +65,11 @@ class InMemoryRuleCategoryRepository implements IRuleCategoryRepository {
 
         return Promise.resolve()
     }
+
+    public deleteById(id: UniqueId): Promise<void> {
+        this.storage.delete(id.value)
+        return Promise.resolve()
+    }
 }
 
 function createCategory(
@@ -127,6 +132,24 @@ describe("IRuleCategoryRepository contract", () => {
             throw new Error("Expected security category to exist")
         }
         expect(result.slug).toBe("quality")
+    })
+
+    test("deletes category by id", async () => {
+        const repository = new InMemoryRuleCategoryRepository()
+        const category = createCategory({
+            slug: "deprecated",
+            name: "Deprecated",
+            description: "Deprecated checks",
+            weight: 0,
+            isActive: false,
+        })
+
+        await repository.save(category)
+        await repository.deleteById(category.id)
+
+        const found = await repository.findById(category.id)
+
+        expect(found).toBeNull()
     })
 
     test("finds all categories", async () => {

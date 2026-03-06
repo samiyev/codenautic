@@ -208,6 +208,17 @@ export {
     type IGetEnabledRulesOutput,
 } from "./application/dto/rules/get-enabled-rules.dto"
 export {
+    type IRuleCategoryDTO,
+    type ICreateRuleCategoryInput,
+    type ICreateRuleCategoryOutput,
+    type IUpdateRuleCategoryInput,
+    type IUpdateRuleCategoryOutput,
+    type IRuleCategoryIdInput,
+    type IDeleteRuleCategoryOutput,
+    type IListRuleCategoriesInput,
+    type IListRuleCategoriesOutput,
+} from "./application/dto/rules/rule-category.dto"
+export {
     type IGetCategoryWeightsInput,
     type IGetCategoryWeightsOutput,
 } from "./application/dto/rules/get-category-weights.dto"
@@ -450,6 +461,22 @@ export {
     ImportDefaultRuleCategoriesUseCase,
     type IImportDefaultRuleCategoriesUseCaseDependencies,
 } from "./application/use-cases/rules/import-default-rule-categories.use-case"
+export {
+    CreateRuleCategoryUseCase,
+    type ICreateRuleCategoryUseCaseDependencies,
+} from "./application/use-cases/rules/create-rule-category.use-case"
+export {
+    UpdateRuleCategoryUseCase,
+    type IUpdateRuleCategoryUseCaseDependencies,
+} from "./application/use-cases/rules/update-rule-category.use-case"
+export {
+    DeleteRuleCategoryUseCase,
+    type IDeleteRuleCategoryUseCaseDependencies,
+} from "./application/use-cases/rules/delete-rule-category.use-case"
+export {
+    ListRuleCategoriesUseCase,
+    type IListRuleCategoriesUseCaseDependencies,
+} from "./application/use-cases/rules/list-rule-categories.use-case"
 export {
     ImportDefaultLibraryRulesUseCase,
     type IImportDefaultLibraryRulesUseCaseDependencies,

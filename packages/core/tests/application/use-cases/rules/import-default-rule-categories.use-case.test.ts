@@ -60,6 +60,16 @@ class InMemoryRuleCategoryRepository implements IRuleCategoryRepository {
         }
         return Promise.resolve()
     }
+
+    public deleteById(id: UniqueId): Promise<void> {
+        for (const [slug, category] of this.storage.entries()) {
+            if (category.id.value === id.value) {
+                this.storage.delete(slug)
+                break
+            }
+        }
+        return Promise.resolve()
+    }
 }
 
 describe("ImportDefaultRuleCategoriesUseCase", () => {

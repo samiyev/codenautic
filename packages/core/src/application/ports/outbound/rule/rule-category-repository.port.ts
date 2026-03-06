@@ -1,5 +1,6 @@
 import type {RuleCategory} from "../../../../domain/entities/rule-category.entity"
 import type {IRepository} from "../common/repository.port"
+import type {UniqueId} from "../../../../domain/value-objects/unique-id.value-object"
 
 /**
  * Outbound contract for rule category persistence.
@@ -40,4 +41,11 @@ export interface IRuleCategoryRepository extends IRepository<RuleCategory> {
      * @param categories Categories to persist.
      */
     saveMany(categories: readonly RuleCategory[]): Promise<void>
+
+    /**
+     * Deletes category by identifier.
+     *
+     * @param id Category id.
+     */
+    deleteById(id: UniqueId): Promise<void>
 }

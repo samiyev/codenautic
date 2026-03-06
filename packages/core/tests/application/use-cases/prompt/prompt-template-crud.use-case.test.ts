@@ -303,6 +303,79 @@ describe("UpdatePromptTemplateUseCase", () => {
             },
         ])
     })
+
+    test("rejects unsupported category", async () => {
+        const repository = new InMemoryPromptTemplateRepository()
+        const factory = new PromptTemplateFactory()
+        const template = buildTemplate(factory, {name: "template-b"})
+        await repository.save(template)
+
+        const useCase = new UpdatePromptTemplateUseCase({
+            promptTemplateRepository: repository,
+            promptTemplateFactory: factory,
+            promptEngineService: new PromptEngineService(),
+        })
+
+        const result = await useCase.execute({
+            templateId: template.id.value,
+            category: "bad-category",
+        })
+
+        expect(result.isFail).toBe(true)
+        expect(result.error.fields).toEqual([
+            {
+                field: "category",
+                message: "must be a supported category",
+            },
+        ])
+    })
+
+    test("rejects unsupported type", async () => {
+        const repository = new InMemoryPromptTemplateRepository()
+        const factory = new PromptTemplateFactory()
+        const template = buildTemplate(factory, {name: "template-c"})
+        await repository.save(template)
+
+        const useCase = new UpdatePromptTemplateUseCase({
+            promptTemplateRepository: repository,
+            promptTemplateFactory: factory,
+            promptEngineService: new PromptEngineService(),
+        })
+
+        const result = await useCase.execute({
+            templateId: template.id.value,
+            type: "bad-type",
+        })
+
+        expect(result.isFail).toBe(true)
+        expect(result.error.fields).toEqual([
+            {
+                field: "type",
+                message: "must be a supported type",
+            },
+        ])
+    })
+
+    test("maps content validation errors", async () => {
+        const repository = new InMemoryPromptTemplateRepository()
+        const factory = new PromptTemplateFactory()
+        const template = buildTemplate(factory, {name: "template-d"})
+        await repository.save(template)
+
+        const useCase = new UpdatePromptTemplateUseCase({
+            promptTemplateRepository: repository,
+            promptTemplateFactory: factory,
+            promptEngineService: new PromptEngineService(),
+        })
+
+        const result = await useCase.execute({
+            templateId: template.id.value,
+            content: "a".repeat(20001),
+        })
+
+        expect(result.isFail).toBe(true)
+        expect(result.error.fields[0]?.field).toBe("content")
+    })
 })
 
 describe("GetPromptTemplateByIdUseCase", () => {

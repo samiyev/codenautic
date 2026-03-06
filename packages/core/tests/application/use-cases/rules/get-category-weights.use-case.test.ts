@@ -169,4 +169,8 @@ class InMemoryRuleCategoryRepository implements IRuleCategoryRepository {
     public saveMany(_categories: readonly RuleCategory[]): Promise<void> {
         return Promise.resolve()
     }
+
+    public deleteById(_id: UniqueId): Promise<void> {
+        return Promise.resolve()
+    }
 }
