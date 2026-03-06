@@ -1,5 +1,6 @@
 import type {ISuggestionDTO} from "../../dto/review/suggestion.dto"
 import type {IGitProvider} from "../../ports/outbound/git/git-provider.port"
+import type {ISystemSettingsProvider} from "../../ports/outbound/common/system-settings-provider.port"
 import type {
     IPipelineStageUseCase,
     IStageCommand,
@@ -15,7 +16,8 @@ import {
     readStringField,
 } from "./pipeline-stage-state.utils"
 
-const BLOCKING_SEVERITIES = new Set(["CRITICAL", "HIGH"])
+const DEFAULT_BLOCKING_SEVERITIES = new Set(["CRITICAL", "HIGH"])
+const BLOCKING_SEVERITIES_SETTINGS_KEY = "review.blocking_severities"
 
 interface ISuggestionStringFields {
     readonly id: string
@@ -37,6 +39,7 @@ interface ISuggestionMetaFields {
  */
 export interface IRequestChangesOrApproveStageDependencies {
     gitProvider: IGitProvider
+    systemSettingsProvider?: ISystemSettingsProvider
 }
 
 /**
@@ -47,6 +50,7 @@ export class RequestChangesOrApproveStageUseCase implements IPipelineStageUseCas
     public readonly stageName: string
 
     private readonly gitProvider: IGitProvider
+    private readonly systemSettingsProvider?: ISystemSettingsProvider
 
     /**
      * Creates request-changes-or-approve stage use case.
@@ -57,6 +61,7 @@ export class RequestChangesOrApproveStageUseCase implements IPipelineStageUseCas
         this.stageId = "request-changes-or-approve"
         this.stageName = "Request Changes Or Approve"
         this.gitProvider = dependencies.gitProvider
+        this.systemSettingsProvider = dependencies.systemSettingsProvider
     }
 
     /**
@@ -81,8 +86,9 @@ export class RequestChangesOrApproveStageUseCase implements IPipelineStageUseCas
 
         const suggestions = this.normalizeSuggestions(input.state.suggestions)
         const autoApprove = this.resolveAutoApprove(input.state.config)
+        const blockingSeverities = await this.resolveBlockingSeverities()
         const blockingSuggestions = suggestions.filter((suggestion): boolean => {
-            return BLOCKING_SEVERITIES.has(suggestion.severity.trim().toUpperCase())
+            return blockingSeverities.has(suggestion.severity.trim().toUpperCase())
         })
         const decision = autoApprove && blockingSuggestions.length === 0 ? "approved" : "changes_requested"
         const decisionReason = this.resolveDecisionReason(autoApprove, blockingSuggestions.length)
@@ -191,6 +197,61 @@ export class RequestChangesOrApproveStageUseCase implements IPipelineStageUseCas
         }
 
         return lines.join("\n")
+    }
+
+    /**
+     * Resolves blocking severities from system settings.
+     *
+     * @returns Blocking severities set.
+     */
+    private async resolveBlockingSeverities(): Promise<Set<string>> {
+        if (this.systemSettingsProvider === undefined) {
+            return DEFAULT_BLOCKING_SEVERITIES
+        }
+
+        try {
+            const payload = await this.systemSettingsProvider.get<unknown>(BLOCKING_SEVERITIES_SETTINGS_KEY)
+            const parsed = this.parseBlockingSeverities(payload)
+            if (parsed !== undefined) {
+                return parsed
+            }
+        } catch {
+            return DEFAULT_BLOCKING_SEVERITIES
+        }
+
+        return DEFAULT_BLOCKING_SEVERITIES
+    }
+
+    /**
+     * Parses blocking severities payload.
+     *
+     * @param payload Raw payload.
+     * @returns Set of severities or undefined.
+     */
+    private parseBlockingSeverities(payload: unknown): Set<string> | undefined {
+        if (!Array.isArray(payload)) {
+            return undefined
+        }
+
+        const normalized: string[] = []
+        for (const entry of payload) {
+            if (typeof entry !== "string") {
+                return undefined
+            }
+
+            const value = entry.trim().toUpperCase()
+            if (value.length === 0) {
+                return undefined
+            }
+
+            normalized.push(value)
+        }
+
+        if (normalized.length === 0) {
+            return undefined
+        }
+
+        return new Set(normalized)
     }
 
     /**

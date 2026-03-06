@@ -9,12 +9,31 @@ import {StageError} from "../../../domain/errors/stage.error"
 import {NotFoundError} from "../../../domain/errors/not-found.error"
 import {Result} from "../../../shared/result"
 import {INITIAL_STAGE_ATTEMPT, readStringField} from "./pipeline-stage-state.utils"
+import type {ISystemSettingsProvider} from "../../ports/outbound/common/system-settings-provider.port"
 
 interface IConfigResolutionContext {
     readonly repositoryId: string
     readonly organizationId: string
     readonly teamId: string
 }
+
+const REVIEW_DEFAULTS_SETTINGS_KEY = "review.defaults"
+
+const DEFAULT_REVIEW_DEFAULTS: Readonly<Record<string, unknown>> = Object.freeze({
+    severityThreshold: "LOW",
+    ignorePaths: [],
+    maxSuggestionsPerFile: 10,
+    maxSuggestionsPerCCR: 50,
+    cadence: "automatic",
+    customRuleIds: [],
+    batchSize: 30,
+    applyFiltersToCustomRules: true,
+    descriptionMode: "COMPLEMENT",
+    newCommitsDescriptionMode: "CONCATENATE",
+    autoPauseThreshold: 20,
+    maxReviewsPerWindow: 10,
+    throttleWindowSeconds: 3600,
+})
 
 /**
  * Stage 3 use case. Resolves layered review configuration (default -> org -> repo).
@@ -25,6 +44,8 @@ export class ResolveConfigStageUseCase implements IPipelineStageUseCase {
 
     private readonly repositoryConfigLoader: IRepositoryConfigLoader
     private readonly configMerger: ConfigurationMergerUseCase
+    private readonly systemSettingsProvider?: ISystemSettingsProvider
+    private readonly defaultConfigFallback: Readonly<Record<string, unknown>>
 
     /**
      * Creates resolve-config stage use case.
@@ -34,9 +55,13 @@ export class ResolveConfigStageUseCase implements IPipelineStageUseCase {
     public constructor(
         repositoryConfigLoader: IRepositoryConfigLoader,
         configMerger: ConfigurationMergerUseCase = new ConfigurationMergerUseCase(),
+        systemSettingsProvider?: ISystemSettingsProvider,
+        defaultConfigFallback: Readonly<Record<string, unknown>> = DEFAULT_REVIEW_DEFAULTS,
     ) {
         this.repositoryConfigLoader = repositoryConfigLoader
         this.configMerger = configMerger
+        this.systemSettingsProvider = systemSettingsProvider
+        this.defaultConfigFallback = defaultConfigFallback
     }
 
     /**
@@ -251,11 +276,59 @@ export class ResolveConfigStageUseCase implements IPipelineStageUseCase {
      * @returns Default config layer or null.
      */
     private async loadDefaultLayer(): Promise<Partial<Record<string, unknown>> | null> {
-        if (this.repositoryConfigLoader.loadDefault === undefined) {
+        let defaultLayer: Partial<Record<string, unknown>> | null = null
+
+        if (this.repositoryConfigLoader.loadDefault !== undefined) {
+            try {
+                defaultLayer = await this.repositoryConfigLoader.loadDefault()
+            } catch {
+                defaultLayer = null
+            }
+        }
+
+        if (defaultLayer !== null) {
+            return defaultLayer
+        }
+
+        const settingsLayer = await this.loadDefaultLayerFromSettings()
+        if (settingsLayer !== null) {
+            return settingsLayer
+        }
+
+        return this.defaultConfigFallback
+    }
+
+    /**
+     * Loads default config layer from system settings when available.
+     *
+     * @returns Settings-backed default layer or null.
+     */
+    private async loadDefaultLayerFromSettings(): Promise<Partial<Record<string, unknown>> | null> {
+        if (this.systemSettingsProvider === undefined) {
             return null
         }
 
-        return this.repositoryConfigLoader.loadDefault()
+        try {
+            const payload = await this.systemSettingsProvider.get<unknown>(REVIEW_DEFAULTS_SETTINGS_KEY)
+            const record = this.readPlainObject(payload)
+            return record ?? null
+        } catch {
+            return null
+        }
+    }
+
+    /**
+     * Reads plain object payload.
+     *
+     * @param payload Raw payload.
+     * @returns Record or undefined.
+     */
+    private readPlainObject(payload: unknown): Record<string, unknown> | undefined {
+        if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+            return undefined
+        }
+
+        return payload as Record<string, unknown>
     }
 
     /**

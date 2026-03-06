@@ -12,6 +12,7 @@ import type {
 import {CHECK_RUN_CONCLUSION, CHECK_RUN_STATUS} from "../../../../src"
 import {ReviewPipelineState} from "../../../../src/application/types/review/review-pipeline-state"
 import {RequestChangesOrApproveStageUseCase} from "../../../../src/application/use-cases/review/request-changes-or-approve-stage.use-case"
+import type {ISystemSettingsProvider} from "../../../../src/application/ports/outbound/common/system-settings-provider.port"
 
 class InMemoryGitProvider implements IGitProvider {
     public postedComments: string[] = []
@@ -81,6 +82,30 @@ class InMemoryGitProvider implements IGitProvider {
             status: CHECK_RUN_STATUS.COMPLETED,
             conclusion: CHECK_RUN_CONCLUSION.SUCCESS,
         })
+    }
+}
+
+class InMemorySystemSettingsProvider implements ISystemSettingsProvider {
+    private readonly values: Readonly<Record<string, unknown>>
+
+    public constructor(values: Readonly<Record<string, unknown>>) {
+        this.values = values
+    }
+
+    public get<T>(key: string): Promise<T | undefined> {
+        return Promise.resolve(this.values[key] as T | undefined)
+    }
+
+    public getMany<T>(keys: readonly string[]): Promise<ReadonlyMap<string, T>> {
+        const result = new Map<string, T>()
+        for (const key of keys) {
+            const value = this.values[key]
+            if (value !== undefined) {
+                result.set(key, value as T)
+            }
+        }
+
+        return Promise.resolve(result)
     }
 }
 
@@ -170,6 +195,68 @@ describe("RequestChangesOrApproveStageUseCase", () => {
 
         expect(result.isOk).toBe(true)
         expect(result.value.metadata?.checkpointHint).toBe("review-decision:changes_requested")
+        const decision = result.value.state.externalContext?.["reviewDecision"] as
+            | Readonly<Record<string, unknown>>
+            | undefined
+        expect(decision?.["decision"]).toBe("changes_requested")
+        expect(decision?.["blockingIssues"]).toBe(1)
+    })
+
+    test("uses blocking severities from settings", async () => {
+        const gitProvider = new InMemoryGitProvider()
+        const settingsProvider = new InMemorySystemSettingsProvider({
+            "review.blocking_severities": ["MEDIUM"],
+        })
+        const useCase = new RequestChangesOrApproveStageUseCase({
+            gitProvider,
+            systemSettingsProvider: settingsProvider,
+        })
+        const state = createState(
+            {
+                autoApprove: true,
+            },
+            [createSuggestion("MEDIUM")],
+            {
+                id: "mr-62",
+            },
+        )
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isOk).toBe(true)
+        const decision = result.value.state.externalContext?.["reviewDecision"] as
+            | Readonly<Record<string, unknown>>
+            | undefined
+        expect(decision?.["decision"]).toBe("changes_requested")
+        expect(decision?.["blockingIssues"]).toBe(1)
+    })
+
+    test("falls back to defaults when settings payload is invalid", async () => {
+        const gitProvider = new InMemoryGitProvider()
+        const settingsProvider = new InMemorySystemSettingsProvider({
+            "review.blocking_severities": ["   "],
+        })
+        const useCase = new RequestChangesOrApproveStageUseCase({
+            gitProvider,
+            systemSettingsProvider: settingsProvider,
+        })
+        const state = createState(
+            {
+                autoApprove: true,
+            },
+            [createSuggestion("HIGH")],
+            {
+                id: "mr-62",
+            },
+        )
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isOk).toBe(true)
         const decision = result.value.state.externalContext?.["reviewDecision"] as
             | Readonly<Record<string, unknown>>
             | undefined

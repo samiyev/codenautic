@@ -4,12 +4,37 @@ import type {IReviewConfigDTO} from "../../../../src/application/dto/review/revi
 import type {IRepositoryConfigLoader} from "../../../../src/application/ports/outbound/review/repository-config-loader.port"
 import {ReviewPipelineState} from "../../../../src/application/types/review/review-pipeline-state"
 import {ResolveConfigStageUseCase} from "../../../../src/application/use-cases/review/resolve-config-stage.use-case"
+import type {ISystemSettingsProvider} from "../../../../src/application/ports/outbound/common/system-settings-provider.port"
 
 const baseDefaultLayer: Partial<IReviewConfigDTO> = {
     severityThreshold: "MEDIUM",
     ignorePaths: [],
     maxSuggestionsPerFile: 5,
     maxSuggestionsPerCCR: 30,
+}
+
+class InMemorySystemSettingsProvider implements ISystemSettingsProvider {
+    private readonly values: Readonly<Record<string, unknown>>
+
+    public constructor(values: Readonly<Record<string, unknown>>) {
+        this.values = values
+    }
+
+    public get<T>(key: string): Promise<T | undefined> {
+        return Promise.resolve(this.values[key] as T | undefined)
+    }
+
+    public getMany<T>(keys: readonly string[]): Promise<ReadonlyMap<string, T>> {
+        const result = new Map<string, T>()
+        for (const key of keys) {
+            const value = this.values[key]
+            if (value !== undefined) {
+                result.set(key, value as T)
+            }
+        }
+
+        return Promise.resolve(result)
+    }
 }
 
 class InMemoryRepositoryConfigLoader implements IRepositoryConfigLoader {
@@ -138,7 +163,36 @@ describe("ResolveConfigStageUseCase", () => {
         })
     })
 
-    test("fails when default layer is missing", async () => {
+    test("falls back to settings defaults when loader default is missing", async () => {
+        const loader = new InMemoryRepositoryConfigLoader()
+        const settingsProvider = new InMemorySystemSettingsProvider({
+            "review.defaults": {
+                severityThreshold: "LOW",
+                ignorePaths: ["generated/**"],
+                maxSuggestionsPerFile: 8,
+                maxSuggestionsPerCCR: 50,
+                cadence: "automatic",
+                customRuleIds: [],
+            },
+        })
+        const useCase = new ResolveConfigStageUseCase(loader, undefined, settingsProvider)
+        const state = createState({
+            repositoryId: "repo-1",
+            organizationId: "org-1",
+            teamId: "team-1",
+        })
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isOk).toBe(true)
+        expect(result.value.state.config["severityThreshold"]).toBe("LOW")
+        expect(result.value.state.config["maxSuggestionsPerCCR"]).toBe(50)
+        expect(result.value.state.config["ignorePaths"]).toEqual(["generated/**"])
+    })
+
+    test("falls back to hardcoded defaults when settings are missing", async () => {
         const loader = new InMemoryRepositoryConfigLoader()
         const useCase = new ResolveConfigStageUseCase(loader)
         const state = createState({
@@ -151,8 +205,9 @@ describe("ResolveConfigStageUseCase", () => {
             state,
         })
 
-        expect(result.isFail).toBe(true)
-        expect(result.error.message).toBe("Default review configuration layer is missing")
+        expect(result.isOk).toBe(true)
+        expect(result.value.state.config["severityThreshold"]).toBe("LOW")
+        expect(result.value.state.config["maxSuggestionsPerCCR"]).toBe(50)
     })
 
     test("prefers new loadConfig method when implemented", async () => {

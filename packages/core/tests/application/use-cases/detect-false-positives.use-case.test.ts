@@ -3,6 +3,7 @@ import {describe, expect, test} from "bun:test"
 import {UniqueId} from "../../../src/domain/value-objects/unique-id.value-object"
 import {FEEDBACK_TYPE} from "../../../src/domain/events/feedback-received"
 import type {IFeedbackRecord, IFeedbackRepository} from "../../../src/application/ports/outbound/feedback-repository.port"
+import type {ISystemSettingsProvider} from "../../../src/application/ports/outbound/common/system-settings-provider.port"
 import {
     DetectFalsePositivesUseCase,
     type IDetectFalsePositivesInput,
@@ -78,6 +79,30 @@ class InMemoryFeedbackRepository implements IFeedbackRepository {
                 return record.ruleId === ruleId && record.type === FEEDBACK_TYPE.FALSE_POSITIVE
             }).length,
         )
+    }
+}
+
+class InMemorySystemSettingsProvider implements ISystemSettingsProvider {
+    private readonly values: Readonly<Record<string, unknown>>
+
+    public constructor(values: Readonly<Record<string, unknown>>) {
+        this.values = values
+    }
+
+    public get<T>(key: string): Promise<T | undefined> {
+        return Promise.resolve(this.values[key] as T | undefined)
+    }
+
+    public getMany<T>(keys: readonly string[]): Promise<ReadonlyMap<string, T>> {
+        const result = new Map<string, T>()
+        for (const key of keys) {
+            const value = this.values[key]
+            if (value !== undefined) {
+                result.set(key, value as T)
+            }
+        }
+
+        return Promise.resolve(result)
     }
 }
 
@@ -273,6 +298,53 @@ describe("DetectFalsePositivesUseCase", () => {
                 message: "minSampleSize must be a positive integer",
             },
         ])
+    })
+
+    test("uses system settings defaults when provided", async () => {
+        const settingsProvider = new InMemorySystemSettingsProvider({
+            "detection.false_positive_thresholds": {
+                threshold: 0.95,
+                deactivateThreshold: 0.98,
+                minSampleSize: 1,
+                minDeactivateSampleSize: 1,
+            },
+        })
+        const useCase = new DetectFalsePositivesUseCase({
+            feedbackRepository: new InMemoryFeedbackRepository(feedback),
+            systemSettingsProvider: settingsProvider,
+        })
+
+        const result = await useCase.execute({})
+
+        if (result.isFail) {
+            throw new Error("Expected success")
+        }
+
+        expect(result.value).toHaveLength(0)
+    })
+
+    test("falls back to defaults when settings are invalid", async () => {
+        const settingsProvider = new InMemorySystemSettingsProvider({
+            "detection.false_positive_thresholds": {
+                threshold: 2,
+                deactivateThreshold: -1,
+                minSampleSize: 0,
+                minDeactivateSampleSize: 0,
+            },
+        })
+        const useCase = new DetectFalsePositivesUseCase({
+            feedbackRepository: new InMemoryFeedbackRepository(feedback),
+            defaults: falsePositiveDefaults,
+            systemSettingsProvider: settingsProvider,
+        })
+
+        const result = await useCase.execute({})
+
+        if (result.isFail) {
+            throw new Error("Expected success")
+        }
+
+        expect(result.value).toHaveLength(2)
     })
 
     test("returns empty result when there is not enough evidence", async () => {

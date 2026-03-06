@@ -2,9 +2,34 @@ import {describe, expect, test} from "bun:test"
 
 import {ReviewPipelineState} from "../../../../src/application/types/review/review-pipeline-state"
 import {FileContextGateStageUseCase} from "../../../../src/application/use-cases/review/file-context-gate-stage.use-case"
+import type {ISystemSettingsProvider} from "../../../../src/application/ports/outbound/common/system-settings-provider.port"
 
 const fileContextDefaults = {
     batchSize: 30,
+}
+
+class InMemorySystemSettingsProvider implements ISystemSettingsProvider {
+    private readonly values: Readonly<Record<string, unknown>>
+
+    public constructor(values: Readonly<Record<string, unknown>>) {
+        this.values = values
+    }
+
+    public get<T>(key: string): Promise<T | undefined> {
+        return Promise.resolve(this.values[key] as T | undefined)
+    }
+
+    public getMany<T>(keys: readonly string[]): Promise<ReadonlyMap<string, T>> {
+        const result = new Map<string, T>()
+        for (const key of keys) {
+            const value = this.values[key]
+            if (value !== undefined) {
+                result.set(key, value as T)
+            }
+        }
+
+        return Promise.resolve(result)
+    }
 }
 
 /**
@@ -71,8 +96,13 @@ describe("FileContextGateStageUseCase", () => {
         expect(gateMetrics["filteredOutCount"]).toBe(1)
     })
 
-    test("keeps all files when context coverage is absent and uses default batch size", async () => {
-        const useCase = new FileContextGateStageUseCase(fileContextDefaults)
+    test("keeps all files when context coverage is absent and uses settings batch size", async () => {
+        const settingsProvider = new InMemorySystemSettingsProvider({
+            "review.file_context_gate_defaults": {
+                batchSize: 12,
+            },
+        })
+        const useCase = new FileContextGateStageUseCase(fileContextDefaults, settingsProvider)
         const state = createState([{path: "src/a.ts"}, {path: "src/b.ts"}], null, {})
 
         const result = await useCase.execute({
@@ -84,8 +114,28 @@ describe("FileContextGateStageUseCase", () => {
         const gateMetrics = result.value.state.externalContext?.[
             "fileContextGate"
         ] as Readonly<Record<string, unknown>>
-        expect(gateMetrics["batchSize"]).toBe(fileContextDefaults.batchSize)
+        expect(gateMetrics["batchSize"]).toBe(12)
         expect(gateMetrics["batchCount"]).toBe(1)
+    })
+
+    test("falls back to defaults when settings payload is invalid", async () => {
+        const settingsProvider = new InMemorySystemSettingsProvider({
+            "review.file_context_gate_defaults": {
+                batchSize: 0,
+            },
+        })
+        const useCase = new FileContextGateStageUseCase(fileContextDefaults, settingsProvider)
+        const state = createState([{path: "src/a.ts"}, {path: "src/b.ts"}], null, {})
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isOk).toBe(true)
+        const gateMetrics = result.value.state.externalContext?.[
+            "fileContextGate"
+        ] as Readonly<Record<string, unknown>>
+        expect(gateMetrics["batchSize"]).toBe(fileContextDefaults.batchSize)
     })
 
     test("drops malformed file entries without valid path", async () => {

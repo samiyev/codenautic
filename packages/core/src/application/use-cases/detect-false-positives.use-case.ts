@@ -1,5 +1,6 @@
 import type {IUseCase} from "../ports/inbound/use-case.port"
 import type {IFeedbackRepository} from "../ports/outbound/feedback-repository.port"
+import type {ISystemSettingsProvider} from "../ports/outbound/common/system-settings-provider.port"
 import {RuleEffectivenessService} from "../../domain/services/rule-effectiveness.service"
 import {ValidationError, type IValidationErrorField} from "../../domain/errors/validation.error"
 import {Result} from "../../shared/result"
@@ -16,6 +17,15 @@ interface IDetectFalsePositivesConfig {
     readonly minSampleSize: number
     readonly minDeactivateSampleSize: number
 }
+
+const FALSE_POSITIVE_DEFAULTS: IFalsePositiveDetectionDefaults = {
+    threshold: 0.5,
+    deactivateThreshold: 0.7,
+    minSampleSize: 5,
+    minDeactivateSampleSize: 10,
+}
+
+const FALSE_POSITIVE_DEFAULTS_SETTINGS_KEY = "detection.false_positive_thresholds"
 
 /**
  * Input for false-positive detection.
@@ -75,6 +85,7 @@ export class DetectFalsePositivesUseCase
 {
     private readonly feedbackRepository: IFeedbackRepository
     private readonly defaults: IFalsePositiveDetectionDefaults
+    private readonly systemSettingsProvider?: ISystemSettingsProvider
 
     /**
      * Creates use case.
@@ -83,10 +94,12 @@ export class DetectFalsePositivesUseCase
      */
     public constructor(dependencies: {
         readonly feedbackRepository: IFeedbackRepository
-        readonly defaults: IFalsePositiveDetectionDefaults
+        readonly defaults?: IFalsePositiveDetectionDefaults
+        readonly systemSettingsProvider?: ISystemSettingsProvider
     }) {
         this.feedbackRepository = dependencies.feedbackRepository
-        this.defaults = dependencies.defaults
+        this.defaults = dependencies.defaults ?? FALSE_POSITIVE_DEFAULTS
+        this.systemSettingsProvider = dependencies.systemSettingsProvider
     }
 
     /**
@@ -109,7 +122,8 @@ export class DetectFalsePositivesUseCase
             )
         }
 
-        const normalized = this.normalizeInput(input)
+        const defaults = await this.resolveDefaults()
+        const normalized = this.normalizeInput(input, defaults)
         if (normalized.result.isFail) {
             return Result.fail<readonly IDetectFalsePositivesOutput[], ValidationError>(
                 normalized.result.error,
@@ -192,22 +206,23 @@ export class DetectFalsePositivesUseCase
      */
     private normalizeInput(
         input: IDetectFalsePositivesInput,
+        defaults: IFalsePositiveDetectionDefaults,
     ): {readonly result: Result<IDetectFalsePositivesConfig & {ruleIds?: readonly string[]}, ValidationError>; readonly criteria?: IDetectFalsePositivesConfig & {
         readonly ruleIds?: readonly string[]
     }} {
         const fields: IValidationErrorField[] = []
-        const threshold = this.normalizeRate(input.threshold, this.defaults.threshold)
+        const threshold = this.normalizeRate(input.threshold, defaults.threshold)
         const deactivateThreshold = this.normalizeRate(
             input.deactivateThreshold,
-            this.defaults.deactivateThreshold,
+            defaults.deactivateThreshold,
         )
         const minSampleSize = this.normalizeSampleSize(
             input.minSampleSize,
-            this.defaults.minSampleSize,
+            defaults.minSampleSize,
         )
         const minDeactivateSampleSize = this.normalizeSampleSize(
             input.minDeactivateSampleSize,
-            this.defaults.minDeactivateSampleSize,
+            defaults.minDeactivateSampleSize,
         )
         const ruleIds = this.normalizeRuleIds(input.ruleIds, fields)
 
@@ -266,6 +281,95 @@ export class DetectFalsePositivesUseCase
             result: Result.ok<IDetectFalsePositivesConfig & {ruleIds?: readonly string[]}, ValidationError>(criteria),
             criteria,
         }
+    }
+
+    /**
+     * Resolves defaults from system settings with fallback values.
+     *
+     * @returns Detection defaults.
+     */
+    private async resolveDefaults(): Promise<IFalsePositiveDetectionDefaults> {
+        if (this.systemSettingsProvider === undefined) {
+            return this.defaults
+        }
+
+        try {
+            const payload = await this.systemSettingsProvider.get<unknown>(
+                FALSE_POSITIVE_DEFAULTS_SETTINGS_KEY,
+            )
+            const record = this.readDefaultsRecord(payload)
+            if (record === undefined) {
+                return this.defaults
+            }
+
+            const threshold = this.readRate(record["threshold"], this.defaults.threshold)
+            const deactivateThreshold = this.readRate(
+                record["deactivateThreshold"],
+                this.defaults.deactivateThreshold,
+            )
+            const minSampleSize = this.readSampleSize(record["minSampleSize"], this.defaults.minSampleSize)
+            const minDeactivateSampleSize = this.readSampleSize(
+                record["minDeactivateSampleSize"],
+                this.defaults.minDeactivateSampleSize,
+            )
+
+            const normalizedDeactivateThreshold = deactivateThreshold < threshold
+                ? Math.max(threshold, this.defaults.deactivateThreshold)
+                : deactivateThreshold
+
+            return {
+                threshold,
+                deactivateThreshold: normalizedDeactivateThreshold,
+                minSampleSize,
+                minDeactivateSampleSize,
+            }
+        } catch {
+            return this.defaults
+        }
+    }
+
+    /**
+     * Reads plain record payload.
+     *
+     * @param payload Raw payload.
+     * @returns Record or undefined.
+     */
+    private readDefaultsRecord(payload: unknown): Record<string, unknown> | undefined {
+        if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+            return undefined
+        }
+
+        return payload as Record<string, unknown>
+    }
+
+    /**
+     * Reads rate value with fallback.
+     *
+     * @param value Raw value.
+     * @param fallback Fallback value.
+     * @returns Valid rate.
+     */
+    private readRate(value: unknown, fallback: number): number {
+        if (typeof value !== "number" || Number.isNaN(value) || value < 0 || value > 1) {
+            return fallback
+        }
+
+        return value
+    }
+
+    /**
+     * Reads sample size with fallback.
+     *
+     * @param value Raw value.
+     * @param fallback Fallback value.
+     * @returns Valid sample size.
+     */
+    private readSampleSize(value: unknown, fallback: number): number {
+        if (typeof value !== "number" || Number.isNaN(value) || value < 1 || !Number.isInteger(value)) {
+            return fallback
+        }
+
+        return value
     }
 
     /**
