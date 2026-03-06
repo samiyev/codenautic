@@ -1,50 +1,30 @@
 import type {IUseCase} from "../../ports/inbound/use-case.port"
-import type {ISystemSettingsProvider} from "../../ports/outbound/common/system-settings-provider.port"
+import type {ISystemSettingsRepository} from "../../ports/outbound/common/system-settings-repository.port"
 import {ValidationError, type IValidationErrorField} from "../../../domain/errors/validation.error"
 import {Result} from "../../../shared/result"
-
-/**
- * Input payload for system setting lookup.
- */
-export interface IGetSystemSettingInput {
-    /**
-     * Setting key.
-     */
-    readonly key: string
-}
-
-/**
- * Output payload for system setting lookup.
- */
-export interface IGetSystemSettingOutput {
-    /**
-     * Requested key.
-     */
-    readonly key: string
-
-    /**
-     * Resolved setting value.
-     */
-    readonly value: unknown
-}
+import type {
+    IGetSystemSettingOutput,
+    ISystemSettingKeyInput,
+} from "../../dto/common/system-setting.dto"
+import {mapSystemSettingToDTO} from "../../dto/common/system-setting.dto"
 
 /**
  * Dependencies for system setting lookup.
  */
 export interface IGetSystemSettingUseCaseDependencies {
     /**
-     * Read-only settings provider.
+     * CRUD settings repository.
      */
-    readonly systemSettingsProvider: ISystemSettingsProvider
+    readonly systemSettingsRepository: ISystemSettingsRepository
 }
 
 /**
  * Returns one system setting by key.
  */
 export class GetSystemSettingUseCase
-    implements IUseCase<IGetSystemSettingInput, IGetSystemSettingOutput, ValidationError>
+    implements IUseCase<ISystemSettingKeyInput, IGetSystemSettingOutput, ValidationError>
 {
-    private readonly systemSettingsProvider: ISystemSettingsProvider
+    private readonly systemSettingsRepository: ISystemSettingsRepository
 
     /**
      * Creates use case instance.
@@ -52,7 +32,7 @@ export class GetSystemSettingUseCase
      * @param dependencies Dependency set.
      */
     public constructor(dependencies: IGetSystemSettingUseCaseDependencies) {
-        this.systemSettingsProvider = dependencies.systemSettingsProvider
+        this.systemSettingsRepository = dependencies.systemSettingsRepository
     }
 
     /**
@@ -62,7 +42,7 @@ export class GetSystemSettingUseCase
      * @returns Setting value or validation error.
      */
     public async execute(
-        input: IGetSystemSettingInput,
+        input: ISystemSettingKeyInput,
     ): Promise<Result<IGetSystemSettingOutput, ValidationError>> {
         const validationError = this.validateKey(input.key)
         if (validationError !== undefined) {
@@ -71,21 +51,21 @@ export class GetSystemSettingUseCase
             )
         }
 
-        try {
-            const value = await this.systemSettingsProvider.get<unknown>(input.key)
-            return Result.ok<IGetSystemSettingOutput, ValidationError>({
-                key: input.key,
-                value,
-            })
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : "system setting lookup failed"
+        const setting = await this.systemSettingsRepository.findByKey(input.key.trim())
+        if (setting === null) {
             return Result.fail<IGetSystemSettingOutput, ValidationError>(
-                new ValidationError("Get system setting failed", [{
-                    field: "key",
-                    message,
-                }]),
+                new ValidationError("Get system setting validation failed", [
+                    {
+                        field: "key",
+                        message: "setting not found",
+                    },
+                ]),
             )
         }
+
+        return Result.ok<IGetSystemSettingOutput, ValidationError>({
+            setting: mapSystemSettingToDTO(setting),
+        })
     }
 
     /**

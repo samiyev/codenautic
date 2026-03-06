@@ -3,6 +3,7 @@ export {type IReviewStageDeps} from "./application/shared/review-stage-deps"
 export {type IDomainEventBus} from "./application/ports/outbound/common/domain-event-bus.port"
 export {type ILogger} from "./application/ports/outbound/common/logger.port"
 export {type ISystemSettingsProvider} from "./application/ports/outbound/common/system-settings-provider.port"
+export {type ISystemSettingsRepository} from "./application/ports/outbound/common/system-settings-repository.port"
 export {type ISystemSettingsWriter} from "./application/ports/outbound/common/system-settings-writer.port"
 export {type IRepository} from "./application/ports/outbound/common/repository.port"
 export {type IProjectRepository} from "./application/ports/outbound/project-repository.port"
@@ -137,6 +138,17 @@ export {
     type IListPromptTemplatesOutput,
 } from "./application/dto/prompt/prompt-template.dto"
 export {type IImportResult} from "./application/dto/common/import-result.dto"
+export {
+    type ISystemSettingDTO,
+    type IUpsertSystemSettingInput,
+    type IUpsertSystemSettingOutput,
+    type ISystemSettingKeyInput,
+    type IGetSystemSettingInput,
+    type IGetSystemSettingOutput,
+    type IListSystemSettingsInput,
+    type IListSystemSettingsOutput,
+    type IDeleteSystemSettingOutput,
+} from "./application/dto/common/system-setting.dto"
 export {type IFileMetricsDTO} from "./application/dto/analytics"
 export {
     ANALYTICS_GROUP_BY,
@@ -563,10 +575,20 @@ export {
 } from "./application/use-cases/configuration-validator.use-case"
 export {
     GetSystemSettingUseCase,
-    type IGetSystemSettingInput,
-    type IGetSystemSettingOutput,
     type IGetSystemSettingUseCaseDependencies,
 } from "./application/use-cases/common/get-system-setting.use-case"
+export {
+    UpsertSystemSettingUseCase,
+    type IUpsertSystemSettingUseCaseDependencies,
+} from "./application/use-cases/common/upsert-system-setting.use-case"
+export {
+    ListSystemSettingsUseCase,
+    type IListSystemSettingsUseCaseDependencies,
+} from "./application/use-cases/common/list-system-settings.use-case"
+export {
+    DeleteSystemSettingUseCase,
+    type IDeleteSystemSettingUseCaseDependencies,
+} from "./application/use-cases/common/delete-system-setting.use-case"
 export {
     GeneratePromptUseCase,
     type IGeneratePromptInput,

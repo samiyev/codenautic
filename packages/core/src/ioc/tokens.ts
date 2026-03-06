@@ -5,6 +5,7 @@ import type {ICache} from "../application/ports/outbound/cache/cache.port"
 import type {IDomainEventBus} from "../application/ports/outbound/common/domain-event-bus.port"
 import type {ILogger} from "../application/ports/outbound/common/logger.port"
 import type {ISystemSettingsProvider} from "../application/ports/outbound/common/system-settings-provider.port"
+import type {ISystemSettingsRepository} from "../application/ports/outbound/common/system-settings-repository.port"
 import type {ISystemSettingsWriter} from "../application/ports/outbound/common/system-settings-writer.port"
 import type {ICustomRuleRepository} from "../application/ports/outbound/custom-rule-repository.port"
 import type {IFeedbackRepository} from "../application/ports/outbound/feedback-repository.port"
@@ -63,6 +64,9 @@ export const TOKENS = {
         Logger: createToken<ILogger>("core.common.logger"),
         SystemSettingsProvider: createToken<ISystemSettingsProvider>(
             "core.common.system-settings-provider",
+        ),
+        SystemSettingsRepository: createToken<ISystemSettingsRepository>(
+            "core.common.system-settings-repository",
         ),
         SystemSettingsWriter: createToken<ISystemSettingsWriter>(
             "core.common.system-settings-writer",
