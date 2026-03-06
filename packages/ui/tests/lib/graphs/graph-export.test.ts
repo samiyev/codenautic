@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import {
     buildGraphExportFileName,
+    resolveGraphPngCanvasSize,
     buildGraphSvg,
     exportGraphAsJson,
     exportGraphAsSvg,
@@ -53,6 +54,24 @@ describe("graph-export", (): void => {
         expect(svgPayload).toContain("&lt;details&gt;")
         expect(svgPayload).toContain("runtime")
         expect(svgPayload).toContain("src/index.ts")
+    })
+
+    it("ограничивает png canvas по размеру стороны и общему числу пикселей", (): void => {
+        expect(resolveGraphPngCanvasSize(1280, 720)).toEqual({
+            height: 720,
+            width: 1280,
+        })
+
+        const resized = resolveGraphPngCanvasSize(12000, 9000)
+        expect(resized.width).toBeLessThanOrEqual(4096)
+        expect(resized.height).toBeLessThanOrEqual(4096)
+        expect(resized.width * resized.height).toBeLessThanOrEqual(16_777_216)
+    })
+
+    it("ошибается на невалидных размерах png canvas", (): void => {
+        expect((): void => {
+            resolveGraphPngCanvasSize(0, 800)
+        }).toThrowError("Unable to resolve PNG export canvas size")
     })
 
     it("скачивает SVG как blob при вызове экспорта", (): void => {

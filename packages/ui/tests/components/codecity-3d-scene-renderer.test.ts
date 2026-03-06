@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import {
     createCodeCityCausalArcs,
     createCodeCityBuildingImpactMap,
     createCodeCityBuildingMeshes,
+    createCodeCityLayoutWorker,
     createCodeCityDistrictHealthAuras,
     createCodeCityDistrictMeshes,
     resolveCodeCityCausalArcColor,
@@ -260,6 +261,23 @@ describe("CodeCity3DSceneRenderer building generation", (): void => {
             quality: "medium",
             useInstancing: true,
         })
+    })
+
+    it("безопасно деградирует к sync layout при ошибке инициализации worker", (): void => {
+        vi.stubGlobal(
+            "Worker",
+            class {
+                public constructor() {
+                    throw new Error("Worker unavailable")
+                }
+            } as unknown as typeof Worker,
+        )
+
+        try {
+            expect(createCodeCityLayoutWorker()).toBeUndefined()
+        } finally {
+            vi.unstubAllGlobals()
+        }
     })
 
     it("строит causal arcs между связанными зданиями и кодирует цвет по типу связи", (): void => {

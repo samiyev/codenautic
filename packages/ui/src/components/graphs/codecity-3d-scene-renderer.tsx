@@ -173,6 +173,25 @@ interface ICodeCityLayoutWorkerResponse {
     readonly districts: ReadonlyArray<ICodeCityDistrictMesh>
 }
 
+/**
+ * Создаёт layout worker для расчёта геометрии CodeCity в фоне.
+ *
+ * @returns Экземпляр Worker или `undefined`, если инициализация недоступна.
+ */
+export function createCodeCityLayoutWorker(): Worker | undefined {
+    if (typeof Worker === "undefined") {
+        return undefined
+    }
+
+    try {
+        return new Worker(new URL("./codecity-3d-layout.worker.ts", import.meta.url), {
+            type: "module",
+        })
+    } catch {
+        return undefined
+    }
+}
+
 const BASE_CAMERA_PRESETS: Readonly<Record<TCodeCityCameraPreset, ICameraPresetTarget>> = {
     "bird-eye": {
         focus: [0, 0, 0],
@@ -1360,7 +1379,8 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
             }
         }
 
-        if (typeof Worker === "undefined") {
+        const layoutWorker = createCodeCityLayoutWorker()
+        if (layoutWorker === undefined) {
             setDistricts(createCodeCityDistrictMeshes(props.files))
             setBuildings(createCodeCityBuildingMeshes(props.files))
             return (): void => {
@@ -1369,9 +1389,6 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
         }
 
         let disposed = false
-        const layoutWorker = new Worker(new URL("./codecity-3d-layout.worker.ts", import.meta.url), {
-            type: "module",
-        })
         const handleMessage = (event: Event): void => {
             const messageEvent = event as MessageEvent<ICodeCityLayoutWorkerResponse>
             if (disposed || messageEvent.data.type !== "layout") {

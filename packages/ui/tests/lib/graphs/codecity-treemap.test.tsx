@@ -385,6 +385,34 @@ describe("codecity treemap graph", (): void => {
         ).not.toBeNull()
     })
 
+    it("сохраняет направленность temporal coupling для двусторонних связей", (): void => {
+        const bidirectionalCouplings: ReadonlyArray<ICodeCityTreemapTemporalCouplingDescriptor> = [
+            {
+                sourceFileId: "src/api/auth.ts",
+                targetFileId: "src/api/session.ts",
+                strength: 0.64,
+            },
+            {
+                sourceFileId: "src/api/session.ts",
+                targetFileId: "src/api/auth.ts",
+                strength: 0.52,
+            },
+        ]
+
+        render(
+            <CodeCityTreemap
+                files={sampleFiles}
+                temporalCouplings={bidirectionalCouplings}
+                title="CodeCity treemap"
+            />,
+        )
+
+        const lines = screen.getAllByTestId("temporal-coupling-line")
+        expect(lines).toHaveLength(2)
+        expect(lines[0]?.getAttribute("x1")).toBe(lines[1]?.getAttribute("x2"))
+        expect(lines[0]?.getAttribute("y1")).toBe(lines[1]?.getAttribute("y2"))
+    })
+
     it("подсвечивает файл на treemap после выбора из side panel", (): void => {
         render(
             <CodeCityTreemap
@@ -463,6 +491,30 @@ describe("codecity treemap graph", (): void => {
         fireEvent.click(backButton)
 
         expect(screen.getByText("Packages: 2, Files: 3, LOC: 150")).not.toBeNull()
+    })
+
+    it("ограничивает tab stop на file-level при больших наборах", (): void => {
+        const largeFiles: ReadonlyArray<ICodeCityTreemapFileDescriptor> = Array.from(
+            { length: 48 },
+            (_value, index): ICodeCityTreemapFileDescriptor => ({
+                complexity: 12,
+                coverage: 77,
+                id: `src/bulk/file-${String(index)}.ts`,
+                loc: 30 + index,
+                path: `src/bulk/file-${String(index)}.ts`,
+            }),
+        )
+
+        render(
+            <CodeCityTreemap
+                files={largeFiles}
+                title="Large treemap"
+            />,
+        )
+
+        const fileCell = screen.getByLabelText("File file-0.ts")
+        expect(fileCell).toHaveAttribute("tabindex", "-1")
+        expect(screen.getByLabelText("Open package src/bulk")).toHaveAttribute("tabindex", "0")
     })
 
     it("передаёт color + impact в payload и позволяет менять метрику", (): void => {

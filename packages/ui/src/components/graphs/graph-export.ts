@@ -7,6 +7,14 @@ interface IGraphSvgBounds {
     readonly width: number
 }
 
+interface IGraphPngCanvasSize {
+    readonly height: number
+    readonly width: number
+}
+
+const MAX_PNG_EXPORT_DIMENSION = 4096
+const MAX_PNG_EXPORT_PIXELS = 16_777_216
+
 /**
  * Escape helper для безопасной подстановки текста в SVG.
  *
@@ -73,6 +81,55 @@ function resolveGraphBounds(nodes: ReadonlyArray<IGraphLayoutNode>): IGraphSvgBo
         minY,
         width: maxX - minX,
         height: maxY - minY,
+    }
+}
+
+/**
+ * Ограничивает размер PNG-холста безопасными лимитами по стороне и числу пикселей.
+ *
+ * @param width Исходная ширина SVG-рендера.
+ * @param height Исходная высота SVG-рендера.
+ * @returns Размер canvas для PNG-экспорта.
+ */
+export function resolveGraphPngCanvasSize(width: number, height: number): IGraphPngCanvasSize {
+    if (
+        Number.isFinite(width) === false
+        || Number.isFinite(height) === false
+        || width <= 0
+        || height <= 0
+    ) {
+        throw new Error("Unable to resolve PNG export canvas size")
+    }
+
+    const normalizedWidth = Math.max(1, Math.floor(width))
+    const normalizedHeight = Math.max(1, Math.floor(height))
+    const totalPixels = normalizedWidth * normalizedHeight
+
+    if (
+        normalizedWidth <= MAX_PNG_EXPORT_DIMENSION
+        && normalizedHeight <= MAX_PNG_EXPORT_DIMENSION
+        && totalPixels <= MAX_PNG_EXPORT_PIXELS
+    ) {
+        return {
+            height: normalizedHeight,
+            width: normalizedWidth,
+        }
+    }
+
+    const dimensionScale = Math.min(
+        MAX_PNG_EXPORT_DIMENSION / normalizedWidth,
+        MAX_PNG_EXPORT_DIMENSION / normalizedHeight,
+        1,
+    )
+    const pixelScale = Math.min(1, Math.sqrt(MAX_PNG_EXPORT_PIXELS / totalPixels))
+    const scale = Math.max(
+        1 / Math.max(normalizedWidth, normalizedHeight),
+        Math.min(dimensionScale, pixelScale),
+    )
+
+    return {
+        height: Math.max(1, Math.floor(normalizedHeight * scale)),
+        width: Math.max(1, Math.floor(normalizedWidth * scale)),
     }
 }
 
@@ -206,14 +263,15 @@ export async function exportGraphAsPng(
             nextImage.src = svgUrl
         })
 
+        const canvasSize = resolveGraphPngCanvasSize(image.width, image.height)
         const canvas = document.createElement("canvas")
-        canvas.width = image.width
-        canvas.height = image.height
+        canvas.width = canvasSize.width
+        canvas.height = canvasSize.height
         const context = canvas.getContext("2d")
         if (context === null) {
             throw new Error("Unable to get 2d context")
         }
-        context.drawImage(image, 0, 0)
+        context.drawImage(image, 0, 0, canvasSize.width, canvasSize.height)
 
         const pngBlob = await new Promise<Blob>((resolve, reject) => {
             canvas.toBlob((blob): void => {

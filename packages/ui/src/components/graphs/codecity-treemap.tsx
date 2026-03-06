@@ -18,6 +18,7 @@ const DEFAULT_COMPARISON_LABEL = "previous snapshot"
 const DEFAULT_TEMPORAL_COUPLING_OVERLAY_ENABLED = true
 const DEFAULT_BUG_HEAT_RANGE: ICodeCityBugHeatRange = "30d"
 const CODE_CITY_COMPARISON_MARKER_HEIGHT = 4
+const MAX_KEYBOARD_FILE_TAB_STOPS = 40
 
 const CODE_CITY_METRICS = ["complexity", "coverage", "churn"] as const
 const CODE_CITY_BUG_HEAT_RANGES = ["7d", "30d", "90d"] as const
@@ -170,6 +171,7 @@ interface ICodeCityTreemapTreemapNodePayload {
 }
 
 interface ICodeCityTreemapTreemapContentProps {
+    readonly enableLeafTabStops?: boolean
     readonly onFileHover?: (payload?: ICodeCityTreemapFileTooltip) => void
     readonly onFileSelect?: (fileId: string) => void
     readonly fileLink?: (file: ICodeCityTreemapFileLinkResolver) => string
@@ -354,7 +356,7 @@ function buildTemporalCouplingLines(
             continue
         }
 
-        const edgeKey = sourceId < targetId ? `${sourceId}::${targetId}` : `${targetId}::${sourceId}`
+        const edgeKey = `${sourceId}::${targetId}`
         if (processedEdges.has(edgeKey) === true) {
             continue
         }
@@ -736,6 +738,7 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
         isLeaf === false ? undefined : props.predictedRiskByFileId?.get(fileId)
     const strokeStyle = resolveOutlineStyle(props, predictedRiskLevel)
     const isHighlightedFile = isLeaf && props.highlightedFileId === fileId
+    const isKeyboardTabStop = isPackage || (isLeaf === true && props.enableLeafTabStops === true)
 
     const handlePackageSelect = (): void => {
         if (isPackage === false || props.onPackageSelect === undefined || nodeName.length === 0) {
@@ -811,7 +814,7 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
             onKeyDown={handlePackageKeyDown}
             onClick={handleNodeClick}
             role="button"
-            tabIndex={0}
+            tabIndex={isKeyboardTabStop ? 0 : -1}
         >
             <rect
                 fill={color}
@@ -1337,6 +1340,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     const temporalCouplingSummaryText = hasTemporalCouplings
         ? `Temporal couplings: ${temporalCouplingLines.length} links`
         : "No temporal couplings for current package selection."
+    const enableLeafTabStops = summary.files <= MAX_KEYBOARD_FILE_TAB_STOPS
     const tooltipTitle = hoveredFile === undefined
         ? "Hover a file for quick metrics and quick link."
         : `File details for ${hoveredFile.fileName}`
@@ -1581,6 +1585,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                     onFileSelect: props.onFileSelect,
                                     fileLink: props.fileLink,
                                     highlightedFileId: props.highlightedFileId,
+                                    enableLeafTabStops,
                                     predictedRiskByFileId,
                                 })
                             }}
