@@ -71,6 +71,7 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
         "token=abc123456789\nowner=security@acme.dev\nnote=share review summary only",
     )
     const [redactedText, setRedactedText] = useState("")
+    const [redactedSourceText, setRedactedSourceText] = useState("")
     const [lastExportState, setLastExportState] = useState<string>("No export executed yet.")
 
     const sensitiveHits = useMemo((): ReadonlyArray<ISensitiveHit> => {
@@ -82,25 +83,30 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
     const handleApplyRedaction = (): void => {
         if (hasSensitiveData !== true) {
             setRedactedText(sourceText)
+            setRedactedSourceText(sourceText)
             showToastInfo("No sensitive fragments detected.")
             return
         }
 
         const nextRedacted = buildRedactedText(sourceText, sensitiveHits)
         setRedactedText(nextRedacted)
+        setRedactedSourceText(sourceText)
         showToastSuccess("Sensitive fragments redacted.")
     }
 
     const handleExport = (): void => {
-        if (hasSensitiveData === true && redactedText.length === 0) {
+        if (
+            hasSensitiveData === true
+            && (redactedText.length === 0 || redactedSourceText !== sourceText)
+        ) {
             setLastExportState(
-                "Export blocked: sensitive fragments detected. Apply redaction first.",
+                "Export blocked: sensitive fragments detected. Apply redaction for current source text first.",
             )
             showToastError("Export blocked by privacy guard.")
             return
         }
 
-        const exportedPayload = redactedText.length > 0 ? redactedText : sourceText
+        const exportedPayload = hasSensitiveData === true ? redactedText : sourceText
         setLastExportState(
             `Safe export confirmed (${exportedPayload.length} chars). Sensitive data removed.`,
         )

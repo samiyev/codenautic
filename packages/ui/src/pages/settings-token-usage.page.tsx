@@ -1,4 +1,4 @@
-import { type ReactElement, useMemo, useState } from "react"
+import { type ReactElement, useEffect, useMemo, useRef, useState } from "react"
 
 import { DataFreshnessPanel, type IProvenanceContext } from "@/components/infrastructure/data-freshness-panel"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
@@ -327,6 +327,7 @@ export function SettingsTokenUsagePage(): ReactElement {
     const [selectedTab, setSelectedTab] = useState<TUsageTab>("by-model")
     const [lastUpdatedAt, setLastUpdatedAt] = useState<string>("2026-03-04T10:25:00Z")
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false)
+    const refreshResetTimerRef = useRef<number | undefined>(undefined)
     const [freshnessActionMessage, setFreshnessActionMessage] = useState<string>("")
 
     const scaledRecords = useMemo(
@@ -406,12 +407,26 @@ export function SettingsTokenUsagePage(): ReactElement {
         [range],
     )
 
+    useEffect((): (() => void) => {
+        return (): void => {
+            if (refreshResetTimerRef.current !== undefined) {
+                window.clearTimeout(refreshResetTimerRef.current)
+                refreshResetTimerRef.current = undefined
+            }
+        }
+    }, [])
+
     const handleRefresh = (): void => {
+        if (refreshResetTimerRef.current !== undefined) {
+            window.clearTimeout(refreshResetTimerRef.current)
+        }
+
         setIsRefreshing(true)
         setLastUpdatedAt(new Date().toISOString())
         setFreshnessActionMessage("Token usage refresh requested.")
-        setTimeout((): void => {
+        refreshResetTimerRef.current = window.setTimeout((): void => {
             setIsRefreshing(false)
+            refreshResetTimerRef.current = undefined
         }, 450)
     }
 

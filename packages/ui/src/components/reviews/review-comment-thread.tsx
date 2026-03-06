@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, type ReactElement } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactElement } from "react"
 
 import type {
     IReviewCommentThread,
@@ -204,6 +204,10 @@ function ReviewCommentNode(props: IReviewCommentNodeProps): ReactElement {
 export function ReviewCommentThread(props: IReviewCommentThreadProps): ReactElement {
     const [threads, setThreads] = useState<ReadonlyArray<IReviewCommentThread>>(props.threads)
     const replyIdCounter = useRef(0)
+
+    useEffect((): void => {
+        setThreads(props.threads)
+    }, [props.threads])
 
     const handleToggleResolve = (commentId: string): void => {
         setThreads((previous): ReadonlyArray<IReviewCommentThread> => {

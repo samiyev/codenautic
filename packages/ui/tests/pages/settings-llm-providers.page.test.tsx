@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
-import { SettingsLlmProvidersPage } from "@/pages/settings-llm-providers.page"
+import { SettingsLlmProvidersPage, toNextProviderConfig } from "@/pages/settings-llm-providers.page"
 import { renderWithProviders } from "../utils/render"
 
 describe("SettingsLlmProvidersPage", (): void => {
@@ -37,5 +37,48 @@ describe("SettingsLlmProvidersPage", (): void => {
         await user.click(saveButton)
 
         expect((apiKeyField as HTMLInputElement).value).toBe("sk-test-1234567890")
+    })
+
+    it("сохраняет connected статус при save, даже если testAfterSave выключен", (): void => {
+        const previousConfig = {
+            "Anthropic": {
+                apiKey: "",
+                connected: false,
+                endpoint: "https://api.anthropic.com",
+                model: "claude-3-7-sonnet",
+                provider: "Anthropic",
+            },
+            "Azure OpenAI": {
+                apiKey: "",
+                connected: false,
+                endpoint: "https://azure-openai.example.com",
+                model: "gpt-4o-mini",
+                provider: "Azure OpenAI",
+            },
+            "Mistral": {
+                apiKey: "",
+                connected: false,
+                endpoint: "https://api.mistral.ai",
+                model: "mistral-small-latest",
+                provider: "Mistral",
+            },
+            "OpenAI": {
+                apiKey: "sk-connected-provider",
+                connected: true,
+                endpoint: "https://api.openai.com/v1",
+                model: "gpt-4o-mini",
+                provider: "OpenAI",
+            },
+        } as const
+
+        const updatedConfig = toNextProviderConfig(previousConfig, "OpenAI", {
+            apiKey: "sk-updated-provider",
+            endpoint: "https://api.openai.com/v1",
+            model: "gpt-4o-mini",
+            provider: "OpenAI",
+            testAfterSave: false,
+        })
+
+        expect(updatedConfig.OpenAI.connected).toBe(true)
     })
 })

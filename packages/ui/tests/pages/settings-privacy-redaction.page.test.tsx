@@ -33,4 +33,23 @@ describe("SettingsPrivacyRedactionPage", (): void => {
             expect(screen.getByText(/Safe export confirmed/)).not.toBeNull()
         })
     })
+
+    it("требует повторного redaction после изменения source text", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsPrivacyRedactionPage />)
+
+        await user.click(screen.getByRole("button", { name: "Apply redaction suggestions" }))
+        await waitFor(() => {
+            expect(screen.getByDisplayValue(/REDACTED_TOKEN/)).not.toBeNull()
+        })
+
+        const sourceTextarea = screen.getByRole("textbox", { name: "Privacy source text" })
+        await user.clear(sourceTextarea)
+        await user.type(sourceTextarea, "token=updated1234567890")
+
+        await user.click(screen.getByRole("button", { name: "Confirm safe export" }))
+        await waitFor(() => {
+            expect(screen.getByText(/Export blocked/)).not.toBeNull()
+        })
+    })
 })

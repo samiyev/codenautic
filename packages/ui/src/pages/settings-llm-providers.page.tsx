@@ -136,7 +136,7 @@ function normalizeFormValues(raw: unknown): INormalizedLlmProviderFormValues {
  * @param next Значения формы.
  * @returns Новая карта конфигов.
  */
-function toNextProviderConfig(
+export function toNextProviderConfig(
     previousValue: Record<TLlmProvider, ILlmProviderConfig>,
     provider: TLlmProvider,
     next: INormalizedLlmProviderFormValues,
@@ -145,7 +145,7 @@ function toNextProviderConfig(
         ...previousValue,
         [provider]: {
             ...previousValue[provider],
-            connected: next.testAfterSave === true ? previousValue[provider].connected === true : false,
+            connected: previousValue[provider].connected,
             provider: next.provider,
             apiKey: next.apiKey,
             model: next.model,
