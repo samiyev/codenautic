@@ -6,42 +6,101 @@ import { RouteErrorFallback } from "@/app/error-fallback"
 import { useNavigate } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
 
+interface IOnboardingScanStartPayload {
+    readonly targetRepositories: ReadonlyArray<string>
+}
+
+interface IOnboardingScanSearch {
+    readonly jobId: string
+    readonly repositoryId?: string
+    readonly source: "onboarding"
+    readonly targetRepositories?: ReadonlyArray<string>
+}
+
+const DEFAULT_ONBOARDING_REPOSITORY_ID = "platform-team/api-gateway"
+
 const LazyOnboardingWizardPage = lazy(
     async (): Promise<{
         default: (props: {
-            onScanStart: (payload: {
-                readonly targetRepositories: ReadonlyArray<string>
-            }) => void
+            onScanStart: (payload: IOnboardingScanStartPayload) => void
         }) => ReactElement
     }> => {
-    const pageModule = await import("@/pages/onboarding-wizard.page")
-    return {
-        default: pageModule.OnboardingWizardPage,
-    }
+        const pageModule = await import("@/pages/onboarding-wizard.page")
+        return {
+            default: pageModule.OnboardingWizardPage,
+        }
 })
 
-function mapRepositoryUrlToRouteId(repositoryUrl: string): string {
+function extractRepositoryPathSegments(repositoryUrl: string): ReadonlyArray<string> {
     const normalizedUrl = repositoryUrl.trim()
     if (normalizedUrl.length === 0) {
-        return "platform-team/api-gateway"
+        return []
     }
 
+    const sshMatch = /^[^@]+@[^:]+:(.+)$/u.exec(normalizedUrl)
+    const rawPath = sshMatch?.[1] ?? normalizedUrl
+
+    let pathname = rawPath
     try {
-        const parsed = new URL(normalizedUrl)
-        const pathParts = parsed.pathname
-            .split("/")
-            .map((part): string => part.trim())
-            .filter((part): boolean => part.length > 0)
-        if (pathParts.length >= 2) {
-            const owner = pathParts[0]
-            const repository = pathParts[1]?.replace(/\.git$/i, "") ?? "repository"
-            return `${owner}/${repository}`
-        }
+        pathname = new URL(normalizedUrl).pathname
     } catch {
-        return "platform-team/api-gateway"
+        pathname = rawPath
     }
 
-    return "platform-team/api-gateway"
+    const withoutQuery = pathname
+        .split("?")
+        .at(0)
+        ?.split("#")
+        .at(0)
+        ?.trim() ?? ""
+
+    if (withoutQuery.length === 0) {
+        return []
+    }
+
+    return withoutQuery
+        .split("/")
+        .map((part): string => part.trim())
+        .filter((part): boolean => part.length > 0)
+}
+
+export function mapRepositoryUrlToRouteId(repositoryUrl: string): string {
+    const pathParts = extractRepositoryPathSegments(repositoryUrl)
+    if (pathParts.length < 2) {
+        return DEFAULT_ONBOARDING_REPOSITORY_ID
+    }
+
+    const owner = pathParts.at(-2) ?? ""
+    const repository = pathParts.at(-1)?.replace(/\.git$/iu, "") ?? ""
+    if (owner.length === 0 || repository.length === 0) {
+        return DEFAULT_ONBOARDING_REPOSITORY_ID
+    }
+
+    return `${owner}/${repository}`
+}
+
+export function resolveOnboardingScanSearch(
+    payload: IOnboardingScanStartPayload,
+): IOnboardingScanSearch {
+    const normalizedTargets = payload.targetRepositories
+        .map((value): string => value.trim())
+        .filter((value): boolean => value.length > 0)
+    const jobId = `scan-${String(Date.now())}`
+
+    if (normalizedTargets.length > 1) {
+        return {
+            jobId,
+            source: "onboarding",
+            targetRepositories: normalizedTargets,
+        }
+    }
+
+    const singleTarget = normalizedTargets.at(0) ?? ""
+    return {
+        jobId,
+        repositoryId: mapRepositoryUrlToRouteId(singleTarget),
+        source: "onboarding",
+    }
 }
 
 /**
@@ -64,16 +123,9 @@ function OnboardingRouteComponent(): ReactElement {
                     <Suspense fallback={<RouteSuspenseFallback />}>
                         <LazyOnboardingWizardPage
                             onScanStart={(payload): void => {
-                                const primaryRepository = payload.targetRepositories[0] ?? ""
-                                const repositoryId = mapRepositoryUrlToRouteId(primaryRepository)
-
                                 void navigate({
                                     to: "/scan-progress",
-                                    search: {
-                                        jobId: `scan-${String(Date.now())}`,
-                                        repositoryId,
-                                        source: "onboarding",
-                                    },
+                                    search: resolveOnboardingScanSearch(payload),
                                 })
                             }}
                         />

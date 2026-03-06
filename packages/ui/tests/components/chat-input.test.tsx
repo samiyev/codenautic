@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { fireEvent, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import type { ReactElement } from "react"
@@ -78,6 +78,25 @@ describe("chat input", (): void => {
 
         await user.type(textarea, "abc")
         expect(counter).toHaveTextContent("3/10")
+    })
+
+    it("не отправляет сообщение во время IME composition на Enter", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const onSubmit = vi.fn()
+        renderWithProviders(
+            <ChatInputHarness onSubmit={onSubmit} />,
+        )
+
+        const textarea = screen.getByRole("textbox", { name: "Message input" })
+        await user.click(textarea)
+        await user.type(textarea, "こんにちは")
+        fireEvent.keyDown(textarea, {
+            key: "Enter",
+            shiftKey: false,
+            isComposing: true,
+        })
+
+        expect(onSubmit).toHaveBeenCalledTimes(0)
     })
 
     it("рендерит селектор файла и рендерит submit блокировку во время loading", async (): Promise<void> => {

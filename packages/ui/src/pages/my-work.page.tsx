@@ -423,6 +423,9 @@ export function MyWorkPage(): ReactElement {
             return
         }
 
+        if (typeof window !== "undefined") {
+            window.location.assign(item.deepLink)
+        }
         setLastActionSummary(`Opened ${item.id} context: ${item.deepLink}`)
         addAuditEntry(itemId, "open_context")
         showToastSuccess("Context opened.")

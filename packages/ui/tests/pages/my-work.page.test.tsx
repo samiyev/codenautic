@@ -1,6 +1,6 @@
 import { fireEvent, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { MyWorkPage } from "@/pages/my-work.page"
 import { renderWithProviders } from "../utils/render"
@@ -77,5 +77,30 @@ describe("MyWorkPage", (): void => {
 
         expect(screen.getByText("Escalated MW-1002 and notified owner channel.")).not.toBeNull()
         expect(screen.getByText(/MW-1002 escalated at/)).not.toBeNull()
+    })
+
+    it("open review действие выполняет переход в deep-link", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const assignSpy = vi
+            .spyOn(window.location, "assign")
+            .mockImplementation((_url: string | URL): void => undefined)
+
+        try {
+            renderWithProviders(<MyWorkPage />)
+
+            const triageList = screen.getByRole("list", { name: "My work triage list" })
+            const reviewItem = within(triageList).getByText("CCR #412 needs final response")
+            const reviewRow = reviewItem.closest("li")
+            if (reviewRow === null) {
+                throw new Error("Review row not found")
+            }
+
+            await user.click(within(reviewRow).getByRole("button", { name: "Open review" }))
+
+            expect(assignSpy).toHaveBeenCalledWith("/reviews/412")
+            expect(screen.getByText("Opened MW-1001 context: /reviews/412")).not.toBeNull()
+        } finally {
+            assignSpy.mockRestore()
+        }
     })
 })

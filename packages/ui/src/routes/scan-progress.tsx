@@ -10,6 +10,7 @@ interface IScanProgressPageModuleProps {
     readonly jobId?: string
     readonly eventSourceUrl?: string
     readonly repositoryId?: string
+    readonly targetRepositories?: ReadonlyArray<string>
     readonly onRetry?: () => void
     readonly onCancel?: () => void
     readonly onOpenRepositoryOverview?: () => void
@@ -33,8 +34,24 @@ interface IScanProgressSearch {
     readonly jobId?: string
     /** Optional repository id to open overview when scan is done. */
     readonly repositoryId?: string
+    /** Optional list of repositories for bulk onboarding scans. */
+    readonly targetRepositories?: ReadonlyArray<string>
     /** Optional source marker for onboarding flow. */
     readonly source?: "onboarding"
+}
+
+function normalizeTargetRepositories(rawValue: unknown): ReadonlyArray<string> | undefined {
+    const valueList = Array.isArray(rawValue) ? rawValue : [rawValue]
+    const normalizedList = valueList
+        .filter((entry): entry is string => typeof entry === "string")
+        .map((entry): string => entry.trim())
+        .filter((entry): boolean => entry.length > 0)
+
+    if (normalizedList.length === 0) {
+        return undefined
+    }
+
+    return normalizedList
 }
 
 /**
@@ -47,6 +64,7 @@ function ScanProgressRouteComponent(): ReactElement {
     const navigate = useNavigate()
     const routeJobId = search.jobId
     const routeRepositoryId = search.repositoryId
+    const routeTargetRepositories = search.targetRepositories
     const pageProps = routeJobId === undefined || routeJobId.length === 0 ? {} : { jobId: routeJobId }
 
     return (
@@ -63,6 +81,7 @@ function ScanProgressRouteComponent(): ReactElement {
                             {...pageProps}
                             eventSourceUrl="/api/v1/scans/progress"
                             repositoryId={routeRepositoryId}
+                            targetRepositories={routeTargetRepositories}
                             onCancel={(): void => {
                                 void navigate({ to: "/repositories" })
                             }}
@@ -100,11 +119,13 @@ export function validateScanProgressSearch(rawSearch: Record<string, unknown>): 
     const repositoryId = typeof rawSearch.repositoryId === "string" && rawSearch.repositoryId.trim().length > 0
         ? rawSearch.repositoryId.trim()
         : undefined
+    const targetRepositories = normalizeTargetRepositories(rawSearch.targetRepositories)
     const source = rawSearch.source === "onboarding" ? "onboarding" : undefined
 
     return {
         jobId,
         repositoryId,
+        targetRepositories,
         source,
     }
 }

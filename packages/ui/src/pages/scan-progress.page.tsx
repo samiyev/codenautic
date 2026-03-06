@@ -72,6 +72,8 @@ interface IScanProgressPageProps {
     readonly seedEvents?: ReadonlyArray<IScanProgressEvent>
     /** Идентификатор репозитория для перехода в overview. */
     readonly repositoryId?: string
+    /** Список репозиториев в batch-сканировании. */
+    readonly targetRepositories?: ReadonlyArray<string>
     /** Повторно открыть onboarding для повторного запуска скана. */
     readonly onRetry?: () => void
     /** Отменить текущий flow и вернуться в список репозиториев. */
@@ -355,6 +357,7 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
             : progressState.percent < 90
               ? "bg-emerald-500"
               : "bg-purple-500"
+    const batchRepositoriesCount = props.targetRepositories?.length ?? 0
 
     return (
         <section className="space-y-4">
@@ -362,6 +365,11 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
             <p className="text-sm text-slate-600">
                 Отслеживайте жизненный цикл скана "{jobId}" в реальном времени.
             </p>
+            {batchRepositoriesCount > 1 ? (
+                <p className="text-sm text-slate-600">
+                    Batch onboarding: {String(batchRepositoriesCount)} repositories are tracked in this run.
+                </p>
+            ) : null}
 
             <Card>
                 <CardHeader>

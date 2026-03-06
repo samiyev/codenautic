@@ -124,6 +124,32 @@ function parseEventTypes(value: string): ReadonlyArray<string> {
         .filter((item): boolean => item.length > 0)
 }
 
+function parseWebhookNumericId(endpointId: string): number | undefined {
+    const match = /^wh-(\d+)$/u.exec(endpointId)
+    if (match === null) {
+        return undefined
+    }
+
+    const parsedValue = Number.parseInt(match[1] ?? "", 10)
+    if (Number.isNaN(parsedValue) === true) {
+        return undefined
+    }
+
+    return parsedValue
+}
+
+function createNextWebhookId(endpoints: ReadonlyArray<IWebhookEndpoint>): string {
+    const maxNumericId = endpoints.reduce((maxValue, endpoint): number => {
+        const parsedId = parseWebhookNumericId(endpoint.id)
+        if (parsedId === undefined) {
+            return maxValue
+        }
+        return parsedId > maxValue ? parsedId : maxValue
+    }, 1000)
+
+    return `wh-${String(maxNumericId + 1)}`
+}
+
 function mapWebhookStatusColor(
     status: TWebhookDeliveryStatus,
 ): "danger" | "primary" | "success" | "warning" | "default" {
@@ -247,7 +273,7 @@ export function SettingsWebhooksPage(): ReactElement {
             return
         }
 
-        const nextId = `wh-${String(1000 + webhooks.length + 1)}`
+        const nextId = createNextWebhookId(webhooks)
         const nextWebhook: IWebhookEndpoint = {
             eventTypes: parsedEvents,
             id: nextId,

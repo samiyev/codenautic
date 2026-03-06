@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
@@ -24,5 +24,31 @@ describe("SettingsWebhooksPage", (): void => {
 
         expect(screen.getByText("https://hooks.acme.dev/provider-health")).not.toBeNull()
         expect(screen.queryByText("https://hooks.acme.dev/code-review")).toBeNull()
+    })
+
+    it("генерирует новый webhook id без коллизии после удаления endpoint", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        const scanEventsUrl = screen.getByText("https://hooks.acme.dev/scan-events")
+        const scanEventsRow = scanEventsUrl.closest("article")
+        if (scanEventsRow === null) {
+            throw new Error("Scan events row not found")
+        }
+
+        await user.click(within(scanEventsRow).getByRole("button", { name: "Delete" }))
+
+        await user.type(
+            screen.getByRole("textbox", { name: "Endpoint URL" }),
+            "https://hooks.acme.dev/new-endpoint",
+        )
+        await user.type(
+            screen.getByRole("textbox", { name: "Event types" }),
+            "scan.completed",
+        )
+        await user.click(screen.getByRole("button", { name: "Create endpoint" }))
+
+        expect(screen.getByText("https://hooks.acme.dev/new-endpoint")).not.toBeNull()
+        expect(screen.getByText(/· wh-1004/u)).not.toBeNull()
     })
 })
