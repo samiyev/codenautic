@@ -212,6 +212,8 @@ describe("layout components", (): void => {
         const initialOption = screen.getByRole("option", { selected: true })
         const initialOptionId = initialOption.getAttribute("id") ?? ""
         expect(initialOptionId).not.toBe("")
+        expect(initialOptionId.includes("/")).toBe(false)
+        expect(initialOptionId.startsWith("header-command-palette-option-")).toBe(true)
         expect(paletteSearch).toHaveAttribute("aria-activedescendant", initialOptionId)
 
         await user.keyboard("{ArrowDown}")
@@ -219,6 +221,7 @@ describe("layout components", (): void => {
         const nextOption = screen.getByRole("option", { selected: true })
         const nextOptionId = nextOption.getAttribute("id") ?? ""
         expect(nextOptionId).not.toBe("")
+        expect(nextOptionId.includes("/")).toBe(false)
         expect(nextOptionId).not.toBe(initialOptionId)
         expect(paletteSearch).toHaveAttribute("aria-activedescendant", nextOptionId)
     })
