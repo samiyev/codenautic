@@ -9,6 +9,22 @@
     ".": {
       "import": "./dist/src/index.js",
       "types": "./dist/src/index.d.ts"
+    },
+    "./git": {
+      "import": "./dist/src/git/index.js",
+      "types": "./dist/src/git/index.d.ts"
+    },
+    "./llm": {
+      "import": "./dist/src/llm/index.js",
+      "types": "./dist/src/llm/index.d.ts"
+    },
+    "./review": {
+      "import": "./dist/src/review/index.js",
+      "types": "./dist/src/review/index.d.ts"
+    },
+    "./rule": {
+      "import": "./dist/src/rule/index.js",
+      "types": "./dist/src/rule/index.d.ts"
     }
   },
   "scripts": {
