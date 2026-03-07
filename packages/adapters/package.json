@@ -9,38 +9,6 @@
     ".": {
       "import": "./dist/src/index.js",
       "types": "./dist/src/index.d.ts"
-    },
-    "./git": {
-      "import": "./dist/src/git/index.js",
-      "types": "./dist/src/git/index.d.ts"
-    },
-    "./llm": {
-      "import": "./dist/src/llm/index.js",
-      "types": "./dist/src/llm/index.d.ts"
-    },
-    "./context": {
-      "import": "./dist/src/context/index.js",
-      "types": "./dist/src/context/index.d.ts"
-    },
-    "./notifications": {
-      "import": "./dist/src/notifications/index.js",
-      "types": "./dist/src/notifications/index.d.ts"
-    },
-    "./ast": {
-      "import": "./dist/src/ast/index.js",
-      "types": "./dist/src/ast/index.d.ts"
-    },
-    "./messaging": {
-      "import": "./dist/src/messaging/index.js",
-      "types": "./dist/src/messaging/index.d.ts"
-    },
-    "./worker": {
-      "import": "./dist/src/worker/index.js",
-      "types": "./dist/src/worker/index.d.ts"
-    },
-    "./database": {
-      "import": "./dist/src/database/index.js",
-      "types": "./dist/src/database/index.d.ts"
     }
   },
   "scripts": {

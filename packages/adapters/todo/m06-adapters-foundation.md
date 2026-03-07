@@ -14,7 +14,7 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| GIT-000 | Реализовать базовую структуру пакета | DONE | Реализованы IoC tokens + `registerGitModule`, barrel export и integration-тесты регистрации; git ACL контракты покрывают happy/failure/idempotency. | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для GIT-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| GIT-000 | Реализовать базовую структуру пакета | TODO | Не начато | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для GIT-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 
 ---
 
@@ -26,7 +26,7 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| LLM-000 | Реализовать базовую структуру пакета | DONE | Реализованы IoC tokens + `registerLlmModule`, barrel export, fallback policy wiring и integration-тесты регистрации; ACL suite покрывает OpenAI/Anthropic happy/failure/fallback. | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для LLM-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| LLM-000 | Реализовать базовую структуру пакета | TODO | Не начато | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для LLM-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 
 ---
 
@@ -38,7 +38,7 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| CTX-000 | Реализовать базовую структуру пакета | DONE | Реализованы IoC tokens + `registerContextModule`, barrel export и integration-тесты регистрации; Jira ACL контракты покрывают mapping и invalid payload сценарии. | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для CTX-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| CTX-000 | Реализовать базовую структуру пакета | TODO | Не начато | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для CTX-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 
 ---
 
@@ -50,7 +50,7 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| NOTIF-000 | Реализовать базовую структуру пакета | DONE | Реализованы `NOTIFICATIONS_TOKENS`, `registerNotificationsModule`, barrel export и in-memory dispatcher adapter с контрактными тестами (deterministic idempotency/validation). | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для NOTIF-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| NOTIF-000 | Реализовать базовую структуру пакета | TODO | Не начато | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для NOTIF-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 
 ---
 
@@ -62,7 +62,7 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| AST-000 | Реализовать базовую структуру пакета | DONE | Реализованы `AST_TOKENS`, `registerAstModule`, barrel export и regex parser adapter с контрактными тестами (TS/JS parsing, валидации, корректные line numbers). | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для AST-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| AST-000 | Реализовать базовую структуру пакета | TODO | Не начато | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для AST-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 
 ---
 
@@ -74,7 +74,7 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| MSG-000 | Реализовать базовую структуру пакета | DONE | Реализованы IoC tokens + `registerMessagingModule`, barrel export и integration-тесты регистрации; минимальные Outbox/Inbox adapters покрыты idempotency/retry тестами. | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для MSG-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| MSG-000 | Реализовать базовую структуру пакета | TODO | Не начато | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для MSG-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 
 ---
 
@@ -86,7 +86,7 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| WORKER-000 | Реализовать базовую структуру пакета | DONE | Реализованы `WORKER_TOKENS`, `registerWorkerModule`, barrel export, in-memory queue/processor registry adapters и тесты регистрации/поведения (FIFO, duplicate, type filter). | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для WORKER-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| WORKER-000 | Реализовать базовую структуру пакета | TODO | Не начато | Реализация: Package.json, tsconfig.json, tsconfig.build.json, IoC module, barrel export. Сборка проходит успешно. Готово, если: для WORKER-000 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 
 ---
 
@@ -98,8 +98,8 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| DB-001 | Реализовать каркас пакета | DONE | Добавлен foundation `src/database` (contracts, errors, tokens, index), подключён экспорт в root barrel и тестовый контур для database-модуля. | Реализация: Package.json, tsconfig, eslint, prettier, bunfig. Сборка проходит успешно. Готово, если: для DB-001 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
-| DB-002 | Реализовать MongoConnectionManager | DONE | Реализован `MongoConnectionManager` с `connect()/disconnect()/getConnection()/isConnected()`, injectable `createConnectionFn`, нормализованными error-кодами и покрытием 9 тестами. | Реализация: Connect(), disconnect(), getConnection(), isConnected(). Injectable createConnectionFn для тестов. 9 тестов. Готово, если: для DB-002 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| DB-001 | Реализовать каркас пакета | TODO | Не начато | Реализация: Package.json, tsconfig, eslint, prettier, bunfig. Сборка проходит успешно. Готово, если: для DB-001 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| DB-002 | Реализовать MongoConnectionManager | TODO | Не начато | Реализация: Connect(), disconnect(), getConnection(), isConnected(). Injectable createConnectionFn для тестов. 9 тестов. Готово, если: для DB-002 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 | DB-003 | Реализовать Mongoose-схемы | TODO | Не начато | Реализация: 10 schemas извлечены из api: Review, Task, Rule, RuleCategory, PromptTemplate, PromptConfiguration, ExpertPanel, ReviewIssueTicket, SystemSettings, Organization. Готово, если: для DB-003 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 | DB-004 | Реализовать MongoDB repository adapters | TODO | Не начато | Реализация: 9 plain-class адаптеров с constructor injection (Model + Фабрика). Реализуют порты из core. Готово, если: для DB-004 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 | DB-005 | Реализовать адаптеры категории D | TODO | Не начато | Реализация: AllowAllAuthService (MVP), MongoOrganizationConfigLoader, DefaultRepositoryConfigLoader. 4 теста. Готово, если: для DB-005 adapter сохраняет стабильный external -> domain контракт, корректно обрабатывает retry/backoff/error/idempotency сценарии, а интеграционные контрактные тесты фиксируют поведение на happy/failure-path; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
