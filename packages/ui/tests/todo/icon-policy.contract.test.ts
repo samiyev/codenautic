@@ -44,7 +44,7 @@ function hasLiteralIconHexColor(fileContent: string): boolean {
     }
 
     const literalHexColorPattern =
-        /<(?:[A-Z][A-Za-z0-9]*)[^>]*(?:color|stroke)=["']#[0-9A-Fa-f]{3,8}["'][^>]*>/m
+        /<(?:[A-Z][A-Za-z0-9]*)[^>]*(?:color|stroke|fill)=["']#[0-9A-Fa-f]{3,8}["'][^>]*>/m
     return literalHexColorPattern.test(fileContent)
 }
 
