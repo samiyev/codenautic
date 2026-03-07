@@ -142,6 +142,7 @@ describe("chat message bubble", (): void => {
         const user = userEvent.setup()
         const onCodeReferenceClick = vi.fn()
         const onCodeReferencePreview = vi.fn()
+        const openSpy = vi.spyOn(window, "open").mockImplementation(() => null)
 
         renderWithProviders(
             <ChatMessageBubble
@@ -159,6 +160,9 @@ describe("chat message bubble", (): void => {
         await user.hover(docsLink)
         expect(onCodeReferenceClick).not.toHaveBeenCalled()
         expect(onCodeReferencePreview).not.toHaveBeenCalled()
+        expect(openSpy).toHaveBeenCalledWith("/docs", "_blank", "noopener,noreferrer")
+
+        openSpy.mockRestore()
     })
 
     it("парсит code references с форматом line:column и hash line+column", async (): Promise<void> => {

@@ -138,6 +138,19 @@ function renderCodeReferenceLink(
             <a
                 className="text-[var(--primary)] underline underline-offset-4"
                 href={href}
+                onClick={(event: MouseEvent<HTMLAnchorElement>): void => {
+                    const isInternalHref = href.startsWith("/")
+                    if (isInternalHref === false) {
+                        return
+                    }
+
+                    event.preventDefault()
+                    if (typeof window === "undefined" || typeof window.open !== "function") {
+                        return
+                    }
+
+                    window.open(href, "_blank", "noopener,noreferrer")
+                }}
                 rel="noreferrer"
                 target="_blank"
             >
