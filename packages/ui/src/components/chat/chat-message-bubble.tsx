@@ -131,7 +131,8 @@ function renderCodeReferenceLink(
     onCodeReferenceClick?: (reference: IChatCodeReference) => void,
     onCodeReferencePreview?: (reference: IChatCodeReference) => void,
 ): ReactElement {
-    const reference = parseCodeReference(href)
+    const referenceCandidate = href.trim().length > 0 ? href : label
+    const reference = parseCodeReference(referenceCandidate)
     if (reference === undefined) {
         return (
             <a
