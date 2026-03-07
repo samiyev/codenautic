@@ -54,6 +54,9 @@ describe("chat thread list", (): void => {
         expect(screen.getByRole("heading", { name: "Threads" })).not.toBeNull()
         expect(screen.getByText("Alpha review")).not.toBeNull()
         expect(screen.getByText("Beta review")).not.toBeNull()
+        expect(
+            screen.getByRole("button", { name: "Open thread Beta review (repo-beta, CCR 1202)" }),
+        ).not.toBeNull()
         const betaButtons = screen.getAllByRole("button", { name: /Beta review/ })
         const activeButton = betaButtons.find(
             (button): boolean => button.getAttribute("aria-pressed") === "true",

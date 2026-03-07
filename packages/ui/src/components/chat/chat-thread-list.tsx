@@ -138,6 +138,7 @@ export function ChatThreadList(props: IChatThreadListProps): ReactElement {
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <button
+                                            aria-label={`Open thread ${thread.title} (${thread.repo}, CCR ${thread.ccr})`}
                                             aria-pressed={isActive}
                                             className="min-w-0 text-left"
                                             onClick={(): void => {
