@@ -11,7 +11,7 @@ export interface ITeamProps {
     memberIds: UniqueId[]
     repoIds: RepositoryId[]
     ruleIds: UniqueId[]
-    disabledRuleUuids: UniqueId[]
+    disabledRuleUuids: string[]
 }
 
 /**
@@ -30,7 +30,7 @@ export class Team extends Entity<ITeamProps> {
         this.props.memberIds = normalizeMembers(props.memberIds)
         this.props.repoIds = normalizeRepoIds(props.repoIds)
         this.props.ruleIds = normalizeRuleIds(props.ruleIds)
-        this.props.disabledRuleUuids = normalizeRuleIds(props.disabledRuleUuids)
+        this.props.disabledRuleUuids = normalizeRuleUuids(props.disabledRuleUuids)
         this.ensureStateIsValid()
     }
 
@@ -84,7 +84,7 @@ export class Team extends Entity<ITeamProps> {
      *
      * @returns Copy of disabled rule uuids.
      */
-    public get disabledRuleUuids(): readonly UniqueId[] {
+    public get disabledRuleUuids(): readonly string[] {
         return [...this.props.disabledRuleUuids]
     }
 
@@ -142,36 +142,40 @@ export class Team extends Entity<ITeamProps> {
     /**
      * Disables a rule for this team.
      *
-     * @param ruleId Rule identifier.
+     * @param ruleUuid Rule uuid.
      */
-    public disableRule(ruleId: UniqueId): void {
-        if (this.hasRule(this.props.disabledRuleUuids, ruleId) === true) {
+    public disableRule(ruleUuid: string): void {
+        const normalizedRuleUuid = normalizeRuleUuid(ruleUuid)
+        if (this.hasRuleUuid(normalizedRuleUuid) === true) {
             return
         }
 
-        this.props.disabledRuleUuids = [...this.props.disabledRuleUuids, ruleId]
+        this.props.disabledRuleUuids = [
+            ...this.props.disabledRuleUuids,
+            normalizedRuleUuid,
+        ]
     }
 
     /**
      * Re-enables a previously disabled rule for this team.
      *
-     * @param ruleId Rule identifier.
+     * @param ruleUuid Rule uuid.
      */
-    public enableRule(ruleId: UniqueId): void {
+    public enableRule(ruleUuid: string): void {
+        const normalizedRuleUuid = normalizeRuleUuid(ruleUuid)
         this.props.disabledRuleUuids = this.props.disabledRuleUuids.filter((item) => {
-            return item.value !== ruleId.value
+            return item !== normalizedRuleUuid
         })
     }
 
     /**
      * Checks whether provided identifier exists in given collection.
      *
-     * @param ruleIds Collection of rule identifiers.
-     * @param ruleId Identifier to lookup.
-     * @returns True when identifier is present.
+     * @param ruleUuid Rule uuid.
+     * @returns True when rule uuid is already disabled.
      */
-    private hasRule(ruleIds: readonly UniqueId[], ruleId: UniqueId): boolean {
-        return ruleIds.some((item) => item.value === ruleId.value)
+    private hasRuleUuid(ruleUuid: string): boolean {
+        return this.props.disabledRuleUuids.some((item) => item === ruleUuid)
     }
 
     /**
@@ -265,4 +269,39 @@ function normalizeRuleIds(ruleIds: readonly UniqueId[]): UniqueId[] {
     }
 
     return [...uniqueRuleIds.values()]
+}
+
+/**
+ * Normalizes and deduplicates rule uuids.
+ *
+ * @param ruleUuids Raw rule uuids.
+ * @returns Unique rule uuids.
+ */
+function normalizeRuleUuids(ruleUuids: readonly string[]): string[] {
+    const uniqueRuleUuids = new Map<string, string>()
+
+    for (const ruleUuid of ruleUuids) {
+        const normalizedRuleUuid = normalizeRuleUuid(ruleUuid)
+        uniqueRuleUuids.set(normalizedRuleUuid, normalizedRuleUuid)
+    }
+
+    return [...uniqueRuleUuids.values()]
+}
+
+/**
+ * Normalizes a single rule uuid.
+ *
+ * @param ruleUuid Rule uuid.
+ * @returns Normalized rule uuid.
+ */
+function normalizeRuleUuid(ruleUuid: string): string {
+    if (ruleUuid === undefined) {
+        throw new Error("Rule uuid cannot be empty")
+    }
+
+    const normalizedRuleUuid = ruleUuid.trim()
+    if (normalizedRuleUuid.length === 0) {
+        throw new Error("Rule uuid cannot be empty")
+    }
+    return normalizedRuleUuid
 }

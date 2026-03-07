@@ -51,8 +51,7 @@ export class TeamFactory implements IEntityFactory<Team, ICreateTeamProps, IReco
             memberIds: (input.memberIds ?? []).map((memberId) => UniqueId.create(memberId)),
             repoIds: (input.repoIds ?? []).map((repoId) => RepositoryId.parse(repoId)),
             ruleIds: (input.ruleIds ?? []).map((ruleId) => UniqueId.create(ruleId)),
-            disabledRuleUuids:
-                (input.disabledRuleUuids ?? []).map((ruleId) => UniqueId.create(ruleId)),
+            disabledRuleUuids: [...(input.disabledRuleUuids ?? [])],
         }
         return new Team(UniqueId.create(), props)
     }
@@ -70,7 +69,7 @@ export class TeamFactory implements IEntityFactory<Team, ICreateTeamProps, IReco
             memberIds: input.memberIds.map((memberId) => UniqueId.create(memberId)),
             repoIds: input.repoIds.map((repoId) => RepositoryId.parse(repoId)),
             ruleIds: input.ruleIds.map((ruleId) => UniqueId.create(ruleId)),
-            disabledRuleUuids: input.disabledRuleUuids.map((ruleId) => UniqueId.create(ruleId)),
+            disabledRuleUuids: [...input.disabledRuleUuids],
         }
         return new Team(UniqueId.create(input.id), props)
     }

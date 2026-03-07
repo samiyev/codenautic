@@ -158,32 +158,32 @@ describe("Team", () => {
 
         expect(team.disabledRuleUuids).toEqual([])
 
-        const disableRule = UniqueId.create("rule-1")
-        const enableRule = UniqueId.create("rule-2")
+        const disableRule = "rule-1"
+        const enableRule = "rule-2"
         team.disableRule(disableRule)
         team.disableRule(enableRule)
 
-        expect(team.disabledRuleUuids.map((id) => id.value)).toEqual(["rule-1", "rule-2"])
+        expect(team.disabledRuleUuids).toEqual(["rule-1", "rule-2"])
 
         team.enableRule(disableRule)
 
-        expect(team.disabledRuleUuids.map((id) => id.value)).toEqual(["rule-2"])
+        expect(team.disabledRuleUuids).toEqual(["rule-2"])
     })
 
     test("ignores disabling already disabled rule", () => {
-        const ruleId = UniqueId.create("rule-1")
+        const ruleId = "rule-1"
         const team = new Team(UniqueId.create(), createTeamProps({
             name: "Disabled Team",
             organizationId: "org-10",
             memberIds: [],
             repoIds: [],
             ruleIds: [],
-            disabledRuleUuids: [ruleId.value],
+            disabledRuleUuids: [ruleId],
         }))
 
         team.disableRule(ruleId)
 
-        expect(team.disabledRuleUuids.map((id) => id.value)).toEqual(["rule-1"])
+        expect(team.disabledRuleUuids).toEqual(["rule-1"])
     })
 
     test("throws when organizationId is missing", () => {
@@ -237,6 +237,32 @@ describe("Team", () => {
             })
         }).toThrow("Rule id cannot be empty")
     })
+
+    test("throws when disabled rule uuid is missing", () => {
+        expect(() => {
+            void new Team(UniqueId.create(), {
+                name: "Bad disabled rule",
+                organizationId: UniqueId.create("org-14"),
+                memberIds: [],
+                repoIds: [],
+                ruleIds: [],
+                disabledRuleUuids: [undefined as unknown as string],
+            })
+        }).toThrow("Rule uuid cannot be empty")
+    })
+
+    test("throws when disabled rule uuid is blank", () => {
+        expect(() => {
+            void new Team(UniqueId.create(), {
+                name: "Blank disabled rule",
+                organizationId: UniqueId.create("org-15"),
+                memberIds: [],
+                repoIds: [],
+                ruleIds: [],
+                disabledRuleUuids: ["  "],
+            })
+        }).toThrow("Rule uuid cannot be empty")
+    })
 })
 
 /**
@@ -259,6 +285,6 @@ function createTeamProps(overrides: {
         memberIds: overrides.memberIds.map((id) => UniqueId.create(id)),
         repoIds: overrides.repoIds.map((id) => RepositoryId.parse(id)),
         ruleIds: overrides.ruleIds.map((id) => UniqueId.create(id)),
-        disabledRuleUuids: overrides.disabledRuleUuids.map((id) => UniqueId.create(id)),
+        disabledRuleUuids: [...overrides.disabledRuleUuids],
     }
 }
