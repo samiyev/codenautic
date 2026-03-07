@@ -64,8 +64,24 @@ function hasIconOnlyButtonWithGlyphText(fileContent: string): boolean {
     return false
 }
 
+function hasIconOnlyButtonWithoutAriaLabel(fileContent: string): boolean {
+    const iconOnlyButtonPattern = /<Button\b[\s\S]*?\bisIconOnly\b[\s\S]*?>[\s\S]*?<\/Button>/g
+    let match: RegExpExecArray | null = iconOnlyButtonPattern.exec(fileContent)
+
+    while (match !== null) {
+        const buttonSource = match[0]
+        if (/aria-label\s*=/.test(buttonSource) === false) {
+            return true
+        }
+
+        match = iconOnlyButtonPattern.exec(fileContent)
+    }
+
+    return false
+}
+
 describe("ui icon policy contract", (): void => {
-    it("запрещает сторонние icon-пакеты, literal hex-цвета и glyph-текст в icon-only кнопках", (): void => {
+    it("запрещает сторонние icon-пакеты, literal hex-цвета, glyph-текст и icon-only кнопки без aria-label", (): void => {
         const packageRoot = resolve(import.meta.dirname, "..", "..")
         const sourceFiles = listSourceFiles(resolve(packageRoot, "src"))
 
@@ -81,9 +97,14 @@ describe("ui icon policy contract", (): void => {
             const fileContent = readFileSync(filePath, "utf8")
             return hasIconOnlyButtonWithGlyphText(fileContent)
         })
+        const filesWithAriaViolations = sourceFiles.filter((filePath): boolean => {
+            const fileContent = readFileSync(filePath, "utf8")
+            return hasIconOnlyButtonWithoutAriaLabel(fileContent)
+        })
 
         expect(filesWithForbiddenImports).toStrictEqual([])
         expect(filesWithLiteralIconColors).toStrictEqual([])
         expect(filesWithGlyphIcons).toStrictEqual([])
+        expect(filesWithAriaViolations).toStrictEqual([])
     })
 })
