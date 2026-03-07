@@ -1,5 +1,6 @@
 import { type ReactElement } from "react"
-import { Laptop, Moon, Sun } from "lucide-react"
+
+import { Laptop, Moon, Sun } from "@/components/icons/app-icons"
 import { Button } from "@/components/ui"
 import {
     type ThemeMode,

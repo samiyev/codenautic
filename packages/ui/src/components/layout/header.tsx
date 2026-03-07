@@ -1,6 +1,6 @@
 import { type ReactElement, useEffect, useMemo, useRef, useState } from "react"
-import { Bell, Menu } from "lucide-react"
 
+import { Bell, Menu } from "@/components/icons/app-icons"
 import { Button } from "@/components/ui"
 import {
     FOCUS_GLOBAL_SEARCH_EVENT,

@@ -1,5 +1,4 @@
 import { type ReactElement, useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
 import {
     Controller,
     type Control,
@@ -7,6 +6,7 @@ import {
     type FieldPath,
     type FieldValues,
 } from "react-hook-form"
+import { Eye, EyeOff } from "@/components/icons/app-icons"
 import { Button, Input } from "@/components/ui"
 
 import { pickFieldMessage } from "./form-field-utils"

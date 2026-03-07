@@ -1,9 +1,9 @@
 import type { ReactElement, ReactNode } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
 
+import { ChevronLeft, ChevronRight } from "@/components/icons/app-icons"
+import { Button } from "@/components/ui"
 import { SidebarNav } from "./sidebar-nav"
 import { SettingsNav } from "./settings-nav"
-import { Button } from "@/components/ui"
 
 /**
  * Свойства sidebar компонента.

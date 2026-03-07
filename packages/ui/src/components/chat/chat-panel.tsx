@@ -1,9 +1,9 @@
 import type { ReactElement } from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { X } from "lucide-react"
 
 import { ChatMessageBubble } from "@/components/chat/chat-message-bubble"
 import { ChatContextIndicator } from "@/components/chat/chat-context-indicator"
+import { X } from "@/components/icons/app-icons"
 import {
     ChatInput,
     type IChatFileContextOption,

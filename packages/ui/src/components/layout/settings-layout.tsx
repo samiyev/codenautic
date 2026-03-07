@@ -22,7 +22,7 @@ import {
     ShieldCheck,
     Users,
     Webhook,
-} from "lucide-react"
+} from "@/components/icons/app-icons"
 
 import { SidebarNav } from "./sidebar-nav"
 

@@ -1,7 +1,7 @@
 import type { ChangeEvent, ReactElement } from "react"
 import { useMemo, useState } from "react"
-import { Archive, X } from "lucide-react"
 
+import { Archive, X } from "@/components/icons/app-icons"
 import { Button, Input } from "@/components/ui"
 
 /** Параметры одного треда чата. */

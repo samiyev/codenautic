@@ -2,8 +2,8 @@ import type { MouseEvent, ReactElement, ReactNode } from "react"
 import { useState } from "react"
 import ReactMarkdown from "react-markdown"
 import type { Components } from "react-markdown"
-import { ChevronDown, ChevronRight, Copy } from "lucide-react"
 
+import { ChevronDown, ChevronRight, Copy } from "@/components/icons/app-icons"
 import { Avatar, Button } from "@/components/ui"
 import { sanitizeText } from "@/lib/validation/schema-validation"
 

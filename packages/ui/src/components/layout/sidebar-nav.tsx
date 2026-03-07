@@ -12,7 +12,7 @@ import {
     LifeBuoy,
     Rocket,
     Settings,
-} from "lucide-react"
+} from "@/components/icons/app-icons"
 import { Button } from "@/components/ui"
 
 /**
