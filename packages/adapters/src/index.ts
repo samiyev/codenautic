@@ -41,5 +41,15 @@ export {
     normalizeLlmProviderResponse,
     registerLlmModule,
 } from "./llm"
+export {
+    JiraContextAcl,
+    JiraTicketAcl,
+    LinearContextAcl,
+    LinearIssueAcl,
+    mapExternalJiraTicket,
+    mapExternalLinearIssue,
+    mapJiraContext,
+    mapLinearContext,
+} from "./context"
 export {type IRegisterReviewModuleOptions, registerReviewModule} from "./review"
 export {type IRegisterRuleModuleOptions, registerRuleModule} from "./rule"
