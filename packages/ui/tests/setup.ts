@@ -195,6 +195,11 @@ function resolveConsoleMessage(args: ReadonlyArray<unknown>): string | undefined
 }
 
 function shouldSuppressTestConsoleNoise(args: ReadonlyArray<unknown>): boolean {
+    const first = args[0]
+    if (first instanceof AggregateError && shouldSuppressUnhandledRejection(first)) {
+        return true
+    }
+
     const message = resolveConsoleMessage(args)
     if (message === undefined) {
         return false
