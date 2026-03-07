@@ -35,6 +35,21 @@ export function createGitProviderMock(): IGitProvider {
         getChangedFiles(_mergeRequestId: string): Promise<readonly IMergeRequestDiffFileDTO[]> {
             return Promise.resolve([])
         },
+        getFileTree(_ref: string): Promise<readonly []> {
+            return Promise.resolve([])
+        },
+        getFileContentByRef(_filePath: string, _ref: string): Promise<string> {
+            return Promise.resolve("")
+        },
+        getBranches(): Promise<readonly []> {
+            return Promise.resolve([])
+        },
+        getCommitHistory(_ref: string): Promise<readonly []> {
+            return Promise.resolve([])
+        },
+        getBlameData(_filePath: string, _ref: string): Promise<readonly []> {
+            return Promise.resolve([])
+        },
         postComment(_mergeRequestId: string, _body: string): Promise<ICommentDTO> {
             return Promise.resolve({} as ICommentDTO)
         },

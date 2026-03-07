@@ -1,7 +1,11 @@
 import {describe, expect, test} from "bun:test"
 
 import {
+    AnthropicRequestAcl,
+    AnthropicResponseAcl,
     LLM_ACL_PROVIDER,
+    OpenAiRequestAcl,
+    OpenAiResponseAcl,
     normalizeLlmProviderRequest,
     normalizeLlmProviderResponse,
 } from "../../src/llm/acl"
@@ -481,5 +485,58 @@ describe("LLM ACL contract", () => {
             "content",
             "usage",
         ])
+    })
+
+    test("exposes class-based ACL wrappers for request and response conversions", () => {
+        const openAiRequestAcl = new OpenAiRequestAcl({
+            fallbackModelByProvider: {
+                OPENAI: "gpt-4o-mini",
+            },
+        })
+        const anthropicRequestAcl = new AnthropicRequestAcl({
+            fallbackModelByProvider: {
+                ANTHROPIC: "claude-3-5-sonnet",
+            },
+        })
+        const openAiResponseAcl = new OpenAiResponseAcl()
+        const anthropicResponseAcl = new AnthropicResponseAcl()
+
+        const openAiRequest = openAiRequestAcl.toDomain({
+            model: "",
+            messages: [
+                {
+                    role: "user",
+                    content: "hello",
+                },
+            ],
+        })
+        const anthropicRequest = anthropicRequestAcl.toDomain({
+            model: "",
+            messages: [
+                {
+                    role: "user",
+                    content: "hello",
+                },
+            ],
+        })
+        const openAiResponse = openAiResponseAcl.toDomain({
+            output_text: "openai",
+            usage: {
+                prompt_tokens: 1,
+                completion_tokens: 1,
+            },
+        })
+        const anthropicResponse = anthropicResponseAcl.toDomain({
+            completion: "anthropic",
+            usage: {
+                input_tokens: 1,
+                output_tokens: 1,
+            },
+        })
+
+        expect(openAiRequest.model).toBe("gpt-4o-mini")
+        expect(anthropicRequest.model).toBe("claude-3-5-sonnet")
+        expect(openAiResponse.response.content).toBe("openai")
+        expect(anthropicResponse.response.content).toBe("anthropic")
     })
 })

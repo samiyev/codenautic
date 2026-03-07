@@ -84,6 +84,34 @@ export interface IAnthropicChatRequest {
 export type LlmProviderChatRequest = IOpenAiChatRequest | IAnthropicChatRequest
 
 /**
+ * Normalizes shared request DTO into OpenAI request shape.
+ *
+ * @param provider Target provider.
+ * @param request Shared request DTO.
+ * @param options Request normalization options.
+ * @returns OpenAI-compatible request.
+ */
+export function normalizeLlmProviderRequest(
+    provider: typeof LLM_ACL_PROVIDER.OPENAI,
+    request: IChatRequestDTO,
+    options?: ILlmAclRequestNormalizationOptions,
+): IOpenAiChatRequest
+
+/**
+ * Normalizes shared request DTO into Anthropic request shape.
+ *
+ * @param provider Target provider.
+ * @param request Shared request DTO.
+ * @param options Request normalization options.
+ * @returns Anthropic-compatible request.
+ */
+export function normalizeLlmProviderRequest(
+    provider: typeof LLM_ACL_PROVIDER.ANTHROPIC,
+    request: IChatRequestDTO,
+    options?: ILlmAclRequestNormalizationOptions,
+): IAnthropicChatRequest
+
+/**
  * Normalizes shared request DTO into provider-specific request shape.
  *
  * @param provider Target provider kind.

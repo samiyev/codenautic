@@ -14,3 +14,6 @@ export {
     mapExternalMergeRequest,
     type IExternalGitMergeRequest,
 } from "./git-acl-mapper"
+export {GitMergeRequestAcl, GitDiffFilesAcl} from "./git-merge-request.acl"
+export {GitErrorAcl} from "./git-error.acl"
+export {GitIdempotencyAcl} from "./git-idempotency.acl"

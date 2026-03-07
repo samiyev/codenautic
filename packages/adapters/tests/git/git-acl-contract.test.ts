@@ -2,6 +2,10 @@ import {describe, expect, test} from "bun:test"
 
 import {
     GIT_ACL_ERROR_KIND,
+    GitDiffFilesAcl,
+    GitErrorAcl,
+    GitIdempotencyAcl,
+    GitMergeRequestAcl,
     createGitAclIdempotencyKey,
     mapExternalDiffFiles,
     mapExternalMergeRequest,
@@ -323,5 +327,52 @@ describe("Git ACL contract", () => {
 
         expect(result.id).toBe("")
         expect(result.number).toBe(0)
+    })
+
+    test("exposes class-based ACL wrappers for mapping and error normalization", () => {
+        const mergeRequestAcl = new GitMergeRequestAcl()
+        const diffFilesAcl = new GitDiffFilesAcl()
+        const errorAcl = new GitErrorAcl()
+        const idempotencyAcl = new GitIdempotencyAcl()
+
+        const mergeRequest = mergeRequestAcl.toDomain({
+            id: 1,
+            title: "title",
+            author: {
+                id: 2,
+                username: "u",
+                display_name: "d",
+            },
+        })
+        const diffFiles = diffFilesAcl.toDomain([
+            {
+                path: "src/a.ts",
+                status: "added",
+                diff: "@@ hunk @@",
+            },
+        ])
+        const error = errorAcl.toDomain({
+            statusCode: 429,
+            message: "rate limit",
+        })
+        const shouldRetry = errorAcl.shouldRetry(
+            {
+                statusCode: 503,
+                message: "service unavailable",
+            },
+            1,
+            2,
+        )
+        const key = idempotencyAcl.build({
+            provider: "github",
+            operation: "comment",
+            mergeRequestId: "77",
+        })
+
+        expect(mergeRequest.id).toBe("1")
+        expect(diffFiles[0]?.path).toBe("src/a.ts")
+        expect(error.kind).toBe(GIT_ACL_ERROR_KIND.RATE_LIMITED)
+        expect(shouldRetry).toBe(true)
+        expect(key).toBe("git:github:comment:77:no-request-id")
     })
 })
