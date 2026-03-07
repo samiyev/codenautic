@@ -1,5 +1,6 @@
 import type { ReactElement } from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { X } from "lucide-react"
 
 import { ChatMessageBubble } from "@/components/chat/chat-message-bubble"
 import { ChatContextIndicator } from "@/components/chat/chat-context-indicator"
@@ -226,7 +227,7 @@ export function ChatPanel(props: IChatPanelProps): ReactElement {
                             variant="light"
                             onPress={props.onClose}
                         >
-                            ×
+                            <X aria-hidden className="size-4" />
                         </Button>
                     )}
                 </CardHeader>

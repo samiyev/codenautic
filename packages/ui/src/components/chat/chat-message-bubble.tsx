@@ -2,6 +2,7 @@ import type { MouseEvent, ReactElement, ReactNode } from "react"
 import { useState } from "react"
 import ReactMarkdown from "react-markdown"
 import type { Components } from "react-markdown"
+import { ChevronDown, ChevronRight, Copy } from "lucide-react"
 
 import { Avatar, Button } from "@/components/ui"
 import { sanitizeText } from "@/lib/validation/schema-validation"
@@ -247,7 +248,7 @@ function parseMessageCodeBlock(
                         size="sm"
                         variant="light"
                     >
-                        ↪
+                        <Copy aria-hidden className="size-4" />
                     </Button>
                     <Button
                         aria-expanded={isExpanded}
@@ -258,7 +259,11 @@ function parseMessageCodeBlock(
                         size="sm"
                         variant="light"
                     >
-                        {isExpanded ? "▾" : "▸"}
+                        {isExpanded ? (
+                            <ChevronDown aria-hidden className="size-4" />
+                        ) : (
+                            <ChevronRight aria-hidden className="size-4" />
+                        )}
                     </Button>
                 </div>
             </div>
@@ -414,7 +419,7 @@ export function ChatMessageBubble(props: IChatMessageBubbleProps): ReactElement 
                         size="sm"
                         variant="light"
                     >
-                        ⧉
+                        <Copy aria-hidden className="size-4" />
                     </Button>
                 </header>
 
