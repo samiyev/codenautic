@@ -1,11 +1,4 @@
 import mongoose from "mongoose"
-import type {Connection} from "mongoose"
-
-import {
-    MongoConnectionManager as AdapterMongoConnectionManager,
-    type CreateMongoConnectionFn as AdapterCreateMongoConnectionFn,
-    type IMongoConnectionManager as IAdapterMongoConnectionManager,
-} from "@codenautic/adapters/database"
 
 /**
  * Retry policy for MongoDB connection attempts.
@@ -142,7 +135,8 @@ export class MongoWriteBlockedError extends Error {
  * Mongo connection manager with retry/backoff and readiness tracking.
  */
 class MongoConnectionManager implements IApiDatabaseConnection {
-    private readonly adapterManager: IAdapterMongoConnectionManager
+    private readonly uri: string
+    private readonly connector: IMongoConnector
     private readonly retryPolicy: IMongoConnectionRetryPolicy
     private readonly sleep: (ms: number) => Promise<void>
 
@@ -153,16 +147,19 @@ class MongoConnectionManager implements IApiDatabaseConnection {
     /**
      * Creates manager instance.
      *
-     * @param adapterManager Adapter-backed connection manager.
+     * @param uri MongoDB connection URI.
+     * @param connector Connector implementation.
      * @param retryPolicy Retry policy.
      * @param sleep Async sleep helper.
      */
     public constructor(
-        adapterManager: IAdapterMongoConnectionManager,
+        uri: string,
+        connector: IMongoConnector,
         retryPolicy: IMongoConnectionRetryPolicy,
         sleep: (ms: number) => Promise<void>,
     ) {
-        this.adapterManager = adapterManager
+        this.uri = uri
+        this.connector = connector
         this.retryPolicy = retryPolicy
         this.sleep = sleep
 
@@ -187,25 +184,21 @@ class MongoConnectionManager implements IApiDatabaseConnection {
         while (this.attempts < this.retryPolicy.maxAttempts) {
             this.attempts += 1
 
-            const connectResult = await this.adapterManager.connect()
-            if (connectResult.isOk) {
+            try {
+                await this.connector.connect(this.uri)
                 this.ready = true
                 this.lastError = null
                 return
-            }
+            } catch (error: unknown) {
+                const normalizedError = normalizeError(error)
+                this.ready = false
+                this.lastError = normalizedError.message
+                lastFailure = normalizedError
 
-            const failure = connectResult.error.cause ?? connectResult.error
-            this.ready = false
-            this.lastError = failure.message
-            lastFailure = failure
-
-            if (!connectResult.error.retryable) {
-                break
-            }
-
-            if (this.attempts < this.retryPolicy.maxAttempts) {
-                const delayMs = calculateRetryDelayMs(this.retryPolicy, this.attempts)
-                await this.sleep(delayMs)
+                if (this.attempts < this.retryPolicy.maxAttempts) {
+                    const delayMs = calculateRetryDelayMs(this.retryPolicy, this.attempts)
+                    await this.sleep(delayMs)
+                }
             }
         }
 
@@ -221,15 +214,8 @@ class MongoConnectionManager implements IApiDatabaseConnection {
      * @returns Promise resolved when disconnect is complete.
      */
     public async disconnect(): Promise<void> {
+        await this.connector.disconnect()
         this.ready = false
-
-        const disconnectResult = await this.adapterManager.disconnect()
-        if (disconnectResult.isFail) {
-            throw new MongoConnectionError(
-                "failed to disconnect from mongodb",
-                disconnectResult.error.cause ?? disconnectResult.error,
-            )
-        }
     }
 
     /**
@@ -238,7 +224,7 @@ class MongoConnectionManager implements IApiDatabaseConnection {
      * @returns True when connection is ready.
      */
     public isReady(): boolean {
-        return this.ready && this.adapterManager.isConnected()
+        return this.ready
     }
 
     /**
@@ -298,60 +284,8 @@ export function createMongoConnectionManager(
 
     const connector = options.connector ?? createMongooseConnector()
     const sleep = options.sleep ?? defaultSleep
-    const adapterManager = createAdapterMongoConnectionManager(uri, connector)
 
-    return new MongoConnectionManager(adapterManager, retryPolicy, sleep)
-}
-
-/**
- * Creates adapter-backed connection manager wired through runtime connector.
- *
- * @param uri MongoDB URI.
- * @param connector Runtime connector contract.
- * @returns Adapter Mongo connection manager instance.
- */
-function createAdapterMongoConnectionManager(
-    uri: string,
-    connector: IMongoConnector,
-): IAdapterMongoConnectionManager {
-    return new AdapterMongoConnectionManager(uri, {
-        createConnectionFn: createAdapterConnectionFactory(connector),
-    })
-}
-
-/**
- * Creates adapter connection factory from runtime connector abstraction.
- *
- * @param connector Runtime connector.
- * @returns Adapter-compatible createConnection function.
- */
-function createAdapterConnectionFactory(connector: IMongoConnector): AdapterCreateMongoConnectionFn {
-    return async (uri: string): Promise<Connection> => {
-        await connector.connect(uri)
-        return createConnectorBackedConnection(connector)
-    }
-}
-
-/**
- * Creates lightweight mongoose-connection shape backed by runtime connector.
- *
- * @param connector Runtime connector.
- * @returns Mongoose-compatible connection object.
- */
-function createConnectorBackedConnection(connector: IMongoConnector): Connection {
-    const connectionLike = {
-        readyState: mongoose.ConnectionStates.connected,
-        async close(): Promise<void> {
-            if (connectionLike.readyState === mongoose.ConnectionStates.disconnected) {
-                return
-            }
-
-            await connector.disconnect()
-            connectionLike.readyState = mongoose.ConnectionStates.disconnected
-        },
-    }
-
-    return connectionLike as unknown as Connection
+    return new MongoConnectionManager(uri, connector, retryPolicy, sleep)
 }
 
 /**
@@ -433,4 +367,18 @@ function calculateRetryDelayMs(
         retryPolicy.initialDelayMs * Math.pow(retryPolicy.backoffFactor, Math.max(0, attempt - 1))
 
     return Math.min(retryPolicy.maxDelayMs, rawDelay)
+}
+
+/**
+ * Normalizes unknown error values.
+ *
+ * @param error Unknown failure value.
+ * @returns Error instance.
+ */
+function normalizeError(error: unknown): Error {
+    if (error instanceof Error) {
+        return error
+    }
+
+    return new Error(String(error))
 }
