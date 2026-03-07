@@ -26,9 +26,14 @@ async function main() {
 
     const manifest = validateManifest(await readJsonFile(VITE_MANIFEST_PATH))
     const routeBundles = await collectRouteBundles(manifest)
+    const totalJsBundle = await collectTotalJsBundle(manifest)
     const routeViolations = collectRouteViolations(
         routeBundles,
         budgetConfig.thresholds.jsPerRouteKb,
+    )
+    const totalJsViolations = collectTotalJsViolations(
+        totalJsBundle.gzipKb,
+        budgetConfig.thresholds.totalJsKb,
     )
 
     const webVitalsPath = resolveBudgetRelativePath(budgetConfig.webVitalsSnapshotPath)
@@ -38,9 +43,9 @@ async function main() {
         budgetConfig.thresholds,
     )
 
-    printReport(routeBundles, webVitalsSnapshot.metrics, budgetConfig.thresholds)
+    printReport(routeBundles, totalJsBundle, webVitalsSnapshot.metrics, budgetConfig.thresholds)
 
-    const violations = [...routeViolations, ...webVitalsViolations]
+    const violations = [...routeViolations, ...totalJsViolations, ...webVitalsViolations]
     if (violations.length > 0) {
         throw new Error(formatViolations(violations))
     }
@@ -86,7 +91,7 @@ function resolveBudgetRelativePath(relativePath) {
  *
  * @param {unknown} rawConfig Raw JSON payload.
  * @returns {{
- *   thresholds: {lcpMs: number, inpMs: number, cls: number, jsPerRouteKb: number},
+ *   thresholds: {lcpMs: number, inpMs: number, cls: number, jsPerRouteKb: number, totalJsKb: number},
  *   webVitalsSnapshotPath: string
  * }} Normalized budget config.
  */
@@ -109,6 +114,7 @@ function validateBudgetConfig(rawConfig) {
     const inpMs = assertPositiveNumber(thresholds["inpMs"], "thresholds.inpMs")
     const cls = assertPositiveNumber(thresholds["cls"], "thresholds.cls")
     const jsPerRouteKb = assertPositiveNumber(thresholds["jsPerRouteKb"], "thresholds.jsPerRouteKb")
+    const totalJsKb = assertPositiveNumber(thresholds["totalJsKb"], "thresholds.totalJsKb")
 
     return {
         thresholds: {
@@ -116,6 +122,7 @@ function validateBudgetConfig(rawConfig) {
             inpMs,
             cls,
             jsPerRouteKb,
+            totalJsKb,
         },
         webVitalsSnapshotPath,
     }
@@ -280,6 +287,49 @@ function collectRouteViolations(routeBundles, jsPerRouteKb) {
 }
 
 /**
+ * Collects gzipped JS size for all emitted JS chunks.
+ *
+ * @param {Record<string, {file: string}>} manifest Vite manifest.
+ * @returns {Promise<{gzipKb: number, jsFiles: string[]}>} Aggregated JS bundle size.
+ */
+async function collectTotalJsBundle(manifest) {
+    const jsFiles = new Set()
+
+    for (const entry of Object.values(manifest)) {
+        if (entry.file.endsWith(".js")) {
+            jsFiles.add(entry.file)
+        }
+    }
+
+    let totalGzipBytes = 0
+    for (const fileName of jsFiles) {
+        const assetPath = path.resolve(DIST_DIRECTORY, fileName)
+        const assetContent = await readFile(assetPath)
+        totalGzipBytes += gzipSync(assetContent).length
+    }
+
+    return {
+        gzipKb: Number((totalGzipBytes / 1024).toFixed(2)),
+        jsFiles: Array.from(jsFiles).sort(),
+    }
+}
+
+/**
+ * Compares total emitted JS size with configured global budget.
+ *
+ * @param {number} totalJsKb Total gzipped JS size in kilobytes.
+ * @param {number} totalJsBudgetKb Allowed global JS budget in kilobytes.
+ * @returns {string[]} List of violations.
+ */
+function collectTotalJsViolations(totalJsKb, totalJsBudgetKb) {
+    if (totalJsKb <= totalJsBudgetKb) {
+        return []
+    }
+
+    return [`Total JS budget exceeded: ${totalJsKb}KB > ${totalJsBudgetKb}KB`]
+}
+
+/**
  * Compares web vitals metrics with configured thresholds.
  *
  * @param {{lcpMs: number, inpMs: number, cls: number}} metrics Captured web vitals.
@@ -304,15 +354,19 @@ function collectWebVitalsViolations(metrics, thresholds) {
  * Prints concise report with route bundles and vitals metrics.
  *
  * @param {Array<{routeId: string, gzipKb: number, jsFiles: string[]}>} routeBundles Route bundle data.
+ * @param {{gzipKb: number, jsFiles: string[]}} totalJsBundle Total emitted JS size summary.
  * @param {{lcpMs: number, inpMs: number, cls: number}} metrics Captured web vitals.
- * @param {{lcpMs: number, inpMs: number, cls: number, jsPerRouteKb: number}} thresholds Budget thresholds.
+ * @param {{lcpMs: number, inpMs: number, cls: number, jsPerRouteKb: number, totalJsKb: number}} thresholds
+ * Budget thresholds.
  */
-function printReport(routeBundles, metrics, thresholds) {
+function printReport(routeBundles, totalJsBundle, metrics, thresholds) {
     console.log("Performance budget report")
     console.log(`JS per route budget: ${thresholds.jsPerRouteKb}KB (gzip)`)
     for (const routeBundle of routeBundles) {
         console.log(` - ${routeBundle.routeId}: ${routeBundle.gzipKb}KB`)
     }
+    console.log(`Total JS budget: ${thresholds.totalJsKb}KB (gzip)`)
+    console.log(` - total emitted JS chunks: ${totalJsBundle.gzipKb}KB`)
 
     console.log("Web Vitals budget")
     console.log(` - LCP: ${metrics.lcpMs}ms (budget ${thresholds.lcpMs}ms)`)

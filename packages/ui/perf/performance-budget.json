@@ -3,7 +3,8 @@
         "lcpMs": 2500,
         "inpMs": 200,
         "cls": 0.1,
-        "jsPerRouteKb": 200
+        "jsPerRouteKb": 200,
+        "totalJsKb": 1200
     },
     "webVitalsSnapshotPath": "./perf/web-vitals-snapshot.json"
 }
