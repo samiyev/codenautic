@@ -4,6 +4,7 @@ import type {
     IStageTransition,
 } from "../../types/review/pipeline-stage.contract"
 import {StageError} from "../../../domain/errors/stage.error"
+import {DirectoryConfigResolverService} from "../../../domain/services/directory-config-resolver.service"
 import {Result} from "../../../shared/result"
 import {
     isPipelineCollectionItem,
@@ -12,6 +13,11 @@ import {
 } from "./pipeline-stage-state.utils"
 import type {IFileContextGateDefaults} from "../../dto/config/system-defaults.dto"
 import type {ISystemSettingsProvider} from "../../ports/outbound/common/system-settings-provider.port"
+import {
+    buildConfigFingerprint,
+    mergeConfigWithOverride,
+    parseDirectoryConfigs,
+} from "../../shared/directory-config.utils"
 
 const FILE_CONTEXT_GATE_DEFAULTS: IFileContextGateDefaults = {
     batchSize: 30,
@@ -54,8 +60,8 @@ export class FileContextGateStageUseCase implements IPipelineStageUseCase {
         const contextPaths = this.resolveContextPaths(input.state.externalContext)
 
         const filteredFiles = files.filter((file): boolean => {
-            const rawPath = file["path"]
-            if (typeof rawPath !== "string" || rawPath.trim().length === 0) {
+            const rawPath = this.resolveFilePath(file)
+            if (rawPath === undefined) {
                 return false
             }
 
@@ -63,11 +69,20 @@ export class FileContextGateStageUseCase implements IPipelineStageUseCase {
                 return true
             }
 
-            return contextPaths.has(rawPath.trim())
+            return contextPaths.has(rawPath)
         })
 
-        const batchSize = await this.resolveBatchSize(input.state.config)
-        const batches = this.createBatches(filteredFiles, batchSize)
+        const directoryConfigs = parseDirectoryConfigs(input.state.config)
+        const directoryResolver = directoryConfigs.length > 0
+            ? new DirectoryConfigResolverService(directoryConfigs)
+            : undefined
+        const defaultBatchSize = await this.resolveBatchSize(input.state.config)
+        const {batches, batchGroups} = this.createBatchesByConfig(
+            filteredFiles,
+            input.state.config,
+            defaultBatchSize,
+            directoryResolver,
+        )
 
         return Result.ok<IStageTransition, StageError>({
             state: input.state.with({
@@ -75,10 +90,11 @@ export class FileContextGateStageUseCase implements IPipelineStageUseCase {
                 externalContext: mergeExternalContext(input.state.externalContext, {
                     batches,
                     fileContextGate: {
-                        batchSize,
+                        batchSize: defaultBatchSize,
                         batchCount: batches.length,
                         eligibleFileCount: filteredFiles.length,
                         filteredOutCount: files.length - filteredFiles.length,
+                        batchGroups,
                     },
                 }),
             }),
@@ -199,6 +215,156 @@ export class FileContextGateStageUseCase implements IPipelineStageUseCase {
         }
 
         return paths
+    }
+
+    /**
+     * Resolves normalized file path from payload.
+     *
+     * @param file File payload.
+     * @returns Normalized path or undefined.
+     */
+    private resolveFilePath(file: Readonly<Record<string, unknown>>): string | undefined {
+        const rawPath = file["path"]
+        if (typeof rawPath !== "string") {
+            return undefined
+        }
+
+        const normalized = rawPath.trim()
+        if (normalized.length === 0) {
+            return undefined
+        }
+
+        return normalized
+    }
+
+    /**
+     * Splits files into batches grouped by effective config.
+     *
+     * @param files Source files.
+     * @param baseConfig Base config payload.
+     * @param defaultBatchSize Default batch size.
+     * @param directoryResolver Directory resolver.
+     * @returns Batched files and group metadata.
+     */
+    private createBatchesByConfig(
+        files: readonly Readonly<Record<string, unknown>>[],
+        baseConfig: Readonly<Record<string, unknown>>,
+        defaultBatchSize: number,
+        directoryResolver: DirectoryConfigResolverService | undefined,
+    ): {
+        readonly batches: readonly Readonly<Record<string, unknown>>[][]
+        readonly batchGroups: readonly Readonly<Record<string, unknown>>[]
+    } {
+        if (files.length === 0) {
+            return {
+                batches: [],
+                batchGroups: [],
+            }
+        }
+
+        const grouped = new Map<string, {
+            config: Readonly<Record<string, unknown>>
+            files: Readonly<Record<string, unknown>>[]
+        }>()
+
+        for (const file of files) {
+            const filePath = this.resolveFilePath(file)
+            if (filePath === undefined) {
+                continue
+            }
+
+            const effectiveConfig = this.resolveEffectiveConfig(
+                baseConfig,
+                filePath,
+                directoryResolver,
+            )
+            const fingerprint = buildConfigFingerprint(effectiveConfig)
+            const group = grouped.get(fingerprint) ?? {
+                config: effectiveConfig,
+                files: [],
+            }
+
+            group.files.push(file)
+            grouped.set(fingerprint, group)
+        }
+
+        const batches: Readonly<Record<string, unknown>>[][] = []
+        const batchGroups: Readonly<Record<string, unknown>>[] = []
+
+        const sortedGroups = [...grouped.entries()].sort(([left], [right]) => {
+            return left.localeCompare(right)
+        })
+
+        for (const [fingerprint, group] of sortedGroups) {
+            const sortedFiles = [...group.files].sort((left, right) => {
+                const leftPath = this.resolveFilePath(left) ?? ""
+                const rightPath = this.resolveFilePath(right) ?? ""
+                return leftPath.localeCompare(rightPath)
+            })
+
+            const groupBatchSize = this.resolveBatchSizeOverride(
+                group.config,
+                defaultBatchSize,
+            )
+            const groupBatches = this.createBatches(sortedFiles, groupBatchSize)
+            batches.push(...groupBatches)
+
+            batchGroups.push({
+                configFingerprint: fingerprint,
+                batchSize: groupBatchSize,
+                batchCount: groupBatches.length,
+                fileCount: sortedFiles.length,
+            })
+        }
+
+        return {
+            batches,
+            batchGroups,
+        }
+    }
+
+    /**
+     * Resolves effective config for a file path.
+     *
+     * @param baseConfig Base config payload.
+     * @param filePath File path.
+     * @param directoryResolver Directory resolver.
+     * @returns Effective config.
+     */
+    private resolveEffectiveConfig(
+        baseConfig: Readonly<Record<string, unknown>>,
+        filePath: string,
+        directoryResolver: DirectoryConfigResolverService | undefined,
+    ): Readonly<Record<string, unknown>> {
+        if (directoryResolver === undefined) {
+            return mergeConfigWithOverride(baseConfig, {})
+        }
+
+        const directoryConfig = directoryResolver.resolve(filePath)
+        if (directoryConfig === null) {
+            return mergeConfigWithOverride(baseConfig, {})
+        }
+
+        return mergeConfigWithOverride(baseConfig, directoryConfig.config)
+    }
+
+    /**
+     * Resolves batch size from effective config or fallback.
+     *
+     * @param config Effective config payload.
+     * @param fallback Batch size fallback.
+     * @returns Batch size.
+     */
+    private resolveBatchSizeOverride(
+        config: Readonly<Record<string, unknown>>,
+        fallback: number,
+    ): number {
+        const overrideBatchSize = this.readBatchSize(config["batchSize"])
+        if (overrideBatchSize !== undefined) {
+            return overrideBatchSize
+        }
+
+        return fallback
     }
 
     /**

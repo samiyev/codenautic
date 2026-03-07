@@ -16,8 +16,6 @@ import {
     REVIEW_DEPTH_STRATEGY,
     type ReviewDepthStrategy,
 } from "../../dto/review/review-config.dto"
-import type {IDirectoryConfig} from "../../dto/config/directory-config.dto"
-import type {IReviewConfigDTO} from "../../dto/review/review-config.dto"
 import type {IGeneratePromptInput} from "../generate-prompt.use-case"
 import type {IUseCase} from "../../ports/inbound/use-case.port"
 import type {ILLMProvider} from "../../ports/outbound/llm/llm-provider.port"
@@ -38,9 +36,14 @@ import type {
 } from "../../types/review/pipeline-stage.contract"
 import type {ValidationError} from "../../../domain/errors/validation.error"
 import {StageError} from "../../../domain/errors/stage.error"
+import {DirectoryConfigResolverService} from "../../../domain/services/directory-config-resolver.service"
 import {deduplicate} from "../../../shared/utils/deduplicate"
 import {hash} from "../../../shared/utils/hash"
 import {Result} from "../../../shared/result"
+import {
+    mergeConfigWithOverride,
+    parseDirectoryConfigs,
+} from "../../shared/directory-config.utils"
 import {enrichSuggestions} from "../../shared/suggestion-enrichment"
 import {SUGGESTION_TOOL} from "../../shared/suggestion-tool"
 import {
@@ -57,7 +60,6 @@ import {
 import {
     INITIAL_STAGE_ATTEMPT,
     mergeExternalContext,
-    readObjectField,
     readStringField,
 } from "./pipeline-stage-state.utils"
 import type {IReviewFileDefaults} from "../../dto/config/system-defaults.dto"
@@ -81,6 +83,14 @@ interface IFileAnalysisResult {
     readonly reviewDepthStrategy: ReviewDepthStrategy
     readonly fallbackToLight: boolean
     readonly hasFileContent: boolean
+}
+
+interface IFileAnalysisParams {
+    readonly config: Readonly<Record<string, unknown>>
+    readonly timeoutMs: number
+    readonly reviewDepthStrategy: ReviewDepthStrategy
+    readonly directoryResolver: DirectoryConfigResolverService | undefined
+    readonly templateSystemPrompt: string
 }
 
 interface IFileReviewModeLog {
@@ -146,6 +156,10 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
     public async execute(input: IStageCommand): Promise<Result<IStageTransition, StageError>> {
         const timeoutMs = this.resolveTimeoutMs(input.state.config)
         const reviewDepthStrategy = this.resolveReviewDepthStrategy(input.state.config)
+        const directoryConfigs = parseDirectoryConfigs(input.state.config)
+        const directoryResolver = directoryConfigs.length > 0
+            ? new DirectoryConfigResolverService(directoryConfigs)
+            : undefined
         const batches = this.resolveBatches(input.state)
         const templateSystemPromptResult = await this.resolveTemplateSystemPrompt(
             input.state.runId,
@@ -161,10 +175,13 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
         try {
             const analysisResults = await this.analyzeFiles(
                 batches,
-                input.state.config,
-                timeoutMs,
-                reviewDepthStrategy,
-                templateSystemPrompt,
+                {
+                    config: input.state.config,
+                    timeoutMs,
+                    reviewDepthStrategy,
+                    directoryResolver,
+                    templateSystemPrompt,
+                },
             )
             const fileReviewModeLogs = this.buildFileReviewModeLogs(
                 analysisResults,
@@ -234,10 +251,7 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
      */
     private async analyzeFiles(
         batches: readonly (readonly PipelineCollectionItem[])[],
-        config: Readonly<Record<string, unknown>>,
-        timeoutMs: number,
-        reviewDepthStrategy: ReviewDepthStrategy,
-        templateSystemPrompt: string,
+        params: IFileAnalysisParams,
     ): Promise<readonly IFileAnalysisResult[]> {
         const results: IFileAnalysisResult[] = []
 
@@ -246,10 +260,7 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
                 batch.map(async (file): Promise<IFileAnalysisResult> => {
                     return this.analyzeSingleFile(
                         file,
-                        config,
-                        timeoutMs,
-                        reviewDepthStrategy,
-                        templateSystemPrompt,
+                        params,
                     )
                 }),
             )
@@ -569,11 +580,15 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
      */
     private async analyzeSingleFile(
         file: PipelineCollectionItem,
-        config: Readonly<Record<string, unknown>>,
-        timeoutMs: number,
-        reviewDepthStrategy: ReviewDepthStrategy,
-        templateSystemPrompt: string,
+        params: IFileAnalysisParams,
     ): Promise<IFileAnalysisResult> {
+        const {
+            config,
+            timeoutMs,
+            reviewDepthStrategy,
+            directoryResolver,
+            templateSystemPrompt,
+        } = params
         const filePathValue = this.resolveString(file["path"])
         if (filePathValue === undefined) {
             return this.createFailedAnalysisResult(
@@ -589,7 +604,7 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
         const hunks = this.resolveHunks(file["hunks"])
         const status = this.resolveDiffFileStatus(file["status"])
         const filePath = this.createFilePath(filePathValue)
-        const fileReviewConfig = this.resolveFileConfig(config, filePath)
+        const fileReviewConfig = this.resolveFileConfig(config, filePath, directoryResolver)
         const fileReviewDepthStrategy = this.resolveReviewDepthStrategy(fileReviewConfig)
 
         const diffFile = this.resolveDiffFile({
@@ -709,195 +724,18 @@ export class ProcessFilesReviewStageUseCase implements IPipelineStageUseCase {
     private resolveFileConfig(
         config: Readonly<Record<string, unknown>>,
         filePath: FilePath,
+        directoryResolver: DirectoryConfigResolverService | undefined,
     ): Readonly<Record<string, unknown>> {
-        const directoryConfig = this.resolveMatchingDirectoryConfig(config, filePath)
-        if (directoryConfig === undefined) {
+        if (directoryResolver === undefined) {
             return config
         }
 
-        const mergedConfig: Record<string, unknown> = {
-            ...config,
-        }
-        delete mergedConfig.directories
-        const override = directoryConfig.config
-
-        for (const [key, value] of Object.entries(override)) {
-            mergedConfig[key] = value
+        const directoryConfig = directoryResolver.resolve(filePath.toString())
+        if (directoryConfig === null) {
+            return config
         }
 
-        return mergedConfig
-    }
-
-    /**
-     * Chooses the most specific matching directory override.
-     *
-     * @param config Pipeline config payload.
-     * @param filePath File path.
-     * @returns The selected directory override or undefined.
-     */
-    private resolveMatchingDirectoryConfig(
-        config: Readonly<Record<string, unknown>>,
-        filePath: FilePath,
-    ): IDirectoryConfig | undefined {
-        const directories = this.resolveDirectoryConfigs(config)
-        let selectedDirectory: IDirectoryConfig | undefined
-        let bestSpecificity = -1
-        let bestIndex = -1
-
-        for (let index = 0; index < directories.length; index += 1) {
-            const directoryConfig = directories[index]
-            if (directoryConfig === undefined) {
-                continue
-            }
-
-            if (this.isDirectoryMatch(filePath, directoryConfig.path) === false) {
-                continue
-            }
-
-            const specificity = this.calculateDirectorySpecificity(directoryConfig.path)
-            if (
-                specificity > bestSpecificity ||
-                (specificity === bestSpecificity && index > bestIndex)
-            ) {
-                selectedDirectory = directoryConfig
-                bestSpecificity = specificity
-                bestIndex = index
-            }
-        }
-
-        return selectedDirectory
-    }
-
-    /**
-     * Resolves directory configs from base config.
-     *
-     * @param config Pipeline config.
-     * @returns Directory configurations.
-     */
-    private resolveDirectoryConfigs(
-        config: Readonly<Record<string, unknown>>,
-    ): readonly IDirectoryConfig[] {
-        const directories = config["directories"]
-        if (Array.isArray(directories) === false) {
-            return []
-        }
-
-        const parsedDirectories: IDirectoryConfig[] = []
-
-        for (const rawDirectoryConfig of directories) {
-            const directoryConfig = this.resolveDirectoryConfig(rawDirectoryConfig)
-            if (directoryConfig !== undefined) {
-                parsedDirectories.push(directoryConfig)
-            }
-        }
-
-        return parsedDirectories
-    }
-
-    /**
-     * Normalizes and validates one directory config entry.
-     *
-     * @param rawDirectoryConfig Raw directory config value.
-     * @returns Parsed directory config or undefined.
-     */
-    private resolveDirectoryConfig(rawDirectoryConfig: unknown): IDirectoryConfig | undefined {
-        if (rawDirectoryConfig === null || typeof rawDirectoryConfig !== "object" || Array.isArray(rawDirectoryConfig)) {
-            return undefined
-        }
-
-        const record = rawDirectoryConfig as Readonly<Record<string, unknown>>
-        const path = this.resolveString(record["path"])
-        if (path === undefined) {
-            return undefined
-        }
-
-        const config = readObjectField(record, "config")
-        if (config === undefined) {
-            return undefined
-        }
-
-        return {
-            path,
-            config: config as Partial<IReviewConfigDTO>,
-        }
-    }
-
-    /**
-     * Checks whether file path matches configured directory rule.
-     *
-     * @param filePath File path.
-     * @param directoryPath Directory matcher.
-     * @returns True when path matches directory rule.
-     */
-    private isDirectoryMatch(filePath: FilePath, directoryPath: string): boolean {
-        const normalizedPath = this.normalizeDirectoryPath(directoryPath)
-        if (normalizedPath.length === 0) {
-            return false
-        }
-
-        const normalizedFilePath = filePath.toString()
-        if (this.isGlobPattern(normalizedPath) === true) {
-            return filePath.matchesGlob(normalizedPath)
-        }
-
-        if (normalizedFilePath === normalizedPath) {
-            return true
-        }
-
-        return normalizedFilePath.startsWith(`${normalizedPath}/`)
-    }
-
-    /**
-     * Checks whether directory pattern contains wildcards.
-     *
-     * @param path Pattern.
-     * @returns True when wildcard tokens are present.
-     */
-    private isGlobPattern(path: string): boolean {
-        return path.includes("*") || path.includes("?")
-    }
-
-    /**
-     * Calculates pattern precedence for conflicting directory overrides.
-     *
-     * @param path Directory pattern.
-     * @returns Numeric specificity score.
-     */
-    private calculateDirectorySpecificity(path: string): number {
-        const normalizedPath = this.normalizeDirectoryPath(path)
-        if (this.isGlobPattern(normalizedPath) === false) {
-            return normalizedPath.length + 1000
-        }
-
-        return normalizedPath.length
-    }
-
-    /**
-     * Normalizes directory rule path before matching.
-     *
-     * @param path Raw directory path.
-     * @returns Normalized path.
-     */
-    private normalizeDirectoryPath(path: string): string {
-        const normalized = path.trim().replaceAll("\\", "/")
-        if (normalized.length === 0) {
-            return ""
-        }
-
-        let result = normalized
-        if (result.startsWith("./")) {
-            result = result.slice(2)
-        }
-
-        while (result.startsWith("/")) {
-            result = result.slice(1)
-        }
-
-        while (result.length > 1 && result.endsWith("/")) {
-            result = result.slice(0, -1)
-        }
-
-        return result
+        return mergeConfigWithOverride(config, directoryConfig.config)
     }
 
     /**

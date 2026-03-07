@@ -149,4 +149,39 @@ describe("FileContextGateStageUseCase", () => {
         expect(result.isOk).toBe(true)
         expect(result.value.state.files).toEqual([{path: "src/a.ts"}])
     })
+
+    test("groups batches by effective config when directory overrides differ", async () => {
+        const useCase = new FileContextGateStageUseCase(fileContextDefaults)
+        const state = createState(
+            [{path: "src/core/a.ts"}, {path: "src/app.ts"}],
+            null,
+            {
+                batchSize: 2,
+                severityThreshold: "LOW",
+                directories: [
+                    {
+                        path: "src/core",
+                        config: {
+                            severityThreshold: "HIGH",
+                        },
+                    },
+                ],
+            },
+        )
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isOk).toBe(true)
+        const batches = result.value.state.externalContext?.["batches"] as readonly unknown[]
+        expect(batches).toHaveLength(2)
+        const gateMetrics = result.value.state.externalContext?.[
+            "fileContextGate"
+        ] as Readonly<Record<string, unknown>>
+        const batchGroups = gateMetrics["batchGroups"] as readonly Readonly<Record<string, unknown>>[]
+        expect(batchGroups).toHaveLength(2)
+        expect(batchGroups[0]?.["fileCount"]).toBe(1)
+        expect(batchGroups[1]?.["fileCount"]).toBe(1)
+    })
 })
