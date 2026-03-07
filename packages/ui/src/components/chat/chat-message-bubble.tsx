@@ -46,7 +46,7 @@ function parseCodeReference(value: string): IChatCodeReference | undefined {
     }
 
     const match = normalized.match(
-        /^(.*\.[A-Za-z0-9-]+)(?::(\d+)(?::\d+)?)?(?:-(\d+)(?::\d+)?)?(?:#(L?\d+(?:C\d+)?(?:-L?\d+(?:C\d+)?)?))?$/,
+        /^(.*?)(?::(\d+)(?::\d+)?)?(?:-(\d+)(?::\d+)?)?(?:#(L?\d+(?:C\d+)?(?:-L?\d+(?:C\d+)?)?))?$/,
     )
     if (match === null) {
         return undefined
@@ -54,7 +54,14 @@ function parseCodeReference(value: string): IChatCodeReference | undefined {
 
     const [, rawFilePath, lineStart, lineEnd, hashRange] = match
     const filePath = (rawFilePath ?? "").trim()
-    if (filePath.length === 0 || filePath.endsWith("/") || filePath.endsWith("\\")) {
+    const hasFileDelimiter = filePath.includes("/") || filePath.includes("\\") || filePath.includes(".")
+    if (
+        filePath.length === 0
+        || filePath.endsWith("/")
+        || filePath.endsWith("\\")
+        || /\s/.test(filePath)
+        || hasFileDelimiter === false
+    ) {
         return undefined
     }
 
@@ -63,6 +70,17 @@ function parseCodeReference(value: string): IChatCodeReference | undefined {
     const parsedLineEnd = parseLineNumber(lineEnd ?? "")
     const parsedHashStart = parseLineNumber(hashMatch?.[1] ?? "")
     const parsedHashEnd = parseLineNumber(hashMatch?.[2] ?? "")
+    const hasLineInfo =
+        parsedLineStart !== undefined
+        || parsedLineEnd !== undefined
+        || parsedHashStart !== undefined
+        || parsedHashEnd !== undefined
+    const hasPathDelimiter = filePath.includes("/") || filePath.includes("\\")
+    const hasFileExtension = /\.[A-Za-z0-9-]+$/.test(filePath)
+
+    if (hasFileExtension === false && (hasPathDelimiter === false || hasLineInfo === false)) {
+        return undefined
+    }
 
     return {
         filePath,

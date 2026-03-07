@@ -147,7 +147,7 @@ describe("chat message bubble", (): void => {
                 message={{
                     ...messageWithMarkdown,
                     content:
-                        "[src/index.ts:12:4](src/index.ts:12:4) [src/app.ts#L8C2](src/app.ts#L8C2) [/tmp/src/main.ts:15:2](/tmp/src/main.ts:15:2)",
+                        "[src/index.ts:12:4](src/index.ts:12:4) [src/app.ts#L8C2](src/app.ts#L8C2) [/tmp/src/main.ts:15:2](/tmp/src/main.ts:15:2) [src/Dockerfile:9](src/Dockerfile:9)",
                     id: "msg-ref-columns",
                     role: "assistant",
                 }}
@@ -158,6 +158,7 @@ describe("chat message bubble", (): void => {
         await user.click(screen.getByRole("link", { name: "Code reference src/index.ts:12" }))
         await user.click(screen.getByRole("link", { name: "Code reference src/app.ts:8" }))
         await user.click(screen.getByRole("link", { name: "Code reference /tmp/src/main.ts:15" }))
+        await user.click(screen.getByRole("link", { name: "Code reference src/Dockerfile:9" }))
 
         expect(onCodeReferenceClick).toHaveBeenNthCalledWith(1, {
             filePath: "src/index.ts",
@@ -172,6 +173,11 @@ describe("chat message bubble", (): void => {
         expect(onCodeReferenceClick).toHaveBeenNthCalledWith(3, {
             filePath: "/tmp/src/main.ts",
             lineStart: 15,
+            lineEnd: undefined,
+        })
+        expect(onCodeReferenceClick).toHaveBeenNthCalledWith(4, {
+            filePath: "src/Dockerfile",
+            lineStart: 9,
             lineEnd: undefined,
         })
     })
