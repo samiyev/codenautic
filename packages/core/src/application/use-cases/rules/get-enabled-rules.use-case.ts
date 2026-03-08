@@ -1,10 +1,10 @@
 import type {IUseCase} from "../../ports/inbound/use-case.port"
-import type {IRuleRepository} from "../../ports/outbound/rule/rule-repository.port"
-import {RULE_STATUS} from "../../../domain/aggregates/rule.aggregate"
+import type {ILibraryRuleRepository} from "../../ports/outbound/rule/library-rule-repository.port"
 import {ValidationError, type IValidationErrorField} from "../../../domain/errors/validation.error"
 import type {IGetEnabledRulesInput, IGetEnabledRulesOutput} from "../../dto/rules/get-enabled-rules.dto"
 import type {ITeamRuleProvider} from "../../ports/outbound/rule/team-rule-provider.port"
 import {Result} from "../../../shared/result"
+import {OrganizationId} from "../../../domain/value-objects/organization-id.value-object"
 
 interface INormalizedGetEnabledRulesInput {
     /**
@@ -31,9 +31,9 @@ interface INormalizedGetEnabledRulesInput {
 /** Dependencies for enabled-rules resolution. */
 export interface IGetEnabledRulesDependencies {
     /**
-     * Rule persistence port.
+     * Library rule persistence port.
      */
-    readonly ruleRepository: IRuleRepository
+    readonly libraryRuleRepository: ILibraryRuleRepository
 
     /**
      * Optional team rules override provider.
@@ -48,7 +48,7 @@ export interface IGetEnabledRulesDependencies {
 export class GetEnabledRulesUseCase
     implements IUseCase<IGetEnabledRulesInput, IGetEnabledRulesOutput, ValidationError>
 {
-    private readonly ruleRepository: IRuleRepository
+    private readonly libraryRuleRepository: ILibraryRuleRepository
     private readonly teamRuleProvider?: ITeamRuleProvider
 
     /**
@@ -57,7 +57,7 @@ export class GetEnabledRulesUseCase
      * @param dependencies Use-case dependencies.
      */
     public constructor(dependencies: IGetEnabledRulesDependencies) {
-        this.ruleRepository = dependencies.ruleRepository
+        this.libraryRuleRepository = dependencies.libraryRuleRepository
         this.teamRuleProvider = dependencies.teamRuleProvider
     }
 
@@ -75,14 +75,19 @@ export class GetEnabledRulesUseCase
             return Result.fail<IGetEnabledRulesOutput, ValidationError>(normalized.error)
         }
 
-        const activeRuleIds = await this.getActiveRuleIds()
+        const availableRuleUuids = await this.getAvailableRuleUuids(normalized.value.organizationId)
         const disabledRuleIds = new Set<string>()
         const resolvedRuleIds = new Set<string>()
 
-        this.mergeRules(normalized.value.globalRuleIds, activeRuleIds, disabledRuleIds, resolvedRuleIds)
+        this.mergeRules(
+            normalized.value.globalRuleIds,
+            availableRuleUuids,
+            disabledRuleIds,
+            resolvedRuleIds,
+        )
         this.mergeRules(
             normalized.value.organizationRuleIds,
-            activeRuleIds,
+            availableRuleUuids,
             disabledRuleIds,
             resolvedRuleIds,
         )
@@ -97,7 +102,7 @@ export class GetEnabledRulesUseCase
                 }
                 this.mergeRules(
                     configuration.ruleIds,
-                    activeRuleIds,
+                    availableRuleUuids,
                     disabledRuleIds,
                     resolvedRuleIds,
                 )
@@ -110,31 +115,38 @@ export class GetEnabledRulesUseCase
     }
 
     /**
-     * Loads all active rule ids from repository.
+     * Loads all available rule UUIDs for organization scope.
      *
-     * @returns Active ids.
+     * @param organizationId Organization identifier.
+     * @returns Available rule UUIDs.
      */
-    private async getActiveRuleIds(): Promise<ReadonlySet<string>> {
-        const rules = await this.ruleRepository.findByStatus(RULE_STATUS.ACTIVE)
-        const activeRuleIds = new Set<string>()
-        for (const rule of rules) {
-            activeRuleIds.add(rule.id.value)
+    private async getAvailableRuleUuids(organizationId: string): Promise<ReadonlySet<string>> {
+        const [globalRules, organizationRules] = await Promise.all([
+            this.libraryRuleRepository.findGlobal(),
+            this.libraryRuleRepository.findByOrganization(OrganizationId.create(organizationId)),
+        ])
+        const availableRuleUuids = new Set<string>()
+        for (const rule of globalRules) {
+            availableRuleUuids.add(rule.uuid)
+        }
+        for (const rule of organizationRules) {
+            availableRuleUuids.add(rule.uuid)
         }
 
-        return activeRuleIds
+        return availableRuleUuids
     }
 
     /**
      * Merges layer ids with higher layer override semantics.
      *
      * @param layerRuleIds Rule ids from one layer.
-     * @param activeRuleIds Active rule ids from repository.
+     * @param availableRuleUuids Available rule uuids from repository.
      * @param disabledRuleIds Disabled rule ids.
      * @param resolvedRuleIds Accumulated resolved ids.
      */
     private mergeRules(
         layerRuleIds: readonly string[],
-        activeRuleIds: ReadonlySet<string>,
+        availableRuleUuids: ReadonlySet<string>,
         disabledRuleIds: ReadonlySet<string>,
         resolvedRuleIds: Set<string>,
     ): void {
@@ -144,7 +156,7 @@ export class GetEnabledRulesUseCase
                 continue
             }
 
-            if (activeRuleIds.has(ruleId) === false) {
+            if (availableRuleUuids.has(ruleId) === false) {
                 continue
             }
 
