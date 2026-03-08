@@ -29,10 +29,13 @@ vi.mock("@/components/graphs/xyflow-graph-renderer", () => ({
 }))
 
 function buildNodes(count: number): ReadonlyArray<IGraphNode> {
-    return Array.from({ length: count }, (_value, index): IGraphNode => ({
-        id: `node-${index}`,
-        label: `Node ${index}`,
-    }))
+    return Array.from(
+        { length: count },
+        (_value, index): IGraphNode => ({
+            id: `node-${index}`,
+            label: `Node ${index}`,
+        }),
+    )
 }
 
 function buildChainEdges(count: number): ReadonlyArray<IGraphEdge> {
@@ -117,7 +120,10 @@ describe("XyFlowGraph", (): void => {
         })
 
         const latestCall = mockRenderer.mock.calls.at(-1)?.[0] as
-            | { readonly nodes: ReadonlyArray<IGraphNode>; readonly edges: ReadonlyArray<IGraphEdge> }
+            | {
+                  readonly nodes: ReadonlyArray<IGraphNode>
+                  readonly edges: ReadonlyArray<IGraphEdge>
+              }
             | undefined
         expect(latestCall).not.toBeUndefined()
         expect((latestCall?.nodes.length ?? 0) <= 4).toBe(true)

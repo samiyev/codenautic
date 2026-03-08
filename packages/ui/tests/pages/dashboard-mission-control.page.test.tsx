@@ -18,13 +18,23 @@ describe("DashboardMissionControlPage", (): void => {
         expect(screen.getByText("Dashboard data freshness")).not.toBeNull()
         expect(screen.getByText("Explainability for release risk")).not.toBeNull()
         expect(screen.getByText("Flow metrics")).not.toBeNull()
-        expect(screen.getByText("Track flow efficiency and delivery capacity dynamics across recent windows.")).not.toBeNull()
+        expect(
+            screen.getByText(
+                "Track flow efficiency and delivery capacity dynamics across recent windows.",
+            ),
+        ).not.toBeNull()
         expect(screen.getByText("Team activity")).not.toBeNull()
         expect(screen.getByText("CCRs merged by developer in selected date range.")).not.toBeNull()
         expect(screen.getByText("Token usage dashboard")).not.toBeNull()
-        expect(screen.getByText("Usage by model, cost breakdown and trend chart for selected range.")).not.toBeNull()
+        expect(
+            screen.getByText("Usage by model, cost breakdown and trend chart for selected range."),
+        ).not.toBeNull()
         expect(screen.getByText("Architecture health")).not.toBeNull()
-        expect(screen.getByText("Health score, layer violations and DDD compliance in one architecture widget.")).not.toBeNull()
+        expect(
+            screen.getByText(
+                "Health score, layer violations and DDD compliance in one architecture widget.",
+            ),
+        ).not.toBeNull()
         expect(screen.getByRole("link", { name: "Open Graph Explorer" })).not.toBeNull()
         expect(screen.getByRole("link", { name: "Open Causal Analysis" })).not.toBeNull()
         expect(screen.getByRole("link", { name: "Open Impact Planning" })).not.toBeNull()

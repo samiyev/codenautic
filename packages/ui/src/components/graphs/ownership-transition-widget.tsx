@@ -43,9 +43,7 @@ export interface IOwnershipTransitionWidgetProps {
     readonly onSelectEvent?: (event: IOwnershipTransitionEvent) => void
 }
 
-function resolveHandoffLabel(
-    severity: TOwnershipTransitionHandoffSeverity,
-): string {
+function resolveHandoffLabel(severity: TOwnershipTransitionHandoffSeverity): string {
     if (severity === "critical") {
         return "Critical handoff"
     }
@@ -55,9 +53,7 @@ function resolveHandoffLabel(
     return "Smooth handoff"
 }
 
-function resolveHandoffBadgeClassName(
-    severity: TOwnershipTransitionHandoffSeverity,
-): string {
+function resolveHandoffBadgeClassName(severity: TOwnershipTransitionHandoffSeverity): string {
     if (severity === "critical") {
         return "border-rose-300 bg-rose-500/15 text-rose-800"
     }
@@ -86,9 +82,7 @@ function formatTransitionDate(changedAt: string): string {
  * @param props Набор переходов владения и callback фокуса.
  * @returns React-компонент timeline.
  */
-export function OwnershipTransitionWidget(
-    props: IOwnershipTransitionWidgetProps,
-): ReactElement {
+export function OwnershipTransitionWidget(props: IOwnershipTransitionWidgetProps): ReactElement {
     return (
         <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
             <p className="text-sm font-semibold text-slate-900">Ownership transition widget</p>
@@ -117,7 +111,9 @@ export function OwnershipTransitionWidget(
                                     {formatTransitionDate(event.changedAt)}
                                 </span>
                             </div>
-                            <p className="mt-1 text-sm font-semibold text-slate-900">{event.scopeLabel}</p>
+                            <p className="mt-1 text-sm font-semibold text-slate-900">
+                                {event.scopeLabel}
+                            </p>
                             <p className="mt-1 text-xs text-slate-600">
                                 {event.fromOwnerName} → {event.toOwnerName}
                             </p>

@@ -9,13 +9,13 @@ import { server } from "../mocks/server"
 import { renderWithProviders } from "../utils/render"
 
 describe("SettingsAppearancePage", (): void => {
-    it(
-        "переключает mode/preset, применяет advanced controls и сбрасывает тему к default",
-        async (): Promise<void> => {
+    it("переключает mode/preset, применяет advanced controls и сбрасывает тему к default", async (): Promise<void> => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsAppearancePage />)
 
-        expect(screen.getByRole("heading", { level: 1, name: "Appearance settings" })).not.toBeNull()
+        expect(
+            screen.getByRole("heading", { level: 1, name: "Appearance settings" }),
+        ).not.toBeNull()
 
         const darkModeButton = screen.getByRole("button", { name: "Use dark theme" })
         const systemModeButton = screen.getByRole("button", { name: "Use system theme" })
@@ -75,7 +75,9 @@ describe("SettingsAppearancePage", (): void => {
             expect(screen.getByText("global radius: 20px")).not.toBeNull()
             expect(screen.getByText("form radius: 15px")).not.toBeNull()
         })
-        expect(document.documentElement.style.getPropertyValue("--accent").length).toBeGreaterThan(0)
+        expect(document.documentElement.style.getPropertyValue("--accent").length).toBeGreaterThan(
+            0,
+        )
         expect(document.documentElement.style.getPropertyValue("--radius-md")).toBe("20px")
 
         await user.click(screen.getByRole("button", { name: "Reset to default" }))
@@ -89,9 +91,7 @@ describe("SettingsAppearancePage", (): void => {
         await user.type(screen.getByRole("textbox", { name: "Theme name" }), "Security Focus Theme")
         await user.click(screen.getByRole("button", { name: "Save current theme" }))
         await waitFor(() => {
-            expect(
-                screen.getByRole("combobox", { name: "Theme library selection" }),
-            ).not.toBeNull()
+            expect(screen.getByRole("combobox", { name: "Theme library selection" })).not.toBeNull()
             expect(screen.getByRole("option", { name: "Security Focus Theme" })).not.toBeNull()
         })
 
@@ -109,7 +109,7 @@ describe("SettingsAppearancePage", (): void => {
 
         await user.click(screen.getByRole("button", { name: "Export library JSON" }))
         const jsonTextarea = screen.getByRole("textbox", { name: "Theme library json" })
-        expect((jsonTextarea as HTMLTextAreaElement).value).toContain("\"version\": 1")
+        expect((jsonTextarea as HTMLTextAreaElement).value).toContain('"version": 1')
 
         const importPayload = JSON.stringify(
             {
@@ -139,9 +139,7 @@ describe("SettingsAppearancePage", (): void => {
         await waitFor(() => {
             expect(screen.getByRole("option", { name: "Security Focus Theme (3)" })).not.toBeNull()
         })
-        },
-        15000,
-    )
+    }, 15000)
 
     it("не перетирает более свежую локальную библиотеку тем устаревшим remote profile", async (): Promise<void> => {
         const localTheme = {

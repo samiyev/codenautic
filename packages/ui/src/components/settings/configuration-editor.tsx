@@ -1,10 +1,7 @@
 import { type ChangeEvent, type FormEvent, type ReactElement } from "react"
 
 import { Button } from "@/components/ui"
-import {
-    REPO_REVIEW_MODE,
-    type TRepoReviewMode,
-} from "@/lib/api/endpoints/repo-config.endpoint"
+import { REPO_REVIEW_MODE, type TRepoReviewMode } from "@/lib/api/endpoints/repo-config.endpoint"
 
 /** Параметры визуального редактора `codenautic-config.yml`. */
 export interface IConfigurationEditorProps {
@@ -73,11 +70,14 @@ export function ConfigurationEditor(props: IConfigurationEditorProps): ReactElem
         >
             <h2 className="text-base font-semibold text-slate-900">Repository config</h2>
             <p className="text-sm text-slate-600">
-                Edit <code>codenautic-config.yml</code> visually and keep repository review
-                settings in sync.
+                Edit <code>codenautic-config.yml</code> visually and keep repository review settings
+                in sync.
             </p>
             <div className="grid gap-3 md:grid-cols-2">
-                <label className="space-y-1 text-sm text-slate-700" htmlFor="repo-config-repository-id">
+                <label
+                    className="space-y-1 text-sm text-slate-700"
+                    htmlFor="repo-config-repository-id"
+                >
                     <span className="font-medium text-slate-900">Repository ID</span>
                     <input
                         aria-label="Repository ID"

@@ -39,9 +39,7 @@ describe("WhatIfPanel", (): void => {
             }),
         )
 
-        expect(
-            screen.getByText("Files: 2 · Impact score: 74 · Total affected: 5"),
-        ).not.toBeNull()
+        expect(screen.getByText("Files: 2 · Impact score: 74 · Total affected: 5")).not.toBeNull()
     })
 
     it("вызывает callback при запуске what-if сценария", async (): Promise<void> => {

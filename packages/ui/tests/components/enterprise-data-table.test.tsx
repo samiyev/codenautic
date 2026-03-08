@@ -155,7 +155,8 @@ describe("EnterpriseDataTable", (): void => {
     })
 
     it("поддерживает кастомный row height estimator для virtual rows", (): void => {
-        const estimateRowHeight = vi.fn<(row: ITestRow, density: "comfortable" | "compact") => number>()
+        const estimateRowHeight =
+            vi.fn<(row: ITestRow, density: "comfortable" | "compact") => number>()
         estimateRowHeight.mockImplementation((row, density): number => {
             if (density === "compact") {
                 return row.status === "open" ? 48 : 44

@@ -86,10 +86,7 @@ export function ChatThreadList(props: IChatThreadListProps): ReactElement {
     }
 
     return (
-        <aside
-            aria-label="Chat threads"
-            className="h-full min-w-0 bg-[var(--surface-muted)] p-3"
-        >
+        <aside aria-label="Chat threads" className="h-full min-w-0 bg-[var(--surface-muted)] p-3">
             <div className="mb-3 flex items-center justify-between gap-2">
                 <h3 className="text-sm font-semibold">Threads</h3>
                 <Button onPress={props.onNewThread} size="sm">
@@ -123,70 +120,68 @@ export function ChatThreadList(props: IChatThreadListProps): ReactElement {
                         No threads found
                     </li>
                 ) : (
-                    visibleThreads.map(
-                        (thread): ReactElement => {
-                            const isActive = thread.id === props.activeThreadId
-                            return (
-                                <li
-                                    className={`rounded-lg border p-2 ${
-                                        isActive
-                                            ? "border-[var(--primary)] bg-[color:color-mix(in oklab, var(--primary) 14%, var(--surface))]"
-                                            : "border-[var(--border)] bg-[var(--surface)]"
-                                    }`}
-                                    key={thread.id}
-                                    role="listitem"
-                                >
-                                    <div className="flex items-start justify-between gap-2">
-                                        <button
-                                            aria-label={`Open thread ${thread.title} (${thread.repo}, CCR ${thread.ccr})`}
-                                            aria-pressed={isActive}
-                                            className="min-w-0 text-left"
-                                            onClick={(): void => {
-                                                handleSelectThread(thread.id)
+                    visibleThreads.map((thread): ReactElement => {
+                        const isActive = thread.id === props.activeThreadId
+                        return (
+                            <li
+                                className={`rounded-lg border p-2 ${
+                                    isActive
+                                        ? "border-[var(--primary)] bg-[color:color-mix(in oklab, var(--primary) 14%, var(--surface))]"
+                                        : "border-[var(--border)] bg-[var(--surface)]"
+                                }`}
+                                key={thread.id}
+                                role="listitem"
+                            >
+                                <div className="flex items-start justify-between gap-2">
+                                    <button
+                                        aria-label={`Open thread ${thread.title} (${thread.repo}, CCR ${thread.ccr})`}
+                                        aria-pressed={isActive}
+                                        className="min-w-0 text-left"
+                                        onClick={(): void => {
+                                            handleSelectThread(thread.id)
+                                        }}
+                                        type="button"
+                                    >
+                                        <p className="truncate text-sm font-medium">
+                                            {thread.title}
+                                        </p>
+                                        <p className="text-xs text-[var(--foreground)]/70">
+                                            {thread.repo}
+                                        </p>
+                                        <p className="text-xs text-[var(--foreground)]/70">
+                                            CCR: {thread.ccr}
+                                        </p>
+                                    </button>
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            aria-label={`Close thread ${thread.title}`}
+                                            isIconOnly
+                                            onPress={(): void => {
+                                                handleCloseThread(thread.id)
                                             }}
-                                            type="button"
+                                            radius="full"
+                                            size="sm"
+                                            variant="light"
                                         >
-                                            <p className="truncate text-sm font-medium">
-                                                {thread.title}
-                                            </p>
-                                            <p className="text-xs text-[var(--foreground)]/70">
-                                                {thread.repo}
-                                            </p>
-                                            <p className="text-xs text-[var(--foreground)]/70">
-                                                CCR: {thread.ccr}
-                                            </p>
-                                        </button>
-                                        <div className="flex items-center gap-1">
-                                            <Button
-                                                aria-label={`Close thread ${thread.title}`}
-                                                isIconOnly
-                                                onPress={(): void => {
-                                                    handleCloseThread(thread.id)
-                                                }}
-                                                radius="full"
-                                                size="sm"
-                                                variant="light"
-                                            >
-                                                <X aria-hidden="true" size={14} />
-                                            </Button>
-                                            <Button
-                                                aria-label={`Archive thread ${thread.title}`}
-                                                isIconOnly
-                                                onPress={(): void => {
-                                                    handleArchiveThread(thread.id)
-                                                }}
-                                                radius="full"
-                                                size="sm"
-                                                variant="light"
-                                            >
-                                                <Archive aria-hidden="true" size={14} />
-                                            </Button>
-                                        </div>
+                                            <X aria-hidden="true" size={14} />
+                                        </Button>
+                                        <Button
+                                            aria-label={`Archive thread ${thread.title}`}
+                                            isIconOnly
+                                            onPress={(): void => {
+                                                handleArchiveThread(thread.id)
+                                            }}
+                                            radius="full"
+                                            size="sm"
+                                            variant="light"
+                                        >
+                                            <Archive aria-hidden="true" size={14} />
+                                        </Button>
                                     </div>
-                                </li>
-                            )
-                        },
-                    )
+                                </div>
+                            </li>
+                        )
+                    })
                 )}
             </ul>
         </aside>

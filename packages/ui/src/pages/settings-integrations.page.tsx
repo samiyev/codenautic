@@ -83,9 +83,7 @@ const INITIAL_INTEGRATIONS: ReadonlyArray<IIntegrationState> = [
     },
 ]
 
-function mapStatusChipColor(
-    status: TIntegrationStatus,
-): "default" | "success" | "warning" {
+function mapStatusChipColor(status: TIntegrationStatus): "default" | "success" | "warning" {
     if (status === "connected") {
         return "success"
     }
@@ -175,42 +173,46 @@ export function SettingsIntegrationsPage(): ReactElement {
         previewEnabled: selectedContextSourceId !== undefined,
     })
 
-    const summary = useMemo(
-        (): { readonly connected: number; readonly degraded: number; readonly disconnected: number } => {
-            return integrations.reduce(
-                (accumulator, integration): {
-                    readonly connected: number
-                    readonly degraded: number
-                    readonly disconnected: number
-                } => {
-                    if (integration.status === "connected") {
-                        return {
-                            ...accumulator,
-                            connected: accumulator.connected + 1,
-                        }
-                    }
-
-                    if (integration.status === "degraded") {
-                        return {
-                            ...accumulator,
-                            degraded: accumulator.degraded + 1,
-                        }
-                    }
-
+    const summary = useMemo((): {
+        readonly connected: number
+        readonly degraded: number
+        readonly disconnected: number
+    } => {
+        return integrations.reduce(
+            (
+                accumulator,
+                integration,
+            ): {
+                readonly connected: number
+                readonly degraded: number
+                readonly disconnected: number
+            } => {
+                if (integration.status === "connected") {
                     return {
                         ...accumulator,
-                        disconnected: accumulator.disconnected + 1,
+                        connected: accumulator.connected + 1,
                     }
-                },
-                {
-                    connected: 0,
-                    degraded: 0,
-                    disconnected: 0,
-                },
-            )
-        },
-        [integrations],
-    )
+                }
+
+                if (integration.status === "degraded") {
+                    return {
+                        ...accumulator,
+                        degraded: accumulator.degraded + 1,
+                    }
+                }
+
+                return {
+                    ...accumulator,
+                    disconnected: accumulator.disconnected + 1,
+                }
+            },
+            {
+                connected: 0,
+                degraded: 0,
+                disconnected: 0,
+            },
+        )
+    }, [integrations])
 
     useEffect((): void => {
         if (selectedContextSourceId !== undefined) {
@@ -226,41 +228,44 @@ export function SettingsIntegrationsPage(): ReactElement {
     }, [externalContext.sourcesQuery.data?.sources, selectedContextSourceId])
 
     const setWorkspace = (provider: TIntegrationProvider, workspace: string): void => {
-        setIntegrations((previous): ReadonlyArray<IIntegrationState> =>
-            updateIntegrationByProvider(
-                previous,
-                provider,
-                (integration): IIntegrationState => ({
-                    ...integration,
-                    workspace,
-                }),
-            ),
+        setIntegrations(
+            (previous): ReadonlyArray<IIntegrationState> =>
+                updateIntegrationByProvider(
+                    previous,
+                    provider,
+                    (integration): IIntegrationState => ({
+                        ...integration,
+                        workspace,
+                    }),
+                ),
         )
     }
 
     const setTarget = (provider: TIntegrationProvider, target: string): void => {
-        setIntegrations((previous): ReadonlyArray<IIntegrationState> =>
-            updateIntegrationByProvider(
-                previous,
-                provider,
-                (integration): IIntegrationState => ({
-                    ...integration,
-                    target,
-                }),
-            ),
+        setIntegrations(
+            (previous): ReadonlyArray<IIntegrationState> =>
+                updateIntegrationByProvider(
+                    previous,
+                    provider,
+                    (integration): IIntegrationState => ({
+                        ...integration,
+                        target,
+                    }),
+                ),
         )
     }
 
     const setSyncEnabled = (provider: TIntegrationProvider, syncEnabled: boolean): void => {
-        setIntegrations((previous): ReadonlyArray<IIntegrationState> =>
-            updateIntegrationByProvider(
-                previous,
-                provider,
-                (integration): IIntegrationState => ({
-                    ...integration,
-                    syncEnabled,
-                }),
-            ),
+        setIntegrations(
+            (previous): ReadonlyArray<IIntegrationState> =>
+                updateIntegrationByProvider(
+                    previous,
+                    provider,
+                    (integration): IIntegrationState => ({
+                        ...integration,
+                        syncEnabled,
+                    }),
+                ),
         )
     }
 
@@ -268,86 +273,85 @@ export function SettingsIntegrationsPage(): ReactElement {
         provider: TIntegrationProvider,
         notificationsEnabled: boolean,
     ): void => {
-        setIntegrations((previous): ReadonlyArray<IIntegrationState> =>
-            updateIntegrationByProvider(
-                previous,
-                provider,
-                (integration): IIntegrationState => ({
-                    ...integration,
-                    notificationsEnabled,
-                }),
-            ),
+        setIntegrations(
+            (previous): ReadonlyArray<IIntegrationState> =>
+                updateIntegrationByProvider(
+                    previous,
+                    provider,
+                    (integration): IIntegrationState => ({
+                        ...integration,
+                        notificationsEnabled,
+                    }),
+                ),
         )
     }
 
     const handleSaveConfiguration = (provider: TIntegrationProvider): void => {
-        setIntegrations((previous): ReadonlyArray<IIntegrationState> =>
-            updateIntegrationByProvider(
-                previous,
-                provider,
-                (integration): IIntegrationState => {
-                    const configReady = hasConfigValues(integration)
-                    const nextStatus =
-                        integration.connected !== true
-                            ? "disconnected"
-                            : configReady
-                              ? "connected"
-                              : "degraded"
+        setIntegrations(
+            (previous): ReadonlyArray<IIntegrationState> =>
+                updateIntegrationByProvider(
+                    previous,
+                    provider,
+                    (integration): IIntegrationState => {
+                        const configReady = hasConfigValues(integration)
+                        const nextStatus =
+                            integration.connected !== true
+                                ? "disconnected"
+                                : configReady
+                                  ? "connected"
+                                  : "degraded"
 
-                    return {
-                        ...integration,
-                        secretConfigured: configReady,
-                        status: nextStatus,
-                    }
-                },
-            ),
+                        return {
+                            ...integration,
+                            secretConfigured: configReady,
+                            status: nextStatus,
+                        }
+                    },
+                ),
         )
         showToastSuccess(`${provider} configuration saved.`)
     }
 
     const handleToggleConnection = (provider: TIntegrationProvider): void => {
-        setIntegrations((previous): ReadonlyArray<IIntegrationState> =>
-            updateIntegrationByProvider(
-                previous,
-                provider,
-                (integration): IIntegrationState => {
-                    const shouldConnect = integration.connected !== true
-                    if (shouldConnect !== true) {
+        setIntegrations(
+            (previous): ReadonlyArray<IIntegrationState> =>
+                updateIntegrationByProvider(
+                    previous,
+                    provider,
+                    (integration): IIntegrationState => {
+                        const shouldConnect = integration.connected !== true
+                        if (shouldConnect !== true) {
+                            return {
+                                ...integration,
+                                connected: false,
+                                status: "disconnected",
+                            }
+                        }
+
+                        const configReady = hasConfigValues(integration)
                         return {
                             ...integration,
-                            connected: false,
-                            status: "disconnected",
+                            connected: true,
+                            lastSyncAt: new Date().toISOString(),
+                            status: configReady ? "connected" : "degraded",
                         }
-                    }
-
-                    const configReady = hasConfigValues(integration)
-                    return {
-                        ...integration,
-                        connected: true,
-                        lastSyncAt: new Date().toISOString(),
-                        status: configReady ? "connected" : "degraded",
-                    }
-                },
-            ),
+                    },
+                ),
         )
         showToastInfo(`${provider} connection state updated.`)
     }
 
     const handleTestConnection = (provider: TIntegrationProvider): boolean => {
-        const integration = integrations.find(
-            (item): boolean => item.provider === provider,
-        )
+        const integration = integrations.find((item): boolean => item.provider === provider)
         const isHealthy =
-            integration !== undefined
-            && integration.connected === true
-            && integration.secretConfigured === true
-            && hasConfigValues(integration)
+            integration !== undefined &&
+            integration.connected === true &&
+            integration.secretConfigured === true &&
+            hasConfigValues(integration)
 
-        setIntegrations((previous): ReadonlyArray<IIntegrationState> =>
-            updateIntegrationByProvider(
-                previous,
-                provider,
-                (current): IIntegrationState => {
+        setIntegrations(
+            (previous): ReadonlyArray<IIntegrationState> =>
+                updateIntegrationByProvider(previous, provider, (current): IIntegrationState => {
                     if (current.connected !== true) {
                         return current
                     }
@@ -357,8 +361,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                         lastSyncAt: new Date().toISOString(),
                         status: isHealthy ? "connected" : "degraded",
                     }
-                },
-            ),
+                }),
         )
 
         if (isHealthy) {
@@ -426,102 +429,109 @@ export function SettingsIntegrationsPage(): ReactElement {
             </Card>
 
             <div className="space-y-4">
-                {integrations.map((integration): ReactElement => (
-                    <Card key={integration.provider}>
-                        <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                            <div>
-                                <p className="text-base font-semibold text-slate-900">
-                                    {integration.provider}
-                                </p>
-                                <p className="text-sm text-slate-600">
-                                    {integration.description}
-                                </p>
-                            </div>
-                            <Chip
-                                color={mapStatusChipColor(integration.status)}
-                                size="sm"
-                                variant="flat"
-                            >
-                                {mapStatusLabel(integration.status)}
-                            </Chip>
-                        </CardHeader>
-                        <CardBody className="space-y-3">
-                            <div className="grid gap-3 md:grid-cols-2">
-                                <Input
-                                    label="Workspace / endpoint"
-                                    onValueChange={(value): void => {
-                                        setWorkspace(integration.provider, value)
-                                    }}
-                                    placeholder={resolveWorkspacePlaceholder(integration.provider)}
-                                    value={integration.workspace}
-                                />
-                                <Input
-                                    label="Target"
-                                    onValueChange={(value): void => {
-                                        setTarget(integration.provider, value)
-                                    }}
-                                    placeholder={resolveTargetPlaceholder(integration.provider)}
-                                    value={integration.target}
-                                />
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-4 text-sm">
-                                <Switch
-                                    isSelected={integration.syncEnabled}
-                                    onValueChange={(value): void => {
-                                        setSyncEnabled(integration.provider, value)
-                                    }}
+                {integrations.map(
+                    (integration): ReactElement => (
+                        <Card key={integration.provider}>
+                            <CardHeader className="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <p className="text-base font-semibold text-slate-900">
+                                        {integration.provider}
+                                    </p>
+                                    <p className="text-sm text-slate-600">
+                                        {integration.description}
+                                    </p>
+                                </div>
+                                <Chip
+                                    color={mapStatusChipColor(integration.status)}
+                                    size="sm"
+                                    variant="flat"
                                 >
-                                    Enable sync
-                                </Switch>
-                                <Switch
-                                    isSelected={integration.notificationsEnabled}
-                                    onValueChange={(value): void => {
-                                        setNotificationsEnabled(integration.provider, value)
-                                    }}
-                                >
-                                    Enable notifications
-                                </Switch>
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-2">
-                                <TestConnectionButton
-                                    onTest={(): Promise<boolean> =>
-                                        Promise.resolve(
-                                            handleTestConnection(integration.provider),
+                                    {mapStatusLabel(integration.status)}
+                                </Chip>
+                            </CardHeader>
+                            <CardBody className="space-y-3">
+                                <div className="grid gap-3 md:grid-cols-2">
+                                    <Input
+                                        label="Workspace / endpoint"
+                                        onValueChange={(value): void => {
+                                            setWorkspace(integration.provider, value)
+                                        }}
+                                        placeholder={resolveWorkspacePlaceholder(
+                                            integration.provider,
                                         )}
-                                    providerLabel={integration.provider}
-                                />
-                                <Button
-                                    onPress={(): void => {
-                                        handleToggleConnection(integration.provider)
-                                    }}
-                                    size="sm"
-                                    variant={
-                                        integration.connected === true ? "secondary" : "solid"
-                                    }
-                                >
-                                    {integration.connected === true ? "Disconnect" : "Connect"}
-                                </Button>
-                                <Button
-                                    onPress={(): void => {
-                                        handleSaveConfiguration(integration.provider)
-                                    }}
-                                    size="sm"
-                                    variant="light"
-                                >
-                                    Save configuration
-                                </Button>
-                            </div>
+                                        value={integration.workspace}
+                                    />
+                                    <Input
+                                        label="Target"
+                                        onValueChange={(value): void => {
+                                            setTarget(integration.provider, value)
+                                        }}
+                                        placeholder={resolveTargetPlaceholder(integration.provider)}
+                                        value={integration.target}
+                                    />
+                                </div>
 
-                            <p className="text-xs text-slate-500">
-                                Secret/token:{" "}
-                                {integration.secretConfigured === true ? "configured" : "not configured"}{" "}
-                                · Last sync: {integration.lastSyncAt ?? "not synced yet"}
-                            </p>
-                        </CardBody>
-                    </Card>
-                ))}
+                                <div className="flex flex-wrap items-center gap-4 text-sm">
+                                    <Switch
+                                        isSelected={integration.syncEnabled}
+                                        onValueChange={(value): void => {
+                                            setSyncEnabled(integration.provider, value)
+                                        }}
+                                    >
+                                        Enable sync
+                                    </Switch>
+                                    <Switch
+                                        isSelected={integration.notificationsEnabled}
+                                        onValueChange={(value): void => {
+                                            setNotificationsEnabled(integration.provider, value)
+                                        }}
+                                    >
+                                        Enable notifications
+                                    </Switch>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <TestConnectionButton
+                                        onTest={(): Promise<boolean> =>
+                                            Promise.resolve(
+                                                handleTestConnection(integration.provider),
+                                            )
+                                        }
+                                        providerLabel={integration.provider}
+                                    />
+                                    <Button
+                                        onPress={(): void => {
+                                            handleToggleConnection(integration.provider)
+                                        }}
+                                        size="sm"
+                                        variant={
+                                            integration.connected === true ? "secondary" : "solid"
+                                        }
+                                    >
+                                        {integration.connected === true ? "Disconnect" : "Connect"}
+                                    </Button>
+                                    <Button
+                                        onPress={(): void => {
+                                            handleSaveConfiguration(integration.provider)
+                                        }}
+                                        size="sm"
+                                        variant="light"
+                                    >
+                                        Save configuration
+                                    </Button>
+                                </div>
+
+                                <p className="text-xs text-slate-500">
+                                    Secret/token:{" "}
+                                    {integration.secretConfigured === true
+                                        ? "configured"
+                                        : "not configured"}{" "}
+                                    · Last sync: {integration.lastSyncAt ?? "not synced yet"}
+                                </p>
+                            </CardBody>
+                        </Card>
+                    ),
+                )}
             </div>
 
             <Card>
@@ -552,8 +562,8 @@ export function SettingsIntegrationsPage(): ReactElement {
                                         <ContextSourceCard
                                             key={source.id}
                                             isLoading={
-                                                externalContext.updateSource.isPending
-                                                || externalContext.refreshSource.isPending
+                                                externalContext.updateSource.isPending ||
+                                                externalContext.refreshSource.isPending
                                             }
                                             selected={source.id === selectedContextSourceId}
                                             source={source}

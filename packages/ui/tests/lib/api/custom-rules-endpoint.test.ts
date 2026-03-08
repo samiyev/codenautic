@@ -100,7 +100,7 @@ describe("CustomRulesApi", (): void => {
             status: CUSTOM_RULE_STATUS.pending,
             examples: [
                 {
-                    snippet: "\"use strict\"",
+                    snippet: '"use strict"',
                     isCorrect: false,
                 },
             ],

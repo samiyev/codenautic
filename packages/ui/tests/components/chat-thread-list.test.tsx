@@ -3,10 +3,7 @@ import userEvent from "@testing-library/user-event"
 import type { ReactElement } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import {
-    ChatThreadList,
-    type IChatThread,
-} from "@/components/chat/chat-thread-list"
+import { ChatThreadList, type IChatThread } from "@/components/chat/chat-thread-list"
 import { renderWithProviders } from "../utils/render"
 
 const threads: ReadonlyArray<IChatThread> = [

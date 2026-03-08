@@ -38,18 +38,18 @@ export function isMultiTabSyncMessage(value: unknown): value is TMultiTabSyncMes
 
     if (candidate.type === "tenant") {
         return (
-            candidate.tenantId === "platform-team"
-            || candidate.tenantId === "frontend-team"
-            || candidate.tenantId === "runtime-team"
+            candidate.tenantId === "platform-team" ||
+            candidate.tenantId === "frontend-team" ||
+            candidate.tenantId === "runtime-team"
         )
     }
 
     if (candidate.type === "permissions") {
         return (
-            candidate.role === "viewer"
-            || candidate.role === "developer"
-            || candidate.role === "lead"
-            || candidate.role === "admin"
+            candidate.role === "viewer" ||
+            candidate.role === "developer" ||
+            candidate.role === "lead" ||
+            candidate.role === "admin"
         )
     }
 

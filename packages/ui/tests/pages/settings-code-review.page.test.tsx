@@ -57,28 +57,32 @@ describe("settings code review page", (): void => {
                     config: repositoryConfig,
                 })
             }),
-            http.put("http://localhost:7120/api/v1/repositories/repo-1/config", async ({ request }) => {
-                const payload = (await request.json()) as {
-                    readonly configYaml?: string
-                    readonly ignorePatterns?: ReadonlyArray<string>
-                    readonly reviewMode?: "MANUAL" | "AUTO" | "AUTO_PAUSE"
-                }
+            http.put(
+                "http://localhost:7120/api/v1/repositories/repo-1/config",
+                async ({ request }) => {
+                    const payload = (await request.json()) as {
+                        readonly configYaml?: string
+                        readonly ignorePatterns?: ReadonlyArray<string>
+                        readonly reviewMode?: "MANUAL" | "AUTO" | "AUTO_PAUSE"
+                    }
 
-                repositoryConfig = {
-                    ...repositoryConfig,
-                    configYaml: payload.configYaml ?? repositoryConfig.configYaml,
-                    ignorePatterns: payload.ignorePatterns ?? repositoryConfig.ignorePatterns,
-                    reviewMode: payload.reviewMode ?? repositoryConfig.reviewMode,
-                }
+                    repositoryConfig = {
+                        ...repositoryConfig,
+                        configYaml: payload.configYaml ?? repositoryConfig.configYaml,
+                        ignorePatterns: payload.ignorePatterns ?? repositoryConfig.ignorePatterns,
+                        reviewMode: payload.reviewMode ?? repositoryConfig.reviewMode,
+                    }
 
-                return HttpResponse.json({
-                    config: repositoryConfig,
-                })
-            }),
+                    return HttpResponse.json({
+                        config: repositoryConfig,
+                    })
+                },
+            ),
         )
 
         renderWithProviders(<SettingsCodeReviewPage />)
-        const yamlInput = await screen.findByLabelText<HTMLTextAreaElement>("Repository config YAML")
+        const yamlInput =
+            await screen.findByLabelText<HTMLTextAreaElement>("Repository config YAML")
         expect(yamlInput.value).toContain("mode: MANUAL")
 
         await user.clear(yamlInput)
@@ -117,31 +121,33 @@ describe("settings code review page", (): void => {
                     config: repositoryConfig,
                 })
             }),
-            http.put("http://localhost:7120/api/v1/repositories/repo-1/config", async ({ request }) => {
-                const payload = (await request.json()) as {
-                    readonly configYaml?: string
-                    readonly ignorePatterns?: ReadonlyArray<string>
-                    readonly reviewMode?: "MANUAL" | "AUTO" | "AUTO_PAUSE"
-                }
+            http.put(
+                "http://localhost:7120/api/v1/repositories/repo-1/config",
+                async ({ request }) => {
+                    const payload = (await request.json()) as {
+                        readonly configYaml?: string
+                        readonly ignorePatterns?: ReadonlyArray<string>
+                        readonly reviewMode?: "MANUAL" | "AUTO" | "AUTO_PAUSE"
+                    }
 
-                repositoryConfig = {
-                    ...repositoryConfig,
-                    configYaml: payload.configYaml ?? repositoryConfig.configYaml,
-                    ignorePatterns: payload.ignorePatterns ?? repositoryConfig.ignorePatterns,
-                    reviewMode: payload.reviewMode ?? repositoryConfig.reviewMode,
-                }
+                    repositoryConfig = {
+                        ...repositoryConfig,
+                        configYaml: payload.configYaml ?? repositoryConfig.configYaml,
+                        ignorePatterns: payload.ignorePatterns ?? repositoryConfig.ignorePatterns,
+                        reviewMode: payload.reviewMode ?? repositoryConfig.reviewMode,
+                    }
 
-                return HttpResponse.json({
-                    config: repositoryConfig,
-                })
-            }),
+                    return HttpResponse.json({
+                        config: repositoryConfig,
+                    })
+                },
+            ),
         )
 
         renderWithProviders(<SettingsCodeReviewPage />)
 
-        const ignorePathsInput = await screen.findByLabelText<HTMLTextAreaElement>(
-            "Ignore patterns",
-        )
+        const ignorePathsInput =
+            await screen.findByLabelText<HTMLTextAreaElement>("Ignore patterns")
         expect(ignorePathsInput.value).toContain("/node_modules")
 
         await user.click(ignorePathsInput)
@@ -212,24 +218,27 @@ describe("settings code review page", (): void => {
                     config: repositoryConfig,
                 })
             }),
-            http.put("http://localhost:7120/api/v1/repositories/repo-1/config", async ({ request }) => {
-                const payload = (await request.json()) as {
-                    readonly configYaml?: string
-                    readonly ignorePatterns?: ReadonlyArray<string>
-                    readonly reviewMode?: "MANUAL" | "AUTO" | "AUTO_PAUSE"
-                }
+            http.put(
+                "http://localhost:7120/api/v1/repositories/repo-1/config",
+                async ({ request }) => {
+                    const payload = (await request.json()) as {
+                        readonly configYaml?: string
+                        readonly ignorePatterns?: ReadonlyArray<string>
+                        readonly reviewMode?: "MANUAL" | "AUTO" | "AUTO_PAUSE"
+                    }
 
-                repositoryConfig = {
-                    ...repositoryConfig,
-                    configYaml: payload.configYaml ?? repositoryConfig.configYaml,
-                    ignorePatterns: payload.ignorePatterns ?? repositoryConfig.ignorePatterns,
-                    reviewMode: payload.reviewMode ?? repositoryConfig.reviewMode,
-                }
+                    repositoryConfig = {
+                        ...repositoryConfig,
+                        configYaml: payload.configYaml ?? repositoryConfig.configYaml,
+                        ignorePatterns: payload.ignorePatterns ?? repositoryConfig.ignorePatterns,
+                        reviewMode: payload.reviewMode ?? repositoryConfig.reviewMode,
+                    }
 
-                return HttpResponse.json({
-                    config: repositoryConfig,
-                })
-            }),
+                    return HttpResponse.json({
+                        config: repositoryConfig,
+                    })
+                },
+            ),
         )
 
         renderWithProviders(<SettingsCodeReviewPage />)
@@ -299,19 +308,22 @@ describe("settings code review page", (): void => {
                     },
                 })
             }),
-            http.post("http://localhost:7120/api/v1/repositories/repo-1/ccr-summary/generate", () => {
-                return HttpResponse.json({
-                    result: {
-                        mode: "MANUAL",
-                        generatedAt: "2026-03-05T09:00:00.000Z",
-                        summary: "Main blocker is provider degradation noise in review queue.",
-                        highlights: [
-                            "Degradation fallback activates too often",
-                            "Retry budget exhausted in peak windows",
-                        ],
-                    },
-                })
-            }),
+            http.post(
+                "http://localhost:7120/api/v1/repositories/repo-1/ccr-summary/generate",
+                () => {
+                    return HttpResponse.json({
+                        result: {
+                            mode: "MANUAL",
+                            generatedAt: "2026-03-05T09:00:00.000Z",
+                            summary: "Main blocker is provider degradation noise in review queue.",
+                            highlights: [
+                                "Degradation fallback activates too often",
+                                "Retry budget exhausted in peak windows",
+                            ],
+                        },
+                    })
+                },
+            ),
         )
 
         renderWithProviders(<SettingsCodeReviewPage />)

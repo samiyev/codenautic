@@ -1,13 +1,6 @@
 import { type ReactElement, useMemo, useState } from "react"
 
-import {
-    Button,
-    Chip,
-    Drawer,
-    DrawerBody,
-    DrawerContent,
-    DrawerHeader,
-} from "@/components/ui"
+import { Button, Chip, Drawer, DrawerBody, DrawerContent, DrawerHeader } from "@/components/ui"
 
 type TFreshnessState = "fresh" | "refreshing" | "stale"
 
@@ -143,9 +136,15 @@ export function DataFreshnessPanel(props: IDataFreshnessPanelProps): ReactElemen
             <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="space-y-1">
-                        <p className="text-sm font-semibold text-[var(--foreground)]">{props.title}</p>
+                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                            {props.title}
+                        </p>
                         <div className="flex flex-wrap items-center gap-2">
-                            <Chip color={getFreshnessChipColor(freshnessState)} size="sm" variant="flat">
+                            <Chip
+                                color={getFreshnessChipColor(freshnessState)}
+                                size="sm"
+                                variant="flat"
+                            >
                                 {getFreshnessChipLabel(freshnessState)}
                             </Chip>
                             <p className="text-xs text-[var(--foreground)]/70">

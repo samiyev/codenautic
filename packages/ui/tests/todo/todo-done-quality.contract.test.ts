@@ -35,9 +35,7 @@ function parseTodoRows(markdown: string, fileName: string): ReadonlyArray<ITodoR
             return
         }
 
-        const rowMatch = line.match(
-            /^\|\s*(WEB-[^|]+?)\s*\|\s*[^|]*\|\s*([^|]+?)\s*\|\s*([^|]*)\|/,
-        )
+        const rowMatch = line.match(/^\|\s*(WEB-[^|]+?)\s*\|\s*[^|]*\|\s*([^|]+?)\s*\|\s*([^|]*)\|/)
         if (rowMatch === null) {
             return
         }

@@ -51,7 +51,10 @@ describe("churn complexity scatter", (): void => {
             />,
         )
 
-        expect(screen.getByLabelText("Churn point auth.ts")).toHaveAttribute("data-selected", "true")
+        expect(screen.getByLabelText("Churn point auth.ts")).toHaveAttribute(
+            "data-selected",
+            "true",
+        )
     })
 
     it("показывает empty state без валидных данных", (): void => {
@@ -66,6 +69,8 @@ describe("churn complexity scatter", (): void => {
             />,
         )
 
-        expect(screen.getByText("Not enough churn/complexity data for scatter plot.")).not.toBeNull()
+        expect(
+            screen.getByText("Not enough churn/complexity data for scatter plot."),
+        ).not.toBeNull()
     })
 })

@@ -36,7 +36,9 @@ describe("CityImpactOverlay", (): void => {
     it("вызывает callback при выборе impact entry", async (): Promise<void> => {
         const user = userEvent.setup()
         const onSelectEntry = vi.fn()
-        renderWithProviders(<CityImpactOverlay entries={TEST_ENTRIES} onSelectEntry={onSelectEntry} />)
+        renderWithProviders(
+            <CityImpactOverlay entries={TEST_ENTRIES} onSelectEntry={onSelectEntry} />,
+        )
 
         await user.click(
             screen.getByRole("button", { name: "Inspect city impact src/services/retry.ts" }),

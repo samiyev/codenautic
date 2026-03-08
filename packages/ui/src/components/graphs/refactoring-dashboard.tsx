@@ -162,55 +162,63 @@ export function RefactoringDashboard(props: IRefactoringDashboardProps): ReactEl
                         onChange={handleModuleFilterChange}
                         value={moduleFilter}
                     >
-                        {moduleOptions.map((module): ReactElement => (
-                            <option key={module} value={module}>
-                                {module}
-                            </option>
-                        ))}
+                        {moduleOptions.map(
+                            (module): ReactElement => (
+                                <option key={module} value={module}>
+                                    {module}
+                                </option>
+                            ),
+                        )}
                     </select>
                 </label>
             </div>
 
             <ul className="mt-3 space-y-2">
-                {prioritizedTargets.map((target): ReactElement => (
-                    <li
-                        className="rounded border border-slate-200 bg-slate-50 p-2"
-                        key={target.id}
-                    >
-                        <div className="flex items-start justify-between gap-3">
-                            <div>
-                                <p className="text-sm font-semibold text-slate-900">{target.title}</p>
-                                <p className="mt-1 text-xs text-slate-600">{target.description}</p>
-                                <p className="mt-1 text-[11px] uppercase tracking-wide text-slate-500">
-                                    Module: {target.module}
-                                </p>
-                            </div>
-                            <span
-                                className={`rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${resolveRiskClassName(target.riskScore)}`}
-                            >
-                                Risk {String(target.riskScore)}
-                            </span>
-                        </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-700">
-                            <span className="rounded border border-slate-300 bg-white px-2 py-0.5">
-                                ROI {String(target.roiScore)}
-                            </span>
-                            <span className="rounded border border-slate-300 bg-white px-2 py-0.5">
-                                Effort {String(target.effortScore)}
-                            </span>
-                        </div>
-                        <button
-                            aria-label={`Inspect refactoring target ${target.title}`}
-                            className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
-                            onClick={(): void => {
-                                props.onSelectTarget?.(target)
-                            }}
-                            type="button"
+                {prioritizedTargets.map(
+                    (target): ReactElement => (
+                        <li
+                            className="rounded border border-slate-200 bg-slate-50 p-2"
+                            key={target.id}
                         >
-                            Inspect target
-                        </button>
-                    </li>
-                ))}
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <p className="text-sm font-semibold text-slate-900">
+                                        {target.title}
+                                    </p>
+                                    <p className="mt-1 text-xs text-slate-600">
+                                        {target.description}
+                                    </p>
+                                    <p className="mt-1 text-[11px] uppercase tracking-wide text-slate-500">
+                                        Module: {target.module}
+                                    </p>
+                                </div>
+                                <span
+                                    className={`rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${resolveRiskClassName(target.riskScore)}`}
+                                >
+                                    Risk {String(target.riskScore)}
+                                </span>
+                            </div>
+                            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-700">
+                                <span className="rounded border border-slate-300 bg-white px-2 py-0.5">
+                                    ROI {String(target.roiScore)}
+                                </span>
+                                <span className="rounded border border-slate-300 bg-white px-2 py-0.5">
+                                    Effort {String(target.effortScore)}
+                                </span>
+                            </div>
+                            <button
+                                aria-label={`Inspect refactoring target ${target.title}`}
+                                className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                                onClick={(): void => {
+                                    props.onSelectTarget?.(target)
+                                }}
+                                type="button"
+                            >
+                                Inspect target
+                            </button>
+                        </li>
+                    ),
+                )}
             </ul>
         </section>
     )

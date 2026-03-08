@@ -25,25 +25,13 @@ export interface IAlertProps extends Omit<HeroUIAlertProps, "title"> {
  * @returns Alert с legacy-поддержкой `color`, `variant` и `title`.
  */
 export function Alert(props: IAlertProps): ReactElement {
-    const {
-        children,
-        className,
-        color,
-        status,
-        title,
-        variant,
-        ...alertProps
-    } = props
+    const { children, className, color, status, title, variant, ...alertProps } = props
 
     const mappedStatus = mapAlertStatus(status, color)
     const mergedClassName = mergeAlertClassName(className, variant)
 
     return (
-        <HeroUIAlert
-            {...alertProps}
-            className={mergedClassName}
-            status={mappedStatus}
-        >
+        <HeroUIAlert {...alertProps} className={mergedClassName} status={mappedStatus}>
             {title === undefined ? (
                 children
             ) : (

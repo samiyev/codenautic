@@ -3,9 +3,11 @@ import { lazy, Suspense, type ReactElement, useState } from "react"
 import { Button, Textarea } from "@/components/ui"
 import type { IRuleEditorMarkdownPreviewProps } from "./rule-editor-markdown-preview"
 
-const LazyPromptOverridePreview = lazy((): Promise<{
-    default: (props: IRuleEditorMarkdownPreviewProps) => ReactElement
-}> => import("./rule-editor-markdown-preview"))
+const LazyPromptOverridePreview = lazy(
+    (): Promise<{
+        default: (props: IRuleEditorMarkdownPreviewProps) => ReactElement
+    }> => import("./rule-editor-markdown-preview"),
+)
 
 interface IPromptOverrideEditorProps {
     readonly value: string
@@ -51,7 +53,9 @@ export function PromptOverrideEditor(props: IPromptOverrideEditorProps): ReactEl
             </div>
             {isPreviewVisible === false ? null : (
                 <section aria-label="Prompt override preview" className="space-y-2">
-                    <Suspense fallback={<p className="text-xs text-slate-600">Loading preview...</p>}>
+                    <Suspense
+                        fallback={<p className="text-xs text-slate-600">Loading preview...</p>}
+                    >
                         <LazyPromptOverridePreview content={props.value} />
                     </Suspense>
                 </section>

@@ -87,9 +87,7 @@ function resolveTechLabel(extension: string): string {
  * @param files Набор файлов.
  * @returns Агрегированный overview для рендера.
  */
-function buildProjectOverviewMetrics(
-    files: ReadonlyArray<IProjectOverviewFileDescriptor>,
-): {
+function buildProjectOverviewMetrics(files: ReadonlyArray<IProjectOverviewFileDescriptor>): {
     readonly architectureSummary: ReadonlyArray<IOverviewMetricItem>
     readonly techStackSummary: ReadonlyArray<IOverviewMetricItem>
     readonly entryPoints: ReadonlyArray<string>
@@ -166,12 +164,14 @@ export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactEl
                     Architecture summary
                 </p>
                 <ul className="space-y-1 text-sm text-slate-700">
-                    {metrics.architectureSummary.map((item): ReactElement => (
-                        <li className="flex items-center justify-between" key={item.label}>
-                            <span>{item.label}</span>
-                            <span className="text-xs text-slate-500">{item.value}</span>
-                        </li>
-                    ))}
+                    {metrics.architectureSummary.map(
+                        (item): ReactElement => (
+                            <li className="flex items-center justify-between" key={item.label}>
+                                <span>{item.label}</span>
+                                <span className="text-xs text-slate-500">{item.value}</span>
+                            </li>
+                        ),
+                    )}
                 </ul>
             </section>
 
@@ -180,12 +180,14 @@ export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactEl
                     Tech stack
                 </p>
                 <ul className="space-y-1 text-sm text-slate-700">
-                    {metrics.techStackSummary.map((item): ReactElement => (
-                        <li className="flex items-center justify-between" key={item.label}>
-                            <span>{item.label}</span>
-                            <span className="text-xs text-slate-500">{item.value}</span>
-                        </li>
-                    ))}
+                    {metrics.techStackSummary.map(
+                        (item): ReactElement => (
+                            <li className="flex items-center justify-between" key={item.label}>
+                                <span>{item.label}</span>
+                                <span className="text-xs text-slate-500">{item.value}</span>
+                            </li>
+                        ),
+                    )}
                 </ul>
             </section>
 
@@ -195,14 +197,18 @@ export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactEl
                 </p>
                 {metrics.entryPoints.length > 0 ? (
                     <ul className="space-y-1 text-xs text-slate-700">
-                        {metrics.entryPoints.map((entryPoint): ReactElement => (
-                            <li className="rounded bg-slate-50 px-2 py-1" key={entryPoint}>
-                                {entryPoint}
-                            </li>
-                        ))}
+                        {metrics.entryPoints.map(
+                            (entryPoint): ReactElement => (
+                                <li className="rounded bg-slate-50 px-2 py-1" key={entryPoint}>
+                                    {entryPoint}
+                                </li>
+                            ),
+                        )}
                     </ul>
                 ) : (
-                    <p className="text-xs text-slate-500">No entry points detected in current scan.</p>
+                    <p className="text-xs text-slate-500">
+                        No entry points detected in current scan.
+                    </p>
                 )}
             </section>
         </article>

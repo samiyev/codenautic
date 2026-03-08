@@ -122,7 +122,8 @@ export function buildFunctionCallGraphData(
         return {
             id: node.id,
             label,
-            width: 220 + ((node.complexity ?? 1) > 0 ? Math.min(node.complexity ?? 1, 25) * 1.5 : 0),
+            width:
+                220 + ((node.complexity ?? 1) > 0 ? Math.min(node.complexity ?? 1, 25) * 1.5 : 0),
             height: 76,
         }
     })
@@ -148,9 +149,7 @@ function filterGraphDataByQuery(
         }
     }
 
-    const filteredNodes = data.nodes.filter(
-        (node): boolean => selectedNodeIds.has(node.id),
-    )
+    const filteredNodes = data.nodes.filter((node): boolean => selectedNodeIds.has(node.id))
     const visibleNodeIds = new Set<string>(filteredNodes.map((node): string => node.id))
     const filteredEdges = data.edges.filter(
         (edge): boolean =>
@@ -246,8 +245,7 @@ export function FunctionClassCallGraph(props: IFunctionCallGraphProps): ReactEle
     const title = props.title ?? "Function/Class call graph"
     const emptyStateLabel = props.emptyStateLabel ?? "No function or class call relationships yet."
     const graphData = useMemo(
-        (): IFunctionCallGraphData =>
-            buildFunctionCallGraphData(props.nodes, props.callRelations),
+        (): IFunctionCallGraphData => buildFunctionCallGraphData(props.nodes, props.callRelations),
         [props.callRelations, props.nodes],
     )
 
@@ -268,7 +266,10 @@ export function FunctionClassCallGraph(props: IFunctionCallGraphProps): ReactEle
     )
 
     const isEmptyState = visibleGraphData.nodes.length === 0
-    const summaryText = createSummaryText(visibleGraphData.nodes.length, visibleGraphData.edges.length)
+    const summaryText = createSummaryText(
+        visibleGraphData.nodes.length,
+        visibleGraphData.edges.length,
+    )
     const nodesById = useMemo((): ReadonlyMap<string, IFunctionCallNode> => {
         const nextMap = new Map<string, IFunctionCallNode>()
         for (const node of props.nodes) {

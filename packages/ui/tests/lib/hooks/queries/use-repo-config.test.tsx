@@ -6,10 +6,7 @@ import { describe, expect, it } from "vitest"
 
 import { renderWithProviders } from "../../../utils/render"
 import { server } from "../../../mocks/server"
-import {
-    useRepoConfig,
-    type IUseRepoConfigResult,
-} from "@/lib/hooks/queries/use-repo-config"
+import { useRepoConfig, type IUseRepoConfigResult } from "@/lib/hooks/queries/use-repo-config"
 
 function RepoConfigProbe(): ReactElement {
     const hook = useRepoConfig({

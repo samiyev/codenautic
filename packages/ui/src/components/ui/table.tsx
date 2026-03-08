@@ -3,8 +3,10 @@ import { type ReactElement, type ReactNode, type HTMLAttributes } from "react"
 /**
  * Свойства таблицы.
  */
-export interface ITableProps
-    extends Omit<HTMLAttributes<HTMLTableElement>, "children" | "onChange"> {
+export interface ITableProps extends Omit<
+    HTMLAttributes<HTMLTableElement>,
+    "children" | "onChange"
+> {
     /** Дочерние ячейки и секции. */
     readonly children?: ReactNode
 }
@@ -80,11 +82,7 @@ export function TableHeader({ children, ...props }: TableHeaderProps): ReactElem
  */
 export function TableBody({ children, emptyContent, ...props }: ITableBodyProps): ReactElement {
     const renderedChildren =
-        typeof children === "undefined"
-            ? []
-            : Array.isArray(children)
-              ? children
-              : [children]
+        typeof children === "undefined" ? [] : Array.isArray(children) ? children : [children]
 
     const hasRows = renderedChildren.some((child): boolean => child !== null && child !== undefined)
 
@@ -107,7 +105,11 @@ export function TableBody({ children, emptyContent, ...props }: ITableBodyProps)
  * Колонка таблицы.
  */
 export function TableColumn({ children, ...props }: TableColumnProps): ReactElement {
-    return <th className="px-3 py-2 text-left text-sm font-semibold text-slate-700" {...props}>{children}</th>
+    return (
+        <th className="px-3 py-2 text-left text-sm font-semibold text-slate-700" {...props}>
+            {children}
+        </th>
+    )
 }
 
 /**

@@ -44,7 +44,9 @@ describe("ExploreModeSidebar", (): void => {
     it("вызывает callback навигации при выборе path", async (): Promise<void> => {
         const user = userEvent.setup()
         const onNavigatePath = vi.fn()
-        renderWithProviders(<ExploreModeSidebar onNavigatePath={onNavigatePath} paths={TEST_PATHS} />)
+        renderWithProviders(
+            <ExploreModeSidebar onNavigatePath={onNavigatePath} paths={TEST_PATHS} />,
+        )
 
         await user.click(screen.getByRole("button", { name: "Navigate path Backend path" }))
 

@@ -19,12 +19,15 @@ describe("MyWorkPage", (): void => {
         ).toBeNull()
 
         await user.selectOptions(screen.getByRole("combobox", { name: "Triage scope" }), "team")
-        expect(within(triageList).getByText("Tenant boundary regression in auth middleware")).not
-            .toBeNull()
+        expect(
+            within(triageList).getByText("Tenant boundary regression in auth middleware"),
+        ).not.toBeNull()
 
         fireEvent.keyDown(window, { altKey: true, key: "3" })
         expect(within(triageList).getByText("Scan worker stuck on queue heartbeat")).not.toBeNull()
-        expect(within(triageList).queryByText("Notification digest pending confirmation")).toBeNull()
+        expect(
+            within(triageList).queryByText("Notification digest pending confirmation"),
+        ).toBeNull()
     })
 
     it("выполняет inline triage actions без потери контекста", async (): Promise<void> => {

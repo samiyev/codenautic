@@ -27,9 +27,7 @@ describe("pages test coverage contract", (): void => {
         const pageTestsDirectory = resolve(packageRoot, "tests/pages")
 
         const pageBasenames = listFileBasenames(pagesDirectory, ".page.tsx")
-        const pageTestBasenames = new Set(
-            listFileBasenames(pageTestsDirectory, ".page.test.tsx"),
-        )
+        const pageTestBasenames = new Set(listFileBasenames(pageTestsDirectory, ".page.test.tsx"))
 
         const missingPageTests = pageBasenames.filter((basename): boolean => {
             return pageTestBasenames.has(basename) === false

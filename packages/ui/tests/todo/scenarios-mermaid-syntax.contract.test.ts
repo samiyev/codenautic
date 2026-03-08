@@ -95,10 +95,12 @@ function extractEdgeTarget(line: string): string | undefined {
 function normalizeLines(blockContent: string): ReadonlyArray<IMermaidLine> {
     return blockContent
         .split(/\r?\n/)
-        .map((line, index): IMermaidLine => ({
-            line: line.trim(),
-            sourceLineOffset: index,
-        }))
+        .map(
+            (line, index): IMermaidLine => ({
+                line: line.trim(),
+                sourceLineOffset: index,
+            }),
+        )
         .filter((entry): boolean => entry.line.length > 0)
 }
 
@@ -111,7 +113,7 @@ function toRelativePath(rootPath: string, absolutePath: string): string {
 }
 
 function hasEvenDoubleQuoteCount(line: string): boolean {
-    const quoteCount = line.split("\"").length - 1
+    const quoteCount = line.split('"').length - 1
     return quoteCount % 2 === 0
 }
 

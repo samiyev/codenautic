@@ -1,11 +1,7 @@
 import { type ReactElement, useMemo } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
-import {
-    type ISSEStreamEvent,
-    type TSSEEventType,
-    useSSEStream,
-} from "@/lib/hooks/use-sse"
+import { type ISSEStreamEvent, type TSSEEventType, useSSEStream } from "@/lib/hooks/use-sse"
 
 /** Пропсы для SSE viewer-а. */
 interface ISSEStreamViewerProps {
@@ -75,7 +71,8 @@ function buildEventLabel(event: ISSEStreamEvent): string {
     }
 
     if (event.type === "progress") {
-        const message = typeof event.payload.message === "string" ? event.payload.message : "Progress update"
+        const message =
+            typeof event.payload.message === "string" ? event.payload.message : "Progress update"
         const stage = typeof event.payload.stage === "string" ? ` · ${event.payload.stage}` : ""
         return `${message}${stage}`
     }
@@ -118,15 +115,7 @@ export function SseStreamViewer(props: ISSEStreamViewerProps): ReactElement {
         maxReconnectAttempts,
         title,
     } = props
-    const {
-        error,
-        events,
-        progressCurrent,
-        progressTotal,
-        start,
-        state,
-        stop,
-    } = useSSEStream({
+    const { error, events, progressCurrent, progressTotal, start, state, stop } = useSSEStream({
         autoStart,
         initialReconnectDelayMs,
         maxReconnectAttempts,
@@ -135,7 +124,9 @@ export function SseStreamViewer(props: ISSEStreamViewerProps): ReactElement {
 
     const isProgressVisible = progressTotal > 0
     const progressPercent = isProgressVisible === true ? (progressCurrent / progressTotal) * 100 : 0
-    const clampedProgressPercent = isProgressVisible ? Math.max(0, Math.min(100, progressPercent)) : 0
+    const clampedProgressPercent = isProgressVisible
+        ? Math.max(0, Math.min(100, progressPercent))
+        : 0
     const recentEvents = useMemo((): ReadonlyArray<ISSEStreamEvent> => {
         return events.slice(-maxEvents)
     }, [events, maxEvents])
@@ -156,7 +147,11 @@ export function SseStreamViewer(props: ISSEStreamViewerProps): ReactElement {
                             onPress={start}
                             radius="sm"
                             size="sm"
-                            disabled={state === "open" || state === "connecting" || state === "reconnecting"}
+                            disabled={
+                                state === "open" ||
+                                state === "connecting" ||
+                                state === "reconnecting"
+                            }
                         >
                             Start
                         </Button>
@@ -203,17 +198,19 @@ export function SseStreamViewer(props: ISSEStreamViewerProps): ReactElement {
                         {recentEvents.length === 0 ? (
                             <li className="text-sm text-slate-600">Ожидание событий</li>
                         ) : null}
-                        {recentEvents.map((event): ReactElement => (
-                            <li
-                                className="rounded-md border border-slate-200 bg-slate-50 p-2 text-sm text-slate-800"
-                                key={createEventItemKey(event)}
-                            >
-                                <p className="text-xs uppercase tracking-wider text-slate-500">
-                                    {getStatusLabel(event.type)}
-                                </p>
-                                <p>{buildEventLabel(event)}</p>
-                            </li>
-                        ))}
+                        {recentEvents.map(
+                            (event): ReactElement => (
+                                <li
+                                    className="rounded-md border border-slate-200 bg-slate-50 p-2 text-sm text-slate-800"
+                                    key={createEventItemKey(event)}
+                                >
+                                    <p className="text-xs uppercase tracking-wider text-slate-500">
+                                        {getStatusLabel(event.type)}
+                                    </p>
+                                    <p>{buildEventLabel(event)}</p>
+                                </li>
+                            ),
+                        )}
                     </ul>
                 </div>
             </CardBody>

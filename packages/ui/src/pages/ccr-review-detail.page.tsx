@@ -1,7 +1,11 @@
 import { useMemo, useRef, useState, type ReactElement } from "react"
 import { Link } from "@tanstack/react-router"
 
-import { ChatPanel, type IChatPanelContext, type IChatPanelMessage } from "@/components/chat/chat-panel"
+import {
+    ChatPanel,
+    type IChatPanelContext,
+    type IChatPanelMessage,
+} from "@/components/chat/chat-panel"
 import { ChatThreadList, type IChatThread } from "@/components/chat/chat-thread-list"
 import {
     CodeCityTreemap,
@@ -136,9 +140,7 @@ export interface ICcrReviewDetailPageProps {
 
 function buildExplainMessage(ccr: ICcrRowData): string {
     const fileHint =
-        ccr.attachedFiles.length > 0
-            ? `Focus on ${ccr.attachedFiles[0]}`
-            : "Focus on touched files"
+        ccr.attachedFiles.length > 0 ? `Focus on ${ccr.attachedFiles[0]}` : "Focus on touched files"
 
     return `Please explain the current diff for ${ccr.id} in ${ccr.repository}. ${fileHint}.`
 }
@@ -178,7 +180,10 @@ function buildReviewContextTreemapFiles(
         const changedLineCount = resolveDiffChangedLineCount(file)
         const issueCount = resolveDiffIssueCount(file)
         const normalizedLoc = Math.max(file.lines.length, 24)
-        const normalizedComplexity = Math.min(40, Math.max(8, 6 + Math.round(changedLineCount * 1.4)))
+        const normalizedComplexity = Math.min(
+            40,
+            Math.max(8, 6 + Math.round(changedLineCount * 1.4)),
+        )
         const normalizedCoverage = Math.min(95, Math.max(45, 90 - changedLineCount))
 
         return {
@@ -223,7 +228,9 @@ function buildReviewImpactSeeds(
                 const normalizedPath = filePath.replace(/^src\//, "").replace(/\.tsx?$/, "")
                 return `tests/${normalizedPath}.test.ts`
             }),
-            fileId: fileIdByPath[file.filePath] ?? `review-context-${String(index + 1).padStart(2, "0")}`,
+            fileId:
+                fileIdByPath[file.filePath] ??
+                `review-context-${String(index + 1).padStart(2, "0")}`,
             id: `impact-seed-${String(index + 1).padStart(2, "0")}`,
             label: file.filePath,
             riskScore: Math.min(95, Math.max(20, changedLineCount * 8 + issueCount * 12)),
@@ -236,30 +243,28 @@ function buildReviewNeighborhoodByPath(
 ): Readonly<Record<string, ReadonlyArray<string>>> {
     const allPaths = diffFiles.map((file): string => file.filePath)
 
-    return diffFiles.reduce(
-        (mapping, file, index): Record<string, ReadonlyArray<string>> => {
-            const currentDirectory = resolvePathDirectory(file.filePath)
-            const directoryNeighbors = allPaths.filter((candidatePath): boolean => {
-                if (candidatePath === file.filePath) {
-                    return false
-                }
-                return resolvePathDirectory(candidatePath) === currentDirectory
-            })
-            const positionalNeighbors = [allPaths[index - 1], allPaths[index + 1]].filter(
-                (candidate): candidate is string => candidate !== undefined && candidate !== file.filePath,
-            )
-            const orderedNeighbors = [...directoryNeighbors, ...positionalNeighbors].filter(
-                (candidatePath, candidateIndex, candidates): boolean =>
-                    candidates.indexOf(candidatePath) === candidateIndex,
-            )
-
-            return {
-                ...mapping,
-                [file.filePath]: orderedNeighbors.slice(0, 4),
+    return diffFiles.reduce((mapping, file, index): Record<string, ReadonlyArray<string>> => {
+        const currentDirectory = resolvePathDirectory(file.filePath)
+        const directoryNeighbors = allPaths.filter((candidatePath): boolean => {
+            if (candidatePath === file.filePath) {
+                return false
             }
-        },
-        {},
-    )
+            return resolvePathDirectory(candidatePath) === currentDirectory
+        })
+        const positionalNeighbors = [allPaths[index - 1], allPaths[index + 1]].filter(
+            (candidate): candidate is string =>
+                candidate !== undefined && candidate !== file.filePath,
+        )
+        const orderedNeighbors = [...directoryNeighbors, ...positionalNeighbors].filter(
+            (candidatePath, candidateIndex, candidates): boolean =>
+                candidates.indexOf(candidatePath) === candidateIndex,
+        )
+
+        return {
+            ...mapping,
+            [file.filePath]: orderedNeighbors.slice(0, 4),
+        }
+    }, {})
 }
 
 function buildFileNeighborhoodDetails(
@@ -339,7 +344,9 @@ function resolveReviewHistoryHeatColor(activityCount: number, maxActivityCount: 
     return `hsl(${String(hue)}, ${String(saturation)}%, ${String(lightness)}%)`
 }
 
-function mapReviewRiskChipColor(level: TReviewRiskLevel): "danger" | "primary" | "success" | "warning" {
+function mapReviewRiskChipColor(
+    level: TReviewRiskLevel,
+): "danger" | "primary" | "success" | "warning" {
     if (level === "critical") {
         return "danger"
     }
@@ -366,15 +373,19 @@ function resolveReviewRiskIndicator(
     const maxHistoryActivity = historyEntries.reduce((maxValue, entry): number => {
         return Math.max(maxValue, entry.reviewsByWindow["30d"])
     }, 0)
-    const averageImpactRisk = impactSeeds.length === 0
-        ? 0
-        : Math.round(
-            impactSeeds.reduce((total, seed): number => total + seed.riskScore, 0) /
-                impactSeeds.length,
-        )
+    const averageImpactRisk =
+        impactSeeds.length === 0
+            ? 0
+            : Math.round(
+                  impactSeeds.reduce((total, seed): number => total + seed.riskScore, 0) /
+                      impactSeeds.length,
+              )
     const score = Math.min(
         100,
-        changedLines * 2 + issueCount * 9 + maxHistoryActivity * 2 + Math.round(averageImpactRisk * 0.35),
+        changedLines * 2 +
+            issueCount * 9 +
+            maxHistoryActivity * 2 +
+            Math.round(averageImpactRisk * 0.35),
     )
 
     if (score >= 80) {
@@ -554,7 +565,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     const activeUiRole = useUiRole()
     const [reviewDecision, setReviewDecision] = useState<TReviewDecision>("pending")
     const [activeFilePath, setActiveFilePath] = useState<string | undefined>(ccr.attachedFiles[0])
-    const [isReviewContextMiniMapExpanded, setReviewContextMiniMapExpanded] = useState<boolean>(false)
+    const [isReviewContextMiniMapExpanded, setReviewContextMiniMapExpanded] =
+        useState<boolean>(false)
     const [threads, setThreads] = useState<ReadonlyArray<IChatThread>>([
         {
             ccr: ccr.id.replace("ccr-", ""),
@@ -600,10 +612,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     }, [ccr])
     const ccrDiffFiles = useMemo((): ReadonlyArray<ICcrDiffFile> => {
         const contextDiffFiles = props.workspaceContext?.diffFiles
-        if (
-            contextDiffFiles !== undefined
-            && props.workspaceContext?.reviewId === ccr.id
-        ) {
+        if (contextDiffFiles !== undefined && props.workspaceContext?.reviewId === ccr.id) {
             return contextDiffFiles.map((file): ICcrDiffFile => {
                 const typedFile: ICcrWorkspaceDiffFile = file
 
@@ -619,10 +628,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     }, [ccr.id, props.workspaceContext?.diffFiles, props.workspaceContext?.reviewId])
     const ccrReviewThreads = useMemo((): ReadonlyArray<IReviewCommentThread> => {
         const contextThreads = props.workspaceContext?.threads
-        if (
-            contextThreads !== undefined
-            && props.workspaceContext?.reviewId === ccr.id
-        ) {
+        if (contextThreads !== undefined && props.workspaceContext?.reviewId === ccr.id) {
             return contextThreads.map((thread): IReviewCommentThread => {
                 const typedThread: ICcrWorkspaceReviewCommentThread = thread
 
@@ -666,8 +672,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
         }
         return reviewContextFileIdByPath[activeFilePath]
     }, [activeFilePath, reviewContextFileIdByPath])
-    const reviewContextImpactedFiles = useMemo(
-        (): ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor> => {
+    const reviewContextImpactedFiles =
+        useMemo((): ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor> => {
             return ccr.attachedFiles
                 .map(
                     (
@@ -698,26 +704,23 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                     },
                 )
                 .filter(
-                    (
-                        descriptor,
-                    ): descriptor is ICodeCityTreemapImpactedFileDescriptor =>
+                    (descriptor): descriptor is ICodeCityTreemapImpactedFileDescriptor =>
                         descriptor !== undefined,
                 )
-        },
-        [ccr.attachedFiles, reviewContextFileIdByPath],
-    )
+        }, [ccr.attachedFiles, reviewContextFileIdByPath])
     const reviewImpactSeeds = useMemo((): ReadonlyArray<IImpactAnalysisSeed> => {
         return buildReviewImpactSeeds(ccrDiffFiles, reviewContextFileIdByPath)
     }, [ccrDiffFiles, reviewContextFileIdByPath])
-    const reviewNeighborhoodByPath = useMemo((): Readonly<Record<string, ReadonlyArray<string>>> => {
+    const reviewNeighborhoodByPath = useMemo((): Readonly<
+        Record<string, ReadonlyArray<string>>
+    > => {
         return buildReviewNeighborhoodByPath(ccrDiffFiles)
     }, [ccrDiffFiles])
-    const fileNeighborhoodDetailsByPath = useMemo(
-        (): Readonly<Record<string, IFileNeighborhoodDetails>> => {
-            return buildFileNeighborhoodDetails(ccrDiffFiles)
-        },
-        [ccrDiffFiles],
-    )
+    const fileNeighborhoodDetailsByPath = useMemo((): Readonly<
+        Record<string, IFileNeighborhoodDetails>
+    > => {
+        return buildFileNeighborhoodDetails(ccrDiffFiles)
+    }, [ccrDiffFiles])
     const reviewHistoryHeatEntries = useMemo((): ReadonlyArray<IReviewHistoryHeatEntry> => {
         return buildReviewHistoryHeatEntries(ccrDiffFiles)
     }, [ccrDiffFiles])
@@ -755,8 +758,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
         return [...reviewHistoryHeatEntries]
             .sort((leftEntry, rightEntry): number => {
                 return (
-                    rightEntry.reviewsByWindow[selectedReviewHistoryWindow]
-                    - leftEntry.reviewsByWindow[selectedReviewHistoryWindow]
+                    rightEntry.reviewsByWindow[selectedReviewHistoryWindow] -
+                    leftEntry.reviewsByWindow[selectedReviewHistoryWindow]
                 )
             })
             .slice(0, 4)
@@ -785,14 +788,17 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
             return ccrDiffFiles
         }
 
-        const focusedFiles = ccrDiffFiles.filter((file): boolean => file.filePath === activeFilePath)
+        const focusedFiles = ccrDiffFiles.filter(
+            (file): boolean => file.filePath === activeFilePath,
+        )
         if (focusedFiles.length === 0) {
             return ccrDiffFiles
         }
 
         return focusedFiles
     }, [activeFilePath, ccrDiffFiles])
-    const activeMessages = activeThreadId.length === 0 ? [] : (messagesByThread[activeThreadId] ?? [])
+    const activeMessages =
+        activeThreadId.length === 0 ? [] : (messagesByThread[activeThreadId] ?? [])
     const decisionBadge = mapReviewDecisionBadge(reviewDecision)
     const activeSafeGuardTraceItem = useMemo((): ISafeGuardTraceItem | undefined => {
         const selectedTrace = safeGuardTraceItems.find((item): boolean => {
@@ -817,8 +823,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
 
         return feedbackHistory.filter((feedbackRecord): boolean => {
             return (
-                feedbackRecord.traceId === activeSafeGuardTraceItem.id
-                || feedbackRecord.linkedTraceId === activeSafeGuardTraceItem.id
+                feedbackRecord.traceId === activeSafeGuardTraceItem.id ||
+                feedbackRecord.linkedTraceId === activeSafeGuardTraceItem.id
             )
         })
     }, [activeSafeGuardTraceItem, feedbackHistory])
@@ -894,18 +900,19 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     }
 
     const handleArchiveThread = (threadId: string): void => {
-        setThreads((previous): ReadonlyArray<IChatThread> =>
-            previous.map((thread): IChatThread => {
-                if (thread.id !== threadId) {
-                    return thread
-                }
+        setThreads(
+            (previous): ReadonlyArray<IChatThread> =>
+                previous.map((thread): IChatThread => {
+                    if (thread.id !== threadId) {
+                        return thread
+                    }
 
-                return {
-                    ...thread,
-                    isArchived: true,
-                    title: `${thread.title} (archived)`,
-                }
-            }),
+                    return {
+                        ...thread,
+                        isArchived: true,
+                        title: `${thread.title} (archived)`,
+                    }
+                }),
         )
     }
 
@@ -918,8 +925,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
             selectedFeedbackReason === "duplicate"
                 ? safeGuardTraceItems.find((traceItem): boolean => {
                       return (
-                          traceItem.finalDecision === "shown"
-                          && traceItem.id !== activeSafeGuardTraceItem.id
+                          traceItem.finalDecision === "shown" &&
+                          traceItem.id !== activeSafeGuardTraceItem.id
                       )
                   })?.id
                 : undefined
@@ -991,7 +998,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             {codeReview.codeReviewQuery.error === null ||
                             codeReview.codeReviewQuery.error === undefined ? null : (
                                 <p className="mt-1 text-xs text-amber-700">
-                                    Live review summary is unavailable, showing workspace fallback data.
+                                    Live review summary is unavailable, showing workspace fallback
+                                    data.
                                 </p>
                             )}
                             <p className="mt-2 text-xs uppercase tracking-[0.08em] text-slate-500">
@@ -1039,14 +1047,17 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     </Button>
                                 </>
                             )}
-                            {reviewFinishPolicy.visibility === "hidden" ? null : reviewFinishPolicy.visibility ===
-                              "disabled" ? (
+                            {reviewFinishPolicy.visibility ===
+                            "hidden" ? null : reviewFinishPolicy.visibility === "disabled" ? (
                                 <p className="text-sm text-slate-500">
                                     Finish review unavailable:{" "}
                                     {reviewFinishPolicy.reason ?? "insufficient role permissions"}
                                 </p>
                             ) : (
-                                <Link className="text-sm underline underline-offset-4" to="/reviews">
+                                <Link
+                                    className="text-sm underline underline-offset-4"
+                                    to="/reviews"
+                                >
                                     Finish review
                                 </Link>
                             )}
@@ -1054,8 +1065,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                     </div>
                 </CardHeader>
                 <CardBody className="space-y-2">
-                    {reviewDecisionPolicy.reason === undefined
-                    || reviewDecisionPolicy.visibility === "enabled" ? null : (
+                    {reviewDecisionPolicy.reason === undefined ||
+                    reviewDecisionPolicy.visibility === "enabled" ? null : (
                         <Alert color="warning" title="Role-based restriction" variant="flat">
                             {reviewDecisionPolicy.reason}
                         </Alert>
@@ -1172,8 +1183,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                         </CardHeader>
                         <CardBody className="space-y-3">
                             <p className="text-xs text-slate-600">
-                                Full CodeCity view with highlighted CCR files, blast radius controls,
-                                and neighborhood context for focused navigation.
+                                Full CodeCity view with highlighted CCR files, blast radius
+                                controls, and neighborhood context for focused navigation.
                             </p>
                             <CodeCityTreemap
                                 fileColorById={reviewHistoryColorByFileId}
@@ -1204,7 +1215,10 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         ? "Hide review history heatmap"
                                         : "Show review history heatmap"}
                                 </Button>
-                                <label className="text-xs text-slate-700" htmlFor="review-history-window">
+                                <label
+                                    className="text-xs text-slate-700"
+                                    htmlFor="review-history-window"
+                                >
                                     Review history window
                                 </label>
                                 <select
@@ -1215,9 +1229,9 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     onChange={(event): void => {
                                         const nextWindow = event.currentTarget.value
                                         if (
-                                            nextWindow === "7d"
-                                            || nextWindow === "30d"
-                                            || nextWindow === "90d"
+                                            nextWindow === "7d" ||
+                                            nextWindow === "30d" ||
+                                            nextWindow === "90d"
                                         ) {
                                             setSelectedReviewHistoryWindow(nextWindow)
                                         }
@@ -1238,16 +1252,21 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     : "Review history heatmap is disabled."}
                             </Alert>
                             <ul aria-label="Review history heatmap list" className="space-y-1">
-                                {hottestReviewHistoryEntries.map((entry): ReactElement => (
-                                    <li
-                                        className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700"
-                                        key={`review-history-${entry.filePath}`}
-                                    >
-                                        <span className="font-semibold">{entry.filePath}</span> · reviews{" "}
-                                        {String(entry.reviewsByWindow[selectedReviewHistoryWindow])}
-                                        {entry.filePath === activeFilePath ? " · focused" : ""}
-                                    </li>
-                                ))}
+                                {hottestReviewHistoryEntries.map(
+                                    (entry): ReactElement => (
+                                        <li
+                                            className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700"
+                                            key={`review-history-${entry.filePath}`}
+                                        >
+                                            <span className="font-semibold">{entry.filePath}</span>{" "}
+                                            · reviews{" "}
+                                            {String(
+                                                entry.reviewsByWindow[selectedReviewHistoryWindow],
+                                            )}
+                                            {entry.filePath === activeFilePath ? " · focused" : ""}
+                                        </li>
+                                    ),
+                                )}
                             </ul>
                             <ImpactAnalysisPanel
                                 onApplyImpact={handleApplyImpactFocus}
@@ -1272,20 +1291,22 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         aria-label="Active file neighborhood list"
                                         className="mt-2 space-y-1"
                                     >
-                                        {activeNeighborhoodFiles.map((filePath): ReactElement => (
-                                            <li key={filePath}>
-                                                <button
-                                                    aria-label={`Open neighborhood file ${filePath}`}
-                                                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-left text-xs text-slate-700 hover:bg-slate-100"
-                                                    type="button"
-                                                    onClick={(): void => {
-                                                        setActiveFilePath(filePath)
-                                                    }}
-                                                >
-                                                    {filePath}
-                                                </button>
-                                            </li>
-                                        ))}
+                                        {activeNeighborhoodFiles.map(
+                                            (filePath): ReactElement => (
+                                                <li key={filePath}>
+                                                    <button
+                                                        aria-label={`Open neighborhood file ${filePath}`}
+                                                        className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-left text-xs text-slate-700 hover:bg-slate-100"
+                                                        type="button"
+                                                        onClick={(): void => {
+                                                            setActiveFilePath(filePath)
+                                                        }}
+                                                    >
+                                                        {filePath}
+                                                    </button>
+                                                </li>
+                                            ),
+                                        )}
                                     </ul>
                                 )}
                                 <div className="mt-3 grid gap-2 md:grid-cols-2">
@@ -1297,7 +1318,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                             aria-label="Neighborhood dependency list"
                                             className="mt-1 space-y-1 text-xs text-slate-700"
                                         >
-                                            {(activeNeighborhoodDetails?.dependencies.length ?? 0) === 0 ? (
+                                            {(activeNeighborhoodDetails?.dependencies.length ??
+                                                0) === 0 ? (
                                                 <li>none</li>
                                             ) : (
                                                 activeNeighborhoodDetails?.dependencies.map(
@@ -1318,8 +1340,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                             aria-label="Neighborhood recent changes list"
                                             className="mt-1 space-y-1 text-xs text-slate-700"
                                         >
-                                            {(activeNeighborhoodDetails?.recentChanges.length ?? 0) ===
-                                            0 ? (
+                                            {(activeNeighborhoodDetails?.recentChanges.length ??
+                                                0) === 0 ? (
                                                 <li>none</li>
                                             ) : (
                                                 activeNeighborhoodDetails?.recentChanges.map(
@@ -1368,20 +1390,27 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     Risk score: {String(reviewRiskIndicator.score)}
                                 </p>
                             </div>
-                            <ul aria-label="Review risk drivers list" className="space-y-1 text-xs text-slate-700">
-                                {reviewRiskIndicator.reasons.map((reason): ReactElement => (
-                                    <li key={`risk-reason-${reason}`}>{reason}</li>
-                                ))}
+                            <ul
+                                aria-label="Review risk drivers list"
+                                className="space-y-1 text-xs text-slate-700"
+                            >
+                                {reviewRiskIndicator.reasons.map(
+                                    (reason): ReactElement => (
+                                        <li key={`risk-reason-${reason}`}>{reason}</li>
+                                    ),
+                                )}
                             </ul>
                         </CardBody>
                     </Card>
                     <Alert color={decisionBadge.color}>
-                        Review status: <strong>{decisionBadge.label}</strong>. Use actions in the header
-                        to finalize this CCR.
+                        Review status: <strong>{decisionBadge.label}</strong>. Use actions in the
+                        header to finalize this CCR.
                     </Alert>
                     <Card>
                         <CardHeader>
-                            <p className="text-sm font-semibold text-slate-900">SafeGuard decision trace</p>
+                            <p className="text-sm font-semibold text-slate-900">
+                                SafeGuard decision trace
+                            </p>
                         </CardHeader>
                         <CardBody className="space-y-3">
                             <p className="text-sm text-slate-700">
@@ -1428,7 +1457,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             {activeSafeGuardTraceItem === undefined ? null : (
                                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                                     <p className="text-sm font-semibold text-slate-900">
-                                        {activeSafeGuardTraceItem.id}: {activeSafeGuardTraceItem.remark}
+                                        {activeSafeGuardTraceItem.id}:{" "}
+                                        {activeSafeGuardTraceItem.remark}
                                     </p>
                                     <p className="mt-1 text-xs text-slate-600">
                                         Decision:{" "}
@@ -1533,19 +1563,23 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     <p>
                                         Latest reason:{" "}
                                         <strong>
-                                            {FEEDBACK_REASON_LABELS[latestActiveTraceFeedback.reason]}
+                                            {
+                                                FEEDBACK_REASON_LABELS[
+                                                    latestActiveTraceFeedback.reason
+                                                ]
+                                            }
                                         </strong>
                                     </p>
                                     {latestActiveTraceFeedback.status === "rejected" ? (
-                                        <p>
-                                            Rejection reason: {latestActiveTraceFeedback.details}
-                                        </p>
+                                        <p>Rejection reason: {latestActiveTraceFeedback.details}</p>
                                     ) : (
                                         <p>Applied outcome: {latestActiveTraceFeedback.details}</p>
                                     )}
-                                    {latestActiveTraceFeedback.linkedTraceId === undefined ? null : (
+                                    {latestActiveTraceFeedback.linkedTraceId ===
+                                    undefined ? null : (
                                         <p>
-                                            Linked to {latestActiveTraceFeedback.linkedTraceId} history.
+                                            Linked to {latestActiveTraceFeedback.linkedTraceId}{" "}
+                                            history.
                                         </p>
                                     )}
                                 </div>
@@ -1561,9 +1595,13 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                                 {feedbackRecord.id} · {feedbackRecord.status}
                                             </p>
                                             <p>
-                                                reason: {FEEDBACK_REASON_LABELS[feedbackRecord.reason]}
+                                                reason:{" "}
+                                                {FEEDBACK_REASON_LABELS[feedbackRecord.reason]}
                                             </p>
-                                            <p>time: {formatFeedbackTimestamp(feedbackRecord.createdAt)}</p>
+                                            <p>
+                                                time:{" "}
+                                                {formatFeedbackTimestamp(feedbackRecord.createdAt)}
+                                            </p>
                                             <p>{feedbackRecord.details}</p>
                                         </li>
                                     ),
@@ -1573,7 +1611,9 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                     </Card>
                     <Card>
                         <CardHeader>
-                            <p className="text-sm font-semibold text-slate-900">Conversation threads</p>
+                            <p className="text-sm font-semibold text-slate-900">
+                                Conversation threads
+                            </p>
                         </CardHeader>
                         <CardBody className="p-0">
                             <ChatThreadList

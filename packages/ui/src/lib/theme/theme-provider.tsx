@@ -931,9 +931,9 @@ function useThemeApplyModePresetEffect(
             mode,
             preset,
             updatedAtMs:
-                pendingLocalProfileUpdatedAtRef?.current
-                ?? profileUpdatedAtRef?.current
-                ?? THEME_PROFILE_DEFAULT_UPDATED_AT_MS,
+                pendingLocalProfileUpdatedAtRef?.current ??
+                profileUpdatedAtRef?.current ??
+                THEME_PROFILE_DEFAULT_UPDATED_AT_MS,
         })
     }, [mode, pendingLocalProfileUpdatedAtRef, preset, profileUpdatedAtRef, resolvedMode])
 }
@@ -972,9 +972,9 @@ function useThemeSyncFromApiEffect(args: {
 
         const localSyncState = readThemeProfileSyncState()
         const localUpdatedAtMs =
-            pendingLocalProfileUpdatedAtRef.current
-            ?? localSyncState?.updatedAtMs
-            ?? profileUpdatedAtRef.current
+            pendingLocalProfileUpdatedAtRef.current ??
+            localSyncState?.updatedAtMs ??
+            profileUpdatedAtRef.current
         const localProfile = toThemeProfile(
             {
                 mode,

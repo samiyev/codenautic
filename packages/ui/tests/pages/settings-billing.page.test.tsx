@@ -18,7 +18,10 @@ describe("SettingsBillingPage", (): void => {
         expect(screen.getByRole("heading", { level: 1, name: "Billing lifecycle" })).not.toBeNull()
         expect(screen.getByText("Current plan:")).not.toBeNull()
 
-        await user.selectOptions(screen.getByRole("combobox", { name: "Billing status" }), "past_due")
+        await user.selectOptions(
+            screen.getByRole("combobox", { name: "Billing status" }),
+            "past_due",
+        )
         await user.click(screen.getByRole("button", { name: "Apply billing change" }))
 
         await waitFor(() => {
@@ -42,6 +45,8 @@ describe("SettingsBillingPage", (): void => {
         await user.click(screen.getByRole("button", { name: "Apply billing change" }))
 
         expect(confirmSpy).toHaveBeenCalledTimes(1)
-        expect(screen.getAllByText(/Applied starter \/ active successfully/).length).toBeGreaterThan(0)
+        expect(
+            screen.getAllByText(/Applied starter \/ active successfully/).length,
+        ).toBeGreaterThan(0)
     })
 })

@@ -40,9 +40,7 @@ export interface IRefactoringExportDialogProps {
 export function RefactoringExportDialog(props: IRefactoringExportDialogProps): ReactElement {
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [destination, setDestination] = useState<TRefactoringExportDestination>("jira")
-    const [templateTitle, setTemplateTitle] = useState<string>(
-        "Refactor {{title}} in {{module}}",
-    )
+    const [templateTitle, setTemplateTitle] = useState<string>("Refactor {{title}} in {{module}}")
     const [templateBody, setTemplateBody] = useState<string>(
         "Goal: reduce risk and complexity. Scope: {{title}}. Notes: {{notes}}",
     )
@@ -142,30 +140,32 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
                     </label>
 
                     <ul className="mt-3 space-y-2">
-                        {props.targets.slice(0, 6).map((target): ReactElement => (
-                            <li
-                                className="flex items-start gap-2 rounded border border-slate-200 bg-white p-2"
-                                key={target.id}
-                            >
-                                <input
-                                    aria-label={`Select export target ${target.title}`}
-                                    checked={selectedTargetIds.includes(target.id)}
-                                    className="mt-0.5 h-4 w-4 rounded border-slate-300"
-                                    onChange={(): void => {
-                                        toggleTarget(target.id)
-                                    }}
-                                    type="checkbox"
-                                />
-                                <div className="min-w-0">
-                                    <p className="text-sm font-semibold text-slate-900">
-                                        {target.title}
-                                    </p>
-                                    <p className="text-xs text-slate-600">
-                                        Module {target.module} · ROI {String(target.roiScore)}
-                                    </p>
-                                </div>
-                            </li>
-                        ))}
+                        {props.targets.slice(0, 6).map(
+                            (target): ReactElement => (
+                                <li
+                                    className="flex items-start gap-2 rounded border border-slate-200 bg-white p-2"
+                                    key={target.id}
+                                >
+                                    <input
+                                        aria-label={`Select export target ${target.title}`}
+                                        checked={selectedTargetIds.includes(target.id)}
+                                        className="mt-0.5 h-4 w-4 rounded border-slate-300"
+                                        onChange={(): void => {
+                                            toggleTarget(target.id)
+                                        }}
+                                        type="checkbox"
+                                    />
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-slate-900">
+                                            {target.title}
+                                        </p>
+                                        <p className="text-xs text-slate-600">
+                                            Module {target.module} · ROI {String(target.roiScore)}
+                                        </p>
+                                    </div>
+                                </li>
+                            ),
+                        )}
                     </ul>
 
                     <button

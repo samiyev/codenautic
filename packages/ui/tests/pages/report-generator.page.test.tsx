@@ -31,16 +31,18 @@ describe("ReportGeneratorPage", (): void => {
         })
 
         expect(screen.getByLabelText("Report preview payload").textContent).toContain(
-            "\"type\": \"delivery\"",
+            '"type": "delivery"',
         )
         expect(screen.getByLabelText("Report preview payload").textContent).toContain(
-            "\"format\": \"html\"",
+            '"format": "html"',
         )
 
         await user.click(screen.getByRole("button", { name: "Generate report" }))
         await waitFor(() => {
             expect(
-                screen.getByText(/Report generation queued for delivery \(HTML\) with 2 sections\./),
+                screen.getByText(
+                    /Report generation queued for delivery \(HTML\) with 2 sections\./,
+                ),
             ).not.toBeNull()
         })
     })

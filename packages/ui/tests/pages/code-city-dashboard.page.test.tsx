@@ -30,7 +30,9 @@ const { mockCodeCityTreemap } = vi.hoisted(() => ({
                     <p>temporal-couplings:{props.temporalCouplings.length}</p>
                     <p>impacted-files:{props.impactedFiles.length}</p>
                     <p>ownership-colors:{Object.keys(props.fileColorById ?? {}).length}</p>
-                    <p>prediction-outlines:{Object.keys(props.predictedRiskByFileId ?? {}).length}</p>
+                    <p>
+                        prediction-outlines:{Object.keys(props.predictedRiskByFileId ?? {}).length}
+                    </p>
                     <p>bus-factor-colors:{Object.keys(props.packageColorByName ?? {}).length}</p>
                     <p>highlighted-file:{props.highlightedFileId ?? "none"}</p>
                 </div>
@@ -223,7 +225,9 @@ const { mockOnboardingProgressTracker } = vi.hoisted(() => ({
                 readonly isComplete: boolean
             }>
         }): React.JSX.Element => {
-            const completedCount = props.modules.filter((module): boolean => module.isComplete).length
+            const completedCount = props.modules.filter(
+                (module): boolean => module.isComplete,
+            ).length
             return (
                 <div>
                     <p>onboarding-modules:{props.modules.length}</p>
@@ -242,11 +246,13 @@ const { mockTourCustomizer } = vi.hoisted(() => ({
                 readonly title: string
                 readonly description: string
             }>
-            readonly onStepsChange: (steps: ReadonlyArray<{
-                readonly id: string
-                readonly title: string
-                readonly description: string
-            }>) => void
+            readonly onStepsChange: (
+                steps: ReadonlyArray<{
+                    readonly id: string
+                    readonly title: string
+                    readonly description: string
+                }>,
+            ) => void
         }): React.JSX.Element => {
             return (
                 <div>
@@ -1841,12 +1847,9 @@ describe("CodeCityDashboardPage", (): void => {
         expect(screen.getByText("CodeCity dashboard")).not.toBeNull()
         expect(screen.getByLabelText("Repository")).not.toBeNull()
         expect(screen.getByLabelText("Metric")).not.toBeNull()
-        expect(screen.getByRole("option", { name: "platform-team/api-gateway" }))
-            .not.toBeNull()
-        expect(screen.getByRole("option", { name: "frontend-team/ui-dashboard" }))
-            .not.toBeNull()
-        expect(screen.getByRole("option", { name: "backend-core/payment-worker" }))
-            .not.toBeNull()
+        expect(screen.getByRole("option", { name: "platform-team/api-gateway" })).not.toBeNull()
+        expect(screen.getByRole("option", { name: "frontend-team/ui-dashboard" })).not.toBeNull()
+        expect(screen.getByRole("option", { name: "backend-core/payment-worker" })).not.toBeNull()
         expect(screen.getByText("Active overlay: Impact map")).not.toBeNull()
         expect(screen.getByText("Guided tour")).not.toBeNull()
         expect(screen.getByText("Step 1 of 3")).not.toBeNull()
@@ -1862,8 +1865,8 @@ describe("CodeCityDashboardPage", (): void => {
         expect(Object.keys(firstTreemapCall?.packageColorByName ?? {})).not.toHaveLength(0)
         const firstTreemapFile = firstTreemapCall?.files.at(0) as
             | {
-                readonly bugIntroductions?: Readonly<Record<string, number>>
-            }
+                  readonly bugIntroductions?: Readonly<Record<string, number>>
+              }
             | undefined
         expect(firstTreemapFile?.bugIntroductions?.["30d"]).toBeGreaterThan(0)
 
@@ -1883,12 +1886,12 @@ describe("CodeCityDashboardPage", (): void => {
         expect(first3DCall?.navigationActiveFileId).toBeUndefined()
         const first3DFile = first3DCall?.files.at(0) as
             | {
-                readonly complexity?: number
-                readonly coverage?: number
-                readonly id: string
-                readonly loc?: number
-                readonly path: string
-            }
+                  readonly complexity?: number
+                  readonly coverage?: number
+                  readonly id: string
+                  readonly loc?: number
+                  readonly path: string
+              }
             | undefined
         expect(first3DFile?.id.length).toBeGreaterThan(0)
         expect(first3DFile?.path.length).toBeGreaterThan(0)
@@ -1897,9 +1900,9 @@ describe("CodeCityDashboardPage", (): void => {
         expect(first3DFile?.coverage).toBeGreaterThan(0)
         const first3DImpactedFile = first3DCall?.impactedFiles.at(0) as
             | {
-                readonly fileId: string
-                readonly impactType: "changed" | "impacted" | "ripple"
-            }
+                  readonly fileId: string
+                  readonly impactType: "changed" | "impacted" | "ripple"
+              }
             | undefined
         expect(first3DImpactedFile?.fileId.length).toBeGreaterThan(0)
 
@@ -2158,7 +2161,9 @@ describe("CodeCityDashboardPage", (): void => {
         expect(prediction3DCall).not.toBeUndefined()
         expect(prediction3DCall?.navigationLabel).toContain("Prediction overlay:")
 
-        await user.click(screen.getByRole("button", { name: "inspect prediction dashboard hotspot" }))
+        await user.click(
+            screen.getByRole("button", { name: "inspect prediction dashboard hotspot" }),
+        )
         const predictionDashboardTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
         expect(predictionDashboardTreemapCall).not.toBeUndefined()
         expect(predictionDashboardTreemapCall?.highlightedFileId).toBe("src/api/auth.ts")
@@ -2198,7 +2203,9 @@ describe("CodeCityDashboardPage", (): void => {
         expect(alertConfig3DCall).not.toBeUndefined()
         expect(alertConfig3DCall?.navigationLabel).toContain("Alert config:")
 
-        await user.click(screen.getByRole("button", { name: "inspect prediction comparison snapshot" }))
+        await user.click(
+            screen.getByRole("button", { name: "inspect prediction comparison snapshot" }),
+        )
         const predictionComparisonTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
         expect(predictionComparisonTreemapCall).not.toBeUndefined()
         expect(predictionComparisonTreemapCall?.highlightedFileId).toBe("src/api/auth.ts")
@@ -2285,7 +2292,9 @@ describe("CodeCityDashboardPage", (): void => {
         const busFactorTrendSeries = mockBusFactorTrendChart.mock.calls.at(-1)?.[0]?.series.at(0)
         const busFactorTrendTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
         expect(busFactorTrendTreemapCall).not.toBeUndefined()
-        expect(busFactorTrendTreemapCall?.highlightedFileId).toBe(busFactorTrendSeries?.primaryFileId)
+        expect(busFactorTrendTreemapCall?.highlightedFileId).toBe(
+            busFactorTrendSeries?.primaryFileId,
+        )
         const busFactorTrend3DCall = mockCodeCity3DScene.mock.calls.at(-1)?.[0]
         expect(busFactorTrend3DCall).not.toBeUndefined()
         expect(busFactorTrend3DCall?.navigationLabel).toContain("Bus factor trend:")
@@ -2316,7 +2325,8 @@ describe("CodeCityDashboardPage", (): void => {
         expect(contributor3DCall?.navigationLabel).toContain("Contributor graph:")
 
         await user.click(screen.getByRole("button", { name: "inspect ownership transition" }))
-        const ownershipTransitionEvent = mockOwnershipTransitionWidget.mock.calls.at(-1)?.[0]
+        const ownershipTransitionEvent = mockOwnershipTransitionWidget.mock.calls
+            .at(-1)?.[0]
             ?.events.at(0)
         const ownershipTransitionTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
         expect(ownershipTransitionTreemapCall).not.toBeUndefined()
@@ -2359,8 +2369,8 @@ describe("CodeCityDashboardPage", (): void => {
         expect(currentTreemapCall?.impactedFiles.length).toBeGreaterThan(0)
         const currentTreemapFile = currentTreemapCall?.files.at(0) as
             | {
-                readonly bugIntroductions?: Readonly<Record<string, number>>
-            }
+                  readonly bugIntroductions?: Readonly<Record<string, number>>
+              }
             | undefined
         expect(currentTreemapFile?.bugIntroductions?.["30d"]).toBeGreaterThan(0)
 
@@ -2421,9 +2431,7 @@ describe("CodeCityDashboardPage", (): void => {
 
         const highlightedTreemapCall = mockCodeCityTreemap.mock.calls.at(-1)?.[0]
         expect(highlightedTreemapCall).not.toBeUndefined()
-        expect(highlightedTreemapCall?.highlightedFileId).toBe(
-            "src/pages/ccr-management.page.tsx",
-        )
+        expect(highlightedTreemapCall?.highlightedFileId).toBe("src/pages/ccr-management.page.tsx")
 
         const progressedOnboardingCall = mockOnboardingProgressTracker.mock.calls.at(-1)?.[0]
         expect(progressedOnboardingCall).not.toBeUndefined()

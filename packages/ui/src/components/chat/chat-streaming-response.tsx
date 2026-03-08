@@ -107,11 +107,11 @@ export function ChatStreamingResponse(props: IChatStreamingResponseProps): React
     )
 
     return (
-        <li className={`rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 ${props.className ?? ""}`}>
+        <li
+            className={`rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 ${props.className ?? ""}`}
+        >
             <div className="mb-2 flex items-center justify-between gap-2">
-                <div className="font-medium">
-                    {senderLabel}
-                </div>
+                <div className="font-medium">{senderLabel}</div>
                 <div className="flex items-center gap-2">
                     {isTyping ? typingDots : null}
                     <Button

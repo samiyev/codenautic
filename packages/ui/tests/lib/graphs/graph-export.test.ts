@@ -79,9 +79,7 @@ describe("graph-export", (): void => {
             .spyOn(URL, "createObjectURL")
             .mockReturnValue("blob:graph-export")
         const revokeObjectUrl = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {})
-        const clickSpy = vi
-            .spyOn(HTMLAnchorElement.prototype, "click")
-            .mockImplementation(() => {})
+        const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {})
 
         try {
             exportGraphAsSvg("Graph file", [], [])
@@ -101,9 +99,7 @@ describe("graph-export", (): void => {
             .spyOn(URL, "createObjectURL")
             .mockReturnValue("blob:graph-export-json")
         const revokeObjectUrl = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {})
-        const clickSpy = vi
-            .spyOn(HTMLAnchorElement.prototype, "click")
-            .mockImplementation(() => {})
+        const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {})
 
         try {
             exportGraphAsJson("Huge Graph fallback", {

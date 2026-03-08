@@ -23,9 +23,7 @@ export interface IUseKeyboardShortcutsResult {
  * @param args Конфигурация shortcut definitions и текущий путь.
  * @returns Активные shortcuts и список конфликтов signatures.
  */
-export function useKeyboardShortcuts(
-    args: IUseKeyboardShortcutsArgs,
-): IUseKeyboardShortcutsResult {
+export function useKeyboardShortcuts(args: IUseKeyboardShortcutsArgs): IUseKeyboardShortcutsResult {
     const registry = useMemo((): KeyboardShortcutRegistry => {
         return new KeyboardShortcutRegistry(args.shortcuts)
     }, [args.shortcuts])

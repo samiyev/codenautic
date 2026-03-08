@@ -8,11 +8,12 @@ describe("SessionRecoveryPage", (): void => {
     it("показывает route-level recovery flow для session expiry", (): void => {
         renderWithProviders(<SessionRecoveryPage />)
 
-        expect(screen.getByRole("heading", { level: 1, name: "Session recovery flow" })).not.toBeNull()
+        expect(
+            screen.getByRole("heading", { level: 1, name: "Session recovery flow" }),
+        ).not.toBeNull()
         expect(screen.getByText("Recovery steps")).not.toBeNull()
         expect(screen.getByRole("button", { name: "Open organization settings" })).not.toBeNull()
         expect(screen.getByRole("button", { name: "Re-authenticate" })).not.toBeNull()
         expect(screen.getByRole("button", { name: "Back to diagnostics" })).not.toBeNull()
     })
 })
-

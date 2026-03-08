@@ -4,10 +4,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import type { TTenantId, TUiRole } from "@/lib/access/access-types"
 import { useAuthAccess } from "@/lib/auth/auth-access"
 import { useUiRole } from "@/lib/permissions/ui-policy"
-import {
-    POLICY_DRIFT_EVENT_NAME,
-    isPolicyDriftEventDetail,
-} from "@/lib/permissions/policy-drift"
+import { POLICY_DRIFT_EVENT_NAME, isPolicyDriftEventDetail } from "@/lib/permissions/policy-drift"
 import { queryKeys } from "@/lib/query/query-keys"
 import {
     PROVIDER_DEGRADATION_EVENT,
@@ -43,7 +40,15 @@ import {
     OPEN_COMMAND_PALETTE_EVENT,
     type IShortcutDefinition,
 } from "@/lib/keyboard/shortcut-registry"
-import { Alert, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@/components/ui"
+import {
+    Alert,
+    Button,
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+} from "@/components/ui"
 
 import { Header } from "./header"
 import type { IHeaderOrganizationOption } from "./header"
@@ -92,16 +97,14 @@ function resolveDefaultOrganizationId(): TTenantId {
     return firstOrganization.id as TTenantId
 }
 
-function readStoredActiveOrganizationId(
-    fallbackTenantId: TTenantId | undefined,
-): TTenantId {
+function readStoredActiveOrganizationId(fallbackTenantId: TTenantId | undefined): TTenantId {
     if (typeof window !== "undefined") {
         try {
             const storedTenantId = window.localStorage.getItem(TENANT_STORAGE_KEY)
             if (
-                storedTenantId === "platform-team"
-                || storedTenantId === "frontend-team"
-                || storedTenantId === "runtime-team"
+                storedTenantId === "platform-team" ||
+                storedTenantId === "frontend-team" ||
+                storedTenantId === "runtime-team"
             ) {
                 return storedTenantId
             }
@@ -155,8 +158,9 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
     const [sessionFailureCode, setSessionFailureCode] = useState<401 | 419>(401)
     const [restoredDraftMessage, setRestoredDraftMessage] = useState<string | undefined>(undefined)
     const [policyDriftNotice, setPolicyDriftNotice] = useState<string | undefined>(undefined)
-    const [providerDegradation, setProviderDegradation] =
-        useState<IProviderDegradationEventDetail | undefined>(undefined)
+    const [providerDegradation, setProviderDegradation] = useState<
+        IProviderDegradationEventDetail | undefined
+    >(undefined)
     const [multiTabNotice, setMultiTabNotice] = useState<string | undefined>(undefined)
     const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false)
     const [shortcutsHelpQuery, setShortcutsHelpQuery] = useState("")
@@ -300,9 +304,9 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
 
     const handleOrganizationChange = (organizationId: string): void => {
         if (
-            organizationId !== "platform-team"
-            && organizationId !== "frontend-team"
-            && organizationId !== "runtime-team"
+            organizationId !== "platform-team" &&
+            organizationId !== "frontend-team" &&
+            organizationId !== "runtime-team"
         ) {
             return
         }
@@ -375,11 +379,11 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
 
             if (isInputElement) {
                 const isTextInput =
-                    target.type === "text"
-                    || target.type === "email"
-                    || target.type === "search"
-                    || target.type === "url"
-                    || target.type === "tel"
+                    target.type === "text" ||
+                    target.type === "email" ||
+                    target.type === "search" ||
+                    target.type === "url" ||
+                    target.type === "tel"
                 if (isTextInput !== true) {
                     return
                 }
@@ -516,10 +520,10 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
         const handleStorageSync = (event: StorageEvent): void => {
             if (event.key === TENANT_STORAGE_KEY && event.newValue !== null) {
                 if (
-                    (event.newValue === "platform-team"
-                        || event.newValue === "frontend-team"
-                        || event.newValue === "runtime-team")
-                    && event.newValue !== activeOrganizationId
+                    (event.newValue === "platform-team" ||
+                        event.newValue === "frontend-team" ||
+                        event.newValue === "runtime-team") &&
+                    event.newValue !== activeOrganizationId
                 ) {
                     setActiveOrganizationId(event.newValue)
                     setMultiTabNotice(`Tenant synchronized from another tab: ${event.newValue}.`)
@@ -527,10 +531,7 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
                 return
             }
 
-            if (
-                event.key === THEME_MODE_STORAGE_KEY
-                || event.key === THEME_PRESET_STORAGE_KEY
-            ) {
+            if (event.key === THEME_MODE_STORAGE_KEY || event.key === THEME_PRESET_STORAGE_KEY) {
                 setMultiTabNotice("Theme synchronized from another tab.")
             }
         }
@@ -631,7 +632,11 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
                         Press ? for keyboard shortcuts.
                     </p>
                     {keyboardShortcuts.conflicts.length === 0 ? null : (
-                        <Alert color="warning" title="Keyboard shortcut conflicts detected" variant="flat">
+                        <Alert
+                            color="warning"
+                            title="Keyboard shortcut conflicts detected"
+                            variant="flat"
+                        >
                             {keyboardShortcuts.conflicts
                                 .map((conflict): string => {
                                     return `${conflict.signature}: ${conflict.ids.join(", ")}`
@@ -695,23 +700,30 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
                             }}
                         />
                         <p className="text-xs text-[var(--foreground)]/60">Press ? for help.</p>
-                        <ul aria-label="Shortcuts list" className="max-h-72 space-y-2 overflow-y-auto">
-                            {filteredShortcuts.map((shortcut): ReactElement => (
-                                <li
-                                    key={shortcut.id}
-                                    className="flex items-center justify-between rounded-md border border-[var(--border)] px-2 py-1"
-                                >
-                                    <span className="text-sm text-[var(--foreground)]">{shortcut.label}</span>
-                                    <span className="flex items-center gap-2 text-xs text-[var(--foreground)]/70">
-                                        <span className="rounded border border-[var(--border)] px-2 py-0.5">
-                                            {shortcut.scope}
+                        <ul
+                            aria-label="Shortcuts list"
+                            className="max-h-72 space-y-2 overflow-y-auto"
+                        >
+                            {filteredShortcuts.map(
+                                (shortcut): ReactElement => (
+                                    <li
+                                        key={shortcut.id}
+                                        className="flex items-center justify-between rounded-md border border-[var(--border)] px-2 py-1"
+                                    >
+                                        <span className="text-sm text-[var(--foreground)]">
+                                            {shortcut.label}
                                         </span>
-                                        <span className="rounded border border-[var(--border)] px-2 py-0.5">
-                                            {shortcut.keys}
+                                        <span className="flex items-center gap-2 text-xs text-[var(--foreground)]/70">
+                                            <span className="rounded border border-[var(--border)] px-2 py-0.5">
+                                                {shortcut.scope}
+                                            </span>
+                                            <span className="rounded border border-[var(--border)] px-2 py-0.5">
+                                                {shortcut.keys}
+                                            </span>
                                         </span>
-                                    </span>
-                                </li>
-                            ))}
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     </ModalBody>
                 </ModalContent>

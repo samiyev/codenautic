@@ -208,8 +208,7 @@ const ONBOARDING_FORM_SCHEMA = z
         repositoryUrlList: z.string().trim(),
         scanMode: z.enum(SCAN_MODE_OPTIONS),
         scanSchedule: z.enum(SCAN_SCHEDULE_OPTIONS),
-        scanThreads: z
-            .coerce
+        scanThreads: z.coerce
             .number()
             .int("Количество воркеров должно быть целым")
             .min(1, "Количество воркеров не должно быть меньше 1")
@@ -233,7 +232,9 @@ const ONBOARDING_FORM_SCHEMA = z
                 context.addIssue({
                     code: z.ZodIssueCode.custom,
                     message:
-                        firstIssue?.code === "too_small" ? "Введите URL репозитория" : "Введите корректный URL репозитория",
+                        firstIssue?.code === "too_small"
+                            ? "Введите URL репозитория"
+                            : "Введите корректный URL репозитория",
                     path: ["repositoryUrl"],
                 })
             }
@@ -389,7 +390,8 @@ const PREVIEW_TEMPLATE_DIFF_LIMIT = 6
 
 const ONBOARDING_TEMPLATES: ReadonlyArray<IOnboardingTemplate> = [
     {
-        description: "Подходит для чувствительных проектов: включена история и строгие теги безопасности.",
+        description:
+            "Подходит для чувствительных проектов: включена история и строгие теги безопасности.",
         id: "security-baseline",
         includeHistory: true,
         includeSubmodules: true,
@@ -645,7 +647,9 @@ function splitTemplateTagsForPreview(tags: ReadonlyArray<string>): ReadonlyArray
     return tags
 }
 
-function convertFormValuesToTemplateState(values: IOnboardingFormValues): IOnboardingTemplateFormState {
+function convertFormValuesToTemplateState(
+    values: IOnboardingFormValues,
+): IOnboardingTemplateFormState {
     return {
         includeHistory: values.includeHistory,
         includeSubmodules: values.includeSubmodules,
@@ -727,11 +731,7 @@ function toAppliedTemplateMeta(
     }
 }
 
-function buildTemplateDiffLine(
-    label: string,
-    previous: string,
-    next: string,
-): string {
+function buildTemplateDiffLine(label: string, previous: string, next: string): string {
     if (previous === next) {
         return `${label}: оставляем ${previous}`
     }
@@ -773,15 +773,15 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
     const [activeStep, setActiveStep] = useState<0 | 1 | 2>(0)
     const [isStarted, setIsStarted] = useState(false)
     const [connectedProvider, setConnectedProvider] = useState<TGitProvider | undefined>(undefined)
-    const [providerConnectionError, setProviderConnectionError] = useState<string | undefined>(undefined)
+    const [providerConnectionError, setProviderConnectionError] = useState<string | undefined>(
+        undefined,
+    )
     const [activeTemplateId, setActiveTemplateId] =
         useState<TOnboardingTemplateId>(CUSTOM_TEMPLATE_ID)
     const [templateAuditLog, setTemplateAuditLog] = useState<
         ReadonlyArray<IOnboardingTemplateAuditEntry>
     >([])
-    const [selectedRepositoryUrls, setSelectedRepositoryUrls] = useState<
-        ReadonlyArray<string>
-    >([])
+    const [selectedRepositoryUrls, setSelectedRepositoryUrls] = useState<ReadonlyArray<string>>([])
     const [isBulkSelectionTouched, setIsBulkSelectionTouched] = useState(false)
     const [bulkJobs, setBulkJobs] = useState<ReadonlyArray<IBulkScanJob>>([])
     const [isBulkPaused, setIsBulkPaused] = useState(false)
@@ -810,57 +810,61 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
     const shouldApplyTemplate = selectedTemplate !== undefined
     const canApplyTemplate = shouldApplyTemplate && selectedTemplate.id !== activeTemplateId
     const templateStateFromForm = convertFormValuesToTemplateState(values)
-    const templateStateFromSelection = selectedTemplate === undefined
-        ? templateStateFromForm
-        : mapTemplateToFormState(selectedTemplate)
+    const templateStateFromSelection =
+        selectedTemplate === undefined
+            ? templateStateFromForm
+            : mapTemplateToFormState(selectedTemplate)
     const templateDiff = shouldApplyTemplate
         ? [
-            buildTemplateDiffLine(
-                "Mode",
-                templateStateFromForm.scanMode,
-                templateStateFromSelection.scanMode,
-            ),
-            buildTemplateDiffLine(
-                "Cadence",
-                templateStateFromForm.scanSchedule,
-                templateStateFromSelection.scanSchedule,
-            ),
-            buildTemplateDiffLine(
-                "Workers",
-                String(templateStateFromForm.scanThreads),
-                String(templateStateFromSelection.scanThreads),
-            ),
-            buildTemplateDiffLine(
-                "Submodules",
-                formatBooleanForSummary(templateStateFromForm.includeSubmodules),
-                formatBooleanForSummary(templateStateFromSelection.includeSubmodules),
-            ),
-            buildTemplateDiffLine(
-                "History",
-                formatBooleanForSummary(templateStateFromForm.includeHistory),
-                formatBooleanForSummary(templateStateFromSelection.includeHistory),
-            ),
-            buildTemplateDiffLine(
-                "Email",
-                templateStateFromForm.notifyEmail.length === 0
-                    ? "не задан"
-                    : templateStateFromForm.notifyEmail,
-                templateStateFromSelection.notifyEmail.length === 0
-                    ? "не задан"
-                    : templateStateFromSelection.notifyEmail,
-            ),
-            buildTemplateDiffLine(
-                "Tags",
-                formatTemplateTags(templateStateFromForm.tags),
-                formatTemplateTags(templateStateFromSelection.tags),
-            ),
-        ]
+              buildTemplateDiffLine(
+                  "Mode",
+                  templateStateFromForm.scanMode,
+                  templateStateFromSelection.scanMode,
+              ),
+              buildTemplateDiffLine(
+                  "Cadence",
+                  templateStateFromForm.scanSchedule,
+                  templateStateFromSelection.scanSchedule,
+              ),
+              buildTemplateDiffLine(
+                  "Workers",
+                  String(templateStateFromForm.scanThreads),
+                  String(templateStateFromSelection.scanThreads),
+              ),
+              buildTemplateDiffLine(
+                  "Submodules",
+                  formatBooleanForSummary(templateStateFromForm.includeSubmodules),
+                  formatBooleanForSummary(templateStateFromSelection.includeSubmodules),
+              ),
+              buildTemplateDiffLine(
+                  "History",
+                  formatBooleanForSummary(templateStateFromForm.includeHistory),
+                  formatBooleanForSummary(templateStateFromSelection.includeHistory),
+              ),
+              buildTemplateDiffLine(
+                  "Email",
+                  templateStateFromForm.notifyEmail.length === 0
+                      ? "не задан"
+                      : templateStateFromForm.notifyEmail,
+                  templateStateFromSelection.notifyEmail.length === 0
+                      ? "не задан"
+                      : templateStateFromSelection.notifyEmail,
+              ),
+              buildTemplateDiffLine(
+                  "Tags",
+                  formatTemplateTags(templateStateFromForm.tags),
+                  formatTemplateTags(templateStateFromSelection.tags),
+              ),
+          ]
         : []
     const hasTemplateChanges = canApplyTemplate
         ? isTemplateStateEqual(templateStateFromForm, templateStateFromSelection) === false
         : false
     const appliedTemplateMeta = toAppliedTemplateMeta(activeTemplateId, activeTemplate)
-    const parsedBulkList = useMemo(() => parseBulkRepositoryList(values.repositoryUrlList), [values.repositoryUrlList])
+    const parsedBulkList = useMemo(
+        () => parseBulkRepositoryList(values.repositoryUrlList),
+        [values.repositoryUrlList],
+    )
     const bulkSummary = useMemo(() => summarizeBulkScanJobs(bulkJobs), [bulkJobs])
     const hasBulkSelection = selectedRepositoryUrls.length > 0
     const lastTemplateAudit = templateAuditLog.at(-1)
@@ -933,7 +937,9 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
 
     const handleSubmit = (nextValues: IOnboardingFormValues): void => {
         const targetRepositories =
-            nextValues.onboardingMode === "bulk" ? selectedRepositoryUrls : [nextValues.repositoryUrl]
+            nextValues.onboardingMode === "bulk"
+                ? selectedRepositoryUrls
+                : [nextValues.repositoryUrl]
         const isBulkMode = nextValues.onboardingMode === "bulk"
         const appliedTemplate = toAppliedTemplateMeta(activeTemplateId, activeTemplate)
 
@@ -946,7 +952,9 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
         }
 
         showToastSuccess(
-            isBulkMode ? "Сканирование репозиториев запущено." : "Сканирование репозитория запущено.",
+            isBulkMode
+                ? "Сканирование репозиториев запущено."
+                : "Сканирование репозитория запущено.",
         )
         props.onScanStart?.({
             ...nextValues,
@@ -973,7 +981,9 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
         form.setValue("scanMode", nextTemplateState.scanMode, { shouldDirty: false })
         form.setValue("scanSchedule", nextTemplateState.scanSchedule, { shouldDirty: false })
         form.setValue("scanThreads", nextTemplateState.scanThreads, { shouldDirty: false })
-        form.setValue("includeSubmodules", nextTemplateState.includeSubmodules, { shouldDirty: false })
+        form.setValue("includeSubmodules", nextTemplateState.includeSubmodules, {
+            shouldDirty: false,
+        })
         form.setValue("includeHistory", nextTemplateState.includeHistory, { shouldDirty: false })
         form.setValue("notifyEmail", nextTemplateState.notifyEmail, { shouldDirty: false })
         form.setValue("tags", formatTemplateTags(nextTemplateState.tags), { shouldDirty: false })
@@ -981,17 +991,19 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
         setActiveTemplateId(template.id)
 
         const nextValues = mapTemplateToFormState(template)
-        setTemplateAuditLog((previous): ReadonlyArray<IOnboardingTemplateAuditEntry> => [
-            ...previous,
-            {
-                after: nextValues,
-                appliedAt: new Date().toISOString(),
-                before,
-                templateId: template.id,
-                templateName: template.name,
-                templateVersion: template.version,
-            },
-        ])
+        setTemplateAuditLog(
+            (previous): ReadonlyArray<IOnboardingTemplateAuditEntry> => [
+                ...previous,
+                {
+                    after: nextValues,
+                    appliedAt: new Date().toISOString(),
+                    before,
+                    templateId: template.id,
+                    templateName: template.name,
+                    templateVersion: template.version,
+                },
+            ],
+        )
     }
 
     const handleApplyTemplate = (): void => {
@@ -1018,8 +1030,9 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
         form.setValue("onboardingTemplateId", CUSTOM_TEMPLATE_ID, { shouldDirty: false })
         setActiveTemplateId(CUSTOM_TEMPLATE_ID)
 
-        setTemplateAuditLog((previousAudit): ReadonlyArray<IOnboardingTemplateAuditEntry> =>
-            previousAudit.slice(0, -1),
+        setTemplateAuditLog(
+            (previousAudit): ReadonlyArray<IOnboardingTemplateAuditEntry> =>
+                previousAudit.slice(0, -1),
         )
     }
 
@@ -1050,17 +1063,18 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
         }
 
         setIsBulkPaused(true)
-        setBulkJobs((previous): ReadonlyArray<IBulkScanJob> =>
-            previous.map((job): IBulkScanJob => {
-                if (job.status !== "running") {
-                    return job
-                }
+        setBulkJobs(
+            (previous): ReadonlyArray<IBulkScanJob> =>
+                previous.map((job): IBulkScanJob => {
+                    if (job.status !== "running") {
+                        return job
+                    }
 
-                return {
-                    ...job,
-                    status: "paused",
-                }
-            }),
+                    return {
+                        ...job,
+                        status: "paused",
+                    }
+                }),
         )
     }
 
@@ -1070,68 +1084,72 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
         }
 
         setIsBulkPaused(false)
-        setBulkJobs((previous): ReadonlyArray<IBulkScanJob> =>
-            previous.map((job): IBulkScanJob => {
-                if (job.status !== "paused") {
-                    return job
-                }
+        setBulkJobs(
+            (previous): ReadonlyArray<IBulkScanJob> =>
+                previous.map((job): IBulkScanJob => {
+                    if (job.status !== "paused") {
+                        return job
+                    }
 
-                return {
-                    ...job,
-                    status: "running",
-                }
-            }),
+                    return {
+                        ...job,
+                        status: "running",
+                    }
+                }),
         )
     }
 
     const handleCancelAll = (): void => {
         setIsBulkPaused(false)
-        setBulkJobs((previous): ReadonlyArray<IBulkScanJob> =>
-            previous.map((job): IBulkScanJob => {
-                if (isBulkScanTerminal(job.status) === true) {
-                    return job
-                }
+        setBulkJobs(
+            (previous): ReadonlyArray<IBulkScanJob> =>
+                previous.map((job): IBulkScanJob => {
+                    if (isBulkScanTerminal(job.status) === true) {
+                        return job
+                    }
 
-                return {
-                    ...job,
-                    status: "cancelled",
-                }
-            }),
+                    return {
+                        ...job,
+                        status: "cancelled",
+                    }
+                }),
         )
     }
 
     const handleRetryJob = (jobId: string): void => {
-        setBulkJobs((previous): ReadonlyArray<IBulkScanJob> =>
-            previous.map((job): IBulkScanJob => {
-                if (job.id !== jobId) {
-                    return job
-                }
+        setBulkJobs(
+            (previous): ReadonlyArray<IBulkScanJob> =>
+                previous.map((job): IBulkScanJob => {
+                    if (job.id !== jobId) {
+                        return job
+                    }
 
-                return {
-                    ...job,
-                    errorDetails: undefined,
-                    errorMessage: undefined,
-                    progress: 0,
-                    status: "running",
-                }
-            }),
+                    return {
+                        ...job,
+                        errorDetails: undefined,
+                        errorMessage: undefined,
+                        progress: 0,
+                        status: "running",
+                    }
+                }),
         )
     }
 
     const handleCancelJob = (jobId: string): void => {
-        setBulkJobs((previous): ReadonlyArray<IBulkScanJob> =>
-            previous.map((job): IBulkScanJob => {
-                if (job.id !== jobId || isBulkScanTerminal(job.status)) {
-                    return job
-                }
+        setBulkJobs(
+            (previous): ReadonlyArray<IBulkScanJob> =>
+                previous.map((job): IBulkScanJob => {
+                    if (job.id !== jobId || isBulkScanTerminal(job.status)) {
+                        return job
+                    }
 
-                return {
-                    ...job,
-                    errorDetails: undefined,
-                    errorMessage: undefined,
-                    status: "cancelled",
-                }
-            }),
+                    return {
+                        ...job,
+                        errorDetails: undefined,
+                        errorMessage: undefined,
+                        status: "cancelled",
+                    }
+                }),
         )
     }
 
@@ -1299,7 +1317,10 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
                                     />
                                 ) : (
                                     <>
-                                        <FormTextareaField<IOnboardingFormValues, "repositoryUrlList">
+                                        <FormTextareaField<
+                                            IOnboardingFormValues,
+                                            "repositoryUrlList"
+                                        >
                                             control={form.control}
                                             id="repository-url-list"
                                             label="Список репозиториев (по одной ссылке на строку)"
@@ -1313,8 +1334,14 @@ https://github.com/owner/repo-b`,
 
                                         <div className="flex items-center justify-between">
                                             <p className="text-sm text-slate-700">
-                                                Выбрано <span className="font-semibold">{selectedRepositoryUrls.length}</span>{" "}
-                                                из <span className="font-semibold">{parsedBulkList.repositories.length}</span>{" "}
+                                                Выбрано{" "}
+                                                <span className="font-semibold">
+                                                    {selectedRepositoryUrls.length}
+                                                </span>{" "}
+                                                из{" "}
+                                                <span className="font-semibold">
+                                                    {parsedBulkList.repositories.length}
+                                                </span>{" "}
                                                 репозиториев
                                             </p>
                                             <div className="flex gap-2">
@@ -1348,36 +1375,51 @@ https://github.com/owner/repo-b`,
                                                 </p>
                                             ) : null}
 
-                                            {parsedBulkList.repositories.map((repositoryUrl): ReactElement => (
-                                                <div className="rounded-md border border-slate-200 p-2" key={repositoryUrl}>
-                                                    <Checkbox
-                                                        isSelected={selectedRepositoryUrls.includes(repositoryUrl)}
-                                                        onValueChange={(): void => {
-                                                            toggleRepositorySelection(repositoryUrl)
-                                                        }}
+                                            {parsedBulkList.repositories.map(
+                                                (repositoryUrl): ReactElement => (
+                                                    <div
+                                                        className="rounded-md border border-slate-200 p-2"
+                                                        key={repositoryUrl}
                                                     >
-                                                        {repositoryUrl}
-                                                    </Checkbox>
-                                                </div>
-                                            ))}
+                                                        <Checkbox
+                                                            isSelected={selectedRepositoryUrls.includes(
+                                                                repositoryUrl,
+                                                            )}
+                                                            onValueChange={(): void => {
+                                                                toggleRepositorySelection(
+                                                                    repositoryUrl,
+                                                                )
+                                                            }}
+                                                        >
+                                                            {repositoryUrl}
+                                                        </Checkbox>
+                                                    </div>
+                                                ),
+                                            )}
                                         </div>
 
                                         {parsedBulkList.invalidLines.length > 0 ? (
                                             <Alert color="danger">
                                                 Некорректные строки
                                                 <ul className="mt-1 list-disc space-y-1 pl-5">
-                                                    {parsedBulkList.invalidLines.map((line): ReactElement => (
-                                                        <li key={`invalid-line-${String(line.line)}`}>
-                                                            {line.line}: {line.value}
-                                                        </li>
-                                                    ))}
+                                                    {parsedBulkList.invalidLines.map(
+                                                        (line): ReactElement => (
+                                                            <li
+                                                                key={`invalid-line-${String(line.line)}`}
+                                                            >
+                                                                {line.line}: {line.value}
+                                                            </li>
+                                                        ),
+                                                    )}
                                                 </ul>
                                             </Alert>
                                         ) : null}
 
-                                        {parsedBulkList.repositories.length > BULK_PROGRESS_PREVIEW_LABEL_LIMIT ? (
+                                        {parsedBulkList.repositories.length >
+                                        BULK_PROGRESS_PREVIEW_LABEL_LIMIT ? (
                                             <Alert color="primary">
-                                                Будет применен единый шаблон сканирования ко всем выбранным репозиториям.
+                                                Будет применен единый шаблон сканирования ко всем
+                                                выбранным репозиториям.
                                             </Alert>
                                         ) : null}
                                     </>
@@ -1385,7 +1427,8 @@ https://github.com/owner/repo-b`,
 
                                 {isSingleMode || isStarted ? null : (
                                     <Alert color="primary">
-                                        В bulk-режиме все выбранные репозитории запускаются по общему шаблону настроек.
+                                        В bulk-режиме все выбранные репозитории запускаются по
+                                        общему шаблону настроек.
                                     </Alert>
                                 )}
                             </section>
@@ -1398,10 +1441,14 @@ https://github.com/owner/repo-b`,
                                         Registry шаблонов onboarding
                                     </p>
                                     <p className="text-xs text-slate-600">
-                                        Выберите шаблон — сначала preview, потом примените в один клик.
+                                        Выберите шаблон — сначала preview, потом примените в один
+                                        клик.
                                     </p>
                                     <div className="mt-2">
-                                        <FormRadioGroupField<IOnboardingFormValues, "onboardingTemplateId">
+                                        <FormRadioGroupField<
+                                            IOnboardingFormValues,
+                                            "onboardingTemplateId"
+                                        >
                                             control={form.control}
                                             helperText="Шаблон влияет только на настройки сканирования."
                                             label="Шаблон"
@@ -1429,14 +1476,18 @@ https://github.com/owner/repo-b`,
                                                     {selectedTemplate.rulesPreset}
                                                 </p>
                                                 <p>
-                                                    <span className="font-semibold">Description:</span>{" "}
+                                                    <span className="font-semibold">
+                                                        Description:
+                                                    </span>{" "}
                                                     {selectedTemplate.description}
                                                 </p>
-                                                {templateDiff.slice(0, PREVIEW_TEMPLATE_DIFF_LIMIT).map(
-                                                    (line): ReactElement => (
-                                                        <p key={line}>{line}</p>
-                                                    ),
-                                                )}
+                                                {templateDiff
+                                                    .slice(0, PREVIEW_TEMPLATE_DIFF_LIMIT)
+                                                    .map(
+                                                        (line): ReactElement => (
+                                                            <p key={line}>{line}</p>
+                                                        ),
+                                                    )}
                                             </div>
                                         </details>
                                     ) : null}
@@ -1471,20 +1522,32 @@ https://github.com/owner/repo-b`,
                                                 {templateAuditLog
                                                     .slice()
                                                     .reverse()
-                                                    .map((entry): ReactElement => (
-                                                        <article className="rounded-md border p-2" key={`${entry.templateId}-${entry.appliedAt}`}>
-                                                            <p className="text-xs">
-                                                                {entry.templateName} — {entry.templateVersion}
-                                                            </p>
-                                                            <p className="text-xs text-slate-600">
-                                                                {entry.appliedAt}
-                                                            </p>
-                                                            <p className="text-xs text-slate-600">
-                                                                From: {formatTemplateTags(entry.before.tags)} →
-                                                                {formatTemplateTags(entry.after.tags)}
-                                                            </p>
-                                                        </article>
-                                                    ))}
+                                                    .map(
+                                                        (entry): ReactElement => (
+                                                            <article
+                                                                className="rounded-md border p-2"
+                                                                key={`${entry.templateId}-${entry.appliedAt}`}
+                                                            >
+                                                                <p className="text-xs">
+                                                                    {entry.templateName} —{" "}
+                                                                    {entry.templateVersion}
+                                                                </p>
+                                                                <p className="text-xs text-slate-600">
+                                                                    {entry.appliedAt}
+                                                                </p>
+                                                                <p className="text-xs text-slate-600">
+                                                                    From:{" "}
+                                                                    {formatTemplateTags(
+                                                                        entry.before.tags,
+                                                                    )}{" "}
+                                                                    →
+                                                                    {formatTemplateTags(
+                                                                        entry.after.tags,
+                                                                    )}
+                                                                </p>
+                                                            </article>
+                                                        ),
+                                                    )}
                                                 <Button
                                                     color="warning"
                                                     isDisabled={lastTemplateAudit === undefined}
@@ -1573,7 +1636,8 @@ https://github.com/owner/repo-b`,
                                 <div className="grid gap-2 rounded-lg border border-slate-200 p-3">
                                     {isSingleMode ? (
                                         <p className="text-sm">
-                                            <span className="font-semibold">Repository:</span> {values.repositoryUrl}
+                                            <span className="font-semibold">Repository:</span>{" "}
+                                            {values.repositoryUrl}
                                         </p>
                                     ) : null}
                                     <details className="rounded-md border border-slate-200 p-2">
@@ -1581,17 +1645,22 @@ https://github.com/owner/repo-b`,
                                             Шаблон onboarding
                                         </summary>
                                         <p className="mt-1 text-sm text-slate-700">
-                                            {appliedTemplateMeta.name} ({appliedTemplateMeta.version})
+                                            {appliedTemplateMeta.name} (
+                                            {appliedTemplateMeta.version})
                                         </p>
                                         <p className="text-sm text-slate-700">
                                             Rules: {appliedTemplateMeta.rulesPreset}
                                         </p>
                                         <div className="mt-1 flex flex-wrap gap-1">
-                                            {splitTemplateTagsForPreview(appliedTemplateMeta.tags).map((tag): ReactElement => (
+                                            {splitTemplateTagsForPreview(
+                                                appliedTemplateMeta.tags,
+                                            ).map(
+                                                (tag): ReactElement => (
                                                     <Chip key={tag} size="sm">
                                                         {tag}
                                                     </Chip>
-                                                ))}
+                                                ),
+                                            )}
                                         </div>
                                     </details>
                                     {isSingleMode ? null : (
@@ -1600,21 +1669,30 @@ https://github.com/owner/repo-b`,
                                                 Применяемый профиль
                                             </summary>
                                             <p className="mt-1 text-sm text-slate-700">
-                                                Один шаблон на {selectedRepositoryUrls.length} репозиториев:{" "}
-                                                {values.scanMode}/{values.scanSchedule}
+                                                Один шаблон на {selectedRepositoryUrls.length}{" "}
+                                                репозиториев: {values.scanMode}/
+                                                {values.scanSchedule}
                                             </p>
                                             {selectedRepositoryUrls.length === 0 ? null : (
                                                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
                                                     {selectedRepositoryUrls
                                                         .slice(0, PREVIEW_REPOSITORY_LIMIT)
-                                                        .map((repositoryUrl): ReactElement => (
-                                                            <li key={`summary-repo-${repositoryUrl}`}>{repositoryUrl}</li>
-                                                        ))}
-                                                    {selectedRepositoryUrls.length > PREVIEW_REPOSITORY_LIMIT ? (
+                                                        .map(
+                                                            (repositoryUrl): ReactElement => (
+                                                                <li
+                                                                    key={`summary-repo-${repositoryUrl}`}
+                                                                >
+                                                                    {repositoryUrl}
+                                                                </li>
+                                                            ),
+                                                        )}
+                                                    {selectedRepositoryUrls.length >
+                                                    PREVIEW_REPOSITORY_LIMIT ? (
                                                         <li>
                                                             ...и еще{" "}
                                                             {String(
-                                                                selectedRepositoryUrls.length - PREVIEW_REPOSITORY_LIMIT,
+                                                                selectedRepositoryUrls.length -
+                                                                    PREVIEW_REPOSITORY_LIMIT,
                                                             )}{" "}
                                                             репозиториев.
                                                         </li>
@@ -1629,13 +1707,16 @@ https://github.com/owner/repo-b`,
                                         {isProviderConnected ? "connected" : "not connected"})
                                     </p>
                                     <p className="text-sm">
-                                        <span className="font-semibold">Mode:</span> {values.scanMode}
+                                        <span className="font-semibold">Mode:</span>{" "}
+                                        {values.scanMode}
                                     </p>
                                     <p className="text-sm">
-                                        <span className="font-semibold">Schedule:</span> {values.scanSchedule}
+                                        <span className="font-semibold">Schedule:</span>{" "}
+                                        {values.scanSchedule}
                                     </p>
                                     <p className="text-sm">
-                                        <span className="font-semibold">Workers:</span> {values.scanThreads}
+                                        <span className="font-semibold">Workers:</span>{" "}
+                                        {values.scanThreads}
                                     </p>
                                     <p className="text-sm">
                                         <span className="font-semibold">Submodules:</span>{" "}
@@ -1647,14 +1728,18 @@ https://github.com/owner/repo-b`,
                                     </p>
                                     <p className="text-sm">
                                         <span className="font-semibold">Email:</span>{" "}
-                                        {values.notifyEmail.length === 0 ? "не указан" : values.notifyEmail}
+                                        {values.notifyEmail.length === 0
+                                            ? "не указан"
+                                            : values.notifyEmail}
                                     </p>
                                 </div>
 
                                 {isSingleMode || isStarted === false ? null : (
                                     <section className="space-y-3">
                                         <div className="flex items-center justify-between gap-2">
-                                            <p className="text-sm font-semibold">Прогресс массового сканирования</p>
+                                            <p className="text-sm font-semibold">
+                                                Прогресс массового сканирования
+                                            </p>
                                             <div className="flex gap-2">
                                                 <Button
                                                     isDisabled={isBulkPaused}
@@ -1694,83 +1779,106 @@ https://github.com/owner/repo-b`,
 
                                         <div className="grid gap-2 rounded-lg border border-slate-200 p-2 text-sm">
                                             <p>
-                                                В работе: {bulkSummary.running}, Очередь: {bulkSummary.queued}, Пауза: {bulkSummary.paused},
-                                                Ошибки: {bulkSummary.error}, Готово: {bulkSummary.completed}, Отменено: {bulkSummary.cancelled}
+                                                В работе: {bulkSummary.running}, Очередь:{" "}
+                                                {bulkSummary.queued}, Пауза: {bulkSummary.paused},
+                                                Ошибки: {bulkSummary.error}, Готово:{" "}
+                                                {bulkSummary.completed}, Отменено:{" "}
+                                                {bulkSummary.cancelled}
                                             </p>
 
-                                            {bulkJobs.map((job): ReactElement => (
-                                                <article className={`rounded-md border p-3 ${mapBulkStatusClasses(job.status)}`} key={job.id}>
-                                                    <div className="flex items-center justify-between">
-                                                        <p className="font-semibold">{job.repositoryUrl}</p>
-                                                        <span
-                                                            className={`rounded-full border px-2 py-1 text-xs ${mapBulkStatusClasses(job.status)}`}
-                                                        >
-                                                            {mapBulkStatusLabel(job.status)}
-                                                        </span>
-                                                    </div>
-                                                    <div className="mt-2 h-2 rounded-full bg-slate-200">
-                                                        <div
-                                                            aria-label={`scan progress bar ${job.repositoryUrl}`}
-                                                            aria-valuemin={0}
-                                                            aria-valuemax={100}
-                                                            aria-valuenow={job.progress}
-                                                            className={`h-2 rounded-full transition-[width] duration-300 ${mapBulkProgressClasses(job.status)}`}
-                                                            role="progressbar"
-                                                            style={{ width: `${job.progress}%` }}
-                                                        />
-                                                    </div>
-                                                    <p className="mt-1 text-xs text-slate-600">Прогресс: {job.progress}%</p>
-
-                                                    {job.errorMessage === undefined ? null : (
-                                                        <Alert color="danger" className="mt-2">
-                                                            {job.errorMessage}
-                                                        </Alert>
-                                                    )}
-                                                    {job.errorDetails === undefined || job.errorDetails.length === 0 ? null : (
-                                                        <details className="mt-2">
-                                                            <summary className="cursor-pointer text-xs font-semibold">
-                                                                Подробнее об ошибке
-                                                            </summary>
-                                                            <ul className="mt-1 list-disc pl-5 text-xs">
-                                                                {job.errorDetails.map(
-                                                                    (detail, index): ReactElement => (
-                                                                        <li key={`${job.id}-detail-${String(index)}`}>{detail}</li>
-                                                                    ),
-                                                                )}
-                                                            </ul>
-                                                        </details>
-                                                    )}
-
-                                                    <div className="mt-2 flex gap-2">
-                                                        {job.status === "error" ? (
-                                                            <Button
-                                                                color="danger"
-                                                                onPress={(): void => {
-                                                                    handleRetryJob(job.id)
-                                                                }}
-                                                                size="sm"
-                                                                type="button"
-                                                                variant="ghost"
+                                            {bulkJobs.map(
+                                                (job): ReactElement => (
+                                                    <article
+                                                        className={`rounded-md border p-3 ${mapBulkStatusClasses(job.status)}`}
+                                                        key={job.id}
+                                                    >
+                                                        <div className="flex items-center justify-between">
+                                                            <p className="font-semibold">
+                                                                {job.repositoryUrl}
+                                                            </p>
+                                                            <span
+                                                                className={`rounded-full border px-2 py-1 text-xs ${mapBulkStatusClasses(job.status)}`}
                                                             >
-                                                                Retry
-                                                            </Button>
-                                                        ) : null}
-                                                        {isBulkScanTerminal(job.status) || job.status === "paused" ? null : (
-                                                            <Button
-                                                                color="danger"
-                                                                onPress={(): void => {
-                                                                    handleCancelJob(job.id)
+                                                                {mapBulkStatusLabel(job.status)}
+                                                            </span>
+                                                        </div>
+                                                        <div className="mt-2 h-2 rounded-full bg-slate-200">
+                                                            <div
+                                                                aria-label={`scan progress bar ${job.repositoryUrl}`}
+                                                                aria-valuemin={0}
+                                                                aria-valuemax={100}
+                                                                aria-valuenow={job.progress}
+                                                                className={`h-2 rounded-full transition-[width] duration-300 ${mapBulkProgressClasses(job.status)}`}
+                                                                role="progressbar"
+                                                                style={{
+                                                                    width: `${job.progress}%`,
                                                                 }}
-                                                                size="sm"
-                                                                type="button"
-                                                                variant="ghost"
-                                                            >
-                                                                Отменить
-                                                            </Button>
+                                                            />
+                                                        </div>
+                                                        <p className="mt-1 text-xs text-slate-600">
+                                                            Прогресс: {job.progress}%
+                                                        </p>
+
+                                                        {job.errorMessage === undefined ? null : (
+                                                            <Alert color="danger" className="mt-2">
+                                                                {job.errorMessage}
+                                                            </Alert>
                                                         )}
-                                                    </div>
-                                                </article>
-                                            ))}
+                                                        {job.errorDetails === undefined ||
+                                                        job.errorDetails.length === 0 ? null : (
+                                                            <details className="mt-2">
+                                                                <summary className="cursor-pointer text-xs font-semibold">
+                                                                    Подробнее об ошибке
+                                                                </summary>
+                                                                <ul className="mt-1 list-disc pl-5 text-xs">
+                                                                    {job.errorDetails.map(
+                                                                        (
+                                                                            detail,
+                                                                            index,
+                                                                        ): ReactElement => (
+                                                                            <li
+                                                                                key={`${job.id}-detail-${String(index)}`}
+                                                                            >
+                                                                                {detail}
+                                                                            </li>
+                                                                        ),
+                                                                    )}
+                                                                </ul>
+                                                            </details>
+                                                        )}
+
+                                                        <div className="mt-2 flex gap-2">
+                                                            {job.status === "error" ? (
+                                                                <Button
+                                                                    color="danger"
+                                                                    onPress={(): void => {
+                                                                        handleRetryJob(job.id)
+                                                                    }}
+                                                                    size="sm"
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                >
+                                                                    Retry
+                                                                </Button>
+                                                            ) : null}
+                                                            {isBulkScanTerminal(job.status) ||
+                                                            job.status === "paused" ? null : (
+                                                                <Button
+                                                                    color="danger"
+                                                                    onPress={(): void => {
+                                                                        handleCancelJob(job.id)
+                                                                    }}
+                                                                    size="sm"
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                >
+                                                                    Отменить
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    </article>
+                                                ),
+                                            )}
                                         </div>
                                     </section>
                                 )}
@@ -1784,7 +1892,8 @@ https://github.com/owner/repo-b`,
                                 ) : null}
                                 {isSingleMode || isStarted ? null : (
                                     <Alert color="primary">
-                                        После запуска вы увидите единый статус для всех репозиториев.
+                                        После запуска вы увидите единый статус для всех
+                                        репозиториев.
                                     </Alert>
                                 )}
                             </section>

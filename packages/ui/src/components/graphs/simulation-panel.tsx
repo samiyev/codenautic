@@ -57,7 +57,7 @@ function resolveSimulationMetrics(
 
     const baseComplexity = Math.round(
         targets.reduce((total, target): number => {
-            return total + (target.effortScore * 4) + Math.round(target.riskScore * 0.5)
+            return total + target.effortScore * 4 + Math.round(target.riskScore * 0.5)
         }, 0) / targets.length,
     )
     const baseRisk = Math.round(
@@ -65,7 +65,7 @@ function resolveSimulationMetrics(
     )
     const baseMaintainability = Math.max(
         1,
-        Math.round(100 - (baseComplexity * 0.45) - (baseRisk * 0.3)),
+        Math.round(100 - baseComplexity * 0.45 - baseRisk * 0.3),
     )
 
     if (mode === "before") {
@@ -165,29 +165,33 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
             </p>
 
             <ul className="mt-3 space-y-2">
-                {props.targets.slice(0, 5).map((target): ReactElement => (
-                    <li
-                        className="flex items-start gap-2 rounded border border-slate-200 bg-slate-50 p-2"
-                        key={target.id}
-                    >
-                        <input
-                            aria-label={`Select simulation target ${target.title}`}
-                            checked={selectedTargetIds.includes(target.id)}
-                            className="mt-0.5 h-4 w-4 rounded border-slate-300"
-                            onChange={(): void => {
-                                toggleTarget(target.id)
-                            }}
-                            type="checkbox"
-                        />
-                        <div className="min-w-0">
-                            <p className="text-sm font-semibold text-slate-900">{target.title}</p>
-                            <p className="text-xs text-slate-600">
-                                ROI {String(target.roiScore)} · Risk {String(target.riskScore)} ·
-                                Effort {String(target.effortScore)}
-                            </p>
-                        </div>
-                    </li>
-                ))}
+                {props.targets.slice(0, 5).map(
+                    (target): ReactElement => (
+                        <li
+                            className="flex items-start gap-2 rounded border border-slate-200 bg-slate-50 p-2"
+                            key={target.id}
+                        >
+                            <input
+                                aria-label={`Select simulation target ${target.title}`}
+                                checked={selectedTargetIds.includes(target.id)}
+                                className="mt-0.5 h-4 w-4 rounded border-slate-300"
+                                onChange={(): void => {
+                                    toggleTarget(target.id)
+                                }}
+                                type="checkbox"
+                            />
+                            <div className="min-w-0">
+                                <p className="text-sm font-semibold text-slate-900">
+                                    {target.title}
+                                </p>
+                                <p className="text-xs text-slate-600">
+                                    ROI {String(target.roiScore)} · Risk {String(target.riskScore)}{" "}
+                                    · Effort {String(target.effortScore)}
+                                </p>
+                            </div>
+                        </li>
+                    ),
+                )}
             </ul>
 
             <div className="mt-3 grid gap-2 md:grid-cols-3">
@@ -222,9 +226,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
                     </p>
                     <p className="text-[11px] text-slate-600">
                         Delta{" "}
-                        {formatDelta(
-                            afterMetrics.maintainability - beforeMetrics.maintainability,
-                        )}
+                        {formatDelta(afterMetrics.maintainability - beforeMetrics.maintainability)}
                     </p>
                 </div>
             </div>

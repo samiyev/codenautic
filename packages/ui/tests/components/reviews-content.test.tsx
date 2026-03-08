@@ -46,7 +46,12 @@ describe("ReviewsContent", (): void => {
         const rows = createRows(180)
 
         renderWithProviders(
-            <ReviewsContent hasMore={false} isLoadingMore={false} rows={rows} onLoadMore={(): void => {}} />,
+            <ReviewsContent
+                hasMore={false}
+                isLoadingMore={false}
+                rows={rows}
+                onLoadMore={(): void => {}}
+            />,
         )
 
         const table = screen.getByRole("table", { name: "CCR management table" })
@@ -64,7 +69,12 @@ describe("ReviewsContent", (): void => {
         const onLoadMore = vi.fn()
 
         renderWithProviders(
-            <ReviewsContent hasMore={true} isLoadingMore={false} rows={createRows(20)} onLoadMore={onLoadMore} />,
+            <ReviewsContent
+                hasMore={true}
+                isLoadingMore={false}
+                rows={createRows(20)}
+                onLoadMore={onLoadMore}
+            />,
         )
 
         await waitFor((): void => {

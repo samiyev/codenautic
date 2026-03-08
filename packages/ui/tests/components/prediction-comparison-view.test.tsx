@@ -37,9 +37,7 @@ describe("PredictionComparisonView", (): void => {
 
         expect(screen.getByText("Prediction comparison view")).not.toBeNull()
         expect(screen.getByLabelText("Prediction comparison snapshots")).not.toBeNull()
-        expect(
-            screen.getByText("3 months ago: predicted 5, actual 4, accuracy 78%"),
-        ).not.toBeNull()
+        expect(screen.getByText("3 months ago: predicted 5, actual 4, accuracy 78%")).not.toBeNull()
         expect(screen.getByLabelText("Prediction comparison summary")).not.toBeNull()
         expect(
             screen.getByText(
@@ -52,7 +50,10 @@ describe("PredictionComparisonView", (): void => {
         const user = userEvent.setup()
         const onSelectSnapshot = vi.fn()
         renderWithProviders(
-            <PredictionComparisonView onSelectSnapshot={onSelectSnapshot} snapshots={TEST_SNAPSHOTS} />,
+            <PredictionComparisonView
+                onSelectSnapshot={onSelectSnapshot}
+                snapshots={TEST_SNAPSHOTS}
+            />,
         )
 
         await user.click(
@@ -70,4 +71,3 @@ describe("PredictionComparisonView", (): void => {
         )
     })
 })
-

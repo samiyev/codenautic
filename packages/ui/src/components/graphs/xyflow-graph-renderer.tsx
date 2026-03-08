@@ -73,10 +73,7 @@ function XYFlowViewportControls(): ReactElement {
     }
 
     return (
-        <Panel
-            className="flex flex-col gap-2 rounded border bg-white/95 p-2"
-            position="top-right"
-        >
+        <Panel className="flex flex-col gap-2 rounded border bg-white/95 p-2" position="top-right">
             <div className="flex gap-1">
                 <button
                     aria-label="Zoom in"
@@ -171,10 +168,7 @@ function XYFlowExportControls(props: {
     const exportTitle = props.graphTitle.trim().length > 0 ? props.graphTitle : "graph"
 
     return (
-        <Panel
-            className="flex flex-col gap-2 rounded border bg-white/95 p-2"
-            position="top-right"
-        >
+        <Panel className="flex flex-col gap-2 rounded border bg-white/95 p-2" position="top-right">
             <button
                 aria-label="Export graph as SVG"
                 className="rounded border border-slate-300 px-2 py-1 text-xs"
@@ -224,8 +218,7 @@ export function XYFlowGraphRenderer(props: IXYFlowGraphRendererProps): ReactElem
         [props.edges, props.layoutOptions, props.nodes],
     )
     const normalizedExportTitle = (props.graphTitle ?? "").trim()
-    const exportTitle =
-        normalizedExportTitle.length === 0 ? "Graph" : normalizedExportTitle
+    const exportTitle = normalizedExportTitle.length === 0 ? "Graph" : normalizedExportTitle
 
     const reactFlowNodes = useMemo((): Array<Node<IGraphNode>> => {
         const highlightedNodeIds = new Set<string>(props.highlightedNodeIds ?? [])
@@ -246,7 +239,7 @@ export function XYFlowGraphRenderer(props: IXYFlowGraphRendererProps): ReactElem
                         ? "2px solid hsl(var(--nextui-colors-primary))"
                         : isHighlighted
                           ? "2px solid hsl(var(--nextui-colors-success))"
-                        : "1px solid hsl(var(--nextui-colors-defaultBorder))",
+                          : "1px solid hsl(var(--nextui-colors-defaultBorder))",
                     backgroundColor: isHighlighted
                         ? "color-mix(in srgb, hsl(var(--nextui-colors-success)) 8%, hsl(var(--nextui-colors-content1)))"
                         : "hsl(var(--nextui-colors-content1))",
@@ -255,7 +248,7 @@ export function XYFlowGraphRenderer(props: IXYFlowGraphRendererProps): ReactElem
                         ? "0 0 0 3px color-mix(in srgb, hsl(var(--nextui-colors-primary)) 20%, transparent)"
                         : isHighlighted
                           ? "0 0 0 2px color-mix(in srgb, hsl(var(--nextui-colors-success)) 16%, transparent)"
-                        : undefined,
+                          : undefined,
                 },
                 type: "default",
                 sourcePosition: Position.Right,

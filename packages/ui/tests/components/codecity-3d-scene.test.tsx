@@ -26,7 +26,8 @@ vi.mock("@/components/graphs/codecity-3d-scene-renderer", () => {
         }): React.JSX.Element => {
             return (
                 <div>
-                    renderer-files:{props.files.length};impacts:{props.impactedFiles.length};couplings:
+                    renderer-files:{props.files.length};impacts:{props.impactedFiles.length}
+                    ;couplings:
                     {props.causalCouplings.length};preset:
                     {props.cameraPreset}
                     ;selected:{props.selectedFileId ?? "none"}
@@ -249,7 +250,9 @@ describe("CodeCity3DScene", (): void => {
             .spyOn(HTMLCanvasElement.prototype, "getContext")
             .mockImplementation((): GPUCanvasContext => fakeContext)
 
-        renderWithProviders(<CodeCity3DScene files={TEST_TIMELINE_FILES} title="3D timeline scene" />)
+        renderWithProviders(
+            <CodeCity3DScene files={TEST_TIMELINE_FILES} title="3D timeline scene" />,
+        )
 
         expect(screen.getByText("City time-lapse")).not.toBeNull()
         expect(screen.getByText("Commit #1")).not.toBeNull()
@@ -284,7 +287,9 @@ describe("CodeCity3DScene", (): void => {
         )
 
         expect(screen.getByText("Causal replay")).not.toBeNull()
-        expect(screen.getByText("Event #1: src/api/repository.ts -> src/api/router.ts")).not.toBeNull()
+        expect(
+            screen.getByText("Event #1: src/api/repository.ts -> src/api/router.ts"),
+        ).not.toBeNull()
         expect(screen.getByRole("button", { name: "Play causal replay" })).not.toBeNull()
         expect(screen.getByRole("button", { name: "Causal replay speed 1x" })).toHaveAttribute(
             "aria-pressed",
@@ -304,8 +309,9 @@ describe("CodeCity3DScene", (): void => {
             },
         })
         await waitFor((): void => {
-            expect(screen.getByText("Event #2: src/api/router.ts -> src/services/metrics.ts"))
-                .not.toBeNull()
+            expect(
+                screen.getByText("Event #2: src/api/router.ts -> src/services/metrics.ts"),
+            ).not.toBeNull()
         })
         expect(screen.getByText(/couplings:2;preset:bird-eye;selected:none/)).not.toBeNull()
 
@@ -328,7 +334,9 @@ describe("CodeCity3DScene", (): void => {
             .spyOn(HTMLCanvasElement.prototype, "getContext")
             .mockImplementation((): GPUCanvasContext => fakeContext)
 
-        renderWithProviders(<CodeCity3DScene files={TEST_FILES} title="weak device fallback scene" />)
+        renderWithProviders(
+            <CodeCity3DScene files={TEST_FILES} title="weak device fallback scene" />,
+        )
         expect(screen.getByRole("status")).toHaveTextContent("Weak GPU/CPU profile detected")
         expect(screen.getByText("2D treemap fallback")).not.toBeNull()
 
@@ -380,10 +388,9 @@ describe("CodeCity3DScene", (): void => {
         })
         expect(screen.getByText("Root-cause trail: Queue latency spike")).not.toBeNull()
         expect(screen.getAllByText("src/api/repository.ts").length).toBeGreaterThan(0)
-        expect(screen.getByRole("button", { name: "Camera preset Focus building" })).toHaveAttribute(
-            "aria-pressed",
-            "true",
-        )
+        expect(
+            screen.getByRole("button", { name: "Camera preset Focus building" }),
+        ).toHaveAttribute("aria-pressed", "true")
 
         getContextSpy.mockRestore()
     })

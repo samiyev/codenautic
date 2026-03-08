@@ -184,7 +184,7 @@ function findFilterOptions(rows: ReadonlyArray<ICcrRow>): {
     readonly teamOptions: ReadonlyArray<string>
     readonly repositoryOptions: ReadonlyArray<string>
 } {
-    const statusValues: string[] = [ ...CCR_SORT_ORDER ]
+    const statusValues: string[] = [...CCR_SORT_ORDER]
     const teamValues: string[] = []
     const repositoryValues: string[] = []
 
@@ -438,7 +438,7 @@ function useCcrFilterPresets(
             name: normalizedName,
         }
 
-        const nextPresets = [ ...presets, preset ]
+        const nextPresets = [...presets, preset]
         setPresets(nextPresets)
         writeStoredFilterPresets(nextPresets)
         setSelectedPresetId(preset.id)
@@ -610,7 +610,8 @@ export function CcrManagementPage(props: ICcrManagementPageProps): ReactElement 
                 Filters are synced with URL. Shareable state for search, status, team and
                 repository.
             </p>
-            {ccrWorkspace.ccrListQuery.error === null || ccrWorkspace.ccrListQuery.error === undefined ? null : (
+            {ccrWorkspace.ccrListQuery.error === null ||
+            ccrWorkspace.ccrListQuery.error === undefined ? null : (
                 <p className="text-xs text-amber-700">
                     Workspace API unavailable, fallback dataset is shown.
                 </p>

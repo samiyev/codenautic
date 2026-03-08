@@ -7,13 +7,7 @@ const CHART_PADDING_LEFT = 34
 const CHART_PADDING_RIGHT = 16
 const CHART_PADDING_TOP = 16
 const CHART_PADDING_BOTTOM = 34
-const SERIES_COLORS = [
-    "#0284c7",
-    "#7c3aed",
-    "#059669",
-    "#d97706",
-    "#dc2626",
-] as const
+const SERIES_COLORS = ["#0284c7", "#7c3aed", "#059669", "#d97706", "#dc2626"] as const
 
 /**
  * Точка тренда bus factor.
@@ -84,7 +78,7 @@ function resolveDateLabel(timestamp: string): string {
 function mapX(index: number, pointCount: number): number {
     const plotWidth = SVG_WIDTH - CHART_PADDING_LEFT - CHART_PADDING_RIGHT
     if (pointCount <= 1) {
-        return CHART_PADDING_LEFT + (plotWidth / 2)
+        return CHART_PADDING_LEFT + plotWidth / 2
     }
 
     return CHART_PADDING_LEFT + (index / (pointCount - 1)) * plotWidth
@@ -132,8 +126,10 @@ export function BusFactorTrendChart(props: IBusFactorTrendChartProps): ReactElem
             .map((series): IBusFactorTrendSeries => {
                 const normalizedPoints = series.points
                     .filter((point): boolean => {
-                        return resolveBusFactor(point.busFactor) !== undefined
-                            && resolveDateValue(point.timestamp) !== undefined
+                        return (
+                            resolveBusFactor(point.busFactor) !== undefined &&
+                            resolveDateValue(point.timestamp) !== undefined
+                        )
                     })
                     .sort((leftPoint, rightPoint): number => {
                         const leftDate = resolveDateValue(leftPoint.timestamp)
@@ -182,7 +178,10 @@ export function BusFactorTrendChart(props: IBusFactorTrendChartProps): ReactElem
             <p className="text-xs text-slate-500">
                 Module-level bus factor trend with team-change annotations.
             </p>
-            <div aria-label="Bus factor trend chart" className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
+            <div
+                aria-label="Bus factor trend chart"
+                className="grid gap-3 lg:grid-cols-[1.4fr_1fr]"
+            >
                 <svg
                     aria-label="Bus factor trend lines"
                     className="h-auto w-full"

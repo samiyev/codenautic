@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactElement } from "react"
 
-import type {
-    IReviewCommentThread,
-    TReviewCommentFeedback,
-} from "@/pages/ccr-data"
+import type { IReviewCommentThread, TReviewCommentFeedback } from "@/pages/ccr-data"
 
 interface IReviewCommentThreadProps {
     /** Набор root-комментариев. */
@@ -51,11 +48,7 @@ function mapCommentTree(
     return changed ? nextComments : comments
 }
 
-function createReply(
-    id: string,
-    author: string,
-    message: string,
-): IReviewCommentThread {
+function createReply(id: string, author: string, message: string): IReviewCommentThread {
     return {
         author,
         createdAt: "Now",
@@ -114,7 +107,9 @@ function ReviewCommentNode(props: IReviewCommentNodeProps): ReactElement {
             <article className="rounded-lg border border-slate-200 bg-white p-3">
                 <div className="flex items-start justify-between gap-2">
                     <div>
-                        <p className="text-sm font-semibold text-slate-900">{props.comment.author}</p>
+                        <p className="text-sm font-semibold text-slate-900">
+                            {props.comment.author}
+                        </p>
                         <p className="text-xs text-slate-600">{props.comment.createdAt}</p>
                     </div>
                     {props.comment.isResolved ? (
@@ -236,11 +231,7 @@ export function ReviewCommentThread(props: IReviewCommentThreadProps): ReactElem
 
     const handleAddReply = (commentId: string, message: string): void => {
         replyIdCounter.current += 1
-        const reply = createReply(
-            `reply-${String(replyIdCounter.current)}`,
-            "You",
-            message,
-        )
+        const reply = createReply(`reply-${String(replyIdCounter.current)}`, "You", message)
 
         setThreads((previous): ReadonlyArray<IReviewCommentThread> => {
             return mapCommentTree(previous, commentId, (comment): IReviewCommentThread => {

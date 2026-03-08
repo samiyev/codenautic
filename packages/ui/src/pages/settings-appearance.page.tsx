@@ -215,12 +215,7 @@ function readStoredHexColor(storageKey: string, fallback: string): string {
     return isHexColor(rawValue) ? rawValue.toLowerCase() : fallback
 }
 
-function readStoredNumber(
-    storageKey: string,
-    fallback: number,
-    min: number,
-    max: number,
-): number {
+function readStoredNumber(storageKey: string, fallback: number, min: number, max: number): number {
     const rawValue = readLocalStorageItem(storageKey)
     if (rawValue === undefined) {
         return fallback
@@ -257,7 +252,11 @@ function getPaletteDefinition(basePaletteId: TBasePaletteId): IBasePaletteConfig
     return fallbackPalette
 }
 
-function getRgbComponents(hex: string): { readonly b: number; readonly g: number; readonly r: number } {
+function getRgbComponents(hex: string): {
+    readonly b: number
+    readonly g: number
+    readonly r: number
+} {
     const normalized = hex.replace("#", "")
     const r = Number.parseInt(normalized.slice(0, 2), 16)
     const g = Number.parseInt(normalized.slice(2, 4), 16)
@@ -339,12 +338,11 @@ function normalizeThemeName(value: string): string {
     return trimmed
 }
 
-function resolveThemeNameConflict(
-    baseName: string,
-    existingNames: ReadonlyArray<string>,
-): string {
+function resolveThemeNameConflict(baseName: string, existingNames: ReadonlyArray<string>): string {
     const normalizedBaseName = normalizeThemeName(baseName)
-    const lowerCaseNameSet = new Set<string>(existingNames.map((name): string => name.toLowerCase()))
+    const lowerCaseNameSet = new Set<string>(
+        existingNames.map((name): string => name.toLowerCase()),
+    )
     if (lowerCaseNameSet.has(normalizedBaseName.toLowerCase()) === false) {
         return normalizedBaseName
     }
@@ -398,23 +396,23 @@ function parseThemeLibraryItem(
         return undefined
     }
     if (
-        typeof rawValue.accentIntensity !== "number"
-        || rawValue.accentIntensity < MIN_INTENSITY
-        || rawValue.accentIntensity > MAX_INTENSITY
+        typeof rawValue.accentIntensity !== "number" ||
+        rawValue.accentIntensity < MIN_INTENSITY ||
+        rawValue.accentIntensity > MAX_INTENSITY
     ) {
         return undefined
     }
     if (
-        typeof rawValue.globalRadius !== "number"
-        || rawValue.globalRadius < MIN_RADIUS
-        || rawValue.globalRadius > MAX_RADIUS
+        typeof rawValue.globalRadius !== "number" ||
+        rawValue.globalRadius < MIN_RADIUS ||
+        rawValue.globalRadius > MAX_RADIUS
     ) {
         return undefined
     }
     if (
-        typeof rawValue.formRadius !== "number"
-        || rawValue.formRadius < MIN_FORM_RADIUS
-        || rawValue.formRadius > MAX_FORM_RADIUS
+        typeof rawValue.formRadius !== "number" ||
+        rawValue.formRadius < MIN_FORM_RADIUS ||
+        rawValue.formRadius > MAX_FORM_RADIUS
     ) {
         return undefined
     }
@@ -442,7 +440,9 @@ function parseThemeLibraryItem(
     }
 }
 
-function readStoredThemeLibrary(availablePresetIds: ReadonlyArray<ThemePresetId>): ReadonlyArray<IUserThemeLibraryItem> {
+function readStoredThemeLibrary(
+    availablePresetIds: ReadonlyArray<ThemePresetId>,
+): ReadonlyArray<IUserThemeLibraryItem> {
     const rawValue = readLocalStorageItem(APPEARANCE_LIBRARY_STORAGE_KEY)
     if (rawValue === undefined) {
         return []
@@ -581,8 +581,8 @@ function parseThemeLibraryImportPayload(
         })
 
         const favoritePresetId =
-            typeof record.favoritePresetId === "string"
-            && availablePresetIds.includes(record.favoritePresetId as ThemePresetId)
+            typeof record.favoritePresetId === "string" &&
+            availablePresetIds.includes(record.favoritePresetId as ThemePresetId)
                 ? (record.favoritePresetId as ThemePresetId)
                 : undefined
 
@@ -625,7 +625,8 @@ function triggerJsonDownload(fileName: string, jsonPayload: string): void {
 export function SettingsAppearancePage(): ReactElement {
     const { mode, preset, presets, resolvedMode, setMode, setPreset } = useThemeMode()
     const availablePresetIds = useMemo(
-        (): ReadonlyArray<ThemePresetId> => presets.map((themePreset): ThemePresetId => themePreset.id),
+        (): ReadonlyArray<ThemePresetId> =>
+            presets.map((themePreset): ThemePresetId => themePreset.id),
         [presets],
     )
     const libraryUpdatedAtMsRef = useRef(readStoredThemeLibraryUpdatedAtMs())
@@ -671,12 +672,18 @@ export function SettingsAppearancePage(): ReactElement {
         readStoredFavoritePreset(availablePresetIds),
     )
     const [isLibraryHydrated, setIsLibraryHydrated] = useState(false)
-    const [librarySyncStatus, setLibrarySyncStatus] = useState<"error" | "idle" | "synced" | "syncing">("idle")
-    const [pendingRandomPresetId, setPendingRandomPresetId] = useState<ThemePresetId | undefined>(undefined)
-    const [lastRandomUndoPresetId, setLastRandomUndoPresetId] = useState<ThemePresetId | undefined>(undefined)
-    const [lastAppliedRandomPresetId, setLastAppliedRandomPresetId] = useState<ThemePresetId | undefined>(
+    const [librarySyncStatus, setLibrarySyncStatus] = useState<
+        "error" | "idle" | "synced" | "syncing"
+    >("idle")
+    const [pendingRandomPresetId, setPendingRandomPresetId] = useState<ThemePresetId | undefined>(
         undefined,
     )
+    const [lastRandomUndoPresetId, setLastRandomUndoPresetId] = useState<ThemePresetId | undefined>(
+        undefined,
+    )
+    const [lastAppliedRandomPresetId, setLastAppliedRandomPresetId] = useState<
+        ThemePresetId | undefined
+    >(undefined)
 
     const activeBasePalette = useMemo((): IBasePalette => {
         const definition = getPaletteDefinition(basePaletteId)
@@ -707,15 +714,15 @@ export function SettingsAppearancePage(): ReactElement {
             .map((themePreset): ThemePresetId => themePreset.id)
     }, [presets, resolvedMode])
 
-    const quickPresetOptions = useMemo((): ReadonlyArray<typeof presets[number]> => {
-        const selected: Array<typeof presets[number]> = []
+    const quickPresetOptions = useMemo((): ReadonlyArray<(typeof presets)[number]> => {
+        const selected: Array<(typeof presets)[number]> = []
         const selectedIds = new Set<string>()
 
         QUICK_PRESET_KEYWORDS.forEach((keyword): void => {
             const match = presets.find(
                 (themePreset): boolean =>
-                    themePreset.label.toLowerCase().includes(keyword)
-                    || themePreset.id.toLowerCase().includes(keyword),
+                    themePreset.label.toLowerCase().includes(keyword) ||
+                    themePreset.id.toLowerCase().includes(keyword),
             )
             if (match !== undefined && selectedIds.has(match.id) === false) {
                 selected.push(match)
@@ -858,16 +865,17 @@ export function SettingsAppearancePage(): ReactElement {
                 .map((themeItem): string => themeItem.name),
         )
         markThemeLibraryDirty()
-        setThemeLibrary((previous): ReadonlyArray<IUserThemeLibraryItem> =>
-            previous.map((themeItem): IUserThemeLibraryItem => {
-                if (themeItem.id !== selectedTheme.id) {
-                    return themeItem
-                }
-                return {
-                    ...themeItem,
-                    name: resolvedName,
-                }
-            }),
+        setThemeLibrary(
+            (previous): ReadonlyArray<IUserThemeLibraryItem> =>
+                previous.map((themeItem): IUserThemeLibraryItem => {
+                    if (themeItem.id !== selectedTheme.id) {
+                        return themeItem
+                    }
+                    return {
+                        ...themeItem,
+                        name: resolvedName,
+                    }
+                }),
         )
         setThemeDraftName("")
         showToastSuccess("Theme renamed.")
@@ -889,7 +897,9 @@ export function SettingsAppearancePage(): ReactElement {
             name: resolvedName,
         }
         markThemeLibraryDirty()
-        setThemeLibrary((previous): ReadonlyArray<IUserThemeLibraryItem> => [duplicate, ...previous])
+        setThemeLibrary(
+            (previous): ReadonlyArray<IUserThemeLibraryItem> => [duplicate, ...previous],
+        )
         setSelectedThemeId(duplicate.id)
         showToastSuccess("Theme duplicated.")
     }
@@ -900,8 +910,9 @@ export function SettingsAppearancePage(): ReactElement {
         }
 
         markThemeLibraryDirty()
-        setThemeLibrary((previous): ReadonlyArray<IUserThemeLibraryItem> =>
-            previous.filter((themeItem): boolean => themeItem.id !== selectedTheme.id),
+        setThemeLibrary(
+            (previous): ReadonlyArray<IUserThemeLibraryItem> =>
+                previous.filter((themeItem): boolean => themeItem.id !== selectedTheme.id),
         )
         setSelectedThemeId("")
         showToastSuccess("Theme removed from library.")
@@ -1083,19 +1094,19 @@ export function SettingsAppearancePage(): ReactElement {
                 .filter((themeItem): themeItem is IUserThemeLibraryItem => themeItem !== undefined)
 
             if (
-                profileState.favoritePresetId !== undefined
-                && availablePresetIds.includes(profileState.favoritePresetId as ThemePresetId)
+                profileState.favoritePresetId !== undefined &&
+                availablePresetIds.includes(profileState.favoritePresetId as ThemePresetId)
             ) {
                 if (
-                    profileState.updatedAtMs
-                    > (pendingLibraryUpdatedAtMsRef.current ?? libraryUpdatedAtMsRef.current)
+                    profileState.updatedAtMs >
+                    (pendingLibraryUpdatedAtMsRef.current ?? libraryUpdatedAtMsRef.current)
                 ) {
                     setFavoritePresetId(profileState.favoritePresetId as ThemePresetId)
                 }
             }
             if (
-                profileState.updatedAtMs
-                > (pendingLibraryUpdatedAtMsRef.current ?? libraryUpdatedAtMsRef.current)
+                profileState.updatedAtMs >
+                (pendingLibraryUpdatedAtMsRef.current ?? libraryUpdatedAtMsRef.current)
             ) {
                 setThemeLibrary(parsedThemes)
                 setSelectedThemeId(parsedThemes[0]?.id ?? "")
@@ -1145,8 +1156,8 @@ export function SettingsAppearancePage(): ReactElement {
                 writeStoredThemeLibraryUpdatedAtMs(updatedAtMs)
                 const updated = await writeThemeLibraryProfileState({
                     favoritePresetId,
-                    themes: themeLibrary.map((themeItem): IThemeLibraryProfileTheme =>
-                        toProfileTheme(themeItem),
+                    themes: themeLibrary.map(
+                        (themeItem): IThemeLibraryProfileTheme => toProfileTheme(themeItem),
                     ),
                     updatedAtMs,
                 })
@@ -1201,10 +1212,7 @@ export function SettingsAppearancePage(): ReactElement {
                     <p className="text-base font-semibold text-[var(--foreground)]">
                         Theme controls
                     </p>
-                    <Button
-                        variant="flat"
-                        onPress={handleResetTheme}
-                    >
+                    <Button variant="flat" onPress={handleResetTheme}>
                         Reset to default
                     </Button>
                 </CardHeader>
@@ -1231,20 +1239,22 @@ export function SettingsAppearancePage(): ReactElement {
                             Quick presets
                         </p>
                         <div className="flex flex-wrap gap-2">
-                            {quickPresetOptions.map((themePreset): ReactElement => (
-                                <Button
-                                    key={themePreset.id}
-                                    aria-label={`Quick preset ${themePreset.label}`}
-                                    radius="full"
-                                    size="sm"
-                                    variant={themePreset.id === preset ? "solid" : "flat"}
-                                    onPress={(): void => {
-                                        setPreset(themePreset.id)
-                                    }}
-                                >
-                                    {themePreset.label}
-                                </Button>
-                            ))}
+                            {quickPresetOptions.map(
+                                (themePreset): ReactElement => (
+                                    <Button
+                                        key={themePreset.id}
+                                        aria-label={`Quick preset ${themePreset.label}`}
+                                        radius="full"
+                                        size="sm"
+                                        variant={themePreset.id === preset ? "solid" : "flat"}
+                                        onPress={(): void => {
+                                            setPreset(themePreset.id)
+                                        }}
+                                    >
+                                        {themePreset.label}
+                                    </Button>
+                                ),
+                            )}
                         </div>
                         <div className="flex flex-wrap gap-2">
                             <Button
@@ -1276,10 +1286,7 @@ export function SettingsAppearancePage(): ReactElement {
                                     Apply to switch immediately or cancel to keep current theme.
                                 </p>
                                 <div className="mt-2 flex flex-wrap gap-2">
-                                    <Button
-                                        size="sm"
-                                        onPress={handleApplyRandomPreset}
-                                    >
+                                    <Button size="sm" onPress={handleApplyRandomPreset}>
                                         Apply random preset
                                     </Button>
                                     <Button
@@ -1353,20 +1360,24 @@ export function SettingsAppearancePage(): ReactElement {
                                 className="flex flex-wrap gap-2"
                                 role="group"
                             >
-                                {BASE_PALETTES.map((palette): ReactElement => (
-                                    <Button
-                                        key={palette.id}
-                                        aria-pressed={basePaletteId === palette.id}
-                                        radius="full"
-                                        size="sm"
-                                        variant={basePaletteId === palette.id ? "solid" : "flat"}
-                                        onPress={(): void => {
-                                            setBasePaletteId(palette.id)
-                                        }}
-                                    >
-                                        {palette.label}
-                                    </Button>
-                                ))}
+                                {BASE_PALETTES.map(
+                                    (palette): ReactElement => (
+                                        <Button
+                                            key={palette.id}
+                                            aria-pressed={basePaletteId === palette.id}
+                                            radius="full"
+                                            size="sm"
+                                            variant={
+                                                basePaletteId === palette.id ? "solid" : "flat"
+                                            }
+                                            onPress={(): void => {
+                                                setBasePaletteId(palette.id)
+                                            }}
+                                        >
+                                            {palette.label}
+                                        </Button>
+                                    ),
+                                )}
                             </div>
                             <p className="text-xs text-[var(--foreground)]/70">
                                 {getPaletteDefinition(basePaletteId).description}
@@ -1432,7 +1443,8 @@ export function SettingsAppearancePage(): ReactElement {
                             size="sm"
                             variant="flat"
                         >
-                            contrast: {contrastRatio.toFixed(2)} ({isAccessibleContrast ? "AA" : "check"})
+                            contrast: {contrastRatio.toFixed(2)} (
+                            {isAccessibleContrast ? "AA" : "check"})
                         </Chip>
                     </div>
                 </CardBody>
@@ -1440,7 +1452,9 @@ export function SettingsAppearancePage(): ReactElement {
 
             <Card>
                 <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-base font-semibold text-[var(--foreground)]">Theme library</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Theme library
+                    </p>
                     <Chip
                         color={
                             librarySyncStatus === "synced"
@@ -1457,16 +1471,14 @@ export function SettingsAppearancePage(): ReactElement {
                 </CardHeader>
                 <CardBody className="space-y-4">
                     <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
-                        <p className="text-sm font-semibold text-[var(--foreground)]">Favorite preset</p>
+                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                            Favorite preset
+                        </p>
                         <p className="mt-1 text-xs text-[var(--foreground)]/70">
                             pinned: {favoritePresetLabel}
                         </p>
                         <div className="mt-2 flex flex-wrap gap-2">
-                            <Button
-                                size="sm"
-                                variant="flat"
-                                onPress={handlePinCurrentPreset}
-                            >
+                            <Button size="sm" variant="flat" onPress={handlePinCurrentPreset}>
                                 Pin current preset
                             </Button>
                             <Button
@@ -1504,17 +1516,17 @@ export function SettingsAppearancePage(): ReactElement {
                                 }}
                             >
                                 <option value="">Select theme</option>
-                                {themeLibrary.map((themeItem): ReactElement => (
-                                    <option key={themeItem.id} value={themeItem.id}>
-                                        {themeItem.name}
-                                    </option>
-                                ))}
+                                {themeLibrary.map(
+                                    (themeItem): ReactElement => (
+                                        <option key={themeItem.id} value={themeItem.id}>
+                                            {themeItem.name}
+                                        </option>
+                                    ),
+                                )}
                             </select>
                         </div>
                         <div className="flex items-end">
-                            <Button onPress={handleCreateLibraryTheme}>
-                                Save current theme
-                            </Button>
+                            <Button onPress={handleCreateLibraryTheme}>Save current theme</Button>
                         </div>
                     </div>
 
@@ -1568,18 +1580,10 @@ export function SettingsAppearancePage(): ReactElement {
                             }}
                         />
                         <div className="flex flex-wrap gap-2">
-                            <Button
-                                size="sm"
-                                variant="flat"
-                                onPress={handleExportThemeLibrary}
-                            >
+                            <Button size="sm" variant="flat" onPress={handleExportThemeLibrary}>
                                 Export library JSON
                             </Button>
-                            <Button
-                                size="sm"
-                                variant="flat"
-                                onPress={handleImportThemeLibrary}
-                            >
+                            <Button size="sm" variant="flat" onPress={handleImportThemeLibrary}>
                                 Import library JSON
                             </Button>
                         </div>
@@ -1636,7 +1640,8 @@ export function SettingsAppearancePage(): ReactElement {
                         </div>
                     </div>
                     <p className="text-xs text-[var(--foreground)]/70">
-                        Preset options: {presets.map((themePreset): string => themePreset.label).join(", ")}
+                        Preset options:{" "}
+                        {presets.map((themePreset): string => themePreset.label).join(", ")}
                     </p>
                 </CardBody>
             </Card>

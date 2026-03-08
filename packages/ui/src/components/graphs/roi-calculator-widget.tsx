@@ -84,29 +84,33 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
             </p>
 
             <ul className="mt-3 space-y-2">
-                {props.targets.slice(0, 6).map((target): ReactElement => (
-                    <li
-                        className="flex items-start gap-2 rounded border border-slate-200 bg-slate-50 p-2"
-                        key={target.id}
-                    >
-                        <input
-                            aria-label={`Select ROI target ${target.title}`}
-                            checked={selectedTargetIds.includes(target.id)}
-                            className="mt-0.5 h-4 w-4 rounded border-slate-300"
-                            onChange={(): void => {
-                                toggleTargetSelection(target.id)
-                            }}
-                            type="checkbox"
-                        />
-                        <div className="min-w-0">
-                            <p className="text-sm font-semibold text-slate-900">{target.title}</p>
-                            <p className="text-xs text-slate-600">
-                                ROI {String(target.roiScore)} · Risk {String(target.riskScore)} ·
-                                Effort {String(target.effortScore)}
-                            </p>
-                        </div>
-                    </li>
-                ))}
+                {props.targets.slice(0, 6).map(
+                    (target): ReactElement => (
+                        <li
+                            className="flex items-start gap-2 rounded border border-slate-200 bg-slate-50 p-2"
+                            key={target.id}
+                        >
+                            <input
+                                aria-label={`Select ROI target ${target.title}`}
+                                checked={selectedTargetIds.includes(target.id)}
+                                className="mt-0.5 h-4 w-4 rounded border-slate-300"
+                                onChange={(): void => {
+                                    toggleTargetSelection(target.id)
+                                }}
+                                type="checkbox"
+                            />
+                            <div className="min-w-0">
+                                <p className="text-sm font-semibold text-slate-900">
+                                    {target.title}
+                                </p>
+                                <p className="text-xs text-slate-600">
+                                    ROI {String(target.roiScore)} · Risk {String(target.riskScore)}{" "}
+                                    · Effort {String(target.effortScore)}
+                                </p>
+                            </div>
+                        </li>
+                    ),
+                )}
             </ul>
 
             <label className="mt-3 block space-y-1" htmlFor="roi-risk-weight">
@@ -154,9 +158,7 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
                 className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={selectedTargets.length === 0}
                 onClick={(): void => {
-                    props.onApplyScenario?.(
-                        selectedTargets.map((target): string => target.fileId),
-                    )
+                    props.onApplyScenario?.(selectedTargets.map((target): string => target.fileId))
                 }}
                 type="button"
             >

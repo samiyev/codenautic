@@ -52,7 +52,9 @@ describe("ImpactGraphView", (): void => {
     it("вызывает callback при выборе узла", async (): Promise<void> => {
         const user = userEvent.setup()
         const onFocusNode = vi.fn()
-        renderWithProviders(<ImpactGraphView edges={TEST_EDGES} nodes={TEST_NODES} onFocusNode={onFocusNode} />)
+        renderWithProviders(
+            <ImpactGraphView edges={TEST_EDGES} nodes={TEST_NODES} onFocusNode={onFocusNode} />,
+        )
 
         await user.click(
             screen.getByRole("button", {

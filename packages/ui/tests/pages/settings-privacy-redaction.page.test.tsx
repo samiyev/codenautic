@@ -22,9 +22,7 @@ describe("SettingsPrivacyRedactionPage", (): void => {
 
         await user.click(screen.getByRole("button", { name: "Apply redaction suggestions" }))
         await waitFor(() => {
-            expect(
-                screen.getByRole("textbox", { name: "Privacy redacted preview" }),
-            ).not.toBeNull()
+            expect(screen.getByRole("textbox", { name: "Privacy redacted preview" })).not.toBeNull()
         })
         expect(screen.getByDisplayValue(/REDACTED_TOKEN/)).not.toBeNull()
 

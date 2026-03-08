@@ -34,10 +34,7 @@ export function DrawerContent({
 /**
  * Заголовок Drawer.
  */
-export function DrawerHeader({
-    children,
-    ...props
-}: ComponentProps<"div">): ReactElement {
+export function DrawerHeader({ children, ...props }: ComponentProps<"div">): ReactElement {
     return (
         <div className="px-4 py-3" {...props}>
             {children}
@@ -48,10 +45,7 @@ export function DrawerHeader({
 /**
  * Тело Drawer.
  */
-export function DrawerBody({
-    children,
-    ...props
-}: ComponentProps<"div">): ReactElement {
+export function DrawerBody({ children, ...props }: ComponentProps<"div">): ReactElement {
     return (
         <div className="flex-1 overflow-y-auto" {...props}>
             {children}

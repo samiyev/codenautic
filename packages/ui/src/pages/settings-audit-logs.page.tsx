@@ -119,9 +119,7 @@ const EXTRA_AUDIT_LOGS: ReadonlyArray<IAuditLogEntry> = Array.from({ length: 120
 
 const ALL_AUDIT_LOGS: ReadonlyArray<IAuditLogEntry> = [...INITIAL_AUDIT_LOGS, ...EXTRA_AUDIT_LOGS]
 
-function mapActionChipColor(
-    action: TAuditAction,
-): "default" | "primary" | "success" | "warning" {
+function mapActionChipColor(action: TAuditAction): "default" | "primary" | "success" | "warning" {
     if (action === "integration.connected") {
         return "success"
     }
@@ -182,7 +180,7 @@ function parseDateBoundary(dateValue: string, boundary: "from" | "to"): number |
 }
 
 function escapeCsvValue(value: string): string {
-    return `"${value.replace(/"/g, "\"\"")}"`
+    return `"${value.replace(/"/g, '""')}"`
 }
 
 function buildAuditCsv(entries: ReadonlyArray<IAuditLogEntry>): string {
@@ -283,8 +281,8 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
         <section className="space-y-4">
             <h1 className="text-2xl font-semibold text-[var(--foreground)]">Audit logs</h1>
             <p className="text-sm text-[var(--foreground)]/70">
-                Review change history, filter by actor and action, inspect selected date range,
-                and export filtered results.
+                Review change history, filter by actor and action, inspect selected date range, and
+                export filtered results.
             </p>
 
             <Card>
@@ -294,7 +292,10 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[1fr_1fr_180px_180px_auto]">
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm text-[var(--foreground)]/80" htmlFor="audit-filter-actor">
+                            <label
+                                className="text-sm text-[var(--foreground)]/80"
+                                htmlFor="audit-filter-actor"
+                            >
                                 Filter by actor
                             </label>
                             <select
@@ -303,22 +304,29 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                                 id="audit-filter-actor"
                                 value={filters.actor}
                                 onChange={(event): void => {
-                                    setFilters((previous): IAuditFilters => ({
-                                        ...previous,
-                                        actor: event.currentTarget.value,
-                                    }))
+                                    setFilters(
+                                        (previous): IAuditFilters => ({
+                                            ...previous,
+                                            actor: event.currentTarget.value,
+                                        }),
+                                    )
                                 }}
                             >
                                 <option value="all">All actors</option>
-                                {actorOptions.map((actor): ReactElement => (
-                                    <option key={actor} value={actor}>
-                                        {actor}
-                                    </option>
-                                ))}
+                                {actorOptions.map(
+                                    (actor): ReactElement => (
+                                        <option key={actor} value={actor}>
+                                            {actor}
+                                        </option>
+                                    ),
+                                )}
                             </select>
                         </div>
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm text-[var(--foreground)]/80" htmlFor="audit-filter-action">
+                            <label
+                                className="text-sm text-[var(--foreground)]/80"
+                                htmlFor="audit-filter-action"
+                            >
                                 Filter by action
                             </label>
                             <select
@@ -329,17 +337,19 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
                                     if (
-                                        nextValue === "all"
-                                        || nextValue === "integration.connected"
-                                        || nextValue === "member.invited"
-                                        || nextValue === "policy.updated"
-                                        || nextValue === "role.changed"
-                                        || nextValue === "schedule.updated"
+                                        nextValue === "all" ||
+                                        nextValue === "integration.connected" ||
+                                        nextValue === "member.invited" ||
+                                        nextValue === "policy.updated" ||
+                                        nextValue === "role.changed" ||
+                                        nextValue === "schedule.updated"
                                     ) {
-                                        setFilters((previous): IAuditFilters => ({
-                                            ...previous,
-                                            action: nextValue,
-                                        }))
+                                        setFilters(
+                                            (previous): IAuditFilters => ({
+                                                ...previous,
+                                                action: nextValue,
+                                            }),
+                                        )
                                     }
                                 }}
                             >
@@ -352,7 +362,10 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                             </select>
                         </div>
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm text-[var(--foreground)]/80" htmlFor="audit-filter-date-from">
+                            <label
+                                className="text-sm text-[var(--foreground)]/80"
+                                htmlFor="audit-filter-date-from"
+                            >
                                 Date from
                             </label>
                             <input
@@ -363,15 +376,20 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                                 value={filters.dateFrom}
                                 onChange={(event): void => {
                                     const nextDateFrom = event.currentTarget.value
-                                    setFilters((previous): IAuditFilters => ({
-                                        ...previous,
-                                        dateFrom: nextDateFrom,
-                                    }))
+                                    setFilters(
+                                        (previous): IAuditFilters => ({
+                                            ...previous,
+                                            dateFrom: nextDateFrom,
+                                        }),
+                                    )
                                 }}
                             />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm text-[var(--foreground)]/80" htmlFor="audit-filter-date-to">
+                            <label
+                                className="text-sm text-[var(--foreground)]/80"
+                                htmlFor="audit-filter-date-to"
+                            >
                                 Date to
                             </label>
                             <input
@@ -382,10 +400,12 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                                 value={filters.dateTo}
                                 onChange={(event): void => {
                                     const nextDateTo = event.currentTarget.value
-                                    setFilters((previous): IAuditFilters => ({
-                                        ...previous,
-                                        dateTo: nextDateTo,
-                                    }))
+                                    setFilters(
+                                        (previous): IAuditFilters => ({
+                                            ...previous,
+                                            dateTo: nextDateTo,
+                                        }),
+                                    )
                                 }}
                             />
                         </div>
@@ -475,7 +495,6 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                     />
                 </CardBody>
             </Card>
-
         </section>
     )
 }

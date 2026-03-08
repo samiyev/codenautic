@@ -40,10 +40,7 @@ interface IIssueTrackingPageProps {
 const ISSUE_STATUS_OPTIONS = ["open", "in_progress", "fixed", "dismissed"] as const
 const ISSUE_SEVERITY_OPTIONS = ["critical", "high", "medium", "low"] as const
 
-const ISSUE_ACTIONS_BY_STATUS: Record<
-    TIssueTrackingStatus,
-    ReadonlyArray<TIssueTrackingAction>
-> = {
+const ISSUE_ACTIONS_BY_STATUS: Record<TIssueTrackingStatus, ReadonlyArray<TIssueTrackingAction>> = {
     dismissed: ["acknowledge"],
     fixed: ["acknowledge"],
     in_progress: ["acknowledge", "snooze", "fix"],
@@ -202,10 +199,8 @@ function filterIssues(
 ): ReadonlyArray<IIssueTrackingIssue> {
     const query = normalize(filters.search)
     return issues.filter((entry): boolean => {
-        const isStatusMatch =
-            filters.status === "all" || entry.status === filters.status
-        const isSeverityMatch =
-            filters.severity === "all" || entry.severity === filters.severity
+        const isStatusMatch = filters.status === "all" || entry.status === filters.status
+        const isSeverityMatch = filters.severity === "all" || entry.severity === filters.severity
         const isSearchMatch =
             query.length === 0 ||
             normalize(entry.id).includes(query) ||
@@ -234,7 +229,10 @@ function formatIssueDate(raw: string): string {
     })
 }
 
-function estimateIssueRowHeight(issue: IIssueTrackingIssue, density: "comfortable" | "compact"): number {
+function estimateIssueRowHeight(
+    issue: IIssueTrackingIssue,
+    density: "comfortable" | "compact",
+): number {
     const baseHeight = density === "compact" ? 44 : 58
     const titleLineCount = Math.max(1, Math.ceil(issue.title.length / 56))
     const messageLineCount = Math.max(1, Math.ceil(issue.message.length / 52))
@@ -333,10 +331,12 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
         }
 
         if (name === "search") {
-            setFilters((previousValue): IIssueTrackingFilters => ({
-                ...previousValue,
-                search: value,
-            }))
+            setFilters(
+                (previousValue): IIssueTrackingFilters => ({
+                    ...previousValue,
+                    search: value,
+                }),
+            )
         }
     }
 
@@ -381,11 +381,13 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
                             onChange={handleSelectChange}
                         >
                             <option value="all">All statuses</option>
-                            {ISSUE_STATUS_OPTIONS.map((status): ReactElement => (
-                                <option key={status} value={status}>
-                                    {ISSUE_STATUS_LABELS[status]}
-                                </option>
-                            ))}
+                            {ISSUE_STATUS_OPTIONS.map(
+                                (status): ReactElement => (
+                                    <option key={status} value={status}>
+                                        {ISSUE_STATUS_LABELS[status]}
+                                    </option>
+                                ),
+                            )}
                         </select>
                         <select
                             aria-label="Filter by severity"
@@ -395,11 +397,13 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
                             onChange={handleSelectChange}
                         >
                             <option value="all">All severities</option>
-                            {ISSUE_SEVERITY_OPTIONS.map((severity): ReactElement => (
-                                <option key={severity} value={severity}>
-                                    {ISSUE_SEVERITY_LABELS[severity]}
-                                </option>
-                            ))}
+                            {ISSUE_SEVERITY_OPTIONS.map(
+                                (severity): ReactElement => (
+                                    <option key={severity} value={severity}>
+                                        {ISSUE_SEVERITY_LABELS[severity]}
+                                    </option>
+                                ),
+                            )}
                         </select>
                         <p className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">
                             {String(filteredIssues.length)} of {String(sourceIssues.length)} issues
@@ -491,22 +495,25 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
                                     size: 280,
                                 },
                                 {
-                                    accessor: (issue): string => ISSUE_ACTIONS_BY_STATUS[issue.status].join(","),
+                                    accessor: (issue): string =>
+                                        ISSUE_ACTIONS_BY_STATUS[issue.status].join(","),
                                     cell: (issue): ReactElement => (
                                         <div className="flex flex-wrap items-center gap-1">
-                                            {ISSUE_ACTIONS_BY_STATUS[issue.status].map((action): ReactElement => (
-                                                <Button
-                                                    aria-label={`${action} issue ${issue.id}`}
-                                                    key={`${issue.id}-${action}`}
-                                                    size="sm"
-                                                    variant="light"
-                                                    onPress={(): void => {
-                                                        handleAction(issue, action)
-                                                    }}
-                                                >
-                                                    {ISSUE_ACTION_LABELS[action]}
-                                                </Button>
-                                            ))}
+                                            {ISSUE_ACTIONS_BY_STATUS[issue.status].map(
+                                                (action): ReactElement => (
+                                                    <Button
+                                                        aria-label={`${action} issue ${issue.id}`}
+                                                        key={`${issue.id}-${action}`}
+                                                        size="sm"
+                                                        variant="light"
+                                                        onPress={(): void => {
+                                                            handleAction(issue, action)
+                                                        }}
+                                                    >
+                                                        {ISSUE_ACTION_LABELS[action]}
+                                                    </Button>
+                                                ),
+                                            )}
                                         </div>
                                     ),
                                     enableGlobalFilter: false,

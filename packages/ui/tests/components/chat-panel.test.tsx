@@ -25,8 +25,7 @@ const messageList: ReadonlyArray<IChatPanelMessage> = [
         sender: "Alice",
     },
     {
-        content:
-            "- Важный пункт\n```ts\nconst ok = true\nreturn ok\n```\n[Docs](/settings)",
+        content: "- Важный пункт\n```ts\nconst ok = true\nreturn ok\n```\n[Docs](/settings)",
         createdAt: "2026-03-03T10:02:00.000Z",
         id: "msg-assistant",
         role: "assistant",
@@ -70,13 +69,7 @@ describe("chat panel", (): void => {
         const openSpy = vi.spyOn(window, "open").mockImplementation(() => null)
 
         try {
-            renderWithProviders(
-                <ChatPanel
-                    isOpen
-                    messages={messageList}
-                    onSendMessage={vi.fn()}
-                />,
-            )
+            renderWithProviders(<ChatPanel isOpen messages={messageList} onSendMessage={vi.fn()} />)
 
             expect(screen.queryByText("Система")).not.toBeNull()
             expect(screen.getByLabelText("Code block code-0")).not.toBeNull()
@@ -109,7 +102,9 @@ describe("chat panel", (): void => {
         expect(screen.getAllByText("repo-alpha — CCR #1201").length).toBeGreaterThan(0)
 
         await user.click(screen.getByRole("button", { name: "Change context" }))
-        await user.click(screen.getByRole("option", { name: "Change context to repo-beta — CCR #1202" }))
+        await user.click(
+            screen.getByRole("option", { name: "Change context to repo-beta — CCR #1202" }),
+        )
 
         expect(onContextChange).toHaveBeenCalledTimes(1)
         expect(onContextChange).toHaveBeenCalledWith("context-beta")
@@ -119,9 +114,7 @@ describe("chat panel", (): void => {
         const user = userEvent.setup()
         const onSendMessage = vi.fn()
 
-        renderWithProviders(
-            <ChatPanel isOpen messages={[]} onSendMessage={onSendMessage} />,
-        )
+        renderWithProviders(<ChatPanel isOpen messages={[]} onSendMessage={onSendMessage} />)
 
         const editor = screen.getByLabelText("Message input")
         const submit = screen.getByRole("button", { name: "Отправить" })

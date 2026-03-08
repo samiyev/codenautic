@@ -101,12 +101,7 @@ const { mockResponsiveContainer, mockTreemap } = vi.hoisted(() => ({
 
                 return content === undefined
                     ? nestedNodes
-                    : [
-                          <span key={key}>
-                              {content}
-                          </span>,
-                          ...nestedNodes,
-                      ]
+                    : [<span key={key}>{content}</span>, ...nestedNodes]
             }
 
             const renderedNodes = props.data.flatMap(
@@ -273,11 +268,7 @@ describe("codecity treemap graph", (): void => {
     })
 
     it("передаёт уровни CCR-импакта в treemap данные", (): void => {
-        const impactData = buildCodeCityTreemapData(
-            sampleFiles,
-            "complexity",
-            sampleImpactedFiles,
-        )
+        const impactData = buildCodeCityTreemapData(sampleFiles, "complexity", sampleImpactedFiles)
         const apiPackage = impactData.packages.find((entry) => entry.name === "src/api")
         const uiPackage = impactData.packages.find((entry) => entry.name === "src/ui")
 
@@ -294,9 +285,7 @@ describe("codecity treemap graph", (): void => {
             [],
             sampleComparedFiles,
         )
-        const apiPackage = comparisonData.packages.find(
-            (entry) => entry.name === "src/api",
-        )
+        const apiPackage = comparisonData.packages.find((entry) => entry.name === "src/api")
         const uiPackage = comparisonData.packages.find((entry) => entry.name === "src/ui")
 
         expect(apiPackage?.children[0]?.comparisonDelta).toBe(0)
@@ -316,12 +305,7 @@ describe("codecity treemap graph", (): void => {
         mockTreemap.mockClear()
         mockResponsiveContainer.mockClear()
 
-        render(
-            <CodeCityTreemap
-                files={sampleFiles}
-                title="CodeCity treemap"
-            />,
-        )
+        render(<CodeCityTreemap files={sampleFiles} title="CodeCity treemap" />)
 
         expect(screen.getByText("CodeCity treemap")).not.toBeNull()
         expect(screen.getByText("Packages: 2, Files: 3, LOC: 150")).not.toBeNull()
@@ -337,12 +321,7 @@ describe("codecity treemap graph", (): void => {
     })
 
     it("показывает bug heat overlay и фильтр диапазона", (): void => {
-        render(
-            <CodeCityTreemap
-                files={sampleFiles}
-                title="CodeCity treemap"
-            />,
-        )
+        render(<CodeCityTreemap files={sampleFiles} title="CodeCity treemap" />)
 
         const bugHeatLegend = screen.getByLabelText("Bug heat overlay legend")
         expect(bugHeatLegend).toHaveTextContent("Bug heat overlay (30d)")
@@ -470,12 +449,7 @@ describe("codecity treemap graph", (): void => {
     it("поддерживает drill-down и возврат по пакетам", (): void => {
         mockTreemap.mockClear()
 
-        render(
-            <CodeCityTreemap
-                files={sampleFiles}
-                title="CodeCity treemap"
-            />,
-        )
+        render(<CodeCityTreemap files={sampleFiles} title="CodeCity treemap" />)
 
         expect(screen.getByText("Packages: 2, Files: 3, LOC: 150")).not.toBeNull()
         expect(screen.getByText("All packages")).not.toBeNull()
@@ -505,12 +479,7 @@ describe("codecity treemap graph", (): void => {
             }),
         )
 
-        render(
-            <CodeCityTreemap
-                files={largeFiles}
-                title="Large treemap"
-            />,
-        )
+        render(<CodeCityTreemap files={largeFiles} title="Large treemap" />)
 
         const fileCell = screen.getByLabelText("File file-0.ts")
         expect(fileCell).toHaveAttribute("tabindex", "-1")
@@ -554,13 +523,7 @@ describe("codecity treemap graph", (): void => {
             },
         )
 
-        render(
-            <CodeCityTreemap
-                fileLink={fileLink}
-                files={sampleFiles}
-                title="CodeCity treemap"
-            />,
-        )
+        render(<CodeCityTreemap fileLink={fileLink} files={sampleFiles} title="CodeCity treemap" />)
 
         expect(screen.getByText("Hover a file for quick metrics and quick link.")).not.toBeNull()
 

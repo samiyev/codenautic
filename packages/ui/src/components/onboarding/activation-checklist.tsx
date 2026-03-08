@@ -200,7 +200,9 @@ export function ActivationChecklist(props: IActivationChecklistProps): ReactElem
     return (
         <Card>
             <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-base font-semibold text-[var(--foreground)]">Activation checklist</p>
+                <p className="text-base font-semibold text-[var(--foreground)]">
+                    Activation checklist
+                </p>
                 <Chip size="sm" variant="flat">
                     Progress: {progressPercent}%
                 </Chip>

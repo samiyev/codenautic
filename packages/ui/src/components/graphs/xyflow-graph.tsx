@@ -86,11 +86,7 @@ const DEFAULT_MAX_TRAVERSAL_DEPTH = 4
 const PROGRESSIVE_RENDER_DELAY_MS = 140
 
 function normalizePositiveInteger(value: number | undefined, fallback: number): number {
-    if (
-        value === undefined ||
-        Number.isFinite(value) !== true ||
-        value < 1
-    ) {
+    if (value === undefined || Number.isFinite(value) !== true || value < 1) {
         return fallback
     }
 
@@ -219,7 +215,9 @@ function buildBudgetedGraphSlice(
 
     const budgetedNodes = nodes.filter((node): boolean => selectedNodeIds.has(node.id))
     const budgetedEdges = edges
-        .filter((edge): boolean => selectedNodeIds.has(edge.source) && selectedNodeIds.has(edge.target))
+        .filter(
+            (edge): boolean => selectedNodeIds.has(edge.source) && selectedNodeIds.has(edge.target),
+        )
         .slice(0, budget.maxEdges)
 
     const droppedNodes = Math.max(nodes.length - budgetedNodes.length, 0)
@@ -285,11 +283,7 @@ export function XyFlowGraph(props: IXYFlowGraphProps): ReactElement {
         return (): void => {
             globalThis.clearTimeout(timerId)
         }
-    }, [
-        progressiveRenderEnabled,
-        budgetedGraphSlice.nodes.length,
-        budgetedGraphSlice.edges.length,
-    ])
+    }, [progressiveRenderEnabled, budgetedGraphSlice.nodes.length, budgetedGraphSlice.edges.length])
 
     return (
         <section className="space-y-2" style={{ width: "100%" }}>

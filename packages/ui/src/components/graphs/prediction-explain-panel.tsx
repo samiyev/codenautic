@@ -50,7 +50,8 @@ function resolveRiskLabel(riskLevel: TCodeCityTreemapPredictionRiskLevel): strin
  */
 export function PredictionExplainPanel(props: IPredictionExplainPanelProps): ReactElement {
     const selectedEntry =
-        props.entries.find((entry): boolean => entry.fileId === props.activeFileId) ?? props.entries[0]
+        props.entries.find((entry): boolean => entry.fileId === props.activeFileId) ??
+        props.entries[0]
 
     return (
         <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
@@ -101,4 +102,3 @@ export function PredictionExplainPanel(props: IPredictionExplainPanelProps): Rea
         </section>
     )
 }
-

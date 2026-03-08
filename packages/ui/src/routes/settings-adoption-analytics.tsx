@@ -6,12 +6,14 @@ import { DashboardLayout, SettingsLayout } from "@/components/layout"
 import { AuthBoundary } from "@/lib/auth/auth-boundary"
 import { createFileRoute } from "@tanstack/react-router"
 
-const LazySettingsAdoptionAnalyticsPage = lazy(async (): Promise<{ default: () => ReactElement }> => {
-    const pageModule = await import("@/pages/settings-adoption-analytics.page")
-    return {
-        default: pageModule.SettingsAdoptionAnalyticsPage,
-    }
-})
+const LazySettingsAdoptionAnalyticsPage = lazy(
+    async (): Promise<{ default: () => ReactElement }> => {
+        const pageModule = await import("@/pages/settings-adoption-analytics.page")
+        return {
+            default: pageModule.SettingsAdoptionAnalyticsPage,
+        }
+    },
+)
 
 function SettingsAdoptionAnalyticsRouteComponent(): ReactElement {
     return (

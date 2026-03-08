@@ -34,7 +34,8 @@ vi.mock("@/components/graphs/xyflow-graph", () => ({
                 <span data-testid="highlighted-edge-count">{highlightedEdgeIds?.length ?? 0}</span>
                 {nodes.map((node, index): React.JSX.Element => {
                     const nodeRecord = node as { readonly id?: unknown }
-                    const nodeId = typeof nodeRecord.id === "string" ? nodeRecord.id : `node-${index}`
+                    const nodeId =
+                        typeof nodeRecord.id === "string" ? nodeRecord.id : `node-${index}`
                     return (
                         <button
                             key={nodeId}
@@ -100,7 +101,8 @@ describe("function/class call graph", (): void => {
         expect(graphData.edges).toHaveLength(1)
         expect(
             graphData.edges.some(
-                (edge): boolean => edge.id === "authController.login->sessionService.createSession:calls",
+                (edge): boolean =>
+                    edge.id === "authController.login->sessionService.createSession:calls",
             ),
         ).toBe(true)
     })

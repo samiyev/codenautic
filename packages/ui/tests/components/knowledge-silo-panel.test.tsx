@@ -43,11 +43,11 @@ describe("KnowledgeSiloPanel", (): void => {
     it("вызывает onSelectEntry при выборе silo", async (): Promise<void> => {
         const user = userEvent.setup()
         const onSelectEntry = vi.fn()
-        renderWithProviders(<KnowledgeSiloPanel entries={TEST_ENTRIES} onSelectEntry={onSelectEntry} />)
-
-        await user.click(
-            screen.getByRole("button", { name: "Inspect knowledge silo src/api" }),
+        renderWithProviders(
+            <KnowledgeSiloPanel entries={TEST_ENTRIES} onSelectEntry={onSelectEntry} />,
         )
+
+        await user.click(screen.getByRole("button", { name: "Inspect knowledge silo src/api" }))
 
         expect(onSelectEntry).toHaveBeenCalledTimes(1)
         expect(onSelectEntry).toHaveBeenCalledWith(

@@ -81,9 +81,7 @@ function replaceSourceInList(
  * @param args Параметры списка/preview.
  * @returns Query + mutation API для управления внешним контекстом.
  */
-export function useExternalContext(
-    args: IUseExternalContextArgs = {},
-): IUseExternalContextResult {
+export function useExternalContext(args: IUseExternalContextArgs = {}): IUseExternalContextResult {
     const { enabled = true, previewEnabled = true } = args
     const normalizedSourceId = normalizeSourceId(args.selectedSourceId)
     const queryClient = useQueryClient()

@@ -47,8 +47,7 @@ export interface IAnalyticsProviderProps {
     readonly onQueueStateChange?: (pending: number) => void
 }
 
-type TAnalyticsTrackPayload<TName extends TAnalyticsEventName> =
-    IAnalyticsPayloadByName[TName]
+type TAnalyticsTrackPayload<TName extends TAnalyticsEventName> = IAnalyticsPayloadByName[TName]
 
 type TAnalyticsHookState = {
     /** Consent для трекинга. */
@@ -192,10 +191,7 @@ export function AnalyticsProvider(props: IAnalyticsProviderProps): ReactElement 
     )
     const trackTimeToFirstValue = useCallback(
         (payload: IAnalyticsTimeToFirstValuePayload): boolean => {
-            return track(
-                ANALYTICS_EVENT_NAMES.timeToFirstValue,
-                sanitizePayload(payload),
-            )
+            return track(ANALYTICS_EVENT_NAMES.timeToFirstValue, sanitizePayload(payload))
         },
         [track],
     )
@@ -226,7 +222,9 @@ export function AnalyticsProvider(props: IAnalyticsProviderProps): ReactElement 
         ],
     )
 
-    return <AnalyticsContext.Provider value={contextValue}>{props.children}</AnalyticsContext.Provider>
+    return (
+        <AnalyticsContext.Provider value={contextValue}>{props.children}</AnalyticsContext.Provider>
+    )
 }
 
 /**
@@ -306,15 +304,13 @@ function createSdkRuntime(args: {
     const options: IAnalyticsSdkRuntimeOptions =
         args.options?.endpoint === undefined
             ? {
-                ...optionsBase,
-                endpoint: DEFAULT_ANALYTICS_ENDPOINT,
-            }
+                  ...optionsBase,
+                  endpoint: DEFAULT_ANALYTICS_ENDPOINT,
+              }
             : optionsBase
 
     return {
-        sendRequest:
-            args.sendRequest ??
-            ((url, init): Promise<Response> => fetch(url, init)),
+        sendRequest: args.sendRequest ?? ((url, init): Promise<Response> => fetch(url, init)),
         isOnline:
             args.isOnline ??
             (() => {

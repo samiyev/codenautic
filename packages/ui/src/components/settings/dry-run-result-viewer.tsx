@@ -53,11 +53,16 @@ export function DryRunResultViewer(props: IDryRunResultViewerProps): ReactElemen
                         {`Mode: ${props.result.mode} · Reviewed files: ${props.result.reviewedFiles} · Suggestions: ${props.result.suggestions}`}
                     </p>
                     <ul className="space-y-1 text-xs text-slate-600">
-                        {props.result.issues.map((issue): ReactElement => (
-                            <li key={`${issue.filePath}-${issue.title}`} data-testid="dry-run-issue-row">
-                                {`${issue.filePath} · ${issue.severity.toUpperCase()} · ${issue.title}`}
-                            </li>
-                        ))}
+                        {props.result.issues.map(
+                            (issue): ReactElement => (
+                                <li
+                                    key={`${issue.filePath}-${issue.title}`}
+                                    data-testid="dry-run-issue-row"
+                                >
+                                    {`${issue.filePath} · ${issue.severity.toUpperCase()} · ${issue.title}`}
+                                </li>
+                            ),
+                        )}
                     </ul>
                 </div>
             )}

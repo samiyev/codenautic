@@ -52,9 +52,7 @@ export function useCCRSummary(params: IUseCcrSummaryParams): IUseCcrSummaryResul
             const cachedResponse = queryClient.getQueryData<IGenerateCcrSummaryResponse>(
                 queryKeys.ccrSummary.byRepository(normalizedRepositoryId),
             )
-            return Promise.resolve(
-                cachedResponse ?? null,
-            )
+            return Promise.resolve(cachedResponse ?? null)
         },
         enabled: normalizedRepositoryId.length > 0 && (params.enabled ?? true),
     })

@@ -27,99 +27,100 @@ const DEFAULT_POLICY: Readonly<IUiActionPolicy> = {
     visibility: "disabled",
 }
 
-const UI_POLICY_MATRIX: Readonly<Record<TUiRole, Readonly<Record<TUiActionId, IUiActionPolicy>>>> = {
-    admin: {
-        "review.decision": {
-            visibility: "enabled",
+const UI_POLICY_MATRIX: Readonly<Record<TUiRole, Readonly<Record<TUiActionId, IUiActionPolicy>>>> =
+    {
+        admin: {
+            "review.decision": {
+                visibility: "enabled",
+            },
+            "review.finish": {
+                visibility: "enabled",
+            },
+            "team.create": {
+                visibility: "enabled",
+            },
+            "team.invite": {
+                visibility: "enabled",
+            },
+            "team.repo.assign": {
+                visibility: "enabled",
+            },
+            "team.role.manage": {
+                visibility: "enabled",
+            },
         },
-        "review.finish": {
-            visibility: "enabled",
+        developer: {
+            "review.decision": {
+                visibility: "enabled",
+            },
+            "review.finish": {
+                visibility: "enabled",
+            },
+            "team.create": {
+                reason: "Only admin can create or delete teams.",
+                visibility: "disabled",
+            },
+            "team.invite": {
+                reason: "Only lead or admin can invite team members.",
+                visibility: "disabled",
+            },
+            "team.repo.assign": {
+                reason: "Repository assignment requires lead or admin role.",
+                visibility: "disabled",
+            },
+            "team.role.manage": {
+                reason: "Role updates are restricted to lead and admin.",
+                visibility: "hidden",
+            },
         },
-        "team.create": {
-            visibility: "enabled",
+        lead: {
+            "review.decision": {
+                visibility: "enabled",
+            },
+            "review.finish": {
+                visibility: "enabled",
+            },
+            "team.create": {
+                reason: "Only admin can create or delete teams.",
+                visibility: "disabled",
+            },
+            "team.invite": {
+                visibility: "enabled",
+            },
+            "team.repo.assign": {
+                visibility: "enabled",
+            },
+            "team.role.manage": {
+                visibility: "enabled",
+            },
         },
-        "team.invite": {
-            visibility: "enabled",
+        viewer: {
+            "review.decision": {
+                reason: "Viewer can inspect review, but cannot approve or request changes.",
+                visibility: "disabled",
+            },
+            "review.finish": {
+                reason: "Viewer cannot finalize review actions.",
+                visibility: "disabled",
+            },
+            "team.create": {
+                reason: "Viewer has read-only access to team management.",
+                visibility: "hidden",
+            },
+            "team.invite": {
+                reason: "Viewer cannot invite members.",
+                visibility: "disabled",
+            },
+            "team.repo.assign": {
+                reason: "Viewer cannot change repository assignments.",
+                visibility: "disabled",
+            },
+            "team.role.manage": {
+                reason: "Viewer cannot update member roles.",
+                visibility: "hidden",
+            },
         },
-        "team.repo.assign": {
-            visibility: "enabled",
-        },
-        "team.role.manage": {
-            visibility: "enabled",
-        },
-    },
-    developer: {
-        "review.decision": {
-            visibility: "enabled",
-        },
-        "review.finish": {
-            visibility: "enabled",
-        },
-        "team.create": {
-            reason: "Only admin can create or delete teams.",
-            visibility: "disabled",
-        },
-        "team.invite": {
-            reason: "Only lead or admin can invite team members.",
-            visibility: "disabled",
-        },
-        "team.repo.assign": {
-            reason: "Repository assignment requires lead or admin role.",
-            visibility: "disabled",
-        },
-        "team.role.manage": {
-            reason: "Role updates are restricted to lead and admin.",
-            visibility: "hidden",
-        },
-    },
-    lead: {
-        "review.decision": {
-            visibility: "enabled",
-        },
-        "review.finish": {
-            visibility: "enabled",
-        },
-        "team.create": {
-            reason: "Only admin can create or delete teams.",
-            visibility: "disabled",
-        },
-        "team.invite": {
-            visibility: "enabled",
-        },
-        "team.repo.assign": {
-            visibility: "enabled",
-        },
-        "team.role.manage": {
-            visibility: "enabled",
-        },
-    },
-    viewer: {
-        "review.decision": {
-            reason: "Viewer can inspect review, but cannot approve or request changes.",
-            visibility: "disabled",
-        },
-        "review.finish": {
-            reason: "Viewer cannot finalize review actions.",
-            visibility: "disabled",
-        },
-        "team.create": {
-            reason: "Viewer has read-only access to team management.",
-            visibility: "hidden",
-        },
-        "team.invite": {
-            reason: "Viewer cannot invite members.",
-            visibility: "disabled",
-        },
-        "team.repo.assign": {
-            reason: "Viewer cannot change repository assignments.",
-            visibility: "disabled",
-        },
-        "team.role.manage": {
-            reason: "Viewer cannot update member roles.",
-            visibility: "hidden",
-        },
-    },
-}
+    }
 
 /**
  * Возвращает безопасную fallback-роль вне защищённого дерева.
@@ -141,9 +142,9 @@ function resolveDefaultUiRole(): TUiRole {
  */
 export function isRolePreviewEnabled(): boolean {
     return (
-        import.meta.env.DEV === true
-        || import.meta.env.MODE === "test"
-        || import.meta.env.VITE_ENABLE_ROLE_PREVIEW === "true"
+        import.meta.env.DEV === true ||
+        import.meta.env.MODE === "test" ||
+        import.meta.env.VITE_ENABLE_ROLE_PREVIEW === "true"
     )
 }
 

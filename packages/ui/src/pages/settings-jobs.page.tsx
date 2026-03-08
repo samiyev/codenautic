@@ -70,8 +70,7 @@ const INITIAL_JOBS: ReadonlyArray<IOperationJob> = [
         status: "running",
     },
     {
-        errorDetails:
-            "Queue connection timeout in scan-worker. Last heartbeat was 4m ago.",
+        errorDetails: "Queue connection timeout in scan-worker. Last heartbeat was 4m ago.",
         etaLabel: "unknown",
         id: "JOB-4102",
         kind: "scan",
@@ -81,8 +80,7 @@ const INITIAL_JOBS: ReadonlyArray<IOperationJob> = [
         status: "stuck",
     },
     {
-        errorDetails:
-            "Analytics aggregation failed due to malformed payload from provider.",
+        errorDetails: "Analytics aggregation failed due to malformed payload from provider.",
         etaLabel: "unknown",
         id: "JOB-4103",
         kind: "analytics",
@@ -161,7 +159,9 @@ function formatTimestamp(rawValue: string): string {
     })
 }
 
-function mapStatusColor(status: TJobStatus): "danger" | "default" | "primary" | "success" | "warning" {
+function mapStatusColor(
+    status: TJobStatus,
+): "danger" | "default" | "primary" | "success" | "warning" {
     if (status === "running") {
         return "primary"
     }
@@ -272,10 +272,7 @@ function buildWeeklyPreview(
     return result
 }
 
-function buildSchedulePreview(
-    schedule: IScheduleDraft,
-    previewCount: number,
-): ReadonlyArray<Date> {
+function buildSchedulePreview(schedule: IScheduleDraft, previewCount: number): ReadonlyArray<Date> {
     const now = new Date()
     if (schedule.mode === "weekly") {
         return buildWeeklyPreview(schedule, previewCount, now)
@@ -288,9 +285,10 @@ function describeSchedule(schedule: IScheduleDraft, target: TScheduleTarget): st
         return `${target} runs every ${String(schedule.intervalHours)}h`
     }
 
-    const weekdayLabel = WEEKDAY_OPTIONS.find((option): boolean => {
-        return option.value === schedule.weekday
-    })?.label ?? "Unknown day"
+    const weekdayLabel =
+        WEEKDAY_OPTIONS.find((option): boolean => {
+            return option.value === schedule.weekday
+        })?.label ?? "Unknown day"
     const hourLabel = String(schedule.hour).padStart(2, "0")
     const minuteLabel = String(schedule.minute).padStart(2, "0")
     return `${target} runs weekly on ${weekdayLabel} at ${hourLabel}:${minuteLabel}`
@@ -339,9 +337,7 @@ export function SettingsJobsPage(): ReactElement {
         }
     }, [jobs])
 
-    const updateActiveSchedule = (
-        updater: (value: IScheduleDraft) => IScheduleDraft,
-    ): void => {
+    const updateActiveSchedule = (updater: (value: IScheduleDraft) => IScheduleDraft): void => {
         setSchedules((previous): Readonly<Record<TScheduleTarget, IScheduleDraft>> => {
             const currentSchedule = previous[scheduleTarget]
             return {
@@ -352,10 +348,12 @@ export function SettingsJobsPage(): ReactElement {
     }
 
     const handleScheduleModeChange = (mode: TScheduleMode): void => {
-        updateActiveSchedule((previous): IScheduleDraft => ({
-            ...previous,
-            mode,
-        }))
+        updateActiveSchedule(
+            (previous): IScheduleDraft => ({
+                ...previous,
+                mode,
+            }),
+        )
     }
 
     const handleIntervalChange = (rawInterval: string): void => {
@@ -364,10 +362,12 @@ export function SettingsJobsPage(): ReactElement {
             return
         }
 
-        updateActiveSchedule((previous): IScheduleDraft => ({
-            ...previous,
-            intervalHours: Math.max(1, Math.min(parsedInterval, 24)),
-        }))
+        updateActiveSchedule(
+            (previous): IScheduleDraft => ({
+                ...previous,
+                intervalHours: Math.max(1, Math.min(parsedInterval, 24)),
+            }),
+        )
     }
 
     const handleWeekdayChange = (rawWeekday: string): void => {
@@ -376,10 +376,12 @@ export function SettingsJobsPage(): ReactElement {
             return
         }
 
-        updateActiveSchedule((previous): IScheduleDraft => ({
-            ...previous,
-            weekday: Math.max(0, Math.min(parsedWeekday, 6)),
-        }))
+        updateActiveSchedule(
+            (previous): IScheduleDraft => ({
+                ...previous,
+                weekday: Math.max(0, Math.min(parsedWeekday, 6)),
+            }),
+        )
     }
 
     const handleHourChange = (rawHour: string): void => {
@@ -388,10 +390,12 @@ export function SettingsJobsPage(): ReactElement {
             return
         }
 
-        updateActiveSchedule((previous): IScheduleDraft => ({
-            ...previous,
-            hour: Math.max(0, Math.min(parsedHour, 23)),
-        }))
+        updateActiveSchedule(
+            (previous): IScheduleDraft => ({
+                ...previous,
+                hour: Math.max(0, Math.min(parsedHour, 23)),
+            }),
+        )
     }
 
     const handleMinuteChange = (rawMinute: string): void => {
@@ -400,83 +404,88 @@ export function SettingsJobsPage(): ReactElement {
             return
         }
 
-        updateActiveSchedule((previous): IScheduleDraft => ({
-            ...previous,
-            minute: Math.max(0, Math.min(parsedMinute, 59)),
-        }))
+        updateActiveSchedule(
+            (previous): IScheduleDraft => ({
+                ...previous,
+                minute: Math.max(0, Math.min(parsedMinute, 59)),
+            }),
+        )
     }
 
     const handleSaveSchedule = (): void => {
-        setScheduleSaveMessage(
-            `Saved ${scheduleDescription} in timezone ${effectiveTimezone}.`,
-        )
+        setScheduleSaveMessage(`Saved ${scheduleDescription} in timezone ${effectiveTimezone}.`)
         showToastSuccess("Schedule saved.")
     }
 
     const appendAuditEntry = (action: TJobAction, jobId: string, outcome: string): void => {
-        setAudit((previous): ReadonlyArray<IJobAuditEntry> => [
-            {
-                action,
-                actor: "Current operator",
-                id: `J-AUD-${Date.now().toString(36)}`,
-                jobId,
-                occurredAt: new Date().toISOString(),
-                outcome,
-            },
-            ...previous,
-        ])
+        setAudit(
+            (previous): ReadonlyArray<IJobAuditEntry> => [
+                {
+                    action,
+                    actor: "Current operator",
+                    id: `J-AUD-${Date.now().toString(36)}`,
+                    jobId,
+                    occurredAt: new Date().toISOString(),
+                    outcome,
+                },
+                ...previous,
+            ],
+        )
     }
 
     const handleRetryJob = (jobId: string): void => {
-        setJobs((previous): ReadonlyArray<IOperationJob> =>
-            previous.map((job): IOperationJob => {
-                if (job.id !== jobId || canRetryJob(job) !== true) {
-                    return job
-                }
+        setJobs(
+            (previous): ReadonlyArray<IOperationJob> =>
+                previous.map((job): IOperationJob => {
+                    if (job.id !== jobId || canRetryJob(job) !== true) {
+                        return job
+                    }
 
-                return {
-                    ...job,
-                    etaLabel: "5m",
-                    retryCount: job.retryCount + 1,
-                    status: "queued",
-                }
-            }),
+                    return {
+                        ...job,
+                        etaLabel: "5m",
+                        retryCount: job.retryCount + 1,
+                        status: "queued",
+                    }
+                }),
         )
         appendAuditEntry("retry", jobId, "Retry queued with updated attempt counter.")
         showToastSuccess("Retry queued.")
     }
 
     const handleCancelJob = (jobId: string): void => {
-        setJobs((previous): ReadonlyArray<IOperationJob> =>
-            previous.map((job): IOperationJob => {
-                if (job.id !== jobId || canCancelJob(job) !== true) {
-                    return job
-                }
+        setJobs(
+            (previous): ReadonlyArray<IOperationJob> =>
+                previous.map((job): IOperationJob => {
+                    if (job.id !== jobId || canCancelJob(job) !== true) {
+                        return job
+                    }
 
-                return {
-                    ...job,
-                    etaLabel: "stopped",
-                    status: "canceled",
-                }
-            }),
+                    return {
+                        ...job,
+                        etaLabel: "stopped",
+                        status: "canceled",
+                    }
+                }),
         )
         appendAuditEntry("cancel", jobId, "Job cancelled by operator from monitor center.")
         showToastInfo("Job canceled.")
     }
 
     const handleRequeueJob = (jobId: string): void => {
-        setJobs((previous): ReadonlyArray<IOperationJob> =>
-            previous.map((job): IOperationJob => {
-                if (job.id !== jobId || canRequeueJob(job) !== true) {
-                    return job
-                }
+        setJobs(
+            (previous): ReadonlyArray<IOperationJob> =>
+                previous.map((job): IOperationJob => {
+                    if (job.id !== jobId || canRequeueJob(job) !== true) {
+                        return job
+                    }
 
-                return {
-                    ...job,
-                    etaLabel: "7m",
-                    status: "queued",
-                }
-            }),
+                    return {
+                        ...job,
+                        etaLabel: "7m",
+                        status: "queued",
+                    }
+                }),
         )
         appendAuditEntry("requeue", jobId, "Job moved back to queue for safe recovery.")
         showToastSuccess("Job requeued.")
@@ -484,7 +493,9 @@ export function SettingsJobsPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-[var(--foreground)]">Operations jobs monitor</h1>
+            <h1 className="text-2xl font-semibold text-[var(--foreground)]">
+                Operations jobs monitor
+            </h1>
             <p className="text-sm text-[var(--foreground)]/70">
                 Track review, scan and analytics jobs with ETA, retries, paused/stuck states,
                 operator recovery actions and audit history.
@@ -550,11 +561,13 @@ export function SettingsJobsPage(): ReactElement {
                                     }
                                 }}
                             >
-                                {TIMEZONE_OPTIONS.map((timezone): ReactElement => (
-                                    <option key={timezone} value={timezone}>
-                                        {timezone}
-                                    </option>
-                                ))}
+                                {TIMEZONE_OPTIONS.map(
+                                    (timezone): ReactElement => (
+                                        <option key={timezone} value={timezone}>
+                                            {timezone}
+                                        </option>
+                                    ),
+                                )}
                             </select>
                         </label>
                         <label className="flex flex-col gap-1 text-sm text-[var(--foreground)]/80">
@@ -580,11 +593,13 @@ export function SettingsJobsPage(): ReactElement {
                                 }}
                             >
                                 <option value="inherit-user">inherit user timezone</option>
-                                {TIMEZONE_OPTIONS.map((timezone): ReactElement => (
-                                    <option key={`org-${timezone}`} value={timezone}>
-                                        {timezone}
-                                    </option>
-                                ))}
+                                {TIMEZONE_OPTIONS.map(
+                                    (timezone): ReactElement => (
+                                        <option key={`org-${timezone}`} value={timezone}>
+                                            {timezone}
+                                        </option>
+                                    ),
+                                )}
                             </select>
                         </label>
                         <label className="flex flex-col gap-1 text-sm text-[var(--foreground)]/80">
@@ -636,11 +651,16 @@ export function SettingsJobsPage(): ReactElement {
                                         handleWeekdayChange(event.currentTarget.value)
                                     }}
                                 >
-                                    {WEEKDAY_OPTIONS.map((option): ReactElement => (
-                                        <option key={`weekday-${String(option.value)}`} value={String(option.value)}>
-                                            {option.label}
-                                        </option>
-                                    ))}
+                                    {WEEKDAY_OPTIONS.map(
+                                        (option): ReactElement => (
+                                            <option
+                                                key={`weekday-${String(option.value)}`}
+                                                value={String(option.value)}
+                                            >
+                                                {option.label}
+                                            </option>
+                                        ),
+                                    )}
                                 </select>
                             </label>
                         )}
@@ -654,11 +674,13 @@ export function SettingsJobsPage(): ReactElement {
                                     handleHourChange(event.currentTarget.value)
                                 }}
                             >
-                                {Array.from({ length: 24 }).map((_entry, hour): ReactElement => (
-                                    <option key={`hour-${String(hour)}`} value={String(hour)}>
-                                        {String(hour).padStart(2, "0")}
-                                    </option>
-                                ))}
+                                {Array.from({ length: 24 }).map(
+                                    (_entry, hour): ReactElement => (
+                                        <option key={`hour-${String(hour)}`} value={String(hour)}>
+                                            {String(hour).padStart(2, "0")}
+                                        </option>
+                                    ),
+                                )}
                             </select>
                         </label>
                         <label className="flex flex-col gap-1 text-sm text-[var(--foreground)]/80">
@@ -671,11 +693,13 @@ export function SettingsJobsPage(): ReactElement {
                                     handleMinuteChange(event.currentTarget.value)
                                 }}
                             >
-                                {["0", "5", "10", "15", "30", "45"].map((minute): ReactElement => (
-                                    <option key={`minute-${minute}`} value={minute}>
-                                        {minute.padStart(2, "0")}
-                                    </option>
-                                ))}
+                                {["0", "5", "10", "15", "30", "45"].map(
+                                    (minute): ReactElement => (
+                                        <option key={`minute-${minute}`} value={minute}>
+                                            {minute.padStart(2, "0")}
+                                        </option>
+                                    ),
+                                )}
                             </select>
                         </label>
                     </div>
@@ -698,19 +722,21 @@ export function SettingsJobsPage(): ReactElement {
                     ) : null}
 
                     <ul aria-label="Schedule preview list" className="space-y-2">
-                        {schedulePreview.map((nextRun, index): ReactElement => (
-                            <li
-                                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)]"
-                                key={`preview-${scheduleTarget}-${String(index)}`}
-                            >
-                                <p className="font-semibold">
-                                    {formatTimezoneDate(nextRun, effectiveTimezone)}
-                                </p>
-                                <p className="text-xs text-[var(--foreground)]/70">
-                                    {formatRelativeTime(nextRun)}
-                                </p>
-                            </li>
-                        ))}
+                        {schedulePreview.map(
+                            (nextRun, index): ReactElement => (
+                                <li
+                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)]"
+                                    key={`preview-${scheduleTarget}-${String(index)}`}
+                                >
+                                    <p className="font-semibold">
+                                        {formatTimezoneDate(nextRun, effectiveTimezone)}
+                                    </p>
+                                    <p className="text-xs text-[var(--foreground)]/70">
+                                        {formatRelativeTime(nextRun)}
+                                    </p>
+                                </li>
+                            ),
+                        )}
                     </ul>
                 </CardBody>
             </Card>
@@ -722,68 +748,75 @@ export function SettingsJobsPage(): ReactElement {
                     </CardHeader>
                     <CardBody className="space-y-2">
                         <ul aria-label="Operations jobs list" className="space-y-2">
-                            {jobs.map((job): ReactElement => (
-                                <li
-                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
-                                    key={job.id}
-                                >
-                                    <div className="flex flex-wrap items-center justify-between gap-2">
-                                        <button
-                                            aria-label={`Open ${job.id} details`}
-                                            className="text-left"
-                                            type="button"
-                                            onClick={(): void => {
-                                                setActiveJobId(job.id)
-                                            }}
-                                        >
-                                            <p className="text-sm font-semibold text-[var(--foreground)]">
-                                                {job.id} · {job.kind}
-                                            </p>
-                                            <p className="text-xs text-[var(--foreground)]/70">
-                                                {job.scope}
-                                            </p>
-                                        </button>
-                                        <Chip color={mapStatusColor(job.status)} size="sm" variant="flat">
-                                            {job.status}
-                                        </Chip>
-                                    </div>
-                                    <p className="mt-1 text-xs text-[var(--foreground)]/70">
-                                        ETA: {job.etaLabel} · retries {job.retryCount}/{job.retryLimit}
-                                    </p>
-                                    <div className="mt-2 flex flex-wrap gap-2">
-                                        <Button
-                                            isDisabled={canRetryJob(job) !== true}
-                                            size="sm"
-                                            variant="flat"
-                                            onPress={(): void => {
-                                                handleRetryJob(job.id)
-                                            }}
-                                        >
-                                            Retry
-                                        </Button>
-                                        <Button
-                                            isDisabled={canCancelJob(job) !== true}
-                                            size="sm"
-                                            variant="flat"
-                                            onPress={(): void => {
-                                                handleCancelJob(job.id)
-                                            }}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button
-                                            isDisabled={canRequeueJob(job) !== true}
-                                            size="sm"
-                                            variant="flat"
-                                            onPress={(): void => {
-                                                handleRequeueJob(job.id)
-                                            }}
-                                        >
-                                            Requeue
-                                        </Button>
-                                    </div>
-                                </li>
-                            ))}
+                            {jobs.map(
+                                (job): ReactElement => (
+                                    <li
+                                        className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
+                                        key={job.id}
+                                    >
+                                        <div className="flex flex-wrap items-center justify-between gap-2">
+                                            <button
+                                                aria-label={`Open ${job.id} details`}
+                                                className="text-left"
+                                                type="button"
+                                                onClick={(): void => {
+                                                    setActiveJobId(job.id)
+                                                }}
+                                            >
+                                                <p className="text-sm font-semibold text-[var(--foreground)]">
+                                                    {job.id} · {job.kind}
+                                                </p>
+                                                <p className="text-xs text-[var(--foreground)]/70">
+                                                    {job.scope}
+                                                </p>
+                                            </button>
+                                            <Chip
+                                                color={mapStatusColor(job.status)}
+                                                size="sm"
+                                                variant="flat"
+                                            >
+                                                {job.status}
+                                            </Chip>
+                                        </div>
+                                        <p className="mt-1 text-xs text-[var(--foreground)]/70">
+                                            ETA: {job.etaLabel} · retries {job.retryCount}/
+                                            {job.retryLimit}
+                                        </p>
+                                        <div className="mt-2 flex flex-wrap gap-2">
+                                            <Button
+                                                isDisabled={canRetryJob(job) !== true}
+                                                size="sm"
+                                                variant="flat"
+                                                onPress={(): void => {
+                                                    handleRetryJob(job.id)
+                                                }}
+                                            >
+                                                Retry
+                                            </Button>
+                                            <Button
+                                                isDisabled={canCancelJob(job) !== true}
+                                                size="sm"
+                                                variant="flat"
+                                                onPress={(): void => {
+                                                    handleCancelJob(job.id)
+                                                }}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                isDisabled={canRequeueJob(job) !== true}
+                                                size="sm"
+                                                variant="flat"
+                                                onPress={(): void => {
+                                                    handleRequeueJob(job.id)
+                                                }}
+                                            >
+                                                Requeue
+                                            </Button>
+                                        </div>
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     </CardBody>
                 </Card>
@@ -819,7 +852,11 @@ export function SettingsJobsPage(): ReactElement {
                                             Diagnostics are healthy for this operation.
                                         </Alert>
                                     ) : (
-                                        <Alert color="danger" title="Latest error trace" variant="flat">
+                                        <Alert
+                                            color="danger"
+                                            title="Latest error trace"
+                                            variant="flat"
+                                        >
                                             {activeJob.errorDetails}
                                         </Alert>
                                     )}
@@ -836,20 +873,24 @@ export function SettingsJobsPage(): ReactElement {
                         </CardHeader>
                         <CardBody className="space-y-2">
                             <ul aria-label="Jobs audit trail list" className="space-y-2">
-                                {audit.map((entry): ReactElement => (
-                                    <li
-                                        className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-xs"
-                                        key={entry.id}
-                                    >
-                                        <p className="font-semibold text-[var(--foreground)]">
-                                            {entry.jobId} · {entry.action} · {entry.actor}
-                                        </p>
-                                        <p className="text-[var(--foreground)]/80">{entry.outcome}</p>
-                                        <p className="text-[var(--foreground)]/70">
-                                            {formatTimestamp(entry.occurredAt)}
-                                        </p>
-                                    </li>
-                                ))}
+                                {audit.map(
+                                    (entry): ReactElement => (
+                                        <li
+                                            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-xs"
+                                            key={entry.id}
+                                        >
+                                            <p className="font-semibold text-[var(--foreground)]">
+                                                {entry.jobId} · {entry.action} · {entry.actor}
+                                            </p>
+                                            <p className="text-[var(--foreground)]/80">
+                                                {entry.outcome}
+                                            </p>
+                                            <p className="text-[var(--foreground)]/70">
+                                                {formatTimestamp(entry.occurredAt)}
+                                            </p>
+                                        </li>
+                                    ),
+                                )}
                             </ul>
                         </CardBody>
                     </Card>

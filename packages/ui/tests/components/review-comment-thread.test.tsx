@@ -22,8 +22,12 @@ function createThread(
 
 describe("ReviewCommentThread", (): void => {
     it("синхронизирует локальный state при обновлении threads через props", (): void => {
-        const initialThreads: ReadonlyArray<IReviewCommentThread> = [createThread("thread-1", "Old comment")]
-        const nextThreads: ReadonlyArray<IReviewCommentThread> = [createThread("thread-2", "Updated comment")]
+        const initialThreads: ReadonlyArray<IReviewCommentThread> = [
+            createThread("thread-1", "Old comment"),
+        ]
+        const nextThreads: ReadonlyArray<IReviewCommentThread> = [
+            createThread("thread-2", "Updated comment"),
+        ]
 
         const rendered = renderWithProviders(<ReviewCommentThread threads={initialThreads} />)
 

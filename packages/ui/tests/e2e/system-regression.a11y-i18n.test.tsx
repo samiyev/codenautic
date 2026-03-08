@@ -71,8 +71,9 @@ describe("system e2e regression suite: a11y + i18n", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<HelpDiagnosticsPage />)
 
-        expect(screen.getByRole("heading", { level: 1, name: "Help & diagnostics center" })).not
-            .toBeNull()
+        expect(
+            screen.getByRole("heading", { level: 1, name: "Help & diagnostics center" }),
+        ).not.toBeNull()
 
         await user.click(screen.getByRole("button", { name: "Run diagnostics" }))
         expect(screen.getByLabelText("Diagnostics checks list")).not.toBeNull()
@@ -82,8 +83,9 @@ describe("system e2e regression suite: a11y + i18n", (): void => {
         expect(document.activeElement).not.toBe(document.body)
 
         await user.click(screen.getByRole("button", { name: "Generate redacted bundle" }))
-        expect(screen.getByText("Redacted support bundle is ready to attach to support ticket.")).not
-            .toBeNull()
+        expect(
+            screen.getByText("Redacted support bundle is ready to attach to support ticket."),
+        ).not.toBeNull()
 
         const bundleTextbox = screen.getByRole("textbox", { name: "Support bundle payload" })
         const payload = JSON.parse((bundleTextbox as HTMLTextAreaElement).value) as {

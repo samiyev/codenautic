@@ -49,7 +49,9 @@ describe("SprintSummaryCard", (): void => {
     it("вызывает onSelectMetric при выборе метрики", async (): Promise<void> => {
         const user = userEvent.setup()
         const onSelectMetric = vi.fn()
-        renderWithProviders(<SprintSummaryCard model={TEST_MODEL} onSelectMetric={onSelectMetric} />)
+        renderWithProviders(
+            <SprintSummaryCard model={TEST_MODEL} onSelectMetric={onSelectMetric} />,
+        )
 
         await user.click(
             screen.getByRole("button", { name: "Inspect sprint summary metric Complexity" }),

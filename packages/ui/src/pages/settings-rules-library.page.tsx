@@ -127,8 +127,7 @@ export function SettingsRulesLibraryPage(): ReactElement {
         const normalizedQuery = searchQuery.trim().toLowerCase()
 
         return rules.filter((rule): boolean => {
-            const matchesCategory =
-                selectedCategory === "all" || rule.category === selectedCategory
+            const matchesCategory = selectedCategory === "all" || rule.category === selectedCategory
             if (matchesCategory !== true) {
                 return false
             }
@@ -291,21 +290,25 @@ export function SettingsRulesLibraryPage(): ReactElement {
                                 onChange={(event): void => {
                                     const value = event.currentTarget.value
                                     if (
-                                        value === "all"
-                                        || value === "security"
-                                        || value === "architecture"
-                                        || value === "performance"
-                                        || value === "style"
+                                        value === "all" ||
+                                        value === "security" ||
+                                        value === "architecture" ||
+                                        value === "performance" ||
+                                        value === "style"
                                     ) {
                                         setSelectedCategory(value)
                                     }
                                 }}
                             >
-                                {CATEGORY_OPTIONS.map((option): ReactElement => (
-                                    <option key={option} value={option}>
-                                        {option === "all" ? "All categories" : formatCategoryLabel(option)}
-                                    </option>
-                                ))}
+                                {CATEGORY_OPTIONS.map(
+                                    (option): ReactElement => (
+                                        <option key={option} value={option}>
+                                            {option === "all"
+                                                ? "All categories"
+                                                : formatCategoryLabel(option)}
+                                        </option>
+                                    ),
+                                )}
                             </select>
                         </div>
                     </div>
@@ -381,7 +384,10 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             onValueChange={setCustomDescription}
                         />
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm text-[var(--foreground)]/80" htmlFor="custom-rule-category">
+                            <label
+                                className="text-sm text-[var(--foreground)]/80"
+                                htmlFor="custom-rule-category"
+                            >
                                 Category
                             </label>
                             <select
@@ -391,10 +397,10 @@ export function SettingsRulesLibraryPage(): ReactElement {
                                 onChange={(event): void => {
                                     const nextCategory = event.currentTarget.value
                                     if (
-                                        nextCategory === "security"
-                                        || nextCategory === "architecture"
-                                        || nextCategory === "performance"
-                                        || nextCategory === "style"
+                                        nextCategory === "security" ||
+                                        nextCategory === "architecture" ||
+                                        nextCategory === "performance" ||
+                                        nextCategory === "style"
                                     ) {
                                         setCustomCategory(nextCategory)
                                     }
@@ -420,11 +426,16 @@ export function SettingsRulesLibraryPage(): ReactElement {
 
                 <Card>
                     <CardHeader>
-                        <p className="text-base font-semibold text-[var(--foreground)]">Test rules</p>
+                        <p className="text-base font-semibold text-[var(--foreground)]">
+                            Test rules
+                        </p>
                     </CardHeader>
                     <CardBody className="space-y-3">
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm text-[var(--foreground)]/80" htmlFor="rule-test-target">
+                            <label
+                                className="text-sm text-[var(--foreground)]/80"
+                                htmlFor="rule-test-target"
+                            >
                                 Rule to test
                             </label>
                             <select
@@ -436,11 +447,13 @@ export function SettingsRulesLibraryPage(): ReactElement {
                                     setTestRuleId(event.currentTarget.value)
                                 }}
                             >
-                                {rules.map((rule): ReactElement => (
-                                    <option key={rule.id} value={rule.id}>
-                                        {rule.name}
-                                    </option>
-                                ))}
+                                {rules.map(
+                                    (rule): ReactElement => (
+                                        <option key={rule.id} value={rule.id}>
+                                            {rule.name}
+                                        </option>
+                                    ),
+                                )}
                             </select>
                         </div>
                         <div className="flex flex-col gap-1">
@@ -468,7 +481,11 @@ export function SettingsRulesLibraryPage(): ReactElement {
                         {testResult === undefined ? null : (
                             <Alert
                                 color={testResult.status === "passed" ? "success" : "warning"}
-                                title={testResult.status === "passed" ? "Rule matched" : "Rule not matched"}
+                                title={
+                                    testResult.status === "passed"
+                                        ? "Rule matched"
+                                        : "Rule not matched"
+                                }
                                 variant="flat"
                             >
                                 {testResult.message}

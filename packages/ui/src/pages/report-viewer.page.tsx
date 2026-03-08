@@ -143,7 +143,9 @@ export function ReportViewerPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Generated report</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Generated report
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <Alert color="success" title="Report summary" variant="flat">
@@ -160,7 +162,10 @@ export function ReportViewerPage(): ReactElement {
                                 value={selectedMetric}
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
-                                    if (nextValue === "riskScore" || nextValue === "deliveryVelocity") {
+                                    if (
+                                        nextValue === "riskScore" ||
+                                        nextValue === "deliveryVelocity"
+                                    ) {
                                         setSelectedMetric(nextValue)
                                     }
                                 }}
@@ -170,7 +175,9 @@ export function ReportViewerPage(): ReactElement {
                             </select>
                         </label>
                         <div className="flex items-end gap-2">
-                            <Button onPress={(): void => handleDownload("PDF")}>Download PDF</Button>
+                            <Button onPress={(): void => handleDownload("PDF")}>
+                                Download PDF
+                            </Button>
                             <Button variant="flat" onPress={(): void => handleDownload("PNG")}>
                                 Download PNG
                             </Button>
@@ -178,7 +185,10 @@ export function ReportViewerPage(): ReactElement {
                     </div>
                     <div aria-label="Report trend chart" className="h-72 w-full">
                         <ResponsiveContainer height="100%" minHeight={1} minWidth={1} width="100%">
-                            <LineChart data={REPORT_TREND_POINTS} margin={{ bottom: 8, left: 8, right: 12, top: 12 }}>
+                            <LineChart
+                                data={REPORT_TREND_POINTS}
+                                margin={{ bottom: 8, left: 8, right: 12, top: 12 }}
+                            >
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="period" />
                                 <YAxis domain={[0, 100]} />
@@ -186,7 +196,12 @@ export function ReportViewerPage(): ReactElement {
                                 <Line
                                     activeDot={{ r: 6 }}
                                     dataKey={selectedMetric}
-                                    dot={{ fill: "#2563eb", r: 3, stroke: "#ffffff", strokeWidth: 1 }}
+                                    dot={{
+                                        fill: "#2563eb",
+                                        r: 3,
+                                        stroke: "#ffffff",
+                                        strokeWidth: 1,
+                                    }}
                                     name={metricLabel}
                                     stroke="#2563eb"
                                     strokeWidth={2.5}
@@ -206,12 +221,14 @@ export function ReportViewerPage(): ReactElement {
                                 <YAxis domain={[0, 40]} />
                                 <Tooltip />
                                 <Bar dataKey="value" name="Section contribution">
-                                    {SECTION_DISTRIBUTION_POINTS.map((entry, index): ReactElement => (
-                                        <Cell
-                                            fill={SECTION_COLORS[index % SECTION_COLORS.length]}
-                                            key={`${entry.section}-${String(index)}`}
-                                        />
-                                    ))}
+                                    {SECTION_DISTRIBUTION_POINTS.map(
+                                        (entry, index): ReactElement => (
+                                            <Cell
+                                                fill={SECTION_COLORS[index % SECTION_COLORS.length]}
+                                                key={`${entry.section}-${String(index)}`}
+                                            />
+                                        ),
+                                    )}
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>

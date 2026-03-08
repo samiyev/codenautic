@@ -94,22 +94,27 @@ export function SettingsProviderDegradationPage(): ReactElement {
             return
         }
 
-        setQueuedActions((previous): ReadonlyArray<IQueuedAction> => [
-            {
-                description: "CCR finalization webhook",
-                id: `QACT-${Date.now().toString(36)}`,
-                status: "queued",
-            },
-            ...previous,
-        ])
+        setQueuedActions(
+            (previous): ReadonlyArray<IQueuedAction> => [
+                {
+                    description: "CCR finalization webhook",
+                    id: `QACT-${Date.now().toString(36)}`,
+                    status: "queued",
+                },
+                ...previous,
+            ],
+        )
     }
 
     const handleRetryQueuedActions = (): void => {
-        setQueuedActions((previous): ReadonlyArray<IQueuedAction> =>
-            previous.map((action): IQueuedAction => ({
-                ...action,
-                status: providerState.level === "operational" ? "sent" : "retrying",
-            })),
+        setQueuedActions(
+            (previous): ReadonlyArray<IQueuedAction> =>
+                previous.map(
+                    (action): IQueuedAction => ({
+                        ...action,
+                        status: providerState.level === "operational" ? "sent" : "retrying",
+                    }),
+                ),
         )
         showToastInfo("Queued actions processed with current provider state.")
     }
@@ -126,7 +131,9 @@ export function SettingsProviderDegradationPage(): ReactElement {
 
             <Alert
                 color={providerState.level === "degraded" ? "danger" : "success"}
-                title={providerState.level === "degraded" ? "Degraded mode active" : "Operational mode"}
+                title={
+                    providerState.level === "degraded" ? "Degraded mode active" : "Operational mode"
+                }
                 variant="flat"
             >
                 {incidentMessage}
@@ -134,7 +141,9 @@ export function SettingsProviderDegradationPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Incident controls</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Incident controls
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -153,11 +162,16 @@ export function SettingsProviderDegradationPage(): ReactElement {
                         <p className="text-sm text-[var(--foreground)]/70">No affected features.</p>
                     ) : (
                         <ul aria-label="Affected features list" className="space-y-1">
-                            {providerState.affectedFeatures.map((feature): ReactElement => (
-                                <li className="text-sm text-[var(--foreground)]/80" key={feature}>
-                                    {feature}
-                                </li>
-                            ))}
+                            {providerState.affectedFeatures.map(
+                                (feature): ReactElement => (
+                                    <li
+                                        className="text-sm text-[var(--foreground)]/80"
+                                        key={feature}
+                                    >
+                                        {feature}
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     )}
                     <div className="flex flex-wrap gap-2">
@@ -197,15 +211,21 @@ export function SettingsProviderDegradationPage(): ReactElement {
                         </Button>
                     </div>
                     <ul aria-label="Queued critical actions list" className="space-y-2">
-                        {queuedActions.map((action): ReactElement => (
-                            <li
-                                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-sm"
-                                key={action.id}
-                            >
-                                <p className="font-semibold text-[var(--foreground)]">{action.description}</p>
-                                <p className="text-[var(--foreground)]/70">Status: {action.status}</p>
-                            </li>
-                        ))}
+                        {queuedActions.map(
+                            (action): ReactElement => (
+                                <li
+                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-sm"
+                                    key={action.id}
+                                >
+                                    <p className="font-semibold text-[var(--foreground)]">
+                                        {action.description}
+                                    </p>
+                                    <p className="text-[var(--foreground)]/70">
+                                        Status: {action.status}
+                                    </p>
+                                </li>
+                            ),
+                        )}
                     </ul>
                     {queuedActions.length === 0 ? (
                         <p className="text-sm text-[var(--foreground)]/70">

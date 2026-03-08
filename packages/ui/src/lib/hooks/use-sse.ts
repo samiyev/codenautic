@@ -60,12 +60,7 @@ export interface IUseSSEStreamResult {
     readonly stop: () => void
 }
 
-const SUPPORTED_EVENT_TYPES = new Set<TSSEEventType>([
-    "message",
-    "progress",
-    "done",
-    "error",
-])
+const SUPPORTED_EVENT_TYPES = new Set<TSSEEventType>(["message", "progress", "done", "error"])
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null
@@ -101,10 +96,7 @@ function parseSSEPayload(data: string): ISSEEventPayload {
             payload[key] = value
         }
 
-        const message =
-            typeof payload.message === "string"
-                ? payload.message
-                : data
+        const message = typeof payload.message === "string" ? payload.message : data
         const stage = typeof payload.stage === "string" ? payload.stage : undefined
         const current = typeof payload.current === "number" ? payload.current : undefined
         const total = typeof payload.total === "number" ? payload.total : undefined
@@ -186,32 +178,35 @@ export function useSSEStream(props: IUseSSEStreamProps): IUseSSEStreamResult {
         }
     }, [clearReconnectTimer])
 
-    const appendEvent = useCallback((nextEvent: ISSEStreamEvent): void => {
-        setEvents((previousEvents): ReadonlyArray<ISSEStreamEvent> => {
-            const nextEvents = [...previousEvents, nextEvent]
-            return nextEvents.slice(-100)
-        })
+    const appendEvent = useCallback(
+        (nextEvent: ISSEStreamEvent): void => {
+            setEvents((previousEvents): ReadonlyArray<ISSEStreamEvent> => {
+                const nextEvents = [...previousEvents, nextEvent]
+                return nextEvents.slice(-100)
+            })
 
-        if (nextEvent.type === "progress") {
-            setProgressCurrent(clampNumber(nextEvent.payload.current))
-            setProgressTotal(clampNumber(nextEvent.payload.total))
-            return
-        }
+            if (nextEvent.type === "progress") {
+                setProgressCurrent(clampNumber(nextEvent.payload.current))
+                setProgressTotal(clampNumber(nextEvent.payload.total))
+                return
+            }
 
-        if (nextEvent.type === "done") {
-            runningRef.current = false
-            closeSource()
-            setState("closed")
-            return
-        }
+            if (nextEvent.type === "done") {
+                runningRef.current = false
+                closeSource()
+                setState("closed")
+                return
+            }
 
-        if (nextEvent.type === "error") {
-            setError(String(nextEvent.payload.message ?? "Stream returned an error event."))
-            runningRef.current = false
-            closeSource()
-            setState("error")
-        }
-    }, [closeSource])
+            if (nextEvent.type === "error") {
+                setError(String(nextEvent.payload.message ?? "Stream returned an error event."))
+                runningRef.current = false
+                closeSource()
+                setState("error")
+            }
+        },
+        [closeSource],
+    )
 
     const openSource = useCallback((): void => {
         if (runningRef.current === false) {
@@ -298,39 +293,21 @@ export function useSSEStream(props: IUseSSEStreamProps): IUseSSEStreamResult {
                 return
             }
 
-            appendEvent(
-                parseSSEEvent(
-                    "progress",
-                    event.data,
-                    createSSEEventId(eventSequenceRef),
-                ),
-            )
+            appendEvent(parseSSEEvent("progress", event.data, createSSEEventId(eventSequenceRef)))
         })
         source.addEventListener("done", (event: Event): void => {
             if (event instanceof MessageEvent === false || typeof event.data !== "string") {
                 return
             }
 
-            appendEvent(
-                parseSSEEvent(
-                    "done",
-                    event.data,
-                    createSSEEventId(eventSequenceRef),
-                ),
-            )
+            appendEvent(parseSSEEvent("done", event.data, createSSEEventId(eventSequenceRef)))
         })
         source.addEventListener("stream-error", (event: Event): void => {
             if (event instanceof MessageEvent === false || typeof event.data !== "string") {
                 return
             }
 
-            appendEvent(
-                parseSSEEvent(
-                    "error",
-                    event.data,
-                    createSSEEventId(eventSequenceRef),
-                ),
-            )
+            appendEvent(parseSSEEvent("error", event.data, createSSEEventId(eventSequenceRef)))
         })
     }, [
         appendEvent,

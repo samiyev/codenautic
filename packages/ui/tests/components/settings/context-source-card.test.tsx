@@ -36,11 +36,7 @@ describe("ContextSourceCard", (): void => {
         const onRefresh = vi.fn((_sourceId: string): void => {})
 
         renderWithProviders(
-            <ContextSourceCard
-                onRefresh={onRefresh}
-                onToggleEnabled={onToggle}
-                source={SOURCE}
-            />,
+            <ContextSourceCard onRefresh={onRefresh} onToggleEnabled={onToggle} source={SOURCE} />,
         )
 
         await user.click(screen.getByRole("button", { name: "Disable" }))

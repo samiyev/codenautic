@@ -37,10 +37,14 @@ describe("SCREENS and scenarios metadata contract", (): void => {
 
         sections.forEach((section): void => {
             if (/^- Цель:/m.test(section.body) === false) {
-                issues.push(`${section.heading} at line ${String(section.lineNumber)} is missing goal metadata`)
+                issues.push(
+                    `${section.heading} at line ${String(section.lineNumber)} is missing goal metadata`,
+                )
             }
             if (/^- Экраны:/m.test(section.body) === false) {
-                issues.push(`${section.heading} at line ${String(section.lineNumber)} is missing screens metadata`)
+                issues.push(
+                    `${section.heading} at line ${String(section.lineNumber)} is missing screens metadata`,
+                )
             }
             if (/^- Референсы:/m.test(section.body) === false) {
                 issues.push(

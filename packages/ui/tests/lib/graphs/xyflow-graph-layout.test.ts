@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import { calculateGraphLayout, type IGraphEdge, type IGraphNode } from "@/components/graphs/xyflow-graph-layout"
+import {
+    calculateGraphLayout,
+    type IGraphEdge,
+    type IGraphNode,
+} from "@/components/graphs/xyflow-graph-layout"
 
 describe("calculateGraphLayout", (): void => {
     it("добавляет координаты для всех переданных нод", (): void => {

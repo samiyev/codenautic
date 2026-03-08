@@ -35,8 +35,11 @@ describe("TrendForecastChart", (): void => {
 
         expect(screen.getByText("Trend forecast chart")).not.toBeNull()
         expect(screen.getByLabelText("Trend forecast visualization")).not.toBeNull()
-        expect(screen.getByText("Forecast zone shaded in slate, confidence interval shown in cyan band."))
-            .not.toBeNull()
+        expect(
+            screen.getByText(
+                "Forecast zone shaded in slate, confidence interval shown in cyan band.",
+            ),
+        ).not.toBeNull()
         expect(screen.getByLabelText("Trend forecast points")).not.toBeNull()
         expect(screen.getByText("Jan 03: 77 to 73 (CI 66-80)")).not.toBeNull()
     })
@@ -44,7 +47,9 @@ describe("TrendForecastChart", (): void => {
     it("вызывает onSelectPoint при выборе точки", async (): Promise<void> => {
         const user = userEvent.setup()
         const onSelectPoint = vi.fn()
-        renderWithProviders(<TrendForecastChart onSelectPoint={onSelectPoint} points={TEST_POINTS} />)
+        renderWithProviders(
+            <TrendForecastChart onSelectPoint={onSelectPoint} points={TEST_POINTS} />,
+        )
 
         await user.click(
             screen.getByRole("button", {

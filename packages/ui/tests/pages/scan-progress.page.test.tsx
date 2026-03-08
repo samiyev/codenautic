@@ -52,12 +52,7 @@ afterEach((): void => {
 
 describe("ScanProgressPage", (): void => {
     it("показывает прогресс и логи из seed событий", (): void => {
-        renderWithProviders(
-            <ScanProgressPage
-                jobId="scan-job-seed"
-                seedEvents={seedEvents}
-            />,
-        )
+        renderWithProviders(<ScanProgressPage jobId="scan-job-seed" seedEvents={seedEvents} />)
 
         expect(screen.getByText("Scan Progress")).not.toBeNull()
         expect(screen.getByText("queue")).not.toBeNull()

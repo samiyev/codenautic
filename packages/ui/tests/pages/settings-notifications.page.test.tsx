@@ -10,7 +10,9 @@ describe("SettingsNotificationsPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsNotificationsPage />)
 
-        expect(screen.getByRole("heading", { level: 1, name: "Notification center" })).not.toBeNull()
+        expect(
+            screen.getByRole("heading", { level: 1, name: "Notification center" }),
+        ).not.toBeNull()
         expect(screen.getByText("Unread: 3")).not.toBeNull()
 
         await user.click(screen.getByRole("button", { name: "Mark as read NTF-1001" }))

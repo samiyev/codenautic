@@ -1,10 +1,5 @@
 import { type ComponentProps, type ReactElement, type ReactNode } from "react"
-import {
-    ListBox,
-    ListBoxItem,
-    ListBoxSection,
-    Select as HeroUISelect,
-} from "@heroui/react"
+import { ListBox, ListBoxItem, ListBoxSection, Select as HeroUISelect } from "@heroui/react"
 
 type THeroUISelectProps = ComponentProps<typeof HeroUISelect>
 type TSelection = Set<string> | "all"
@@ -14,7 +9,10 @@ type TSelectSize = "sm" | "md" | "lg"
 /**
  * Свойства совместимого select с поддержкой старого API (`selectedKeys`).
  */
-export interface ISelectProps extends Omit<THeroUISelectProps, "selectedKey" | "defaultSelectedKey" | "onSelectionChange"> {
+export interface ISelectProps extends Omit<
+    THeroUISelectProps,
+    "selectedKey" | "defaultSelectedKey" | "onSelectionChange"
+> {
     /** Legacy API: legacy-набор строковых ключей для одного выбора. */
     readonly selectedKeys?: ReadonlySet<string> | "all"
     /** Legacy API: дефолтный набор ключей для одного выбора. */

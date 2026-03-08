@@ -173,14 +173,14 @@ const MOCK_CCR_DIFFS: ReadonlyArray<{ ccrId: string; files: ReadonlyArray<ICcrDi
                     {
                         leftLine: 2,
                         rightLine: 2,
-                        leftText: "import { log } from \"./logger\"",
-                        rightText: "import { log } from \"./logger\"",
+                        leftText: 'import { log } from "./logger"',
+                        rightText: 'import { log } from "./logger"',
                         type: "context",
                     },
                     {
                         leftLine: 3,
                         rightLine: 3,
-                        leftText: "import { isUserBlocked } from \"./policy\"",
+                        leftText: 'import { isUserBlocked } from "./policy"',
                         rightText: 'import { isUserBlocked, isUserRevoked } from "./policy"',
                         type: "added",
                     },
@@ -194,15 +194,17 @@ const MOCK_CCR_DIFFS: ReadonlyArray<{ ccrId: string; files: ReadonlyArray<ICcrDi
                     {
                         leftLine: 5,
                         rightLine: 5,
-                        leftText: "  const token = req.headers.authorization?.replace(\"Bearer \", \"\")",
-                        rightText: "  const token = req.headers.authorization?.replace(\"Bearer \", \"\")",
+                        leftText:
+                            '  const token = req.headers.authorization?.replace("Bearer ", "")',
+                        rightText:
+                            '  const token = req.headers.authorization?.replace("Bearer ", "")',
                         type: "context",
                     },
                     {
                         leftLine: 6,
                         rightLine: 6,
                         leftText: "  const user = verifyToken(token)",
-                        rightText: '  const user = verifyToken(token)',
+                        rightText: "  const user = verifyToken(token)",
                         type: "context",
                     },
                     {
@@ -230,7 +232,7 @@ const MOCK_CCR_DIFFS: ReadonlyArray<{ ccrId: string; files: ReadonlyArray<ICcrDi
                         leftLine: 10,
                         rightLine: 10,
                         leftText: "",
-                        rightText: '  if (isUserRevoked(user.id)) {',
+                        rightText: "  if (isUserRevoked(user.id)) {",
                         type: "added",
                     },
                     {
@@ -279,7 +281,8 @@ const MOCK_CCR_DIFFS: ReadonlyArray<{ ccrId: string; files: ReadonlyArray<ICcrDi
                             {
                                 author: "Nika",
                                 line: 13,
-                                message: "Should we keep explicit return for middleware consistency?",
+                                message:
+                                    "Should we keep explicit return for middleware consistency?",
                                 side: "left",
                             },
                         ],
@@ -293,15 +296,15 @@ const MOCK_CCR_DIFFS: ReadonlyArray<{ ccrId: string; files: ReadonlyArray<ICcrDi
                     {
                         leftLine: 1,
                         rightLine: 1,
-                        leftText: "export * from \"./middleware\"",
-                        rightText: "export * from \"./middleware\"",
+                        leftText: 'export * from "./middleware"',
+                        rightText: 'export * from "./middleware"',
                         type: "context",
                     },
                     {
                         leftLine: 2,
                         rightLine: undefined,
                         leftText: "",
-                        rightText: "export { isAdmin } from \"./policy\"",
+                        rightText: 'export { isAdmin } from "./policy"',
                         type: "added",
                     },
                 ],
@@ -318,15 +321,15 @@ const MOCK_CCR_DIFFS: ReadonlyArray<{ ccrId: string; files: ReadonlyArray<ICcrDi
                     {
                         leftLine: 1,
                         rightLine: 1,
-                        leftText: "import pLimit from \"p-limit\"",
-                        rightText: "import pLimit from \"p-limit\"",
+                        leftText: 'import pLimit from "p-limit"',
+                        rightText: 'import pLimit from "p-limit"',
                         type: "context",
                     },
                     {
                         leftLine: 2,
                         rightLine: 2,
-                        leftText: "import { RetryPolicy } from \"./retry-policy\"",
-                        rightText: "import { RetryPolicy } from \"./retry-policy\"",
+                        leftText: 'import { RetryPolicy } from "./retry-policy"',
+                        rightText: 'import { RetryPolicy } from "./retry-policy"',
                         type: "context",
                     },
                     {

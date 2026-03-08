@@ -61,7 +61,8 @@ export const CODE_REVIEW_FEEDBACK_TYPES = {
 } as const
 
 /** Тип обратной связи по issue. */
-export type TCodeReviewFeedbackType = (typeof CODE_REVIEW_FEEDBACK_TYPES)[keyof typeof CODE_REVIEW_FEEDBACK_TYPES]
+export type TCodeReviewFeedbackType =
+    (typeof CODE_REVIEW_FEEDBACK_TYPES)[keyof typeof CODE_REVIEW_FEEDBACK_TYPES]
 
 /** Элемент обратной связи. */
 export interface ICodeReviewFeedbackItem {
@@ -133,7 +134,9 @@ export interface ICodeReviewApi {
      * @param request Payload обратной связи.
      * @returns Результат сохранения.
      */
-    submitFeedback(request: ISubmitCodeReviewFeedbackRequest): Promise<ISubmitCodeReviewFeedbackResponse>
+    submitFeedback(
+        request: ISubmitCodeReviewFeedbackRequest,
+    ): Promise<ISubmitCodeReviewFeedbackResponse>
 }
 
 /** Endpoint-слой для code review API. */

@@ -1,6 +1,13 @@
 import type { ReactElement } from "react"
 
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts"
+import {
+    Radar,
+    RadarChart,
+    PolarGrid,
+    PolarAngleAxis,
+    PolarRadiusAxis,
+    ResponsiveContainer,
+} from "recharts"
 
 import { Card, CardBody, CardHeader, Chip } from "@/components/ui"
 

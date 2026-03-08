@@ -56,10 +56,15 @@ export function AiSummaryWidget(props: IAiSummaryWidgetProps): ReactElement {
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-[var(--foreground)]">AI summary widget</p>
+                <p className="text-base font-semibold text-[var(--foreground)]">
+                    AI summary widget
+                </p>
             </CardHeader>
             <CardBody className="space-y-3">
-                <p aria-label="AI summary text" className="rounded border border-slate-200 bg-slate-50 p-3 text-sm">
+                <p
+                    aria-label="AI summary text"
+                    className="rounded border border-slate-200 bg-slate-50 p-3 text-sm"
+                >
                     {summary}
                 </p>
                 <div className="flex gap-2">

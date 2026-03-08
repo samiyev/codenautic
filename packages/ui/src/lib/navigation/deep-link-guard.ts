@@ -17,11 +17,7 @@ export interface IDeepLinkGuardResult {
     readonly switchTenantId?: TTenantId
 }
 
-const TENANT_OPTIONS: ReadonlyArray<TTenantId> = [
-    "platform-team",
-    "frontend-team",
-    "runtime-team",
-]
+const TENANT_OPTIONS: ReadonlyArray<TTenantId> = ["platform-team", "frontend-team", "runtime-team"]
 
 const FALLBACK_PATH = "/settings"
 
@@ -63,9 +59,7 @@ export function sanitizeDeepLinkPath(targetPath: string): string {
     })
 
     const queryString = sanitizedParams.toString()
-    return queryString.length > 0
-        ? `${parsedUrl.pathname}?${queryString}`
-        : parsedUrl.pathname
+    return queryString.length > 0 ? `${parsedUrl.pathname}?${queryString}` : parsedUrl.pathname
 }
 
 /**

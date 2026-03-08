@@ -2,10 +2,7 @@ import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import {
-    ChangeRiskGauge,
-    type IChangeRiskGaugePoint,
-} from "@/components/graphs/change-risk-gauge"
+import { ChangeRiskGauge, type IChangeRiskGaugePoint } from "@/components/graphs/change-risk-gauge"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_POINTS: ReadonlyArray<IChangeRiskGaugePoint> = [

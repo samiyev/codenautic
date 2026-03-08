@@ -84,7 +84,9 @@ export function ChangeRiskGauge(props: IChangeRiskGaugeProps): ReactElement {
                             key={point.label}
                         >
                             <div>
-                                <p className="text-sm font-semibold text-slate-900">{point.label}</p>
+                                <p className="text-sm font-semibold text-slate-900">
+                                    {point.label}
+                                </p>
                                 <p className="text-xs text-slate-600">
                                     Historical {String(point.score)} · Delta{" "}
                                     {delta > 0 ? `+${String(delta)}` : String(delta)}

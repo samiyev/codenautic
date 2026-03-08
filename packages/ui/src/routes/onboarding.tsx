@@ -29,7 +29,8 @@ const LazyOnboardingWizardPage = lazy(
         return {
             default: pageModule.OnboardingWizardPage,
         }
-})
+    },
+)
 
 function extractRepositoryPathSegments(repositoryUrl: string): ReadonlyArray<string> {
     const normalizedUrl = repositoryUrl.trim()
@@ -47,12 +48,7 @@ function extractRepositoryPathSegments(repositoryUrl: string): ReadonlyArray<str
         pathname = rawPath
     }
 
-    const withoutQuery = pathname
-        .split("?")
-        .at(0)
-        ?.split("#")
-        .at(0)
-        ?.trim() ?? ""
+    const withoutQuery = pathname.split("?").at(0)?.split("#").at(0)?.trim() ?? ""
 
     if (withoutQuery.length === 0) {
         return []

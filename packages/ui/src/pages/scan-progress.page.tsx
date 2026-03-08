@@ -168,52 +168,55 @@ function mapPhaseState(
     const currentIndex = PHASES.indexOf(currentPhase)
     const latestEvent = events.at(-1)
 
-    return PHASES.map((phase, index): {
-        isCompleted: boolean
-        isActive: boolean
-        message: string
-        phase: TScanPhase
-    } => {
-        if (latestEvent === undefined) {
-            return {
-                isCompleted: false,
-                isActive: index === 0,
-                message: "Ожидание",
-                phase,
-            }
-        }
-
-        if (index < currentIndex) {
-            return {
-                isCompleted: true,
-                isActive: false,
-                message: "Завершено",
-                phase,
-            }
-        }
-
-        if (index > currentIndex) {
-            return {
-                isCompleted: false,
-                isActive: false,
-                message: "Ожидание",
-                phase,
-            }
-        }
-
-        const isCurrentActive = latestEvent.phaseCompleted === false
-        return {
-            isCompleted: latestEvent.phaseCompleted,
-            isActive: isCurrentActive && currentPercent < 100,
-            message: latestEvent.message,
+    return PHASES.map(
+        (
             phase,
-        }
-    })
+            index,
+        ): {
+            isCompleted: boolean
+            isActive: boolean
+            message: string
+            phase: TScanPhase
+        } => {
+            if (latestEvent === undefined) {
+                return {
+                    isCompleted: false,
+                    isActive: index === 0,
+                    message: "Ожидание",
+                    phase,
+                }
+            }
+
+            if (index < currentIndex) {
+                return {
+                    isCompleted: true,
+                    isActive: false,
+                    message: "Завершено",
+                    phase,
+                }
+            }
+
+            if (index > currentIndex) {
+                return {
+                    isCompleted: false,
+                    isActive: false,
+                    message: "Ожидание",
+                    phase,
+                }
+            }
+
+            const isCurrentActive = latestEvent.phaseCompleted === false
+            return {
+                isCompleted: latestEvent.phaseCompleted,
+                isActive: isCurrentActive && currentPercent < 100,
+                message: latestEvent.message,
+                phase,
+            }
+        },
+    )
 }
 
-function buildProgressState(
-    state: IUseScanProgressState,
-): {
+function buildProgressState(state: IUseScanProgressState): {
     readonly phaseStates: ReadonlyArray<{
         phase: TScanPhase
         isCompleted: boolean
@@ -341,16 +344,14 @@ function formatProgressLabel(percent: number): string {
  * @returns Экран реального прогресса сканирования.
  */
 export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
-    const jobId = props.jobId?.trim().length === 0 ? DEFAULT_JOB_ID : props.jobId ?? DEFAULT_JOB_ID
+    const jobId =
+        props.jobId?.trim().length === 0 ? DEFAULT_JOB_ID : (props.jobId ?? DEFAULT_JOB_ID)
     const state = useScanProgressEvents(jobId, {
         eventSourceUrl: props.eventSourceUrl,
         seedEvents: props.seedEvents ?? DEFAULT_SEED_EVENTS,
         jobId,
     })
-    const progressState = useMemo(
-        () => buildProgressState(state),
-        [state],
-    )
+    const progressState = useMemo(() => buildProgressState(state), [state])
     const progressClass =
         progressState.percent < 50
             ? "bg-blue-500"
@@ -367,7 +368,8 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
             </p>
             {batchRepositoriesCount > 1 ? (
                 <p className="text-sm text-slate-600">
-                    Batch onboarding: {String(batchRepositoriesCount)} repositories are tracked in this run.
+                    Batch onboarding: {String(batchRepositoriesCount)} repositories are tracked in
+                    this run.
                 </p>
             ) : null}
 
@@ -394,7 +396,8 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                         <div className="mt-2 flex items-center justify-between text-sm text-slate-600">
                             <span>Прогресс: {formatProgressLabel(progressState.percent)}</span>
                             <span>
-                                ETA: {progressState.etaSeconds === undefined
+                                ETA:{" "}
+                                {progressState.etaSeconds === undefined
                                     ? "—"
                                     : formatSecondsToMinutes(progressState.etaSeconds)}
                             </span>
@@ -402,39 +405,36 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                     </div>
 
                     <div className="grid gap-2 md:grid-cols-5">
-                        {progressState.phaseStates.map((phase): ReactElement => (
-                            <article
-                                className={`rounded-lg border px-3 py-2 ${
-                                    phase.isCompleted
-                                        ? "border-emerald-200 bg-emerald-50"
-                                        : phase.isActive
-                                          ? "border-blue-200 bg-blue-50"
-                                          : "border-slate-200 bg-white"
-                                }`}
-                                key={phase.phase}
-                            >
-                                <p className="text-xs uppercase tracking-wider text-slate-500">
-                                    {phase.phase}
-                                </p>
-                                <p className="text-sm font-semibold text-slate-900">
-                                    {phase.isCompleted
-                                        ? "Готово"
-                                        : phase.isActive
-                                          ? "Выполняется"
-                                          : "Ожидает"}
-                                </p>
-                                <p className="text-xs text-slate-600">{phase.message}</p>
-                            </article>
-                        ))}
+                        {progressState.phaseStates.map(
+                            (phase): ReactElement => (
+                                <article
+                                    className={`rounded-lg border px-3 py-2 ${
+                                        phase.isCompleted
+                                            ? "border-emerald-200 bg-emerald-50"
+                                            : phase.isActive
+                                              ? "border-blue-200 bg-blue-50"
+                                              : "border-slate-200 bg-white"
+                                    }`}
+                                    key={phase.phase}
+                                >
+                                    <p className="text-xs uppercase tracking-wider text-slate-500">
+                                        {phase.phase}
+                                    </p>
+                                    <p className="text-sm font-semibold text-slate-900">
+                                        {phase.isCompleted
+                                            ? "Готово"
+                                            : phase.isActive
+                                              ? "Выполняется"
+                                              : "Ожидает"}
+                                    </p>
+                                    <p className="text-xs text-slate-600">{phase.message}</p>
+                                </article>
+                            ),
+                        )}
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                        <Button
-                            onPress={props.onRetry}
-                            size="sm"
-                            type="button"
-                            variant="light"
-                        >
+                        <Button onPress={props.onRetry} size="sm" type="button" variant="light">
                             Retry
                         </Button>
                         <Button
@@ -468,35 +468,41 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                         <p
                             className={`text-xs ${progressState.isDone ? "text-emerald-700" : "text-slate-500"}`}
                         >
-                            {progressState.isDone ? "Завершено" : state.isLive ? "ОБНОВЛЯЕТСЯ" : "ОЖИДАЕТ"}
+                            {progressState.isDone
+                                ? "Завершено"
+                                : state.isLive
+                                  ? "ОБНОВЛЯЕТСЯ"
+                                  : "ОЖИДАЕТ"}
                         </p>
                     </div>
                 </CardHeader>
                 <CardBody>
-                    {state.errorMessage !== undefined ? <Alert color="danger">{state.errorMessage}</Alert> : null}
+                    {state.errorMessage !== undefined ? (
+                        <Alert color="danger">{state.errorMessage}</Alert>
+                    ) : null}
 
-                    <ul
-                        aria-label="Scan logs"
-                        className="space-y-2 text-sm"
-                        role="log"
-                    >
+                    <ul aria-label="Scan logs" className="space-y-2 text-sm" role="log">
                         {state.events.length === 0 ? (
                             <li className="rounded-md border border-slate-200 p-3 text-slate-500">
                                 Пока нет событий сканирования.
                             </li>
                         ) : null}
-                        {state.events.map((event): ReactElement => (
-                            <li
-                                key={`${event.timestamp}-${event.phase}-${event.message}`}
-                                className="rounded-md border border-slate-200 bg-slate-50 p-3"
-                            >
-                                <p className="text-xs text-slate-500">{formatLogTime(event.timestamp)}</p>
-                                <p>{event.message}</p>
-                                {event.log === undefined ? null : (
-                                    <p className="mt-1 text-xs text-slate-700">{event.log}</p>
-                                )}
-                            </li>
-                        ))}
+                        {state.events.map(
+                            (event): ReactElement => (
+                                <li
+                                    key={`${event.timestamp}-${event.phase}-${event.message}`}
+                                    className="rounded-md border border-slate-200 bg-slate-50 p-3"
+                                >
+                                    <p className="text-xs text-slate-500">
+                                        {formatLogTime(event.timestamp)}
+                                    </p>
+                                    <p>{event.message}</p>
+                                    {event.log === undefined ? null : (
+                                        <p className="mt-1 text-xs text-slate-700">{event.log}</p>
+                                    )}
+                                </li>
+                            ),
+                        )}
                     </ul>
                 </CardBody>
             </Card>

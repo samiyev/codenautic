@@ -2,10 +2,19 @@ import { type ReactElement, Suspense, lazy, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { ActivationChecklist } from "@/components/onboarding/activation-checklist"
-import { DataFreshnessPanel, type IProvenanceContext } from "@/components/infrastructure/data-freshness-panel"
+import {
+    DataFreshnessPanel,
+    type IProvenanceContext,
+} from "@/components/infrastructure/data-freshness-panel"
 import { ExplainabilityPanel } from "@/components/infrastructure/explainability-panel"
-import { FlowMetricsWidget, type IFlowMetricsPoint } from "@/components/dashboard/flow-metrics-widget"
-import { TeamActivityWidget, type ITeamActivityPoint } from "@/components/dashboard/team-activity-widget"
+import {
+    FlowMetricsWidget,
+    type IFlowMetricsPoint,
+} from "@/components/dashboard/flow-metrics-widget"
+import {
+    TeamActivityWidget,
+    type ITeamActivityPoint,
+} from "@/components/dashboard/team-activity-widget"
 import { ArchitectureHealthWidget } from "@/components/dashboard/architecture-health-widget"
 import {
     TokenUsageDashboardWidget,
@@ -164,7 +173,12 @@ interface IWorkspacePersonalization {
     readonly layoutPreset: TWorkspaceLayoutPreset
 }
 
-const WORKSPACE_SHORTCUT_OPTIONS = ["/reviews", "/issues", "/dashboard/code-city", "/my-work"] as const
+const WORKSPACE_SHORTCUT_OPTIONS = [
+    "/reviews",
+    "/issues",
+    "/dashboard/code-city",
+    "/my-work",
+] as const
 const PERSONALIZATION_STORAGE_KEY = "ui.workspace.personalization.v1"
 
 function readWorkspacePersonalization(): IWorkspacePersonalization {
@@ -211,11 +225,13 @@ function readWorkspacePersonalization(): IWorkspacePersonalization {
                     : "all-orgs",
             pinnedShortcuts: Array.isArray(pinnedShortcuts)
                 ? pinnedShortcuts.filter((shortcut): shortcut is string => {
-                    return (
-                        typeof shortcut === "string" &&
-                        WORKSPACE_SHORTCUT_OPTIONS.includes(shortcut as (typeof WORKSPACE_SHORTCUT_OPTIONS)[number])
-                    )
-                })
+                      return (
+                          typeof shortcut === "string" &&
+                          WORKSPACE_SHORTCUT_OPTIONS.includes(
+                              shortcut as (typeof WORKSPACE_SHORTCUT_OPTIONS)[number],
+                          )
+                      )
+                  })
                 : ["/reviews", "/my-work"],
             repositoryScope:
                 repositoryScope === "all-repos" ||
@@ -691,8 +707,9 @@ export function DashboardMissionControlPage(): ReactElement {
     const personalizationDefaults = readWorkspacePersonalization()
     const [range, setRange] = useState<TDashboardDateRange>("7d")
     const [orgScope, setOrgScope] = useState<TOrgScope>(personalizationDefaults.orgScope)
-    const [repositoryScope, setRepositoryScope] =
-        useState<TRepositoryScope>(personalizationDefaults.repositoryScope)
+    const [repositoryScope, setRepositoryScope] = useState<TRepositoryScope>(
+        personalizationDefaults.repositoryScope,
+    )
     const [teamScope, setTeamScope] = useState<TTeamScope>(personalizationDefaults.teamScope)
     const [pinnedShortcuts, setPinnedShortcuts] = useState<ReadonlyArray<string>>(
         personalizationDefaults.pinnedShortcuts,
@@ -719,8 +736,14 @@ export function DashboardMissionControlPage(): ReactElement {
     const timelinePayload = useMemo((): ReadonlyArray<IWorkQueuePayload["timeline"][number]> => {
         return getTimelinePayload(dashboardPayload)
     }, [dashboardPayload])
-    const teamActivity = useMemo((): ReadonlyArray<ITeamActivityPoint> => getTeamActivity(range), [range])
-    const flowMetrics = useMemo((): ReadonlyArray<IFlowMetricsPoint> => getFlowMetrics(range), [range])
+    const teamActivity = useMemo(
+        (): ReadonlyArray<ITeamActivityPoint> => getTeamActivity(range),
+        [range],
+    )
+    const flowMetrics = useMemo(
+        (): ReadonlyArray<IFlowMetricsPoint> => getFlowMetrics(range),
+        [range],
+    )
     const tokenUsageByModel = useMemo((): ReadonlyArray<ITokenUsageModelPoint> => {
         return getTokenUsageByModel(range)
     }, [range])
@@ -751,7 +774,10 @@ export function DashboardMissionControlPage(): ReactElement {
             {
                 impact: "high",
                 label: "Open CCR backlog",
-                value: range === "1d" ? "19 open CCRs in current window." : "41 open CCRs in trend window.",
+                value:
+                    range === "1d"
+                        ? "19 open CCRs in current window."
+                        : "41 open CCRs in trend window.",
             },
             {
                 impact: "medium",
@@ -824,8 +850,8 @@ export function DashboardMissionControlPage(): ReactElement {
                         Dashboard Mission Control
                     </h1>
                     <p className="text-sm text-slate-600">
-                        Scope: {orgScope} / {repositoryScope} / {teamScope}. Use quick links for deep
-                        navigation.
+                        Scope: {orgScope} / {repositoryScope} / {teamScope}. Use quick links for
+                        deep navigation.
                     </p>
                 </div>
                 <div className="grid gap-2 sm:min-w-[380px] sm:grid-cols-2">
@@ -914,22 +940,24 @@ export function DashboardMissionControlPage(): ReactElement {
                     <div className="space-y-1">
                         <p className="text-sm text-slate-700">Pinned shortcuts</p>
                         <div className="grid gap-2 sm:grid-cols-2">
-                            {WORKSPACE_SHORTCUT_OPTIONS.map((shortcut): ReactElement => (
-                                <label
-                                    className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                                    key={shortcut}
-                                >
-                                    <input
-                                        aria-label={`Pin ${shortcut}`}
-                                        checked={pinnedShortcuts.includes(shortcut)}
-                                        type="checkbox"
-                                        onChange={(): void => {
-                                            handleToggleShortcut(shortcut)
-                                        }}
-                                    />
-                                    {shortcut}
-                                </label>
-                            ))}
+                            {WORKSPACE_SHORTCUT_OPTIONS.map(
+                                (shortcut): ReactElement => (
+                                    <label
+                                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                                        key={shortcut}
+                                    >
+                                        <input
+                                            aria-label={`Pin ${shortcut}`}
+                                            checked={pinnedShortcuts.includes(shortcut)}
+                                            type="checkbox"
+                                            onChange={(): void => {
+                                                handleToggleShortcut(shortcut)
+                                            }}
+                                        />
+                                        {shortcut}
+                                    </label>
+                                ),
+                            )}
                         </div>
                     </div>
 
@@ -999,11 +1027,7 @@ export function DashboardMissionControlPage(): ReactElement {
 
             <ActivationChecklist role={checklistRole} />
             <MetricsGrid metrics={metrics} />
-            <FlowMetricsWidget
-                capacityTrendLabel="+6%"
-                flowTrendLabel="+4%"
-                points={flowMetrics}
-            />
+            <FlowMetricsWidget capacityTrendLabel="+6%" flowTrendLabel="+4%" points={flowMetrics} />
             <TeamActivityWidget points={teamActivity} />
             <TokenUsageDashboardWidget byModel={tokenUsageByModel} costTrend={tokenUsageTrend} />
             <ArchitectureHealthWidget

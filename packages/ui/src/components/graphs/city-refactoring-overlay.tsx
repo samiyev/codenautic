@@ -60,34 +60,38 @@ export function CityRefactoringOverlay(props: ICityRefactoringOverlayProps): Rea
             </p>
 
             <ul className="mt-3 space-y-2">
-                {props.entries.map((entry): ReactElement => (
-                    <li
-                        className="rounded border border-slate-200 bg-slate-50 p-2"
-                        key={entry.fileId}
-                    >
-                        <div className="flex items-start justify-between gap-3">
-                            <div>
-                                <p className="text-sm font-semibold text-slate-900">{entry.label}</p>
-                                <p className="mt-1 text-xs text-slate-600">{entry.details}</p>
-                            </div>
-                            <span
-                                className={`rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${resolvePriorityClassName(entry.priority)}`}
-                            >
-                                {entry.priority}
-                            </span>
-                        </div>
-                        <button
-                            aria-label={`Inspect refactoring overlay ${entry.label}`}
-                            className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
-                            onClick={(): void => {
-                                props.onSelectEntry?.(entry)
-                            }}
-                            type="button"
+                {props.entries.map(
+                    (entry): ReactElement => (
+                        <li
+                            className="rounded border border-slate-200 bg-slate-50 p-2"
+                            key={entry.fileId}
                         >
-                            Show in city
-                        </button>
-                    </li>
-                ))}
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <p className="text-sm font-semibold text-slate-900">
+                                        {entry.label}
+                                    </p>
+                                    <p className="mt-1 text-xs text-slate-600">{entry.details}</p>
+                                </div>
+                                <span
+                                    className={`rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${resolvePriorityClassName(entry.priority)}`}
+                                >
+                                    {entry.priority}
+                                </span>
+                            </div>
+                            <button
+                                aria-label={`Inspect refactoring overlay ${entry.label}`}
+                                className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                                onClick={(): void => {
+                                    props.onSelectEntry?.(entry)
+                                }}
+                                type="button"
+                            >
+                                Show in city
+                            </button>
+                        </li>
+                    ),
+                )}
             </ul>
         </section>
     )

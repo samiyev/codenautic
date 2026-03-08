@@ -1,9 +1,4 @@
-import {
-    type ChangeEvent,
-    type ReactElement,
-    useEffect,
-    useState,
-} from "react"
+import { type ChangeEvent, type ReactElement, useEffect, useState } from "react"
 
 import { Link } from "@tanstack/react-router"
 
@@ -281,9 +276,7 @@ const REPOSITORY_OVERVIEWS: ReadonlyArray<IRepositoryOverviewProfile> = [
             {
                 area: "Frontend shell",
                 risk: "low",
-                summary:
-                    "Модульный подход сохранен, критические цепочки " +
-                    "в UI не перегружены.",
+                summary: "Модульный подход сохранен, критические цепочки " + "в UI не перегружены.",
             },
             {
                 area: "State",
@@ -374,14 +367,13 @@ const REPOSITORY_OVERVIEWS: ReadonlyArray<IRepositoryOverviewProfile> = [
                 area: "Persistence",
                 risk: "high",
                 summary:
-                    "Точки записи в Redis не идемпотентны; " +
-                    "возможны дублирующиеся задачи.",
+                    "Точки записи в Redis не идемпотентны; " + "возможны дублирующиеся задачи.",
             },
             {
                 area: "Monitoring",
                 risk: "low",
-                summary: "Метрики в хорошем состоянии, alert policy покрывает " +
-                    "SLO на 95p latency.",
+                summary:
+                    "Метрики в хорошем состоянии, alert policy покрывает " + "SLO на 95p latency.",
             },
         ],
         branch: "release",
@@ -451,9 +443,7 @@ const FALLBACK_ARCHITECTURE_SUMMARY: ReadonlyArray<IArchitectureSummary> = [
     {
         area: "Repository overview",
         risk: "critical",
-        summary:
-            "Информация по репозиторию отсутствует, требуется " +
-            "повторно запустить скан.",
+        summary: "Информация по репозиторию отсутствует, требуется " + "повторно запустить скан.",
     },
 ]
 
@@ -1558,9 +1548,7 @@ function isCronManual(cronExpression: string): boolean {
     return cronExpression.trim() === "manual"
 }
 
-function createRescanScheduleFromCron(
-    cronExpression: string,
-): IRescanScheduleValues {
+function createRescanScheduleFromCron(cronExpression: string): IRescanScheduleValues {
     if (isCronManual(cronExpression)) {
         return DEFAULT_RESCAN_VALUES
     }
@@ -1595,8 +1583,7 @@ function createRescanScheduleFromCron(
         }
     }
 
-    const isDailyPattern =
-        values[2] === "*" && values[3] === "*" && values[4] === "*"
+    const isDailyPattern = values[2] === "*" && values[3] === "*" && values[4] === "*"
     if (isDailyPattern === true) {
         return {
             ...DEFAULT_RESCAN_VALUES,
@@ -1751,14 +1738,16 @@ function TechnologyStackList(props: { stack: ReadonlyArray<ITechStackItem> }): R
                 <p className="text-sm font-semibold text-slate-900">Tech stack</p>
             </CardHeader>
             <CardBody className="space-y-3">
-                {props.stack.map((entry): ReactElement => (
-                    <div className="space-y-0.5" key={`${entry.name}-${entry.version}`}>
-                        <p className="text-sm font-semibold text-slate-900">
-                            {entry.name} <span className="font-normal">{entry.version}</span>
-                        </p>
-                        <p className="text-sm text-slate-600">{entry.note}</p>
-                    </div>
-                ))}
+                {props.stack.map(
+                    (entry): ReactElement => (
+                        <div className="space-y-0.5" key={`${entry.name}-${entry.version}`}>
+                            <p className="text-sm font-semibold text-slate-900">
+                                {entry.name} <span className="font-normal">{entry.version}</span>
+                            </p>
+                            <p className="text-sm text-slate-600">{entry.note}</p>
+                        </div>
+                    ),
+                )}
             </CardBody>
         </Card>
     )
@@ -1776,17 +1765,12 @@ function ArchitectureSummaryList(props: {
                 {props.lines.map((line): ReactElement => {
                     const chipColor = mapRiskToChipColor(line.risk)
                     return (
-                        <section
-                            className="rounded-lg border border-slate-200 p-3"
-                            key={line.area}
-                        >
+                        <section className="rounded-lg border border-slate-200 p-3" key={line.area}>
                             <div className="mb-1 flex items-center gap-2">
                                 <Chip color={chipColor} size="sm">
                                     {mapRiskToLabel(line.risk)}
                                 </Chip>
-                                <p className="text-sm font-semibold text-slate-900">
-                                    {line.area}
-                                </p>
+                                <p className="text-sm font-semibold text-slate-900">{line.area}</p>
                             </div>
                             <p className="text-sm text-slate-600">{line.summary}</p>
                         </section>
@@ -1801,10 +1785,10 @@ function RepositoryOverviewNotFound(props: { repositoryId: string }): ReactEleme
     return (
         <section className="space-y-3">
             <Alert color="warning">Скан-результат репозитория не найден</Alert>
-                <p className="text-sm text-slate-700">
-                    Не найдено overview для ID:{" "}
-                    <span className="font-semibold">{props.repositoryId}</span>.
-                </p>
+            <p className="text-sm text-slate-700">
+                Не найдено overview для ID:{" "}
+                <span className="font-semibold">{props.repositoryId}</span>.
+            </p>
             <Link className="text-sm underline underline-offset-4" to="/repositories">
                 К списку репозиториев
             </Link>
@@ -1825,12 +1809,9 @@ export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactEl
     )
 
     const [isRescheduleDialogOpen, setIsRescheduleDialogOpen] = useState<boolean>(false)
-    const [currentReschedule, setCurrentReschedule] = useState<IRescanScheduleValues>(
-        defaultReschedule,
-    )
-    const [draftReschedule, setDraftReschedule] = useState<IRescanScheduleValues>(
-        defaultReschedule,
-    )
+    const [currentReschedule, setCurrentReschedule] =
+        useState<IRescanScheduleValues>(defaultReschedule)
+    const [draftReschedule, setDraftReschedule] = useState<IRescanScheduleValues>(defaultReschedule)
 
     useEffect((): void => {
         const nextReschedule = createRescanScheduleFromCron(
@@ -1878,44 +1859,57 @@ export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactEl
             return
         }
 
-        setDraftReschedule((previous): IRescanScheduleValues => ({
-            ...previous,
-            mode: nextMode,
-        }))
+        setDraftReschedule(
+            (previous): IRescanScheduleValues => ({
+                ...previous,
+                mode: nextMode,
+            }),
+        )
     }
 
     const updateRescheduleMinute = (event: ChangeEvent<HTMLSelectElement>): void => {
         const nextMinute = parseCronNumber(event.currentTarget.value, 0, 59, draftReschedule.minute)
-        setDraftReschedule((previous): IRescanScheduleValues => ({
-            ...previous,
-            minute: nextMinute,
-        }))
+        setDraftReschedule(
+            (previous): IRescanScheduleValues => ({
+                ...previous,
+                minute: nextMinute,
+            }),
+        )
     }
 
     const updateRescheduleHour = (event: ChangeEvent<HTMLSelectElement>): void => {
         const nextHour = parseCronNumber(event.currentTarget.value, 0, 23, draftReschedule.hour)
-        setDraftReschedule((previous): IRescanScheduleValues => ({
-            ...previous,
-            hour: nextHour,
-        }))
+        setDraftReschedule(
+            (previous): IRescanScheduleValues => ({
+                ...previous,
+                hour: nextHour,
+            }),
+        )
     }
 
     const updateRescheduleWeekday = (event: ChangeEvent<HTMLSelectElement>): void => {
-        const nextWeekday = parseCronNumber(event.currentTarget.value, 0, 6, draftReschedule.weekday)
-        setDraftReschedule((previous): IRescanScheduleValues => ({
-            ...previous,
-            weekday: nextWeekday,
-        }))
+        const nextWeekday = parseCronNumber(
+            event.currentTarget.value,
+            0,
+            6,
+            draftReschedule.weekday,
+        )
+        setDraftReschedule(
+            (previous): IRescanScheduleValues => ({
+                ...previous,
+                weekday: nextWeekday,
+            }),
+        )
     }
 
-    const updateRescheduleCustomCron = (
-        event: ChangeEvent<HTMLInputElement>,
-    ): void => {
+    const updateRescheduleCustomCron = (event: ChangeEvent<HTMLInputElement>): void => {
         const nextCustomCron = event.currentTarget.value
-        setDraftReschedule((previous): IRescanScheduleValues => ({
-            ...previous,
-            customCron: nextCustomCron,
-        }))
+        setDraftReschedule(
+            (previous): IRescanScheduleValues => ({
+                ...previous,
+                customCron: nextCustomCron,
+            }),
+        )
     }
 
     if (repository === undefined) {
@@ -2079,10 +2073,7 @@ export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactEl
 
                         {draftReschedule.mode === "weekly" ? (
                             <div className="mt-3 space-y-2">
-                                <label
-                                    className="text-sm text-slate-700"
-                                    htmlFor="rescan-weekday"
-                                >
+                                <label className="text-sm text-slate-700" htmlFor="rescan-weekday">
                                     День недели
                                 </label>
                                 <select
@@ -2173,14 +2164,14 @@ export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactEl
                 showMiniMap
                 title="Function/Class call graph"
             />
-                <PackageDependencyGraph
-                    height="420px"
-                    nodes={packageDependencyGraph.nodes}
-                    relations={packageDependencyGraph.packageRelations}
-                    showControls
-                    showMiniMap
-                    title="Package dependency graph"
-                />
+            <PackageDependencyGraph
+                height="420px"
+                nodes={packageDependencyGraph.nodes}
+                relations={packageDependencyGraph.packageRelations}
+                showControls
+                showMiniMap
+                title="Package dependency graph"
+            />
             <CodeCityTreemap
                 files={resolveCodeCityTreemapFiles(fileDependencyGraph.files)}
                 height="440px"

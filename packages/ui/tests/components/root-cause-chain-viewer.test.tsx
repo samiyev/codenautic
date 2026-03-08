@@ -87,7 +87,9 @@ describe("RootCauseChainViewer", (): void => {
                 name: "Open chain node Burst retries",
             }),
         )
-        expect(screen.getByText("Burst requests triggered cascading provider retries.")).not.toBeNull()
+        expect(
+            screen.getByText("Burst requests triggered cascading provider retries."),
+        ).not.toBeNull()
     })
 
     it("сообщает выбранную цепочку для 3D chain navigation", async (): Promise<void> => {

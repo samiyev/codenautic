@@ -17,7 +17,7 @@ function collectDependencyNames(packageJson: IPackageJson): ReadonlyArray<string
     const dependencyNames = Object.keys(packageJson.dependencies ?? {})
     const devDependencyNames = Object.keys(packageJson.devDependencies ?? {})
 
-    return [ ...dependencyNames, ...devDependencyNames ]
+    return [...dependencyNames, ...devDependencyNames]
 }
 
 describe("ui dependency migration policy contract", (): void => {

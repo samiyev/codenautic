@@ -42,10 +42,7 @@ describe("SettingsWebhooksPage", (): void => {
             screen.getByRole("textbox", { name: "Endpoint URL" }),
             "https://hooks.acme.dev/new-endpoint",
         )
-        await user.type(
-            screen.getByRole("textbox", { name: "Event types" }),
-            "scan.completed",
-        )
+        await user.type(screen.getByRole("textbox", { name: "Event types" }), "scan.completed")
         await user.click(screen.getByRole("button", { name: "Create endpoint" }))
 
         expect(screen.getByText("https://hooks.acme.dev/new-endpoint")).not.toBeNull()

@@ -33,8 +33,7 @@ interface ISsoTestState {
 const INITIAL_SAML_CONFIG: ISamlConfigState = {
     entityId: "urn:codenautic:sp:acme",
     ssoUrl: "https://idp.acme.dev/sso/saml",
-    x509Certificate:
-        "-----BEGIN CERTIFICATE-----\nMIIC...acme...prod\n-----END CERTIFICATE-----",
+    x509Certificate: "-----BEGIN CERTIFICATE-----\nMIIC...acme...prod\n-----END CERTIFICATE-----",
 }
 
 const INITIAL_OIDC_CONFIG: IOidcConfigState = {
@@ -127,10 +126,12 @@ export function SettingsSsoPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-[var(--foreground)]">SSO provider management</h1>
+            <h1 className="text-2xl font-semibold text-[var(--foreground)]">
+                SSO provider management
+            </h1>
             <p className="text-sm text-[var(--foreground)]/70">
-                Configure SAML and OIDC providers, validate required fields, and run test SSO
-                checks before rollout.
+                Configure SAML and OIDC providers, validate required fields, and run test SSO checks
+                before rollout.
             </p>
 
             <div className="grid gap-4 xl:grid-cols-2">
@@ -146,10 +147,12 @@ export function SettingsSsoPage(): ReactElement {
                             placeholder="urn:codenautic:sp:acme"
                             value={samlConfig.entityId}
                             onValueChange={(value): void => {
-                                setSamlConfig((previous): ISamlConfigState => ({
-                                    ...previous,
-                                    entityId: value,
-                                }))
+                                setSamlConfig(
+                                    (previous): ISamlConfigState => ({
+                                        ...previous,
+                                        entityId: value,
+                                    }),
+                                )
                             }}
                         />
                         <Input
@@ -157,10 +160,12 @@ export function SettingsSsoPage(): ReactElement {
                             placeholder="https://idp.acme.dev/sso/saml"
                             value={samlConfig.ssoUrl}
                             onValueChange={(value): void => {
-                                setSamlConfig((previous): ISamlConfigState => ({
-                                    ...previous,
-                                    ssoUrl: value,
-                                }))
+                                setSamlConfig(
+                                    (previous): ISamlConfigState => ({
+                                        ...previous,
+                                        ssoUrl: value,
+                                    }),
+                                )
                             }}
                         />
                         <Textarea
@@ -169,10 +174,12 @@ export function SettingsSsoPage(): ReactElement {
                             placeholder="-----BEGIN CERTIFICATE-----"
                             value={samlConfig.x509Certificate}
                             onValueChange={(value): void => {
-                                setSamlConfig((previous): ISamlConfigState => ({
-                                    ...previous,
-                                    x509Certificate: value,
-                                }))
+                                setSamlConfig(
+                                    (previous): ISamlConfigState => ({
+                                        ...previous,
+                                        x509Certificate: value,
+                                    }),
+                                )
                             }}
                         />
                         <div className="flex flex-wrap items-center gap-2">
@@ -206,10 +213,12 @@ export function SettingsSsoPage(): ReactElement {
                             placeholder="https://auth.acme.dev/realms/platform"
                             value={oidcConfig.issuerUrl}
                             onValueChange={(value): void => {
-                                setOidcConfig((previous): IOidcConfigState => ({
-                                    ...previous,
-                                    issuerUrl: value,
-                                }))
+                                setOidcConfig(
+                                    (previous): IOidcConfigState => ({
+                                        ...previous,
+                                        issuerUrl: value,
+                                    }),
+                                )
                             }}
                         />
                         <Input
@@ -217,10 +226,12 @@ export function SettingsSsoPage(): ReactElement {
                             placeholder="codenautic-web"
                             value={oidcConfig.clientId}
                             onValueChange={(value): void => {
-                                setOidcConfig((previous): IOidcConfigState => ({
-                                    ...previous,
-                                    clientId: value,
-                                }))
+                                setOidcConfig(
+                                    (previous): IOidcConfigState => ({
+                                        ...previous,
+                                        clientId: value,
+                                    }),
+                                )
                             }}
                         />
                         <Input
@@ -229,10 +240,12 @@ export function SettingsSsoPage(): ReactElement {
                             type="password"
                             value={oidcConfig.clientSecret}
                             onValueChange={(value): void => {
-                                setOidcConfig((previous): IOidcConfigState => ({
-                                    ...previous,
-                                    clientSecret: value,
-                                }))
+                                setOidcConfig(
+                                    (previous): IOidcConfigState => ({
+                                        ...previous,
+                                        clientSecret: value,
+                                    }),
+                                )
                             }}
                         />
                         <p className="text-xs text-[var(--foreground)]/70">

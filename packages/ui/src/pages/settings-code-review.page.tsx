@@ -15,14 +15,15 @@ import { ReviewCadenceSelector } from "@/components/settings/review-cadence-sele
 import { RuleEditor } from "@/components/settings/rule-editor"
 import { SuggestionLimitConfig } from "@/components/settings/suggestion-limit-config"
 import type { ICodeReviewFormValues } from "@/components/settings/settings-form-schemas"
-import {
-    REPO_REVIEW_MODE,
-    type TRepoReviewMode,
-} from "@/lib/api/endpoints/repo-config.endpoint"
+import { REPO_REVIEW_MODE, type TRepoReviewMode } from "@/lib/api/endpoints/repo-config.endpoint"
 import { useCCRSummary, useDryRun, useRepoConfig, useReviewCadence } from "@/lib/hooks/queries"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
-const DEFAULT_IGNORED_PATHS: ReadonlyArray<string> = ["/dist", "/node_modules", "/coverage"] as const
+const DEFAULT_IGNORED_PATHS: ReadonlyArray<string> = [
+    "/dist",
+    "/node_modules",
+    "/coverage",
+] as const
 const DEFAULT_REPOSITORY_ID = "repo-1"
 const DEFAULT_REPOSITORY_CONFIG = "version: 1\nreview:\n  mode: MANUAL\n"
 const DEFAULT_CCR_PROMPT_OVERRIDE = [
@@ -338,8 +339,8 @@ export function SettingsCodeReviewPage(): ReactElement {
         <section className="space-y-4">
             <h1 className="text-2xl font-semibold text-slate-900">Code Review Configuration</h1>
             <p className="text-sm text-slate-600">
-                Configure repository YAML, cadence, severity threshold and ignore paths for automated
-                review.
+                Configure repository YAML, cadence, severity threshold and ignore paths for
+                automated review.
             </p>
             <ConfigurationEditor
                 configYaml={configYaml}
@@ -377,10 +378,12 @@ export function SettingsCodeReviewPage(): ReactElement {
                         checked={ccrSummarySettings.enabled}
                         type="checkbox"
                         onChange={(event): void => {
-                            setCcrSummarySettings((prev): ICcrSummarySettings => ({
-                                ...prev,
-                                enabled: event.currentTarget.checked,
-                            }))
+                            setCcrSummarySettings(
+                                (prev): ICcrSummarySettings => ({
+                                    ...prev,
+                                    enabled: event.currentTarget.checked,
+                                }),
+                            )
                         }}
                     />
                     Enable CCR summary generation
@@ -390,10 +393,12 @@ export function SettingsCodeReviewPage(): ReactElement {
                         checked={ccrSummarySettings.includeRiskOverview}
                         type="checkbox"
                         onChange={(event): void => {
-                            setCcrSummarySettings((prev): ICcrSummarySettings => ({
-                                ...prev,
-                                includeRiskOverview: event.currentTarget.checked,
-                            }))
+                            setCcrSummarySettings(
+                                (prev): ICcrSummarySettings => ({
+                                    ...prev,
+                                    includeRiskOverview: event.currentTarget.checked,
+                                }),
+                            )
                         }}
                     />
                     Include risk overview section
@@ -403,15 +408,20 @@ export function SettingsCodeReviewPage(): ReactElement {
                         checked={ccrSummarySettings.includeTimeline}
                         type="checkbox"
                         onChange={(event): void => {
-                            setCcrSummarySettings((prev): ICcrSummarySettings => ({
-                                ...prev,
-                                includeTimeline: event.currentTarget.checked,
-                            }))
+                            setCcrSummarySettings(
+                                (prev): ICcrSummarySettings => ({
+                                    ...prev,
+                                    includeTimeline: event.currentTarget.checked,
+                                }),
+                            )
                         }}
                     />
                     Include timeline highlights
                 </label>
-                <label className="space-y-1 text-sm text-slate-700" htmlFor="ccr-summary-detail-level">
+                <label
+                    className="space-y-1 text-sm text-slate-700"
+                    htmlFor="ccr-summary-detail-level"
+                >
                     <span className="block font-medium text-slate-900">Summary detail level</span>
                     <select
                         id="ccr-summary-detail-level"
@@ -419,10 +429,12 @@ export function SettingsCodeReviewPage(): ReactElement {
                         value={ccrSummarySettings.detailLevel}
                         onChange={(event): void => {
                             const nextLevel = event.currentTarget.value as TCcrSummaryDetailLevel
-                            setCcrSummarySettings((prev): ICcrSummarySettings => ({
-                                ...prev,
-                                detailLevel: nextLevel,
-                            }))
+                            setCcrSummarySettings(
+                                (prev): ICcrSummarySettings => ({
+                                    ...prev,
+                                    detailLevel: nextLevel,
+                                }),
+                            )
                         }}
                     >
                         <option value={CCR_SUMMARY_DETAIL_LEVEL.concise}>Concise</option>
@@ -433,10 +445,12 @@ export function SettingsCodeReviewPage(): ReactElement {
                 <SuggestionLimitConfig
                     value={ccrSummarySettings.maxSuggestions}
                     onChange={(nextValue): void => {
-                        setCcrSummarySettings((prev): ICcrSummarySettings => ({
-                            ...prev,
-                            maxSuggestions: nextValue,
-                        }))
+                        setCcrSummarySettings(
+                            (prev): ICcrSummarySettings => ({
+                                ...prev,
+                                maxSuggestions: nextValue,
+                            }),
+                        )
                     }}
                 />
                 <p className="text-xs text-slate-500" data-testid="ccr-summary-state">
@@ -446,7 +460,9 @@ export function SettingsCodeReviewPage(): ReactElement {
                     Save CCR summary settings
                 </Button>
                 <Button
-                    isDisabled={ccrSummary.generateSummary.isPending || normalizedRepositoryId.length === 0}
+                    isDisabled={
+                        ccrSummary.generateSummary.isPending || normalizedRepositoryId.length === 0
+                    }
                     type="button"
                     variant="flat"
                     onPress={handleGenerateCcrSummary}
@@ -461,7 +477,8 @@ export function SettingsCodeReviewPage(): ReactElement {
                         setPromptOverride(DEFAULT_CCR_PROMPT_OVERRIDE)
                     }}
                 />
-                {ccrSummary.summaryQuery.data === undefined || ccrSummary.summaryQuery.data === null ? (
+                {ccrSummary.summaryQuery.data === undefined ||
+                ccrSummary.summaryQuery.data === null ? (
                     <p className="text-xs text-slate-500" data-testid="ccr-summary-output-empty">
                         Generate summary preview to inspect current output.
                     </p>
@@ -501,10 +518,12 @@ export function SettingsCodeReviewPage(): ReactElement {
                         checked={ideSyncSettings.enabled}
                         type="checkbox"
                         onChange={(event): void => {
-                            setIdeSyncSettings((prev): IIdeSyncSettings => ({
-                                ...prev,
-                                enabled: event.currentTarget.checked,
-                            }))
+                            setIdeSyncSettings(
+                                (prev): IIdeSyncSettings => ({
+                                    ...prev,
+                                    enabled: event.currentTarget.checked,
+                                }),
+                            )
                         }}
                     />
                     Enable IDE plugin sync
@@ -517,10 +536,12 @@ export function SettingsCodeReviewPage(): ReactElement {
                         value={ideSyncSettings.provider}
                         onChange={(event): void => {
                             const nextProvider = event.currentTarget.value as TIdeSyncProvider
-                            setIdeSyncSettings((prev): IIdeSyncSettings => ({
-                                ...prev,
-                                provider: nextProvider,
-                            }))
+                            setIdeSyncSettings(
+                                (prev): IIdeSyncSettings => ({
+                                    ...prev,
+                                    provider: nextProvider,
+                                }),
+                            )
                         }}
                     >
                         <option value={IDE_SYNC_PROVIDER.vscode}>VS Code</option>
@@ -533,10 +554,12 @@ export function SettingsCodeReviewPage(): ReactElement {
                         checked={ideSyncSettings.syncOnPush}
                         type="checkbox"
                         onChange={(event): void => {
-                            setIdeSyncSettings((prev): IIdeSyncSettings => ({
-                                ...prev,
-                                syncOnPush: event.currentTarget.checked,
-                            }))
+                            setIdeSyncSettings(
+                                (prev): IIdeSyncSettings => ({
+                                    ...prev,
+                                    syncOnPush: event.currentTarget.checked,
+                                }),
+                            )
                         }}
                     />
                     Sync decisions on every push
@@ -546,10 +569,12 @@ export function SettingsCodeReviewPage(): ReactElement {
                         checked={ideSyncSettings.autoOpenDiffOnSync}
                         type="checkbox"
                         onChange={(event): void => {
-                            setIdeSyncSettings((prev): IIdeSyncSettings => ({
-                                ...prev,
-                                autoOpenDiffOnSync: event.currentTarget.checked,
-                            }))
+                            setIdeSyncSettings(
+                                (prev): IIdeSyncSettings => ({
+                                    ...prev,
+                                    autoOpenDiffOnSync: event.currentTarget.checked,
+                                }),
+                            )
                         }}
                     />
                     Auto-open affected diffs after sync
@@ -562,9 +587,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                 </Button>
             </section>
             <section className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
-                <h2 className="text-base font-semibold text-slate-900">
-                    MCP server control panel
-                </h2>
+                <h2 className="text-base font-semibold text-slate-900">MCP server control panel</h2>
                 <p className="text-sm text-slate-600">
                     Review MCP tool usage and runtime quality to spot unstable tools before they
                     impact CCR generation.
@@ -574,7 +597,10 @@ export function SettingsCodeReviewPage(): ReactElement {
                         <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
                             Total tool calls
                         </p>
-                        <p className="text-xl font-semibold text-slate-900" data-testid="mcp-total-calls">
+                        <p
+                            className="text-xl font-semibold text-slate-900"
+                            data-testid="mcp-total-calls"
+                        >
                             {mcpTotalCalls}
                         </p>
                     </article>

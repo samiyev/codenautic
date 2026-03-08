@@ -1,9 +1,15 @@
 import { type ReactElement, useEffect, useMemo, useRef, useState } from "react"
 
-import { DataFreshnessPanel, type IProvenanceContext } from "@/components/infrastructure/data-freshness-panel"
+import {
+    DataFreshnessPanel,
+    type IProvenanceContext,
+} from "@/components/infrastructure/data-freshness-panel"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 import { ExplainabilityPanel } from "@/components/infrastructure/explainability-panel"
-import { DashboardDateRangeFilter, type TDashboardDateRange } from "@/components/dashboard/dashboard-date-range-filter"
+import {
+    DashboardDateRangeFilter,
+    type TDashboardDateRange,
+} from "@/components/dashboard/dashboard-date-range-filter"
 import { type IMetricGridMetric, MetricsGrid } from "@/components/dashboard/metrics-grid"
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
 
@@ -144,11 +150,13 @@ function toScaledUsageRecords(
     range: TDashboardDateRange,
 ): ReadonlyArray<ITokenUsageRecord> {
     const scale = getRangeScale(range)
-    return records.map((record): ITokenUsageRecord => ({
-        ...record,
-        completionTokens: Math.round(record.completionTokens * scale),
-        promptTokens: Math.round(record.promptTokens * scale),
-    }))
+    return records.map(
+        (record): ITokenUsageRecord => ({
+            ...record,
+            completionTokens: Math.round(record.completionTokens * scale),
+            promptTokens: Math.round(record.promptTokens * scale),
+        }),
+    )
 }
 
 function estimateCostForRecord(record: ITokenUsageRecord): number {
@@ -207,9 +215,7 @@ function buildKpiMetrics(
         (accumulator, record): number => accumulator + estimateCostForRecord(record),
         0,
     )
-    const activeDevelopers = new Set(
-        records.map((record): string => record.developer),
-    ).size
+    const activeDevelopers = new Set(records.map((record): string => record.developer)).size
     const activeCcr = new Set(records.map((record): string => record.ccr)).size
     const totalTokens = totalPrompt + totalCompletion
 
@@ -353,45 +359,42 @@ export function SettingsTokenUsagePage(): ReactElement {
         (): ReadonlyArray<IMetricGridMetric> => buildKpiMetrics(scaledRecords),
         [scaledRecords],
     )
-    const explainabilityFactors = useMemo(
-        (): ReadonlyArray<{
-            readonly impact: "high" | "low" | "medium"
-            readonly label: string
-            readonly value: string
-        }> => {
-            const topModel = byModel[0]
-            const topDeveloper = byDeveloper[0]
-            const topCcr = byCcr[0]
+    const explainabilityFactors = useMemo((): ReadonlyArray<{
+        readonly impact: "high" | "low" | "medium"
+        readonly label: string
+        readonly value: string
+    }> => {
+        const topModel = byModel[0]
+        const topDeveloper = byDeveloper[0]
+        const topCcr = byCcr[0]
 
-            return [
-                {
-                    impact: "high",
-                    label: "Top model contribution",
-                    value:
-                        topModel === undefined
-                            ? "No model data for current range."
-                            : `${topModel.key} consumed ${formatTokens(topModel.totalTokens)} tokens.`,
-                },
-                {
-                    impact: "medium",
-                    label: "Developer concentration",
-                    value:
-                        topDeveloper === undefined
-                            ? "No developer data for current range."
-                            : `${topDeveloper.key} drives largest usage share in this window.`,
-                },
-                {
-                    impact: "low",
-                    label: "CCR distribution",
-                    value:
-                        topCcr === undefined
-                            ? "No CCR data for current range."
-                            : `Top CCR ${topCcr.key} contributes ${formatCostUsd(topCcr.estimatedCostUsd)}.`,
-                },
-            ]
-        },
-        [byCcr, byDeveloper, byModel],
-    )
+        return [
+            {
+                impact: "high",
+                label: "Top model contribution",
+                value:
+                    topModel === undefined
+                        ? "No model data for current range."
+                        : `${topModel.key} consumed ${formatTokens(topModel.totalTokens)} tokens.`,
+            },
+            {
+                impact: "medium",
+                label: "Developer concentration",
+                value:
+                    topDeveloper === undefined
+                        ? "No developer data for current range."
+                        : `${topDeveloper.key} drives largest usage share in this window.`,
+            },
+            {
+                impact: "low",
+                label: "CCR distribution",
+                value:
+                    topCcr === undefined
+                        ? "No CCR data for current range."
+                        : `Top CCR ${topCcr.key} contributes ${formatCostUsd(topCcr.estimatedCostUsd)}.`,
+            },
+        ]
+    }, [byCcr, byDeveloper, byModel])
     const provenance = useMemo(
         (): IProvenanceContext => ({
             branch: "main",

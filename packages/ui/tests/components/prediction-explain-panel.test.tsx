@@ -20,7 +20,8 @@ const TEST_ENTRIES: ReadonlyArray<IPredictionExplainPanelEntry> = [
     },
     {
         confidenceScore: 75,
-        explanation: "LLM forecast sees unstable temporal couplings with retry worker and queue bridge.",
+        explanation:
+            "LLM forecast sees unstable temporal couplings with retry worker and queue bridge.",
         fileId: "src/worker/retry.ts",
         label: "src/worker/retry.ts",
         reason: "Medium volatility in temporal coupling window",
@@ -65,4 +66,3 @@ describe("PredictionExplainPanel", (): void => {
         )
     })
 })
-

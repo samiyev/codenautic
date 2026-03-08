@@ -30,9 +30,7 @@ export interface ICityBusFactorOverlayProps {
     readonly onSelectEntry?: (entry: ICityBusFactorOverlayEntry) => void
 }
 
-function resolveBusFactorBadgeClassName(
-    busFactor: number,
-): string {
+function resolveBusFactorBadgeClassName(busFactor: number): string {
     if (busFactor <= 1) {
         return "border-rose-300 bg-rose-500/20 text-rose-800"
     }
@@ -42,9 +40,7 @@ function resolveBusFactorBadgeClassName(
     return "border-emerald-300 bg-emerald-500/20 text-emerald-800"
 }
 
-function resolveBusFactorRiskLabel(
-    busFactor: number,
-): string {
+function resolveBusFactorRiskLabel(busFactor: number): string {
     if (busFactor <= 1) {
         return "Critical"
     }
@@ -54,9 +50,7 @@ function resolveBusFactorRiskLabel(
     return "Healthy"
 }
 
-function resolveEntryClassName(
-    isActive: boolean,
-): string {
+function resolveEntryClassName(isActive: boolean): string {
     return [
         "w-full rounded-lg border p-2 text-left transition",
         isActive

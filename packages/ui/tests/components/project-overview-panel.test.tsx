@@ -31,10 +31,7 @@ describe("ProjectOverviewPanel", (): void => {
     it("показывает fallback, если entry points отсутствуют", (): void => {
         renderWithProviders(
             <ProjectOverviewPanel
-                files={[
-                    { path: "src/domain/entity.ts" },
-                    { path: "src/domain/value-object.ts" },
-                ]}
+                files={[{ path: "src/domain/entity.ts" }, { path: "src/domain/value-object.ts" }]}
                 repositoryId="backend-core/payment-worker"
                 repositoryLabel="Payment worker"
             />,

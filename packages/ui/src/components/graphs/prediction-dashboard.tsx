@@ -81,11 +81,7 @@ function resolveHotspotClassName(
         : "border-slate-200 bg-slate-50 hover:border-slate-300"
     const highRiskClassName = riskLevel === "high" ? "border-dashed" : ""
 
-    return [
-        "w-full rounded-lg border p-2 text-left transition",
-        baseClassName,
-        highRiskClassName,
-    ]
+    return ["w-full rounded-lg border p-2 text-left transition", baseClassName, highRiskClassName]
         .filter((entry): boolean => entry.length > 0)
         .join(" ")
 }
@@ -121,8 +117,8 @@ export function PredictionDashboard(props: IPredictionDashboardProps): ReactElem
                             <p className="text-sm font-semibold text-slate-900">{entry.label}</p>
                             <p className="mt-1 text-xs text-slate-600">
                                 Risk {resolveRiskLabel(entry.riskLevel)} · Confidence{" "}
-                                {String(entry.confidenceScore)}% · Forecast +{String(entry.predictedIssueIncrease)}{" "}
-                                issues
+                                {String(entry.confidenceScore)}% · Forecast +
+                                {String(entry.predictedIssueIncrease)} issues
                             </p>
                         </button>
                     )
@@ -169,4 +165,3 @@ export function PredictionDashboard(props: IPredictionDashboardProps): ReactElem
         </section>
     )
 }
-

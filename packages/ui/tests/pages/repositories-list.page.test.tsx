@@ -51,9 +51,7 @@ describe("repositories list page", (): void => {
 
         await user.selectOptions(screen.getByLabelText("Фильтр по статусу"), "error")
         expect(screen.queryByRole("link", { name: /platform-team\/api-gateway/u })).toBeNull()
-        expect(
-            screen.queryByText("Результатов по заданным фильтрам не найдено."),
-        ).not.toBeNull()
+        expect(screen.queryByText("Результатов по заданным фильтрам не найдено.")).not.toBeNull()
     })
 
     it("меняет порядок сортировки", async (): Promise<void> => {

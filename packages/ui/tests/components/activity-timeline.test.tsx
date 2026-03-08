@@ -4,7 +4,10 @@ import userEvent, { type UserEvent } from "@testing-library/user-event"
 import { screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { ActivityTimeline, type IActivityTimelineEntry } from "@/components/dashboard/activity-timeline"
+import {
+    ActivityTimeline,
+    type IActivityTimelineEntry,
+} from "@/components/dashboard/activity-timeline"
 import { renderWithProviders } from "../utils/render"
 
 const timeline: ReadonlyArray<IActivityTimelineEntry> = [

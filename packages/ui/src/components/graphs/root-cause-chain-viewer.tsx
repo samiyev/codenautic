@@ -47,7 +47,9 @@ export function RootCauseChainViewer(props: IRootCauseChainViewerProps): ReactEl
         if (selectedIssueId === undefined) {
             return props.issues[0]
         }
-        return props.issues.find((issue): boolean => issue.id === selectedIssueId) ?? props.issues[0]
+        return (
+            props.issues.find((issue): boolean => issue.id === selectedIssueId) ?? props.issues[0]
+        )
     }, [props.issues, selectedIssueId])
     const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>(
         selectedIssue?.chain[0]?.id,
@@ -60,7 +62,8 @@ export function RootCauseChainViewer(props: IRootCauseChainViewerProps): ReactEl
             return selectedIssue.chain[0]
         }
         return (
-            selectedIssue.chain.find((node): boolean => node.id === selectedNodeId) ?? selectedIssue.chain[0]
+            selectedIssue.chain.find((node): boolean => node.id === selectedNodeId) ??
+            selectedIssue.chain[0]
         )
     }, [selectedIssue, selectedNodeId])
     const chainFileIds = useMemo((): ReadonlyArray<string> => {
@@ -98,60 +101,66 @@ export function RootCauseChainViewer(props: IRootCauseChainViewerProps): ReactEl
     return (
         <section className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
             <aside className="space-y-2">
-                {props.issues.map((issue): ReactElement => (
-                    <button
-                        aria-label={`Open causal issue ${issue.title}`}
-                        className={`w-full rounded-md border px-3 py-2 text-left transition ${
-                            selectedIssue.id === issue.id
-                                ? "border-cyan-300 bg-cyan-50"
-                                : "border-slate-200 bg-white hover:border-slate-300"
-                        }`}
-                        key={issue.id}
-                        onClick={(): void => {
-                            setSelectedIssueId(issue.id)
-                            setSelectedNodeId(issue.chain[0]?.id)
-                        }}
-                        type="button"
-                    >
-                        <p className="text-sm font-semibold text-slate-900">{issue.title}</p>
-                        <span
-                            className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[11px] font-semibold ${
-                                SEVERITY_TONE[issue.severity]
+                {props.issues.map(
+                    (issue): ReactElement => (
+                        <button
+                            aria-label={`Open causal issue ${issue.title}`}
+                            className={`w-full rounded-md border px-3 py-2 text-left transition ${
+                                selectedIssue.id === issue.id
+                                    ? "border-cyan-300 bg-cyan-50"
+                                    : "border-slate-200 bg-white hover:border-slate-300"
                             }`}
+                            key={issue.id}
+                            onClick={(): void => {
+                                setSelectedIssueId(issue.id)
+                                setSelectedNodeId(issue.chain[0]?.id)
+                            }}
+                            type="button"
                         >
-                            {issue.severity.toUpperCase()}
-                        </span>
-                    </button>
-                ))}
+                            <p className="text-sm font-semibold text-slate-900">{issue.title}</p>
+                            <span
+                                className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[11px] font-semibold ${
+                                    SEVERITY_TONE[issue.severity]
+                                }`}
+                            >
+                                {issue.severity.toUpperCase()}
+                            </span>
+                        </button>
+                    ),
+                )}
             </aside>
 
             <div className="space-y-3">
                 <p className="text-sm font-semibold text-slate-900">Causal chain</p>
                 <div className="rounded-md border border-slate-200 bg-white p-3">
                     <div className="space-y-2">
-                        {selectedIssue.chain.map((node, index): ReactElement => (
-                            <div className="relative pl-6" key={node.id}>
-                                {index > 0 ? (
-                                    <span className="absolute left-2 top-[-10px] h-3.5 border-l border-slate-300" />
-                                ) : null}
-                                <span className="absolute left-2 top-4 h-[calc(100%-6px)] border-l border-slate-300" />
-                                <button
-                                    aria-label={`Open chain node ${node.label}`}
-                                    className={`w-full rounded border px-2 py-1.5 text-left text-sm transition ${
-                                        selectedNode?.id === node.id
-                                            ? "border-cyan-300 bg-cyan-50"
-                                            : "border-slate-200 bg-slate-50 hover:border-slate-300"
-                                    }`}
-                                    onClick={(): void => {
-                                        setSelectedNodeId(node.id)
-                                    }}
-                                    type="button"
-                                >
-                                    <p className="font-semibold text-slate-900">{node.label}</p>
-                                    <p className="text-xs uppercase tracking-wide text-slate-500">{node.type}</p>
-                                </button>
-                            </div>
-                        ))}
+                        {selectedIssue.chain.map(
+                            (node, index): ReactElement => (
+                                <div className="relative pl-6" key={node.id}>
+                                    {index > 0 ? (
+                                        <span className="absolute left-2 top-[-10px] h-3.5 border-l border-slate-300" />
+                                    ) : null}
+                                    <span className="absolute left-2 top-4 h-[calc(100%-6px)] border-l border-slate-300" />
+                                    <button
+                                        aria-label={`Open chain node ${node.label}`}
+                                        className={`w-full rounded border px-2 py-1.5 text-left text-sm transition ${
+                                            selectedNode?.id === node.id
+                                                ? "border-cyan-300 bg-cyan-50"
+                                                : "border-slate-200 bg-slate-50 hover:border-slate-300"
+                                        }`}
+                                        onClick={(): void => {
+                                            setSelectedNodeId(node.id)
+                                        }}
+                                        type="button"
+                                    >
+                                        <p className="font-semibold text-slate-900">{node.label}</p>
+                                        <p className="text-xs uppercase tracking-wide text-slate-500">
+                                            {node.type}
+                                        </p>
+                                    </button>
+                                </div>
+                            ),
+                        )}
                     </div>
                 </div>
 

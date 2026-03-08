@@ -114,7 +114,9 @@ export function SprintSummaryCard(props: ISprintSummaryCardProps): ReactElement 
                                         <p className="text-sm font-semibold text-slate-900">
                                             {metric.label}
                                         </p>
-                                        <p className="mt-1 text-xs text-slate-600">{metric.value}</p>
+                                        <p className="mt-1 text-xs text-slate-600">
+                                            {metric.value}
+                                        </p>
                                     </div>
                                     <span
                                         className={`text-xs font-semibold ${resolveDeltaClassName(metric.deltaPercent)}`}

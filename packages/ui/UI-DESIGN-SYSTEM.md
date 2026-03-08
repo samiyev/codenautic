@@ -103,9 +103,9 @@
 
 1. Сначала генерировать foundation (tokens + components + states), затем экраны.
 2. Во всех промптах явно указывать:
-   - multi-tenant scope bar (org + repo/team + date range),
-   - deep-link CTA на целевые экраны,
-   - полный набор состояний `loading/empty/error/degraded`.
+    - multi-tenant scope bar (org + repo/team + date range),
+    - deep-link CTA на целевые экраны,
+    - полный набор состояний `loading/empty/error/degraded`.
 3. Не генерировать новый визуальный язык поверх текущих токенов без отдельного решения.
 4. Использовать только зафиксированные семантические роли цветов (`primary/accent/success/warning/danger`).
 5. Для dashboard и operational экранов держать высокую информационную плотность и clear severity cues.

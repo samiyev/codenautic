@@ -10,7 +10,9 @@ describe("SettingsContractValidationPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsContractValidationPage />)
 
-        expect(screen.getByRole("heading", { level: 1, name: "Contract validation" })).not.toBeNull()
+        expect(
+            screen.getByRole("heading", { level: 1, name: "Contract validation" }),
+        ).not.toBeNull()
 
         await user.click(screen.getByRole("button", { name: "Validate contract" }))
         await waitFor(() => {
@@ -106,7 +108,7 @@ describe("SettingsContractValidationPage", (): void => {
             expect(screen.getByText(/Exported drift report with 1 violations/)).not.toBeNull()
         })
         expect(screen.getByLabelText("Drift report export payload").textContent).toContain(
-            "\"totalViolations\": 1",
+            '"totalViolations": 1',
         )
     })
 
@@ -116,11 +118,15 @@ describe("SettingsContractValidationPage", (): void => {
 
         expect(screen.getByText("Drift overlay CodeCity")).not.toBeNull()
 
-        await user.click(screen.getByRole("button", { name: "src/infrastructure/http/review.controller.ts" }))
+        await user.click(
+            screen.getByRole("button", { name: "src/infrastructure/http/review.controller.ts" }),
+        )
         await waitFor(() => {
             expect(screen.getByLabelText("Selected drift file violations")).not.toBeNull()
         })
-        expect(screen.getAllByText("src/infrastructure/http/review.controller.ts").length).toBeGreaterThan(0)
+        expect(
+            screen.getAllByText("src/infrastructure/http/review.controller.ts").length,
+        ).toBeGreaterThan(0)
         expect(screen.getByLabelText("Selected drift file violations")).not.toBeNull()
         expect(
             screen.getByText("Layer violation: infrastructure imports domain directly"),
@@ -147,9 +153,7 @@ describe("SettingsContractValidationPage", (): void => {
         expect(screen.getByLabelText("Drift score trend chart")).not.toBeNull()
         expect(screen.getByLabelText("Architecture change annotations list")).not.toBeNull()
         expect(
-            screen.getByText(
-                /ADR-021: Introduced anti-corruption layer for provider boundaries\./,
-            ),
+            screen.getByText(/ADR-021: Introduced anti-corruption layer for provider boundaries\./),
         ).not.toBeNull()
     })
 
@@ -157,14 +161,24 @@ describe("SettingsContractValidationPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsContractValidationPage />)
 
-        await user.selectOptions(screen.getByLabelText("Drift alert severity threshold"), "critical")
-        await user.clear(screen.getByRole("spinbutton", { name: "Drift alert violation threshold" }))
-        await user.type(screen.getByRole("spinbutton", { name: "Drift alert violation threshold" }), "1")
+        await user.selectOptions(
+            screen.getByLabelText("Drift alert severity threshold"),
+            "critical",
+        )
+        await user.clear(
+            screen.getByRole("spinbutton", { name: "Drift alert violation threshold" }),
+        )
+        await user.type(
+            screen.getByRole("spinbutton", { name: "Drift alert violation threshold" }),
+            "1",
+        )
         await user.click(screen.getByRole("checkbox", { name: "Drift alert channel email" }))
         await user.click(screen.getByRole("button", { name: "Save drift alert config" }))
 
         await waitFor(() => {
-            expect(screen.getByText(/Drift alerts saved: severity critical, threshold 1/)).not.toBeNull()
+            expect(
+                screen.getByText(/Drift alerts saved: severity critical, threshold 1/),
+            ).not.toBeNull()
         })
         expect(screen.getByText(/channels: slack, email\./)).not.toBeNull()
     })
@@ -181,7 +195,9 @@ describe("SettingsContractValidationPage", (): void => {
 
         await user.click(screen.getByRole("button", { name: "Apply guardrails" }))
         await waitFor(() => {
-            expect(screen.getByText(/Applied architecture guardrails with 3 rules\./)).not.toBeNull()
+            expect(
+                screen.getByText(/Applied architecture guardrails with 3 rules\./),
+            ).not.toBeNull()
         })
     })
 })

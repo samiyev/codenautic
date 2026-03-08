@@ -1,13 +1,6 @@
 import { type ReactElement, useMemo, useState } from "react"
 
-import {
-    Button,
-    Drawer,
-    DrawerBody,
-    DrawerContent,
-    DrawerHeader,
-    Textarea,
-} from "@/components/ui"
+import { Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, Textarea } from "@/components/ui"
 
 type TFactorImpact = "high" | "low" | "medium"
 
@@ -63,14 +56,23 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
             .map((factor): string => `${factor.label}: ${factor.value}`)
             .join(" | ")
         return `${props.signalLabel}=${props.signalValue}; threshold=${props.threshold}; confidence=${props.confidence}; window=${props.dataWindow}; factors=${factorSummary}`
-    }, [props.confidence, props.dataWindow, props.factors, props.signalLabel, props.signalValue, props.threshold])
+    }, [
+        props.confidence,
+        props.dataWindow,
+        props.factors,
+        props.signalLabel,
+        props.signalValue,
+        props.threshold,
+    ])
 
     return (
         <>
             <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="space-y-1">
-                        <p className="text-sm font-semibold text-[var(--foreground)]">{props.title}</p>
+                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                            {props.title}
+                        </p>
                         <p className="text-xs text-[var(--foreground)]/70">
                             {`${props.signalLabel}: ${props.signalValue} · threshold ${props.threshold} · confidence ${props.confidence}`}
                         </p>
@@ -111,22 +113,24 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                                 Top factors
                             </p>
                             <ul aria-label="Explainability factors" className="space-y-2">
-                                {props.factors.map((factor): ReactElement => (
-                                    <li
-                                        className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2"
-                                        key={factor.label}
-                                    >
-                                        <p className="text-sm font-semibold text-[var(--foreground)]">
-                                            {factor.label}
-                                        </p>
-                                        <p className="text-xs text-[var(--foreground)]/70">
-                                            {formatImpactLabel(factor.impact)}
-                                        </p>
-                                        <p className="text-sm text-[var(--foreground)]/80">
-                                            {factor.value}
-                                        </p>
-                                    </li>
-                                ))}
+                                {props.factors.map(
+                                    (factor): ReactElement => (
+                                        <li
+                                            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2"
+                                            key={factor.label}
+                                        >
+                                            <p className="text-sm font-semibold text-[var(--foreground)]">
+                                                {factor.label}
+                                            </p>
+                                            <p className="text-xs text-[var(--foreground)]/70">
+                                                {formatImpactLabel(factor.impact)}
+                                            </p>
+                                            <p className="text-sm text-[var(--foreground)]/80">
+                                                {factor.value}
+                                            </p>
+                                        </li>
+                                    ),
+                                )}
                             </ul>
                         </section>
 
@@ -134,10 +138,15 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                             <p className="text-sm font-semibold text-[var(--foreground)]">
                                 Known limitations
                             </p>
-                            <ul aria-label="Explainability limitations" className="list-disc space-y-1 pl-5 text-sm text-[var(--foreground)]/80">
-                                {props.limitations.map((limitation): ReactElement => (
-                                    <li key={limitation}>{limitation}</li>
-                                ))}
+                            <ul
+                                aria-label="Explainability limitations"
+                                className="list-disc space-y-1 pl-5 text-sm text-[var(--foreground)]/80"
+                            >
+                                {props.limitations.map(
+                                    (limitation): ReactElement => (
+                                        <li key={limitation}>{limitation}</li>
+                                    ),
+                                )}
                             </ul>
                         </section>
 

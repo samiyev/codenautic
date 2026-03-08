@@ -53,11 +53,7 @@ describe("OnboardingWizardPage", (): void => {
         const user = userEvent.setup()
         const onScanStart = vi.fn()
 
-        renderWithProviders(
-            <OnboardingWizardPage
-                onScanStart={onScanStart}
-            />,
-        )
+        renderWithProviders(<OnboardingWizardPage onScanStart={onScanStart} />)
         await moveToRepositoryStep(user)
 
         await user.type(
@@ -87,14 +83,14 @@ describe("OnboardingWizardPage", (): void => {
 
         await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
         await user.type(
-            screen.getByRole("textbox", { name: "Список репозиториев (по одной ссылке на строку)" }),
+            screen.getByRole("textbox", {
+                name: "Список репозиториев (по одной ссылке на строку)",
+            }),
             "https://github.com/org/first\ninvalid-url",
         )
         await user.click(screen.getByRole("button", { name: "Далее" }))
 
-        expect(
-            screen.queryByText("Некорректные ссылки: 2: invalid-url"),
-        ).not.toBeNull()
+        expect(screen.queryByText("Некорректные ссылки: 2: invalid-url")).not.toBeNull()
         expect(screen.queryByText(/Выбрано/u)).not.toBeNull()
     })
 
@@ -102,16 +98,14 @@ describe("OnboardingWizardPage", (): void => {
         const user = userEvent.setup()
         const onScanStart = vi.fn()
 
-        renderWithProviders(
-            <OnboardingWizardPage
-                onScanStart={onScanStart}
-            />,
-        )
+        renderWithProviders(<OnboardingWizardPage onScanStart={onScanStart} />)
         await moveToRepositoryStep(user)
 
         await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
         await user.type(
-            screen.getByRole("textbox", { name: "Список репозиториев (по одной ссылке на строку)" }),
+            screen.getByRole("textbox", {
+                name: "Список репозиториев (по одной ссылке на строку)",
+            }),
             "https://github.com/org/first\nhttps://github.com/org/second",
         )
         await user.click(screen.getByRole("button", { name: "Далее" }))
@@ -126,26 +120,19 @@ describe("OnboardingWizardPage", (): void => {
             includeSubmodules: true,
             includeHistory: false,
             notifyEmail: "",
-            targetRepositories: [
-                "https://github.com/org/first",
-                "https://github.com/org/second",
-            ],
+            targetRepositories: ["https://github.com/org/first", "https://github.com/org/second"],
         })
+        expect(screen.queryByText("Прогресс массового сканирования")).not.toBeNull()
         expect(
-            screen.queryByText("Прогресс массового сканирования"),
+            screen.queryByText("Сканирование прервано: ошибка доступа к репозиторию"),
         ).not.toBeNull()
-        expect(screen.queryByText("Сканирование прервано: ошибка доступа к репозиторию")).not.toBeNull()
     })
 
     it("показывает предпросмотр шаблона и применяет его в single режиме", async (): Promise<void> => {
         const user = userEvent.setup()
         const onScanStart = vi.fn()
 
-        renderWithProviders(
-            <OnboardingWizardPage
-                onScanStart={onScanStart}
-            />,
-        )
+        renderWithProviders(<OnboardingWizardPage onScanStart={onScanStart} />)
         await moveToRepositoryStep(user)
 
         await user.type(
@@ -154,9 +141,7 @@ describe("OnboardingWizardPage", (): void => {
         )
         await user.click(screen.getByRole("button", { name: "Далее" }))
 
-        await user.click(
-            await screen.findByRole("radio", { name: "Security Baseline — v1.2.0" }),
-        )
+        await user.click(await screen.findByRole("radio", { name: "Security Baseline — v1.2.0" }))
         expect(screen.queryByText("Что будет применено")).not.toBeNull()
 
         await user.click(screen.getByRole("button", { name: "Применить шаблон" }))
@@ -201,11 +186,9 @@ describe("OnboardingWizardPage", (): void => {
         await user.click(await screen.findByRole("radio", { name: "Quality Scan — v1.0.1" }))
         await user.click(screen.getByRole("button", { name: "Применить шаблон" }))
         expect(
-            (
-                screen.getByRole<HTMLInputElement>("spinbutton", {
-                    name: "Количество воркеров",
-                })
-            ).value,
+            screen.getByRole<HTMLInputElement>("spinbutton", {
+                name: "Количество воркеров",
+            }).value,
         ).toBe("6")
 
         await user.click(screen.getByText("Применённые шаблоны (audit log)"))

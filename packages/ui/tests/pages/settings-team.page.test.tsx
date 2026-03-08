@@ -30,7 +30,10 @@ describe("SettingsTeamPage", (): void => {
         expect(screen.getByRole("button", { name: /Platform Enablement/ })).not.toBeNull()
         expect(screen.getByText("Active team: Platform Enablement")).not.toBeNull()
 
-        await user.type(screen.getByRole("textbox", { name: "Invite member by email" }), "anya@acme.dev")
+        await user.type(
+            screen.getByRole("textbox", { name: "Invite member by email" }),
+            "anya@acme.dev",
+        )
         await user.selectOptions(screen.getByRole("combobox", { name: "Invite role" }), "developer")
         await user.click(screen.getByRole("button", { name: "Add member" }))
 

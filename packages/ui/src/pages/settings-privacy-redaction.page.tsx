@@ -96,8 +96,8 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
 
     const handleExport = (): void => {
         if (
-            hasSensitiveData === true
-            && (redactedText.length === 0 || redactedSourceText !== sourceText)
+            hasSensitiveData === true &&
+            (redactedText.length === 0 || redactedSourceText !== sourceText)
         ) {
             setLastExportState(
                 "Export blocked: sensitive fragments detected. Apply redaction for current source text first.",
@@ -132,7 +132,9 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Source content</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Source content
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <Textarea
@@ -152,22 +154,26 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Detection summary</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Detection summary
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     {hasSensitiveData ? (
                         <ul aria-label="Sensitive hits list" className="space-y-2">
-                            {sensitiveHits.map((hit, index): ReactElement => (
-                                <li
-                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-sm"
-                                    key={`${hit.type}-${String(index)}`}
-                                >
-                                    <p className="font-semibold text-[var(--foreground)]">
-                                        {hit.type}
-                                    </p>
-                                    <p className="text-[var(--foreground)]/70">{hit.value}</p>
-                                </li>
-                            ))}
+                            {sensitiveHits.map(
+                                (hit, index): ReactElement => (
+                                    <li
+                                        className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-sm"
+                                        key={`${hit.type}-${String(index)}`}
+                                    >
+                                        <p className="font-semibold text-[var(--foreground)]">
+                                            {hit.type}
+                                        </p>
+                                        <p className="text-[var(--foreground)]/70">{hit.value}</p>
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     ) : (
                         <p className="text-sm text-[var(--foreground)]/70">

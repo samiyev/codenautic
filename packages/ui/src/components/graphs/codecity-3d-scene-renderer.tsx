@@ -215,9 +215,7 @@ const BASE_CAMERA_PRESETS: Readonly<Record<TCodeCityCameraPreset, ICameraPresetT
  * @param couplingType Категория причинной связи.
  * @returns Hex-цвет линии и particle-flow.
  */
-export function resolveCodeCityCausalArcColor(
-    couplingType: TCodeCityCausalCouplingType,
-): string {
+export function resolveCodeCityCausalArcColor(couplingType: TCodeCityCausalCouplingType): string {
     if (couplingType === "dependency") {
         return "#fb923c"
     }
@@ -294,11 +292,7 @@ function interpolateQuadraticBezierPoint(
     return [x, y, z]
 }
 
-function sampleQuadraticBezierPath(
-    start: TVec3,
-    control: TVec3,
-    end: TVec3,
-): ReadonlyArray<TVec3> {
+function sampleQuadraticBezierPath(start: TVec3, control: TVec3, end: TVec3): ReadonlyArray<TVec3> {
     const sampled: Array<TVec3> = []
     for (let segment = 0; segment <= CAUSAL_ARC_SEGMENTS; segment += 1) {
         const ratio = segment / CAUSAL_ARC_SEGMENTS
@@ -441,7 +435,10 @@ export function resolveCodeCityBugEmissionSettings(
     }
 }
 
-function resolveFileHealthScore(file: ICodeCity3DSceneFileDescriptor, totalBugCount: number): number {
+function resolveFileHealthScore(
+    file: ICodeCity3DSceneFileDescriptor,
+    totalBugCount: number,
+): number {
     const coverage = file.coverage ?? 62
     const complexity = file.complexity ?? 8
     const complexityPenalty = Math.min(28, complexity * 1.05)
@@ -489,8 +486,8 @@ export function createCodeCityDistrictHealthAuras(
             districtBuildings.length === 0
                 ? 50
                 : districtBuildings.reduce((sum, building): number => {
-                    return sum + building.healthScore
-                }, 0) / districtBuildings.length
+                      return sum + building.healthScore
+                  }, 0) / districtBuildings.length
         return {
             color: resolveCodeCityHealthAuraColor(averageHealth),
             depth: district.depth,
@@ -861,12 +858,16 @@ export function createCodeCityBuildingImpactMap(
     for (const origin of impactOrigins) {
         const districtNeighbors = candidateNeighborsByDistrict.get(origin.districtId) ?? []
         const nearestNeighbors = districtNeighbors
-            .map((candidate): { readonly building: ICodeCityBuildingMesh; readonly distance: number } => {
-                return {
-                    building: candidate,
-                    distance: Math.hypot(candidate.x - origin.x, candidate.z - origin.z),
-                }
-            })
+            .map(
+                (
+                    candidate,
+                ): { readonly building: ICodeCityBuildingMesh; readonly distance: number } => {
+                    return {
+                        building: candidate,
+                        distance: Math.hypot(candidate.x - origin.x, candidate.z - origin.z),
+                    }
+                },
+            )
             .sort((leftCandidate, rightCandidate): number => {
                 return leftCandidate.distance - rightCandidate.distance
             })
@@ -947,11 +948,7 @@ function resolveCameraPresetTarget(
     }
 
     return {
-        focus: [
-            focusBuilding.x,
-            Math.max(1.5, focusBuilding.height / 2),
-            focusBuilding.z,
-        ] as const,
+        focus: [focusBuilding.x, Math.max(1.5, focusBuilding.height / 2), focusBuilding.z] as const,
         position: [
             focusBuilding.x + 8,
             Math.max(7, focusBuilding.height + 4),
@@ -973,7 +970,10 @@ interface ICameraPresetControllerProps {
  */
 function CameraPresetController(props: ICameraPresetControllerProps): null {
     const { camera } = useThree()
-    const targetPosition = useMemo((): Vector3 => new Vector3(...props.target.position), [props.target])
+    const targetPosition = useMemo(
+        (): Vector3 => new Vector3(...props.target.position),
+        [props.target],
+    )
     const targetFocus = useMemo((): Vector3 => new Vector3(...props.target.focus), [props.target])
 
     useFrame((): void => {
@@ -1044,7 +1044,8 @@ function CausalArcMesh(props: ICausalArcMeshProps): ReactElement {
     }, [props.arc.control, props.arc.end, props.arc.start])
 
     useFrame((state): void => {
-        const flowPhase = (state.clock.getElapsedTime() * props.arc.particleSpeed + props.phaseSeed) % 1
+        const flowPhase =
+            (state.clock.getElapsedTime() * props.arc.particleSpeed + props.phaseSeed) % 1
         const point = interpolateQuadraticBezierPoint(
             props.arc.start,
             props.arc.control,
@@ -1123,7 +1124,11 @@ function InstancedBuildingsMesh(props: IInstancedBuildingsMeshProps): ReactEleme
     }
 
     return (
-        <instancedMesh args={[undefined, undefined, props.buildings.length]} frustumCulled={true} ref={meshRef}>
+        <instancedMesh
+            args={[undefined, undefined, props.buildings.length]}
+            frustumCulled={true}
+            ref={meshRef}
+        >
             <boxGeometry args={[1, 1, 1]} />
             <meshStandardMaterial metalness={0.05} roughness={0.68} vertexColors={true} />
         </instancedMesh>
@@ -1198,28 +1203,34 @@ function BugEmissionMesh(props: IBugEmissionMeshProps): ReactElement {
 
     return (
         <group>
-            {particleOffsets.map((offset, index): ReactElement => (
-                <mesh
-                    key={`${props.building.id}-bug-particle-${String(index)}`}
-                    ref={(mesh): void => {
-                        particleRefs.current[index] = mesh
-                    }}
-                >
-                    <sphereGeometry args={[0.08, 8, 8]} />
-                    <meshStandardMaterial
-                        color={props.settings.color}
-                        emissive={props.settings.color}
-                        emissiveIntensity={0.85}
-                        opacity={0.7}
-                        toneMapped={false}
-                        transparent={true}
-                    />
-                </mesh>
-            ))}
+            {particleOffsets.map(
+                (offset, index): ReactElement => (
+                    <mesh
+                        key={`${props.building.id}-bug-particle-${String(index)}`}
+                        ref={(mesh): void => {
+                            particleRefs.current[index] = mesh
+                        }}
+                    >
+                        <sphereGeometry args={[0.08, 8, 8]} />
+                        <meshStandardMaterial
+                            color={props.settings.color}
+                            emissive={props.settings.color}
+                            emissiveIntensity={0.85}
+                            opacity={0.7}
+                            toneMapped={false}
+                            transparent={true}
+                        />
+                    </mesh>
+                ),
+            )}
             {props.building.recentBugCount > 0 ? (
                 <mesh ref={pulseRef} rotation={[-Math.PI / 2, 0, 0]}>
                     <ringGeometry args={[0.28, 0.44, 24]} />
-                    <meshBasicMaterial color={props.settings.color} opacity={0.28} transparent={true} />
+                    <meshBasicMaterial
+                        color={props.settings.color}
+                        opacity={0.28}
+                        transparent={true}
+                    />
                 </mesh>
             ) : null}
         </group>
@@ -1243,7 +1254,9 @@ function DistrictHealthAuraMesh(props: IDistrictHealthAuraMeshProps): ReactEleme
     const baseOpacity = 0.1 + (100 - props.aura.healthScore) / 260
 
     useFrame((state): void => {
-        const wave = (Math.sin(state.clock.getElapsedTime() * props.aura.pulseSpeed + props.phaseSeed) + 1) / 2
+        const wave =
+            (Math.sin(state.clock.getElapsedTime() * props.aura.pulseSpeed + props.phaseSeed) + 1) /
+            2
         const mesh = meshRef.current
         if (mesh !== null) {
             const scale = 1 + wave * 0.14
@@ -1292,16 +1305,14 @@ interface IImpactBuildingMeshProps {
 function ImpactBuildingMesh(props: IImpactBuildingMeshProps): ReactElement {
     const meshRef = useRef<Mesh | null>(null)
     const materialRef = useRef<MeshStandardMaterial | null>(null)
-    const impactProfile = useMemo(
-        (): ICodeCityBuildingImpactProfile => {
-            return resolveCodeCityBuildingImpactProfile(props.impactState)
-        },
-        [props.impactState],
-    )
+    const impactProfile = useMemo((): ICodeCityBuildingImpactProfile => {
+        return resolveCodeCityBuildingImpactProfile(props.impactState)
+    }, [props.impactState])
     const baseY = props.building.height / 2
 
     useFrame((state): void => {
-        const animationPhase = state.clock.getElapsedTime() * impactProfile.pulseSpeed + props.phaseSeed
+        const animationPhase =
+            state.clock.getElapsedTime() * impactProfile.pulseSpeed + props.phaseSeed
         const material = materialRef.current
         if (material !== null) {
             const pulseOffset =
@@ -1354,7 +1365,9 @@ function ImpactBuildingMesh(props: IImpactBuildingMeshProps): ReactElement {
                 color={props.building.color}
                 emissive={impactProfile.emissive}
                 emissiveIntensity={
-                    props.isSelected ? Math.max(impactProfile.baseIntensity, 0.55) : impactProfile.baseIntensity
+                    props.isSelected
+                        ? Math.max(impactProfile.baseIntensity, 0.55)
+                        : impactProfile.baseIntensity
                 }
                 metalness={0.1}
                 ref={materialRef}
@@ -1435,7 +1448,9 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
     }, [buildings, props.causalCouplings])
     const visibleCausalArcs = useMemo((): ReadonlyArray<ICodeCityCausalArc> => {
         const maxArcs =
-            renderBudget.quality === "low" ? MAX_CAUSAL_ARCS_LOW_QUALITY : MAX_CAUSAL_ARCS_HIGH_QUALITY
+            renderBudget.quality === "low"
+                ? MAX_CAUSAL_ARCS_LOW_QUALITY
+                : MAX_CAUSAL_ARCS_HIGH_QUALITY
         return causalArcs.slice(0, maxArcs)
     }, [causalArcs, renderBudget.quality])
     const districtHealthAuras = useMemo((): ReadonlyArray<ICodeCityDistrictHealthAura> => {
@@ -1465,7 +1480,11 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
             return impactState === "changed" || impactState === "impacted"
         })
         const remaining = visibleBuildings.filter((building): boolean => {
-            return prioritized.some((priorityBuilding): boolean => priorityBuilding.id === building.id) === false
+            return (
+                prioritized.some(
+                    (priorityBuilding): boolean => priorityBuilding.id === building.id,
+                ) === false
+            )
         })
         return [...prioritized, ...remaining].slice(0, renderBudget.maxInteractiveBuildings)
     }, [
@@ -1496,7 +1515,9 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
     }, [interactiveBuildings])
     const focusBuilding = useMemo((): ICodeCityBuildingMesh | undefined => {
         if (props.navigationActiveFileId !== undefined) {
-            return buildings.find((building): boolean => building.id === props.navigationActiveFileId)
+            return buildings.find(
+                (building): boolean => building.id === props.navigationActiveFileId,
+            )
         }
         if (props.selectedFileId !== undefined) {
             return buildings.find((building): boolean => building.id === props.selectedFileId)
@@ -1518,32 +1539,43 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
             <color args={["#020617"]} attach="background" />
             <ambientLight intensity={0.55} />
             <directionalLight intensity={0.9} position={[18, 30, 12]} />
-            <gridHelper args={[100, 80, "#334155", "#1e293b"]} visible={renderBudget.quality !== "low"} />
-            {districts.map((district): ReactElement => (
-                <group key={`district-${district.id}`}>
-                    <mesh position={[district.x, -0.03, district.z]}>
-                        <boxGeometry args={[district.width, 0.06, district.depth]} />
-                        <meshStandardMaterial color="#0f172a" metalness={0.02} roughness={0.92} />
-                    </mesh>
-                    <Text
-                        anchorX="center"
-                        anchorY="middle"
-                        color="#94a3b8"
-                        fontSize={Math.max(0.38, Math.min(0.95, district.width / 6))}
-                        position={[district.x, 0.04, district.z]}
-                        rotation={[-Math.PI / 2, 0, 0]}
-                    >
-                        {district.label}
-                    </Text>
-                </group>
-            ))}
-            {districtHealthAuras.map((aura, index): ReactElement => (
-                <DistrictHealthAuraMesh
-                    aura={aura}
-                    key={`${aura.districtId}-health-aura`}
-                    phaseSeed={index * 0.44}
-                />
-            ))}
+            <gridHelper
+                args={[100, 80, "#334155", "#1e293b"]}
+                visible={renderBudget.quality !== "low"}
+            />
+            {districts.map(
+                (district): ReactElement => (
+                    <group key={`district-${district.id}`}>
+                        <mesh position={[district.x, -0.03, district.z]}>
+                            <boxGeometry args={[district.width, 0.06, district.depth]} />
+                            <meshStandardMaterial
+                                color="#0f172a"
+                                metalness={0.02}
+                                roughness={0.92}
+                            />
+                        </mesh>
+                        <Text
+                            anchorX="center"
+                            anchorY="middle"
+                            color="#94a3b8"
+                            fontSize={Math.max(0.38, Math.min(0.95, district.width / 6))}
+                            position={[district.x, 0.04, district.z]}
+                            rotation={[-Math.PI / 2, 0, 0]}
+                        >
+                            {district.label}
+                        </Text>
+                    </group>
+                ),
+            )}
+            {districtHealthAuras.map(
+                (aura, index): ReactElement => (
+                    <DistrictHealthAuraMesh
+                        aura={aura}
+                        key={`${aura.districtId}-health-aura`}
+                        phaseSeed={index * 0.44}
+                    />
+                ),
+            )}
             {navigationTrailVectors.length >= 2 ? (
                 <Line
                     color="#e2e8f0"
@@ -1557,45 +1589,56 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                     transparent={true}
                 />
             ) : null}
-            {navigationTrail.map((point, index): ReactElement => (
-                <mesh key={`breadcrumb-${String(index)}`} position={[point[0], point[1], point[2]]}>
-                    <sphereGeometry args={[0.16, 10, 10]} />
-                    <meshStandardMaterial
-                        color="#f8fafc"
-                        emissive="#bae6fd"
-                        emissiveIntensity={0.9}
-                        toneMapped={false}
+            {navigationTrail.map(
+                (point, index): ReactElement => (
+                    <mesh
+                        key={`breadcrumb-${String(index)}`}
+                        position={[point[0], point[1], point[2]]}
+                    >
+                        <sphereGeometry args={[0.16, 10, 10]} />
+                        <meshStandardMaterial
+                            color="#f8fafc"
+                            emissive="#bae6fd"
+                            emissiveIntensity={0.9}
+                            toneMapped={false}
+                        />
+                    </mesh>
+                ),
+            )}
+            {visibleCausalArcs.map(
+                (arc, index): ReactElement => (
+                    <CausalArcMesh
+                        arc={arc}
+                        key={`${arc.sourceFileId}-${arc.targetFileId}-${arc.couplingType}`}
+                        phaseSeed={index * 0.31}
                     />
-                </mesh>
-            ))}
-            {visibleCausalArcs.map((arc, index): ReactElement => (
-                <CausalArcMesh
-                    arc={arc}
-                    key={`${arc.sourceFileId}-${arc.targetFileId}-${arc.couplingType}`}
-                    phaseSeed={index * 0.31}
-                />
-            ))}
-            {bugEmissionBuildings.map((building): ReactElement => (
-                <BugEmissionMesh
-                    building={building}
-                    key={`${building.id}-bug-emission`}
-                    settings={resolveCodeCityBugEmissionSettings(
-                        building.totalBugCount,
-                        building.recentBugCount,
-                    )}
-                />
-            ))}
-            {interactiveBuildings.map((building, index): ReactElement => (
-                <ImpactBuildingMesh
-                    building={building}
-                    impactState={impactMap.get(building.id) ?? "none"}
-                    isSelected={props.selectedFileId === building.id}
-                    key={building.id}
-                    onHover={props.onBuildingHover}
-                    onSelect={props.onBuildingSelect}
-                    phaseSeed={index * 0.45}
-                />
-            ))}
+                ),
+            )}
+            {bugEmissionBuildings.map(
+                (building): ReactElement => (
+                    <BugEmissionMesh
+                        building={building}
+                        key={`${building.id}-bug-emission`}
+                        settings={resolveCodeCityBugEmissionSettings(
+                            building.totalBugCount,
+                            building.recentBugCount,
+                        )}
+                    />
+                ),
+            )}
+            {interactiveBuildings.map(
+                (building, index): ReactElement => (
+                    <ImpactBuildingMesh
+                        building={building}
+                        impactState={impactMap.get(building.id) ?? "none"}
+                        isSelected={props.selectedFileId === building.id}
+                        key={building.id}
+                        onHover={props.onBuildingHover}
+                        onSelect={props.onBuildingSelect}
+                        phaseSeed={index * 0.45}
+                    />
+                ),
+            )}
             <InstancedBuildingsMesh buildings={instancedBuildings} />
             <OrbitControls
                 enablePan={true}

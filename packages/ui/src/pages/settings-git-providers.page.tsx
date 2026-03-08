@@ -78,8 +78,8 @@ export function SettingsGitProvidersPage(): ReactElement {
     const providerCards = useMemo((): ReadonlyArray<IGitProviderCardProps> => {
         return sourceProviders.map((provider): IGitProviderCardProps => {
             const isMutatingProvider =
-                gitProviders.updateConnection.isPending === true
-                && gitProviders.updateConnection.variables?.providerId === provider.id
+                gitProviders.updateConnection.isPending === true &&
+                gitProviders.updateConnection.variables?.providerId === provider.id
 
             return {
                 account: provider.account,
@@ -122,7 +122,10 @@ export function SettingsGitProvidersPage(): ReactElement {
                     <div className="space-y-2">
                         {sourceProviders.map(
                             (provider): ReactElement => (
-                                <div key={`connectivity-${provider.id}`} className="flex items-center gap-3">
+                                <div
+                                    key={`connectivity-${provider.id}`}
+                                    className="flex items-center gap-3"
+                                >
                                     <TestConnectionButton
                                         providerLabel={provider.provider}
                                         onTest={async (): Promise<boolean> => {

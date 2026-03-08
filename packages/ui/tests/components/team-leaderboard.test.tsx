@@ -2,10 +2,7 @@ import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import {
-    TeamLeaderboard,
-    type ITeamLeaderboardEntry,
-} from "@/components/graphs/team-leaderboard"
+import { TeamLeaderboard, type ITeamLeaderboardEntry } from "@/components/graphs/team-leaderboard"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_ENTRIES: ReadonlyArray<ITeamLeaderboardEntry> = [
@@ -67,7 +64,9 @@ describe("TeamLeaderboard", (): void => {
     it("вызывает onSelectEntry при выборе участника", async (): Promise<void> => {
         const user = userEvent.setup()
         const onSelectEntry = vi.fn()
-        renderWithProviders(<TeamLeaderboard entries={TEST_ENTRIES} onSelectEntry={onSelectEntry} />)
+        renderWithProviders(
+            <TeamLeaderboard entries={TEST_ENTRIES} onSelectEntry={onSelectEntry} />,
+        )
 
         await user.click(
             screen.getByRole("button", { name: "Inspect leaderboard contributor Alice" }),

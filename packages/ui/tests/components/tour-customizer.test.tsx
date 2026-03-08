@@ -36,7 +36,9 @@ function TourCustomizerHarness(): ReactElement {
 
 describe("TourCustomizer", (): void => {
     it("показывает admin-gated состояние, когда прав нет", (): void => {
-        renderWithProviders(<TourCustomizer isAdmin={false} onStepsChange={(): void => {}} steps={TEST_STEPS} />)
+        renderWithProviders(
+            <TourCustomizer isAdmin={false} onStepsChange={(): void => {}} steps={TEST_STEPS} />,
+        )
 
         expect(screen.getByText("Tour customizer")).not.toBeNull()
         expect(

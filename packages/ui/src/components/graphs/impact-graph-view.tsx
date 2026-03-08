@@ -155,11 +155,13 @@ export function ImpactGraphView(props: IImpactGraphViewProps): ReactElement {
             </p>
 
             <ul className="mt-3 space-y-1 rounded border border-slate-200 bg-slate-50 p-2">
-                {visibleEdges.map((edge): ReactElement => (
-                    <li className="text-[11px] text-slate-600 animate-pulse" key={edge.id}>
-                        {edge.sourceId} → {edge.targetId}
-                    </li>
-                ))}
+                {visibleEdges.map(
+                    (edge): ReactElement => (
+                        <li className="text-[11px] text-slate-600 animate-pulse" key={edge.id}>
+                            {edge.sourceId} → {edge.targetId}
+                        </li>
+                    ),
+                )}
             </ul>
 
             <ul className="mt-3 space-y-2">
@@ -175,7 +177,9 @@ export function ImpactGraphView(props: IImpactGraphViewProps): ReactElement {
                         >
                             <div className="flex items-center justify-between gap-2">
                                 <div>
-                                    <p className="text-sm font-semibold text-slate-900">{node.label}</p>
+                                    <p className="text-sm font-semibold text-slate-900">
+                                        {node.label}
+                                    </p>
                                     <p className="text-xs text-slate-600">
                                         Impact score {String(node.impactScore)}
                                     </p>

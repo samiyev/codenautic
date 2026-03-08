@@ -13,9 +13,9 @@ describe("onboarding route helpers", (): void => {
         expect(mapRepositoryUrlToRouteId("git@github.com:example/repository.git")).toBe(
             "example/repository",
         )
-        expect(mapRepositoryUrlToRouteId("https://gitlab.example.com/group/subgroup/repository")).toBe(
-            "subgroup/repository",
-        )
+        expect(
+            mapRepositoryUrlToRouteId("https://gitlab.example.com/group/subgroup/repository"),
+        ).toBe("subgroup/repository")
     })
 
     it("возвращает fallback repository id для пустых/некорректных значений", (): void => {

@@ -27,22 +27,16 @@ function PermissionsProbe({ roles }: { readonly roles: ReadonlyArray<string> }):
 
     return (
         <div>
-            <div data-testid="permissions">
-                {query.data?.permissions.join(",") ?? "empty"}
-            </div>
+            <div data-testid="permissions">{query.data?.permissions.join(",") ?? "empty"}</div>
             <div data-testid="review-read-enabled">
                 {isPermissionEnabled(query, PERMISSION_KEYS.reviewRead).toString()}
             </div>
-            <div data-testid="admin-permissions">
-                {DEFAULT_ADMIN_PERMISSIONS.join(",")}
-            </div>
+            <div data-testid="admin-permissions">{DEFAULT_ADMIN_PERMISSIONS.join(",")}</div>
         </div>
     )
 }
 
-function createQueryState(
-    overrides: Partial<IPermissionsQueryState> = {},
-): IPermissionsQueryState {
+function createQueryState(overrides: Partial<IPermissionsQueryState> = {}): IPermissionsQueryState {
     return {
         data: undefined,
         error: null,

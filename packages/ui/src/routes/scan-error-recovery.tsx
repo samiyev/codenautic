@@ -37,4 +37,3 @@ export const Route = createFileRoute("/scan-error-recovery")({
     component: ScanErrorRecoveryRouteComponent,
     errorComponent: RouteErrorFallback,
 })
-

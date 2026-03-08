@@ -116,11 +116,11 @@ function parseThemeItem(rawValue: unknown): IThemeLibraryProfileTheme | undefine
             : undefined
 
     if (
-        mode === undefined
-        || basePaletteId === undefined
-        || accentIntensity === undefined
-        || globalRadius === undefined
-        || formRadius === undefined
+        mode === undefined ||
+        basePaletteId === undefined ||
+        accentIntensity === undefined ||
+        globalRadius === undefined ||
+        formRadius === undefined
     ) {
         return undefined
     }
@@ -226,7 +226,9 @@ function createThemeLibraryApiClient(): IHttpClient | undefined {
  *
  * @returns Нормализованный профиль, если данные доступны.
  */
-export async function readThemeLibraryProfileState(): Promise<IThemeLibraryProfileState | undefined> {
+export async function readThemeLibraryProfileState(): Promise<
+    IThemeLibraryProfileState | undefined
+> {
     const client = createThemeLibraryApiClient()
     if (client === undefined) {
         return undefined

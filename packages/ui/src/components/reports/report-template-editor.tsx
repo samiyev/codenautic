@@ -59,9 +59,12 @@ function reorderTemplateSections(
  */
 export function ReportTemplateEditor(): ReactElement {
     const [templateName, setTemplateName] = useState<string>("Weekly engineering report")
-    const [brandLogoUrl, setBrandLogoUrl] = useState<string>("https://assets.codenautic.app/logo.svg")
+    const [brandLogoUrl, setBrandLogoUrl] = useState<string>(
+        "https://assets.codenautic.app/logo.svg",
+    )
     const [brandAccentColor, setBrandAccentColor] = useState<string>("#2563eb")
-    const [sections, setSections] = useState<ReadonlyArray<ITemplateSection>>(DEFAULT_TEMPLATE_SECTIONS)
+    const [sections, setSections] =
+        useState<ReadonlyArray<ITemplateSection>>(DEFAULT_TEMPLATE_SECTIONS)
     const [draggedSectionId, setDraggedSectionId] = useState<string | undefined>()
     const [status, setStatus] = useState<string>("No template changes saved yet.")
 
@@ -69,7 +72,9 @@ export function ReportTemplateEditor(): ReactElement {
         return sections.filter((section): boolean => section.enabled)
     }, [sections])
     const templatePreviewSummary = useMemo((): string => {
-        const enabledSectionTitles = enabledSections.map((section): string => section.title).join(" -> ")
+        const enabledSectionTitles = enabledSections
+            .map((section): string => section.title)
+            .join(" -> ")
         return `Template: ${templateName} · Brand: ${brandLogoUrl} · Accent: ${brandAccentColor} · Sections: ${enabledSectionTitles}`
     }, [brandAccentColor, brandLogoUrl, enabledSections, templateName])
 
@@ -88,7 +93,9 @@ export function ReportTemplateEditor(): ReactElement {
     }
     const handleMoveSection = (sectionId: string, direction: "up" | "down"): void => {
         setSections((currentSections): ReadonlyArray<ITemplateSection> => {
-            const currentIndex = currentSections.findIndex((section): boolean => section.id === sectionId)
+            const currentIndex = currentSections.findIndex(
+                (section): boolean => section.id === sectionId,
+            )
             if (currentIndex < 0) {
                 return currentSections
             }
@@ -134,12 +141,16 @@ export function ReportTemplateEditor(): ReactElement {
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-[var(--foreground)]">Report template editor</p>
+                <p className="text-base font-semibold text-[var(--foreground)]">
+                    Report template editor
+                </p>
             </CardHeader>
             <CardBody className="space-y-3">
                 <div className="grid gap-3 md:grid-cols-3">
                     <label className="space-y-1 text-sm">
-                        <span className="font-semibold text-[var(--foreground)]">Template name</span>
+                        <span className="font-semibold text-[var(--foreground)]">
+                            Template name
+                        </span>
                         <input
                             aria-label="Template name"
                             className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900"
@@ -151,7 +162,9 @@ export function ReportTemplateEditor(): ReactElement {
                         />
                     </label>
                     <label className="space-y-1 text-sm">
-                        <span className="font-semibold text-[var(--foreground)]">Brand logo URL</span>
+                        <span className="font-semibold text-[var(--foreground)]">
+                            Brand logo URL
+                        </span>
                         <input
                             aria-label="Template brand logo"
                             className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900"
@@ -176,54 +189,56 @@ export function ReportTemplateEditor(): ReactElement {
                     </label>
                 </div>
                 <ul aria-label="Template sections list" className="space-y-2">
-                    {sections.map((section): ReactElement => (
-                        <li
-                            className="rounded border border-slate-200 bg-slate-50 p-2"
-                            draggable={true}
-                            key={section.id}
-                            onDragStart={(event): void => {
-                                handleDragStart(event, section.id)
-                            }}
-                            onDragOver={(event): void => {
-                                event.preventDefault()
-                            }}
-                            onDrop={(event): void => {
-                                handleDrop(event, section.id)
-                            }}
-                        >
-                            <div className="flex flex-wrap items-center gap-2">
-                                <input
-                                    aria-label={`Template section enabled ${section.id}`}
-                                    checked={section.enabled}
-                                    type="checkbox"
-                                    onChange={(): void => {
-                                        handleSectionToggle(section.id)
-                                    }}
-                                />
-                                <span className="text-sm font-semibold text-slate-900">
-                                    {section.title}
-                                </span>
-                                <Button
-                                    size="sm"
-                                    variant="flat"
-                                    onPress={(): void => {
-                                        handleMoveSection(section.id, "up")
-                                    }}
-                                >
-                                    {`Move up section ${section.id}`}
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    variant="flat"
-                                    onPress={(): void => {
-                                        handleMoveSection(section.id, "down")
-                                    }}
-                                >
-                                    {`Move down section ${section.id}`}
-                                </Button>
-                            </div>
-                        </li>
-                    ))}
+                    {sections.map(
+                        (section): ReactElement => (
+                            <li
+                                className="rounded border border-slate-200 bg-slate-50 p-2"
+                                draggable={true}
+                                key={section.id}
+                                onDragStart={(event): void => {
+                                    handleDragStart(event, section.id)
+                                }}
+                                onDragOver={(event): void => {
+                                    event.preventDefault()
+                                }}
+                                onDrop={(event): void => {
+                                    handleDrop(event, section.id)
+                                }}
+                            >
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <input
+                                        aria-label={`Template section enabled ${section.id}`}
+                                        checked={section.enabled}
+                                        type="checkbox"
+                                        onChange={(): void => {
+                                            handleSectionToggle(section.id)
+                                        }}
+                                    />
+                                    <span className="text-sm font-semibold text-slate-900">
+                                        {section.title}
+                                    </span>
+                                    <Button
+                                        size="sm"
+                                        variant="flat"
+                                        onPress={(): void => {
+                                            handleMoveSection(section.id, "up")
+                                        }}
+                                    >
+                                        {`Move up section ${section.id}`}
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="flat"
+                                        onPress={(): void => {
+                                            handleMoveSection(section.id, "down")
+                                        }}
+                                    >
+                                        {`Move down section ${section.id}`}
+                                    </Button>
+                                </div>
+                            </li>
+                        ),
+                    )}
                 </ul>
                 <Alert color="primary" title="Template preview" variant="flat">
                     <span aria-label="Template preview summary">{templatePreviewSummary}</span>

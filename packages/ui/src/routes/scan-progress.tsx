@@ -65,7 +65,8 @@ function ScanProgressRouteComponent(): ReactElement {
     const routeJobId = search.jobId
     const routeRepositoryId = search.repositoryId
     const routeTargetRepositories = search.targetRepositories
-    const pageProps = routeJobId === undefined || routeJobId.length === 0 ? {} : { jobId: routeJobId }
+    const pageProps =
+        routeJobId === undefined || routeJobId.length === 0 ? {} : { jobId: routeJobId }
 
     return (
         <AuthBoundary loginPath="/login">
@@ -87,8 +88,8 @@ function ScanProgressRouteComponent(): ReactElement {
                             }}
                             onOpenRepositoryOverview={(): void => {
                                 if (
-                                    typeof routeRepositoryId === "string"
-                                    && routeRepositoryId.trim().length > 0
+                                    typeof routeRepositoryId === "string" &&
+                                    routeRepositoryId.trim().length > 0
                                 ) {
                                     void navigate({
                                         to: "/repositories/$repositoryId",
@@ -112,13 +113,17 @@ function ScanProgressRouteComponent(): ReactElement {
     )
 }
 
-export function validateScanProgressSearch(rawSearch: Record<string, unknown>): IScanProgressSearch {
-    const jobId = typeof rawSearch.jobId === "string" && rawSearch.jobId.trim().length > 0
-        ? rawSearch.jobId.trim()
-        : undefined
-    const repositoryId = typeof rawSearch.repositoryId === "string" && rawSearch.repositoryId.trim().length > 0
-        ? rawSearch.repositoryId.trim()
-        : undefined
+export function validateScanProgressSearch(
+    rawSearch: Record<string, unknown>,
+): IScanProgressSearch {
+    const jobId =
+        typeof rawSearch.jobId === "string" && rawSearch.jobId.trim().length > 0
+            ? rawSearch.jobId.trim()
+            : undefined
+    const repositoryId =
+        typeof rawSearch.repositoryId === "string" && rawSearch.repositoryId.trim().length > 0
+            ? rawSearch.repositoryId.trim()
+            : undefined
     const targetRepositories = normalizeTargetRepositories(rawSearch.targetRepositories)
     const source = rawSearch.source === "onboarding" ? "onboarding" : undefined
 

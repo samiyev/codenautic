@@ -12,13 +12,7 @@ type TTriageCategory =
     | "stuck_job"
 type TTriageSeverity = "critical" | "high" | "medium"
 type TTriageScope = "mine" | "repo" | "team"
-type TTriageStatus =
-    | "assigned"
-    | "blocked"
-    | "done"
-    | "in_progress"
-    | "snoozed"
-    | "unassigned"
+type TTriageStatus = "assigned" | "blocked" | "done" | "in_progress" | "snoozed" | "unassigned"
 type TTriageOwner = "me" | "team" | "unassigned"
 type TReviewerRole = "admin" | "developer" | "lead" | "viewer"
 type TSlaState = "breach" | "healthy" | "warning"
@@ -208,7 +202,9 @@ function getSlaColor(state: TSlaState): "danger" | "success" | "warning" {
     return "warning"
 }
 
-function getStatusColor(status: TTriageStatus): "danger" | "default" | "primary" | "success" | "warning" {
+function getStatusColor(
+    status: TTriageStatus,
+): "danger" | "default" | "primary" | "success" | "warning" {
     if (status === "blocked") {
         return "danger"
     }
@@ -224,7 +220,9 @@ function getStatusColor(status: TTriageStatus): "danger" | "default" | "primary"
     return "default"
 }
 
-function getEscalationColor(level: ITriageItem["escalationLevel"]): "danger" | "default" | "warning" {
+function getEscalationColor(
+    level: ITriageItem["escalationLevel"],
+): "danger" | "default" | "warning" {
     if (level === "critical") {
         return "danger"
     }
@@ -368,49 +366,52 @@ export function MyWorkPage(): ReactElement {
             return
         }
 
-        setItems((previous): ReadonlyArray<ITriageItem> =>
-            previous.map((item): ITriageItem => {
-                if (item.id !== itemId) {
-                    return item
-                }
-                return {
-                    ...item,
-                    owner: "me",
-                    status: item.status === "unassigned" ? "assigned" : item.status,
-                }
-            }),
+        setItems(
+            (previous): ReadonlyArray<ITriageItem> =>
+                previous.map((item): ITriageItem => {
+                    if (item.id !== itemId) {
+                        return item
+                    }
+                    return {
+                        ...item,
+                        owner: "me",
+                        status: item.status === "unassigned" ? "assigned" : item.status,
+                    }
+                }),
         )
         setLastActionSummary(`Assigned ${itemId} to current reviewer.`)
         addAuditEntry(itemId, "assign_to_me")
     }
 
     const handleMarkRead = (itemId: string): void => {
-        setItems((previous): ReadonlyArray<ITriageItem> =>
-            previous.map((item): ITriageItem => {
-                if (item.id !== itemId) {
-                    return item
-                }
-                return {
-                    ...item,
-                    isRead: true,
-                }
-            }),
+        setItems(
+            (previous): ReadonlyArray<ITriageItem> =>
+                previous.map((item): ITriageItem => {
+                    if (item.id !== itemId) {
+                        return item
+                    }
+                    return {
+                        ...item,
+                        isRead: true,
+                    }
+                }),
         )
         setLastActionSummary(`Marked ${itemId} as read.`)
         addAuditEntry(itemId, "mark_read")
     }
 
     const handleSnooze = (itemId: string): void => {
-        setItems((previous): ReadonlyArray<ITriageItem> =>
-            previous.map((item): ITriageItem => {
-                if (item.id !== itemId) {
-                    return item
-                }
-                return {
-                    ...item,
-                    status: "snoozed",
-                }
-            }),
+        setItems(
+            (previous): ReadonlyArray<ITriageItem> =>
+                previous.map((item): ITriageItem => {
+                    if (item.id !== itemId) {
+                        return item
+                    }
+                    return {
+                        ...item,
+                        status: "snoozed",
+                    }
+                }),
         )
         setLastActionSummary(`Snoozed ${itemId} until next triage cycle.`)
         addAuditEntry(itemId, "snooze")
@@ -437,17 +438,18 @@ export function MyWorkPage(): ReactElement {
             return
         }
 
-        setItems((previous): ReadonlyArray<ITriageItem> =>
-            previous.map((item): ITriageItem => {
-                if (item.id !== itemId) {
-                    return item
-                }
-                return {
-                    ...item,
-                    escalationLevel: item.escalationLevel === "none" ? "warn" : "critical",
-                    status: item.status === "done" ? item.status : "blocked",
-                }
-            }),
+        setItems(
+            (previous): ReadonlyArray<ITriageItem> =>
+                previous.map((item): ITriageItem => {
+                    if (item.id !== itemId) {
+                        return item
+                    }
+                    return {
+                        ...item,
+                        escalationLevel: item.escalationLevel === "none" ? "warn" : "critical",
+                        status: item.status === "done" ? item.status : "blocked",
+                    }
+                }),
         )
 
         setLastActionSummary(`Escalated ${itemId} and notified owner channel.`)
@@ -461,18 +463,19 @@ export function MyWorkPage(): ReactElement {
             return
         }
 
-        setItems((previous): ReadonlyArray<ITriageItem> =>
-            previous.map((item): ITriageItem => {
-                if (item.id !== itemId) {
-                    return item
-                }
+        setItems(
+            (previous): ReadonlyArray<ITriageItem> =>
+                previous.map((item): ITriageItem => {
+                    if (item.id !== itemId) {
+                        return item
+                    }
 
-                return {
-                    ...item,
-                    owner: item.owner === "unassigned" ? "me" : item.owner,
-                    status: "in_progress",
-                }
-            }),
+                    return {
+                        ...item,
+                        owner: item.owner === "unassigned" ? "me" : item.owner,
+                        status: "in_progress",
+                    }
+                }),
         )
         setLastActionSummary(`Moved ${itemId} to in_progress.`)
         addAuditEntry(itemId, "start_work")
@@ -484,16 +487,17 @@ export function MyWorkPage(): ReactElement {
             return
         }
 
-        setItems((previous): ReadonlyArray<ITriageItem> =>
-            previous.map((item): ITriageItem => {
-                if (item.id !== itemId) {
-                    return item
-                }
-                return {
-                    ...item,
-                    status: "done",
-                }
-            }),
+        setItems(
+            (previous): ReadonlyArray<ITriageItem> =>
+                previous.map((item): ITriageItem => {
+                    if (item.id !== itemId) {
+                        return item
+                    }
+                    return {
+                        ...item,
+                        status: "done",
+                    }
+                }),
         )
         setLastActionSummary(`Marked ${itemId} as done.`)
         addAuditEntry(itemId, "mark_done")
@@ -578,7 +582,9 @@ export function MyWorkPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Unified triage list</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Unified triage list
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     {filteredItems.length === 0 ? (
@@ -608,7 +614,11 @@ export function MyWorkPage(): ReactElement {
                                                 {item.category}
                                             </Chip>
                                             <Chip
-                                                color={item.severity === "critical" ? "danger" : "warning"}
+                                                color={
+                                                    item.severity === "critical"
+                                                        ? "danger"
+                                                        : "warning"
+                                                }
                                                 size="sm"
                                                 variant="flat"
                                             >
@@ -617,7 +627,11 @@ export function MyWorkPage(): ReactElement {
                                             <Chip size="sm" variant="flat">
                                                 owner: {item.owner}
                                             </Chip>
-                                            <Chip color={getStatusColor(item.status)} size="sm" variant="flat">
+                                            <Chip
+                                                color={getStatusColor(item.status)}
+                                                size="sm"
+                                                variant="flat"
+                                            >
                                                 status: {item.status}
                                             </Chip>
                                             <Chip
@@ -638,7 +652,8 @@ export function MyWorkPage(): ReactElement {
                                             </Chip>
                                         </div>
                                         <p className="mt-1 text-xs text-[var(--foreground)]/70">
-                                            {item.repository} · created {formatTimestamp(item.timestamp)} · due{" "}
+                                            {item.repository} · created{" "}
+                                            {formatTimestamp(item.timestamp)} · due{" "}
                                             {formatTimestamp(item.dueAt)} · sla {item.slaMinutes}m
                                         </p>
                                         <div className="mt-2 flex flex-wrap gap-2">
@@ -653,7 +668,10 @@ export function MyWorkPage(): ReactElement {
                                             </Button>
                                             <Button
                                                 isDisabled={
-                                                    isRoleAllowed(reviewerRole, ASSIGNABLE_ROLES) !== true
+                                                    isRoleAllowed(
+                                                        reviewerRole,
+                                                        ASSIGNABLE_ROLES,
+                                                    ) !== true
                                                 }
                                                 size="sm"
                                                 variant="flat"
@@ -665,7 +683,10 @@ export function MyWorkPage(): ReactElement {
                                             </Button>
                                             <Button
                                                 isDisabled={
-                                                    isRoleAllowed(reviewerRole, ASSIGNABLE_ROLES) !== true
+                                                    isRoleAllowed(
+                                                        reviewerRole,
+                                                        ASSIGNABLE_ROLES,
+                                                    ) !== true
                                                 }
                                                 size="sm"
                                                 variant="flat"
@@ -677,7 +698,10 @@ export function MyWorkPage(): ReactElement {
                                             </Button>
                                             <Button
                                                 isDisabled={
-                                                    isRoleAllowed(reviewerRole, ASSIGNABLE_ROLES) !== true
+                                                    isRoleAllowed(
+                                                        reviewerRole,
+                                                        ASSIGNABLE_ROLES,
+                                                    ) !== true
                                                 }
                                                 size="sm"
                                                 variant="flat"
@@ -689,7 +713,10 @@ export function MyWorkPage(): ReactElement {
                                             </Button>
                                             <Button
                                                 isDisabled={
-                                                    isRoleAllowed(reviewerRole, ESCALATION_ROLES) !== true
+                                                    isRoleAllowed(
+                                                        reviewerRole,
+                                                        ESCALATION_ROLES,
+                                                    ) !== true
                                                 }
                                                 size="sm"
                                                 variant="flat"
@@ -740,15 +767,19 @@ export function MyWorkPage(): ReactElement {
                 </CardHeader>
                 <CardBody className="space-y-2">
                     {auditTrail.length === 0 ? (
-                        <p className="text-sm text-[var(--foreground)]/70">No ownership changes yet.</p>
+                        <p className="text-sm text-[var(--foreground)]/70">
+                            No ownership changes yet.
+                        </p>
                     ) : (
                         <ul aria-label="Ownership audit trail" className="space-y-1">
-                            {auditTrail.map((entry): ReactElement => (
-                                <li
-                                    className="text-xs text-[var(--foreground)]/80"
-                                    key={entry.id}
-                                >{`${entry.itemId} ${formatAuditAction(entry.action)} at ${formatTimestamp(entry.timestamp)}`}</li>
-                            ))}
+                            {auditTrail.map(
+                                (entry): ReactElement => (
+                                    <li
+                                        className="text-xs text-[var(--foreground)]/80"
+                                        key={entry.id}
+                                    >{`${entry.itemId} ${formatAuditAction(entry.action)} at ${formatTimestamp(entry.timestamp)}`}</li>
+                                ),
+                            )}
                         </ul>
                     )}
                 </CardBody>

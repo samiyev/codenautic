@@ -34,9 +34,7 @@ describe("RefactoringExportDialog", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<RefactoringExportDialog targets={TEST_TARGETS} />)
 
-        await user.click(
-            screen.getByRole("button", { name: "Open refactoring export dialog" }),
-        )
+        await user.click(screen.getByRole("button", { name: "Open refactoring export dialog" }))
         expect(screen.getByLabelText("Refactoring export destination")).not.toBeNull()
         expect(screen.getByLabelText("Refactoring export template title")).not.toBeNull()
         expect(screen.getByLabelText("Refactoring export template body")).not.toBeNull()
@@ -56,9 +54,7 @@ describe("RefactoringExportDialog", (): void => {
         const onExport = vi.fn()
         renderWithProviders(<RefactoringExportDialog onExport={onExport} targets={TEST_TARGETS} />)
 
-        await user.click(
-            screen.getByRole("button", { name: "Open refactoring export dialog" }),
-        )
+        await user.click(screen.getByRole("button", { name: "Open refactoring export dialog" }))
         await user.click(
             screen.getByRole("checkbox", { name: "Select export target src/api/retry.ts" }),
         )

@@ -39,7 +39,12 @@ export function TeamActivityWidget(props: ITeamActivityWidgetProps): ReactElemen
                             <XAxis dataKey="developer" />
                             <YAxis />
                             <Tooltip />
-                            <Bar dataKey="ccrMerged" fill="#2563eb" name="CCR merged" radius={[6, 6, 0, 0]} />
+                            <Bar
+                                dataKey="ccrMerged"
+                                fill="#2563eb"
+                                name="CCR merged"
+                                radius={[6, 6, 0, 0]}
+                            />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

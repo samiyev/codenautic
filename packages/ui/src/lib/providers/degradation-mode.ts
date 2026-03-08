@@ -22,7 +22,9 @@ export interface IProviderDegradationEventDetail {
  * @param value Любой value из CustomEvent.detail.
  * @returns true если payload валиден.
  */
-export function isProviderDegradationDetail(value: unknown): value is IProviderDegradationEventDetail {
+export function isProviderDegradationDetail(
+    value: unknown,
+): value is IProviderDegradationEventDetail {
     if (typeof value !== "object" || value === null) {
         return false
     }
@@ -36,16 +38,16 @@ export function isProviderDegradationDetail(value: unknown): value is IProviderD
     }
 
     const isProvider =
-        candidate.provider === "git"
-        || candidate.provider === "llm"
-        || candidate.provider === "context"
-        || candidate.provider === "notifications"
+        candidate.provider === "git" ||
+        candidate.provider === "llm" ||
+        candidate.provider === "context" ||
+        candidate.provider === "notifications"
     const isLevel = candidate.level === "operational" || candidate.level === "degraded"
     const hasEta = typeof candidate.eta === "string"
     const hasRunbook = typeof candidate.runbookUrl === "string"
     const hasFeatures =
-        Array.isArray(candidate.affectedFeatures)
-        && candidate.affectedFeatures.every((item): boolean => typeof item === "string")
+        Array.isArray(candidate.affectedFeatures) &&
+        candidate.affectedFeatures.every((item): boolean => typeof item === "string")
 
     return isProvider && isLevel && hasEta && hasRunbook && hasFeatures
 }

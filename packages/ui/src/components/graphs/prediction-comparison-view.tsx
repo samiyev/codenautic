@@ -28,12 +28,10 @@ export interface IPredictionComparisonViewProps {
  * @param props Snapshot-модель и callback выбора.
  * @returns React-компонент comparison view.
  */
-export function PredictionComparisonView(
-    props: IPredictionComparisonViewProps,
-): ReactElement {
+export function PredictionComparisonView(props: IPredictionComparisonViewProps): ReactElement {
     const selectedSnapshot =
-        props.snapshots.find((snapshot): boolean => snapshot.id === props.activeSnapshotId)
-        ?? props.snapshots[0]
+        props.snapshots.find((snapshot): boolean => snapshot.id === props.activeSnapshotId) ??
+        props.snapshots[0]
 
     return (
         <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
@@ -59,8 +57,8 @@ export function PredictionComparisonView(
                             }}
                             type="button"
                         >
-                            {snapshot.periodLabel}: predicted {String(snapshot.predictedHotspots)}
-                            , actual {String(snapshot.actualHotspots)}, accuracy{" "}
+                            {snapshot.periodLabel}: predicted {String(snapshot.predictedHotspots)},
+                            actual {String(snapshot.actualHotspots)}, accuracy{" "}
                             {String(snapshot.accuracyScore)}%
                         </button>
                     )
@@ -83,4 +81,3 @@ export function PredictionComparisonView(
         </section>
     )
 }
-

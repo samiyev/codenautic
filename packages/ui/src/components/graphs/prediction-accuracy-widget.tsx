@@ -64,9 +64,7 @@ function resolvePredictedLabel(riskLevel: TCodeCityTreemapPredictionRiskLevel): 
  * @param props Accuracy points, matrix и cases.
  * @returns React-компонент виджета.
  */
-export function PredictionAccuracyWidget(
-    props: IPredictionAccuracyWidgetProps,
-): ReactElement {
+export function PredictionAccuracyWidget(props: IPredictionAccuracyWidgetProps): ReactElement {
     return (
         <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
             <p className="text-sm font-semibold text-slate-900">Prediction accuracy widget</p>
@@ -79,9 +77,9 @@ export function PredictionAccuracyWidget(
                 {props.points.map((point): ReactElement => {
                     return (
                         <p className="text-xs text-slate-700" key={point.timestamp}>
-                            {point.timestamp}: predicted {String(point.predictedIncidents)} /
-                            actual {String(point.actualIncidents)} / accuracy{" "}
-                            {String(point.accuracyScore)}%
+                            {point.timestamp}: predicted {String(point.predictedIncidents)} / actual{" "}
+                            {String(point.actualIncidents)} / accuracy {String(point.accuracyScore)}
+                            %
                         </p>
                     )
                 })}
@@ -131,4 +129,3 @@ export function PredictionAccuracyWidget(
         </section>
     )
 }
-

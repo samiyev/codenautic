@@ -2,9 +2,7 @@ import { fireEvent, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import {
-    ROICalculatorWidget,
-} from "@/components/graphs/roi-calculator-widget"
+import { ROICalculatorWidget } from "@/components/graphs/roi-calculator-widget"
 import type { IRefactoringTargetDescriptor } from "@/components/graphs/refactoring-dashboard"
 import { renderWithProviders } from "../utils/render"
 
@@ -39,7 +37,9 @@ describe("ROICalculatorWidget", (): void => {
         expect(screen.getByText("Selected files: 0")).not.toBeNull()
         expect(screen.getByRole("button", { name: "Apply ROI scenario" })).toBeDisabled()
 
-        await user.click(screen.getByRole("checkbox", { name: "Select ROI target src/adapters/queue.ts" }))
+        await user.click(
+            screen.getByRole("checkbox", { name: "Select ROI target src/adapters/queue.ts" }),
+        )
         expect(screen.getByText("Selected files: 1")).not.toBeNull()
         expect(screen.getByRole("button", { name: "Apply ROI scenario" })).not.toBeDisabled()
 
@@ -66,8 +66,12 @@ describe("ROICalculatorWidget", (): void => {
             />,
         )
 
-        await user.click(screen.getByRole("checkbox", { name: "Select ROI target src/adapters/queue.ts" }))
-        await user.click(screen.getByRole("checkbox", { name: "Select ROI target src/services/retry.ts" }))
+        await user.click(
+            screen.getByRole("checkbox", { name: "Select ROI target src/adapters/queue.ts" }),
+        )
+        await user.click(
+            screen.getByRole("checkbox", { name: "Select ROI target src/services/retry.ts" }),
+        )
         await user.click(screen.getByRole("button", { name: "Apply ROI scenario" }))
 
         expect(onApplyScenario).toHaveBeenCalledTimes(1)

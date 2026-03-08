@@ -144,7 +144,9 @@ export function ReportListPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Report filters</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Report filters
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-3">
@@ -159,10 +161,10 @@ export function ReportListPage(): ReactElement {
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
                                     if (
-                                        nextValue === "all"
-                                        || nextValue === "architecture"
-                                        || nextValue === "delivery"
-                                        || nextValue === "quality"
+                                        nextValue === "all" ||
+                                        nextValue === "architecture" ||
+                                        nextValue === "delivery" ||
+                                        nextValue === "quality"
                                     ) {
                                         setReportTypeFilter(nextValue)
                                     }
@@ -175,7 +177,9 @@ export function ReportListPage(): ReactElement {
                             </select>
                         </label>
                         <label className="space-y-1 text-sm">
-                            <span className="font-semibold text-[var(--foreground)]">Date from</span>
+                            <span className="font-semibold text-[var(--foreground)]">
+                                Date from
+                            </span>
                             <input
                                 aria-label="Report list date from"
                                 className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900"
@@ -214,51 +218,59 @@ export function ReportListPage(): ReactElement {
                         </Alert>
                     ) : (
                         <ul aria-label="Generated reports list" className="space-y-2">
-                            {filteredReports.map((report): ReactElement => (
-                                <li
-                                    aria-label={`Report row ${report.id}`}
-                                    className="rounded border border-slate-200 bg-slate-50 p-3"
-                                    key={report.id}
-                                >
-                                    <div className="mb-2 flex flex-wrap items-center gap-2">
-                                        <p className="font-semibold text-slate-900">{report.title}</p>
-                                        <span
-                                            className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${resolveReportStatusBadgeClass(
-                                                report.status,
-                                            )}`}
-                                        >
-                                            {report.status}
-                                        </span>
-                                    </div>
-                                    <p className="text-sm text-slate-700">
-                                        Type: {report.type} · Date: {report.generatedAt}
-                                    </p>
-                                    <div className="mt-2 flex gap-2">
-                                        <Button size="sm" variant="flat" onPress={handleOpenViewer}>
-                                            Open viewer
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="flat"
-                                            onPress={(): void => {
-                                                handleRegenerateReport(report.id)
-                                            }}
-                                        >
-                                            {`Regenerate ${report.id}`}
-                                        </Button>
-                                        <Button
-                                            color="danger"
-                                            size="sm"
-                                            variant="flat"
-                                            onPress={(): void => {
-                                                handleDeleteReport(report.id)
-                                            }}
-                                        >
-                                            {`Delete ${report.id}`}
-                                        </Button>
-                                    </div>
-                                </li>
-                            ))}
+                            {filteredReports.map(
+                                (report): ReactElement => (
+                                    <li
+                                        aria-label={`Report row ${report.id}`}
+                                        className="rounded border border-slate-200 bg-slate-50 p-3"
+                                        key={report.id}
+                                    >
+                                        <div className="mb-2 flex flex-wrap items-center gap-2">
+                                            <p className="font-semibold text-slate-900">
+                                                {report.title}
+                                            </p>
+                                            <span
+                                                className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${resolveReportStatusBadgeClass(
+                                                    report.status,
+                                                )}`}
+                                            >
+                                                {report.status}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-slate-700">
+                                            Type: {report.type} · Date: {report.generatedAt}
+                                        </p>
+                                        <div className="mt-2 flex gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant="flat"
+                                                onPress={handleOpenViewer}
+                                            >
+                                                Open viewer
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="flat"
+                                                onPress={(): void => {
+                                                    handleRegenerateReport(report.id)
+                                                }}
+                                            >
+                                                {`Regenerate ${report.id}`}
+                                            </Button>
+                                            <Button
+                                                color="danger"
+                                                size="sm"
+                                                variant="flat"
+                                                onPress={(): void => {
+                                                    handleDeleteReport(report.id)
+                                                }}
+                                            >
+                                                {`Delete ${report.id}`}
+                                            </Button>
+                                        </div>
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     )}
                     <Alert color="primary" title="Action status" variant="flat">

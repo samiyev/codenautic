@@ -219,10 +219,12 @@ export function SettingsNotificationsPage(): ReactElement {
         quietHoursStart: "22:00",
     })
     const [deepLinkGuardNotice, setDeepLinkGuardNotice] = useState<string | undefined>(undefined)
-    const [selectedNotificationIds, setSelectedNotificationIds] = useState<ReadonlyArray<string>>([])
-    const [bulkPendingState, setBulkPendingState] = useState<INotificationBulkPendingState | undefined>(
-        undefined,
+    const [selectedNotificationIds, setSelectedNotificationIds] = useState<ReadonlyArray<string>>(
+        [],
     )
+    const [bulkPendingState, setBulkPendingState] = useState<
+        INotificationBulkPendingState | undefined
+    >(undefined)
     const [bulkAudit, setBulkAudit] = useState<ReadonlyArray<INotificationBulkAuditEntry>>([])
     const bulkPendingTimerRef = useRef<number | undefined>(undefined)
 
@@ -256,25 +258,29 @@ export function SettingsNotificationsPage(): ReactElement {
     }, [muteRules])
 
     const handleToggleRead = (id: string): void => {
-        setNotifications((previous): ReadonlyArray<INotificationItem> =>
-            previous.map((notification): INotificationItem => {
-                if (notification.id !== id) {
-                    return notification
-                }
-                return {
-                    ...notification,
-                    isRead: notification.isRead !== true,
-                }
-            }),
+        setNotifications(
+            (previous): ReadonlyArray<INotificationItem> =>
+                previous.map((notification): INotificationItem => {
+                    if (notification.id !== id) {
+                        return notification
+                    }
+                    return {
+                        ...notification,
+                        isRead: notification.isRead !== true,
+                    }
+                }),
         )
     }
 
     const handleMarkAllAsRead = (): void => {
-        setNotifications((previous): ReadonlyArray<INotificationItem> =>
-            previous.map((notification): INotificationItem => ({
-                ...notification,
-                isRead: true,
-            })),
+        setNotifications(
+            (previous): ReadonlyArray<INotificationItem> =>
+                previous.map(
+                    (notification): INotificationItem => ({
+                        ...notification,
+                        isRead: true,
+                    }),
+                ),
         )
         showToastSuccess("All notifications marked as read.")
     }
@@ -337,16 +343,18 @@ export function SettingsNotificationsPage(): ReactElement {
         selectedIds: ReadonlyArray<string>,
         summary: string,
     ): void => {
-        setBulkAudit((previous): ReadonlyArray<INotificationBulkAuditEntry> => [
-            {
-                id: actionId,
-                notificationIds: selectedIds,
-                occurredAt: new Date().toISOString(),
-                status,
-                summary,
-            },
-            ...previous.filter((entry): boolean => entry.id !== actionId),
-        ])
+        setBulkAudit(
+            (previous): ReadonlyArray<INotificationBulkAuditEntry> => [
+                {
+                    id: actionId,
+                    notificationIds: selectedIds,
+                    occurredAt: new Date().toISOString(),
+                    status,
+                    summary,
+                },
+                ...previous.filter((entry): boolean => entry.id !== actionId),
+            ],
+        )
     }
 
     const handleToggleNotificationSelection = (notificationId: string): void => {
@@ -370,17 +378,18 @@ export function SettingsNotificationsPage(): ReactElement {
         const selectedIds = selectedNotificationIds
         const previousSnapshot = notifications
 
-        setNotifications((previous): ReadonlyArray<INotificationItem> =>
-            previous.map((notification): INotificationItem => {
-                if (selectedIds.includes(notification.id) !== true) {
-                    return notification
-                }
+        setNotifications(
+            (previous): ReadonlyArray<INotificationItem> =>
+                previous.map((notification): INotificationItem => {
+                    if (selectedIds.includes(notification.id) !== true) {
+                        return notification
+                    }
 
-                return {
-                    ...notification,
-                    isRead: true,
-                }
-            }),
+                    return {
+                        ...notification,
+                        isRead: true,
+                    }
+                }),
         )
         setSelectedNotificationIds([])
         setBulkPendingState({
@@ -517,10 +526,10 @@ export function SettingsNotificationsPage(): ReactElement {
                             onChange={(event): void => {
                                 const value = event.currentTarget.value
                                 if (
-                                    value === "all"
-                                    || value === "review.completed"
-                                    || value === "drift.alert"
-                                    || value === "prediction.alert"
+                                    value === "all" ||
+                                    value === "review.completed" ||
+                                    value === "drift.alert" ||
+                                    value === "prediction.alert"
                                 ) {
                                     setEventTypeFilter(value)
                                 }
@@ -534,66 +543,70 @@ export function SettingsNotificationsPage(): ReactElement {
                     </div>
 
                     <ul aria-label="Notification inbox list" className="space-y-2" role="list">
-                        {filteredNotifications.map((notification): ReactElement => (
-                            <li
-                                key={notification.id}
-                                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
-                                role="listitem"
-                            >
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <input
-                                        aria-label={`Select ${notification.id}`}
-                                        checked={selectedNotificationIds.includes(notification.id)}
-                                        className="h-4 w-4 accent-[var(--primary)]"
-                                        type="checkbox"
-                                        onChange={(): void => {
-                                            handleToggleNotificationSelection(notification.id)
-                                        }}
-                                    />
-                                    <p className="text-sm font-semibold text-[var(--foreground)]">
-                                        {notification.title}
+                        {filteredNotifications.map(
+                            (notification): ReactElement => (
+                                <li
+                                    key={notification.id}
+                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
+                                    role="listitem"
+                                >
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <input
+                                            aria-label={`Select ${notification.id}`}
+                                            checked={selectedNotificationIds.includes(
+                                                notification.id,
+                                            )}
+                                            className="h-4 w-4 accent-[var(--primary)]"
+                                            type="checkbox"
+                                            onChange={(): void => {
+                                                handleToggleNotificationSelection(notification.id)
+                                            }}
+                                        />
+                                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                                            {notification.title}
+                                        </p>
+                                        <Chip
+                                            size="sm"
+                                            variant={notification.isRead ? "flat" : "solid"}
+                                        >
+                                            {notification.isRead ? "Read" : "Unread"}
+                                        </Chip>
+                                        <Chip size="sm" variant="flat">
+                                            {EVENT_TYPE_LABELS[notification.type]}
+                                        </Chip>
+                                        <p className="text-xs text-[var(--foreground)]/70">
+                                            {formatNotificationTime(notification.occurredAt)}
+                                        </p>
+                                    </div>
+                                    <p className="mt-1 text-sm text-[var(--foreground)]/80">
+                                        {notification.message}
                                     </p>
-                                    <Chip
-                                        size="sm"
-                                        variant={notification.isRead ? "flat" : "solid"}
-                                    >
-                                        {notification.isRead ? "Read" : "Unread"}
-                                    </Chip>
-                                    <Chip size="sm" variant="flat">
-                                        {EVENT_TYPE_LABELS[notification.type]}
-                                    </Chip>
-                                    <p className="text-xs text-[var(--foreground)]/70">
-                                        {formatNotificationTime(notification.occurredAt)}
-                                    </p>
-                                </div>
-                                <p className="mt-1 text-sm text-[var(--foreground)]/80">
-                                    {notification.message}
-                                </p>
-                                <div className="mt-2 flex flex-wrap items-center gap-2">
-                                    <Button
-                                        size="sm"
-                                        variant="flat"
-                                        onPress={(): void => {
-                                            handleToggleRead(notification.id)
-                                        }}
-                                    >
-                                        {notification.isRead
-                                            ? `Mark as unread ${notification.id}`
-                                            : `Mark as read ${notification.id}`}
-                                    </Button>
-                                    <Button
-                                        aria-label={`Open ${notification.id} context`}
-                                        size="sm"
-                                        variant="flat"
-                                        onPress={(): void => {
-                                            handleOpenDeepLink(notification.targetHref)
-                                        }}
-                                    >
-                                        Open context
-                                    </Button>
-                                </div>
-                            </li>
-                        ))}
+                                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                                        <Button
+                                            size="sm"
+                                            variant="flat"
+                                            onPress={(): void => {
+                                                handleToggleRead(notification.id)
+                                            }}
+                                        >
+                                            {notification.isRead
+                                                ? `Mark as unread ${notification.id}`
+                                                : `Mark as read ${notification.id}`}
+                                        </Button>
+                                        <Button
+                                            aria-label={`Open ${notification.id} context`}
+                                            size="sm"
+                                            variant="flat"
+                                            onPress={(): void => {
+                                                handleOpenDeepLink(notification.targetHref)
+                                            }}
+                                        >
+                                            Open context
+                                        </Button>
+                                    </div>
+                                </li>
+                            ),
+                        )}
                     </ul>
                     {filteredNotifications.length === 0 ? (
                         <Alert color="warning" title="No notifications found" variant="flat">
@@ -670,7 +683,9 @@ export function SettingsNotificationsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">In-app mute rules</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        In-app mute rules
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--foreground)]/70">
@@ -685,10 +700,12 @@ export function SettingsNotificationsPage(): ReactElement {
                         aria-label="Mute non-critical alerts in-app"
                         isSelected={muteRules.muteNonCriticalAtNight}
                         onValueChange={(value): void => {
-                            setMuteRules((previous): IInAppMuteRules => ({
-                                ...previous,
-                                muteNonCriticalAtNight: value,
-                            }))
+                            setMuteRules(
+                                (previous): IInAppMuteRules => ({
+                                    ...previous,
+                                    muteNonCriticalAtNight: value,
+                                }),
+                            )
                         }}
                     >
                         Mute non-critical alerts in-app
@@ -697,10 +714,12 @@ export function SettingsNotificationsPage(): ReactElement {
                         aria-label="Mute prediction alerts for archived repositories"
                         isSelected={muteRules.mutePredictionsForArchivedRepos}
                         onValueChange={(value): void => {
-                            setMuteRules((previous): IInAppMuteRules => ({
-                                ...previous,
-                                mutePredictionsForArchivedRepos: value,
-                            }))
+                            setMuteRules(
+                                (previous): IInAppMuteRules => ({
+                                    ...previous,
+                                    mutePredictionsForArchivedRepos: value,
+                                }),
+                            )
                         }}
                     >
                         Mute prediction alerts for archived repositories
@@ -711,10 +730,12 @@ export function SettingsNotificationsPage(): ReactElement {
                             type="time"
                             value={muteRules.quietHoursStart}
                             onValueChange={(value): void => {
-                                setMuteRules((previous): IInAppMuteRules => ({
-                                    ...previous,
-                                    quietHoursStart: value,
-                                }))
+                                setMuteRules(
+                                    (previous): IInAppMuteRules => ({
+                                        ...previous,
+                                        quietHoursStart: value,
+                                    }),
+                                )
                             }}
                         />
                         <Input
@@ -722,10 +743,12 @@ export function SettingsNotificationsPage(): ReactElement {
                             type="time"
                             value={muteRules.quietHoursEnd}
                             onValueChange={(value): void => {
-                                setMuteRules((previous): IInAppMuteRules => ({
-                                    ...previous,
-                                    quietHoursEnd: value,
-                                }))
+                                setMuteRules(
+                                    (previous): IInAppMuteRules => ({
+                                        ...previous,
+                                        quietHoursEnd: value,
+                                    }),
+                                )
                             }}
                         />
                     </div>
@@ -734,7 +757,9 @@ export function SettingsNotificationsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Bulk action audit</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Bulk action audit
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     {bulkAudit.length === 0 ? (
@@ -743,20 +768,24 @@ export function SettingsNotificationsPage(): ReactElement {
                         </p>
                     ) : (
                         <ul aria-label="Bulk action audit list" className="space-y-2">
-                            {bulkAudit.map((entry): ReactElement => (
-                                <li
-                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-xs"
-                                    key={entry.id}
-                                >
-                                    <p className="font-semibold text-[var(--foreground)]">
-                                        {entry.status}
-                                    </p>
-                                    <p className="text-[var(--foreground)]/80">{entry.summary}</p>
-                                    <p className="text-[var(--foreground)]/70">
-                                        Notifications: {entry.notificationIds.join(", ")}
-                                    </p>
-                                </li>
-                            ))}
+                            {bulkAudit.map(
+                                (entry): ReactElement => (
+                                    <li
+                                        className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-xs"
+                                        key={entry.id}
+                                    >
+                                        <p className="font-semibold text-[var(--foreground)]">
+                                            {entry.status}
+                                        </p>
+                                        <p className="text-[var(--foreground)]/80">
+                                            {entry.summary}
+                                        </p>
+                                        <p className="text-[var(--foreground)]/70">
+                                            Notifications: {entry.notificationIds.join(", ")}
+                                        </p>
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     )}
                 </CardBody>

@@ -183,53 +183,58 @@ export function TourCustomizer(props: ITourCustomizerProps): ReactElement {
             </button>
 
             <ul className="mt-3 space-y-2">
-                {props.steps.map((step): ReactElement => (
-                    <li
-                        className="rounded border border-slate-200 bg-slate-50 p-2"
-                        draggable={true}
-                        key={step.id}
-                        onDragOver={(event): void => {
-                            event.preventDefault()
-                        }}
-                        onDragStart={(): void => {
-                            setDraggingStepId(step.id)
-                        }}
-                        onDrop={(event): void => {
-                            handleDropOnStep(step.id, event)
-                        }}
-                    >
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                            Step ID: {step.id}
-                        </p>
-                        <label className="mt-1 block space-y-1" htmlFor={`step-title-${step.id}`}>
-                            <span className="text-xs text-slate-500">Title</span>
-                            <input
-                                aria-label={`Tour step title ${step.id}`}
-                                className="w-full rounded border border-slate-200 px-2 py-1 text-sm"
-                                id={`step-title-${step.id}`}
-                                onChange={(event): void => {
-                                    handleTitleChange(step.id, event)
-                                }}
-                                value={step.title}
-                            />
-                        </label>
-                        <label
-                            className="mt-1 block space-y-1"
-                            htmlFor={`step-description-${step.id}`}
+                {props.steps.map(
+                    (step): ReactElement => (
+                        <li
+                            className="rounded border border-slate-200 bg-slate-50 p-2"
+                            draggable={true}
+                            key={step.id}
+                            onDragOver={(event): void => {
+                                event.preventDefault()
+                            }}
+                            onDragStart={(): void => {
+                                setDraggingStepId(step.id)
+                            }}
+                            onDrop={(event): void => {
+                                handleDropOnStep(step.id, event)
+                            }}
                         >
-                            <span className="text-xs text-slate-500">Description</span>
-                            <textarea
-                                aria-label={`Tour step description ${step.id}`}
-                                className="min-h-16 w-full rounded border border-slate-200 px-2 py-1 text-sm"
-                                id={`step-description-${step.id}`}
-                                onChange={(event): void => {
-                                    handleDescriptionChange(step.id, event)
-                                }}
-                                value={step.description}
-                            />
-                        </label>
-                    </li>
-                ))}
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                                Step ID: {step.id}
+                            </p>
+                            <label
+                                className="mt-1 block space-y-1"
+                                htmlFor={`step-title-${step.id}`}
+                            >
+                                <span className="text-xs text-slate-500">Title</span>
+                                <input
+                                    aria-label={`Tour step title ${step.id}`}
+                                    className="w-full rounded border border-slate-200 px-2 py-1 text-sm"
+                                    id={`step-title-${step.id}`}
+                                    onChange={(event): void => {
+                                        handleTitleChange(step.id, event)
+                                    }}
+                                    value={step.title}
+                                />
+                            </label>
+                            <label
+                                className="mt-1 block space-y-1"
+                                htmlFor={`step-description-${step.id}`}
+                            >
+                                <span className="text-xs text-slate-500">Description</span>
+                                <textarea
+                                    aria-label={`Tour step description ${step.id}`}
+                                    className="min-h-16 w-full rounded border border-slate-200 px-2 py-1 text-sm"
+                                    id={`step-description-${step.id}`}
+                                    onChange={(event): void => {
+                                        handleDescriptionChange(step.id, event)
+                                    }}
+                                    value={step.description}
+                                />
+                            </label>
+                        </li>
+                    ),
+                )}
             </ul>
         </section>
     )

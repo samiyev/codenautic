@@ -63,15 +63,11 @@ describe("PredictionDashboard", (): void => {
 
         expect(screen.getByText("Prediction dashboard")).not.toBeNull()
         expect(screen.getByLabelText("Prediction hotspots list")).not.toBeNull()
-        expect(
-            screen.getByText("Risk High · Confidence 88% · Forecast +4 issues"),
-        ).not.toBeNull()
+        expect(screen.getByText("Risk High · Confidence 88% · Forecast +4 issues")).not.toBeNull()
         expect(screen.getByLabelText("Prediction quality trend")).not.toBeNull()
         expect(screen.getByText("W-2: 76 → 70")).not.toBeNull()
         expect(screen.getByLabelText("Prediction bug-prone files")).not.toBeNull()
-        expect(
-            screen.getByText("src/api/auth.ts · bugs 30d 5 · confidence 87%"),
-        ).not.toBeNull()
+        expect(screen.getByText("src/api/auth.ts · bugs 30d 5 · confidence 87%")).not.toBeNull()
     })
 
     it("вызывает onSelectHotspot при выборе hotspot", async (): Promise<void> => {
@@ -102,4 +98,3 @@ describe("PredictionDashboard", (): void => {
         )
     })
 })
-

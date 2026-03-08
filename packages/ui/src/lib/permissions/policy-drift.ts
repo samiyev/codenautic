@@ -26,10 +26,10 @@ export function isPolicyDriftEventDetail(value: unknown): value is IPolicyDriftE
     }
 
     const isRole =
-        candidate.nextRole === "viewer"
-        || candidate.nextRole === "developer"
-        || candidate.nextRole === "lead"
-        || candidate.nextRole === "admin"
+        candidate.nextRole === "viewer" ||
+        candidate.nextRole === "developer" ||
+        candidate.nextRole === "lead" ||
+        candidate.nextRole === "admin"
 
     return isRole && typeof candidate.reason === "string"
 }

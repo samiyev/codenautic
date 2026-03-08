@@ -36,9 +36,7 @@ export interface ICityOwnershipOverlayProps {
     readonly onSelectOwner?: (owner: ICityOwnershipOverlayOwnerEntry) => void
 }
 
-function resolveOwnerItemClassName(
-    isActive: boolean,
-): string {
+function resolveOwnerItemClassName(isActive: boolean): string {
     return [
         "w-full rounded-lg border p-2 text-left transition",
         isActive
@@ -80,10 +78,7 @@ export function CityOwnershipOverlay(props: ICityOwnershipOverlayProps): ReactEl
                 </button>
             </div>
 
-            <ul
-                aria-label="Ownership legend"
-                className="mt-3 grid gap-2 sm:grid-cols-2"
-            >
+            <ul aria-label="Ownership legend" className="mt-3 grid gap-2 sm:grid-cols-2">
                 {props.owners.map((owner): ReactElement => {
                     const isActive = props.activeOwnerId === owner.ownerId
                     const fileCount = owner.fileIds.length

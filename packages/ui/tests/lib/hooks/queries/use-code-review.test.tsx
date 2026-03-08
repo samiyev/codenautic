@@ -6,10 +6,7 @@ import { describe, expect, it } from "vitest"
 
 import { renderWithProviders } from "../../../utils/render"
 import { server } from "../../../mocks/server"
-import {
-    useCodeReview,
-    type IUseCodeReviewResult,
-} from "@/lib/hooks/queries/use-code-review"
+import { useCodeReview, type IUseCodeReviewResult } from "@/lib/hooks/queries/use-code-review"
 
 interface ICodeReviewProbeProps {
     readonly reviewId: string
@@ -64,9 +61,7 @@ function ReviewQueryState(hook: IUseCodeReviewResult): ReactElement {
         <div>
             <p data-testid="review-id">{hook.codeReviewQuery.data?.reviewId}</p>
             <p data-testid="review-status">{hook.codeReviewQuery.data?.status}</p>
-            <p data-testid="review-issues-count">
-                {hook.codeReviewQuery.data?.issues.length ?? 0}
-            </p>
+            <p data-testid="review-issues-count">{hook.codeReviewQuery.data?.issues.length ?? 0}</p>
         </div>
     )
 }

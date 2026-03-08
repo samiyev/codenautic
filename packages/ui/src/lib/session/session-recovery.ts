@@ -33,9 +33,7 @@ function safeParse<T>(rawValue: string): T | undefined {
  * @param field Редактируемое поле.
  * @returns Идентификатор draft.
  */
-export function buildDraftFieldKey(
-    field: HTMLInputElement | HTMLTextAreaElement,
-): string {
+export function buildDraftFieldKey(field: HTMLInputElement | HTMLTextAreaElement): string {
     const fieldName = field.name.trim()
     if (fieldName.length > 0) {
         return `name:${fieldName}`
@@ -130,10 +128,10 @@ export function readSessionDraftSnapshot(): ISessionDraftSnapshot | undefined {
     }
 
     if (
-        typeof parsed.fieldKey !== "string"
-        || typeof parsed.path !== "string"
-        || typeof parsed.value !== "string"
-        || typeof parsed.updatedAt !== "string"
+        typeof parsed.fieldKey !== "string" ||
+        typeof parsed.path !== "string" ||
+        typeof parsed.value !== "string" ||
+        typeof parsed.updatedAt !== "string"
     ) {
         return undefined
     }

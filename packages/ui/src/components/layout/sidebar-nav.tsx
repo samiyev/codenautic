@@ -112,9 +112,7 @@ export function SidebarNav(props: ISidebarNavProps): ReactElement {
             return currentLocation.pathname === "/"
         }
 
-        return (
-            currentLocation.pathname === to || currentLocation.pathname.startsWith(`${to}/`)
-        )
+        return currentLocation.pathname === to || currentLocation.pathname.startsWith(`${to}/`)
     }
 
     return (
@@ -123,9 +121,7 @@ export function SidebarNav(props: ISidebarNavProps): ReactElement {
                 {items.map((item): ReactElement => {
                     const isNavigable = item.to !== undefined && item.isDisabled !== true
                     const isActive =
-                        item.to !== undefined &&
-                        isItemActive(item.to) &&
-                        item.isDisabled !== true
+                        item.to !== undefined && isItemActive(item.to) && item.isDisabled !== true
 
                     const handlePress = (): void => {
                         if (isNavigable !== true) {
@@ -153,11 +149,15 @@ export function SidebarNav(props: ISidebarNavProps): ReactElement {
                         void navigate({ to: item.to })
                     }
 
-                    const startContent = item.icon === undefined ? undefined : (
-                        <span aria-hidden="true" className="inline-flex items-center justify-center">
-                            {item.icon}
-                        </span>
-                    )
+                    const startContent =
+                        item.icon === undefined ? undefined : (
+                            <span
+                                aria-hidden="true"
+                                className="inline-flex items-center justify-center"
+                            >
+                                {item.icon}
+                            </span>
+                        )
 
                     return (
                         <li key={item.label}>

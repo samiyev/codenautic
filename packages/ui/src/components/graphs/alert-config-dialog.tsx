@@ -52,7 +52,8 @@ function buildInitialModuleState(
     const moduleState: Record<string, boolean> = {}
     modules.forEach((module): void => {
         const explicitValue = moduleIds?.includes(module.moduleId) ?? false
-        moduleState[module.moduleId] = moduleIds === undefined ? module.enabledByDefault : explicitValue
+        moduleState[module.moduleId] =
+            moduleIds === undefined ? module.enabledByDefault : explicitValue
     })
     return moduleState
 }
@@ -88,7 +89,9 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
     )
 
     useEffect((): void => {
-        setConfidenceThreshold(props.defaultValue?.confidenceThreshold ?? DEFAULT_CONFIDENCE_THRESHOLD)
+        setConfidenceThreshold(
+            props.defaultValue?.confidenceThreshold ?? DEFAULT_CONFIDENCE_THRESHOLD,
+        )
         setIssueIncreaseThreshold(
             props.defaultValue?.issueIncreaseThreshold ?? DEFAULT_ISSUE_INCREASE_THRESHOLD,
         )
@@ -100,9 +103,7 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
     const handleChannelToggle = (channel: TAlertConfigChannel): void => {
         setChannels((currentChannels): ReadonlyArray<TAlertConfigChannel> => {
             if (currentChannels.includes(channel)) {
-                const nextChannels = currentChannels.filter(
-                    (entry): boolean => entry !== channel,
-                )
+                const nextChannels = currentChannels.filter((entry): boolean => entry !== channel)
                 return nextChannels.length === 0 ? currentChannels : nextChannels
             }
             return [...currentChannels, channel]
@@ -179,7 +180,10 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
                 </legend>
                 {(["slack", "email", "webhook"] as const).map((channel): ReactElement => {
                     return (
-                        <label className="flex items-center gap-2 text-xs text-slate-700" key={channel}>
+                        <label
+                            className="flex items-center gap-2 text-xs text-slate-700"
+                            key={channel}
+                        >
                             <input
                                 checked={channels.includes(channel)}
                                 onChange={(): void => {
@@ -203,9 +207,9 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
                     onChange={(event: ChangeEvent<HTMLSelectElement>): void => {
                         const nextFrequency = event.currentTarget.value
                         if (
-                            nextFrequency === "realtime"
-                            || nextFrequency === "daily"
-                            || nextFrequency === "weekly"
+                            nextFrequency === "realtime" ||
+                            nextFrequency === "daily" ||
+                            nextFrequency === "weekly"
                         ) {
                             setFrequency(nextFrequency)
                         }
@@ -224,7 +228,10 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
                 </legend>
                 {props.modules.map((module): ReactElement => {
                     return (
-                        <label className="flex items-center gap-2 text-xs text-slate-700" key={module.moduleId}>
+                        <label
+                            className="flex items-center gap-2 text-xs text-slate-700"
+                            key={module.moduleId}
+                        >
                             <input
                                 checked={moduleState[module.moduleId] === true}
                                 onChange={(event: ChangeEvent<HTMLInputElement>): void => {
@@ -257,4 +264,3 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
         </section>
     )
 }
-

@@ -62,9 +62,7 @@ function resolveOverlayButtonClass(
  * @param props Значение режима и callback обновления.
  * @returns UI-элемент управления overlays.
  */
-export function CausalOverlaySelector(
-    props: ICausalOverlaySelectorProps,
-): ReactElement {
+export function CausalOverlaySelector(props: ICausalOverlaySelectorProps): ReactElement {
     const activeLabel = CAUSAL_OVERLAY_LABELS[props.value]
 
     const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>): void => {
@@ -89,11 +87,13 @@ export function CausalOverlaySelector(
                         value={props.value}
                         onChange={handleSelectChange}
                     >
-                        {CAUSAL_OVERLAY_OPTIONS.map((option): ReactElement => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
+                        {CAUSAL_OVERLAY_OPTIONS.map(
+                            (option): ReactElement => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ),
+                        )}
                     </select>
                 </label>
                 <div
@@ -101,20 +101,22 @@ export function CausalOverlaySelector(
                     className="flex flex-wrap items-center gap-2"
                     role="toolbar"
                 >
-                    {CAUSAL_OVERLAY_OPTIONS.map((option): ReactElement => (
-                        <button
-                            aria-label={`Switch to ${option.label} overlay`}
-                            aria-pressed={props.value === option.value}
-                            className={resolveOverlayButtonClass(props.value, option.value)}
-                            key={option.value}
-                            type="button"
-                            onClick={(): void => {
-                                props.onChange(option.value)
-                            }}
-                        >
-                            {option.label}
-                        </button>
-                    ))}
+                    {CAUSAL_OVERLAY_OPTIONS.map(
+                        (option): ReactElement => (
+                            <button
+                                aria-label={`Switch to ${option.label} overlay`}
+                                aria-pressed={props.value === option.value}
+                                className={resolveOverlayButtonClass(props.value, option.value)}
+                                key={option.value}
+                                type="button"
+                                onClick={(): void => {
+                                    props.onChange(option.value)
+                                }}
+                            >
+                                {option.label}
+                            </button>
+                        ),
+                    )}
                 </div>
             </div>
             <p aria-live="polite" className="text-xs text-slate-600">

@@ -179,7 +179,10 @@ function createCodeCityTimelineSnapshots(
                 const nextComplexity = Math.max(1, Math.round((file.complexity ?? 4) * ratio))
                 const nextCoverage =
                     file.coverage !== undefined
-                        ? Math.min(100, Math.max(20, Math.round(file.coverage * (0.82 + ratio * 0.18))))
+                        ? Math.min(
+                              100,
+                              Math.max(20, Math.round(file.coverage * (0.82 + ratio * 0.18))),
+                          )
                         : undefined
 
                 return {
@@ -226,12 +229,10 @@ function resolveCodeCityRenderCapability(
         }
     }
 
-    const contextWithMetrics = (webGl2Context ?? webGlContext) as
-        | {
-            readonly MAX_TEXTURE_SIZE?: number
-            getParameter?: (parameter: number) => unknown
-        }
-        | null
+    const contextWithMetrics = (webGl2Context ?? webGlContext) as {
+        readonly MAX_TEXTURE_SIZE?: number
+        getParameter?: (parameter: number) => unknown
+    } | null
     const maxTextureSize =
         contextWithMetrics !== null &&
         contextWithMetrics.MAX_TEXTURE_SIZE !== undefined &&
@@ -289,8 +290,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
         return createCodeCityTimelineSnapshots(props.files)
     }, [props.files])
     const lastTimelineIndex = snapshots.length - 1
-    const currentSnapshot =
-        snapshots[Math.min(timelineIndex, lastTimelineIndex)] ??
+    const currentSnapshot = snapshots[Math.min(timelineIndex, lastTimelineIndex)] ??
         snapshots[0] ?? {
             files: [],
             id: "snapshot-fallback",
@@ -330,14 +330,16 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
         )
     }, [props.files])
     const causalTimelineEvents = useMemo((): ReadonlyArray<string> => {
-        return props.causalCouplings?.map((coupling, index): string => {
-            const sourcePath =
-                repositoryFilePathById.get(coupling.sourceFileId) ?? coupling.sourceFileId
-            const targetPath =
-                repositoryFilePathById.get(coupling.targetFileId) ?? coupling.targetFileId
+        return (
+            props.causalCouplings?.map((coupling, index): string => {
+                const sourcePath =
+                    repositoryFilePathById.get(coupling.sourceFileId) ?? coupling.sourceFileId
+                const targetPath =
+                    repositoryFilePathById.get(coupling.targetFileId) ?? coupling.targetFileId
 
-            return `Event #${String(index + 1)}: ${sourcePath} -> ${targetPath}`
-        }) ?? []
+                return `Event #${String(index + 1)}: ${sourcePath} -> ${targetPath}`
+            }) ?? []
+        )
     }, [props.causalCouplings, repositoryFilePathById])
     const currentCausalEventLabel = useMemo((): string => {
         if (causalTimelineEvents.length === 0) {
@@ -348,8 +350,8 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
         const normalizedIndex = Math.max(0, Math.min(causalReplayIndex, maxIndex))
         return causalTimelineEvents[normalizedIndex] ?? "Event #1"
     }, [causalReplayIndex, causalTimelineEvents])
-    const displayedCausalCouplings = useMemo(
-        (): ReadonlyArray<ICodeCity3DCausalCouplingDescriptor> => {
+    const displayedCausalCouplings =
+        useMemo((): ReadonlyArray<ICodeCity3DCausalCouplingDescriptor> => {
             const causalCouplings = props.causalCouplings ?? []
             if (causalCouplings.length === 0) {
                 return []
@@ -358,9 +360,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
             const maxIndex = causalCouplings.length - 1
             const normalizedIndex = Math.max(0, Math.min(causalReplayIndex, maxIndex))
             return causalCouplings.slice(0, normalizedIndex + 1)
-        },
-        [causalReplayIndex, props.causalCouplings],
-    )
+        }, [causalReplayIndex, props.causalCouplings])
 
     useEffect((): void => {
         setCausalReplayIndex((currentIndex): number => {
@@ -396,9 +396,10 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
 
     const fileById = useMemo((): ReadonlyMap<string, ICodeCity3DSceneFileDescriptor> => {
         return new Map(
-            currentSnapshot.files.map(
-                (file): readonly [string, ICodeCity3DSceneFileDescriptor] => [file.id, file],
-            ),
+            currentSnapshot.files.map((file): readonly [string, ICodeCity3DSceneFileDescriptor] => [
+                file.id,
+                file,
+            ]),
         )
     }, [currentSnapshot.files])
     const navigationBreadcrumbPaths = useMemo((): ReadonlyArray<string> => {
@@ -473,7 +474,10 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                                 1,
                                 Math.min(3, Math.ceil((file.complexity ?? 1) / 10)),
                             )
-                            const rowSpan = Math.max(1, Math.min(2, Math.ceil((file.loc ?? 20) / 120)))
+                            const rowSpan = Math.max(
+                                1,
+                                Math.min(2, Math.ceil((file.loc ?? 20) / 120)),
+                            )
 
                             return (
                                 <article
@@ -484,8 +488,12 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                                         gridRow: `span ${String(rowSpan)} / span ${String(rowSpan)}`,
                                     }}
                                 >
-                                    <p className="truncate font-medium text-slate-900">{file.path}</p>
-                                    <p className="mt-1 text-slate-500">LOC {String(file.loc ?? 0)}</p>
+                                    <p className="truncate font-medium text-slate-900">
+                                        {file.path}
+                                    </p>
+                                    <p className="mt-1 text-slate-500">
+                                        LOC {String(file.loc ?? 0)}
+                                    </p>
                                     <p className="text-slate-500">
                                         Complexity {String(file.complexity ?? 0)}
                                     </p>
@@ -505,24 +513,26 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
             style={{ height: `${String(props.height ?? 420)}px` }}
         >
             <div className="absolute left-3 top-3 z-10 flex gap-2">
-                {CAMERA_PRESET_OPTIONS.map((option): ReactElement => (
-                    <button
-                        aria-label={`Camera preset ${option.label}`}
-                        aria-pressed={cameraPreset === option.id}
-                        className={`rounded-md border px-2 py-1 text-xs font-medium transition ${
-                            cameraPreset === option.id
-                                ? "border-cyan-300 bg-cyan-500/20 text-cyan-100"
-                                : "border-slate-500 bg-slate-900/70 text-slate-300 hover:border-slate-300 hover:text-slate-100"
-                        }`}
-                        key={option.id}
-                        onClick={(): void => {
-                            setCameraPreset(option.id)
-                        }}
-                        type="button"
-                    >
-                        {option.label}
-                    </button>
-                ))}
+                {CAMERA_PRESET_OPTIONS.map(
+                    (option): ReactElement => (
+                        <button
+                            aria-label={`Camera preset ${option.label}`}
+                            aria-pressed={cameraPreset === option.id}
+                            className={`rounded-md border px-2 py-1 text-xs font-medium transition ${
+                                cameraPreset === option.id
+                                    ? "border-cyan-300 bg-cyan-500/20 text-cyan-100"
+                                    : "border-slate-500 bg-slate-900/70 text-slate-300 hover:border-slate-300 hover:text-slate-100"
+                            }`}
+                            key={option.id}
+                            onClick={(): void => {
+                                setCameraPreset(option.id)
+                            }}
+                            type="button"
+                        >
+                            {option.label}
+                        </button>
+                    ),
+                )}
             </div>
             {navigationBreadcrumbPaths.length > 0 ? (
                 <aside className="absolute left-3 top-14 z-10 max-w-lg rounded-md border border-cyan-400/50 bg-slate-900/90 px-3 py-2 text-xs text-slate-100 shadow-lg">
@@ -531,9 +541,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                             ? `Root-cause trail: ${props.navigationLabel}`
                             : "Root-cause trail"}
                     </p>
-                    <p className="mt-1 text-slate-300">
-                        {navigationBreadcrumbPaths.join(" -> ")}
-                    </p>
+                    <p className="mt-1 text-slate-300">{navigationBreadcrumbPaths.join(" -> ")}</p>
                 </aside>
             ) : null}
             <div className="absolute right-3 top-3 z-10 w-72 rounded-md border border-slate-500/50 bg-slate-900/90 p-2.5 text-xs text-slate-100 shadow-lg">
@@ -569,7 +577,8 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                     value={timelineIndex}
                 />
                 <p className="mt-1 text-slate-400">
-                    Files: {String(currentSnapshot?.files.length ?? 0)} / {String(props.files.length)}
+                    Files: {String(currentSnapshot?.files.length ?? 0)} /{" "}
+                    {String(props.files.length)}
                 </p>
                 {causalTimelineEvents.length > 0 ? (
                     <div className="mt-3 border-t border-slate-700/70 pt-2">
@@ -609,27 +618,30 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                             value={causalReplayIndex}
                         />
                         <div className="mt-2 flex items-center gap-1.5">
-                            {CAUSAL_REPLAY_SPEED_OPTIONS.map((speed): ReactElement => (
-                                <button
-                                    aria-label={`Causal replay speed ${String(speed)}x`}
-                                    aria-pressed={causalReplaySpeed === speed}
-                                    className={`rounded border px-2 py-0.5 text-[11px] transition ${
-                                        causalReplaySpeed === speed
-                                            ? "border-cyan-300 bg-cyan-500/20 text-cyan-100"
-                                            : "border-slate-500 bg-slate-900/70 text-slate-300 hover:border-slate-300 hover:text-slate-100"
-                                    }`}
-                                    key={speed}
-                                    onClick={(): void => {
-                                        setCausalReplaySpeed(speed)
-                                    }}
-                                    type="button"
-                                >
-                                    {String(speed)}x
-                                </button>
-                            ))}
+                            {CAUSAL_REPLAY_SPEED_OPTIONS.map(
+                                (speed): ReactElement => (
+                                    <button
+                                        aria-label={`Causal replay speed ${String(speed)}x`}
+                                        aria-pressed={causalReplaySpeed === speed}
+                                        className={`rounded border px-2 py-0.5 text-[11px] transition ${
+                                            causalReplaySpeed === speed
+                                                ? "border-cyan-300 bg-cyan-500/20 text-cyan-100"
+                                                : "border-slate-500 bg-slate-900/70 text-slate-300 hover:border-slate-300 hover:text-slate-100"
+                                        }`}
+                                        key={speed}
+                                        onClick={(): void => {
+                                            setCausalReplaySpeed(speed)
+                                        }}
+                                        type="button"
+                                    >
+                                        {String(speed)}x
+                                    </button>
+                                ),
+                            )}
                         </div>
                         <p className="mt-1 text-slate-400">
-                            Events: {String(Math.min(causalReplayIndex + 1, causalTimelineEvents.length))} /{" "}
+                            Events:{" "}
+                            {String(Math.min(causalReplayIndex + 1, causalTimelineEvents.length))} /{" "}
                             {String(causalTimelineEvents.length)}
                         </p>
                     </div>

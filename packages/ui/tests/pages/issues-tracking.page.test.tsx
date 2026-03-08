@@ -116,13 +116,19 @@ describe("IssuesTrackingPage", (): void => {
         expect(screen.getByRole("heading", { level: 1, name: "Issues tracking" })).not.toBeNull()
         expect(screen.getByText("4 of 4 issues")).not.toBeNull()
 
-        await user.selectOptions(screen.getByRole("combobox", { name: "Filter by severity" }), "critical")
+        await user.selectOptions(
+            screen.getByRole("combobox", { name: "Filter by severity" }),
+            "critical",
+        )
         expect(screen.getByText("1 of 4 issues")).not.toBeNull()
 
         await user.selectOptions(screen.getByRole("combobox", { name: "Filter by status" }), "open")
         expect(screen.getByText("1 of 4 issues")).not.toBeNull()
 
-        await user.selectOptions(screen.getByRole("combobox", { name: "Filter by severity" }), "all")
+        await user.selectOptions(
+            screen.getByRole("combobox", { name: "Filter by severity" }),
+            "all",
+        )
         await user.selectOptions(screen.getByRole("combobox", { name: "Filter by status" }), "all")
         await user.clear(screen.getByRole("textbox", { name: "Search issues" }))
         await user.type(screen.getByRole("textbox", { name: "Search issues" }), "ISS-103")

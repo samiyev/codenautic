@@ -85,34 +85,38 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
         <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
             <p className="text-sm font-semibold text-slate-900">What-if panel</p>
             <p className="mt-1 text-xs text-slate-500">
-                Select multiple files to simulate aggregated impact and blast radius before
-                applying changes.
+                Select multiple files to simulate aggregated impact and blast radius before applying
+                changes.
             </p>
 
             <ul className="mt-3 space-y-2">
-                {props.options.slice(0, 6).map((option): ReactElement => (
-                    <li
-                        className="flex items-start gap-2 rounded border border-slate-200 bg-slate-50 p-2"
-                        key={option.id}
-                    >
-                        <input
-                            aria-label={`Select what-if option ${option.label}`}
-                            checked={selectedOptionIds.includes(option.id)}
-                            className="mt-0.5 h-4 w-4 rounded border-slate-300"
-                            onChange={(): void => {
-                                toggleOption(option.id)
-                            }}
-                            type="checkbox"
-                        />
-                        <div className="min-w-0">
-                            <p className="text-sm font-semibold text-slate-900">{option.label}</p>
-                            <p className="text-xs text-slate-600">
-                                Impact {String(option.impactScore)} · Affected{" "}
-                                {String(option.affectedCount)}
-                            </p>
-                        </div>
-                    </li>
-                ))}
+                {props.options.slice(0, 6).map(
+                    (option): ReactElement => (
+                        <li
+                            className="flex items-start gap-2 rounded border border-slate-200 bg-slate-50 p-2"
+                            key={option.id}
+                        >
+                            <input
+                                aria-label={`Select what-if option ${option.label}`}
+                                checked={selectedOptionIds.includes(option.id)}
+                                className="mt-0.5 h-4 w-4 rounded border-slate-300"
+                                onChange={(): void => {
+                                    toggleOption(option.id)
+                                }}
+                                type="checkbox"
+                            />
+                            <div className="min-w-0">
+                                <p className="text-sm font-semibold text-slate-900">
+                                    {option.label}
+                                </p>
+                                <p className="text-xs text-slate-600">
+                                    Impact {String(option.impactScore)} · Affected{" "}
+                                    {String(option.affectedCount)}
+                                </p>
+                            </div>
+                        </li>
+                    ),
+                )}
             </ul>
 
             <div className="mt-3 rounded border border-cyan-200 bg-cyan-500/10 p-2">

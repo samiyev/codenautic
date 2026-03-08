@@ -85,4 +85,3 @@ describe("KnowledgeMapExportWidget", (): void => {
         expect(onExport).toHaveBeenNthCalledWith(2, "png")
     })
 })
-

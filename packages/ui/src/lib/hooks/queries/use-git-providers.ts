@@ -108,8 +108,7 @@ export function useGitProviders(args: IUseGitProvidersArgs = {}): IUseGitProvide
             }
         },
         onSuccess: (response): void => {
-            const current =
-                queryClient.getQueryData<IListGitProvidersResponse>(providersQueryKey)
+            const current = queryClient.getQueryData<IListGitProvidersResponse>(providersQueryKey)
             if (current === undefined) {
                 return
             }

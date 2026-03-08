@@ -30,7 +30,9 @@ export function ScanErrorRecoveryPage(): ReactElement {
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <ol className="list-decimal space-y-2 pl-5 text-sm text-[var(--foreground)]/85">
-                        <li>Open repositories and confirm provider connectivity and webhook status.</li>
+                        <li>
+                            Open repositories and confirm provider connectivity and webhook status.
+                        </li>
                         <li>Retry scan for the affected repository from the onboarding queue.</li>
                         <li>Open jobs and check worker logs if retry fails again.</li>
                     </ol>
@@ -74,4 +76,3 @@ export function ScanErrorRecoveryPage(): ReactElement {
         </section>
     )
 }
-

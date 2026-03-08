@@ -49,7 +49,9 @@ describe("ImpactAnalysisPanel", (): void => {
     it("передаёт выбранный сценарий в callback", async (): Promise<void> => {
         const user = userEvent.setup()
         const onApplyImpact = vi.fn()
-        renderWithProviders(<ImpactAnalysisPanel onApplyImpact={onApplyImpact} seeds={TEST_SEEDS} />)
+        renderWithProviders(
+            <ImpactAnalysisPanel onApplyImpact={onApplyImpact} seeds={TEST_SEEDS} />,
+        )
 
         await user.click(
             screen.getByRole("checkbox", { name: "Select impact file src/services/retry.ts" }),

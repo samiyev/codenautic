@@ -27,10 +27,7 @@ export function Tab(props: TabProps): ReactElement {
     const { title, children, ...tabProps } = props
 
     return (
-        <HeroUITab
-            {...tabProps}
-            {...(title === undefined ? {} : { title })}
-        >
+        <HeroUITab {...tabProps} {...(title === undefined ? {} : { title })}>
             {children}
         </HeroUITab>
     )

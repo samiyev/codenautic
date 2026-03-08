@@ -1,6 +1,21 @@
 import { type ReactElement, useMemo, useState } from "react"
 
-import { Alert, Button, Card, CardBody, CardHeader, Chip, Input, Switch, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@/components/ui"
+import {
+    Alert,
+    Button,
+    Card,
+    CardBody,
+    CardHeader,
+    Chip,
+    Input,
+    Switch,
+    Table,
+    TableBody,
+    TableCell,
+    TableColumn,
+    TableHeader,
+    TableRow,
+} from "@/components/ui"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TPlanName = "enterprise" | "pro" | "starter"
@@ -242,11 +257,7 @@ function BillingCard(props: {
         <Card>
             <CardHeader className="flex items-center justify-between">
                 <p className="text-base font-semibold text-slate-900">Billing</p>
-                <Chip
-                    color={mapBillingStatusColor(props.billing.status)}
-                    size="sm"
-                    variant="flat"
-                >
+                <Chip color={mapBillingStatusColor(props.billing.status)} size="sm" variant="flat">
                     {props.billing.status}
                 </Chip>
             </CardHeader>
@@ -289,11 +300,7 @@ function BillingCard(props: {
                         <option value="pro">pro</option>
                         <option value="enterprise">enterprise</option>
                     </select>
-                    <Button
-                        onPress={props.onRetryPayment}
-                        size="sm"
-                        variant="light"
-                    >
+                    <Button onPress={props.onRetryPayment} size="sm" variant="light">
                         Retry payment
                     </Button>
                     <Button
@@ -344,10 +351,10 @@ function MembersCard(props: {
                             onChange={(event): void => {
                                 const role = event.currentTarget.value
                                 if (
-                                    role === "viewer"
-                                    || role === "developer"
-                                    || role === "lead"
-                                    || role === "admin"
+                                    role === "viewer" ||
+                                    role === "developer" ||
+                                    role === "lead" ||
+                                    role === "admin"
                                 ) {
                                     props.onInviteRoleChange(role)
                                 }
@@ -392,10 +399,10 @@ function MembersCard(props: {
                                                 onChange={(event): void => {
                                                     const role = event.currentTarget.value
                                                     if (
-                                                        role === "viewer"
-                                                        || role === "developer"
-                                                        || role === "lead"
-                                                        || role === "admin"
+                                                        role === "viewer" ||
+                                                        role === "developer" ||
+                                                        role === "lead" ||
+                                                        role === "admin"
                                                     ) {
                                                         props.onRoleChange(member.id, role)
                                                     }
@@ -459,15 +466,9 @@ function ByokCard(props: {
                         LLM key configured
                     </Switch>
                 </div>
-                <p className="text-xs text-slate-500">
-                    Active key ref: {props.byok.maskedKeyRef}
-                </p>
+                <p className="text-xs text-slate-500">Active key ref: {props.byok.maskedKeyRef}</p>
                 <div>
-                    <Button
-                        onPress={props.onRotate}
-                        size="sm"
-                        variant="light"
-                    >
+                    <Button onPress={props.onRotate} size="sm" variant="light">
                         Rotate BYOK secret
                     </Button>
                 </div>
@@ -525,10 +526,7 @@ export function SettingsOrganizationPage(): ReactElement {
         maskedKeyRef: "byok_****a2f8",
     })
     const [billingError, setBillingError] = useState<string | undefined>(undefined)
-    const auditLogs = useMemo(
-        (): ReadonlyArray<IAuditLogEntry> => AUDIT_LOGS_DEFAULT,
-        [],
-    )
+    const auditLogs = useMemo((): ReadonlyArray<IAuditLogEntry> => AUDIT_LOGS_DEFAULT, [])
 
     const handleSaveProfile = (): void => {
         if (profile.name.trim().length === 0 || profile.slug.trim().length === 0) {
@@ -558,34 +556,38 @@ export function SettingsOrganizationPage(): ReactElement {
     }
 
     const handleMemberRoleChange = (memberId: string, role: TMemberRole): void => {
-        setMembers((previous): ReadonlyArray<IOrganizationMember> =>
-            previous.map((member): IOrganizationMember => {
-                if (member.id !== memberId) {
-                    return member
-                }
+        setMembers(
+            (previous): ReadonlyArray<IOrganizationMember> =>
+                previous.map((member): IOrganizationMember => {
+                    if (member.id !== memberId) {
+                        return member
+                    }
 
-                return {
-                    ...member,
-                    role,
-                }
-            }),
+                    return {
+                        ...member,
+                        role,
+                    }
+                }),
         )
         showToastInfo("Member role updated.")
     }
 
     const handleRemoveMember = (memberId: string): void => {
-        setMembers((previous): ReadonlyArray<IOrganizationMember> =>
-            previous.filter((member): boolean => member.id !== memberId),
+        setMembers(
+            (previous): ReadonlyArray<IOrganizationMember> =>
+                previous.filter((member): boolean => member.id !== memberId),
         )
         showToastInfo("Member removed.")
     }
 
     const handlePlanChange = (plan: TPlanName): void => {
-        setBilling((previous): IBillingState => ({
-            ...previous,
-            plan,
-            status: plan === "starter" ? "trial" : previous.status,
-        }))
+        setBilling(
+            (previous): IBillingState => ({
+                ...previous,
+                plan,
+                status: plan === "starter" ? "trial" : previous.status,
+            }),
+        )
         setBillingError(undefined)
         showToastSuccess("Billing plan updated.")
     }
@@ -603,28 +605,33 @@ export function SettingsOrganizationPage(): ReactElement {
     }
 
     const handleConfirmCriticalBillingAction = (): void => {
-        const isConfirmed = typeof window === "undefined"
-            ? true
-            : window.confirm("Confirm critical billing action?")
+        const isConfirmed =
+            typeof window === "undefined"
+                ? true
+                : window.confirm("Confirm critical billing action?")
 
         if (isConfirmed !== true) {
             showToastInfo("Billing action cancelled.")
             return
         }
 
-        setBilling((previous): IBillingState => ({
-            ...previous,
-            status: "active",
-        }))
+        setBilling(
+            (previous): IBillingState => ({
+                ...previous,
+                status: "active",
+            }),
+        )
         setBillingError(undefined)
         showToastInfo("Critical billing action confirmed.")
     }
 
     const handleByokRotate = (): void => {
-        setByok((previous): IByokState => ({
-            ...previous,
-            maskedKeyRef: `byok_****${String(Date.now()).slice(-4)}`,
-        }))
+        setByok(
+            (previous): IByokState => ({
+                ...previous,
+                maskedKeyRef: `byok_****${String(Date.now()).slice(-4)}`,
+            }),
+        )
         showToastSuccess("BYOK secret rotated.")
     }
 
@@ -635,9 +642,7 @@ export function SettingsOrganizationPage(): ReactElement {
                 Manage organization profile, billing, members, BYOK and audit history.
             </p>
 
-            {billingError === undefined ? null : (
-                <Alert color="danger">{billingError}</Alert>
-            )}
+            {billingError === undefined ? null : <Alert color="danger">{billingError}</Alert>}
 
             <OrganizationProfileCard
                 onProfileChange={setProfile}
@@ -664,16 +669,20 @@ export function SettingsOrganizationPage(): ReactElement {
                 byok={byok}
                 onRotate={handleByokRotate}
                 onToggleGitToken={(value): void => {
-                    setByok((previous): IByokState => ({
-                        ...previous,
-                        gitProviderTokenConfigured: value,
-                    }))
+                    setByok(
+                        (previous): IByokState => ({
+                            ...previous,
+                            gitProviderTokenConfigured: value,
+                        }),
+                    )
                 }}
                 onToggleLlmToken={(value): void => {
-                    setByok((previous): IByokState => ({
-                        ...previous,
-                        llmKeyConfigured: value,
-                    }))
+                    setByok(
+                        (previous): IByokState => ({
+                            ...previous,
+                            llmKeyConfigured: value,
+                        }),
+                    )
                 }}
             />
             <AuditLogsCard logs={auditLogs} />

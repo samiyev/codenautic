@@ -21,7 +21,9 @@ describe("settings adoption analytics route", (): void => {
         expect(await screen.findByText("Usage & adoption analytics")).not.toBeNull()
         expect(screen.getByText("Adoption funnel")).not.toBeNull()
         expect(screen.getByText("Workflow health")).not.toBeNull()
-        expect(screen.getAllByRole("navigation", { name: "Main navigation" }).length).toBeGreaterThan(1)
+        expect(
+            screen.getAllByRole("navigation", { name: "Main navigation" }).length,
+        ).toBeGreaterThan(1)
         expect(screen.getByText("Adoption Analytics")).not.toBeNull()
     })
 })

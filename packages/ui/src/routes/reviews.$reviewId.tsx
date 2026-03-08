@@ -70,10 +70,7 @@ function ReviewRouteFallback(): ReactElement {
             <p className="mt-1 text-sm text-rose-800">
                 Review not found. Open available CCR list to pick active review.
             </p>
-            <Link
-                className="mt-3 inline-block text-sm underline underline-offset-4"
-                to="/reviews"
-            >
+            <Link className="mt-3 inline-block text-sm underline underline-offset-4" to="/reviews">
                 Back to reviews
             </Link>
         </div>
@@ -87,9 +84,10 @@ function ReviewsDetailRouteComponent(): ReactElement {
     })
     const seedCcr = getCcrById(params.reviewId)
     const apiCcr = ccrWorkspace.ccrContextQuery.data?.ccr
-    const ccr = apiCcr !== undefined
-        ? mapWorkspaceRowToCcrRow(apiCcr)
-        : seedCcr ?? createFallbackCcrRow(params.reviewId)
+    const ccr =
+        apiCcr !== undefined
+            ? mapWorkspaceRowToCcrRow(apiCcr)
+            : (seedCcr ?? createFallbackCcrRow(params.reviewId))
 
     if (params.reviewId.trim().length === 0) {
         return (

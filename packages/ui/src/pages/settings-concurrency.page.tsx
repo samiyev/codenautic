@@ -122,7 +122,8 @@ function resolveDiffRows(
  * @returns Conflict dialog с merge/reload/retry и audit trail решений.
  */
 export function SettingsConcurrencyPage(): ReactElement {
-    const [remoteSnapshot, setRemoteSnapshot] = useState<IAdminConfigSnapshot>(DEFAULT_REMOTE_CONFIG)
+    const [remoteSnapshot, setRemoteSnapshot] =
+        useState<IAdminConfigSnapshot>(DEFAULT_REMOTE_CONFIG)
     const [localDraft, setLocalDraft] = useState<IAdminConfigSnapshot>(DEFAULT_REMOTE_CONFIG)
     const [conflictState, setConflictState] = useState<IConfigConflictState | undefined>(undefined)
     const [audit, setAudit] = useState<ReadonlyArray<IConcurrencyAuditEntry>>([])
@@ -144,16 +145,18 @@ export function SettingsConcurrencyPage(): ReactElement {
         resultingEtag: number,
         summary: string,
     ): void => {
-        setAudit((previous): ReadonlyArray<IConcurrencyAuditEntry> => [
-            {
-                decision,
-                id: `CONC-${Date.now().toString(36)}`,
-                occurredAt: new Date().toISOString(),
-                resultingEtag,
-                summary,
-            },
-            ...previous,
-        ])
+        setAudit(
+            (previous): ReadonlyArray<IConcurrencyAuditEntry> => [
+                {
+                    decision,
+                    id: `CONC-${Date.now().toString(36)}`,
+                    occurredAt: new Date().toISOString(),
+                    resultingEtag,
+                    summary,
+                },
+                ...previous,
+            ],
+        )
     }
 
     const applySave = (nextSnapshot: IAdminConfigSnapshot): void => {
@@ -272,17 +275,22 @@ export function SettingsConcurrencyPage(): ReactElement {
                         label="Ignore paths"
                         value={localDraft.values.ignorePaths}
                         onValueChange={(value): void => {
-                            setLocalDraft((previous): IAdminConfigSnapshot => ({
-                                ...previous,
-                                values: {
-                                    ...previous.values,
-                                    ignorePaths: value,
-                                },
-                            }))
+                            setLocalDraft(
+                                (previous): IAdminConfigSnapshot => ({
+                                    ...previous,
+                                    values: {
+                                        ...previous.values,
+                                        ignorePaths: value,
+                                    },
+                                }),
+                            )
                         }}
                     />
                     <div className="space-y-1">
-                        <label className="text-sm text-[var(--foreground)]/80" htmlFor="concurrency-severity">
+                        <label
+                            className="text-sm text-[var(--foreground)]/80"
+                            htmlFor="concurrency-severity"
+                        >
                             Severity threshold
                         </label>
                         <select
@@ -293,17 +301,19 @@ export function SettingsConcurrencyPage(): ReactElement {
                             onChange={(event): void => {
                                 const nextValue = event.currentTarget.value
                                 if (
-                                    nextValue === "low"
-                                    || nextValue === "medium"
-                                    || nextValue === "high"
+                                    nextValue === "low" ||
+                                    nextValue === "medium" ||
+                                    nextValue === "high"
                                 ) {
-                                    setLocalDraft((previous): IAdminConfigSnapshot => ({
-                                        ...previous,
-                                        values: {
-                                            ...previous.values,
-                                            severityThreshold: nextValue,
-                                        },
-                                    }))
+                                    setLocalDraft(
+                                        (previous): IAdminConfigSnapshot => ({
+                                            ...previous,
+                                            values: {
+                                                ...previous.values,
+                                                severityThreshold: nextValue,
+                                            },
+                                        }),
+                                    )
                                 }
                             }}
                         >
@@ -316,13 +326,15 @@ export function SettingsConcurrencyPage(): ReactElement {
                         aria-label="Require reviewer approval"
                         isSelected={localDraft.values.requireReviewerApproval}
                         onValueChange={(value): void => {
-                            setLocalDraft((previous): IAdminConfigSnapshot => ({
-                                ...previous,
-                                values: {
-                                    ...previous.values,
-                                    requireReviewerApproval: value,
-                                },
-                            }))
+                            setLocalDraft(
+                                (previous): IAdminConfigSnapshot => ({
+                                    ...previous,
+                                    values: {
+                                        ...previous.values,
+                                        requireReviewerApproval: value,
+                                    },
+                                }),
+                            )
                         }}
                     >
                         Require reviewer approval
@@ -349,20 +361,24 @@ export function SettingsConcurrencyPage(): ReactElement {
                         </Alert>
                     ) : (
                         <ul aria-label="Concurrency audit list" className="space-y-2">
-                            {audit.map((entry): ReactElement => (
-                                <li
-                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-sm"
-                                    key={entry.id}
-                                >
-                                    <p className="font-semibold text-[var(--foreground)]">
-                                        {entry.decision} · etag {entry.resultingEtag}
-                                    </p>
-                                    <p className="text-[var(--foreground)]/80">{entry.summary}</p>
-                                    <p className="text-xs text-[var(--foreground)]/70">
-                                        {formatTimestamp(entry.occurredAt)}
-                                    </p>
-                                </li>
-                            ))}
+                            {audit.map(
+                                (entry): ReactElement => (
+                                    <li
+                                        className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-sm"
+                                        key={entry.id}
+                                    >
+                                        <p className="font-semibold text-[var(--foreground)]">
+                                            {entry.decision} · etag {entry.resultingEtag}
+                                        </p>
+                                        <p className="text-[var(--foreground)]/80">
+                                            {entry.summary}
+                                        </p>
+                                        <p className="text-xs text-[var(--foreground)]/70">
+                                            {formatTimestamp(entry.occurredAt)}
+                                        </p>
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     )}
                 </CardBody>
@@ -380,20 +396,24 @@ export function SettingsConcurrencyPage(): ReactElement {
                     <ModalHeader>Config conflict detected</ModalHeader>
                     <ModalBody>
                         <p className="text-sm text-[var(--foreground)]/80">
-                            Server ETag changed while you were editing. Choose deterministic conflict
-                            strategy.
+                            Server ETag changed while you were editing. Choose deterministic
+                            conflict strategy.
                         </p>
                         <ul aria-label="Conflict diff list" className="space-y-2">
-                            {diffRows.map((row): ReactElement => (
-                                <li
-                                    className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-2 text-xs"
-                                    key={row.field}
-                                >
-                                    <p className="font-semibold text-[var(--foreground)]">{row.field}</p>
-                                    <p>Local: {row.localValue}</p>
-                                    <p>Remote: {row.remoteValue}</p>
-                                </li>
-                            ))}
+                            {diffRows.map(
+                                (row): ReactElement => (
+                                    <li
+                                        className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-2 text-xs"
+                                        key={row.field}
+                                    >
+                                        <p className="font-semibold text-[var(--foreground)]">
+                                            {row.field}
+                                        </p>
+                                        <p>Local: {row.localValue}</p>
+                                        <p>Remote: {row.remoteValue}</p>
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     </ModalBody>
                     <ModalFooter>

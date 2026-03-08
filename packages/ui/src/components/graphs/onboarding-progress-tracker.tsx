@@ -81,24 +81,30 @@ export function OnboardingProgressTracker(props: IOnboardingProgressTrackerProps
                 />
             </div>
             <ul className="mt-3 space-y-2">
-                {props.modules.map((module): ReactElement => (
-                    <li
-                        className="rounded border border-slate-200 bg-slate-50 p-2"
-                        key={module.id}
-                    >
-                        <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                                <p className="text-sm font-semibold text-slate-900">{module.title}</p>
-                                <p className="mt-1 text-xs text-slate-600">{module.description}</p>
+                {props.modules.map(
+                    (module): ReactElement => (
+                        <li
+                            className="rounded border border-slate-200 bg-slate-50 p-2"
+                            key={module.id}
+                        >
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <p className="text-sm font-semibold text-slate-900">
+                                        {module.title}
+                                    </p>
+                                    <p className="mt-1 text-xs text-slate-600">
+                                        {module.description}
+                                    </p>
+                                </div>
+                                <span
+                                    className={`rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${resolveModuleBadgeClassName(module.isComplete)}`}
+                                >
+                                    {module.isComplete ? "Complete" : "Pending"}
+                                </span>
                             </div>
-                            <span
-                                className={`rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${resolveModuleBadgeClassName(module.isComplete)}`}
-                            >
-                                {module.isComplete ? "Complete" : "Pending"}
-                            </span>
-                        </div>
-                    </li>
-                ))}
+                        </li>
+                    ),
+                )}
             </ul>
         </section>
     )

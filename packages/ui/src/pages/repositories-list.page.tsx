@@ -211,10 +211,7 @@ function useFilteredRepositories(
         return isStatusMatch && isQueryMatch
     })
 
-    return useMemo(
-        () => sortRepositories(visible, sortBy),
-        [visible, sortBy],
-    )
+    return useMemo(() => sortRepositories(visible, sortBy), [visible, sortBy])
 }
 
 function RepositoryStatusBadge(props: { status: TRepositoryStatus }): ReactElement {
@@ -244,16 +241,20 @@ function RepositoryScanErrorRecovery(props: {
         return <></>
     }
 
-    const partialSummary = props.scanError.totalFiles === undefined
-        ? `Проанализировано файлов до ошибки: ${props.scanError.partialFilesScanned}`
-        : `Проанализировано файлов до ошибки: ${props.scanError.partialFilesScanned} из ${props.scanError.totalFiles}`
+    const partialSummary =
+        props.scanError.totalFiles === undefined
+            ? `Проанализировано файлов до ошибки: ${props.scanError.partialFilesScanned}`
+            : `Проанализировано файлов до ошибки: ${props.scanError.partialFilesScanned} из ${props.scanError.totalFiles}`
 
     return (
         <section className="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900">
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-rose-600">Ошибка сканирования</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-rose-600">
+                Ошибка сканирования
+            </p>
             <p className="mt-1 text-sm font-medium">{props.scanError.message}</p>
             <p className="mt-1 text-sm text-rose-700">{partialSummary}</p>
-            {props.scanError.details === undefined || props.scanError.details.length === 0 ? null : (
+            {props.scanError.details === undefined ||
+            props.scanError.details.length === 0 ? null : (
                 <details className="mt-2">
                     <summary className="cursor-pointer text-sm font-semibold text-rose-800">
                         Подробнее об ошибке
@@ -261,7 +262,9 @@ function RepositoryScanErrorRecovery(props: {
                     <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-rose-800">
                         {props.scanError.details.map(
                             (detail, index): ReactElement => (
-                                <li key={`scan-error-detail-${props.repositoryId}-${String(index)}`}>
+                                <li
+                                    key={`scan-error-detail-${props.repositoryId}-${String(index)}`}
+                                >
                                     {detail}
                                 </li>
                             ),
@@ -322,7 +325,9 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
     })
 
     const repoReadyCount = repositories.filter((item): boolean => item.status === "ready").length
-    const repoScanningCount = repositories.filter((item): boolean => item.status === "scanning").length
+    const repoScanningCount = repositories.filter(
+        (item): boolean => item.status === "scanning",
+    ).length
     const repoErrorCount = repositories.filter((item): boolean => item.status === "error").length
 
     const handleSearch = (event: ChangeEvent<HTMLInputElement>): void => {
@@ -452,7 +457,9 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
                             },
                             {
                                 accessor: (item): string => mapStatusToLabel(item.status),
-                                cell: (item): ReactElement => <RepositoryStatusBadge status={item.status} />,
+                                cell: (item): ReactElement => (
+                                    <RepositoryStatusBadge status={item.status} />
+                                ),
                                 header: "Status",
                                 id: "status",
                                 size: 150,
@@ -465,7 +472,9 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
                             },
                             {
                                 accessor: (item): string =>
-                                    item.scanError === undefined ? "healthy" : item.scanError.message,
+                                    item.scanError === undefined
+                                        ? "healthy"
+                                        : item.scanError.message,
                                 cell: (item): ReactElement => {
                                     if (item.scanError === undefined || item.status !== "error") {
                                         return <span className="text-xs text-slate-500">—</span>

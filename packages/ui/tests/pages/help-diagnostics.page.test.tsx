@@ -13,12 +13,13 @@ describe("HelpDiagnosticsPage", (): void => {
         expect(screen.getByText("Help & diagnostics center")).not.toBeNull()
 
         await user.type(screen.getByRole("textbox", { name: "Help search" }), "provider")
-        await user.selectOptions(screen.getByRole("combobox", { name: "Help category" }), "providers")
+        await user.selectOptions(
+            screen.getByRole("combobox", { name: "Help category" }),
+            "providers",
+        )
 
         expect(screen.getByText("Provider outage playbook")).not.toBeNull()
-        expect(
-            screen.getAllByRole("link", { name: "Open article / diagnostics" }).length,
-        ).toBe(1)
+        expect(screen.getAllByRole("link", { name: "Open article / diagnostics" }).length).toBe(1)
 
         await user.clear(screen.getByRole("textbox", { name: "Help search" }))
         await user.type(screen.getByRole("textbox", { name: "Help search" }), "no-match-query")
@@ -37,8 +38,9 @@ describe("HelpDiagnosticsPage", (): void => {
         expect(screen.getAllByRole("button", { name: "Open action" }).length).toBeGreaterThan(0)
 
         await user.click(screen.getByRole("button", { name: "Generate redacted bundle" }))
-        expect(screen.getByText("Redacted support bundle is ready to attach to support ticket.")).not
-            .toBeNull()
+        expect(
+            screen.getByText("Redacted support bundle is ready to attach to support ticket."),
+        ).not.toBeNull()
         const bundleTextbox = screen.getByRole("textbox", { name: "Support bundle payload" })
         expect(bundleTextbox).not.toBeNull()
         const bundlePayload = JSON.parse((bundleTextbox as HTMLTextAreaElement).value) as {

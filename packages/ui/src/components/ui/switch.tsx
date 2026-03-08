@@ -1,8 +1,5 @@
 import type { ReactElement } from "react"
-import {
-    Switch as HeroUISwitch,
-    type SwitchProps as HeroUISwitchProps,
-} from "@heroui/react"
+import { Switch as HeroUISwitch, type SwitchProps as HeroUISwitchProps } from "@heroui/react"
 
 /**
  * Свойства Switch с поддержкой legacy callback `onValueChange`.

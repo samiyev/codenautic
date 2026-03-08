@@ -25,7 +25,9 @@ const TEST_HIGHLIGHTS: ReadonlyArray<IHotAreaHighlightDescriptor> = [
 
 describe("HotAreaHighlights", (): void => {
     it("рендерит pulsing зоны с лейблами и описаниями", (): void => {
-        renderWithProviders(<HotAreaHighlights highlights={TEST_HIGHLIGHTS} onFocusHotArea={vi.fn()} />)
+        renderWithProviders(
+            <HotAreaHighlights highlights={TEST_HIGHLIGHTS} onFocusHotArea={vi.fn()} />,
+        )
 
         expect(screen.getByText("Hot area highlights")).not.toBeNull()
         expect(screen.getByText("src/api/repository.ts")).not.toBeNull()
@@ -40,7 +42,9 @@ describe("HotAreaHighlights", (): void => {
             <HotAreaHighlights highlights={TEST_HIGHLIGHTS} onFocusHotArea={onFocusHotArea} />,
         )
 
-        await user.click(screen.getByRole("button", { name: "Focus hot area src/api/repository.ts" }))
+        await user.click(
+            screen.getByRole("button", { name: "Focus hot area src/api/repository.ts" }),
+        )
         expect(onFocusHotArea).toHaveBeenCalledTimes(1)
         expect(onFocusHotArea).toHaveBeenCalledWith(
             expect.objectContaining({

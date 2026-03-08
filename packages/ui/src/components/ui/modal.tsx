@@ -67,9 +67,7 @@ export function ModalFooter({
 /**
  * Прозрачный fallback для старого экспорта `ModalBackdrop`.
  */
-export function ModalBackdrop(
-    props: ComponentProps<typeof HeroUIModal.Backdrop>,
-): ReactElement {
+export function ModalBackdrop(props: ComponentProps<typeof HeroUIModal.Backdrop>): ReactElement {
     return <HeroUIModal.Backdrop {...props} />
 }
 
@@ -80,7 +78,9 @@ export type ModalContentProps = Omit<HeroUIModalDialogProps, "children"> & {
 export type ModalHeaderProps = Omit<HeroUIModalHeaderProps, "children"> & {
     readonly children?: ReactNode
 }
-export type ModalBodyProps = Omit<HeroUIModalBodyProps, "children"> & { readonly children?: ReactNode }
+export type ModalBodyProps = Omit<HeroUIModalBodyProps, "children"> & {
+    readonly children?: ReactNode
+}
 export type ModalFooterProps = Omit<HeroUIModalFooterProps, "children"> & {
     readonly children?: ReactNode
 }

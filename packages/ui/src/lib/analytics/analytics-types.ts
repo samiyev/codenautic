@@ -6,8 +6,7 @@ export const ANALYTICS_EVENT_NAMES = {
 } as const
 
 /** Названия всех событий аналитики, поддерживаемых SDK. */
-export type TAnalyticsEventName =
-    (typeof ANALYTICS_EVENT_NAMES)[keyof typeof ANALYTICS_EVENT_NAMES]
+export type TAnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[keyof typeof ANALYTICS_EVENT_NAMES]
 
 /** Режим передачи в аналитику. */
 export type TAnalyticsConsent = "granted" | "denied" | "pending"

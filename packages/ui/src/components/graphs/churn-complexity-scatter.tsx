@@ -72,7 +72,10 @@ function resolvePoints(
     return points
 }
 
-function resolveScaleMax(points: ReadonlyArray<IScatterPoint>): { readonly x: number; readonly y: number } {
+function resolveScaleMax(points: ReadonlyArray<IScatterPoint>): {
+    readonly x: number
+    readonly y: number
+} {
     if (points.length === 0) {
         return { x: 1, y: 1 }
     }
@@ -166,7 +169,12 @@ export function ChurnComplexityScatter(props: IChurnComplexityScatterProps): Rea
                     y1={centerY}
                     y2={centerY}
                 />
-                <text fill="hsl(var(--nextui-colors-foreground-500))" fontSize="10" x={PADDING_LEFT} y={14}>
+                <text
+                    fill="hsl(var(--nextui-colors-foreground-500))"
+                    fontSize="10"
+                    x={PADDING_LEFT}
+                    y={14}
+                >
                     High complexity
                 </text>
                 <text

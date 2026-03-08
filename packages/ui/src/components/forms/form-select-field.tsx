@@ -130,7 +130,7 @@ export function FormSelectField<
                         >
                             {props.options.map((option): ReactElement => {
                                 return (
-                                <SelectItem
+                                    <SelectItem
                                         key={option.value}
                                         isDisabled={option.isDisabled}
                                         id={option.value}

@@ -35,9 +35,7 @@ interface IReviewCadenceSelectorProps {
 }
 
 function mapReviewModeToLabel(mode: TRepoReviewMode): string {
-    const modeLabel = REVIEW_CADENCE_OPTIONS.find(
-        (option): boolean => option.key === mode,
-    )?.label
+    const modeLabel = REVIEW_CADENCE_OPTIONS.find((option): boolean => option.key === mode)?.label
     if (modeLabel === undefined) {
         return "Unknown"
     }
@@ -75,7 +73,9 @@ export function ReviewCadenceSelector(props: IReviewCadenceSelectorProps): React
                                 }}
                             />
                             <span className="space-y-1">
-                                <span className="block font-medium text-slate-900">{option.label}</span>
+                                <span className="block font-medium text-slate-900">
+                                    {option.label}
+                                </span>
                                 <span className="block text-xs text-slate-600">
                                     {option.description}
                                 </span>

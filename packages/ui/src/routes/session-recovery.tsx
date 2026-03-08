@@ -37,4 +37,3 @@ export const Route = createFileRoute("/session-recovery")({
     component: SessionRecoveryRouteComponent,
     errorComponent: RouteErrorFallback,
 })
-

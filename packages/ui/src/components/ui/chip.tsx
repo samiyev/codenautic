@@ -27,13 +27,7 @@ export function Chip(props: IChipProps): ReactElement {
     const mappedColor = mapChipColor(color)
     const mappedVariant = mapChipVariant(variant)
 
-    return (
-        <HeroUIChip
-            {...chipProps}
-            color={mappedColor}
-            variant={mappedVariant}
-        />
-    )
+    return <HeroUIChip {...chipProps} color={mappedColor} variant={mappedVariant} />
 }
 
 /**

@@ -24,10 +24,7 @@ describe("SettingsRulesLibraryPage", (): void => {
             screen.getByRole("textbox", { name: "Description" }),
             "Disallow console.log in production changes",
         )
-        await user.type(
-            screen.getByRole("textbox", { name: "Rule expression" }),
-            "console.log(",
-        )
+        await user.type(screen.getByRole("textbox", { name: "Rule expression" }), "console.log(")
         await user.click(screen.getByRole("button", { name: "Create custom rule" }))
 
         expect(screen.getByText("Block console log")).not.toBeNull()

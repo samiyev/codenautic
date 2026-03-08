@@ -43,7 +43,8 @@ vi.mock("@/components/graphs/xyflow-graph", () => ({
                 <span data-testid="highlighted-edge-count">{highlightedEdgeIds?.length ?? 0}</span>
                 {nodes.map((node, index): React.JSX.Element => {
                     const nodeRecord = node as { readonly id?: unknown }
-                    const nodeId = typeof nodeRecord.id === "string" ? nodeRecord.id : `node-${index}`
+                    const nodeId =
+                        typeof nodeRecord.id === "string" ? nodeRecord.id : `node-${index}`
                     return (
                         <button
                             key={nodeId}
@@ -103,11 +104,9 @@ describe("package dependency graph", (): void => {
 
         expect(graphData.nodes).toHaveLength(3)
         expect(graphData.edges).toHaveLength(1)
-        expect(
-            graphData.edges.some(
-                (edge): boolean => edge.id === "pkg-a->pkg-b:runtime",
-            ),
-        ).toBe(true)
+        expect(graphData.edges.some((edge): boolean => edge.id === "pkg-a->pkg-b:runtime")).toBe(
+            true,
+        )
     })
 
     it("рендерит summary и fallback поисковый placeholder", (): void => {
@@ -366,9 +365,9 @@ describe("package dependency graph", (): void => {
         const nodes: ReadonlyArray<IPackageDependencyNode> = Array.from(
             { length: 270 },
             (_item, index): IPackageDependencyNode => ({
-            id: `pkg-${index}`,
-            layer: (index % 3 === 0 ? "core" : index % 3 === 1 ? "api" : "ui"),
-            name: `pkg-${index}`,
+                id: `pkg-${index}`,
+                layer: index % 3 === 0 ? "core" : index % 3 === 1 ? "api" : "ui",
+                name: `pkg-${index}`,
             }),
         )
         const relations = Array.from({ length: 269 }, (_item, index) => ({
@@ -377,13 +376,7 @@ describe("package dependency graph", (): void => {
             target: `pkg-${index + 1}`,
         }))
 
-        render(
-            <PackageDependencyGraph
-                nodes={nodes}
-                relations={relations}
-                title="Huge graph"
-            />,
-        )
+        render(<PackageDependencyGraph nodes={nodes} relations={relations} title="Huge graph" />)
 
         expect(screen.getByText(/Graph is too large for full render/)).not.toBeNull()
         await user.click(screen.getByRole("button", { name: "Export fallback JSON" }))

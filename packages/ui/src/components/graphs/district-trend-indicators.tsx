@@ -64,10 +64,7 @@ function resolveRowClassName(isActive: boolean): string {
     return `w-full rounded-lg border p-2 text-left transition ${baseClassName}`
 }
 
-function resolveDeltaCopy(
-    trend: TDistrictTrendDirection,
-    deltaPercentage: number,
-): string {
+function resolveDeltaCopy(trend: TDistrictTrendDirection, deltaPercentage: number): string {
     const absoluteValue = Math.abs(deltaPercentage)
     if (trend === "improving") {
         return `${String(absoluteValue)}% better`
@@ -160,9 +157,7 @@ function TrendDirectionIcon(props: { readonly trend: TDistrictTrendDirection }):
  * @param props Данные district trends и callback выбора.
  * @returns React-компонент district indicators.
  */
-export function DistrictTrendIndicators(
-    props: IDistrictTrendIndicatorsProps,
-): ReactElement {
+export function DistrictTrendIndicators(props: IDistrictTrendIndicatorsProps): ReactElement {
     return (
         <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
             <p className="text-sm font-semibold text-slate-900">District trend indicators</p>

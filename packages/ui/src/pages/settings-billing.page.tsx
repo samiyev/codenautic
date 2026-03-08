@@ -124,8 +124,7 @@ function buildPaywallBanner(status: TBillingStatus): {
     if (status === "past_due") {
         return {
             color: "danger",
-            description:
-                "Premium features are temporarily locked until invoice is paid.",
+            description: "Premium features are temporarily locked until invoice is paid.",
             title: "Payment overdue",
         }
     }
@@ -148,7 +147,8 @@ function buildPaywallBanner(status: TBillingStatus): {
  * @returns UI для управления plan/status, paywall, upgrade/downgrade и истории.
  */
 export function SettingsBillingPage(): ReactElement {
-    const [billingSnapshot, setBillingSnapshot] = useState<IBillingSnapshot>(INITIAL_BILLING_SNAPSHOT)
+    const [billingSnapshot, setBillingSnapshot] =
+        useState<IBillingSnapshot>(INITIAL_BILLING_SNAPSHOT)
     const [draftPlan, setDraftPlan] = useState<TPlanName>(INITIAL_BILLING_SNAPSHOT.plan)
     const [draftStatus, setDraftStatus] = useState<TBillingStatus>(INITIAL_BILLING_SNAPSHOT.status)
     const [history, setHistory] = useState<ReadonlyArray<IPlanHistoryEntry>>(INITIAL_HISTORY)
@@ -213,16 +213,18 @@ export function SettingsBillingPage(): ReactElement {
 
         setBillingSnapshot(nextSnapshot)
         setLastOutcome(outcome)
-        setHistory((previous): ReadonlyArray<IPlanHistoryEntry> => [
-            {
-                action: actionType,
-                actor: "Current operator",
-                id: `BILL-${Date.now().toString(36)}`,
-                occurredAt: new Date().toISOString(),
-                outcome,
-            },
-            ...previous,
-        ])
+        setHistory(
+            (previous): ReadonlyArray<IPlanHistoryEntry> => [
+                {
+                    action: actionType,
+                    actor: "Current operator",
+                    id: `BILL-${Date.now().toString(36)}`,
+                    occurredAt: new Date().toISOString(),
+                    outcome,
+                },
+                ...previous,
+            ],
+        )
         showToastSuccess("Billing lifecycle updated.")
     }
 
@@ -236,16 +238,18 @@ export function SettingsBillingPage(): ReactElement {
         setBillingSnapshot(nextSnapshot)
         setDraftStatus("active")
         setLastOutcome(outcome)
-        setHistory((previous): ReadonlyArray<IPlanHistoryEntry> => [
-            {
-                action: "invoice_paid",
-                actor: "Current operator",
-                id: `BILL-${Date.now().toString(36)}`,
-                occurredAt: new Date().toISOString(),
-                outcome,
-            },
-            ...previous,
-        ])
+        setHistory(
+            (previous): ReadonlyArray<IPlanHistoryEntry> => [
+                {
+                    action: "invoice_paid",
+                    actor: "Current operator",
+                    id: `BILL-${Date.now().toString(36)}`,
+                    occurredAt: new Date().toISOString(),
+                    outcome,
+                },
+                ...previous,
+            ],
+        )
         showToastSuccess("Invoice marked as paid.")
     }
 
@@ -272,7 +276,11 @@ export function SettingsBillingPage(): ReactElement {
                     <p className="text-base font-semibold text-[var(--foreground)]">
                         Current billing snapshot
                     </p>
-                    <Chip color={mapStatusChipColor(billingSnapshot.status)} size="sm" variant="flat">
+                    <Chip
+                        color={mapStatusChipColor(billingSnapshot.status)}
+                        size="sm"
+                        variant="flat"
+                    >
                         {billingSnapshot.status}
                     </Chip>
                 </CardHeader>
@@ -282,7 +290,10 @@ export function SettingsBillingPage(): ReactElement {
                     </p>
                     <div className="grid gap-3 md:grid-cols-2">
                         <div className="space-y-1">
-                            <label className="text-sm text-[var(--foreground)]/80" htmlFor="billing-plan-select">
+                            <label
+                                className="text-sm text-[var(--foreground)]/80"
+                                htmlFor="billing-plan-select"
+                            >
                                 Plan
                             </label>
                             <select
@@ -293,9 +304,9 @@ export function SettingsBillingPage(): ReactElement {
                                 onChange={(event): void => {
                                     const nextPlan = event.currentTarget.value
                                     if (
-                                        nextPlan === "starter"
-                                        || nextPlan === "pro"
-                                        || nextPlan === "enterprise"
+                                        nextPlan === "starter" ||
+                                        nextPlan === "pro" ||
+                                        nextPlan === "enterprise"
                                     ) {
                                         setDraftPlan(nextPlan)
                                     }
@@ -307,7 +318,10 @@ export function SettingsBillingPage(): ReactElement {
                             </select>
                         </div>
                         <div className="space-y-1">
-                            <label className="text-sm text-[var(--foreground)]/80" htmlFor="billing-status-select">
+                            <label
+                                className="text-sm text-[var(--foreground)]/80"
+                                htmlFor="billing-status-select"
+                            >
                                 Billing status
                             </label>
                             <select
@@ -318,10 +332,10 @@ export function SettingsBillingPage(): ReactElement {
                                 onChange={(event): void => {
                                     const nextStatus = event.currentTarget.value
                                     if (
-                                        nextStatus === "trial"
-                                        || nextStatus === "active"
-                                        || nextStatus === "past_due"
-                                        || nextStatus === "canceled"
+                                        nextStatus === "trial" ||
+                                        nextStatus === "active" ||
+                                        nextStatus === "past_due" ||
+                                        nextStatus === "canceled"
                                     ) {
                                         setDraftStatus(nextStatus)
                                     }
@@ -356,30 +370,32 @@ export function SettingsBillingPage(): ReactElement {
                 </CardHeader>
                 <CardBody className="space-y-2">
                     <ul aria-label="Entitlement features list" className="space-y-2">
-                        {entitledFeatures.map((feature): ReactElement => (
-                            <li
-                                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
-                                key={feature.id}
-                            >
-                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                    <p className="text-sm font-semibold text-[var(--foreground)]">
-                                        {feature.label}
-                                    </p>
-                                    <Chip
-                                        color={feature.isLocked ? "danger" : "success"}
-                                        size="sm"
-                                        variant="flat"
-                                    >
-                                        {feature.isLocked ? "Locked" : "Unlocked"}
-                                    </Chip>
-                                </div>
-                                {feature.lockReason === undefined ? null : (
-                                    <p className="mt-1 text-xs text-[var(--foreground)]/70">
-                                        {feature.lockReason}
-                                    </p>
-                                )}
-                            </li>
-                        ))}
+                        {entitledFeatures.map(
+                            (feature): ReactElement => (
+                                <li
+                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
+                                    key={feature.id}
+                                >
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                                            {feature.label}
+                                        </p>
+                                        <Chip
+                                            color={feature.isLocked ? "danger" : "success"}
+                                            size="sm"
+                                            variant="flat"
+                                        >
+                                            {feature.isLocked ? "Locked" : "Unlocked"}
+                                        </Chip>
+                                    </div>
+                                    {feature.lockReason === undefined ? null : (
+                                        <p className="mt-1 text-xs text-[var(--foreground)]/70">
+                                            {feature.lockReason}
+                                        </p>
+                                    )}
+                                </li>
+                            ),
+                        )}
                     </ul>
                 </CardBody>
             </Card>
@@ -392,20 +408,22 @@ export function SettingsBillingPage(): ReactElement {
                 </CardHeader>
                 <CardBody className="space-y-2">
                     <ul aria-label="Billing history list" className="space-y-2">
-                        {history.map((entry): ReactElement => (
-                            <li
-                                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-sm"
-                                key={entry.id}
-                            >
-                                <p className="font-semibold text-[var(--foreground)]">
-                                    {entry.action} · {entry.actor}
-                                </p>
-                                <p className="text-[var(--foreground)]/80">{entry.outcome}</p>
-                                <p className="text-xs text-[var(--foreground)]/70">
-                                    {formatTimestamp(entry.occurredAt)}
-                                </p>
-                            </li>
-                        ))}
+                        {history.map(
+                            (entry): ReactElement => (
+                                <li
+                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-sm"
+                                    key={entry.id}
+                                >
+                                    <p className="font-semibold text-[var(--foreground)]">
+                                        {entry.action} · {entry.actor}
+                                    </p>
+                                    <p className="text-[var(--foreground)]/80">{entry.outcome}</p>
+                                    <p className="text-xs text-[var(--foreground)]/70">
+                                        {formatTimestamp(entry.occurredAt)}
+                                    </p>
+                                </li>
+                            ),
+                        )}
                     </ul>
                 </CardBody>
             </Card>

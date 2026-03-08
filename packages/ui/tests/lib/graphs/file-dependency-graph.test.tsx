@@ -34,7 +34,8 @@ vi.mock("@/components/graphs/xyflow-graph", () => ({
                 <span data-testid="highlighted-edge-count">{highlightedEdgeIds?.length ?? 0}</span>
                 {nodes.map((node, index): React.JSX.Element => {
                     const nodeRecord = node as { readonly id?: unknown }
-                    const nodeId = typeof nodeRecord.id === "string" ? nodeRecord.id : `node-${index}`
+                    const nodeId =
+                        typeof nodeRecord.id === "string" ? nodeRecord.id : `node-${index}`
                     return (
                         <button
                             key={nodeId}
@@ -89,9 +90,7 @@ describe("file dependency graph", (): void => {
         expect(graphData.nodes).toHaveLength(3)
         expect(graphData.edges).toHaveLength(2)
         expect(
-            graphData.edges.some(
-                (edge): boolean => edge.id === "src/index.ts->src/api.ts:import",
-            ),
+            graphData.edges.some((edge): boolean => edge.id === "src/index.ts->src/api.ts:import"),
         ).toBe(true)
         expect(
             graphData.edges.some(

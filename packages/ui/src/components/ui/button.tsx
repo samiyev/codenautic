@@ -1,8 +1,5 @@
 import type { ReactElement, ReactNode } from "react"
-import {
-    Button as HeroUIButton,
-    type ButtonProps as HeroUIButtonProps,
-} from "@heroui/react"
+import { Button as HeroUIButton, type ButtonProps as HeroUIButtonProps } from "@heroui/react"
 
 type TButtonVariant = HeroUIButtonProps["variant"]
 
@@ -10,11 +7,10 @@ type TLegacyButtonVariant = TButtonVariant | "flat" | "light" | "solid" | "borde
 
 type TLegacyButtonRadius = "sm" | "md" | "lg" | "full" | "none"
 
-interface IInternalButtonProps
-    extends Omit<
-        HeroUIButtonProps,
-        "onValueChange" | "radius" | "children" | "className" | "variant"
-    > {
+interface IInternalButtonProps extends Omit<
+    HeroUIButtonProps,
+    "onValueChange" | "radius" | "children" | "className" | "variant"
+> {
     /** Legacy variant (legacy UI had `solid`/`light`). */
     readonly variant?: TLegacyButtonVariant
     /** Legacy loading flag from shadcn-уровня. */
@@ -35,7 +31,10 @@ interface IInternalButtonProps
     readonly disabled?: boolean
 }
 
-function getClassName(radius: IInternalButtonProps["radius"], className: string | undefined): string {
+function getClassName(
+    radius: IInternalButtonProps["radius"],
+    className: string | undefined,
+): string {
     const normalizedClassName = className ?? ""
     if (radius !== "full") {
         return normalizedClassName
@@ -135,9 +134,7 @@ export function Button(props: IInternalButtonProps): ReactElement {
             aria-busy={isLoading}
         >
             {isLoading === true ? (
-                <span className="inline-flex items-center gap-2">
-                    {mappedChildren}
-                </span>
+                <span className="inline-flex items-center gap-2">{mappedChildren}</span>
             ) : (
                 mappedChildren
             )}

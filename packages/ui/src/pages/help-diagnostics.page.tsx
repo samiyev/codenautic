@@ -378,8 +378,8 @@ export function HelpDiagnosticsPage(): ReactElement {
             typeof window !== "undefined" && window.localStorage.getItem("session-token") !== null
         const networkOnline = typeof navigator !== "undefined" && navigator.onLine === true
         const webGlReady =
-            typeof document !== "undefined"
-            && document.createElement("canvas").getContext("webgl") !== null
+            typeof document !== "undefined" &&
+            document.createElement("canvas").getContext("webgl") !== null
 
         const connectedProviderCount =
             externalContext.sourcesQuery.data?.sources.filter((source): boolean => {
@@ -417,13 +417,14 @@ export function HelpDiagnosticsPage(): ReactElement {
 
     const handleGenerateSupportBundle = (): void => {
         const browserLanguage = typeof navigator !== "undefined" ? navigator.language : "unknown"
-        const browserUserAgent =
-            typeof navigator !== "undefined" ? navigator.userAgent : undefined
+        const browserUserAgent = typeof navigator !== "undefined" ? navigator.userAgent : undefined
         const payload = {
-            checks: checks.map((check): { readonly id: string; readonly status: TDiagnosticStatus } => ({
-                id: check.id,
-                status: check.status,
-            })),
+            checks: checks.map(
+                (check): { readonly id: string; readonly status: TDiagnosticStatus } => ({
+                    id: check.id,
+                    status: check.status,
+                }),
+            ),
             generatedAt: new Date().toISOString(),
             redactedClient: {
                 clientFamily: resolveClientFamily(browserUserAgent),
@@ -435,12 +436,14 @@ export function HelpDiagnosticsPage(): ReactElement {
                 sourceContext,
             },
             providers: {
-                connected: externalContext.sourcesQuery.data?.sources.filter((source): boolean => {
-                    return source.status === "CONNECTED"
-                }).length ?? 0,
-                degraded: externalContext.sourcesQuery.data?.sources.filter((source): boolean => {
-                    return source.status === "DEGRADED" || source.status === "SYNCING"
-                }).length ?? 0,
+                connected:
+                    externalContext.sourcesQuery.data?.sources.filter((source): boolean => {
+                        return source.status === "CONNECTED"
+                    }).length ?? 0,
+                degraded:
+                    externalContext.sourcesQuery.data?.sources.filter((source): boolean => {
+                        return source.status === "DEGRADED" || source.status === "SYNCING"
+                    }).length ?? 0,
                 total: externalContext.sourcesQuery.data?.total ?? 0,
             },
             featureFlags: {
@@ -455,7 +458,9 @@ export function HelpDiagnosticsPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-[var(--foreground)]">Help & diagnostics center</h1>
+            <h1 className="text-2xl font-semibold text-[var(--foreground)]">
+                Help & diagnostics center
+            </h1>
             <p className="text-sm text-[var(--foreground)]/70">
                 Search help knowledge base, run diagnostics checks, and generate a redacted support
                 bundle without losing workflow context.
@@ -469,7 +474,9 @@ export function HelpDiagnosticsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Knowledge base search</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Knowledge base search
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[1fr_220px]">
@@ -527,25 +534,27 @@ export function HelpDiagnosticsPage(): ReactElement {
                         />
                     ) : (
                         <ul aria-label="Help articles list" className="space-y-2">
-                            {filteredArticles.map((article): ReactElement => (
-                                <li
-                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2"
-                                    key={article.id}
-                                >
-                                    <p className="text-sm font-semibold text-[var(--foreground)]">
-                                        {article.title}
-                                    </p>
-                                    <p className="text-xs text-[var(--foreground)]/70">
-                                        {article.summary}
-                                    </p>
-                                    <a
-                                        className="mt-1 inline-flex text-xs underline underline-offset-4"
-                                        href={article.href}
+                            {filteredArticles.map(
+                                (article): ReactElement => (
+                                    <li
+                                        className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2"
+                                        key={article.id}
                                     >
-                                        Open article / diagnostics
-                                    </a>
-                                </li>
-                            ))}
+                                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                                            {article.title}
+                                        </p>
+                                        <p className="text-xs text-[var(--foreground)]/70">
+                                            {article.summary}
+                                        </p>
+                                        <a
+                                            className="mt-1 inline-flex text-xs underline underline-offset-4"
+                                            href={article.href}
+                                        >
+                                            Open article / diagnostics
+                                        </a>
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     )}
                 </CardBody>
@@ -553,7 +562,9 @@ export function HelpDiagnosticsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Diagnostics checks</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Diagnostics checks
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -604,65 +615,75 @@ export function HelpDiagnosticsPage(): ReactElement {
                         </div>
                     </div>
                     <ul aria-label="Diagnostics checks list" className="space-y-2">
-                        {checks.map((check): ReactElement => (
-                            <li
-                                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2"
-                                key={check.id}
-                            >
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <p className="text-sm font-semibold text-[var(--foreground)]">
-                                        {check.label}
-                                    </p>
-                                    <Chip color={mapStatusColor(check.status)} size="sm" variant="flat">
-                                        {check.status}
-                                    </Chip>
-                                </div>
-                                <p className="text-xs text-[var(--foreground)]/70">{check.details}</p>
-                                <a
-                                    className="inline-flex text-xs underline underline-offset-4"
-                                    href={check.articleHref}
+                        {checks.map(
+                            (check): ReactElement => (
+                                <li
+                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2"
+                                    key={check.id}
                                 >
-                                    Open related guide
-                                </a>
-                            </li>
-                        ))}
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                                            {check.label}
+                                        </p>
+                                        <Chip
+                                            color={mapStatusColor(check.status)}
+                                            size="sm"
+                                            variant="flat"
+                                        >
+                                            {check.status}
+                                        </Chip>
+                                    </div>
+                                    <p className="text-xs text-[var(--foreground)]/70">
+                                        {check.details}
+                                    </p>
+                                    <a
+                                        className="inline-flex text-xs underline underline-offset-4"
+                                        href={check.articleHref}
+                                    >
+                                        Open related guide
+                                    </a>
+                                </li>
+                            ),
+                        )}
                     </ul>
                     <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2">
                         <p className="text-sm font-semibold text-[var(--foreground)]">
                             Suggested actions
                         </p>
                         <ul aria-label="Diagnostics suggested actions" className="mt-2 space-y-2">
-                            {suggestedActions.map((action): ReactElement => (
-                                <li
-                                    className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-2"
-                                    key={action.id}
-                                >
-                                    <p className="text-sm font-semibold text-[var(--foreground)]">
-                                        {action.label}
-                                    </p>
-                                    <p className="text-xs text-[var(--foreground)]/70">
-                                        {action.description}
-                                    </p>
-                                    {action.path !== undefined ? (
-                                        <Button
-                                            className="mt-2"
-                                            size="sm"
-                                            variant="flat"
-                                            onPress={(): void => {
-                                                const actionPath = action.path
-                                                if (actionPath === undefined) {
-                                                    return
-                                                }
-                                                void navigate({
-                                                    to: actionPath,
-                                                })
-                                            }}
-                                        >
-                                            Open action
-                                        </Button>
-                                    ) : null}
-                                </li>
-                            ))}
+                            {suggestedActions.map(
+                                (action): ReactElement => (
+                                    <li
+                                        className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-2"
+                                        key={action.id}
+                                    >
+                                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                                            {action.label}
+                                        </p>
+                                        <p className="text-xs text-[var(--foreground)]/70">
+                                            {action.description}
+                                        </p>
+                                        {action.path !== undefined ? (
+                                            <Button
+                                                className="mt-2"
+                                                size="sm"
+                                                variant="flat"
+                                                onPress={(): void => {
+                                                    const actionPath = action.path
+                                                    if (actionPath === undefined) {
+                                                        return
+                                                    }
+                                                    void navigate({
+                                                        to: actionPath,
+                                                    })
+                                                }}
+                                            >
+                                                Open action
+                                            </Button>
+                                        ) : null}
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     </div>
                 </CardBody>
@@ -670,7 +691,9 @@ export function HelpDiagnosticsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Support bundle</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Support bundle
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <Button size="sm" variant="flat" onPress={handleGenerateSupportBundle}>

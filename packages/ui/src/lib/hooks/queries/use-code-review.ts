@@ -67,7 +67,9 @@ export function useCodeReview(args: IUseCodeReviewQueryArgs = {}): IUseCodeRevie
     })
 
     const triggerReview = useMutation({
-        mutationFn: async (request: ITriggerCodeReviewRequest): Promise<ITriggerCodeReviewResponse> => {
+        mutationFn: async (
+            request: ITriggerCodeReviewRequest,
+        ): Promise<ITriggerCodeReviewResponse> => {
             return api.codeReview.triggerCodeReview(request)
         },
         onSuccess: async (response): Promise<void> => {

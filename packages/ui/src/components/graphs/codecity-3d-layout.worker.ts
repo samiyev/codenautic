@@ -417,7 +417,10 @@ const workerScope = globalThis as unknown as {
     postMessage?: (message: ICodeCityLayoutWorkerResponse) => void
 }
 
-if (typeof workerScope.addEventListener === "function" && typeof workerScope.postMessage === "function") {
+if (
+    typeof workerScope.addEventListener === "function" &&
+    typeof workerScope.postMessage === "function"
+) {
     workerScope.addEventListener("message", (event): void => {
         const layout = computeCodeCityLayout(event.data.files)
         workerScope.postMessage?.({

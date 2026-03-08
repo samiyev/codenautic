@@ -73,8 +73,10 @@ export function HealthTrendChart(props: IHealthTrendChartProps): ReactElement {
     const preparedPoints = useMemo((): ReadonlyArray<IHealthTrendPoint> => {
         return props.points
             .filter((point): boolean => {
-                return resolveScore(point.healthScore) !== undefined
-                    && resolveDate(point.timestamp) !== undefined
+                return (
+                    resolveScore(point.healthScore) !== undefined &&
+                    resolveDate(point.timestamp) !== undefined
+                )
             })
             .sort((left, right): number => {
                 const leftDate = resolveDate(left.timestamp)
@@ -126,31 +128,30 @@ export function HealthTrendChart(props: IHealthTrendChartProps): ReactElement {
             .join(" ")
     }, [visiblePoints])
 
-    const stats = useMemo(
-        (): { readonly avg: number; readonly min: number; readonly max: number } | undefined => {
-            if (visiblePoints.length === 0) {
-                return undefined
-            }
+    const stats = useMemo(():
+        | { readonly avg: number; readonly min: number; readonly max: number }
+        | undefined => {
+        if (visiblePoints.length === 0) {
+            return undefined
+        }
 
-            const scores = visiblePoints
-                .map((point): number | undefined => resolveScore(point.healthScore))
-                .filter((value): value is number => value !== undefined)
-            if (scores.length === 0) {
-                return undefined
-            }
+        const scores = visiblePoints
+            .map((point): number | undefined => resolveScore(point.healthScore))
+            .filter((value): value is number => value !== undefined)
+        if (scores.length === 0) {
+            return undefined
+        }
 
-            const sum = scores.reduce((total, score): number => total + score, 0)
-            const min = Math.min(...scores)
-            const max = Math.max(...scores)
+        const sum = scores.reduce((total, score): number => total + score, 0)
+        const min = Math.min(...scores)
+        const max = Math.max(...scores)
 
-            return {
-                avg: Math.round((sum / scores.length) * 10) / 10,
-                min,
-                max,
-            }
-        },
-        [visiblePoints],
-    )
+        return {
+            avg: Math.round((sum / scores.length) * 10) / 10,
+            min,
+            max,
+        }
+    }, [visiblePoints])
 
     const handlePeriodChange = (event: ChangeEvent<HTMLSelectElement>): void => {
         const nextPeriod = event.currentTarget.value
@@ -185,11 +186,13 @@ export function HealthTrendChart(props: IHealthTrendChartProps): ReactElement {
                     onChange={handlePeriodChange}
                     value={period}
                 >
-                    {PERIOD_OPTIONS.map((option): ReactElement => (
-                        <option key={option.value} value={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
+                    {PERIOD_OPTIONS.map(
+                        (option): ReactElement => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ),
+                    )}
                 </select>
             </div>
             <svg
@@ -206,12 +209,7 @@ export function HealthTrendChart(props: IHealthTrendChartProps): ReactElement {
                     x={PADDING_LEFT}
                     y={PADDING_TOP}
                 />
-                <path
-                    d={linePath}
-                    fill="none"
-                    stroke="hsl(214, 92%, 55%)"
-                    strokeWidth={2.5}
-                />
+                <path d={linePath} fill="none" stroke="hsl(214, 92%, 55%)" strokeWidth={2.5} />
                 {visiblePoints.map((point, index): ReactElement | null => {
                     const score = resolveScore(point.healthScore)
                     if (score === undefined) {

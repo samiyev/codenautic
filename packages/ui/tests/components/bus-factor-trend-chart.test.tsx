@@ -59,9 +59,7 @@ describe("BusFactorTrendChart", (): void => {
         expect(screen.getByLabelText("Bus factor trend lines")).not.toBeNull()
         expect(screen.getByTestId("bus-factor-line-src/api")).not.toBeNull()
         expect(screen.getByTestId("bus-factor-line-src/worker")).not.toBeNull()
-        expect(
-            screen.getByLabelText("Bus factor annotation src/api Team rotation"),
-        ).not.toBeNull()
+        expect(screen.getByLabelText("Bus factor annotation src/api Team rotation")).not.toBeNull()
     })
 
     it("вызывает onSelectSeries при выборе module trend", async (): Promise<void> => {
@@ -71,9 +69,7 @@ describe("BusFactorTrendChart", (): void => {
             <BusFactorTrendChart series={TEST_SERIES} onSelectSeries={onSelectSeries} />,
         )
 
-        await user.click(
-            screen.getByRole("button", { name: "Inspect bus factor trend src/api" }),
-        )
+        await user.click(screen.getByRole("button", { name: "Inspect bus factor trend src/api" }))
 
         expect(onSelectSeries).toHaveBeenCalledTimes(1)
         expect(onSelectSeries).toHaveBeenCalledWith(

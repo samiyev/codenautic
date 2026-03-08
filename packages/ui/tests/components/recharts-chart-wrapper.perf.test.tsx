@@ -55,7 +55,11 @@ function renderLineChartCase(size: number, expectedMaxPoints: number, budgetMs: 
             }}
             title="Line perf"
         >
-            {({ displayData, isAggregated: aggregated, aggregationFactor: factor }): ReactElement => {
+            {({
+                displayData,
+                isAggregated: aggregated,
+                aggregationFactor: factor,
+            }): ReactElement => {
                 renderedCount = displayData.length
                 isAggregated = aggregated
                 aggregationFactor = factor

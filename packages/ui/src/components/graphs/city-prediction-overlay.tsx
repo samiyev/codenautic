@@ -59,11 +59,7 @@ function resolveRowClassName(
         : "border-slate-200 bg-slate-50 hover:border-slate-300"
     const dashedClassName = riskLevel === "high" ? "border-dashed" : ""
 
-    return [
-        "w-full rounded-lg border p-2 text-left transition",
-        baseClassName,
-        dashedClassName,
-    ]
+    return ["w-full rounded-lg border p-2 text-left transition", baseClassName, dashedClassName]
         .filter((entry): boolean => entry.length > 0)
         .join(" ")
 }
@@ -122,4 +118,3 @@ export function CityPredictionOverlay(props: ICityPredictionOverlayProps): React
         </section>
     )
 }
-

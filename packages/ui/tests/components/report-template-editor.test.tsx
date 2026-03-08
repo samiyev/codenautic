@@ -13,13 +13,20 @@ describe("ReportTemplateEditor", (): void => {
         await user.clear(screen.getByLabelText("Template name"))
         await user.type(screen.getByLabelText("Template name"), "Leadership weekly digest")
         await user.clear(screen.getByLabelText("Template brand logo"))
-        await user.type(screen.getByLabelText("Template brand logo"), "https://cdn.codenautic.app/lead.svg")
+        await user.type(
+            screen.getByLabelText("Template brand logo"),
+            "https://cdn.codenautic.app/lead.svg",
+        )
         fireEvent.change(screen.getByLabelText("Template accent color"), {
             target: { value: "#0f766e" },
         })
 
-        await user.click(screen.getByRole("button", { name: "Move down section executive-summary" }))
-        await user.click(screen.getByRole("checkbox", { name: "Template section enabled risks-and-actions" }))
+        await user.click(
+            screen.getByRole("button", { name: "Move down section executive-summary" }),
+        )
+        await user.click(
+            screen.getByRole("checkbox", { name: "Template section enabled risks-and-actions" }),
+        )
 
         expect(screen.getByLabelText("Template preview summary").textContent).toContain(
             "Leadership weekly digest",

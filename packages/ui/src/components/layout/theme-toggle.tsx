@@ -198,10 +198,7 @@ function ThemePalettePreview({
     )
 }
 
-function getPresetLabel(
-    presets: ReadonlyArray<IThemePreset>,
-    presetId: string,
-): string {
+function getPresetLabel(presets: ReadonlyArray<IThemePreset>, presetId: string): string {
     const nextPreset = presets.find((themePreset): boolean => themePreset.id === presetId)
     if (nextPreset === undefined) {
         return presetId

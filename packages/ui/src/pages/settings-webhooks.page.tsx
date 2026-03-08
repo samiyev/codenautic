@@ -203,8 +203,7 @@ function hasUrlPrefix(url: string): boolean {
  * @returns UI для create/delete/rotate/logs с виртуализацией.
  */
 export function SettingsWebhooksPage(): ReactElement {
-    const [webhooks, setWebhooks] =
-        useState<ReadonlyArray<IWebhookEndpoint>>(INITIAL_WEBHOOKS)
+    const [webhooks, setWebhooks] = useState<ReadonlyArray<IWebhookEndpoint>>(INITIAL_WEBHOOKS)
     const [deliveryLogs, setDeliveryLogs] =
         useState<ReadonlyArray<IWebhookDeliveryLog>>(INITIAL_DELIVERY_LOGS)
     const [search, setSearch] = useState("")
@@ -221,13 +220,12 @@ export function SettingsWebhooksPage(): ReactElement {
         const normalizedSearch = normalizeSearch(search)
         return webhooks.filter((webhook): boolean => {
             const searchMatches =
-                normalizedSearch.length === 0
-                || webhook.url.toLowerCase().includes(normalizedSearch)
-                || webhook.eventTypes.some((eventType): boolean =>
+                normalizedSearch.length === 0 ||
+                webhook.url.toLowerCase().includes(normalizedSearch) ||
+                webhook.eventTypes.some((eventType): boolean =>
                     eventType.toLowerCase().includes(normalizedSearch),
                 )
-            const statusMatches =
-                statusFilter === "all" || webhook.status === statusFilter
+            const statusMatches = statusFilter === "all" || webhook.status === statusFilter
 
             return searchMatches && statusMatches
         })
@@ -238,9 +236,7 @@ export function SettingsWebhooksPage(): ReactElement {
             return []
         }
 
-        return deliveryLogs.filter(
-            (entry): boolean => entry.endpointId === activeEndpointId,
-        )
+        return deliveryLogs.filter((entry): boolean => entry.endpointId === activeEndpointId)
     }, [activeEndpointId, deliveryLogs])
 
     const endpointsVirtualizer = useVirtualizer({
@@ -256,9 +252,7 @@ export function SettingsWebhooksPage(): ReactElement {
         overscan: 8,
     })
 
-    const activeEndpoint = webhooks.find(
-        (item): boolean => item.id === activeEndpointId,
-    )
+    const activeEndpoint = webhooks.find((item): boolean => item.id === activeEndpointId)
 
     const handleCreateWebhook = (): void => {
         const trimmedUrl = createForm.url.trim()
@@ -294,50 +288,51 @@ export function SettingsWebhooksPage(): ReactElement {
 
     const handleDeleteWebhook = (endpointId: string): void => {
         setWebhooks((previous): ReadonlyArray<IWebhookEndpoint> => {
-            const nextItems = previous.filter(
-                (entry): boolean => entry.id !== endpointId,
-            )
+            const nextItems = previous.filter((entry): boolean => entry.id !== endpointId)
             if (activeEndpointId === endpointId) {
                 setActiveEndpointId(nextItems[0]?.id ?? "")
             }
             return nextItems
         })
-        setDeliveryLogs((previous): ReadonlyArray<IWebhookDeliveryLog> =>
-            previous.filter((entry): boolean => entry.endpointId !== endpointId),
+        setDeliveryLogs(
+            (previous): ReadonlyArray<IWebhookDeliveryLog> =>
+                previous.filter((entry): boolean => entry.endpointId !== endpointId),
         )
         showToastInfo("Webhook endpoint deleted.")
     }
 
     const handleRotateSecret = (endpointId: string): void => {
-        setWebhooks((previous): ReadonlyArray<IWebhookEndpoint> =>
-            previous.map((webhook): IWebhookEndpoint => {
-                if (webhook.id !== endpointId) {
-                    return webhook
-                }
+        setWebhooks(
+            (previous): ReadonlyArray<IWebhookEndpoint> =>
+                previous.map((webhook): IWebhookEndpoint => {
+                    if (webhook.id !== endpointId) {
+                        return webhook
+                    }
 
-                return {
-                    ...webhook,
-                    secretPreview: buildMaskedSecret(`${endpointId}-${Date.now().toString()}`),
-                    status: "retrying",
-                }
-            }),
+                    return {
+                        ...webhook,
+                        secretPreview: buildMaskedSecret(`${endpointId}-${Date.now().toString()}`),
+                        status: "retrying",
+                    }
+                }),
         )
         showToastSuccess("Webhook secret rotated.")
     }
 
     const handleToggleEndpoint = (endpointId: string, isEnabled: boolean): void => {
-        setWebhooks((previous): ReadonlyArray<IWebhookEndpoint> =>
-            previous.map((webhook): IWebhookEndpoint => {
-                if (webhook.id !== endpointId) {
-                    return webhook
-                }
+        setWebhooks(
+            (previous): ReadonlyArray<IWebhookEndpoint> =>
+                previous.map((webhook): IWebhookEndpoint => {
+                    if (webhook.id !== endpointId) {
+                        return webhook
+                    }
 
-                return {
-                    ...webhook,
-                    isEnabled,
-                    status: isEnabled ? webhook.status : "disconnected",
-                }
-            }),
+                    return {
+                        ...webhook,
+                        isEnabled,
+                        status: isEnabled ? webhook.status : "disconnected",
+                    }
+                }),
         )
     }
 
@@ -358,18 +353,19 @@ export function SettingsWebhooksPage(): ReactElement {
         }
 
         setDeliveryLogs((previous): ReadonlyArray<IWebhookDeliveryLog> => [nextLog, ...previous])
-        setWebhooks((previous): ReadonlyArray<IWebhookEndpoint> =>
-            previous.map((entry): IWebhookEndpoint => {
-                if (entry.id !== endpointId) {
-                    return entry
-                }
+        setWebhooks(
+            (previous): ReadonlyArray<IWebhookEndpoint> =>
+                previous.map((entry): IWebhookEndpoint => {
+                    if (entry.id !== endpointId) {
+                        return entry
+                    }
 
-                return {
-                    ...entry,
-                    lastDeliveryAt: now,
-                    status: isHealthy ? "success" : "failed",
-                }
-            }),
+                    return {
+                        ...entry,
+                        lastDeliveryAt: now,
+                        status: isHealthy ? "success" : "failed",
+                    }
+                }),
         )
 
         if (isHealthy) {
@@ -399,10 +395,12 @@ export function SettingsWebhooksPage(): ReactElement {
                         <Input
                             label="Endpoint URL"
                             onValueChange={(value): void => {
-                                setCreateForm((previous): ICreateWebhookFormState => ({
-                                    ...previous,
-                                    url: value,
-                                }))
+                                setCreateForm(
+                                    (previous): ICreateWebhookFormState => ({
+                                        ...previous,
+                                        url: value,
+                                    }),
+                                )
                             }}
                             placeholder="https://hooks.acme.dev/code-review"
                             value={createForm.url}
@@ -410,19 +408,18 @@ export function SettingsWebhooksPage(): ReactElement {
                         <Input
                             label="Event types"
                             onValueChange={(value): void => {
-                                setCreateForm((previous): ICreateWebhookFormState => ({
-                                    ...previous,
-                                    eventTypesCsv: value,
-                                }))
+                                setCreateForm(
+                                    (previous): ICreateWebhookFormState => ({
+                                        ...previous,
+                                        eventTypesCsv: value,
+                                    }),
+                                )
                             }}
                             placeholder="review.completed, scan.failed"
                             value={createForm.eventTypesCsv}
                         />
                         <div className="flex items-end">
-                            <Button
-                                onPress={handleCreateWebhook}
-                                type="button"
-                            >
+                            <Button onPress={handleCreateWebhook} type="button">
                                 Create endpoint
                             </Button>
                         </div>
@@ -436,9 +433,7 @@ export function SettingsWebhooksPage(): ReactElement {
             <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
                 <Card>
                     <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-base font-semibold text-slate-900">
-                            Webhook endpoints
-                        </p>
+                        <p className="text-base font-semibold text-slate-900">Webhook endpoints</p>
                         <div className="flex flex-wrap gap-2">
                             <Input
                                 className="min-w-[200px]"
@@ -453,9 +448,9 @@ export function SettingsWebhooksPage(): ReactElement {
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
                                     if (
-                                        nextValue === "success"
-                                        || nextValue === "retrying"
-                                        || nextValue === "failed"
+                                        nextValue === "success" ||
+                                        nextValue === "retrying" ||
+                                        nextValue === "failed"
                                     ) {
                                         setStatusFilter(nextValue)
                                         return
@@ -479,93 +474,99 @@ export function SettingsWebhooksPage(): ReactElement {
                                 className="relative"
                                 style={{ height: `${endpointsVirtualizer.getTotalSize()}px` }}
                             >
-                                {endpointsVirtualizer.getVirtualItems().map((virtualItem): ReactElement | null => {
-                                    const webhook = filteredWebhooks[virtualItem.index]
-                                    if (webhook === undefined) {
-                                        return null
-                                    }
+                                {endpointsVirtualizer
+                                    .getVirtualItems()
+                                    .map((virtualItem): ReactElement | null => {
+                                        const webhook = filteredWebhooks[virtualItem.index]
+                                        if (webhook === undefined) {
+                                            return null
+                                        }
 
-                                    const isActive = webhook.id === activeEndpointId
+                                        const isActive = webhook.id === activeEndpointId
 
-                                    return (
-                                        <article
-                                            className={`absolute left-0 top-0 w-full border-b border-slate-100 px-3 py-3 ${
-                                                isActive ? "bg-blue-50/50" : "bg-white"
-                                            }`}
-                                            key={webhook.id}
-                                            style={{
-                                                height: `${virtualItem.size}px`,
-                                                transform: `translateY(${virtualItem.start}px)`,
-                                            }}
-                                        >
-                                            <div className="flex items-start justify-between gap-3">
-                                                <button
-                                                    className="min-w-0 text-left"
-                                                    onClick={(): void => {
-                                                        setActiveEndpointId(webhook.id)
-                                                    }}
-                                                    type="button"
-                                                >
-                                                    <p className="truncate text-sm font-semibold text-slate-900">
-                                                        {webhook.url}
-                                                    </p>
-                                                    <p className="mt-1 text-xs text-slate-600">
-                                                        Events: {webhook.eventTypes.join(", ")}
-                                                    </p>
-                                                    <p className="text-xs text-slate-500">
-                                                        Secret: {webhook.secretPreview}
-                                                    </p>
-                                                </button>
-                                                <Chip
-                                                    color={mapWebhookStatusColor(webhook.status)}
-                                                    size="sm"
-                                                    variant="flat"
-                                                >
-                                                    {mapWebhookStatusText(webhook.status)}
-                                                </Chip>
-                                            </div>
-                                            <div className="mt-2 flex flex-wrap items-center gap-2">
-                                                <Switch
-                                                    isSelected={webhook.isEnabled}
-                                                    onValueChange={(value): void => {
-                                                        handleToggleEndpoint(webhook.id, value)
-                                                    }}
-                                                >
-                                                    Enabled
-                                                </Switch>
-                                                <Button
-                                                    onPress={(): void => {
-                                                        handleRotateSecret(webhook.id)
-                                                    }}
-                                                    size="sm"
-                                                    variant="light"
-                                                >
-                                                    Rotate secret
-                                                </Button>
-                                                <TestConnectionButton
-                                                    onTest={(): Promise<boolean> =>
-                                                        Promise.resolve(
-                                                            handleTestDelivery(webhook.id),
+                                        return (
+                                            <article
+                                                className={`absolute left-0 top-0 w-full border-b border-slate-100 px-3 py-3 ${
+                                                    isActive ? "bg-blue-50/50" : "bg-white"
+                                                }`}
+                                                key={webhook.id}
+                                                style={{
+                                                    height: `${virtualItem.size}px`,
+                                                    transform: `translateY(${virtualItem.start}px)`,
+                                                }}
+                                            >
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <button
+                                                        className="min-w-0 text-left"
+                                                        onClick={(): void => {
+                                                            setActiveEndpointId(webhook.id)
+                                                        }}
+                                                        type="button"
+                                                    >
+                                                        <p className="truncate text-sm font-semibold text-slate-900">
+                                                            {webhook.url}
+                                                        </p>
+                                                        <p className="mt-1 text-xs text-slate-600">
+                                                            Events: {webhook.eventTypes.join(", ")}
+                                                        </p>
+                                                        <p className="text-xs text-slate-500">
+                                                            Secret: {webhook.secretPreview}
+                                                        </p>
+                                                    </button>
+                                                    <Chip
+                                                        color={mapWebhookStatusColor(
+                                                            webhook.status,
                                                         )}
-                                                    providerLabel="Webhook"
-                                                />
-                                                <Button
-                                                    color="danger"
-                                                    onPress={(): void => {
-                                                        handleDeleteWebhook(webhook.id)
-                                                    }}
-                                                    size="sm"
-                                                    variant="ghost"
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </div>
-                                            <p className="mt-1 text-xs text-slate-500">
-                                                Last delivery: {webhook.lastDeliveryAt ?? "not delivered"}
-                                            </p>
-                                        </article>
-                                    )
-                                })}
+                                                        size="sm"
+                                                        variant="flat"
+                                                    >
+                                                        {mapWebhookStatusText(webhook.status)}
+                                                    </Chip>
+                                                </div>
+                                                <div className="mt-2 flex flex-wrap items-center gap-2">
+                                                    <Switch
+                                                        isSelected={webhook.isEnabled}
+                                                        onValueChange={(value): void => {
+                                                            handleToggleEndpoint(webhook.id, value)
+                                                        }}
+                                                    >
+                                                        Enabled
+                                                    </Switch>
+                                                    <Button
+                                                        onPress={(): void => {
+                                                            handleRotateSecret(webhook.id)
+                                                        }}
+                                                        size="sm"
+                                                        variant="light"
+                                                    >
+                                                        Rotate secret
+                                                    </Button>
+                                                    <TestConnectionButton
+                                                        onTest={(): Promise<boolean> =>
+                                                            Promise.resolve(
+                                                                handleTestDelivery(webhook.id),
+                                                            )
+                                                        }
+                                                        providerLabel="Webhook"
+                                                    />
+                                                    <Button
+                                                        color="danger"
+                                                        onPress={(): void => {
+                                                            handleDeleteWebhook(webhook.id)
+                                                        }}
+                                                        size="sm"
+                                                        variant="ghost"
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </div>
+                                                <p className="mt-1 text-xs text-slate-500">
+                                                    Last delivery:{" "}
+                                                    {webhook.lastDeliveryAt ?? "not delivered"}
+                                                </p>
+                                            </article>
+                                        )
+                                    })}
                             </div>
                         </div>
                     </CardBody>
@@ -574,7 +575,8 @@ export function SettingsWebhooksPage(): ReactElement {
                 <Card>
                     <CardHeader>
                         <p className="text-base font-semibold text-slate-900">
-                            Delivery logs {activeEndpoint === undefined ? "" : `· ${activeEndpoint.id}`}
+                            Delivery logs{" "}
+                            {activeEndpoint === undefined ? "" : `· ${activeEndpoint.id}`}
                         </p>
                     </CardHeader>
                     <CardBody className="space-y-3">
@@ -589,38 +591,44 @@ export function SettingsWebhooksPage(): ReactElement {
                                 className="relative"
                                 style={{ height: `${logsVirtualizer.getTotalSize()}px` }}
                             >
-                                {logsVirtualizer.getVirtualItems().map((virtualItem): ReactElement | null => {
-                                    const log = selectedEndpointLogs[virtualItem.index]
-                                    if (log === undefined) {
-                                        return null
-                                    }
+                                {logsVirtualizer
+                                    .getVirtualItems()
+                                    .map((virtualItem): ReactElement | null => {
+                                        const log = selectedEndpointLogs[virtualItem.index]
+                                        if (log === undefined) {
+                                            return null
+                                        }
 
-                                    return (
-                                        <article
-                                            className="absolute left-0 top-0 w-full border-b border-slate-100 px-3 py-3"
-                                            key={log.id}
-                                            style={{
-                                                height: `${virtualItem.size}px`,
-                                                transform: `translateY(${virtualItem.start}px)`,
-                                            }}
-                                        >
-                                            <div className="flex items-start justify-between gap-2">
-                                                <p className="text-xs text-slate-500">{log.timestamp}</p>
-                                                <Chip
-                                                    color={mapWebhookStatusColor(log.status)}
-                                                    size="sm"
-                                                    variant="flat"
-                                                >
-                                                    {mapWebhookStatusText(log.status)}
-                                                </Chip>
-                                            </div>
-                                            <p className="mt-1 text-sm text-slate-800">{log.message}</p>
-                                            <p className="text-xs text-slate-500">
-                                                HTTP status: {log.httpStatus}
-                                            </p>
-                                        </article>
-                                    )
-                                })}
+                                        return (
+                                            <article
+                                                className="absolute left-0 top-0 w-full border-b border-slate-100 px-3 py-3"
+                                                key={log.id}
+                                                style={{
+                                                    height: `${virtualItem.size}px`,
+                                                    transform: `translateY(${virtualItem.start}px)`,
+                                                }}
+                                            >
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <p className="text-xs text-slate-500">
+                                                        {log.timestamp}
+                                                    </p>
+                                                    <Chip
+                                                        color={mapWebhookStatusColor(log.status)}
+                                                        size="sm"
+                                                        variant="flat"
+                                                    >
+                                                        {mapWebhookStatusText(log.status)}
+                                                    </Chip>
+                                                </div>
+                                                <p className="mt-1 text-sm text-slate-800">
+                                                    {log.message}
+                                                </p>
+                                                <p className="text-xs text-slate-500">
+                                                    HTTP status: {log.httpStatus}
+                                                </p>
+                                            </article>
+                                        )
+                                    })}
                             </div>
                         </div>
                     </CardBody>

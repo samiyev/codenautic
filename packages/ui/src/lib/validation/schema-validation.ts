@@ -78,11 +78,9 @@ export function createEnumSchema<TValues extends readonly [string, ...string[]]>
 ): z.ZodType<TValues[number]> {
     const lookup = new Set(values)
 
-    return z
-        .string()
-        .refine((value): value is TValues[number] => {
-            return typeof value === "string" && lookup.has(value)
-        }, "Некорректное enum значение") as z.ZodType<TValues[number]>
+    return z.string().refine((value): value is TValues[number] => {
+        return typeof value === "string" && lookup.has(value)
+    }, "Некорректное enum значение") as z.ZodType<TValues[number]>
 }
 
 /**

@@ -74,38 +74,50 @@ export function ExploreModeSidebar(props: IExploreModeSidebarProps): ReactElemen
                     onChange={handleRoleFilterChange}
                     value={roleFilter}
                 >
-                    {roleOptions.map((role): ReactElement => (
-                        <option key={role} value={role}>
-                            {role}
-                        </option>
-                    ))}
+                    {roleOptions.map(
+                        (role): ReactElement => (
+                            <option key={role} value={role}>
+                                {role}
+                            </option>
+                        ),
+                    )}
                 </select>
             </label>
 
             <ul className="mt-3 space-y-2">
-                {filteredPaths.map((path): ReactElement => (
-                    <li className="rounded border border-slate-200 bg-slate-50 p-2" key={path.id}>
-                        <div className="flex items-start justify-between gap-2">
-                            <div>
-                                <p className="text-sm font-semibold text-slate-900">{path.title}</p>
-                                <p className="mt-1 text-xs text-slate-600">{path.description}</p>
-                                <p className="mt-1 text-[11px] uppercase tracking-wide text-slate-500">
-                                    Role: {path.role} · Files: {String(path.fileChainIds.length)}
-                                </p>
+                {filteredPaths.map(
+                    (path): ReactElement => (
+                        <li
+                            className="rounded border border-slate-200 bg-slate-50 p-2"
+                            key={path.id}
+                        >
+                            <div className="flex items-start justify-between gap-2">
+                                <div>
+                                    <p className="text-sm font-semibold text-slate-900">
+                                        {path.title}
+                                    </p>
+                                    <p className="mt-1 text-xs text-slate-600">
+                                        {path.description}
+                                    </p>
+                                    <p className="mt-1 text-[11px] uppercase tracking-wide text-slate-500">
+                                        Role: {path.role} · Files:{" "}
+                                        {String(path.fileChainIds.length)}
+                                    </p>
+                                </div>
+                                <button
+                                    aria-label={`Navigate path ${path.title}`}
+                                    className="rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                                    onClick={(): void => {
+                                        props.onNavigatePath(path)
+                                    }}
+                                    type="button"
+                                >
+                                    Navigate
+                                </button>
                             </div>
-                            <button
-                                aria-label={`Navigate path ${path.title}`}
-                                className="rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
-                                onClick={(): void => {
-                                    props.onNavigatePath(path)
-                                }}
-                                type="button"
-                            >
-                                Navigate
-                            </button>
-                        </div>
-                    </li>
-                ))}
+                        </li>
+                    ),
+                )}
             </ul>
         </aside>
     )

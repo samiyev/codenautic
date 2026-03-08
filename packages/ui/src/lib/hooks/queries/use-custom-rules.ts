@@ -19,10 +19,7 @@ import type {
     TCustomRuleScope,
     TCustomRuleStatus,
 } from "@/lib/api/endpoints/custom-rules.endpoint"
-import {
-    CUSTOM_RULE_SCOPE,
-    CUSTOM_RULE_STATUS,
-} from "@/lib/api/endpoints/custom-rules.endpoint"
+import { CUSTOM_RULE_SCOPE, CUSTOM_RULE_STATUS } from "@/lib/api/endpoints/custom-rules.endpoint"
 import { queryKeys } from "@/lib/query/query-keys"
 
 type TCustomRulesQuery = {

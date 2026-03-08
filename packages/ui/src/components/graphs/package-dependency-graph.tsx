@@ -179,8 +179,9 @@ function readLayoutSnapshot(): ILayerLayoutSnapshot | undefined {
                 expandedLayerIds: parsed.expandedLayerIds
                     .filter((item): item is string => typeof item === "string")
                     .map((item): string => item.trim())
-                    .filter((item): item is IPackageDependencyNode["layer"] =>
-                        item.length > 0 && isPackageLayer(item),
+                    .filter(
+                        (item): item is IPackageDependencyNode["layer"] =>
+                            item.length > 0 && isPackageLayer(item),
                     ),
             }
         }
@@ -230,10 +231,7 @@ function filterRelationsByType(
     })
 }
 
-function createClusterLabel(
-    layer: IPackageDependencyNode["layer"],
-    membersCount: number,
-): string {
+function createClusterLabel(layer: IPackageDependencyNode["layer"], membersCount: number): string {
     return `${layer.toUpperCase()} cluster (${membersCount})`
 }
 
@@ -615,9 +613,9 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
         showImpactPaths: false,
         viewMode: initialLayoutSnapshot?.viewMode ?? "detailed",
         lodMode: initialLayoutSnapshot?.lodMode ?? "overview",
-        expandedLayerIds:
-            (initialLayoutSnapshot?.expandedLayerIds ?? [])
-                .filter((item): item is IPackageDependencyNode["layer"] => isPackageLayer(item)),
+        expandedLayerIds: (initialLayoutSnapshot?.expandedLayerIds ?? []).filter(
+            (item): item is IPackageDependencyNode["layer"] => isPackageLayer(item),
+        ),
         focusPathOnly: false,
         isClusterDetailLoading: false,
         forceGraphRenderInHugeMode: false,
@@ -635,14 +633,11 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
         return nextMap
     }, [props.nodes])
     const layerClusterMap = useMemo(() => buildLayerClusterMap(props.nodes), [props.nodes])
-    const allLayerIds = useMemo(
-        (): ReadonlyArray<IPackageDependencyNode["layer"]> => {
-            return Array.from(layerClusterMap.keys()).sort((left, right): number =>
-                left.localeCompare(right),
-            )
-        },
-        [layerClusterMap],
-    )
+    const allLayerIds = useMemo((): ReadonlyArray<IPackageDependencyNode["layer"]> => {
+        return Array.from(layerClusterMap.keys()).sort((left, right): number =>
+            left.localeCompare(right),
+        )
+    }, [layerClusterMap])
     const relationTypes = useMemo((): ReadonlyArray<string> => {
         return collectRelationTypes(props.relations)
     }, [props.relations])
@@ -666,57 +661,60 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
             ),
         [filteredRelations, props.nodes, state.query],
     )
-    const effectiveExpandedLayerIds = useMemo(
-        (): ReadonlyArray<IPackageDependencyNode["layer"]> => {
-            if (state.lodMode === "details") {
-                return allLayerIds
-            }
+    const effectiveExpandedLayerIds = useMemo((): ReadonlyArray<
+        IPackageDependencyNode["layer"]
+    > => {
+        if (state.lodMode === "details") {
+            return allLayerIds
+        }
 
-            return state.expandedLayerIds.filter((item): boolean => allLayerIds.includes(item))
-        },
-        [allLayerIds, state.expandedLayerIds, state.lodMode],
-    )
+        return state.expandedLayerIds.filter((item): boolean => allLayerIds.includes(item))
+    }, [allLayerIds, state.expandedLayerIds, state.lodMode])
     const clusteredGraphData = useMemo(
         (): IPackageDependencyGraphData =>
-            buildClusteredPackageGraphData(props.nodes, filteredRelations, effectiveExpandedLayerIds),
+            buildClusteredPackageGraphData(
+                props.nodes,
+                filteredRelations,
+                effectiveExpandedLayerIds,
+            ),
         [effectiveExpandedLayerIds, filteredRelations, props.nodes],
     )
     const graphViewMode: "detailed" | "clustered" =
         state.query.trim().length > 0 ? "detailed" : state.viewMode
-    const graphDataByViewMode = graphViewMode === "clustered" ? clusteredGraphData : detailedGraphData
+    const graphDataByViewMode =
+        graphViewMode === "clustered" ? clusteredGraphData : detailedGraphData
     const visibleGraphData = useMemo(
         (): IPackageDependencyGraphData =>
             applyFocusPathFilter(graphDataByViewMode, state.selectedNodeId, state.focusPathOnly),
         [graphDataByViewMode, state.focusPathOnly, state.selectedNodeId],
     )
-    const layoutedNodes = useMemo(
-        (): ReadonlyArray<IGraphNode> => {
-            if (shouldRenderGraph !== true) {
-                return []
-            }
+    const layoutedNodes = useMemo((): ReadonlyArray<IGraphNode> => {
+        if (shouldRenderGraph !== true) {
+            return []
+        }
 
-            return calculateGraphLayout(visibleGraphData.nodes, visibleGraphData.edges, {
-                direction: "LR",
-                nodeSpacingX: 120,
-                nodeSpacingY: 90,
-                margin: 20,
-            })
-        },
-        [shouldRenderGraph, visibleGraphData],
+        return calculateGraphLayout(visibleGraphData.nodes, visibleGraphData.edges, {
+            direction: "LR",
+            nodeSpacingX: 120,
+            nodeSpacingY: 90,
+            margin: 20,
+        })
+    }, [shouldRenderGraph, visibleGraphData])
+
+    const summaryText = createSummaryText(
+        visibleGraphData.nodes.length,
+        visibleGraphData.edges.length,
     )
+    const selectedClusterLayer = useMemo((): IPackageDependencyNode["layer"] | undefined => {
+        if (state.selectedNodeId === undefined) {
+            return undefined
+        }
 
-    const summaryText = createSummaryText(visibleGraphData.nodes.length, visibleGraphData.edges.length)
-    const selectedClusterLayer = useMemo(
-        (): IPackageDependencyNode["layer"] | undefined => {
-            if (state.selectedNodeId === undefined) {
-                return undefined
-            }
-
-            return parseClusterLayer(state.selectedNodeId)
-        },
-        [state.selectedNodeId],
-    )
-    const selectedClusterMembers = useMemo((): ReadonlyArray<IPackageDependencyNode> | undefined => {
+        return parseClusterLayer(state.selectedNodeId)
+    }, [state.selectedNodeId])
+    const selectedClusterMembers = useMemo(():
+        | ReadonlyArray<IPackageDependencyNode>
+        | undefined => {
         if (selectedClusterLayer === undefined) {
             return undefined
         }
@@ -781,20 +779,24 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         placeholder="Filter packages by name"
                         value={state.query}
                         onValueChange={(nextQuery): void => {
-                            setState((previous): IPackageDependencyGraphState => ({
-                                ...previous,
-                                query: nextQuery,
-                            }))
+                            setState(
+                                (previous): IPackageDependencyGraphState => ({
+                                    ...previous,
+                                    query: nextQuery,
+                                }),
+                            )
                         }}
                     />
                     {relationTypes.length > 0 ? (
                         <Button
                             color="default"
                             onPress={(): void => {
-                                setState((previous): IPackageDependencyGraphState => ({
-                                    ...previous,
-                                    selectedRelationTypes: [],
-                                }))
+                                setState(
+                                    (previous): IPackageDependencyGraphState => ({
+                                        ...previous,
+                                        selectedRelationTypes: [],
+                                    }),
+                                )
                             }}
                             variant="flat"
                         >
@@ -805,10 +807,12 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         <Button
                             color="default"
                             onPress={(): void => {
-                                setState((previous): IPackageDependencyGraphState => ({
-                                    ...previous,
-                                    query: "",
-                                }))
+                                setState(
+                                    (previous): IPackageDependencyGraphState => ({
+                                        ...previous,
+                                        query: "",
+                                    }),
+                                )
                             }}
                             variant="flat"
                         >
@@ -819,10 +823,12 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         color={state.showImpactPaths ? "success" : "default"}
                         isDisabled={state.selectedNodeId === undefined}
                         onPress={(): void => {
-                            setState((previousState): IPackageDependencyGraphState => ({
-                                ...previousState,
-                                showImpactPaths: !previousState.showImpactPaths,
-                            }))
+                            setState(
+                                (previousState): IPackageDependencyGraphState => ({
+                                    ...previousState,
+                                    showImpactPaths: !previousState.showImpactPaths,
+                                }),
+                            )
                         }}
                         variant={state.showImpactPaths ? "flat" : "bordered"}
                     >
@@ -831,23 +837,25 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                     <Button
                         color="default"
                         onPress={(): void => {
-                            setState((previousState): IPackageDependencyGraphState => ({
-                                ...previousState,
-                                viewMode:
-                                    previousState.viewMode === "clustered"
-                                        ? "detailed"
-                                        : "clustered",
-                                lodMode:
-                                    previousState.viewMode === "clustered"
-                                        ? "overview"
-                                        : previousState.lodMode,
-                                expandedLayerIds:
-                                    previousState.viewMode === "clustered"
-                                        ? []
-                                        : previousState.expandedLayerIds,
-                                selectedNodeId: undefined,
-                                focusPathOnly: false,
-                            }))
+                            setState(
+                                (previousState): IPackageDependencyGraphState => ({
+                                    ...previousState,
+                                    viewMode:
+                                        previousState.viewMode === "clustered"
+                                            ? "detailed"
+                                            : "clustered",
+                                    lodMode:
+                                        previousState.viewMode === "clustered"
+                                            ? "overview"
+                                            : previousState.lodMode,
+                                    expandedLayerIds:
+                                        previousState.viewMode === "clustered"
+                                            ? []
+                                            : previousState.expandedLayerIds,
+                                    selectedNodeId: undefined,
+                                    focusPathOnly: false,
+                                }),
+                            )
                         }}
                         variant="flat"
                     >
@@ -859,10 +867,12 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         color={state.focusPathOnly ? "primary" : "default"}
                         isDisabled={state.selectedNodeId === undefined}
                         onPress={(): void => {
-                            setState((previousState): IPackageDependencyGraphState => ({
-                                ...previousState,
-                                focusPathOnly: !previousState.focusPathOnly,
-                            }))
+                            setState(
+                                (previousState): IPackageDependencyGraphState => ({
+                                    ...previousState,
+                                    focusPathOnly: !previousState.focusPathOnly,
+                                }),
+                            )
                         }}
                         variant={state.focusPathOnly ? "flat" : "bordered"}
                     >
@@ -881,26 +891,32 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                             }
 
                             if (state.lodMode === "details") {
-                                setState((previousState): IPackageDependencyGraphState => ({
-                                    ...previousState,
-                                    lodMode: "overview",
-                                    expandedLayerIds: [],
-                                    isClusterDetailLoading: false,
-                                }))
+                                setState(
+                                    (previousState): IPackageDependencyGraphState => ({
+                                        ...previousState,
+                                        lodMode: "overview",
+                                        expandedLayerIds: [],
+                                        isClusterDetailLoading: false,
+                                    }),
+                                )
                                 return
                             }
 
-                            setState((previousState): IPackageDependencyGraphState => ({
-                                ...previousState,
-                                isClusterDetailLoading: true,
-                            }))
-                            clusterDetailTimerRef.current = globalThis.setTimeout((): void => {
-                                setState((previousState): IPackageDependencyGraphState => ({
+                            setState(
+                                (previousState): IPackageDependencyGraphState => ({
                                     ...previousState,
-                                    lodMode: "details",
-                                    expandedLayerIds: allLayerIds,
-                                    isClusterDetailLoading: false,
-                                }))
+                                    isClusterDetailLoading: true,
+                                }),
+                            )
+                            clusterDetailTimerRef.current = globalThis.setTimeout((): void => {
+                                setState(
+                                    (previousState): IPackageDependencyGraphState => ({
+                                        ...previousState,
+                                        lodMode: "details",
+                                        expandedLayerIds: allLayerIds,
+                                        isClusterDetailLoading: false,
+                                    }),
+                                )
                             }, CLUSTER_DETAILS_DELAY_MS)
                         }}
                         variant="flat"
@@ -911,10 +927,13 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         <Button
                             color={state.forceGraphRenderInHugeMode ? "warning" : "default"}
                             onPress={(): void => {
-                                setState((previousState): IPackageDependencyGraphState => ({
-                                    ...previousState,
-                                    forceGraphRenderInHugeMode: !previousState.forceGraphRenderInHugeMode,
-                                }))
+                                setState(
+                                    (previousState): IPackageDependencyGraphState => ({
+                                        ...previousState,
+                                        forceGraphRenderInHugeMode:
+                                            !previousState.forceGraphRenderInHugeMode,
+                                    }),
+                                )
                             }}
                             variant="flat"
                         >
@@ -927,13 +946,15 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         <Button
                             color="default"
                             onPress={(): void => {
-                                setState((previousState): IPackageDependencyGraphState => ({
-                                    ...previousState,
-                                    expandedLayerIds: toggleExpandedLayer(
-                                        previousState.expandedLayerIds,
-                                        selectedClusterLayer,
-                                    ),
-                                }))
+                                setState(
+                                    (previousState): IPackageDependencyGraphState => ({
+                                        ...previousState,
+                                        expandedLayerIds: toggleExpandedLayer(
+                                            previousState.expandedLayerIds,
+                                            selectedClusterLayer,
+                                        ),
+                                    }),
+                                )
                             }}
                             variant="light"
                         >
@@ -958,10 +979,12 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                             state.selectedRelationTypes,
                                             relationType,
                                         )
-                                        setState((previous): IPackageDependencyGraphState => ({
-                                            ...previous,
-                                            selectedRelationTypes,
-                                        }))
+                                        setState(
+                                            (previous): IPackageDependencyGraphState => ({
+                                                ...previous,
+                                                selectedRelationTypes,
+                                            }),
+                                        )
                                     }}
                                 >
                                     {relationType}
@@ -1012,11 +1035,13 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                             <section className="rounded-lg border border-default-200 bg-content1 p-3">
                                 <h5 className="text-sm font-semibold text-foreground">Top hubs</h5>
                                 <ul className="mt-2 space-y-1 text-xs text-foreground-700">
-                                    {hugeGraphFallbackData.topHubs.map((hub): ReactElement => (
-                                        <li key={hub.nodeId}>
-                                            {`${hub.label}: degree ${hub.totalDegree} (in ${hub.incoming}, out ${hub.outgoing})`}
-                                        </li>
-                                    ))}
+                                    {hugeGraphFallbackData.topHubs.map(
+                                        (hub): ReactElement => (
+                                            <li key={hub.nodeId}>
+                                                {`${hub.label}: degree ${hub.totalDegree} (in ${hub.incoming}, out ${hub.outgoing})`}
+                                            </li>
+                                        ),
+                                    )}
                                 </ul>
                             </section>
                             <section className="rounded-lg border border-default-200 bg-content1 p-3">
@@ -1024,11 +1049,13 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                     Sampled paths
                                 </h5>
                                 <ul className="mt-2 space-y-1 text-xs text-foreground-700">
-                                    {hugeGraphFallbackData.pathRows.map((row, index): ReactElement => (
-                                        <li key={`${row.source}-${row.target}-${index}`}>
-                                            {`${row.source} -> ${row.target} (${row.relationType})`}
-                                        </li>
-                                    ))}
+                                    {hugeGraphFallbackData.pathRows.map(
+                                        (row, index): ReactElement => (
+                                            <li key={`${row.source}-${row.target}-${index}`}>
+                                                {`${row.source} -> ${row.target} (${row.relationType})`}
+                                            </li>
+                                        ),
+                                    )}
                                 </ul>
                             </section>
                         </div>
@@ -1041,19 +1068,23 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         height={props.height}
                         nodes={layoutedNodes}
                         onNodeSelect={(nodeId): void => {
-                            setState((previousState): IPackageDependencyGraphState => ({
-                                ...previousState,
-                                showImpactPaths:
-                                    previousState.selectedNodeId === nodeId
-                                        ? false
-                                        : previousState.showImpactPaths,
-                                focusPathOnly:
-                                    previousState.selectedNodeId === nodeId
-                                        ? false
-                                        : previousState.focusPathOnly,
-                                selectedNodeId:
-                                    previousState.selectedNodeId === nodeId ? undefined : nodeId,
-                            }))
+                            setState(
+                                (previousState): IPackageDependencyGraphState => ({
+                                    ...previousState,
+                                    showImpactPaths:
+                                        previousState.selectedNodeId === nodeId
+                                            ? false
+                                            : previousState.showImpactPaths,
+                                    focusPathOnly:
+                                        previousState.selectedNodeId === nodeId
+                                            ? false
+                                            : previousState.focusPathOnly,
+                                    selectedNodeId:
+                                        previousState.selectedNodeId === nodeId
+                                            ? undefined
+                                            : nodeId,
+                                }),
+                            )
                         }}
                         highlightedEdgeIds={impactPathHighlight.edgeIds}
                         highlightedNodeIds={impactPathHighlight.nodeIds}
@@ -1077,7 +1108,8 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                             <p>{`Impact path nodes: ${impactPathHighlight.nodeIds.length}`}</p>
                             <p>{`Impact path edges: ${impactPathHighlight.edgeIds.length}`}</p>
                         </div>
-                    ) : selectedClusterLayer !== undefined && selectedClusterMembers !== undefined ? (
+                    ) : selectedClusterLayer !== undefined &&
+                      selectedClusterMembers !== undefined ? (
                         <div className="mt-2 space-y-1 text-sm text-foreground-700">
                             <p>{`Cluster layer: ${selectedClusterLayer}`}</p>
                             <p>{`Packages in cluster: ${selectedClusterMembers.length}`}</p>

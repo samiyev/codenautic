@@ -259,12 +259,16 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
     }, [graphData])
 
     const visibleGraphData = useMemo(
-        (): IFileDependencyGraphData => filterFileDependencyData(graphData, props.files, state.query),
+        (): IFileDependencyGraphData =>
+            filterFileDependencyData(graphData, props.files, state.query),
         [graphData, props.files, state.query],
     )
 
     const isEmptyState = visibleGraphData.nodes.length === 0
-    const summaryText = createSummaryText(visibleGraphData.nodes.length, visibleGraphData.edges.length)
+    const summaryText = createSummaryText(
+        visibleGraphData.nodes.length,
+        visibleGraphData.edges.length,
+    )
     const filesById = useMemo((): ReadonlyMap<string, IFileDependencyNode> => {
         const nextMap = new Map<string, IFileDependencyNode>()
         for (const file of props.files) {

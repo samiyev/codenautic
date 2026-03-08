@@ -53,7 +53,9 @@ describe("chat context indicator", (): void => {
         const changeButton = screen.getByRole("button", { name: "Change context" })
         await user.click(changeButton)
 
-        const second = screen.getByRole("option", { name: "Change context to repo-beta — CCR #1202" })
+        const second = screen.getByRole("option", {
+            name: "Change context to repo-beta — CCR #1202",
+        })
         await user.click(second)
 
         expect(onContextChange).toHaveBeenCalledTimes(1)

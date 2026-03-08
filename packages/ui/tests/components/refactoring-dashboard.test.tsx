@@ -50,9 +50,10 @@ describe("RefactoringDashboard", (): void => {
         expect(screen.getByText("src/adapters/queue.ts")).not.toBeNull()
         expect(screen.getByText("src/services/retry.ts")).not.toBeNull()
 
-        await user.selectOptions(screen.getByRole("combobox", { name: "Refactoring module filter" }), [
-            "pages",
-        ])
+        await user.selectOptions(
+            screen.getByRole("combobox", { name: "Refactoring module filter" }),
+            ["pages"],
+        )
         expect(screen.getByText("src/pages/ccr-management.page.tsx")).not.toBeNull()
         expect(screen.queryByText("src/adapters/queue.ts")).toBeNull()
 
@@ -70,7 +71,9 @@ describe("RefactoringDashboard", (): void => {
         )
 
         await user.click(
-            screen.getByRole("button", { name: "Inspect refactoring target src/adapters/queue.ts" }),
+            screen.getByRole("button", {
+                name: "Inspect refactoring target src/adapters/queue.ts",
+            }),
         )
         expect(onSelectTarget).toHaveBeenCalledTimes(1)
         expect(onSelectTarget).toHaveBeenCalledWith(

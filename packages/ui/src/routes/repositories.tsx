@@ -50,11 +50,15 @@ function RepositoriesRouteComponent(): ReactElement {
     )
 }
 
-export function validateRepositoriesSearch(rawSearch: Record<string, unknown>): IRepositoriesSearch {
+export function validateRepositoriesSearch(
+    rawSearch: Record<string, unknown>,
+): IRepositoriesSearch {
     return {
         q: typeof rawSearch.q === "string" ? rawSearch.q.trim() : undefined,
         sort:
-            rawSearch.sort === "name" || rawSearch.sort === "status" || rawSearch.sort === "lastScanAt"
+            rawSearch.sort === "name" ||
+            rawSearch.sort === "status" ||
+            rawSearch.sort === "lastScanAt"
                 ? rawSearch.sort
                 : undefined,
         status:

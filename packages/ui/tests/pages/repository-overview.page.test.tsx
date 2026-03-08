@@ -125,9 +125,7 @@ describe("repository overview page", (): void => {
     it("показывает fallback для неизвестного репозитория", (): void => {
         renderWithProviders(<RepositoryOverviewPage repositoryId="unknown/repo" />)
 
-        expect(
-            screen.getByText("Скан-результат репозитория не найден"),
-        ).not.toBeNull()
+        expect(screen.getByText("Скан-результат репозитория не найден")).not.toBeNull()
         expect(screen.getByText("unknown/repo")).not.toBeNull()
         expect(screen.getByRole("link", { name: "К списку репозиториев" })).not.toBeNull()
     })

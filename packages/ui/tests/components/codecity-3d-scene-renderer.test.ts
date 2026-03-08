@@ -337,11 +337,7 @@ describe("CodeCity3DSceneRenderer building generation", (): void => {
         const arcs = createCodeCityCausalArcs(buildings, couplings)
 
         expect(arcs).toHaveLength(3)
-        expect(arcs.map((arc): string => arc.color)).toEqual([
-            "#38bdf8",
-            "#fb923c",
-            "#22c55e",
-        ])
+        expect(arcs.map((arc): string => arc.color)).toEqual(["#38bdf8", "#fb923c", "#22c55e"])
         const firstArc = arcs[0]
         expect(firstArc?.control[1]).toBeGreaterThan(firstArc?.start[1] ?? 0)
         expect(firstArc?.control[1]).toBeGreaterThan(firstArc?.end[1] ?? 0)
@@ -400,7 +396,7 @@ describe("CodeCity3DSceneRenderer building generation", (): void => {
         const uiAura = auras.find((aura): boolean => aura.districtId === "ui")
         expect(apiAura).not.toBeUndefined()
         expect(uiAura).not.toBeUndefined()
-        expect((apiAura?.healthScore ?? 100)).toBeLessThan(uiAura?.healthScore ?? 0)
+        expect(apiAura?.healthScore ?? 100).toBeLessThan(uiAura?.healthScore ?? 0)
         expect(apiAura?.color).toBe(resolveCodeCityHealthAuraColor(apiAura?.healthScore ?? 0))
         expect(uiAura?.color).toBe(resolveCodeCityHealthAuraColor(uiAura?.healthScore ?? 0))
         expect(apiAura?.pulseSpeed).toBeGreaterThan(0)

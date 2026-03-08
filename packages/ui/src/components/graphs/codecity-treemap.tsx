@@ -1,10 +1,4 @@
-import {
-    type ChangeEvent,
-    type KeyboardEvent,
-    type ReactElement,
-    useMemo,
-    useState,
-} from "react"
+import { type ChangeEvent, type KeyboardEvent, type ReactElement, useMemo, useState } from "react"
 
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { ResponsiveContainer, Treemap } from "recharts"
@@ -237,10 +231,7 @@ function resolveComparisonDeltaColor(delta: number | undefined): string | undefi
         : CODE_CITY_COMPARISON_DELTA_COLOR_SHRINK
 }
 
-function resolveIssueHeatmapColor(
-    issueCount: number,
-    maxIssueCount: number,
-): string | undefined {
+function resolveIssueHeatmapColor(issueCount: number, maxIssueCount: number): string | undefined {
     if (issueCount <= 0 || maxIssueCount <= 0) {
         return undefined
     }
@@ -391,10 +382,12 @@ function buildTemporalCouplingLines(
         return []
     }
 
-    return lines.map((line): ICodeCityTreemapTemporalCouplingLine => ({
-        ...line,
-        strength: line.strength / maxStrength,
-    }))
+    return lines.map(
+        (line): ICodeCityTreemapTemporalCouplingLine => ({
+            ...line,
+            strength: line.strength / maxStrength,
+        }),
+    )
 }
 
 function buildImpactedFileIndex(
@@ -409,8 +402,9 @@ function buildImpactedFileIndex(
 
         const currentImpact = impactByFileId.get(entry.fileId)
         if (
-            currentImpact === undefined
-            || CODE_CITY_IMPACT_PRIORITIES[entry.impactType] > CODE_CITY_IMPACT_PRIORITIES[currentImpact]
+            currentImpact === undefined ||
+            CODE_CITY_IMPACT_PRIORITIES[entry.impactType] >
+                CODE_CITY_IMPACT_PRIORITIES[currentImpact]
         ) {
             impactByFileId.set(entry.fileId, entry.impactType)
         }
@@ -465,9 +459,9 @@ function resolveComparisonSummary(
     for (const file of currentFiles) {
         currentLoc += file.value
         if (
-            comparisonFileIds.has(file.id)
-            && file.comparisonDelta !== undefined
-            && file.comparisonDelta !== 0
+            comparisonFileIds.has(file.id) &&
+            file.comparisonDelta !== undefined &&
+            file.comparisonDelta !== 0
         ) {
             changedFiles += 1
         }
@@ -527,9 +521,11 @@ function resolveImpactSummary(
     return summary
 }
 
-function resolveImpactStyle(
-    props: ICodeCityTreemapTreemapContentProps,
-): { readonly stroke: string; readonly strokeWidth: number; readonly strokeDasharray?: string } {
+function resolveImpactStyle(props: ICodeCityTreemapTreemapContentProps): {
+    readonly stroke: string
+    readonly strokeWidth: number
+    readonly strokeDasharray?: string
+} {
     const node = props.payload
     if (node?.impactType === "changed") {
         return { stroke: CODE_CITY_IMPACT_COLOR.changed, strokeWidth: 2.5 }
@@ -553,7 +549,9 @@ function resolveImpactStyle(
 
 function resolvePredictionStyle(
     riskLevel: TCodeCityTreemapPredictionRiskLevel | undefined,
-): { readonly stroke: string; readonly strokeWidth: number; readonly strokeDasharray?: string } | undefined {
+):
+    | { readonly stroke: string; readonly strokeWidth: number; readonly strokeDasharray?: string }
+    | undefined {
     if (riskLevel === "high") {
         return {
             stroke: "hsl(348, 83%, 58%)",
@@ -684,10 +682,7 @@ function resolveMetricColor(range: ICodeCityTreemapMetricRange, value: number): 
         return "hsl(120, 80%, 44%)"
     }
 
-    const ratio = Math.max(
-        0,
-        Math.min(1, (value - range.min) / (range.max - range.min)),
-    )
+    const ratio = Math.max(0, Math.min(1, (value - range.min) / (range.max - range.min)))
     const hue = Math.round(120 - ratio * 120)
 
     return `hsl(${hue}, 78%, 44%)`
@@ -724,7 +719,7 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
     const node = props.payload
     const issueHeatmapColor = node?.issueHeatmapColor
     const bugHeatColor = node?.bugHeatColor
-    const color = node?.color ?? (props.fill ?? "hsl(120, 80%, 44%)")
+    const color = node?.color ?? props.fill ?? "hsl(120, 80%, 44%)"
     const comparisonDelta =
         typeof node?.comparisonDelta === "number" ? node.comparisonDelta : undefined
     const comparisonDeltaColor = resolveComparisonDeltaColor(comparisonDelta)
@@ -803,9 +798,7 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
 
     return (
         <g
-            aria-label={
-                isPackage ? `Open package ${nodeName}` : `File ${nodeName}`
-            }
+            aria-label={isPackage ? `Open package ${nodeName}` : `File ${nodeName}`}
             className={isPackage === true ? "cursor-pointer" : ""}
             onBlur={isPackage === false ? handleFileMouseLeave : undefined}
             onFocus={isPackage === false ? handleFileMouseEnter : undefined}
@@ -827,22 +820,10 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
                 y={y}
             />
             {issueHeatmapColor !== undefined ? (
-                <rect
-                    fill={issueHeatmapColor}
-                    height={height}
-                    width={width}
-                    x={x}
-                    y={y}
-                />
+                <rect fill={issueHeatmapColor} height={height} width={width} x={x} y={y} />
             ) : null}
             {bugHeatColor !== undefined ? (
-                <rect
-                    fill={bugHeatColor}
-                    height={height}
-                    width={width}
-                    x={x}
-                    y={y}
-                />
+                <rect fill={bugHeatColor} height={height} width={width} x={x} y={y} />
             ) : null}
             {isHighlightedFile ? (
                 <rect
@@ -869,7 +850,11 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
                     y={y + Math.max(0, height - CODE_CITY_COMPARISON_MARKER_HEIGHT)}
                 />
             )}
-            {isLeaf && canShowText ? <text x={x + 4} y={y + 14} fill="#fff">{nodeName}</text> : null}
+            {isLeaf && canShowText ? (
+                <text x={x + 4} y={y + 14} fill="#fff">
+                    {nodeName}
+                </text>
+            ) : null}
         </g>
     )
 }
@@ -997,9 +982,7 @@ export interface ICodeCityTreemapProps {
     /** Принудительная раскраска зданий по file id (например ownership overlay). */
     readonly fileColorById?: Readonly<Record<string, string>>
     /** Принудительная обводка зданий по file id для prediction overlays. */
-    readonly predictedRiskByFileId?: Readonly<
-        Record<string, TCodeCityTreemapPredictionRiskLevel>
-    >
+    readonly predictedRiskByFileId?: Readonly<Record<string, TCodeCityTreemapPredictionRiskLevel>>
     /** Принудительная раскраска district/package по package name (например bus factor). */
     readonly packageColorByName?: Readonly<Record<string, string>>
 }
@@ -1081,11 +1064,12 @@ export function buildCodeCityTreemapData(
         const metricValue = resolveTreemapFileMetricValue(file, metric)
         const impactType = file.impactType ?? impactByFileId.get(file.id)
         const compareFile = comparisonFileById.get(file.id)
-        const comparisonDelta = comparisonFileById.size === 0
-            ? undefined
-            : compareFile === undefined
-                ? fileLoc
-                : fileLoc - resolveFileLoc(compareFile)
+        const comparisonDelta =
+            comparisonFileById.size === 0
+                ? undefined
+                : compareFile === undefined
+                  ? fileLoc
+                  : fileLoc - resolveFileLoc(compareFile)
         const issueCount = resolveIssueCount(file.issueCount)
         const bugIntroductions = resolveBugIntroductions(file.bugIntroductions?.[bugHeatRange])
         totalIssues += issueCount
@@ -1134,10 +1118,7 @@ export function buildCodeCityTreemapData(
                 return {
                     ...fileNode,
                     color: ownershipColor ?? resolveMetricColor(metricRange, fileNode.metricValue),
-                    issueHeatmapColor: resolveIssueHeatmapColor(
-                        fileNode.issueCount,
-                        maxIssueCount,
-                    ),
+                    issueHeatmapColor: resolveIssueHeatmapColor(fileNode.issueCount, maxIssueCount),
                     bugHeatColor: resolveBugHeatOverlayColor(
                         fileNode.bugIntroductions,
                         maxBugIntroductions,
@@ -1151,15 +1132,16 @@ export function buildCodeCityTreemapData(
                 (total, fileNode): number => total + fileNode.value,
                 0,
             )
-            const packageMetricValue = sortedChildren.length === 0
-                ? 0
-                : sortedChildren.reduce(
-                    (total, fileNode): number => total + fileNode.metricValue,
-                    0,
-                ) / sortedChildren.length
+            const packageMetricValue =
+                sortedChildren.length === 0
+                    ? 0
+                    : sortedChildren.reduce(
+                          (total, fileNode): number => total + fileNode.metricValue,
+                          0,
+                      ) / sortedChildren.length
 
-            const packageColor = packageColorByName.get(name) ??
-                resolveMetricColor(metricRange, packageMetricValue)
+            const packageColor =
+                packageColorByName.get(name) ?? resolveMetricColor(metricRange, packageMetricValue)
 
             return {
                 children: sortedChildren,
@@ -1174,10 +1156,7 @@ export function buildCodeCityTreemapData(
     const fileNodes = Array.from(packageMap.values()).flatMap(
         (entry): ReadonlyArray<ICodeCityTreemapFileNode> => entry,
     )
-    const comparisonSummary = resolveComparisonSummary(
-        fileNodes,
-        comparisonFileById,
-    )
+    const comparisonSummary = resolveComparisonSummary(fileNodes, comparisonFileById)
 
     let filesWithIssues = 0
     for (const packageItem of packages) {
@@ -1225,39 +1204,33 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     )
     const [selectedPackage, setSelectedPackage] = useState<string | undefined>()
     const [hoveredFile, setHoveredFile] = useState<ICodeCityTreemapFileTooltip | undefined>()
-    const [bugHeatRange, setBugHeatRange] =
-        useState<ICodeCityBugHeatRange>(DEFAULT_BUG_HEAT_RANGE)
-    const [isTemporalCouplingOverlayEnabled, setTemporalCouplingOverlayEnabled] =
-        useState<boolean>(DEFAULT_TEMPORAL_COUPLING_OVERLAY_ENABLED)
-    const fileColorById = useMemo(
-        (): ReadonlyMap<string, string> => {
-            if (props.fileColorById === undefined) {
-                return new Map<string, string>()
-            }
-            return new Map<string, string>(Object.entries(props.fileColorById))
-        },
-        [props.fileColorById],
+    const [bugHeatRange, setBugHeatRange] = useState<ICodeCityBugHeatRange>(DEFAULT_BUG_HEAT_RANGE)
+    const [isTemporalCouplingOverlayEnabled, setTemporalCouplingOverlayEnabled] = useState<boolean>(
+        DEFAULT_TEMPORAL_COUPLING_OVERLAY_ENABLED,
     )
-    const packageColorByName = useMemo(
-        (): ReadonlyMap<string, string> => {
-            if (props.packageColorByName === undefined) {
-                return new Map<string, string>()
-            }
-            return new Map<string, string>(Object.entries(props.packageColorByName))
-        },
-        [props.packageColorByName],
-    )
-    const predictedRiskByFileId = useMemo(
-        (): ReadonlyMap<string, TCodeCityTreemapPredictionRiskLevel> => {
-            if (props.predictedRiskByFileId === undefined) {
-                return new Map<string, TCodeCityTreemapPredictionRiskLevel>()
-            }
-            return new Map<string, TCodeCityTreemapPredictionRiskLevel>(
-                Object.entries(props.predictedRiskByFileId),
-            )
-        },
-        [props.predictedRiskByFileId],
-    )
+    const fileColorById = useMemo((): ReadonlyMap<string, string> => {
+        if (props.fileColorById === undefined) {
+            return new Map<string, string>()
+        }
+        return new Map<string, string>(Object.entries(props.fileColorById))
+    }, [props.fileColorById])
+    const packageColorByName = useMemo((): ReadonlyMap<string, string> => {
+        if (props.packageColorByName === undefined) {
+            return new Map<string, string>()
+        }
+        return new Map<string, string>(Object.entries(props.packageColorByName))
+    }, [props.packageColorByName])
+    const predictedRiskByFileId = useMemo((): ReadonlyMap<
+        string,
+        TCodeCityTreemapPredictionRiskLevel
+    > => {
+        if (props.predictedRiskByFileId === undefined) {
+            return new Map<string, TCodeCityTreemapPredictionRiskLevel>()
+        }
+        return new Map<string, TCodeCityTreemapPredictionRiskLevel>(
+            Object.entries(props.predictedRiskByFileId),
+        )
+    }, [props.predictedRiskByFileId])
     const treemapData = useMemo(
         () =>
             buildCodeCityTreemapData(
@@ -1283,9 +1256,9 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         () =>
             selectedPackage === undefined
                 ? treemapData.packages
-                : treemapData.packages.filter((packageItem): boolean =>
-                    packageItem.name === selectedPackage,
-                ),
+                : treemapData.packages.filter(
+                      (packageItem): boolean => packageItem.name === selectedPackage,
+                  ),
         [selectedPackage, treemapData.packages],
     )
     const summary = useMemo(
@@ -1313,9 +1286,10 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
             (value): boolean => resolveBugIntroductions(value) > 0,
         )
     })
-    const bugHeatSummaryText = bugHeatSummary.maxBugIntroductions > 0
-        ? `Bug introductions: ${bugHeatSummary.totalBugIntroductions} in ${bugHeatSummary.filesWithBugIntroductions} files`
-        : "No bug introductions for selected range."
+    const bugHeatSummaryText =
+        bugHeatSummary.maxBugIntroductions > 0
+            ? `Bug introductions: ${bugHeatSummary.totalBugIntroductions} in ${bugHeatSummary.filesWithBugIntroductions} files`
+            : "No bug introductions for selected range."
     const metricLabel = resolveMetricLabel(metric)
     const hasIssueHeatmap = issueSummary.maxIssuesPerFile > 0
     const comparisonSummary = treemapData.comparisonSummary
@@ -1324,15 +1298,13 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         ? resolveComparisonSummaryLabel(comparisonSummary, comparisonLabel)
         : undefined
     const selectorId = `${DEFAULT_METRIC_SELECTOR_ID}-${title.toLowerCase().replaceAll(" ", "-")}`
-    const bugHeatSelectorId =
-        `${DEFAULT_BUG_HEAT_SELECTOR_ID}-${title.toLowerCase().replaceAll(" ", "-")}`
+    const bugHeatSelectorId = `${DEFAULT_BUG_HEAT_SELECTOR_ID}-${title.toLowerCase().replaceAll(" ", "-")}`
     const impactSummary = summary.impactSummary
     const impactSummaryText = `Changed: ${impactSummary.changed}, Impacted: ${impactSummary.impacted}, Ripple: ${impactSummary.ripple}`
     const showBackButton = selectedPackage !== undefined
     const summaryText = `Packages: ${summary.packageCount}, Files: ${summary.files}, LOC: ${summary.loc}`
-    const breadcrumbText = selectedPackage === undefined
-        ? "All packages"
-        : `All packages / ${selectedPackage}`
+    const breadcrumbText =
+        selectedPackage === undefined ? "All packages" : `All packages / ${selectedPackage}`
     const hasTemporalCouplings = temporalCouplingLines.length > 0
     const temporalCouplingToggleLabel = isTemporalCouplingOverlayEnabled
         ? "Hide temporal coupling overlay"
@@ -1341,9 +1313,10 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         ? `Temporal couplings: ${temporalCouplingLines.length} links`
         : "No temporal couplings for current package selection."
     const enableLeafTabStops = summary.files <= MAX_KEYBOARD_FILE_TAB_STOPS
-    const tooltipTitle = hoveredFile === undefined
-        ? "Hover a file for quick metrics and quick link."
-        : `File details for ${hoveredFile.fileName}`
+    const tooltipTitle =
+        hoveredFile === undefined
+            ? "Hover a file for quick metrics and quick link."
+            : `File details for ${hoveredFile.fileName}`
 
     const handleResetSelection = (): void => {
         setSelectedPackage(undefined)
@@ -1440,11 +1413,13 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                             onChange={handleMetricChange}
                             value={metric}
                         >
-                            {CODE_CITY_METRICS.map((metricName): ReactElement => (
-                                <option key={metricName} value={metricName}>
-                                    {resolveMetricLabel(metricName)}
-                                </option>
-                            ))}
+                            {CODE_CITY_METRICS.map(
+                                (metricName): ReactElement => (
+                                    <option key={metricName} value={metricName}>
+                                        {resolveMetricLabel(metricName)}
+                                    </option>
+                                ),
+                            )}
                         </select>
                         {hasAnyBugHeatData ? (
                             <>
@@ -1537,7 +1512,9 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                         <span
                                             aria-hidden={true}
                                             className="inline-block h-3 w-3 rounded-full"
-                                            style={{ backgroundColor: CODE_CITY_IMPACT_COLOR[impact] }}
+                                            style={{
+                                                backgroundColor: CODE_CITY_IMPACT_COLOR[impact],
+                                            }}
                                         />
                                         <span>{CODE_CITY_IMPACT_LABELS[impact]}</span>
                                     </div>
@@ -1572,7 +1549,9 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                 >
                     <ResponsiveContainer height="100%" minHeight={1} minWidth={1} width="100%">
                         <Treemap
-                            data={visiblePackages as unknown as ReadonlyArray<Record<string, unknown>>}
+                            data={
+                                visiblePackages as unknown as ReadonlyArray<Record<string, unknown>>
+                            }
                             dataKey="value"
                             nameKey="name"
                             stroke="hsl(var(--nextui-colors-defaultBorder))"

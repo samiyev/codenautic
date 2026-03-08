@@ -117,37 +117,37 @@ export function SettingsByokPage(): ReactElement {
         secret: "",
     })
 
-    const stats = useMemo(
-        (): {
-            readonly activeKeys: number
-            readonly totalKeys: number
-            readonly totalRequests: number
-            readonly totalTokens: number
-        } => {
-            return keys.reduce(
-                (accumulator, entry): {
-                    readonly activeKeys: number
-                    readonly totalKeys: number
-                    readonly totalRequests: number
-                    readonly totalTokens: number
-                } => {
-                    return {
-                        activeKeys: accumulator.activeKeys + (entry.isActive ? 1 : 0),
-                        totalKeys: accumulator.totalKeys + 1,
-                        totalRequests: accumulator.totalRequests + entry.usageRequests,
-                        totalTokens: accumulator.totalTokens + entry.usageTokens,
-                    }
-                },
-                {
-                    activeKeys: 0,
-                    totalKeys: 0,
-                    totalRequests: 0,
-                    totalTokens: 0,
-                },
-            )
-        },
-        [keys],
-    )
+    const stats = useMemo((): {
+        readonly activeKeys: number
+        readonly totalKeys: number
+        readonly totalRequests: number
+        readonly totalTokens: number
+    } => {
+        return keys.reduce(
+            (
+                accumulator,
+                entry,
+            ): {
+                readonly activeKeys: number
+                readonly totalKeys: number
+                readonly totalRequests: number
+                readonly totalTokens: number
+            } => {
+                return {
+                    activeKeys: accumulator.activeKeys + (entry.isActive ? 1 : 0),
+                    totalKeys: accumulator.totalKeys + 1,
+                    totalRequests: accumulator.totalRequests + entry.usageRequests,
+                    totalTokens: accumulator.totalTokens + entry.usageTokens,
+                }
+            },
+            {
+                activeKeys: 0,
+                totalKeys: 0,
+                totalRequests: 0,
+                totalTokens: 0,
+            },
+        )
+    }, [keys])
 
     const providerUsage = useMemo((): ReadonlyArray<{
         readonly keys: number
@@ -155,26 +155,27 @@ export function SettingsByokPage(): ReactElement {
         readonly requests: number
         readonly tokens: number
     }> => {
-        return PROVIDER_OPTIONS.map((provider): {
-            readonly keys: number
-            readonly provider: TByokProvider
-            readonly requests: number
-            readonly tokens: number
-        } => {
-            const matchingKeys = keys.filter((entry): boolean => entry.provider === provider)
-            return {
-                keys: matchingKeys.length,
+        return PROVIDER_OPTIONS.map(
+            (
                 provider,
-                requests: matchingKeys.reduce(
-                    (sum, entry): number => sum + entry.usageRequests,
-                    0,
-                ),
-                tokens: matchingKeys.reduce(
-                    (sum, entry): number => sum + entry.usageTokens,
-                    0,
-                ),
-            }
-        })
+            ): {
+                readonly keys: number
+                readonly provider: TByokProvider
+                readonly requests: number
+                readonly tokens: number
+            } => {
+                const matchingKeys = keys.filter((entry): boolean => entry.provider === provider)
+                return {
+                    keys: matchingKeys.length,
+                    provider,
+                    requests: matchingKeys.reduce(
+                        (sum, entry): number => sum + entry.usageRequests,
+                        0,
+                    ),
+                    tokens: matchingKeys.reduce((sum, entry): number => sum + entry.usageTokens, 0),
+                }
+            },
+        )
     }, [keys])
 
     const handleCreateKey = (): void => {
@@ -212,41 +213,44 @@ export function SettingsByokPage(): ReactElement {
     }
 
     const handleRotateKey = (keyId: string): void => {
-        setKeys((previous): ReadonlyArray<IByokKeyEntry> =>
-            previous.map((entry): IByokKeyEntry => {
-                if (entry.id !== keyId) {
-                    return entry
-                }
+        setKeys(
+            (previous): ReadonlyArray<IByokKeyEntry> =>
+                previous.map((entry): IByokKeyEntry => {
+                    if (entry.id !== keyId) {
+                        return entry
+                    }
 
-                const syntheticSecret = `${entry.provider}-${Date.now().toString(36)}-rot`
-                return {
-                    ...entry,
-                    lastUsedAt: new Date().toISOString(),
-                    maskedSecret: maskSecret(syntheticSecret),
-                    rotationCount: entry.rotationCount + 1,
-                }
-            }),
+                    const syntheticSecret = `${entry.provider}-${Date.now().toString(36)}-rot`
+                    return {
+                        ...entry,
+                        lastUsedAt: new Date().toISOString(),
+                        maskedSecret: maskSecret(syntheticSecret),
+                        rotationCount: entry.rotationCount + 1,
+                    }
+                }),
         )
         showToastInfo("Key rotated successfully.")
     }
 
     const handleToggleActive = (keyId: string, isActive: boolean): void => {
-        setKeys((previous): ReadonlyArray<IByokKeyEntry> =>
-            previous.map((entry): IByokKeyEntry => {
-                if (entry.id !== keyId) {
-                    return entry
-                }
-                return {
-                    ...entry,
-                    isActive,
-                }
-            }),
+        setKeys(
+            (previous): ReadonlyArray<IByokKeyEntry> =>
+                previous.map((entry): IByokKeyEntry => {
+                    if (entry.id !== keyId) {
+                        return entry
+                    }
+                    return {
+                        ...entry,
+                        isActive,
+                    }
+                }),
         )
     }
 
     const handleDeleteKey = (keyId: string): void => {
-        setKeys((previous): ReadonlyArray<IByokKeyEntry> =>
-            previous.filter((entry): boolean => entry.id !== keyId),
+        setKeys(
+            (previous): ReadonlyArray<IByokKeyEntry> =>
+                previous.filter((entry): boolean => entry.id !== keyId),
         )
         showToastInfo("BYOK key removed.")
     }
@@ -265,7 +269,10 @@ export function SettingsByokPage(): ReactElement {
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[180px_1fr_1fr_auto]">
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm text-[var(--foreground)]/80" htmlFor="byok-provider">
+                            <label
+                                className="text-sm text-[var(--foreground)]/80"
+                                htmlFor="byok-provider"
+                            >
                                 Provider
                             </label>
                             <select
@@ -276,15 +283,17 @@ export function SettingsByokPage(): ReactElement {
                                 onChange={(event): void => {
                                     const nextProvider = event.currentTarget.value
                                     if (
-                                        nextProvider === "openai"
-                                        || nextProvider === "anthropic"
-                                        || nextProvider === "github"
-                                        || nextProvider === "gitlab"
+                                        nextProvider === "openai" ||
+                                        nextProvider === "anthropic" ||
+                                        nextProvider === "github" ||
+                                        nextProvider === "gitlab"
                                     ) {
-                                        setForm((previous): ICreateKeyFormState => ({
-                                            ...previous,
-                                            provider: nextProvider,
-                                        }))
+                                        setForm(
+                                            (previous): ICreateKeyFormState => ({
+                                                ...previous,
+                                                provider: nextProvider,
+                                            }),
+                                        )
                                     }
                                 }}
                             >
@@ -299,10 +308,12 @@ export function SettingsByokPage(): ReactElement {
                             placeholder="openai-prod-main"
                             value={form.label}
                             onValueChange={(value): void => {
-                                setForm((previous): ICreateKeyFormState => ({
-                                    ...previous,
-                                    label: value,
-                                }))
+                                setForm(
+                                    (previous): ICreateKeyFormState => ({
+                                        ...previous,
+                                        label: value,
+                                    }),
+                                )
                             }}
                         />
                         <Input
@@ -311,10 +322,12 @@ export function SettingsByokPage(): ReactElement {
                             type="password"
                             value={form.secret}
                             onValueChange={(value): void => {
-                                setForm((previous): ICreateKeyFormState => ({
-                                    ...previous,
-                                    secret: value,
-                                }))
+                                setForm(
+                                    (previous): ICreateKeyFormState => ({
+                                        ...previous,
+                                        secret: value,
+                                    }),
+                                )
                             }}
                         />
                         <div className="flex items-end">
@@ -335,20 +348,28 @@ export function SettingsByokPage(): ReactElement {
                         <p className="text-sm font-semibold text-[var(--foreground)]">Total keys</p>
                     </CardHeader>
                     <CardBody>
-                        <p className="text-2xl font-semibold text-[var(--foreground)]">{stats.totalKeys}</p>
+                        <p className="text-2xl font-semibold text-[var(--foreground)]">
+                            {stats.totalKeys}
+                        </p>
                     </CardBody>
                 </Card>
                 <Card>
                     <CardHeader>
-                        <p className="text-sm font-semibold text-[var(--foreground)]">Active keys</p>
+                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                            Active keys
+                        </p>
                     </CardHeader>
                     <CardBody>
-                        <p className="text-2xl font-semibold text-[var(--foreground)]">{stats.activeKeys}</p>
+                        <p className="text-2xl font-semibold text-[var(--foreground)]">
+                            {stats.activeKeys}
+                        </p>
                     </CardBody>
                 </Card>
                 <Card>
                     <CardHeader>
-                        <p className="text-sm font-semibold text-[var(--foreground)]">Usage requests</p>
+                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                            Usage requests
+                        </p>
                     </CardHeader>
                     <CardBody>
                         <p className="text-2xl font-semibold text-[var(--foreground)]">
@@ -358,7 +379,9 @@ export function SettingsByokPage(): ReactElement {
                 </Card>
                 <Card>
                     <CardHeader>
-                        <p className="text-sm font-semibold text-[var(--foreground)]">Usage tokens</p>
+                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                            Usage tokens
+                        </p>
                     </CardHeader>
                     <CardBody>
                         <p className="text-2xl font-semibold text-[var(--foreground)]">
@@ -370,28 +393,35 @@ export function SettingsByokPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Provider usage stats</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Provider usage stats
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-2">
-                    {providerUsage.map((entry): ReactElement => (
-                        <div
-                            key={entry.provider}
-                            className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm"
-                        >
-                            <p className="font-semibold text-[var(--foreground)]">
-                                {formatProviderLabel(entry.provider)}
-                            </p>
-                            <p className="text-[var(--foreground)]/70">
-                                Keys: {entry.keys} • Requests: {entry.requests} • Tokens: {entry.tokens}
-                            </p>
-                        </div>
-                    ))}
+                    {providerUsage.map(
+                        (entry): ReactElement => (
+                            <div
+                                key={entry.provider}
+                                className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm"
+                            >
+                                <p className="font-semibold text-[var(--foreground)]">
+                                    {formatProviderLabel(entry.provider)}
+                                </p>
+                                <p className="text-[var(--foreground)]/70">
+                                    Keys: {entry.keys} • Requests: {entry.requests} • Tokens:{" "}
+                                    {entry.tokens}
+                                </p>
+                            </div>
+                        ),
+                    )}
                 </CardBody>
             </Card>
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Configured keys</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Configured keys
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     {keys.length === 0 ? (
@@ -399,75 +429,78 @@ export function SettingsByokPage(): ReactElement {
                             Add your first provider key to activate secure provider calls.
                         </Alert>
                     ) : (
-                        keys.map((entry): ReactElement => (
-                            <article
-                                key={entry.id}
-                                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
-                            >
-                                <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                                    <div className="space-y-1">
-                                        <p className="text-sm font-semibold text-[var(--foreground)]">
-                                            {entry.label}
-                                        </p>
-                                        <p className="text-xs text-[var(--foreground)]/70">
-                                            Provider: {formatProviderLabel(entry.provider)}
-                                        </p>
-                                        <p className="font-mono text-xs text-[var(--foreground)]/70">
-                                            {entry.maskedSecret}
-                                        </p>
-                                        <p className="text-xs text-[var(--foreground)]/70">
-                                            Rotation: {entry.rotationCount}
-                                        </p>
-                                        <p className="text-xs text-[var(--foreground)]/70">
-                                            Usage: {entry.usageRequests} requests • {entry.usageTokens} tokens
-                                        </p>
-                                        <p className="text-xs text-[var(--foreground)]/70">
-                                            Last used: {formatLastUsed(entry.lastUsedAt)}
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-col items-start gap-2">
-                                        <Chip
-                                            color={entry.isActive ? "success" : "default"}
-                                            size="sm"
-                                            variant="flat"
-                                        >
-                                            {entry.isActive ? "active" : "inactive"}
-                                        </Chip>
-                                        <Switch
-                                            aria-label={`Active key ${entry.label}`}
-                                            isSelected={entry.isActive}
-                                            size="sm"
-                                            onValueChange={(value): void => {
-                                                handleToggleActive(entry.id, value)
-                                            }}
-                                        >
-                                            Active
-                                        </Switch>
-                                        <div className="flex gap-2">
-                                            <Button
+                        keys.map(
+                            (entry): ReactElement => (
+                                <article
+                                    key={entry.id}
+                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
+                                >
+                                    <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-semibold text-[var(--foreground)]">
+                                                {entry.label}
+                                            </p>
+                                            <p className="text-xs text-[var(--foreground)]/70">
+                                                Provider: {formatProviderLabel(entry.provider)}
+                                            </p>
+                                            <p className="font-mono text-xs text-[var(--foreground)]/70">
+                                                {entry.maskedSecret}
+                                            </p>
+                                            <p className="text-xs text-[var(--foreground)]/70">
+                                                Rotation: {entry.rotationCount}
+                                            </p>
+                                            <p className="text-xs text-[var(--foreground)]/70">
+                                                Usage: {entry.usageRequests} requests •{" "}
+                                                {entry.usageTokens} tokens
+                                            </p>
+                                            <p className="text-xs text-[var(--foreground)]/70">
+                                                Last used: {formatLastUsed(entry.lastUsedAt)}
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-col items-start gap-2">
+                                            <Chip
+                                                color={entry.isActive ? "success" : "default"}
                                                 size="sm"
                                                 variant="flat"
-                                                onPress={(): void => {
-                                                    handleRotateKey(entry.id)
-                                                }}
                                             >
-                                                {`Rotate key ${entry.label}`}
-                                            </Button>
-                                            <Button
-                                                color="danger"
+                                                {entry.isActive ? "active" : "inactive"}
+                                            </Chip>
+                                            <Switch
+                                                aria-label={`Active key ${entry.label}`}
+                                                isSelected={entry.isActive}
                                                 size="sm"
-                                                variant="ghost"
-                                                onPress={(): void => {
-                                                    handleDeleteKey(entry.id)
+                                                onValueChange={(value): void => {
+                                                    handleToggleActive(entry.id, value)
                                                 }}
                                             >
-                                                {`Remove key ${entry.label}`}
-                                            </Button>
+                                                Active
+                                            </Switch>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant="flat"
+                                                    onPress={(): void => {
+                                                        handleRotateKey(entry.id)
+                                                    }}
+                                                >
+                                                    {`Rotate key ${entry.label}`}
+                                                </Button>
+                                                <Button
+                                                    color="danger"
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onPress={(): void => {
+                                                        handleDeleteKey(entry.id)
+                                                    }}
+                                                >
+                                                    {`Remove key ${entry.label}`}
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </article>
-                        ))
+                                </article>
+                            ),
+                        )
                     )}
                 </CardBody>
             </Card>

@@ -370,8 +370,8 @@ const server = createServer(async (request, response) => {
     }
 
     if (
-        (pathname === "/api/v1/user/settings" || pathname === "/api/v1/user/preferences")
-        && (method === "PUT" || method === "PATCH" || method === "POST")
+        (pathname === "/api/v1/user/settings" || pathname === "/api/v1/user/preferences") &&
+        (method === "PUT" || method === "PATCH" || method === "POST")
     ) {
         await handleThemePreferencesMutation(request, response, origin)
         return

@@ -3,9 +3,11 @@ import { lazy, Suspense, type ReactElement, useEffect, useId, useState } from "r
 import { Button, Card, CardBody, CardHeader, Textarea } from "@/components/ui"
 import type { IRuleEditorMarkdownPreviewProps } from "./rule-editor-markdown-preview"
 
-const LazyRuleEditorPreview = lazy((): Promise<{
-    default: (props: IRuleEditorMarkdownPreviewProps) => ReactElement
-}> => import("./rule-editor-markdown-preview"))
+const LazyRuleEditorPreview = lazy(
+    (): Promise<{
+        default: (props: IRuleEditorMarkdownPreviewProps) => ReactElement
+    }> => import("./rule-editor-markdown-preview"),
+)
 
 type TTipTapLoadState = "fallback" | "loading" | "ready"
 

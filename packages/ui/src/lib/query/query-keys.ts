@@ -45,33 +45,25 @@ export const queryKeys = {
         sources: (): readonly ["external-context", "sources"] => {
             return ["external-context", "sources"] as const
         },
-        preview: (
-            sourceId: string,
-        ): readonly ["external-context", "preview", string] => {
+        preview: (sourceId: string): readonly ["external-context", "preview", string] => {
             return ["external-context", "preview", sourceId] as const
         },
     },
     repoConfig: {
         all: (): readonly ["repo-config"] => ["repo-config"] as const,
-        byRepository: (
-            repositoryId: string,
-        ): readonly ["repo-config", "by-repository", string] => {
+        byRepository: (repositoryId: string): readonly ["repo-config", "by-repository", string] => {
             return ["repo-config", "by-repository", repositoryId] as const
         },
     },
     dryRun: {
         all: (): readonly ["dry-run"] => ["dry-run"] as const,
-        byRepository: (
-            repositoryId: string,
-        ): readonly ["dry-run", "by-repository", string] => {
+        byRepository: (repositoryId: string): readonly ["dry-run", "by-repository", string] => {
             return ["dry-run", "by-repository", repositoryId] as const
         },
     },
     ccrSummary: {
         all: (): readonly ["ccr-summary"] => ["ccr-summary"] as const,
-        byRepository: (
-            repositoryId: string,
-        ): readonly ["ccr-summary", "by-repository", string] => {
+        byRepository: (repositoryId: string): readonly ["ccr-summary", "by-repository", string] => {
             return ["ccr-summary", "by-repository", repositoryId] as const
         },
     },

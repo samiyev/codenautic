@@ -10,7 +10,9 @@ describe("SettingsJobsPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsJobsPage />)
 
-        expect(screen.getByRole("heading", { level: 1, name: "Operations jobs monitor" })).not.toBeNull()
+        expect(
+            screen.getByRole("heading", { level: 1, name: "Operations jobs monitor" }),
+        ).not.toBeNull()
         expect(screen.getByText("Failed/Stuck: 2")).not.toBeNull()
         expect(screen.getByText("JOB-4102 · scan")).not.toBeNull()
 
@@ -32,7 +34,9 @@ describe("SettingsJobsPage", (): void => {
             await user.click(firstCancelButton)
         }
         await waitFor(() => {
-            expect(screen.getByText("Job cancelled by operator from monitor center.")).not.toBeNull()
+            expect(
+                screen.getByText("Job cancelled by operator from monitor center."),
+            ).not.toBeNull()
         })
 
         await user.click(screen.getByRole("button", { name: "Open JOB-4103 details" }))

@@ -32,9 +32,7 @@ export interface IKnowledgeSiloPanelProps {
     readonly onSelectEntry?: (entry: IKnowledgeSiloPanelEntry) => void
 }
 
-function resolveRiskClassName(
-    riskScore: number,
-): string {
+function resolveRiskClassName(riskScore: number): string {
     if (riskScore >= 75) {
         return "border-rose-300 bg-rose-500/20 text-rose-800"
     }
@@ -44,9 +42,7 @@ function resolveRiskClassName(
     return "border-emerald-300 bg-emerald-500/20 text-emerald-800"
 }
 
-function resolveEntryClassName(
-    isActive: boolean,
-): string {
+function resolveEntryClassName(isActive: boolean): string {
     return [
         "w-full rounded-lg border p-2 text-left transition",
         isActive

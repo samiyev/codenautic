@@ -51,11 +51,15 @@ describe("SCREENS and scenarios structure contract", (): void => {
             const textBlocks = countFencedBlocks(section.body, "text")
 
             if (mermaidBlocks < 1) {
-                issues.push(`${section.heading} at line ${String(section.lineNumber)} has no mermaid block`)
+                issues.push(
+                    `${section.heading} at line ${String(section.lineNumber)} has no mermaid block`,
+                )
             }
 
             if (textBlocks < 1) {
-                issues.push(`${section.heading} at line ${String(section.lineNumber)} has no text mockup block`)
+                issues.push(
+                    `${section.heading} at line ${String(section.lineNumber)} has no text mockup block`,
+                )
             }
         })
 

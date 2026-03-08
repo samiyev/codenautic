@@ -86,10 +86,7 @@ function renderHighlightedCode(code: string): ReactElement {
         <span className="text-left">
             {tokens.map(
                 (token, tokenIndex): ReactElement => (
-                    <span
-                        key={`token-${String(tokenIndex)}`}
-                        className={getTokenClass(token)}
-                    >
+                    <span key={`token-${String(tokenIndex)}`} className={getTokenClass(token)}>
                         {token}
                     </span>
                 ),
@@ -116,7 +113,9 @@ function getLineNumber(lineValue: number | undefined): string {
 
 function CodeDiffLine(props: ICodeLineProps): ReactElement {
     const isLeft = props.side === "left"
-    const shouldRenderCode = props.diffType === "context" || (isLeft ? props.diffType !== "added" : props.diffType !== "removed")
+    const shouldRenderCode =
+        props.diffType === "context" ||
+        (isLeft ? props.diffType !== "added" : props.diffType !== "removed")
     const text = isLeft ? props.line.leftText : props.line.rightText
     const lineNumber = isLeft ? props.line.leftLine : props.line.rightLine
     const lineClassName = isLeft
@@ -124,14 +123,18 @@ function CodeDiffLine(props: ICodeLineProps): ReactElement {
             ? "bg-slate-100 text-slate-300"
             : "bg-white text-slate-700"
         : props.diffType === "removed"
-            ? "bg-slate-100 text-slate-300"
-            : "bg-white text-slate-700"
+          ? "bg-slate-100 text-slate-300"
+          : "bg-white text-slate-700"
 
     const code = shouldRenderCode ? renderHighlightedCode(text) : null
 
     return (
-        <div className={`grid ${isLeft ? "grid-cols-[3rem_1fr]" : "grid-cols-[3rem_1fr]"} items-stretch border-r border-slate-200`}>
-            <div className={`border-r border-slate-200 px-2 py-1 text-right text-xs ${lineClassName}`}>
+        <div
+            className={`grid ${isLeft ? "grid-cols-[3rem_1fr]" : "grid-cols-[3rem_1fr]"} items-stretch border-r border-slate-200`}
+        >
+            <div
+                className={`border-r border-slate-200 px-2 py-1 text-right text-xs ${lineClassName}`}
+            >
                 {getLineNumber(lineNumber)}
             </div>
             <div className={`px-2 py-1 text-[11px] leading-5 font-mono ${lineClassName}`}>
@@ -181,7 +184,10 @@ function CodeDiffFilePanel(props: ICcrDiffFile): ReactElement {
                     className="relative max-h-96 overflow-auto border-b border-slate-200"
                     ref={virtualizer.parentRef}
                 >
-                    <div style={{ height: `${virtualizer.totalSize}px` }} className="relative w-max">
+                    <div
+                        style={{ height: `${virtualizer.totalSize}px` }}
+                        className="relative w-max"
+                    >
                         {virtualizer.virtualItems.map((virtualItem): ReactElement | null => {
                             const line = fileData.lines[virtualItem.index]
                             if (line === undefined) {
@@ -199,8 +205,16 @@ function CodeDiffFilePanel(props: ICcrDiffFile): ReactElement {
                                     className={`border-b border-slate-200 ${lineStyle}`}
                                 >
                                     <div className="grid w-full min-w-[56rem] grid-cols-[1fr_1fr]">
-                                        <CodeDiffLine diffType={line.type} line={line} side="left" />
-                                        <CodeDiffLine diffType={line.type} line={line} side="right" />
+                                        <CodeDiffLine
+                                            diffType={line.type}
+                                            line={line}
+                                            side="left"
+                                        />
+                                        <CodeDiffLine
+                                            diffType={line.type}
+                                            line={line}
+                                            side="right"
+                                        />
                                     </div>
                                     {hasComments ? (
                                         <ul className="px-3 pb-2">
@@ -211,7 +225,8 @@ function CodeDiffFilePanel(props: ICcrDiffFile): ReactElement {
                                                         className="mt-1 rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-700"
                                                     >
                                                         <p className="font-medium">
-                                                            {comment.author} ({comment.side}:{comment.line})
+                                                            {comment.author} ({comment.side}:
+                                                            {comment.line})
                                                         </p>
                                                         <p>{comment.message}</p>
                                                     </li>

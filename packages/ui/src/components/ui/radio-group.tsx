@@ -31,20 +31,14 @@ export type RadioGroupProps = IRadioGroupProps
 export function RadioGroup(props: IRadioGroupProps): ReactElement {
     const { isInvalid, onValueChange, onChange, ...radioGroupProps } = props
     type TRadioValueChangeHandler = (value: string) => void
-    const safeOnValueChange = (onChange ?? onValueChange) as
-        | TRadioValueChangeHandler
-        | undefined
+    const safeOnValueChange = (onChange ?? onValueChange) as TRadioValueChangeHandler | undefined
 
     const handleValueChange = (value: string): void => {
         safeOnValueChange?.(value)
     }
 
     return (
-        <HeroUIRadioGroup
-            {...radioGroupProps}
-            isInvalid={isInvalid}
-            onChange={handleValueChange}
-        />
+        <HeroUIRadioGroup {...radioGroupProps} isInvalid={isInvalid} onChange={handleValueChange} />
     )
 }
 

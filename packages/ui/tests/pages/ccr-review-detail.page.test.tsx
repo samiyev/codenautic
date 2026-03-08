@@ -62,7 +62,9 @@ describe("ccr review detail page", (): void => {
         expect(
             screen.getByRole("heading", { name: "CCR context CodeCity mini-map" }),
         ).not.toBeNull()
-        expect(screen.getByText("Mini-map mode is active. Click expand for detailed context.")).not.toBeNull()
+        expect(
+            screen.getByText("Mini-map mode is active. Click expand for detailed context."),
+        ).not.toBeNull()
 
         await user.click(screen.getByRole("button", { name: "Expand review context mini-map" }))
 
@@ -120,7 +122,9 @@ describe("ccr review detail page", (): void => {
 
         expect(screen.getByText("File neighborhood panel")).not.toBeNull()
         expect(screen.getByRole("list", { name: "Neighborhood dependency list" })).not.toBeNull()
-        expect(screen.getByRole("list", { name: "Neighborhood recent changes list" })).not.toBeNull()
+        expect(
+            screen.getByRole("list", { name: "Neighborhood recent changes list" }),
+        ).not.toBeNull()
 
         const neighborhoodButtons = screen.getAllByRole("button", {
             name: /Open neighborhood file/,
@@ -212,7 +216,10 @@ describe("ccr review detail page", (): void => {
                 this.listeners = {}
             }
 
-            public addEventListener(type: string, listener: (event: MessageEvent<string>) => void): void {
+            public addEventListener(
+                type: string,
+                listener: (event: MessageEvent<string>) => void,
+            ): void {
                 const listeners = this.listeners[type]
                 if (listeners === undefined) {
                     this.listeners[type] = [listener]
@@ -246,12 +253,7 @@ describe("ccr review detail page", (): void => {
         // @ts-expect-error mock EventSource only for test
         globalThis.EventSource = EventSourceProxy
 
-        renderWithProviders(
-            <CcrReviewDetailPage
-                ccr={ccr}
-                streamSourceUrl="/api/v1/ccr/stream"
-            />,
-        )
+        renderWithProviders(<CcrReviewDetailPage ccr={ccr} streamSourceUrl="/api/v1/ccr/stream" />)
 
         const startButton = screen.getByRole("button", { name: "Start" })
         await user.click(startButton)

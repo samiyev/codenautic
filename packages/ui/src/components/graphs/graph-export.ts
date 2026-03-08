@@ -26,7 +26,7 @@ function escapeSvgText(value: string): string {
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
-        .replaceAll("\"", "&quot;")
+        .replaceAll('"', "&quot;")
         .replaceAll("'", "&#39;")
 }
 
@@ -93,10 +93,10 @@ function resolveGraphBounds(nodes: ReadonlyArray<IGraphLayoutNode>): IGraphSvgBo
  */
 export function resolveGraphPngCanvasSize(width: number, height: number): IGraphPngCanvasSize {
     if (
-        Number.isFinite(width) === false
-        || Number.isFinite(height) === false
-        || width <= 0
-        || height <= 0
+        Number.isFinite(width) === false ||
+        Number.isFinite(height) === false ||
+        width <= 0 ||
+        height <= 0
     ) {
         throw new Error("Unable to resolve PNG export canvas size")
     }
@@ -106,9 +106,9 @@ export function resolveGraphPngCanvasSize(width: number, height: number): IGraph
     const totalPixels = normalizedWidth * normalizedHeight
 
     if (
-        normalizedWidth <= MAX_PNG_EXPORT_DIMENSION
-        && normalizedHeight <= MAX_PNG_EXPORT_DIMENSION
-        && totalPixels <= MAX_PNG_EXPORT_PIXELS
+        normalizedWidth <= MAX_PNG_EXPORT_DIMENSION &&
+        normalizedHeight <= MAX_PNG_EXPORT_DIMENSION &&
+        totalPixels <= MAX_PNG_EXPORT_PIXELS
     ) {
         return {
             height: normalizedHeight,
@@ -176,9 +176,19 @@ export function buildGraphSvg(
             }
 
             const sourceX = sourceNode.position.x - bounds.minX + graphPadding + sourceNode.width
-            const sourceY = sourceNode.position.y - bounds.minY + graphPadding + sourceNode.height / 2 + headerHeight
+            const sourceY =
+                sourceNode.position.y -
+                bounds.minY +
+                graphPadding +
+                sourceNode.height / 2 +
+                headerHeight
             const targetX = targetNode.position.x - bounds.minX + graphPadding
-            const targetY = targetNode.position.y - bounds.minY + graphPadding + targetNode.height / 2 + headerHeight
+            const targetY =
+                targetNode.position.y -
+                bounds.minY +
+                graphPadding +
+                targetNode.height / 2 +
+                headerHeight
             const midX = (sourceX + targetX) / 2
             const midY = (sourceY + targetY) / 2
             const edgeLabel = edge.label === undefined ? "" : escapeSvgText(edge.label)

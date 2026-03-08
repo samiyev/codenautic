@@ -7,9 +7,7 @@ import { describe, expect, it, vi } from "vitest"
 import { ChatInput, type IChatInputProps } from "@/components/chat/chat-input"
 import { renderWithProviders } from "../utils/render"
 
-function ChatInputHarness(
-    props: Omit<IChatInputProps, "draft" | "onDraftChange">,
-): ReactElement {
+function ChatInputHarness(props: Omit<IChatInputProps, "draft" | "onDraftChange">): ReactElement {
     const [draft, setDraft] = useState("")
 
     const handleSubmit = (message: string): void => {
@@ -34,10 +32,7 @@ describe("chat input", (): void => {
         const user = userEvent.setup()
         const onSubmit = vi.fn()
         renderWithProviders(
-            <ChatInputHarness
-                onSubmit={onSubmit}
-                placeholder="Type a message and press Enter"
-            />,
+            <ChatInputHarness onSubmit={onSubmit} placeholder="Type a message and press Enter" />,
         )
 
         const textarea = screen.getByRole("textbox", { name: "Message input" })
@@ -52,9 +47,7 @@ describe("chat input", (): void => {
     it("не отправляет сообщение на Shift+Enter", async (): Promise<void> => {
         const user = userEvent.setup()
         const onSubmit = vi.fn()
-        renderWithProviders(
-            <ChatInputHarness onSubmit={onSubmit} />,
-        )
+        renderWithProviders(<ChatInputHarness onSubmit={onSubmit} />)
 
         const textarea = screen.getByRole("textbox", { name: "Message input" })
         await user.click(textarea)
@@ -68,9 +61,7 @@ describe("chat input", (): void => {
     it("показывает счетчик символов", async (): Promise<void> => {
         const user = userEvent.setup()
         const onSubmit = vi.fn()
-        renderWithProviders(
-            <ChatInputHarness onSubmit={onSubmit} maxLength={10} />,
-        )
+        renderWithProviders(<ChatInputHarness onSubmit={onSubmit} maxLength={10} />)
 
         const counter = screen.getByLabelText("Message character count")
         const textarea = screen.getByRole("textbox", { name: "Message input" })
@@ -83,9 +74,7 @@ describe("chat input", (): void => {
     it("не отправляет сообщение во время IME composition на Enter", async (): Promise<void> => {
         const user = userEvent.setup()
         const onSubmit = vi.fn()
-        renderWithProviders(
-            <ChatInputHarness onSubmit={onSubmit} />,
-        )
+        renderWithProviders(<ChatInputHarness onSubmit={onSubmit} />)
 
         const textarea = screen.getByRole("textbox", { name: "Message input" })
         await user.click(textarea)

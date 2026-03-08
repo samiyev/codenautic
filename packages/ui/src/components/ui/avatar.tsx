@@ -30,11 +30,14 @@ export function Avatar(props: IAvatarProps): ReactElement {
     const { fallback, label, name, src, ...avatarProps } = props
     const resolvedName = typeof name === "string" ? name : undefined
     const fallbackSeed = fallback ?? label ?? resolvedName
-    const fallbackText = fallbackSeed === undefined ? undefined : fallbackSeed.slice(0, 2).toUpperCase()
+    const fallbackText =
+        fallbackSeed === undefined ? undefined : fallbackSeed.slice(0, 2).toUpperCase()
 
     return (
         <HeroUIAvatar {...avatarProps}>
-            {src === undefined ? null : <AvatarImage alt={resolvedName ?? fallbackText} src={src} />}
+            {src === undefined ? null : (
+                <AvatarImage alt={resolvedName ?? fallbackText} src={src} />
+            )}
             {fallbackText === undefined ? null : <AvatarFallback>{fallbackText}</AvatarFallback>}
         </HeroUIAvatar>
     )

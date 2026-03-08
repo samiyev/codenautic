@@ -27,9 +27,7 @@ export interface IKnowledgeMapExportWidgetProps {
  * @param props Snapshot-модель и callback после экспорта.
  * @returns React-компонент knowledge map export.
  */
-export function KnowledgeMapExportWidget(
-    props: IKnowledgeMapExportWidgetProps,
-): ReactElement {
+export function KnowledgeMapExportWidget(props: IKnowledgeMapExportWidgetProps): ReactElement {
     const [isPngExporting, setPngExporting] = useState<boolean>(false)
     const [lastExportLabel, setLastExportLabel] = useState<string>("")
 
@@ -89,7 +87,10 @@ export function KnowledgeMapExportWidget(
                 <ul className="mt-1 space-y-1">
                     {props.model.owners.slice(0, 3).map((entry): ReactElement => {
                         return (
-                            <li className="flex items-center gap-2 text-xs text-slate-700" key={entry.ownerName}>
+                            <li
+                                className="flex items-center gap-2 text-xs text-slate-700"
+                                key={entry.ownerName}
+                            >
                                 <span
                                     aria-hidden={true}
                                     className="inline-flex h-3 w-3 rounded-full border border-slate-300"
@@ -138,4 +139,3 @@ export function KnowledgeMapExportWidget(
         </section>
     )
 }
-

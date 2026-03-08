@@ -154,18 +154,20 @@ export function SettingsAdoptionAnalyticsPage(): ReactElement {
             </p>
 
             <div className="flex flex-wrap gap-2">
-                {(["7d", "30d", "90d"] as const).map((option): ReactElement => (
-                    <Button
-                        key={option}
-                        size="sm"
-                        variant={range === option ? "solid" : "flat"}
-                        onPress={(): void => {
-                            setRange(option)
-                        }}
-                    >
-                        {option}
-                    </Button>
-                ))}
+                {(["7d", "30d", "90d"] as const).map(
+                    (option): ReactElement => (
+                        <Button
+                            key={option}
+                            size="sm"
+                            variant={range === option ? "solid" : "flat"}
+                            onPress={(): void => {
+                                setRange(option)
+                            }}
+                        >
+                            {option}
+                        </Button>
+                    ),
+                )}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -196,24 +198,30 @@ export function SettingsAdoptionAnalyticsPage(): ReactElement {
                     </CardHeader>
                     <CardBody className="space-y-2">
                         <ul aria-label="Workflow health list" className="space-y-2">
-                            {workflowHealth.map((item): ReactElement => (
-                                <li
-                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
-                                    key={item.stage}
-                                >
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <p className="text-sm font-semibold text-[var(--foreground)]">
-                                            {item.stage}
+                            {workflowHealth.map(
+                                (item): ReactElement => (
+                                    <li
+                                        className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
+                                        key={item.stage}
+                                    >
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <p className="text-sm font-semibold text-[var(--foreground)]">
+                                                {item.stage}
+                                            </p>
+                                            <Chip
+                                                color={mapHealthColor(item.health)}
+                                                size="sm"
+                                                variant="flat"
+                                            >
+                                                {item.health}
+                                            </Chip>
+                                        </div>
+                                        <p className="text-xs text-[var(--foreground)]/70">
+                                            {item.summary}
                                         </p>
-                                        <Chip color={mapHealthColor(item.health)} size="sm" variant="flat">
-                                            {item.health}
-                                        </Chip>
-                                    </div>
-                                    <p className="text-xs text-[var(--foreground)]/70">
-                                        {item.summary}
-                                    </p>
-                                </li>
-                            ))}
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     </CardBody>
                 </Card>
@@ -221,14 +229,20 @@ export function SettingsAdoptionAnalyticsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Adoption funnel</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Adoption funnel
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     <ul aria-label="Adoption funnel list" className="space-y-2">
                         {funnelStages.map((stage, index): ReactElement => {
-                            const previous = index === 0 ? stage.count : funnelStages[index - 1]?.count ?? stage.count
+                            const previous =
+                                index === 0
+                                    ? stage.count
+                                    : (funnelStages[index - 1]?.count ?? stage.count)
                             const dropOff = previous - stage.count
-                            const conversion = previous === 0 ? 0 : Math.round((stage.count / previous) * 100)
+                            const conversion =
+                                previous === 0 ? 0 : Math.round((stage.count / previous) * 100)
 
                             return (
                                 <li

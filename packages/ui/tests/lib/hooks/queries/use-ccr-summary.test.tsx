@@ -52,16 +52,19 @@ async function triggerCcrSummaryGeneration(
 describe("useCCRSummary", (): void => {
     it("генерирует ccr summary и возвращает результат", async (): Promise<void> => {
         server.use(
-            http.post("http://localhost:7120/api/v1/repositories/repo-1/ccr-summary/generate", () => {
-                return HttpResponse.json({
-                    result: {
-                        mode: "AUTO",
-                        generatedAt: "2026-03-05T07:00:00.000Z",
-                        summary: "Queue pressure increased in review-worker stage.",
-                        highlights: ["Queue saturation", "Retry spikes"],
-                    },
-                })
-            }),
+            http.post(
+                "http://localhost:7120/api/v1/repositories/repo-1/ccr-summary/generate",
+                () => {
+                    return HttpResponse.json({
+                        result: {
+                            mode: "AUTO",
+                            generatedAt: "2026-03-05T07:00:00.000Z",
+                            summary: "Queue pressure increased in review-worker stage.",
+                            highlights: ["Queue saturation", "Retry spikes"],
+                        },
+                    })
+                },
+            ),
         )
 
         renderWithProviders(<CcrSummaryProbe />)

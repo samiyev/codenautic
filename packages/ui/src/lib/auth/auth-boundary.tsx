@@ -129,7 +129,8 @@ export function AuthBoundary(props: IAuthBoundaryProps): ReactElement {
             ? resolveAuthAccess(state.session)
             : undefined
     const shouldRedirectForRouteAccess =
-        resolvedAccess !== undefined && isRouteAccessible(routePath, {
+        resolvedAccess !== undefined &&
+        isRouteAccessible(routePath, {
             isAuthenticated: true,
             role: resolvedAccess.role,
             tenantId: resolvedAccess.tenantId,
@@ -170,9 +171,9 @@ export function AuthBoundary(props: IAuthBoundaryProps): ReactElement {
     }, [routeAccessRedirectPath, shouldRedirectForRouteAccess])
 
     const isLoadingState =
-        state.isPending === true
-        || shouldRedirectToLogin === true
-        || shouldRedirectForRouteAccess === true
+        state.isPending === true ||
+        shouldRedirectToLogin === true ||
+        shouldRedirectForRouteAccess === true
     if (isLoadingState === true) {
         return renderAuthLoadingState(labels.appTitle, labels.checkingSession)
     }
@@ -952,9 +953,9 @@ function resolveAuthTenantId(session: IAuthSession): TTenantId {
     }
 
     if (
-        session.user.tenantId === "platform-team"
-        || session.user.tenantId === "frontend-team"
-        || session.user.tenantId === "runtime-team"
+        session.user.tenantId === "platform-team" ||
+        session.user.tenantId === "frontend-team" ||
+        session.user.tenantId === "runtime-team"
     ) {
         return session.user.tenantId
     }
@@ -974,7 +975,11 @@ function readStoredTenantId(): TTenantId | undefined {
 
     try {
         const tenantId = window.localStorage.getItem("codenautic:tenant:active")
-        if (tenantId === "platform-team" || tenantId === "frontend-team" || tenantId === "runtime-team") {
+        if (
+            tenantId === "platform-team" ||
+            tenantId === "frontend-team" ||
+            tenantId === "runtime-team"
+        ) {
             return tenantId
         }
     } catch {

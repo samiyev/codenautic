@@ -127,7 +127,9 @@ export function TrendTimelineWidget(props: ITrendTimelineWidgetProps): ReactElem
                                                 >
                                                     <polyline
                                                         fill="none"
-                                                        points={resolveSparklinePoints(metric.points)}
+                                                        points={resolveSparklinePoints(
+                                                            metric.points,
+                                                        )}
                                                         stroke="currentColor"
                                                         strokeLinecap="round"
                                                         strokeLinejoin="round"

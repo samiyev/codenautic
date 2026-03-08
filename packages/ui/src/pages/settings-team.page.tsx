@@ -95,9 +95,7 @@ function createMemberDisplayName(email: string): string {
     return normalized.length > 0 ? normalized : "New Member"
 }
 
-function mapRoleChipColor(
-    role: TTeamMemberRole,
-): "default" | "primary" | "success" | "warning" {
+function mapRoleChipColor(role: TTeamMemberRole): "default" | "primary" | "success" | "warning" {
     if (role === "admin") {
         return "primary"
     }
@@ -124,7 +122,9 @@ function updateTeamById(
 }
 
 function hasMemberWithEmail(team: ITeamState, email: string): boolean {
-    return team.members.some((member): boolean => member.email.toLowerCase() === email.toLowerCase())
+    return team.members.some(
+        (member): boolean => member.email.toLowerCase() === email.toLowerCase(),
+    )
 }
 
 function TeamDirectoryCard(props: {
@@ -154,8 +154,12 @@ function TeamDirectoryCard(props: {
                                 props.onTeamSelect(team.id)
                             }}
                         >
-                            <p className="text-sm font-semibold text-[var(--foreground)]">{team.name}</p>
-                            <p className="text-xs text-[var(--foreground)]/70">{team.description}</p>
+                            <p className="text-sm font-semibold text-[var(--foreground)]">
+                                {team.name}
+                            </p>
+                            <p className="text-xs text-[var(--foreground)]/70">
+                                {team.description}
+                            </p>
                             <p className="mt-1 text-xs text-[var(--foreground)]/70">
                                 {team.members.length} members • {team.repositories.length} repos
                             </p>
@@ -196,7 +200,10 @@ function TeamMembersCard(props: {
                         onValueChange={props.onInviteEmailChange}
                     />
                     <div className="flex flex-col gap-1">
-                        <label className="text-sm text-[var(--foreground)]/80" htmlFor="team-invite-role">
+                        <label
+                            className="text-sm text-[var(--foreground)]/80"
+                            htmlFor="team-invite-role"
+                        >
                             Invite role
                         </label>
                         <select
@@ -206,20 +213,22 @@ function TeamMembersCard(props: {
                             onChange={(event): void => {
                                 const nextRole = event.currentTarget.value
                                 if (
-                                    nextRole === "viewer"
-                                    || nextRole === "developer"
-                                    || nextRole === "lead"
-                                    || nextRole === "admin"
+                                    nextRole === "viewer" ||
+                                    nextRole === "developer" ||
+                                    nextRole === "lead" ||
+                                    nextRole === "admin"
                                 ) {
                                     props.onInviteRoleChange(nextRole)
                                 }
                             }}
                         >
-                            {ROLE_OPTIONS.map((role): ReactElement => (
-                                <option key={role} value={role}>
-                                    {role}
-                                </option>
-                            ))}
+                            {ROLE_OPTIONS.map(
+                                (role): ReactElement => (
+                                    <option key={role} value={role}>
+                                        {role}
+                                    </option>
+                                ),
+                            )}
                         </select>
                     </div>
                     <div className="flex items-end">
@@ -239,60 +248,73 @@ function TeamMembersCard(props: {
                 )}
 
                 <ul aria-label={`Members in ${props.team.name}`} className="space-y-2">
-                    {props.team.members.map((member): ReactElement => (
-                        <li
-                            key={member.id}
-                            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
-                        >
-                            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                                <div>
-                                    <p className="text-sm font-semibold text-[var(--foreground)]">{member.name}</p>
-                                    <p className="text-xs text-[var(--foreground)]/70">{member.email}</p>
+                    {props.team.members.map(
+                        (member): ReactElement => (
+                            <li
+                                key={member.id}
+                                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
+                            >
+                                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                                    <div>
+                                        <p className="text-sm font-semibold text-[var(--foreground)]">
+                                            {member.name}
+                                        </p>
+                                        <p className="text-xs text-[var(--foreground)]/70">
+                                            {member.email}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Chip
+                                            color={mapRoleChipColor(member.role)}
+                                            size="sm"
+                                            variant="flat"
+                                        >
+                                            {member.role}
+                                        </Chip>
+                                        {isRoleManagementHidden ? null : (
+                                            <>
+                                                <label
+                                                    className="text-xs text-[var(--foreground)]/70"
+                                                    htmlFor={`member-role-${member.id}`}
+                                                >
+                                                    Role
+                                                </label>
+                                                <select
+                                                    aria-label={`Role for member ${member.email}`}
+                                                    className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs"
+                                                    disabled={isRoleManagementDisabled}
+                                                    id={`member-role-${member.id}`}
+                                                    value={member.role}
+                                                    onChange={(event): void => {
+                                                        const nextRole = event.currentTarget.value
+                                                        if (
+                                                            nextRole === "viewer" ||
+                                                            nextRole === "developer" ||
+                                                            nextRole === "lead" ||
+                                                            nextRole === "admin"
+                                                        ) {
+                                                            props.onRoleUpdate(member.id, nextRole)
+                                                        }
+                                                    }}
+                                                >
+                                                    {ROLE_OPTIONS.map(
+                                                        (role): ReactElement => (
+                                                            <option key={role} value={role}>
+                                                                {role}
+                                                            </option>
+                                                        ),
+                                                    )}
+                                                </select>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Chip color={mapRoleChipColor(member.role)} size="sm" variant="flat">
-                                        {member.role}
-                                    </Chip>
-                                    {isRoleManagementHidden ? null : (
-                                        <>
-                                            <label
-                                                className="text-xs text-[var(--foreground)]/70"
-                                                htmlFor={`member-role-${member.id}`}
-                                            >
-                                                Role
-                                            </label>
-                                            <select
-                                                aria-label={`Role for member ${member.email}`}
-                                                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs"
-                                                disabled={isRoleManagementDisabled}
-                                                id={`member-role-${member.id}`}
-                                                value={member.role}
-                                                onChange={(event): void => {
-                                                    const nextRole = event.currentTarget.value
-                                                    if (
-                                                        nextRole === "viewer"
-                                                        || nextRole === "developer"
-                                                        || nextRole === "lead"
-                                                        || nextRole === "admin"
-                                                    ) {
-                                                        props.onRoleUpdate(member.id, nextRole)
-                                                    }
-                                                }}
-                                            >
-                                                {ROLE_OPTIONS.map((role): ReactElement => (
-                                                    <option key={role} value={role}>
-                                                        {role}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        </li>
-                    ))}
+                            </li>
+                        ),
+                    )}
                 </ul>
-                {props.roleManagementPolicy.reason === undefined || isRoleManagementHidden ? null : (
+                {props.roleManagementPolicy.reason === undefined ||
+                isRoleManagementHidden ? null : (
                     <p className="text-xs text-[var(--foreground)]/70">
                         Role policy: {props.roleManagementPolicy.reason}
                     </p>
@@ -313,7 +335,9 @@ function TeamRepositoriesCard(props: {
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-[var(--foreground)]">Repository assignment</p>
+                <p className="text-base font-semibold text-[var(--foreground)]">
+                    Repository assignment
+                </p>
             </CardHeader>
             <CardBody className="space-y-2">
                 {props.repositories.map((repository): ReactElement => {
@@ -330,14 +354,18 @@ function TeamRepositoriesCard(props: {
                                 disabled={isAssignmentDisabled}
                                 type="checkbox"
                                 onChange={(event): void => {
-                                    props.onRepositoryToggle(repository, event.currentTarget.checked)
+                                    props.onRepositoryToggle(
+                                        repository,
+                                        event.currentTarget.checked,
+                                    )
                                 }}
                             />
                             <span>{repository}</span>
                         </label>
                     )
                 })}
-                {props.assignmentPolicy.reason === undefined || isAssignmentDisabled === false ? null : (
+                {props.assignmentPolicy.reason === undefined ||
+                isAssignmentDisabled === false ? null : (
                     <p className="text-xs text-[var(--foreground)]/70">
                         Repository policy: {props.assignmentPolicy.reason}
                     </p>
@@ -441,11 +469,16 @@ export function SettingsTeamPage(): ReactElement {
             role: inviteRole,
         }
 
-        setTeams((previous): ReadonlyArray<ITeamState> =>
-            updateTeamById(previous, activeTeam.id, (team): ITeamState => ({
-                ...team,
-                members: [...team.members, nextMember],
-            })),
+        setTeams(
+            (previous): ReadonlyArray<ITeamState> =>
+                updateTeamById(
+                    previous,
+                    activeTeam.id,
+                    (team): ITeamState => ({
+                        ...team,
+                        members: [...team.members, nextMember],
+                    }),
+                ),
         )
         setInviteEmail("")
         showToastSuccess(`${nextMember.email} added to ${activeTeam.name}.`)
@@ -463,19 +496,24 @@ export function SettingsTeamPage(): ReactElement {
             return
         }
 
-        setTeams((previous): ReadonlyArray<ITeamState> =>
-            updateTeamById(previous, activeTeam.id, (team): ITeamState => ({
-                ...team,
-                members: team.members.map((member): ITeamMember => {
-                    if (member.id !== memberId) {
-                        return member
-                    }
-                    return {
-                        ...member,
-                        role,
-                    }
-                }),
-            })),
+        setTeams(
+            (previous): ReadonlyArray<ITeamState> =>
+                updateTeamById(
+                    previous,
+                    activeTeam.id,
+                    (team): ITeamState => ({
+                        ...team,
+                        members: team.members.map((member): ITeamMember => {
+                            if (member.id !== memberId) {
+                                return member
+                            }
+                            return {
+                                ...member,
+                                role,
+                            }
+                        }),
+                    }),
+                ),
         )
         showToastInfo("Member role updated.")
     }
@@ -492,23 +530,24 @@ export function SettingsTeamPage(): ReactElement {
             return
         }
 
-        setTeams((previous): ReadonlyArray<ITeamState> =>
-            updateTeamById(previous, activeTeam.id, (team): ITeamState => {
-                const currentlySelected = team.repositories.includes(repository)
-                if (isSelected === currentlySelected) {
-                    return team
-                }
+        setTeams(
+            (previous): ReadonlyArray<ITeamState> =>
+                updateTeamById(previous, activeTeam.id, (team): ITeamState => {
+                    const currentlySelected = team.repositories.includes(repository)
+                    if (isSelected === currentlySelected) {
+                        return team
+                    }
 
-                const nextRepositories =
-                    isSelected === true
-                        ? [...team.repositories, repository]
-                        : team.repositories.filter((item): boolean => item !== repository)
+                    const nextRepositories =
+                        isSelected === true
+                            ? [...team.repositories, repository]
+                            : team.repositories.filter((item): boolean => item !== repository)
 
-                return {
-                    ...team,
-                    repositories: nextRepositories,
-                }
-            }),
+                    return {
+                        ...team,
+                        repositories: nextRepositories,
+                    }
+                }),
         )
         showToastInfo(`Repository assignment updated for ${activeTeam.name}.`)
     }
@@ -553,7 +592,8 @@ export function SettingsTeamPage(): ReactElement {
                     )}
                 </CardBody>
             </Card>
-            {createTeamPolicy.reason === undefined || createTeamPolicy.visibility === "enabled" ? null : (
+            {createTeamPolicy.reason === undefined ||
+            createTeamPolicy.visibility === "enabled" ? null : (
                 <p className="text-xs text-[var(--foreground)]/70">
                     Create team policy: {createTeamPolicy.reason}
                 </p>
@@ -565,7 +605,8 @@ export function SettingsTeamPage(): ReactElement {
                 </Alert>
             ) : (
                 <Alert color="primary" title={`Active team: ${activeTeam.name}`} variant="flat">
-                    Members: {activeTeam.members.length} • Repositories: {activeTeam.repositories.length}
+                    Members: {activeTeam.members.length} • Repositories:{" "}
+                    {activeTeam.repositories.length}
                 </Alert>
             )}
 

@@ -191,12 +191,12 @@ describe("AnalyticsSdk", (): void => {
         expect(sendRequest).toHaveBeenCalledTimes(2)
         expect(sdk.getPendingEventsCount()).toBe(0)
 
-        const firstPayload = JSON.parse(
-            String(sendRequest.mock.calls[0]?.[1]?.body),
-        ) as { readonly events: ReadonlyArray<{ readonly id: string }> }
-        const secondPayload = JSON.parse(
-            String(sendRequest.mock.calls[1]?.[1]?.body),
-        ) as { readonly events: ReadonlyArray<{ readonly id: string }> }
+        const firstPayload = JSON.parse(String(sendRequest.mock.calls[0]?.[1]?.body)) as {
+            readonly events: ReadonlyArray<{ readonly id: string }>
+        }
+        const secondPayload = JSON.parse(String(sendRequest.mock.calls[1]?.[1]?.body)) as {
+            readonly events: ReadonlyArray<{ readonly id: string }>
+        }
         expect(firstPayload.events[0]?.id).toBe(secondPayload.events[0]?.id)
     })
 

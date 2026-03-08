@@ -1,8 +1,5 @@
 import { useId, type ChangeEvent, type ReactElement, type ReactNode } from "react"
-import {
-    Input as HeroUIInput,
-    type InputProps as HeroUIInputProps,
-} from "@heroui/react"
+import { Input as HeroUIInput, type InputProps as HeroUIInputProps } from "@heroui/react"
 
 /**
  * Свойства `Input` с поддержкой legacy-свойств.

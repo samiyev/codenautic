@@ -51,18 +51,24 @@ const llmApiKeySchema = z
 
 export const llmProviderFormSchema = z.object({
     apiKey: llmApiKeySchema,
-    endpoint: z.preprocess((value: unknown): string => {
-        if (typeof value !== "string") {
-            return ""
-        }
+    endpoint: z.preprocess(
+        (value: unknown): string => {
+            if (typeof value !== "string") {
+                return ""
+            }
 
-        const sanitizedEndpoint = sanitizeText(value)
-        if (sanitizedEndpoint.length === 0) {
-            return ""
-        }
+            const sanitizedEndpoint = sanitizeText(value)
+            if (sanitizedEndpoint.length === 0) {
+                return ""
+            }
 
-        return sanitizedEndpoint
-    }, z.union([z.literal(""), z.string().url("Укажите корректный endpoint").max(250, "Слишком длинный URL")])),
+            return sanitizedEndpoint
+        },
+        z.union([
+            z.literal(""),
+            z.string().url("Укажите корректный endpoint").max(250, "Слишком длинный URL"),
+        ]),
+    ),
     model: z.enum(LLM_MODEL_OPTIONS),
     provider: z.enum(LLM_PROVIDER_OPTIONS),
     testAfterSave: z.boolean(),

@@ -131,33 +131,35 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
         <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
             <p className="text-sm font-semibold text-slate-900">Impact analysis panel</p>
             <p className="mt-1 text-xs text-slate-500">
-                Select files to inspect blast radius, affected tests/consumers, and aggregated
-                risk score.
+                Select files to inspect blast radius, affected tests/consumers, and aggregated risk
+                score.
             </p>
 
             <ul className="mt-3 space-y-2">
-                {props.seeds.slice(0, 6).map((seed): ReactElement => (
-                    <li
-                        className="flex items-start gap-2 rounded border border-slate-200 bg-slate-50 p-2"
-                        key={seed.id}
-                    >
-                        <input
-                            aria-label={`Select impact file ${seed.label}`}
-                            checked={selectedSeedIds.includes(seed.id)}
-                            className="mt-0.5 h-4 w-4 rounded border-slate-300"
-                            onChange={(): void => {
-                                toggleSeed(seed.id)
-                            }}
-                            type="checkbox"
-                        />
-                        <div className="min-w-0">
-                            <p className="text-sm font-semibold text-slate-900">{seed.label}</p>
-                            <p className="text-xs text-slate-600">
-                                Individual risk {String(seed.riskScore)}
-                            </p>
-                        </div>
-                    </li>
-                ))}
+                {props.seeds.slice(0, 6).map(
+                    (seed): ReactElement => (
+                        <li
+                            className="flex items-start gap-2 rounded border border-slate-200 bg-slate-50 p-2"
+                            key={seed.id}
+                        >
+                            <input
+                                aria-label={`Select impact file ${seed.label}`}
+                                checked={selectedSeedIds.includes(seed.id)}
+                                className="mt-0.5 h-4 w-4 rounded border-slate-300"
+                                onChange={(): void => {
+                                    toggleSeed(seed.id)
+                                }}
+                                type="checkbox"
+                            />
+                            <div className="min-w-0">
+                                <p className="text-sm font-semibold text-slate-900">{seed.label}</p>
+                                <p className="text-xs text-slate-600">
+                                    Individual risk {String(seed.riskScore)}
+                                </p>
+                            </div>
+                        </li>
+                    ),
+                )}
             </ul>
 
             <div className="mt-3 rounded border border-cyan-200 bg-cyan-500/10 p-2">

@@ -47,8 +47,8 @@ function resolveDeltaClassName(delta: number): string {
  */
 export function SprintComparisonView(props: ISprintComparisonViewProps): ReactElement {
     const selectedSnapshot =
-        props.snapshots.find((snapshot): boolean => snapshot.id === props.activeSnapshotId)
-        ?? props.snapshots[0]
+        props.snapshots.find((snapshot): boolean => snapshot.id === props.activeSnapshotId) ??
+        props.snapshots[0]
 
     return (
         <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
@@ -93,13 +93,20 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
                         const delta = metric.afterValue - metric.beforeValue
                         const progressWidth = Math.max(
                             8,
-                            Math.min(100, Math.round((metric.afterValue / Math.max(metric.beforeValue, 1)) * 100)),
+                            Math.min(
+                                100,
+                                Math.round(
+                                    (metric.afterValue / Math.max(metric.beforeValue, 1)) * 100,
+                                ),
+                            ),
                         )
                         return (
                             <div key={metric.label}>
                                 <div className="flex items-center justify-between gap-2 text-xs">
                                     <p className="font-semibold text-slate-800">{metric.label}</p>
-                                    <p className={`rounded border px-1 py-0.5 ${resolveDeltaClassName(delta)}`}>
+                                    <p
+                                        className={`rounded border px-1 py-0.5 ${resolveDeltaClassName(delta)}`}
+                                    >
                                         {delta > 0 ? "+" : ""}
                                         {String(delta)}
                                     </p>

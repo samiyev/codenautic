@@ -83,6 +83,6 @@ describe("useFilterPersistence", (): void => {
 
         await user.click(screen.getByTestId("reset-filter"))
         expect(screen.getByTestId("persisted-filter-value")).toHaveTextContent("|all")
-        expect(localStorage.getItem(STORAGE_KEY)).toContain("\"search\":\"\"")
+        expect(localStorage.getItem(STORAGE_KEY)).toContain('"search":""')
     })
 })

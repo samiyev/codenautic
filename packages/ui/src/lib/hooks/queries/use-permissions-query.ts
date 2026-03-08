@@ -2,7 +2,11 @@ import { useEffect, useMemo, useRef } from "react"
 import { useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query"
 
 import { createApiContracts } from "@/lib/api"
-import { PERMISSION_KEYS, type IPermissionsResponse, type TPermissionKey } from "@/lib/permissions/permissions"
+import {
+    PERMISSION_KEYS,
+    type IPermissionsResponse,
+    type TPermissionKey,
+} from "@/lib/permissions/permissions"
 import { queryKeys } from "@/lib/query/query-keys"
 
 const api = createApiContracts()

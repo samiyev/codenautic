@@ -33,8 +33,9 @@ describe("CityPredictionOverlay", (): void => {
         expect(screen.getByLabelText("Prediction hotspots")).not.toBeNull()
         expect(screen.getByText("High risk forecast")).not.toBeNull()
         expect(screen.getByText("Medium risk forecast")).not.toBeNull()
-        expect(screen.getByText("Confidence 89% · Rising churn with recurrent bug introductions."))
-            .not.toBeNull()
+        expect(
+            screen.getByText("Confidence 89% · Rising churn with recurrent bug introductions."),
+        ).not.toBeNull()
     })
 
     it("вызывает onSelectEntry при выборе hotspot", async (): Promise<void> => {
@@ -58,4 +59,3 @@ describe("CityPredictionOverlay", (): void => {
         )
     })
 })
-

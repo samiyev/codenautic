@@ -10,7 +10,9 @@ describe("SettingsSsoPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsSsoPage />)
 
-        expect(screen.getByRole("heading", { level: 1, name: "SSO provider management" })).not.toBeNull()
+        expect(
+            screen.getByRole("heading", { level: 1, name: "SSO provider management" }),
+        ).not.toBeNull()
 
         await user.clear(screen.getByRole("textbox", { name: "SAML Entity ID" }))
         await user.type(

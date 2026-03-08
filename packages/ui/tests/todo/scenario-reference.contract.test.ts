@@ -51,7 +51,9 @@ describe("SCREENS and scenarios references contract", (): void => {
         sections.forEach((section): void => {
             const refs = extractWebRefs(section.body)
             if (refs.length === 0) {
-                issues.push(`${section.heading} at line ${String(section.lineNumber)} has no WEB references`)
+                issues.push(
+                    `${section.heading} at line ${String(section.lineNumber)} has no WEB references`,
+                )
             }
         })
 

@@ -20,10 +20,7 @@ vi.mock("@/lib/hooks/use-intersection-observer", () => {
     }
 })
 
-import {
-    CCR_FILTER_PRESETS_STORAGE_KEY,
-    CcrManagementPage,
-} from "@/pages/ccr-management.page"
+import { CCR_FILTER_PRESETS_STORAGE_KEY, CcrManagementPage } from "@/pages/ccr-management.page"
 import { renderWithProviders } from "../utils/render"
 
 interface IStoredPresetShape {
@@ -73,10 +70,16 @@ describe("ccr management page filter presets", (): void => {
 
         const searchInput = screen.getByPlaceholderText("Search title / id / repo / assignee")
         await user.type(searchInput, "security")
-        await user.selectOptions(screen.getByRole("combobox", { name: "Filter by team" }), "frontend")
+        await user.selectOptions(
+            screen.getByRole("combobox", { name: "Filter by team" }),
+            "frontend",
+        )
         expect(screen.queryByPlaceholderText("Search by repository or title")).toBeNull()
 
-        await user.type(screen.getByRole("textbox", { name: "Filter preset name" }), "Critical preset")
+        await user.type(
+            screen.getByRole("textbox", { name: "Filter preset name" }),
+            "Critical preset",
+        )
         await user.click(screen.getByRole("button", { name: "Save preset" }))
 
         expect(screen.getByRole("option", { name: "Critical preset" })).not.toBeNull()

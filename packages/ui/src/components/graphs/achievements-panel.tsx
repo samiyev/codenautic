@@ -37,9 +37,7 @@ export interface IAchievementsPanelProps {
     readonly onSelectAchievement?: (entry: IAchievementPanelEntry) => void
 }
 
-function resolveBadgeClassName(
-    badge: TAchievementBadge,
-): string {
+function resolveBadgeClassName(badge: TAchievementBadge): string {
     if (badge === "gold") {
         return "border-amber-300 bg-amber-100 text-amber-900"
     }
@@ -49,9 +47,7 @@ function resolveBadgeClassName(
     return "border-orange-300 bg-orange-100 text-orange-900"
 }
 
-function resolveBadgeLabel(
-    badge: TAchievementBadge,
-): string {
+function resolveBadgeLabel(badge: TAchievementBadge): string {
     if (badge === "gold") {
         return "Gold badge"
     }

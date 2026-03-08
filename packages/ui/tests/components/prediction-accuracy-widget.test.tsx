@@ -52,7 +52,11 @@ const TEST_CASES: ReadonlyArray<IPredictionAccuracyCase> = [
 describe("PredictionAccuracyWidget", (): void => {
     it("рендерит accuracy trend, confusion matrix и case list", (): void => {
         renderWithProviders(
-            <PredictionAccuracyWidget cases={TEST_CASES} matrix={TEST_MATRIX} points={TEST_POINTS} />,
+            <PredictionAccuracyWidget
+                cases={TEST_CASES}
+                matrix={TEST_MATRIX}
+                points={TEST_POINTS}
+            />,
         )
 
         expect(screen.getByText("Prediction accuracy widget")).not.toBeNull()
@@ -63,9 +67,7 @@ describe("PredictionAccuracyWidget", (): void => {
         expect(screen.getByText("TN 8")).not.toBeNull()
         expect(screen.getByLabelText("Prediction accuracy cases")).not.toBeNull()
         expect(
-            screen.getByText(
-                "We predicted incident on src/api/auth.ts, actual result: incident.",
-            ),
+            screen.getByText("We predicted incident on src/api/auth.ts, actual result: incident."),
         ).not.toBeNull()
     })
 

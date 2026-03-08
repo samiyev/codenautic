@@ -19,7 +19,7 @@ function extractWebReferences(markdown: string): ReadonlyArray<string> {
         }),
     )
 
-    return [ ...uniqueReferences ].sort()
+    return [...uniqueReferences].sort()
 }
 
 function parseTodoStatuses(markdown: string): ITodoStatusMap {

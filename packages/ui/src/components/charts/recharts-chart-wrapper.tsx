@@ -78,7 +78,9 @@ function isValidNumeric(value: unknown): value is number {
     return typeof value === "number" && Number.isFinite(value)
 }
 
-function detectNumericKeys<TPoint extends TChartPoint>(point: TPoint): ReadonlyArray<TChartKey<TPoint>> {
+function detectNumericKeys<TPoint extends TChartPoint>(
+    point: TPoint,
+): ReadonlyArray<TChartKey<TPoint>> {
     return Object.keys(point).filter((rawKey): rawKey is TChartKey<TPoint> => {
         const pointRecord = point as Record<string, unknown>
         const value = pointRecord[rawKey]
@@ -162,8 +164,8 @@ function convertToCsvCell(value: unknown): string {
     }
 
     if (typeof value === "string") {
-        if (value.includes(",") || value.includes("\n") || value.includes("\"")) {
-            return `"${value.replaceAll("\"", "\"\"")}"`
+        if (value.includes(",") || value.includes("\n") || value.includes('"')) {
+            return `"${value.replaceAll('"', '""')}"`
         }
 
         return value
@@ -190,13 +192,10 @@ function convertToCsv<TPoint extends TChartPoint>(
     }
 
     const columns =
-        csvColumns ??
-        (Object.keys(firstPoint) as unknown as ReadonlyArray<TChartKey<TPoint>>)
+        csvColumns ?? (Object.keys(firstPoint) as unknown as ReadonlyArray<TChartKey<TPoint>>)
     const header = columns.map((column): string => String(column)).join(",")
     const rows = rawData.map((point) =>
-        columns
-            .map((column): string => convertToCsvCell(readPointValue(point, column)))
-            .join(","),
+        columns.map((column): string => convertToCsvCell(readPointValue(point, column))).join(","),
     )
 
     return `${header}\n${rows.join("\n")}`
@@ -286,19 +285,10 @@ export function RechartsChartWrapper<TPoint extends TChartPoint>(
                             <Alert color="warning">
                                 <div className="space-y-2">
                                     <p className="text-sm">
-                                        Data aggregated for interactive rendering. Showing
-                                        {" "}
-                                        {scaleResult.data.length}
-                                        {" "}
-                                        of
-                                        {" "}
-                                        {props.data === undefined ? 0 : props.data.length}
-                                        {" "}
-                                        points.
-                                        {" "}
-                                        Aggregation factor:
-                                        {" "}
-                                        {scaleResult.aggregationFactor}x.
+                                        Data aggregated for interactive rendering. Showing{" "}
+                                        {scaleResult.data.length} of{" "}
+                                        {props.data === undefined ? 0 : props.data.length} points.{" "}
+                                        Aggregation factor: {scaleResult.aggregationFactor}x.
                                     </p>
                                     <div className="flex flex-wrap items-center gap-2">
                                         {props.onRequestServerAggregation === undefined ? null : (

@@ -24,12 +24,7 @@ describe("IgnorePatternEditor", (): void => {
         const user = userEvent.setup()
         const onChange = vi.fn((_patterns: ReadonlyArray<string>): void => {})
 
-        renderWithProviders(
-            <IgnorePatternEditor
-                ignoredPatterns={["/dist"]}
-                onChange={onChange}
-            />,
-        )
+        renderWithProviders(<IgnorePatternEditor ignoredPatterns={["/dist"]} onChange={onChange} />)
 
         const editor = screen.getByLabelText("Ignore patterns")
         await user.click(editor)

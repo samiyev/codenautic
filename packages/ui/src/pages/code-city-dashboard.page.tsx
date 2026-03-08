@@ -23,10 +23,7 @@ import {
     CausalOverlaySelector,
     type TCausalOverlayMode,
 } from "@/components/graphs/causal-overlay-selector"
-import {
-    ChangeRiskGauge,
-    type IChangeRiskGaugePoint,
-} from "@/components/graphs/change-risk-gauge"
+import { ChangeRiskGauge, type IChangeRiskGaugePoint } from "@/components/graphs/change-risk-gauge"
 import {
     CityBusFactorOverlay,
     type ICityBusFactorOverlayEntry,
@@ -85,10 +82,7 @@ import {
     AchievementsPanel,
     type IAchievementPanelEntry,
 } from "@/components/graphs/achievements-panel"
-import {
-    TeamLeaderboard,
-    type ITeamLeaderboardEntry,
-} from "@/components/graphs/team-leaderboard"
+import { TeamLeaderboard, type ITeamLeaderboardEntry } from "@/components/graphs/team-leaderboard"
 import {
     SprintSummaryCard,
     type ISprintSummaryCardModel,
@@ -106,10 +100,7 @@ import {
     CityRefactoringOverlay,
     type ICityRefactoringOverlayEntry,
 } from "@/components/graphs/city-refactoring-overlay"
-import {
-    GuidedTourOverlay,
-    type IGuidedTourStep,
-} from "@/components/graphs/guided-tour-overlay"
+import { GuidedTourOverlay, type IGuidedTourStep } from "@/components/graphs/guided-tour-overlay"
 import {
     ImpactGraphView,
     type IImpactGraphEdge,
@@ -206,8 +197,7 @@ interface ICodeCityDashboardRepositoryProfile {
     /** Маппинг файл -> owner для ownership overlay. */
     readonly ownership: ReadonlyArray<ICodeCityDashboardOwnershipDescriptor>
     /** Связи co-authoring между контрибьюторами. */
-    readonly contributorCollaborations:
-        ReadonlyArray<ICodeCityDashboardContributorCollaborationDescriptor>
+    readonly contributorCollaborations: ReadonlyArray<ICodeCityDashboardContributorCollaborationDescriptor>
 }
 
 interface ICodeCityDashboardContributorDescriptor {
@@ -905,9 +895,7 @@ function getDefaultDashboardRepository(): ICodeCityDashboardRepositoryProfile {
     return defaultRepository
 }
 
-function resolveDashboardProfile(
-    repositoryId: string,
-): ICodeCityDashboardRepositoryProfile {
+function resolveDashboardProfile(repositoryId: string): ICodeCityDashboardRepositoryProfile {
     const selected = CODE_CITY_DASHBOARD_REPOSITORIES.find(
         (entry): boolean => entry.id === repositoryId,
     )
@@ -924,8 +912,9 @@ function resolveRepositoryOptions(
     return repositories.map((entry): string => entry.id)
 }
 
-function createRepositoryFilesLink(repositoryId: string):
-    ((file: ICodeCityTreemapFileLinkResolver) => string) {
+function createRepositoryFilesLink(
+    repositoryId: string,
+): (file: ICodeCityTreemapFileLinkResolver) => string {
     const encodedRepo = encodeURIComponent(repositoryId)
 
     return (file): string => {
@@ -964,12 +953,7 @@ interface IExploreNavigationFocusState {
     readonly activeFileId?: string
 }
 
-type TDashboardOnboardingAreaId =
-    | "controls"
-    | "explore"
-    | "hot-areas"
-    | "root-cause"
-    | "city-3d"
+type TDashboardOnboardingAreaId = "controls" | "explore" | "hot-areas" | "root-cause" | "city-3d"
 
 interface ICodeCityDashboardOnboardingAreaDescriptor {
     readonly id: TDashboardOnboardingAreaId
@@ -977,10 +961,11 @@ interface ICodeCityDashboardOnboardingAreaDescriptor {
     readonly description: string
 }
 
-const CODE_CITY_DASHBOARD_ONBOARDING_AREAS:
-    ReadonlyArray<ICodeCityDashboardOnboardingAreaDescriptor> = [
+const CODE_CITY_DASHBOARD_ONBOARDING_AREAS: ReadonlyArray<ICodeCityDashboardOnboardingAreaDescriptor> =
+    [
         {
-            description: "Repository, metric and overlay filters were adjusted for current analysis.",
+            description:
+                "Repository, metric and overlay filters were adjusted for current analysis.",
             id: "controls",
             title: "Dashboard controls",
         },
@@ -1009,16 +994,14 @@ const CODE_CITY_DASHBOARD_ONBOARDING_AREAS:
 function buildOnboardingProgressModules(
     exploredAreaIds: ReadonlyArray<string>,
 ): ReadonlyArray<IOnboardingProgressModuleDescriptor> {
-    return CODE_CITY_DASHBOARD_ONBOARDING_AREAS.map(
-        (area): IOnboardingProgressModuleDescriptor => {
-            return {
-                description: area.description,
-                id: area.id,
-                isComplete: exploredAreaIds.includes(area.id),
-                title: area.title,
-            }
-        },
-    )
+    return CODE_CITY_DASHBOARD_ONBOARDING_AREAS.map((area): IOnboardingProgressModuleDescriptor => {
+        return {
+            description: area.description,
+            id: area.id,
+            isComplete: exploredAreaIds.includes(area.id),
+            title: area.title,
+        }
+    })
 }
 
 function resolveOnboardingAreaFromTourStep(
@@ -1096,9 +1079,9 @@ function buildHotAreaHighlights(
     const rankedFiles = [...files]
         .sort((leftFile, rightFile): number => {
             const leftRiskScore =
-                (leftFile.complexity ?? 0) + ((leftFile.bugIntroductions?.["30d"] ?? 0) * 2)
+                (leftFile.complexity ?? 0) + (leftFile.bugIntroductions?.["30d"] ?? 0) * 2
             const rightRiskScore =
-                (rightFile.complexity ?? 0) + ((rightFile.bugIntroductions?.["30d"] ?? 0) * 2)
+                (rightFile.complexity ?? 0) + (rightFile.bugIntroductions?.["30d"] ?? 0) * 2
             return rightRiskScore - leftRiskScore
         })
         .slice(0, 4)
@@ -1134,14 +1117,13 @@ function buildRefactoringTargets(
         const moduleName = file.path.split("/")[1] ?? "core"
 
         return {
-            description:
-                `Complexity ${String(complexity)}, churn ${String(churn)}, bugs(30d) ${String(bugCount)}`,
-            effortScore: Math.max(1, Math.round((loc / 40) + (complexity / 8))),
+            description: `Complexity ${String(complexity)}, churn ${String(churn)}, bugs(30d) ${String(bugCount)}`,
+            effortScore: Math.max(1, Math.round(loc / 40 + complexity / 8)),
             fileId: file.id,
             id: `refactor-${file.id}`,
             module: moduleName,
-            riskScore: Math.max(1, Math.min(99, Math.round((bugCount * 12) + (churn * 6)))),
-            roiScore: Math.max(1, Math.round((complexity * 1.2) + (bugCount * 10))),
+            riskScore: Math.max(1, Math.min(99, Math.round(bugCount * 12 + churn * 6))),
+            roiScore: Math.max(1, Math.round(complexity * 1.2 + bugCount * 10)),
             title: file.path,
         }
     })
@@ -1199,7 +1181,7 @@ function buildRefactoringTimelineTasks(
             durationWeeks: Math.max(1, Math.min(6, Math.round(target.effortScore / 2))),
             fileId: target.fileId,
             id: `timeline-${target.id}`,
-            startWeek: (index * 2) + 1,
+            startWeek: index * 2 + 1,
             title: target.title,
         }
     })
@@ -1225,10 +1207,9 @@ function buildImpactAnalysisSeeds(
                 `${file.path.split("/")[1] ?? "core"}-consumer`,
                 `${file.path.split("/")[2] ?? "runtime"}-worker`,
             ],
-            affectedFiles: [
-                nextFile?.path ?? file.path,
-                secondNextFile?.path ?? file.path,
-            ].filter((path): boolean => path.length > 0),
+            affectedFiles: [nextFile?.path ?? file.path, secondNextFile?.path ?? file.path].filter(
+                (path): boolean => path.length > 0,
+            ),
             affectedTests: [
                 `tests/${file.path.split("/").slice(-1)[0] ?? "module"}.test.ts`,
                 `tests/${nextFile?.path.split("/").slice(-1)[0] ?? "module"}.test.ts`,
@@ -1236,7 +1217,7 @@ function buildImpactAnalysisSeeds(
             fileId: file.id,
             id: `impact-${file.id}`,
             label: file.path,
-            riskScore: Math.max(1, Math.min(99, Math.round((complexity * 1.5) + (bugCount * 9)))),
+            riskScore: Math.max(1, Math.min(99, Math.round(complexity * 1.5 + bugCount * 9))),
         }
     })
 }
@@ -1252,8 +1233,7 @@ function buildCityImpactOverlayEntries(
 ): ReadonlyArray<ICityImpactOverlayEntry> {
     return seeds.slice(0, 5).map((seed): ICityImpactOverlayEntry => {
         return {
-            details:
-                `Affected files ${String(seed.affectedFiles.length)} · Tests ${String(seed.affectedTests.length)} · Consumers ${String(seed.affectedConsumers.length)}`,
+            details: `Affected files ${String(seed.affectedFiles.length)} · Tests ${String(seed.affectedTests.length)} · Consumers ${String(seed.affectedConsumers.length)}`,
             fileId: seed.fileId,
             intensity: Math.max(1, Math.min(99, seed.riskScore)),
             label: seed.label,
@@ -1300,9 +1280,7 @@ function resolvePredictionConfidence(file: ICodeCityTreemapFileDescriptor): numb
     return Math.max(45, Math.min(96, confidence))
 }
 
-function resolvePredictionRiskPriority(
-    riskLevel: TCodeCityTreemapPredictionRiskLevel,
-): number {
+function resolvePredictionRiskPriority(riskLevel: TCodeCityTreemapPredictionRiskLevel): number {
     if (riskLevel === "high") {
         return 3
     }
@@ -1334,8 +1312,8 @@ function buildPredictionOverlayEntries(
         })
         .sort((leftEntry, rightEntry): number => {
             const riskPriorityDiff =
-                resolvePredictionRiskPriority(rightEntry.riskLevel)
-                - resolvePredictionRiskPriority(leftEntry.riskLevel)
+                resolvePredictionRiskPriority(rightEntry.riskLevel) -
+                resolvePredictionRiskPriority(leftEntry.riskLevel)
             if (riskPriorityDiff !== 0) {
                 return riskPriorityDiff
             }
@@ -1431,7 +1409,9 @@ function buildTrendForecastChartPoints(
         const forecastScore = Math.max(1, Math.round(point.healthScore - (index + 1) * 2))
         const confidenceRadius = 4 + index
         const linkedFileId =
-            overlayEntries.length === 0 ? undefined : overlayEntries[index % overlayEntries.length]?.fileId
+            overlayEntries.length === 0
+                ? undefined
+                : overlayEntries[index % overlayEntries.length]?.fileId
         return {
             confidenceHigh: Math.min(100, forecastScore + confidenceRadius),
             confidenceLow: Math.max(1, forecastScore - confidenceRadius),
@@ -1455,16 +1435,15 @@ function buildPredictionAccuracyPoints(
 ): ReadonlyArray<IPredictionAccuracyPoint> {
     return healthTrend.slice(-4).map((point, index): IPredictionAccuracyPoint => {
         const predictedIncidents = Math.max(1, Math.round((100 - point.healthScore) / 8) + index)
-        const actualIncidents = Math.max(
-            0,
-            predictedIncidents + (index % 2 === 0 ? -1 : 1),
-        )
+        const actualIncidents = Math.max(0, predictedIncidents + (index % 2 === 0 ? -1 : 1))
         const denominator = Math.max(predictedIncidents, actualIncidents, 1)
         const accuracyScore = Math.max(
             0,
             Math.min(
                 100,
-                Math.round(100 - (Math.abs(predictedIncidents - actualIncidents) / denominator) * 100),
+                Math.round(
+                    100 - (Math.abs(predictedIncidents - actualIncidents) / denominator) * 100,
+                ),
             ),
         )
         return {
@@ -1622,24 +1601,23 @@ function buildPredictionComparisonSnapshots(
     return periods.map((periodLabel, index): IPredictionComparisonSnapshot => {
         const entry = entries[index]
         const file = entry === undefined ? undefined : fileById.get(entry.fileId)
-        const riskBonus =
-            entry?.riskLevel === "high" ? 2 : entry?.riskLevel === "medium" ? 1 : 0
+        const riskBonus = entry?.riskLevel === "high" ? 2 : entry?.riskLevel === "medium" ? 1 : 0
         const predictedHotspots = Math.max(1, 4 - index + riskBonus)
-        const actualHotspots = Math.max(
-            0,
-            predictedHotspots + (index % 2 === 0 ? -1 : 0),
-        )
+        const actualHotspots = Math.max(0, predictedHotspots + (index % 2 === 0 ? -1 : 0))
         const denominator = Math.max(predictedHotspots, actualHotspots, 1)
         const accuracyScore = Math.max(
             0,
             Math.min(
                 100,
-                Math.round(100 - (Math.abs(predictedHotspots - actualHotspots) / denominator) * 100),
+                Math.round(
+                    100 - (Math.abs(predictedHotspots - actualHotspots) / denominator) * 100,
+                ),
             ),
         )
         const anchorLabel = entry?.label ?? "core module"
-        const summary = `${periodLabel} we predicted ${String(predictedHotspots)} hotspots in ${anchorLabel}; `
-            + `${String(actualHotspots)} actually happened after observing recent CCR outcomes.`
+        const summary =
+            `${periodLabel} we predicted ${String(predictedHotspots)} hotspots in ${anchorLabel}; ` +
+            `${String(actualHotspots)} actually happened after observing recent CCR outcomes.`
 
         return {
             accuracyScore,
@@ -1653,9 +1631,7 @@ function buildPredictionComparisonSnapshots(
     })
 }
 
-function calculateSprintImprovementScore(
-    metrics: ReadonlyArray<ISprintComparisonMetric>,
-): number {
+function calculateSprintImprovementScore(metrics: ReadonlyArray<ISprintComparisonMetric>): number {
     const weightedChange = metrics.reduce((total, metric): number => {
         const beforeValue = Math.max(metric.beforeValue, 1)
         if (metric.label === "Coverage") {
@@ -1679,10 +1655,7 @@ function buildSprintComparisonSnapshots(
     return candidateFiles.map((file, index): ISprintComparisonSnapshot => {
         const beforeComplexity = Math.max(1, Math.round((file.complexity ?? 0) + 4 + index))
         const afterComplexity = Math.max(1, beforeComplexity - 2 - index)
-        const beforeCoverage = Math.max(
-            1,
-            Math.round(68 - (file.complexity ?? 0) / 2 - index),
-        )
+        const beforeCoverage = Math.max(1, Math.round(68 - (file.complexity ?? 0) / 2 - index))
         const afterCoverage = Math.min(100, beforeCoverage + 4 + index)
         const beforeChurn = Math.max(1, (file.churn ?? 0) + 5 + index)
         const afterChurn = Math.max(1, beforeChurn - 2)
@@ -1775,22 +1748,13 @@ function buildDistrictTrendIndicators(
                 district.churn * 0.6 +
                 district.bugIntroductions * 8 +
                 district.fileIds.length * 2
-            const trendShiftRatio =
-                index % 3 === 0
-                    ? 0.16
-                    : index % 3 === 1
-                      ? -0.12
-                      : 0.02
+            const trendShiftRatio = index % 3 === 0 ? 0.16 : index % 3 === 1 ? -0.12 : 0.02
             const currentRisk = Math.max(1, baselineRisk * (1 - trendShiftRatio))
             const deltaPercentage = Math.round(
                 ((baselineRisk - currentRisk) / Math.max(baselineRisk, 1)) * 100,
             )
             const trend: IDistrictTrendIndicatorEntry["trend"] =
-                deltaPercentage >= 4
-                    ? "improving"
-                    : deltaPercentage <= -4
-                      ? "degrading"
-                      : "stable"
+                deltaPercentage >= 4 ? "improving" : deltaPercentage <= -4 ? "degrading" : "stable"
 
             return {
                 affectedFileIds: district.fileIds,
@@ -1804,7 +1768,8 @@ function buildDistrictTrendIndicators(
         })
         .filter((entry): entry is IDistrictTrendIndicatorEntry => entry !== undefined)
         .sort((leftEntry, rightEntry): number => {
-            const deltaDistance = Math.abs(rightEntry.deltaPercentage) - Math.abs(leftEntry.deltaPercentage)
+            const deltaDistance =
+                Math.abs(rightEntry.deltaPercentage) - Math.abs(leftEntry.deltaPercentage)
             if (deltaDistance !== 0) {
                 return deltaDistance
             }
@@ -1812,9 +1777,7 @@ function buildDistrictTrendIndicators(
         })
 }
 
-function resolveAchievementBadge(
-    improvementPercent: number,
-): IAchievementPanelEntry["badge"] {
+function resolveAchievementBadge(improvementPercent: number): IAchievementPanelEntry["badge"] {
     if (improvementPercent >= 18) {
         return "gold"
     }
@@ -1842,10 +1805,7 @@ function buildSprintAchievements(
                 6,
                 Math.min(24, Math.round(baseComplexity / (index + 2) + 8)),
             )
-            const churnReduction = Math.max(
-                4,
-                Math.round(((file.churn ?? 0) + index + 3) / 2),
-            )
+            const churnReduction = Math.max(4, Math.round(((file.churn ?? 0) + index + 3) / 2))
             const improvementPercent = Math.max(complexityReduction, churnReduction)
             const relatedFileIds = files
                 .filter((candidateFile): boolean => {
@@ -1853,8 +1813,7 @@ function buildSprintAchievements(
                 })
                 .slice(0, 3)
                 .map((candidateFile): string => candidateFile.id)
-            const normalizedRelatedFileIds =
-                relatedFileIds.length > 0 ? relatedFileIds : [file.id]
+            const normalizedRelatedFileIds = relatedFileIds.length > 0 ? relatedFileIds : [file.id]
 
             return {
                 badge: resolveAchievementBadge(improvementPercent),
@@ -1863,9 +1822,9 @@ function buildSprintAchievements(
                 improvementPercent,
                 relatedFileIds: normalizedRelatedFileIds,
                 summary:
-                    `Reduced complexity in module ${districtName} by `
-                    + `${String(complexityReduction)}%. Churn also improved by `
-                    + `${String(churnReduction)}%.`,
+                    `Reduced complexity in module ${districtName} by ` +
+                    `${String(complexityReduction)}%. Churn also improved by ` +
+                    `${String(churnReduction)}%.`,
                 title: `Reduced complexity in ${districtName} by ${String(complexityReduction)}%`,
             }
         })
@@ -1916,11 +1875,7 @@ function buildTeamLeaderboardEntries(
         .map((contributor): ITeamLeaderboardEntry => {
             const ownerFileIds = fileIdsByOwner.get(contributor.ownerId) ?? []
             const normalizedFileIds =
-                ownerFileIds.length > 0
-                    ? ownerFileIds
-                    : files[0] === undefined
-                      ? []
-                      : [files[0].id]
+                ownerFileIds.length > 0 ? ownerFileIds : files[0] === undefined ? [] : [files[0].id]
             const primaryFileId =
                 normalizedFileIds[0] ?? files[0]?.id ?? `leaderboard-${contributor.ownerId}`
             const ownerFiles = normalizedFileIds
@@ -2037,8 +1992,8 @@ function buildSprintSummaryCardModel(
         districtTrends.length === 0
             ? 0
             : Math.round(
-                  districtTrends.reduce((sum, entry): number => sum + entry.deltaPercentage, 0)
-                      / districtTrends.length,
+                  districtTrends.reduce((sum, entry): number => sum + entry.deltaPercentage, 0) /
+                      districtTrends.length,
               )
     const baseScore =
         complexityDelta * 0.35 +
@@ -2049,7 +2004,9 @@ function buildSprintSummaryCardModel(
     const overallImprovementScore = Math.max(1, Math.min(99, Math.round(baseScore)))
     const primarySnapshot = snapshots[0]
     const focusFileId = primarySnapshot?.fileId ?? files[0]?.id
-    const topImprovingDistricts = districtTrends.filter((entry): boolean => entry.deltaPercentage > 0)
+    const topImprovingDistricts = districtTrends.filter(
+        (entry): boolean => entry.deltaPercentage > 0,
+    )
     const focusedDistrict = topImprovingDistricts[0]
     const metrics: ReadonlyArray<ISprintSummaryMetric> = [
         {
@@ -2151,7 +2108,10 @@ function buildTrendTimelineEntries(
                 {
                     label: "Churn",
                     points: pointsSlice.map((point, pointIndex): number => {
-                        return Math.max(1, Math.round((120 - point.healthScore) / 4 + pointIndex * 2))
+                        return Math.max(
+                            1,
+                            Math.round((120 - point.healthScore) / 4 + pointIndex * 2),
+                        )
                     }),
                 },
             ],
@@ -2177,16 +2137,18 @@ function buildPredictionBugProneFiles(
     overlayEntries: ReadonlyArray<ICityPredictionOverlayEntry>,
 ): ReadonlyArray<IPredictionDashboardBugProneFile> {
     const confidenceByFileId = new Map<string, number>(
-        overlayEntries.map(
-            (entry): readonly [string, number] => [entry.fileId, entry.confidenceScore],
-        ),
+        overlayEntries.map((entry): readonly [string, number] => [
+            entry.fileId,
+            entry.confidenceScore,
+        ]),
     )
 
     return files
         .map((file): IPredictionDashboardBugProneFile => {
             return {
                 bugIntroductions30d: file.bugIntroductions?.["30d"] ?? 0,
-                confidenceScore: confidenceByFileId.get(file.id) ?? resolvePredictionConfidence(file),
+                confidenceScore:
+                    confidenceByFileId.get(file.id) ?? resolvePredictionConfidence(file),
                 fileId: file.id,
                 label: file.path,
             }
@@ -2223,9 +2185,9 @@ function buildPredictionExplainEntries(
         return {
             confidenceScore: entry.confidenceScore,
             explanation:
-                `LLM forecast: ${entry.label} has complexity ${String(complexity)}, `
-                + `churn ${String(churn)}, and ${String(bugIntroductions30d)} `
-                + "bug introductions in 30d, so this area is likely to evolve into a hotspot.",
+                `LLM forecast: ${entry.label} has complexity ${String(complexity)}, ` +
+                `churn ${String(churn)}, and ${String(bugIntroductions30d)} ` +
+                "bug introductions in 30d, so this area is likely to evolve into a hotspot.",
             fileId: entry.fileId,
             label: entry.label,
             reason: entry.reason,
@@ -2311,7 +2273,9 @@ function buildOwnershipOverlayEntries(
             }
         })
         .filter((entry): entry is ICityOwnershipOverlayOwnerEntry => entry !== undefined)
-        .sort((leftOwner, rightOwner): number => rightOwner.fileIds.length - leftOwner.fileIds.length)
+        .sort(
+            (leftOwner, rightOwner): number => rightOwner.fileIds.length - leftOwner.fileIds.length,
+        )
 }
 
 /**
@@ -2339,9 +2303,7 @@ function buildOwnershipFileColorById(
     return Object.keys(colorByFileId).length === 0 ? undefined : colorByFileId
 }
 
-function resolveBusFactorDistrictColor(
-    busFactor: number,
-): string {
+function resolveBusFactorDistrictColor(busFactor: number): string {
     if (busFactor <= 1) {
         return "#dc2626"
     }
@@ -2351,9 +2313,7 @@ function resolveBusFactorDistrictColor(
     return "#15803d"
 }
 
-function resolveDistrictName(
-    filePath: string,
-): string {
+function resolveDistrictName(filePath: string): string {
     const normalizedPath = filePath.trim().replaceAll("\\", "/")
     const separatorIndex = normalizedPath.lastIndexOf("/")
     if (separatorIndex <= 0) {
@@ -2543,7 +2503,10 @@ function buildKnowledgeSiloPanelEntries(
             churnBySilo.set(siloId, file.churn ?? 0)
         } else if (siloFileIds.includes(file.id) === false) {
             siloFileIds.push(file.id)
-            complexityBySilo.set(siloId, (complexityBySilo.get(siloId) ?? 0) + (file.complexity ?? 0))
+            complexityBySilo.set(
+                siloId,
+                (complexityBySilo.get(siloId) ?? 0) + (file.complexity ?? 0),
+            )
             churnBySilo.set(siloId, (churnBySilo.get(siloId) ?? 0) + (file.churn ?? 0))
         }
 
@@ -2742,7 +2705,7 @@ function resolveOwnershipTransitionFromOwnerId(
 
 function resolveOwnershipTransitionDate(index: number): string {
     const month = 10 + index
-    const day = 6 + (index * 5)
+    const day = 6 + index * 5
     return new Date(Date.UTC(2025, month, day)).toISOString()
 }
 
@@ -2891,11 +2854,15 @@ function buildImpactGraphModel(seeds: ReadonlyArray<IImpactAnalysisSeed>): {
  * @param seeds Impact seeds текущего профиля.
  * @returns Опции multi-file сценария.
  */
-function buildWhatIfOptions(seeds: ReadonlyArray<IImpactAnalysisSeed>): ReadonlyArray<IWhatIfOption> {
+function buildWhatIfOptions(
+    seeds: ReadonlyArray<IImpactAnalysisSeed>,
+): ReadonlyArray<IWhatIfOption> {
     return seeds.slice(0, 6).map((seed): IWhatIfOption => {
         return {
             affectedCount:
-                seed.affectedFiles.length + seed.affectedTests.length + seed.affectedConsumers.length,
+                seed.affectedFiles.length +
+                seed.affectedTests.length +
+                seed.affectedConsumers.length,
             fileId: seed.fileId,
             id: `what-if-${seed.id}`,
             impactScore: seed.riskScore,
@@ -2904,9 +2871,7 @@ function buildWhatIfOptions(seeds: ReadonlyArray<IImpactAnalysisSeed>): Readonly
     })
 }
 
-export function CodeCityDashboardPage(
-    props: ICodeCityDashboardPageProps = {},
-): ReactElement {
+export function CodeCityDashboardPage(props: ICodeCityDashboardPageProps = {}): ReactElement {
     const repositoryOptions = resolveRepositoryOptions(CODE_CITY_DASHBOARD_REPOSITORIES)
     const initialRepositoryId =
         props.initialRepositoryId === undefined
@@ -2918,25 +2883,29 @@ export function CodeCityDashboardPage(
     const [repositoryId, setRepositoryId] = useState<string>(initialRepositoryId)
     const [metric, setMetric] = useState<TCodeCityDashboardMetric>("complexity")
     const [overlayMode, setOverlayMode] = useState<TCausalOverlayMode>("impact")
-    const [exploreNavigationFocus, setExploreNavigationFocus] = useState<IExploreNavigationFocusState>(
-        {
+    const [exploreNavigationFocus, setExploreNavigationFocus] =
+        useState<IExploreNavigationFocusState>({
             chainFileIds: [],
             title: "",
-        },
-    )
+        })
     const [highlightedFileId, setHighlightedFileId] = useState<string | undefined>()
     const [activeBusFactorDistrictId, setActiveBusFactorDistrictId] = useState<string | undefined>()
-    const [activeBusFactorTrendModuleId, setActiveBusFactorTrendModuleId] = useState<string | undefined>()
+    const [activeBusFactorTrendModuleId, setActiveBusFactorTrendModuleId] = useState<
+        string | undefined
+    >()
     const [activePredictionFileId, setActivePredictionFileId] = useState<string | undefined>()
     const [activePredictionHotspotId, setActivePredictionHotspotId] = useState<string | undefined>()
-    const [activeTrendForecastPointId, setActiveTrendForecastPointId] = useState<string | undefined>()
+    const [activeTrendForecastPointId, setActiveTrendForecastPointId] = useState<
+        string | undefined
+    >()
     const [activePredictionAccuracyCaseId, setActivePredictionAccuracyCaseId] = useState<
         string | undefined
     >()
     const [activePredictionComparisonSnapshotId, setActivePredictionComparisonSnapshotId] =
         useState<string | undefined>()
-    const [activeSprintComparisonSnapshotId, setActiveSprintComparisonSnapshotId] =
-        useState<string | undefined>()
+    const [activeSprintComparisonSnapshotId, setActiveSprintComparisonSnapshotId] = useState<
+        string | undefined
+    >()
     const [activeDistrictTrendId, setActiveDistrictTrendId] = useState<string | undefined>()
     const [activeAchievementId, setActiveAchievementId] = useState<string | undefined>()
     const [activeTeamLeaderboardOwnerId, setActiveTeamLeaderboardOwnerId] = useState<
@@ -2950,7 +2919,9 @@ export function CodeCityDashboardPage(
     >()
     const [activeKnowledgeSiloId, setActiveKnowledgeSiloId] = useState<string | undefined>()
     const [activeContributorId, setActiveContributorId] = useState<string | undefined>()
-    const [activeOwnershipTransitionId, setActiveOwnershipTransitionId] = useState<string | undefined>()
+    const [activeOwnershipTransitionId, setActiveOwnershipTransitionId] = useState<
+        string | undefined
+    >()
     const [isOwnershipOverlayEnabled, setOwnershipOverlayEnabled] = useState<boolean>(true)
     const [activeOwnershipOwnerId, setActiveOwnershipOwnerId] = useState<string | undefined>()
     const [exploredAreaIds, setExploredAreaIds] = useState<ReadonlyArray<string>>(["controls"])
@@ -3033,9 +3004,7 @@ export function CodeCityDashboardPage(
         currentProfile.files,
         currentProfile.ownership,
     )
-    const busFactorPackageColorByName = buildBusFactorPackageColorByName(
-        busFactorOverlayEntries,
-    )
+    const busFactorPackageColorByName = buildBusFactorPackageColorByName(busFactorOverlayEntries)
     const busFactorTrendSeries = buildBusFactorTrendSeries(busFactorOverlayEntries)
     const knowledgeSiloEntries = buildKnowledgeSiloPanelEntries(
         currentProfile.files,
@@ -3074,13 +3043,11 @@ export function CodeCityDashboardPage(
     const whatIfOptions = buildWhatIfOptions(impactAnalysisSeeds)
     const onboardingProgressModules = buildOnboardingProgressModules(exploredAreaIds)
     const fileLink = createRepositoryFilesLink(currentProfile.id)
-    const overlayImpactedFiles =
-        overlayMode === "impact" ? currentProfile.impactedFiles : []
+    const overlayImpactedFiles = overlayMode === "impact" ? currentProfile.impactedFiles : []
     const overlayTemporalCouplings =
         overlayMode === "temporal-coupling" ? currentProfile.temporalCouplings : []
     const overlayRootCauseIssues = overlayMode === "root-cause" ? rootCauseIssues : []
-    const overlayCausalCouplings =
-        overlayMode === "temporal-coupling" ? causalCouplings : []
+    const overlayCausalCouplings = overlayMode === "temporal-coupling" ? causalCouplings : []
 
     const markAreaExplored = (areaId: TDashboardOnboardingAreaId): void => {
         setExploredAreaIds((currentAreaIds): ReadonlyArray<string> => {
@@ -3232,11 +3199,13 @@ export function CodeCityDashboardPage(
                                 value={repositoryId}
                                 onChange={handleRepositoryChange}
                             >
-                                {repositoryOptions.map((entry): ReactElement => (
-                                    <option key={entry} value={entry}>
-                                        {entry}
-                                    </option>
-                                ))}
+                                {repositoryOptions.map(
+                                    (entry): ReactElement => (
+                                        <option key={entry} value={entry}>
+                                            {entry}
+                                        </option>
+                                    ),
+                                )}
                             </select>
                         </label>
                         <label className="space-y-1" htmlFor="dashboard-metric">
@@ -3250,11 +3219,13 @@ export function CodeCityDashboardPage(
                                 value={metric}
                                 onChange={handleMetricChange}
                             >
-                                {CODE_CITY_DASHBOARD_METRICS.map((entry): ReactElement => (
-                                    <option key={entry.value} value={entry.value}>
-                                        {entry.label}
-                                    </option>
-                                ))}
+                                {CODE_CITY_DASHBOARD_METRICS.map(
+                                    (entry): ReactElement => (
+                                        <option key={entry.value} value={entry.value}>
+                                            {entry.label}
+                                        </option>
+                                    ),
+                                )}
                             </select>
                         </label>
                     </div>
@@ -3596,8 +3567,7 @@ export function CodeCityDashboardPage(
                             }
                             setExploreNavigationFocus({
                                 activeFileId: point.fileId,
-                                chainFileIds:
-                                    point.fileId === undefined ? [] : [point.fileId],
+                                chainFileIds: point.fileId === undefined ? [] : [point.fileId],
                                 title: `Trend forecast: ${point.timestamp}`,
                             })
                             markAreaExplored("controls")
@@ -4057,7 +4027,9 @@ export function CodeCityDashboardPage(
                         onSelectHistoricalPoint={(point): void => {
                             const primaryImpactSeed = impactAnalysisSeeds[0]
                             const activeFileId =
-                                primaryImpactSeed === undefined ? undefined : primaryImpactSeed.fileId
+                                primaryImpactSeed === undefined
+                                    ? undefined
+                                    : primaryImpactSeed.fileId
                             if (activeFileId !== undefined) {
                                 setHighlightedFileId(activeFileId)
                             }

@@ -159,7 +159,10 @@ export class AnalyticsSdk {
         }
 
         try {
-            const response = await this.options.sendRequest(this.options.endpoint, this.createBatchRequest(batchToSend))
+            const response = await this.options.sendRequest(
+                this.options.endpoint,
+                this.createBatchRequest(batchToSend),
+            )
 
             if (response.ok !== true) {
                 return
@@ -458,9 +461,9 @@ function createEventId(args: {
 }
 
 function createSessionId(): string {
-    const randomSeed = `${Date.now()}-${Math.random().toString(16).slice(2, 10)}-${
-        Math.floor(Math.random() * 1_000_000).toString(16)
-    }`
+    const randomSeed = `${Date.now()}-${Math.random().toString(16).slice(2, 10)}-${Math.floor(
+        Math.random() * 1_000_000,
+    ).toString(16)}`
 
     return `s_${createDeterministicHash(randomSeed).toString(16).slice(0, DEFAULT_SESSION_ID_LENGTH)}`
 }
@@ -471,8 +474,7 @@ function createDeterministicHash(input: string): number {
     for (let index = 0; index < input.length; index += 1) {
         const code = input.charCodeAt(index)
         hash ^= code
-        hash +=
-            (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24)
+        hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24)
     }
 
     return hash >>> 0
@@ -647,7 +649,9 @@ export type IAnalyticsSdkRuntimeOptions = {
  * @param overrides Базовые зависимости окружения.
  * @returns Заполненный объект опций.
  */
-export function createDefaultAnalyticsSdkOptions(overrides: IAnalyticsDefaultOptions): IAnalyticsSdkOptions {
+export function createDefaultAnalyticsSdkOptions(
+    overrides: IAnalyticsDefaultOptions,
+): IAnalyticsSdkOptions {
     return {
         endpoint: "/api/v1/analytics/events",
         maxBatchSize: DEFAULT_MAX_BATCH_SIZE,
@@ -672,9 +676,11 @@ export function createDefaultAnalyticsSdkOptions(overrides: IAnalyticsDefaultOpt
  *
  * @param overrides Параметры среды и переопределения.
  */
-export function createAnalyticsSdk(overrides: IAnalyticsDefaultOptions & {
-    readonly options?: IAnalyticsSdkRuntimeOptions
-}): AnalyticsSdk {
+export function createAnalyticsSdk(
+    overrides: IAnalyticsDefaultOptions & {
+        readonly options?: IAnalyticsSdkRuntimeOptions
+    },
+): AnalyticsSdk {
     const defaultOptions = createDefaultAnalyticsSdkOptions(overrides)
     const options = overrides.options
 

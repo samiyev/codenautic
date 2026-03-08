@@ -168,7 +168,9 @@ export function DropdownTrigger(props: IDropdownTriggerProps): ReactElement {
 export function DropdownItem(props: DropdownItemProps): ReactElement {
     const { color, className, ...dropdownItemProps } = props
     const mergedClassName =
-        color === "danger" && className === undefined ? "text-red-600 hover:text-red-700" : className
+        color === "danger" && className === undefined
+            ? "text-red-600 hover:text-red-700"
+            : className
 
     return <HeroUIDropdownItem {...dropdownItemProps} className={mergedClassName} />
 }

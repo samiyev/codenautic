@@ -137,7 +137,7 @@ function readSavedView(tableId: string): IEnterpriseTableSavedView {
             columnOrder: Array.isArray(parsed.columnOrder) ? parsed.columnOrder : [],
             columnVisibility:
                 typeof parsed.columnVisibility === "object" && parsed.columnVisibility !== null
-                    ? (parsed.columnVisibility)
+                    ? parsed.columnVisibility
                     : {},
             density,
             globalFilter: typeof parsed.globalFilter === "string" ? parsed.globalFilter : "",
@@ -177,7 +177,7 @@ function downloadFile(fileName: string, payload: string, contentType: string): v
 }
 
 function csvEscape(value: string): string {
-    return `"${value.replace(/"/g, "\"\"")}"`
+    return `"${value.replace(/"/g, '""')}"`
 }
 
 function buildCsvPayload<TRow>(
@@ -195,20 +195,22 @@ function buildCsvPayload<TRow>(
 function createColumnDefs<TRow>(
     columns: ReadonlyArray<IEnterpriseDataTableColumn<TRow>>,
 ): ReadonlyArray<ColumnDef<TRow>> {
-    return columns.map((column): ColumnDef<TRow> => ({
-        accessorFn: (row): string | number => column.accessor(row),
-        cell: (context): ReactElement | string | number => {
-            if (column.cell !== undefined) {
-                return column.cell(context.row.original)
-            }
-            return column.accessor(context.row.original)
-        },
-        enableGlobalFilter: column.enableGlobalFilter !== false,
-        enableHiding: column.isHideable !== false,
-        header: column.header,
-        id: column.id,
-        size: column.size ?? 180,
-    }))
+    return columns.map(
+        (column): ColumnDef<TRow> => ({
+            accessorFn: (row): string | number => column.accessor(row),
+            cell: (context): ReactElement | string | number => {
+                if (column.cell !== undefined) {
+                    return column.cell(context.row.original)
+                }
+                return column.accessor(context.row.original)
+            },
+            enableGlobalFilter: column.enableGlobalFilter !== false,
+            enableHiding: column.isHideable !== false,
+            header: column.header,
+            id: column.id,
+            size: column.size ?? 180,
+        }),
+    )
 }
 
 /**
@@ -300,7 +302,8 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
         .map((column): string => `${String(Math.max(column.getSize(), 120))}px`)
         .join(" ")}`
     const totalTableWidth =
-        48 + visibleColumns.reduce((accumulator, column): number => {
+        48 +
+        visibleColumns.reduce((accumulator, column): number => {
             return accumulator + Math.max(column.getSize(), 120)
         }, 0)
 
@@ -339,20 +342,27 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
         rowModel.length,
         Math.max(1, Math.ceil(maxBodyHeight / fallbackRowHeight) + overscan),
     )
-    const renderedRowOffsets: ReadonlyArray<IRenderedRowOffset> = virtualItems.length > 0
-        ? virtualItems.map((item): IRenderedRowOffset => ({
-            index: item.index,
-            key: String(item.key),
-            start: item.start,
-        }))
-        : Array.from({ length: fallbackRenderedRowCount }, (_unusedValue, index): IRenderedRowOffset => ({
-            index,
-            key: `fallback-row-${props.id}-${String(index)}`,
-            start: index * fallbackRowHeight,
-        }))
-    const totalRowsHeight = virtualItems.length > 0
-        ? rowVirtualizer.getTotalSize()
-        : rowModel.length * fallbackRowHeight
+    const renderedRowOffsets: ReadonlyArray<IRenderedRowOffset> =
+        virtualItems.length > 0
+            ? virtualItems.map(
+                  (item): IRenderedRowOffset => ({
+                      index: item.index,
+                      key: String(item.key),
+                      start: item.start,
+                  }),
+              )
+            : Array.from(
+                  { length: fallbackRenderedRowCount },
+                  (_unusedValue, index): IRenderedRowOffset => ({
+                      index,
+                      key: `fallback-row-${props.id}-${String(index)}`,
+                      start: index * fallbackRowHeight,
+                  }),
+              )
+    const totalRowsHeight =
+        virtualItems.length > 0
+            ? rowVirtualizer.getTotalSize()
+            : rowModel.length * fallbackRowHeight
 
     const selectedRows = table.getSelectedRowModel().rows
     const isStickyHeaderEnabled = props.stickyHeader?.enabled !== false
@@ -379,25 +389,18 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
     }
 
     const handleExportCsv = (): void => {
-        const filteredRows = table
-            .getFilteredRowModel()
-            .rows.map((row): TRow => row.original)
+        const filteredRows = table.getFilteredRowModel().rows.map((row): TRow => row.original)
         const payload = buildCsvPayload(filteredRows, props.columns)
         downloadFile(`${props.id}.csv`, payload, "text/csv;charset=utf-8;")
     }
 
     const handleExportJson = (): void => {
-        const filteredRows = table
-            .getFilteredRowModel()
-            .rows.map((row): TRow => row.original)
+        const filteredRows = table.getFilteredRowModel().rows.map((row): TRow => row.original)
         const payload = JSON.stringify(filteredRows, null, 2)
         downloadFile(`${props.id}.json`, payload, "application/json;charset=utf-8;")
     }
 
-    const handleRowKeyDown = (
-        event: KeyboardEvent<HTMLDivElement>,
-        rowIndex: number,
-    ): void => {
+    const handleRowKeyDown = (event: KeyboardEvent<HTMLDivElement>, rowIndex: number): void => {
         if (event.key === "ArrowDown") {
             const nextIndex = Math.min(rowIndex + 1, rowModel.length - 1)
             setFocusedRowIndex(nextIndex)
@@ -424,10 +427,12 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
         if (column === undefined) {
             return
         }
-        table.setColumnSizing((previous): ColumnSizingState => ({
-            ...previous,
-            [columnId]: next,
-        }))
+        table.setColumnSizing(
+            (previous): ColumnSizingState => ({
+                ...previous,
+                [columnId]: next,
+            }),
+        )
     }
 
     const handleBodyScroll = (event: UIEvent<HTMLDivElement>): void => {
@@ -653,7 +658,9 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                 </div>
 
                 {rowModel.length === 0 ? (
-                    <p className="px-3 py-6 text-sm text-[var(--foreground)]/70">{props.emptyMessage}</p>
+                    <p className="px-3 py-6 text-sm text-[var(--foreground)]/70">
+                        {props.emptyMessage}
+                    </p>
                 ) : (
                     <div
                         ref={parentRef}
@@ -703,11 +710,16 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                                                 onChange={row.getToggleSelectedHandler()}
                                             />
                                         </div>
-                                        {row.getVisibleCells().map((cell): ReactElement => (
-                                            <div key={cell.id} role="cell">
-                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                            </div>
-                                        ))}
+                                        {row.getVisibleCells().map(
+                                            (cell): ReactElement => (
+                                                <div key={cell.id} role="cell">
+                                                    {flexRender(
+                                                        cell.column.columnDef.cell,
+                                                        cell.getContext(),
+                                                    )}
+                                                </div>
+                                            ),
+                                        )}
                                     </div>
                                 )
                             })}

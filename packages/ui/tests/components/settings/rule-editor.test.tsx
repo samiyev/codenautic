@@ -10,12 +10,7 @@ function ControlledRuleEditor(props: { readonly initialValue: string }): ReactEl
     const [value, setValue] = useState<string>(props.initialValue)
 
     return (
-        <RuleEditor
-            id="test-rule-editor"
-            label="Rule editor"
-            onChange={setValue}
-            value={value}
-        />
+        <RuleEditor id="test-rule-editor" label="Rule editor" onChange={setValue} value={value} />
     )
 }
 
@@ -29,9 +24,7 @@ describe("RuleEditor", (): void => {
         })
         await user.type(textarea, " text")
 
-        expect(
-            await screen.findByRole("heading", { level: 1, name: "Intro text" }),
-        ).not.toBeNull()
+        expect(await screen.findByRole("heading", { level: 1, name: "Intro text" })).not.toBeNull()
     })
 
     it("добавляет markdown-разметку кнопкой Bold", async (): Promise<void> => {

@@ -14,9 +14,11 @@ vi.mock("@/components/graphs/graph-export", () => ({
 
 const { mockUseReactFlow } = vi.hoisted(() => ({
     mockUseReactFlow: vi.fn(() => {
-        const getViewport = vi.fn(
-            (): { x: number; y: number; zoom: number } => ({ x: 0, y: 0, zoom: 1 }),
-        )
+        const getViewport = vi.fn((): { x: number; y: number; zoom: number } => ({
+            x: 0,
+            y: 0,
+            zoom: 1,
+        }))
 
         return {
             fitView: vi.fn(async (): Promise<void> => {}),
@@ -37,16 +39,10 @@ vi.mock("@xyflow/react", () => ({
         Left: "left",
         Right: "right",
     },
-    Panel: ({
-        children,
-    }: {
-        readonly children?: ReactNode
-    }): ReactNode => <div>{children}</div>,
-    ReactFlow: ({
-        children,
-    }: {
-        readonly children?: ReactNode
-    }): ReactNode => <section>{children}</section>,
+    Panel: ({ children }: { readonly children?: ReactNode }): ReactNode => <div>{children}</div>,
+    ReactFlow: ({ children }: { readonly children?: ReactNode }): ReactNode => (
+        <section>{children}</section>
+    ),
     useReactFlow: mockUseReactFlow,
 }))
 

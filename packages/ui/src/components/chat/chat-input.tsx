@@ -82,9 +82,7 @@ export function ChatInput(props: IChatInputProps): ReactElement {
     const maxLengthLabel = `${String(normalizedLength)}/${String(maxLength)}`
     const trimmedDraft = props.draft.trim()
     const canSubmit =
-        trimmedDraft.length > 0 &&
-        props.isLoading !== true &&
-        normalizedLength <= maxLength
+        trimmedDraft.length > 0 && props.isLoading !== true && normalizedLength <= maxLength
 
     useEffect((): void => {
         if (contextOptions.length === 0) {
@@ -116,7 +114,10 @@ export function ChatInput(props: IChatInputProps): ReactElement {
             return
         }
 
-        if (selectedContext === "" || contextOptions.some((item): boolean => item.id === selectedContext) === false) {
+        if (
+            selectedContext === "" ||
+            contextOptions.some((item): boolean => item.id === selectedContext) === false
+        ) {
             setSelectedContext(fallback.id)
             props.onContextChange?.(fallback.id)
         }

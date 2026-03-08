@@ -104,8 +104,8 @@ function normalizeCombinationToken(rawToken: string): string {
     const key = parts.find((part): boolean => {
         return part !== "ctrl" && part !== "meta" && part !== "alt" && part !== "shift"
     })
-    const orderedModifiers = [ ...new Set(modifiers) ].sort()
-    const orderedParts = key === undefined ? orderedModifiers : [ ...orderedModifiers, key ]
+    const orderedModifiers = [...new Set(modifiers)].sort()
+    const orderedParts = key === undefined ? orderedModifiers : [...orderedModifiers, key]
 
     return orderedParts.join("+")
 }
@@ -148,7 +148,7 @@ function toKeyboardEventToken(event: KeyboardEvent): string {
     }
     const key = normalizeKeyboardEventKey(event)
 
-    return normalizeCombinationToken([ ...modifiers, key ].join("+"))
+    return normalizeCombinationToken([...modifiers, key].join("+"))
 }
 
 function doesSequenceMatchSuffix(

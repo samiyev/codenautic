@@ -65,12 +65,12 @@ export function ChatContextIndicator(props: IChatContextIndicatorProps): ReactEl
         (context): boolean => context.id === props.activeContextId,
     )
     const resolvedContext = activeContext ?? props.contexts[0]
-    const contextSummary = resolvedContext === undefined
-        ? "Unknown"
-        : formatContextSummary(resolvedContext)
-    const filesText = resolvedContext === undefined
-        ? "No attached files"
-        : formatAttachedFiles(resolvedContext.attachedFiles)
+    const contextSummary =
+        resolvedContext === undefined ? "Unknown" : formatContextSummary(resolvedContext)
+    const filesText =
+        resolvedContext === undefined
+            ? "No attached files"
+            : formatAttachedFiles(resolvedContext.attachedFiles)
 
     const renderContextItem = (context: IChatPanelContextInfo): ReactNode => (
         <div className="flex min-w-0 flex-col gap-1 text-left">

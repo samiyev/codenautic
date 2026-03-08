@@ -68,12 +68,17 @@ export function TokenUsageDashboardWidget(props: ITokenUsageDashboardWidgetProps
                                     nameKey="model"
                                     outerRadius={84}
                                 >
-                                    {props.byModel.map((entry, index): ReactElement => (
-                                        <Cell
-                                            fill={PIE_COLORS[index % PIE_COLORS.length] ?? "#2563eb"}
-                                            key={entry.model}
-                                        />
-                                    ))}
+                                    {props.byModel.map(
+                                        (entry, index): ReactElement => (
+                                            <Cell
+                                                fill={
+                                                    PIE_COLORS[index % PIE_COLORS.length] ??
+                                                    "#2563eb"
+                                                }
+                                                key={entry.model}
+                                            />
+                                        ),
+                                    )}
                                 </Pie>
                                 <Tooltip />
                             </PieChart>
@@ -102,8 +107,4 @@ export function TokenUsageDashboardWidget(props: ITokenUsageDashboardWidgetProps
     )
 }
 
-export type {
-    ITokenUsageDashboardWidgetProps,
-    ITokenUsageModelPoint,
-    ITokenUsageTrendPoint,
-}
+export type { ITokenUsageDashboardWidgetProps, ITokenUsageModelPoint, ITokenUsageTrendPoint }

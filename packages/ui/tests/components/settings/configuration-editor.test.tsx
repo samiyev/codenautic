@@ -38,9 +38,7 @@ describe("ConfigurationEditor", (): void => {
         const user = userEvent.setup()
         const onRepositoryIdChange = vi.fn((_value: string): void => {})
         const onConfigYamlChange = vi.fn((_value: string): void => {})
-        const onReviewModeChange = vi.fn(
-            (_event: ChangeEvent<HTMLSelectElement>): void => {},
-        )
+        const onReviewModeChange = vi.fn((_event: ChangeEvent<HTMLSelectElement>): void => {})
         const onSave = vi.fn((_event: FormEvent): void => {})
 
         renderWithProviders(

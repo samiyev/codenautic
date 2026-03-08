@@ -46,7 +46,9 @@ describe("AlertConfigDialog", (): void => {
         await user.click(screen.getByRole("checkbox", { name: "webhook" }))
         await user.selectOptions(screen.getByLabelText("Alert frequency"), "weekly")
         await user.click(screen.getByRole("checkbox", { name: "worker" }))
-        await user.click(screen.getByRole("button", { name: "Save prediction alert configuration" }))
+        await user.click(
+            screen.getByRole("button", { name: "Save prediction alert configuration" }),
+        )
 
         expect(onSave).toHaveBeenCalledTimes(1)
         expect(onSave).toHaveBeenCalledWith(
@@ -59,4 +61,3 @@ describe("AlertConfigDialog", (): void => {
         )
     })
 })
-

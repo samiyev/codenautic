@@ -33,7 +33,11 @@ const AuthAccessContext = createContext<IAuthAccessContextValue | undefined>(und
  * @returns React provider для защищённого UI.
  */
 export function AuthAccessProvider(props: IAuthAccessProviderProps): ReactElement {
-    return <AuthAccessContext.Provider value={props.value}>{props.children}</AuthAccessContext.Provider>
+    return (
+        <AuthAccessContext.Provider value={props.value}>
+            {props.children}
+        </AuthAccessContext.Provider>
+    )
 }
 
 /**

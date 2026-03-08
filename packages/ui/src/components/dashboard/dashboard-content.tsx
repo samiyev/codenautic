@@ -56,10 +56,7 @@ export function DashboardContent(props: IDashboardContentProps): ReactElement {
                     </CardHeader>
                     <CardBody>
                         {hasCriticalSignals ? (
-                            <Alert
-                                className="mb-4"
-                                color="warning"
-                            >
+                            <Alert className="mb-4" color="warning">
                                 <p className="mb-1 text-sm font-semibold text-amber-900">
                                     Ops notice
                                 </p>

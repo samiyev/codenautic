@@ -190,7 +190,7 @@ function createCommandPaletteItems(
         }
     })
 
-    return [ ...actionItems, ...routeItems ]
+    return [...actionItems, ...routeItems]
 }
 
 function sortByReferenceOrder<TValue extends { readonly path: string }>(
@@ -202,7 +202,7 @@ function sortByReferenceOrder<TValue extends { readonly path: string }>(
         positions.set(path, index)
     })
 
-    return [ ...items ].sort((left, right): number => {
+    return [...items].sort((left, right): number => {
         const leftPosition = positions.get(left.path)
         const rightPosition = positions.get(right.path)
         if (leftPosition === undefined && rightPosition === undefined) {
@@ -347,21 +347,24 @@ export function Header(props: IHeaderProps): ReactElement {
         )
         const recent = sortByReferenceOrder(
             searchedItems.filter((item): boolean => {
-                return recentCommands.includes(item.path) && pinnedCommands.includes(item.path) === false
+                return (
+                    recentCommands.includes(item.path) &&
+                    pinnedCommands.includes(item.path) === false
+                )
             }),
             recentCommands,
         )
         const baseline = searchedItems.filter((item): boolean => {
             return (
-                pinnedCommands.includes(item.path) === false
-                && recentCommands.includes(item.path) === false
+                pinnedCommands.includes(item.path) === false &&
+                recentCommands.includes(item.path) === false
             )
         })
-        const sortedBaseline = [ ...baseline ].sort((left, right): number => {
+        const sortedBaseline = [...baseline].sort((left, right): number => {
             return left.label.localeCompare(right.label)
         })
 
-        return [ ...pinned, ...recent, ...sortedBaseline ]
+        return [...pinned, ...recent, ...sortedBaseline]
     }, [commandPaletteItems, commandPaletteQuery, pinnedCommands, recentCommands])
     const groupedCommandPaletteItems = useMemo((): ReadonlyArray<ICommandPaletteGroupSection> => {
         return groupCommandPaletteItems(filteredCommandPaletteItems)
@@ -416,7 +419,10 @@ export function Header(props: IHeaderProps): ReactElement {
         }
 
         const handleKeyboardShortcut = (event: KeyboardEvent): void => {
-            if ((event.ctrlKey !== true && event.metaKey !== true) || event.key.toLowerCase() !== "k") {
+            if (
+                (event.ctrlKey !== true && event.metaKey !== true) ||
+                event.key.toLowerCase() !== "k"
+            ) {
                 return
             }
 
@@ -444,7 +450,10 @@ export function Header(props: IHeaderProps): ReactElement {
             searchInputRef.current?.select()
         }
 
-        window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, handleOpenCommandPalette as EventListener)
+        window.addEventListener(
+            OPEN_COMMAND_PALETTE_EVENT,
+            handleOpenCommandPalette as EventListener,
+        )
         window.addEventListener(FOCUS_GLOBAL_SEARCH_EVENT, handleFocusGlobalSearch as EventListener)
 
         return (): void => {
@@ -489,11 +498,15 @@ export function Header(props: IHeaderProps): ReactElement {
                         <Menu size={20} />
                     </Button>
                 </div>
-                <p className="text-sm font-semibold tracking-wide text-[var(--foreground)]">CodeNautic</p>
+                <p className="text-sm font-semibold tracking-wide text-[var(--foreground)]">
+                    CodeNautic
+                </p>
                 <div className="mx-auto hidden md:block">
                     {props.title !== undefined ? (
                         <div className="space-y-0.5">
-                            <p className="text-sm font-medium text-[var(--foreground)]/80">{props.title}</p>
+                            <p className="text-sm font-medium text-[var(--foreground)]/80">
+                                {props.title}
+                            </p>
                             {props.breadcrumbs === undefined ? null : (
                                 <p className="text-[11px] text-[var(--foreground)]/60">
                                     {props.breadcrumbs.join(" / ")}
@@ -531,9 +544,14 @@ export function Header(props: IHeaderProps): ReactElement {
                             }}
                         />
                         <datalist id="header-global-route-search">
-                            {filteredSearchRoutes.map((route): ReactElement => (
-                                <option key={route.path} value={`${route.label} (${route.path})`} />
-                            ))}
+                            {filteredSearchRoutes.map(
+                                (route): ReactElement => (
+                                    <option
+                                        key={route.path}
+                                        value={`${route.label} (${route.path})`}
+                                    />
+                                ),
+                            )}
                         </datalist>
                     </div>
                 )}
@@ -556,11 +574,13 @@ export function Header(props: IHeaderProps): ReactElement {
                                         props.onOrganizationChange?.(event.currentTarget.value)
                                     }}
                                 >
-                                    {props.organizations.map((organization): ReactElement => (
-                                        <option key={organization.id} value={organization.id}>
-                                            {organization.label}
-                                        </option>
-                                    ))}
+                                    {props.organizations.map(
+                                        (organization): ReactElement => (
+                                            <option key={organization.id} value={organization.id}>
+                                                {organization.label}
+                                            </option>
+                                        ),
+                                    )}
                                 </select>
                                 <p className="text-[11px] text-[var(--foreground)]/60">
                                     Current: {activeOrganization?.label ?? "Unknown workspace"}
@@ -584,11 +604,13 @@ export function Header(props: IHeaderProps): ReactElement {
                                         props.onRoleChange?.(event.currentTarget.value)
                                     }}
                                 >
-                                    {props.roleOptions.map((role): ReactElement => (
-                                        <option key={role.id} value={role.id}>
-                                            {role.label}
-                                        </option>
-                                    ))}
+                                    {props.roleOptions.map(
+                                        (role): ReactElement => (
+                                            <option key={role.id} value={role.id}>
+                                                {role.label}
+                                            </option>
+                                        ),
+                                    )}
                                 </select>
                                 <p className="text-[11px] text-[var(--foreground)]/60">
                                     Active: {activeRole?.label ?? "Unknown role"}
@@ -676,7 +698,9 @@ export function Header(props: IHeaderProps): ReactElement {
                                         return
                                     }
                                     setActiveCommandIndex((previousIndex): number => {
-                                        return (previousIndex + 1) % filteredCommandPaletteItems.length
+                                        return (
+                                            (previousIndex + 1) % filteredCommandPaletteItems.length
+                                        )
                                     })
                                     return
                                 }
@@ -704,7 +728,8 @@ export function Header(props: IHeaderProps): ReactElement {
                                 }
 
                                 event.preventDefault()
-                                const targetCommand = filteredCommandPaletteItems[activeCommandIndex]
+                                const targetCommand =
+                                    filteredCommandPaletteItems[activeCommandIndex]
                                 if (targetCommand === undefined) {
                                     return
                                 }
@@ -725,14 +750,19 @@ export function Header(props: IHeaderProps): ReactElement {
                             ) : (
                                 groupedCommandPaletteItems.map(
                                     (section): ReactElement => (
-                                        <div key={section.group} className="border-b border-[var(--border)] last:border-b-0">
+                                        <div
+                                            key={section.group}
+                                            className="border-b border-[var(--border)] last:border-b-0"
+                                        >
                                             <p className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground)]/60">
                                                 {section.group}
                                             </p>
                                             {section.items.map((item): ReactElement => {
-                                                const itemIndex = filteredCommandPaletteItems.findIndex(
-                                                    (candidate): boolean => candidate.id === item.id,
-                                                )
+                                                const itemIndex =
+                                                    filteredCommandPaletteItems.findIndex(
+                                                        (candidate): boolean =>
+                                                            candidate.id === item.id,
+                                                    )
                                                 const isActive = itemIndex === activeCommandIndex
                                                 const isPinned = pinnedCommands.includes(item.path)
 
@@ -745,7 +775,10 @@ export function Header(props: IHeaderProps): ReactElement {
                                                                 ? "bg-[color:color-mix(in_oklab,var(--primary)_12%,var(--surface))]"
                                                                 : "bg-transparent"
                                                         }`}
-                                                        id={createCommandPaletteOptionId(item.id, itemIndex)}
+                                                        id={createCommandPaletteOptionId(
+                                                            item.id,
+                                                            itemIndex,
+                                                        )}
                                                         role="option"
                                                     >
                                                         <button
@@ -758,7 +791,9 @@ export function Header(props: IHeaderProps): ReactElement {
                                                                 setActiveCommandIndex(itemIndex)
                                                             }}
                                                         >
-                                                            <span className="font-medium">{item.label}</span>
+                                                            <span className="font-medium">
+                                                                {item.label}
+                                                            </span>
                                                             <span className="ml-2 text-[11px] text-[var(--foreground)]/60">
                                                                 {item.path}
                                                             </span>

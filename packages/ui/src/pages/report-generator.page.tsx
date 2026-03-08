@@ -199,9 +199,9 @@ export function ReportGeneratorPage(): ReactElement {
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
                                     if (
-                                        nextValue === "architecture"
-                                        || nextValue === "delivery"
-                                        || nextValue === "quality"
+                                        nextValue === "architecture" ||
+                                        nextValue === "delivery" ||
+                                        nextValue === "quality"
                                     ) {
                                         setReportType(nextValue)
                                     }
@@ -222,7 +222,11 @@ export function ReportGeneratorPage(): ReactElement {
                                 value={reportFormat}
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
-                                    if (nextValue === "pdf" || nextValue === "png" || nextValue === "html") {
+                                    if (
+                                        nextValue === "pdf" ||
+                                        nextValue === "png" ||
+                                        nextValue === "html"
+                                    ) {
                                         setReportFormat(nextValue)
                                     }
                                 }}
@@ -233,7 +237,9 @@ export function ReportGeneratorPage(): ReactElement {
                             </select>
                         </label>
                         <label className="space-y-1 text-sm">
-                            <span className="font-semibold text-[var(--foreground)]">Start date</span>
+                            <span className="font-semibold text-[var(--foreground)]">
+                                Start date
+                            </span>
                             <input
                                 aria-label="Report date range start"
                                 className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900"
@@ -258,22 +264,24 @@ export function ReportGeneratorPage(): ReactElement {
                             Report sections
                         </legend>
                         <div className="grid gap-2 sm:grid-cols-2">
-                            {REPORT_SECTION_OPTIONS.map((section): ReactElement => (
-                                <label
-                                    className="flex items-center gap-2 rounded border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-900"
-                                    key={section.id}
-                                >
-                                    <input
-                                        aria-label={`Report section ${section.id}`}
-                                        checked={selectedSections.includes(section.id)}
-                                        type="checkbox"
-                                        onChange={(): void => {
-                                            handleSectionToggle(section.id)
-                                        }}
-                                    />
-                                    <span>{section.label}</span>
-                                </label>
-                            ))}
+                            {REPORT_SECTION_OPTIONS.map(
+                                (section): ReactElement => (
+                                    <label
+                                        className="flex items-center gap-2 rounded border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-900"
+                                        key={section.id}
+                                    >
+                                        <input
+                                            aria-label={`Report section ${section.id}`}
+                                            checked={selectedSections.includes(section.id)}
+                                            type="checkbox"
+                                            onChange={(): void => {
+                                                handleSectionToggle(section.id)
+                                            }}
+                                        />
+                                        <span>{section.label}</span>
+                                    </label>
+                                ),
+                            )}
                         </div>
                     </fieldset>
                     <div className="flex gap-2">
@@ -304,9 +312,11 @@ export function ReportGeneratorPage(): ReactElement {
                         </Alert>
                     ) : (
                         <ul aria-label="Selected report sections" className="space-y-1 text-sm">
-                            {selectedSectionLabels.map((label): ReactElement => (
-                                <li key={label}>{label}</li>
-                            ))}
+                            {selectedSectionLabels.map(
+                                (label): ReactElement => (
+                                    <li key={label}>{label}</li>
+                                ),
+                            )}
                         </ul>
                     )}
                     <pre

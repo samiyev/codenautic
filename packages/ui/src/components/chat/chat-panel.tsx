@@ -120,8 +120,7 @@ export function ChatPanel(props: IChatPanelProps): ReactElement {
 
     const title = props.title ?? "Conversation"
     const inputPlaceholder = props.placeholder ?? "Type a message and press Enter"
-    const emptyText =
-        props.emptyStateText ?? "No messages yet. Start the conversation to begin."
+    const emptyText = props.emptyStateText ?? "No messages yet. Start the conversation to begin."
     const panelAriaLabel = props.panelAriaLabel ?? "Conversation panel"
     const messageListAriaLabel = props.messageListAriaLabel ?? "Conversation messages"
     const inputAriaLabel = props.inputAriaLabel ?? "Message input"
@@ -143,11 +142,8 @@ export function ChatPanel(props: IChatPanelProps): ReactElement {
         )
     }, [props.contextOptions, normalizedContextItems])
     const availableContextId =
-        inputContextOptions.length === 0
-            ? ""
-            : inputContextOptions[0]?.id ?? ""
-    const effectiveContextId =
-        selectedContextId === "" ? availableContextId : selectedContextId
+        inputContextOptions.length === 0 ? "" : (inputContextOptions[0]?.id ?? "")
+    const effectiveContextId = selectedContextId === "" ? availableContextId : selectedContextId
 
     useEffect((): void => {
         if (props.activeContextId !== undefined) {
@@ -170,16 +166,16 @@ export function ChatPanel(props: IChatPanelProps): ReactElement {
         }
 
         if (
-            selectedContextId === ""
-            || inputContextOptions.some((context): boolean => context.id === selectedContextId) === false
+            selectedContextId === "" ||
+            inputContextOptions.some((context): boolean => context.id === selectedContextId) ===
+                false
         ) {
             setSelectedContextId(availableContextId)
         }
     }, [availableContextId, inputContextOptions, props.activeContextId, selectedContextId])
-    const wrapperClassName =
-        `fixed inset-y-0 right-0 z-40 flex w-full transform flex-col border-l border-[var(--border)] bg-[var(--surface)] shadow-2xl transition-transform duration-200 sm:max-w-[420px] ${
-            isPanelOpen ? "translate-x-0" : "translate-x-full"
-        } ${props.className ?? ""}`
+    const wrapperClassName = `fixed inset-y-0 right-0 z-40 flex w-full transform flex-col border-l border-[var(--border)] bg-[var(--surface)] shadow-2xl transition-transform duration-200 sm:max-w-[420px] ${
+        isPanelOpen ? "translate-x-0" : "translate-x-full"
+    } ${props.className ?? ""}`
 
     const handleSubmit = (message: string): void => {
         if (message.length === 0 || isSending) {
@@ -210,11 +206,7 @@ export function ChatPanel(props: IChatPanelProps): ReactElement {
     }
 
     return (
-        <aside
-            aria-label={panelAriaLabel}
-            className={wrapperClassName}
-            role="complementary"
-        >
+        <aside aria-label={panelAriaLabel} className={wrapperClassName} role="complementary">
             <Card className="min-h-full rounded-none border-0 shadow-none">
                 <CardHeader className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface)]">
                     <h2 className="text-sm font-semibold">{title}</h2>

@@ -7,9 +7,7 @@ import {
     LLM_PROVIDER_OPTIONS,
     type ILlmProviderFormValues,
 } from "@/components/settings/settings-form-schemas"
-import {
-    LlmProviderForm,
-} from "@/components/settings/llm-provider-form"
+import { LlmProviderForm } from "@/components/settings/llm-provider-form"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
 
 /** Конфигурация LLM integration. */
@@ -119,11 +117,11 @@ function normalizeFormValues(raw: unknown): INormalizedLlmProviderFormValues {
                 typeof next.endpoint === "string" && next.endpoint.length > 0
                     ? next.endpoint
                     : DEFAULT_FORM_VALUES.endpoint,
-                model: sanitizeChoice(LLM_MODEL_OPTIONS, next.model),
-                provider: sanitizeChoice(LLM_PROVIDER_OPTIONS, next.provider),
-                testAfterSave: next.testAfterSave === true,
-            }
+            model: sanitizeChoice(LLM_MODEL_OPTIONS, next.model),
+            provider: sanitizeChoice(LLM_PROVIDER_OPTIONS, next.provider),
+            testAfterSave: next.testAfterSave === true,
         }
+    }
 
     return DEFAULT_FORM_VALUES
 }

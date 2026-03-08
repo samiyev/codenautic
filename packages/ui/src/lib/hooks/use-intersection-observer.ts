@@ -79,9 +79,7 @@ export function useIntersectionObserver(
     }
 }
 
-function normalizeThreshold(
-    threshold: number | readonly number[] | undefined,
-): number | number[] {
+function normalizeThreshold(threshold: number | readonly number[] | undefined): number | number[] {
     if (threshold === undefined) {
         return 0
     }
@@ -93,9 +91,7 @@ function normalizeThreshold(
     return threshold
 }
 
-function isReadOnlyNumberArray(
-    value: unknown,
-): value is readonly number[] {
+function isReadOnlyNumberArray(value: unknown): value is readonly number[] {
     if (Array.isArray(value) === false) {
         return false
     }

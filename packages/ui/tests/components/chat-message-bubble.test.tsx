@@ -40,11 +40,7 @@ describe("chat message bubble", (): void => {
     it("копирует содержимое сообщения целиком", async (): Promise<void> => {
         const user = userEvent.setup()
         const message = messageWithCode
-        renderWithProviders(
-            <ChatMessageBubble
-                message={message}
-            />,
-        )
+        renderWithProviders(<ChatMessageBubble message={message} />)
 
         const copyMessageButton = screen.getByRole("button", {
             name: `Copy message ${message.sender}`,
@@ -55,11 +51,7 @@ describe("chat message bubble", (): void => {
 
     it("поддерживает копирование и разворачивание блока кода", async (): Promise<void> => {
         const user = userEvent.setup()
-        renderWithProviders(
-            <ChatMessageBubble
-                message={messageWithCode}
-            />,
-        )
+        renderWithProviders(<ChatMessageBubble message={messageWithCode} />)
 
         const copyCodeButton = screen.getByRole("button", {
             name: "Copy code block code-0",
@@ -88,11 +80,7 @@ describe("chat message bubble", (): void => {
     })
 
     it("рендерит markdown: заголовок, списки, ссылку и inline-code", (): void => {
-        renderWithProviders(
-            <ChatMessageBubble
-                message={messageWithMarkdown}
-            />,
-        )
+        renderWithProviders(<ChatMessageBubble message={messageWithMarkdown} />)
 
         expect(screen.getByRole("heading", { level: 5, name: "Заголовок" })).not.toBeNull()
         expect(screen.getByRole("list")).not.toBeNull()
@@ -188,7 +176,9 @@ describe("chat message bubble", (): void => {
         await user.click(screen.getByRole("link", { name: "Code reference src/app.ts:8" }))
         await user.click(screen.getByRole("link", { name: "Code reference /tmp/src/main.ts:15" }))
         await user.click(screen.getByRole("link", { name: "Code reference src/Dockerfile:9" }))
-        await user.click(screen.getByRole("link", { name: "Code reference C:\\repo\\src\\index.ts:22" }))
+        await user.click(
+            screen.getByRole("link", { name: "Code reference C:\\repo\\src\\index.ts:22" }),
+        )
 
         expect(onCodeReferenceClick).toHaveBeenNthCalledWith(1, {
             filePath: "src/index.ts",

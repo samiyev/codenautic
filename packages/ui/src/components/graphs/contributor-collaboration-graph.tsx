@@ -65,7 +65,7 @@ function resolveNodeRadius(
     }
 
     const normalized = (commitCount - minCount) / (maxCount - minCount)
-    return MIN_RADIUS + (normalized * (MAX_RADIUS - MIN_RADIUS))
+    return MIN_RADIUS + normalized * (MAX_RADIUS - MIN_RADIUS)
 }
 
 /**
@@ -92,8 +92,8 @@ function buildContributorGraphLayout(
     contributors.forEach((contributor, index): void => {
         const angle = (Math.PI * 2 * index) / nodeCount
         positionById.set(contributor.contributorId, {
-            x: centerX + (Math.cos(angle) * baseRadius),
-            y: centerY + (Math.sin(angle) * baseRadius),
+            x: centerX + Math.cos(angle) * baseRadius,
+            y: centerY + Math.sin(angle) * baseRadius,
         })
     })
 
@@ -112,7 +112,11 @@ function buildContributorGraphLayout(
             if (sourcePosition === undefined) {
                 continue
             }
-            for (let targetIndex = sourceIndex + 1; targetIndex < contributors.length; targetIndex += 1) {
+            for (
+                let targetIndex = sourceIndex + 1;
+                targetIndex < contributors.length;
+                targetIndex += 1
+            ) {
                 const target = contributors[targetIndex]
                 if (target === undefined) {
                     continue
@@ -123,7 +127,7 @@ function buildContributorGraphLayout(
                 }
                 const deltaX = sourcePosition.x - targetPosition.x
                 const deltaY = sourcePosition.y - targetPosition.y
-                const distance = Math.max(12, Math.sqrt((deltaX * deltaX) + (deltaY * deltaY)))
+                const distance = Math.max(12, Math.sqrt(deltaX * deltaX + deltaY * deltaY))
                 const repulsion = 2200 / (distance * distance)
                 const normalizedX = deltaX / distance
                 const normalizedY = deltaY / distance
@@ -148,8 +152,8 @@ function buildContributorGraphLayout(
             }
             const deltaX = targetPosition.x - sourcePosition.x
             const deltaY = targetPosition.y - sourcePosition.y
-            const distance = Math.max(10, Math.sqrt((deltaX * deltaX) + (deltaY * deltaY)))
-            const spring = ((distance - 140) * 0.008) * Math.max(1, edge.coAuthorCount / 2)
+            const distance = Math.max(10, Math.sqrt(deltaX * deltaX + deltaY * deltaY))
+            const spring = (distance - 140) * 0.008 * Math.max(1, edge.coAuthorCount / 2)
             const normalizedX = deltaX / distance
             const normalizedY = deltaY / distance
             const sourceForce = forceById.get(edge.sourceContributorId)
@@ -171,8 +175,8 @@ function buildContributorGraphLayout(
             if (position === undefined || force === undefined) {
                 continue
             }
-            position.x = Math.min(LAYOUT_WIDTH - 24, Math.max(24, position.x + (force.x * 0.6)))
-            position.y = Math.min(LAYOUT_HEIGHT - 24, Math.max(24, position.y + (force.y * 0.6)))
+            position.x = Math.min(LAYOUT_WIDTH - 24, Math.max(24, position.x + force.x * 0.6))
+            position.y = Math.min(LAYOUT_HEIGHT - 24, Math.max(24, position.y + force.y * 0.6))
         }
     }
 

@@ -18,7 +18,8 @@ export function ReportScheduleDialog(): ReactElement {
     const [status, setStatus] = useState<string>("No scheduled delivery configured yet.")
 
     const schedulePreview = useMemo((): string => {
-        const normalizedRecipients = recipients.trim().length === 0 ? "no recipients" : recipients.trim()
+        const normalizedRecipients =
+            recipients.trim().length === 0 ? "no recipients" : recipients.trim()
         return `Cron: ${cronExpression} · Recipients: ${normalizedRecipients} · Format: ${format.toUpperCase()}`
     }, [cronExpression, format, recipients])
 
@@ -29,7 +30,9 @@ export function ReportScheduleDialog(): ReactElement {
         setCronExpression(event.currentTarget.value)
     }
     const handleSaveSchedule = (): void => {
-        setStatus(`Scheduled delivery saved (${format.toUpperCase()}) for cron "${cronExpression}".`)
+        setStatus(
+            `Scheduled delivery saved (${format.toUpperCase()}) for cron "${cronExpression}".`,
+        )
         showToastSuccess("Report schedule saved.")
     }
 
@@ -56,7 +59,9 @@ export function ReportScheduleDialog(): ReactElement {
                         role="dialog"
                     >
                         <label className="space-y-1 text-sm">
-                            <span className="font-semibold text-[var(--foreground)]">Recipients</span>
+                            <span className="font-semibold text-[var(--foreground)]">
+                                Recipients
+                            </span>
                             <input
                                 aria-label="Schedule recipients"
                                 className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900"
@@ -66,7 +71,9 @@ export function ReportScheduleDialog(): ReactElement {
                             />
                         </label>
                         <label className="space-y-1 text-sm">
-                            <span className="font-semibold text-[var(--foreground)]">Cron expression</span>
+                            <span className="font-semibold text-[var(--foreground)]">
+                                Cron expression
+                            </span>
                             <input
                                 aria-label="Schedule cron expression"
                                 className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900"
@@ -76,14 +83,20 @@ export function ReportScheduleDialog(): ReactElement {
                             />
                         </label>
                         <label className="space-y-1 text-sm">
-                            <span className="font-semibold text-[var(--foreground)]">Delivery format</span>
+                            <span className="font-semibold text-[var(--foreground)]">
+                                Delivery format
+                            </span>
                             <select
                                 aria-label="Schedule format"
                                 className="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900"
                                 value={format}
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
-                                    if (nextValue === "pdf" || nextValue === "png" || nextValue === "html") {
+                                    if (
+                                        nextValue === "pdf" ||
+                                        nextValue === "png" ||
+                                        nextValue === "html"
+                                    ) {
                                         setFormat(nextValue)
                                     }
                                 }}

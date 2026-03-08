@@ -22,7 +22,10 @@ function listSourceFiles(directory: string): ReadonlyArray<string> {
             return
         }
 
-        if (entry.isFile() === true && (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx"))) {
+        if (
+            entry.isFile() === true &&
+            (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx"))
+        ) {
             filePaths.push(entryPath)
         }
     })
@@ -58,7 +61,9 @@ function hasLiteralIconHexColor(fileContent: string): boolean {
 }
 
 function extractLucideIconNames(fileContent: string): ReadonlyArray<string> {
-    const lucideImportMatch = fileContent.match(/import\s*\{([^}]+)\}\s*from\s*["']lucide-react["']/)
+    const lucideImportMatch = fileContent.match(
+        /import\s*\{([^}]+)\}\s*from\s*["']lucide-react["']/,
+    )
     if (lucideImportMatch === null) {
         return []
     }
@@ -165,8 +170,7 @@ describe("ui icon policy contract", (): void => {
         const filesWithDirectLucideImports = sourceFiles.filter((filePath): boolean => {
             const fileContent = readFileSync(filePath, "utf8")
             return (
-                hasDirectLucideImport(fileContent)
-                && isAllowedLucideImportFile(filePath) === false
+                hasDirectLucideImport(fileContent) && isAllowedLucideImportFile(filePath) === false
             )
         })
         const filesWithLiteralIconColors = sourceFiles.filter((filePath): boolean => {

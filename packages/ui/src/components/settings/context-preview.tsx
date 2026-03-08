@@ -45,23 +45,29 @@ export function ContextPreview(props: IContextPreviewProps): ReactElement {
                     <p className="text-sm text-foreground-500">{emptyStateLabel}</p>
                 ) : (
                     <ul className="space-y-2">
-                        {props.preview.items.map((item): ReactElement => (
-                            <li
-                                key={item.id}
-                                className="rounded-lg border border-default-200 bg-content1 p-3"
-                            >
-                                <p className="text-sm font-semibold text-foreground">{item.title}</p>
-                                <p className="mt-1 text-xs text-foreground-600">{item.excerpt}</p>
-                                <a
-                                    className="mt-2 inline-block text-xs font-medium text-primary"
-                                    href={item.url}
-                                    rel="noreferrer"
-                                    target="_blank"
+                        {props.preview.items.map(
+                            (item): ReactElement => (
+                                <li
+                                    key={item.id}
+                                    className="rounded-lg border border-default-200 bg-content1 p-3"
                                 >
-                                    Open source item
-                                </a>
-                            </li>
-                        ))}
+                                    <p className="text-sm font-semibold text-foreground">
+                                        {item.title}
+                                    </p>
+                                    <p className="mt-1 text-xs text-foreground-600">
+                                        {item.excerpt}
+                                    </p>
+                                    <a
+                                        className="mt-2 inline-block text-xs font-medium text-primary"
+                                        href={item.url}
+                                        rel="noreferrer"
+                                        target="_blank"
+                                    >
+                                        Open source item
+                                    </a>
+                                </li>
+                            ),
+                        )}
                     </ul>
                 )}
             </CardBody>

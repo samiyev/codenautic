@@ -54,13 +54,14 @@ function parseCodeReference(value: string): IChatCodeReference | undefined {
 
     const [, rawFilePath, lineStart, lineEnd, hashRange] = match
     const filePath = (rawFilePath ?? "").trim()
-    const hasFileDelimiter = filePath.includes("/") || filePath.includes("\\") || filePath.includes(".")
+    const hasFileDelimiter =
+        filePath.includes("/") || filePath.includes("\\") || filePath.includes(".")
     if (
-        filePath.length === 0
-        || filePath.endsWith("/")
-        || filePath.endsWith("\\")
-        || /\s/.test(filePath)
-        || hasFileDelimiter === false
+        filePath.length === 0 ||
+        filePath.endsWith("/") ||
+        filePath.endsWith("\\") ||
+        /\s/.test(filePath) ||
+        hasFileDelimiter === false
     ) {
         return undefined
     }
@@ -71,10 +72,10 @@ function parseCodeReference(value: string): IChatCodeReference | undefined {
     const parsedHashStart = parseLineNumber(hashMatch?.[1] ?? "")
     const parsedHashEnd = parseLineNumber(hashMatch?.[2] ?? "")
     const hasLineInfo =
-        parsedLineStart !== undefined
-        || parsedLineEnd !== undefined
-        || parsedHashStart !== undefined
-        || parsedHashEnd !== undefined
+        parsedLineStart !== undefined ||
+        parsedLineEnd !== undefined ||
+        parsedHashStart !== undefined ||
+        parsedHashEnd !== undefined
     const hasPathDelimiter = filePath.includes("/") || filePath.includes("\\")
     const hasFileExtension = /\.[A-Za-z0-9-]+$/.test(filePath)
 
@@ -162,17 +163,14 @@ function renderCodeReferenceLink(
     const handleHoverOrFocus = (): void => {
         onCodeReferencePreview?.(reference)
     }
-    const shouldHandle = onCodeReferenceClick !== undefined
-        || onCodeReferencePreview !== undefined
+    const shouldHandle = onCodeReferenceClick !== undefined || onCodeReferencePreview !== undefined
 
     return (
         <a
             aria-label={`Code reference ${buildReferenceLabel(reference)}`}
             className="text-[var(--primary)] underline underline-offset-4"
             href={shouldHandle ? "#" : href}
-            onClick={(
-                event: MouseEvent<HTMLAnchorElement>,
-            ): void => {
+            onClick={(event: MouseEvent<HTMLAnchorElement>): void => {
                 if (onCodeReferenceClick === undefined) {
                     return
                 }
@@ -238,9 +236,7 @@ function parseMessageCodeBlock(
     onCopy: (text: string) => void,
     onToggleExpand: () => void,
 ): ReactElement {
-    const className = isExpanded
-        ? "max-h-none"
-        : "max-h-36 overflow-hidden"
+    const className = isExpanded ? "max-h-none" : "max-h-36 overflow-hidden"
     const blockClassName = [
         "overflow-x-auto rounded-md border border-[var(--border)] bg-[var(--background)]",
         "p-3 text-sm transition-[max-height]",
@@ -287,9 +283,7 @@ function parseMessageCodeBlock(
                     </Button>
                 </div>
             </div>
-            <pre
-                className={blockClassName}
-            >
+            <pre className={blockClassName}>
                 <code className={`language-${language} block whitespace-pre`} lang={language}>
                     {source}
                 </code>
@@ -336,28 +330,16 @@ export function ChatMessageBubble(props: IChatMessageBubbleProps): ReactElement 
     }
 
     const markdownComponents: Components = {
-        h1: ({children}): ReactElement => (
-            <h3 className="text-lg font-semibold">{children}</h3>
-        ),
-        h2: ({children}): ReactElement => (
-            <h4 className="text-base font-semibold">{children}</h4>
-        ),
-        h3: ({children}): ReactElement => (
-            <h5 className="text-sm font-semibold">{children}</h5>
-        ),
-        h4: ({children}): ReactElement => (
-            <h6 className="text-sm font-semibold">{children}</h6>
-        ),
-        h5: ({children}): ReactElement => (
-            <h6 className="text-xs font-semibold">{children}</h6>
-        ),
-        h6: ({children}): ReactElement => (
-            <h6 className="text-xs font-semibold">{children}</h6>
-        ),
-        p: ({children}): ReactElement => (
+        h1: ({ children }): ReactElement => <h3 className="text-lg font-semibold">{children}</h3>,
+        h2: ({ children }): ReactElement => <h4 className="text-base font-semibold">{children}</h4>,
+        h3: ({ children }): ReactElement => <h5 className="text-sm font-semibold">{children}</h5>,
+        h4: ({ children }): ReactElement => <h6 className="text-sm font-semibold">{children}</h6>,
+        h5: ({ children }): ReactElement => <h6 className="text-xs font-semibold">{children}</h6>,
+        h6: ({ children }): ReactElement => <h6 className="text-xs font-semibold">{children}</h6>,
+        p: ({ children }): ReactElement => (
             <p className="leading-relaxed text-[var(--foreground)]">{children}</p>
         ),
-        ul: ({children}): ReactElement => (
+        ul: ({ children }): ReactElement => (
             <ul className="list-disc space-y-1 pl-6">{children}</ul>
         ),
         code: (markdownCodeProps): ReactElement => {
@@ -372,9 +354,7 @@ export function ChatMessageBubble(props: IChatMessageBubbleProps): ReactElement 
                 )
             }
 
-            const source = sourceValue
-                .replace(/^\n+/, "")
-                .replace(/\n+$/, "")
+            const source = sourceValue.replace(/^\n+/, "").replace(/\n+$/, "")
             const language = parseCodeBlockLanguage(markdownCodeProps.className)
             const key = `code-${String(blockIndex)}`
             const currentIndex = blockIndex
@@ -392,7 +372,7 @@ export function ChatMessageBubble(props: IChatMessageBubbleProps): ReactElement 
                 },
             )
         },
-        a: ({href, children}): ReactElement => {
+        a: ({ href, children }): ReactElement => {
             const targetHref = typeof href === "string" ? href : ""
             const label = readNodeText(children)
 
@@ -416,18 +396,10 @@ export function ChatMessageBubble(props: IChatMessageBubbleProps): ReactElement 
                 }`}
             >
                 <header className="mb-0.5 flex items-start gap-2">
-                    <Avatar
-                        fallback={avatarLabel}
-                        name={sender}
-                        size="sm"
-                    />
+                    <Avatar fallback={avatarLabel} name={sender} size="sm" />
                     <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold text-[var(--foreground)]">
-                            {sender}
-                        </p>
-                        <p className="text-xs text-[var(--foreground)]/70">
-                            {formattedTime}
-                        </p>
+                        <p className="text-xs font-semibold text-[var(--foreground)]">{sender}</p>
+                        <p className="text-xs text-[var(--foreground)]/70">{formattedTime}</p>
                     </div>
                     <Button
                         aria-label={`Copy message ${sender}`}

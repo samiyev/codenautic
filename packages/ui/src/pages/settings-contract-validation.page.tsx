@@ -136,7 +136,10 @@ const DRIFT_SEVERITY_PRIORITY: Record<TDriftSeverity, number> = {
 
 const DEFAULT_DRIFT_VIOLATIONS: ReadonlyArray<IDriftViolation> = [
     {
-        affectedFiles: ["src/infrastructure/http/review.controller.ts", "src/domain/review.aggregate.ts"],
+        affectedFiles: [
+            "src/infrastructure/http/review.controller.ts",
+            "src/domain/review.aggregate.ts",
+        ],
         id: "drift-001",
         rationale: "Controller layer imports aggregate directly, bypassing application use case.",
         rule: "Layer violation: infrastructure imports domain directly",
@@ -633,11 +636,7 @@ function parseContractEnvelope(rawValue: string): IValidationResult {
         errors.push("Payload is required.")
     }
 
-    if (
-        errors.length === 0
-        && typeof candidate.version === "number"
-        && candidate.version === 1
-    ) {
+    if (errors.length === 0 && typeof candidate.version === "number" && candidate.version === 1) {
         migrationHints.push(
             "Version 1 contract is accepted with migration. Add explicit `metadata` block for v2.",
         )
@@ -793,8 +792,12 @@ export function SettingsContractValidationPage(): ReactElement {
     const [driftExportPayload, setDriftExportPayload] = useState<string>(
         "No drift report exported yet.",
     )
-    const [driftExportStatus, setDriftExportStatus] = useState<string>("No drift report exported yet.")
-    const [selectedDriftOverlayFileId, setSelectedDriftOverlayFileId] = useState<string | undefined>()
+    const [driftExportStatus, setDriftExportStatus] = useState<string>(
+        "No drift report exported yet.",
+    )
+    const [selectedDriftOverlayFileId, setSelectedDriftOverlayFileId] = useState<
+        string | undefined
+    >()
     const [driftAlertSeverityThreshold, setDriftAlertSeverityThreshold] =
         useState<TDriftSeverity>("high")
     const [driftAlertViolationThreshold, setDriftAlertViolationThreshold] = useState<number>(2)
@@ -831,10 +834,10 @@ export function SettingsContractValidationPage(): ReactElement {
             const matchesSeverity =
                 driftSeverityFilter === "all" || violation.severity === driftSeverityFilter
             const matchesSearch =
-                normalizedSearchQuery.length === 0
-                || violation.rule.toLowerCase().includes(normalizedSearchQuery)
-                || violation.rationale.toLowerCase().includes(normalizedSearchQuery)
-                || violation.affectedFiles.some((file): boolean => {
+                normalizedSearchQuery.length === 0 ||
+                violation.rule.toLowerCase().includes(normalizedSearchQuery) ||
+                violation.rationale.toLowerCase().includes(normalizedSearchQuery) ||
+                violation.affectedFiles.some((file): boolean => {
                     return file.toLowerCase().includes(normalizedSearchQuery)
                 })
             return matchesSeverity && matchesSearch
@@ -844,8 +847,8 @@ export function SettingsContractValidationPage(): ReactElement {
                 return compareDriftViolations(left, right, driftSortMode)
             })
     }, [driftSearchQuery, driftSeverityFilter, driftSortMode])
-    const driftOverlayImpactedFiles = useMemo(
-        (): ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor> => {
+    const driftOverlayImpactedFiles =
+        useMemo((): ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor> => {
             const impactedByFileId = new Map<string, ICodeCityTreemapImpactedFileDescriptor>()
             for (const violation of DEFAULT_DRIFT_VIOLATIONS) {
                 const affectedFileIds = resolveDriftViolationFileIds(violation)
@@ -857,10 +860,11 @@ export function SettingsContractValidationPage(): ReactElement {
                 }
             }
             return Array.from(impactedByFileId.values())
-        },
-        [],
-    )
-    const driftViolationsByFileId = useMemo((): ReadonlyMap<string, ReadonlyArray<IDriftViolation>> => {
+        }, [])
+    const driftViolationsByFileId = useMemo((): ReadonlyMap<
+        string,
+        ReadonlyArray<IDriftViolation>
+    > => {
         const violationsByFileId = new Map<string, IDriftViolation[]>()
         for (const violation of DEFAULT_DRIFT_VIOLATIONS) {
             const affectedFileIds = resolveDriftViolationFileIds(violation)
@@ -891,7 +895,9 @@ export function SettingsContractValidationPage(): ReactElement {
         return buildArchitectureDifferences(BLUEPRINT_STRUCTURE_NODES, REALITY_STRUCTURE_NODES)
     }, [])
     const architectureDifferenceSummary = useMemo((): string => {
-        const matchCount = architectureDifferences.filter((entry): boolean => entry.status === "match").length
+        const matchCount = architectureDifferences.filter(
+            (entry): boolean => entry.status === "match",
+        ).length
         const missingCount = architectureDifferences.filter(
             (entry): boolean => entry.status === "missing",
         ).length
@@ -1025,7 +1031,9 @@ export function SettingsContractValidationPage(): ReactElement {
     const handleDriftAlertChannelToggle = (channel: TDriftAlertChannel): void => {
         setDriftAlertChannels((currentChannels): ReadonlyArray<TDriftAlertChannel> => {
             if (currentChannels.includes(channel) === true) {
-                return currentChannels.filter((currentChannel): boolean => currentChannel !== channel)
+                return currentChannels.filter(
+                    (currentChannel): boolean => currentChannel !== channel,
+                )
             }
             return [...currentChannels, channel]
         })
@@ -1088,7 +1096,9 @@ export function SettingsContractValidationPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Contract payload</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Contract payload
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <Textarea
@@ -1108,7 +1118,9 @@ export function SettingsContractValidationPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Validation result</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Validation result
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     {validationResult.errors.length === 0 ? (
@@ -1118,18 +1130,22 @@ export function SettingsContractValidationPage(): ReactElement {
                     ) : (
                         <Alert color="danger" title="Contract validation errors" variant="flat">
                             <ul aria-label="Contract errors list" className="space-y-1">
-                                {validationResult.errors.map((error): ReactElement => (
-                                    <li key={error}>{error}</li>
-                                ))}
+                                {validationResult.errors.map(
+                                    (error): ReactElement => (
+                                        <li key={error}>{error}</li>
+                                    ),
+                                )}
                             </ul>
                         </Alert>
                     )}
                     {validationResult.migrationHints.length === 0 ? null : (
                         <Alert color="warning" title="Migration hints" variant="flat">
                             <ul aria-label="Contract migration hints list" className="space-y-1">
-                                {validationResult.migrationHints.map((hint): ReactElement => (
-                                    <li key={hint}>{hint}</li>
-                                ))}
+                                {validationResult.migrationHints.map(
+                                    (hint): ReactElement => (
+                                        <li key={hint}>{hint}</li>
+                                    ),
+                                )}
                             </ul>
                         </Alert>
                     )}
@@ -1179,9 +1195,11 @@ export function SettingsContractValidationPage(): ReactElement {
                     ) : (
                         <Alert color="danger" title="Blueprint validation errors" variant="flat">
                             <ul aria-label="Blueprint errors list" className="space-y-1">
-                                {blueprintValidationResult.errors.map((error): ReactElement => (
-                                    <li key={error}>{error}</li>
-                                ))}
+                                {blueprintValidationResult.errors.map(
+                                    (error): ReactElement => (
+                                        <li key={error}>{error}</li>
+                                    ),
+                                )}
                             </ul>
                         </Alert>
                     )}
@@ -1202,22 +1220,27 @@ export function SettingsContractValidationPage(): ReactElement {
                         aria-label="Blueprint syntax highlight preview"
                         className="overflow-x-auto rounded-md border border-slate-200 bg-slate-950 p-3 text-xs leading-6"
                     >
-                        {blueprintHighlightLines.map((line): ReactElement => (
-                            <div key={line.id} style={{ paddingLeft: `${String(line.indent)}px` }}>
-                                {line.comment === undefined ? null : (
-                                    <span className="text-slate-400">{line.comment}</span>
-                                )}
-                                {line.key === undefined ? null : (
-                                    <span className="text-sky-300">{line.key}</span>
-                                )}
-                                {line.key === undefined ? null : (
-                                    <span className="text-slate-500">: </span>
-                                )}
-                                {line.value === undefined ? null : (
-                                    <span className="text-emerald-300">{line.value}</span>
-                                )}
-                            </div>
-                        ))}
+                        {blueprintHighlightLines.map(
+                            (line): ReactElement => (
+                                <div
+                                    key={line.id}
+                                    style={{ paddingLeft: `${String(line.indent)}px` }}
+                                >
+                                    {line.comment === undefined ? null : (
+                                        <span className="text-slate-400">{line.comment}</span>
+                                    )}
+                                    {line.key === undefined ? null : (
+                                        <span className="text-sky-300">{line.key}</span>
+                                    )}
+                                    {line.key === undefined ? null : (
+                                        <span className="text-slate-500">: </span>
+                                    )}
+                                    {line.value === undefined ? null : (
+                                        <span className="text-emerald-300">{line.value}</span>
+                                    )}
+                                </div>
+                            ),
+                        )}
                     </pre>
                 </CardBody>
             </Card>
@@ -1230,21 +1253,25 @@ export function SettingsContractValidationPage(): ReactElement {
                 </CardHeader>
                 <CardBody>
                     <ul aria-label="Blueprint visual nodes list" className="space-y-1">
-                        {blueprintValidationResult.nodes.map((node): ReactElement => (
-                            <li
-                                className="flex items-center gap-2 rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs"
-                                key={node.id}
-                                style={{ marginLeft: `${String(node.depth * 12)}px` }}
-                            >
-                                <span className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
-                                    {node.kind}
-                                </span>
-                                <span className="font-semibold text-slate-900">{node.label}</span>
-                                {node.value === undefined ? null : (
-                                    <span className="text-slate-600">{node.value}</span>
-                                )}
-                            </li>
-                        ))}
+                        {blueprintValidationResult.nodes.map(
+                            (node): ReactElement => (
+                                <li
+                                    className="flex items-center gap-2 rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs"
+                                    key={node.id}
+                                    style={{ marginLeft: `${String(node.depth * 12)}px` }}
+                                >
+                                    <span className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
+                                        {node.kind}
+                                    </span>
+                                    <span className="font-semibold text-slate-900">
+                                        {node.label}
+                                    </span>
+                                    {node.value === undefined ? null : (
+                                        <span className="text-slate-600">{node.value}</span>
+                                    )}
+                                </li>
+                            ),
+                        )}
                     </ul>
                 </CardBody>
             </Card>
@@ -1283,11 +1310,11 @@ export function SettingsContractValidationPage(): ReactElement {
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
                                     if (
-                                        nextValue === "all"
-                                        || nextValue === "critical"
-                                        || nextValue === "high"
-                                        || nextValue === "medium"
-                                        || nextValue === "low"
+                                        nextValue === "all" ||
+                                        nextValue === "critical" ||
+                                        nextValue === "high" ||
+                                        nextValue === "medium" ||
+                                        nextValue === "low"
                                     ) {
                                         setDriftSeverityFilter(nextValue)
                                     }
@@ -1309,10 +1336,10 @@ export function SettingsContractValidationPage(): ReactElement {
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
                                     if (
-                                        nextValue === "severity-desc"
-                                        || nextValue === "severity-asc"
-                                        || nextValue === "files-desc"
-                                        || nextValue === "files-asc"
+                                        nextValue === "severity-desc" ||
+                                        nextValue === "severity-asc" ||
+                                        nextValue === "files-desc" ||
+                                        nextValue === "files-asc"
                                     ) {
                                         setDriftSortMode(nextValue)
                                     }
@@ -1337,25 +1364,27 @@ export function SettingsContractValidationPage(): ReactElement {
                         </Alert>
                     ) : (
                         <ul aria-label="Drift violations list" className="space-y-2">
-                            {filteredSortedDriftViolations.map((violation): ReactElement => (
-                                <li
-                                    className="space-y-1 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm"
-                                    key={violation.id}
-                                >
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <span className="font-semibold text-slate-900">
-                                            {violation.rule}
-                                        </span>
-                                        <span className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
-                                            {violation.severity}
-                                        </span>
-                                    </div>
-                                    <p className="text-slate-700">{violation.rationale}</p>
-                                    <p className="text-xs text-slate-600">
-                                        Affected files: {violation.affectedFiles.join(", ")}
-                                    </p>
-                                </li>
-                            ))}
+                            {filteredSortedDriftViolations.map(
+                                (violation): ReactElement => (
+                                    <li
+                                        className="space-y-1 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm"
+                                        key={violation.id}
+                                    >
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <span className="font-semibold text-slate-900">
+                                                {violation.rule}
+                                            </span>
+                                            <span className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
+                                                {violation.severity}
+                                            </span>
+                                        </div>
+                                        <p className="text-slate-700">{violation.rationale}</p>
+                                        <p className="text-xs text-slate-600">
+                                            Affected files: {violation.affectedFiles.join(", ")}
+                                        </p>
+                                    </li>
+                                ),
+                            )}
                         </ul>
                     )}
                     <Alert color="primary" title="Drift export status" variant="flat">
@@ -1389,24 +1418,23 @@ export function SettingsContractValidationPage(): ReactElement {
                         onFileSelect={setSelectedDriftOverlayFileId}
                         title="Architecture drift overlay treemap"
                     />
-                    <div
-                        aria-label="Drift overlay file shortcuts"
-                        className="flex flex-wrap gap-2"
-                    >
-                        {DRIFT_CODE_CITY_FILES.map((file): ReactElement => (
-                            <Button
-                                key={file.id}
-                                size="sm"
-                                variant={
-                                    selectedDriftOverlayFileId === file.id ? "solid" : "flat"
-                                }
-                                onPress={(): void => {
-                                    setSelectedDriftOverlayFileId(file.id)
-                                }}
-                            >
-                                {file.path}
-                            </Button>
-                        ))}
+                    <div aria-label="Drift overlay file shortcuts" className="flex flex-wrap gap-2">
+                        {DRIFT_CODE_CITY_FILES.map(
+                            (file): ReactElement => (
+                                <Button
+                                    key={file.id}
+                                    size="sm"
+                                    variant={
+                                        selectedDriftOverlayFileId === file.id ? "solid" : "flat"
+                                    }
+                                    onPress={(): void => {
+                                        setSelectedDriftOverlayFileId(file.id)
+                                    }}
+                                >
+                                    {file.path}
+                                </Button>
+                            ),
+                        )}
                     </div>
                     {selectedDriftOverlayFile === undefined ? (
                         <Alert color="primary" title="Drift violation details" variant="flat">
@@ -1415,18 +1443,32 @@ export function SettingsContractValidationPage(): ReactElement {
                     ) : (
                         <Alert color="danger" title="Drift violation details" variant="flat">
                             <p className="mb-2 text-sm">
-                                File: <span className="font-semibold">{selectedDriftOverlayFile.path}</span>
+                                File:{" "}
+                                <span className="font-semibold">
+                                    {selectedDriftOverlayFile.path}
+                                </span>
                             </p>
                             {selectedDriftOverlayViolations.length === 0 ? (
-                                <p className="text-sm">No mapped drift violations for selected file.</p>
+                                <p className="text-sm">
+                                    No mapped drift violations for selected file.
+                                </p>
                             ) : (
-                                <ul aria-label="Selected drift file violations" className="space-y-1">
-                                    {selectedDriftOverlayViolations.map((violation): ReactElement => (
-                                        <li key={`${selectedDriftOverlayFile.id}-${violation.id}`}>
-                                            <span className="font-semibold">{violation.severity}</span>:{" "}
-                                            {violation.rule}
-                                        </li>
-                                    ))}
+                                <ul
+                                    aria-label="Selected drift file violations"
+                                    className="space-y-1"
+                                >
+                                    {selectedDriftOverlayViolations.map(
+                                        (violation): ReactElement => (
+                                            <li
+                                                key={`${selectedDriftOverlayFile.id}-${violation.id}`}
+                                            >
+                                                <span className="font-semibold">
+                                                    {violation.severity}
+                                                </span>
+                                                : {violation.rule}
+                                            </li>
+                                        ),
+                                    )}
                                 </ul>
                             )}
                         </Alert>
@@ -1454,20 +1496,24 @@ export function SettingsContractValidationPage(): ReactElement {
                                 aria-label="Blueprint intended architecture list"
                                 className="space-y-2"
                             >
-                                {BLUEPRINT_STRUCTURE_NODES.map((node): ReactElement => (
-                                    <li
-                                        className="rounded border border-slate-200 bg-slate-50 p-2 text-xs"
-                                        key={node.id}
-                                    >
-                                        <p className="font-semibold text-slate-900">
-                                            {node.layer} / {node.module}
-                                        </p>
-                                        <p className="text-slate-600">
-                                            Depends on:{" "}
-                                            {node.dependsOn.length === 0 ? "—" : node.dependsOn.join(", ")}
-                                        </p>
-                                    </li>
-                                ))}
+                                {BLUEPRINT_STRUCTURE_NODES.map(
+                                    (node): ReactElement => (
+                                        <li
+                                            className="rounded border border-slate-200 bg-slate-50 p-2 text-xs"
+                                            key={node.id}
+                                        >
+                                            <p className="font-semibold text-slate-900">
+                                                {node.layer} / {node.module}
+                                            </p>
+                                            <p className="text-slate-600">
+                                                Depends on:{" "}
+                                                {node.dependsOn.length === 0
+                                                    ? "—"
+                                                    : node.dependsOn.join(", ")}
+                                            </p>
+                                        </li>
+                                    ),
+                                )}
                             </ul>
                         </div>
                         <div>
@@ -1475,20 +1521,24 @@ export function SettingsContractValidationPage(): ReactElement {
                                 Runtime structure
                             </p>
                             <ul aria-label="Reality architecture list" className="space-y-2">
-                                {REALITY_STRUCTURE_NODES.map((node): ReactElement => (
-                                    <li
-                                        className="rounded border border-slate-200 bg-slate-50 p-2 text-xs"
-                                        key={node.id}
-                                    >
-                                        <p className="font-semibold text-slate-900">
-                                            {node.layer} / {node.module}
-                                        </p>
-                                        <p className="text-slate-600">
-                                            Depends on:{" "}
-                                            {node.dependsOn.length === 0 ? "—" : node.dependsOn.join(", ")}
-                                        </p>
-                                    </li>
-                                ))}
+                                {REALITY_STRUCTURE_NODES.map(
+                                    (node): ReactElement => (
+                                        <li
+                                            className="rounded border border-slate-200 bg-slate-50 p-2 text-xs"
+                                            key={node.id}
+                                        >
+                                            <p className="font-semibold text-slate-900">
+                                                {node.layer} / {node.module}
+                                            </p>
+                                            <p className="text-slate-600">
+                                                Depends on:{" "}
+                                                {node.dependsOn.length === 0
+                                                    ? "—"
+                                                    : node.dependsOn.join(", ")}
+                                            </p>
+                                        </li>
+                                    ),
+                                )}
                             </ul>
                         </div>
                     </div>
@@ -1496,33 +1546,37 @@ export function SettingsContractValidationPage(): ReactElement {
                         {architectureDifferenceSummary}
                     </Alert>
                     <ul aria-label="Architecture differences list" className="space-y-2">
-                        {architectureDifferences.map((difference): ReactElement => (
-                            <li
-                                className="rounded border border-slate-200 bg-white p-2 text-xs"
-                                key={difference.id}
-                            >
-                                <div className="mb-1 flex flex-wrap items-center gap-2">
-                                    <span className="font-semibold text-slate-900">
-                                        {difference.layer} / {difference.module}
-                                    </span>
-                                    <span
-                                        className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${resolveArchitectureDifferenceBadgeClass(
-                                            difference.status,
-                                        )}`}
-                                    >
-                                        {difference.status}
-                                    </span>
-                                </div>
-                                <p className="text-slate-700">{difference.description}</p>
-                            </li>
-                        ))}
+                        {architectureDifferences.map(
+                            (difference): ReactElement => (
+                                <li
+                                    className="rounded border border-slate-200 bg-white p-2 text-xs"
+                                    key={difference.id}
+                                >
+                                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                                        <span className="font-semibold text-slate-900">
+                                            {difference.layer} / {difference.module}
+                                        </span>
+                                        <span
+                                            className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${resolveArchitectureDifferenceBadgeClass(
+                                                difference.status,
+                                            )}`}
+                                        >
+                                            {difference.status}
+                                        </span>
+                                    </div>
+                                    <p className="text-slate-700">{difference.description}</p>
+                                </li>
+                            ),
+                        )}
                     </ul>
                 </CardBody>
             </Card>
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-[var(--foreground)]">Drift trend chart</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                        Drift trend chart
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <p className="text-sm text-[var(--foreground)]/70">
@@ -1530,7 +1584,10 @@ export function SettingsContractValidationPage(): ReactElement {
                     </p>
                     <div aria-label="Drift score trend chart" className="h-72 w-full">
                         <ResponsiveContainer height="100%" minHeight={1} minWidth={1} width="100%">
-                            <LineChart data={DRIFT_TREND_POINTS} margin={{ bottom: 8, left: 8, right: 12, top: 12 }}>
+                            <LineChart
+                                data={DRIFT_TREND_POINTS}
+                                margin={{ bottom: 8, left: 8, right: 12, top: 12 }}
+                            >
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="period" />
                                 <YAxis domain={[0, 100]} />
@@ -1548,30 +1605,37 @@ export function SettingsContractValidationPage(): ReactElement {
                                     strokeWidth={2.5}
                                     type="monotone"
                                 />
-                                {driftTrendAnnotations.map((point): ReactElement => (
-                                    <ReferenceDot
-                                        fill="#dc2626"
-                                        key={`${point.period}-annotation`}
-                                        r={5}
-                                        stroke="#ffffff"
-                                        strokeWidth={1}
-                                        x={point.period}
-                                        y={point.driftScore}
-                                    />
-                                ))}
+                                {driftTrendAnnotations.map(
+                                    (point): ReactElement => (
+                                        <ReferenceDot
+                                            fill="#dc2626"
+                                            key={`${point.period}-annotation`}
+                                            r={5}
+                                            stroke="#ffffff"
+                                            strokeWidth={1}
+                                            x={point.period}
+                                            y={point.driftScore}
+                                        />
+                                    ),
+                                )}
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
                     <Alert color="primary" title="Trend summary" variant="flat">
                         {driftTrendSummary}
                     </Alert>
-                    <ul aria-label="Architecture change annotations list" className="space-y-1 text-sm">
-                        {driftTrendAnnotations.map((point): ReactElement => (
-                            <li key={`${point.period}-${String(point.driftScore)}`}>
-                                <span className="font-semibold">{point.period}</span>:{" "}
-                                {point.architectureChange}
-                            </li>
-                        ))}
+                    <ul
+                        aria-label="Architecture change annotations list"
+                        className="space-y-1 text-sm"
+                    >
+                        {driftTrendAnnotations.map(
+                            (point): ReactElement => (
+                                <li key={`${point.period}-${String(point.driftScore)}`}>
+                                    <span className="font-semibold">{point.period}</span>:{" "}
+                                    {point.architectureChange}
+                                </li>
+                            ),
+                        )}
                     </ul>
                 </CardBody>
             </Card>
@@ -1599,10 +1663,10 @@ export function SettingsContractValidationPage(): ReactElement {
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
                                     if (
-                                        nextValue === "critical"
-                                        || nextValue === "high"
-                                        || nextValue === "medium"
-                                        || nextValue === "low"
+                                        nextValue === "critical" ||
+                                        nextValue === "high" ||
+                                        nextValue === "medium" ||
+                                        nextValue === "low"
                                     ) {
                                         setDriftAlertSeverityThreshold(nextValue)
                                     }
@@ -1633,26 +1697,33 @@ export function SettingsContractValidationPage(): ReactElement {
                             Notification channels
                         </legend>
                         <div className="grid gap-2 sm:grid-cols-2">
-                            {DRIFT_ALERT_CHANNEL_OPTIONS.map((channel): ReactElement => (
-                                <label
-                                    className="flex items-center gap-2 rounded border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-900"
-                                    key={channel.id}
-                                >
-                                    <input
-                                        aria-label={`Drift alert channel ${channel.id}`}
-                                        checked={driftAlertChannels.includes(channel.id)}
-                                        type="checkbox"
-                                        onChange={(): void => {
-                                            handleDriftAlertChannelToggle(channel.id)
-                                        }}
-                                    />
-                                    <span>{channel.label}</span>
-                                </label>
-                            ))}
+                            {DRIFT_ALERT_CHANNEL_OPTIONS.map(
+                                (channel): ReactElement => (
+                                    <label
+                                        className="flex items-center gap-2 rounded border border-slate-200 bg-slate-50 px-2 py-1 text-sm text-slate-900"
+                                        key={channel.id}
+                                    >
+                                        <input
+                                            aria-label={`Drift alert channel ${channel.id}`}
+                                            checked={driftAlertChannels.includes(channel.id)}
+                                            type="checkbox"
+                                            onChange={(): void => {
+                                                handleDriftAlertChannelToggle(channel.id)
+                                            }}
+                                        />
+                                        <span>{channel.label}</span>
+                                    </label>
+                                ),
+                            )}
                         </div>
                     </fieldset>
-                    <Alert color={driftAlertWouldTrigger === true ? "danger" : "primary"} title="Alert trigger preview" variant="flat">
-                        Violations at or above threshold: {String(driftAlertRelevantViolationCount)}.
+                    <Alert
+                        color={driftAlertWouldTrigger === true ? "danger" : "primary"}
+                        title="Alert trigger preview"
+                        variant="flat"
+                    >
+                        Violations at or above threshold: {String(driftAlertRelevantViolationCount)}
+                        .
                         {driftAlertWouldTrigger === true
                             ? " Alert will trigger with current drift data."
                             : " Alert will not trigger with current drift data."}
@@ -1694,39 +1765,43 @@ export function SettingsContractValidationPage(): ReactElement {
                     ) : (
                         <Alert color="danger" title="Guardrails validation errors" variant="flat">
                             <ul aria-label="Guardrails errors list" className="space-y-1">
-                                {guardrailsValidationResult.errors.map((error): ReactElement => (
-                                    <li key={error}>{error}</li>
-                                ))}
+                                {guardrailsValidationResult.errors.map(
+                                    (error): ReactElement => (
+                                        <li key={error}>{error}</li>
+                                    ),
+                                )}
                             </ul>
                         </Alert>
                     )}
                     <ul aria-label="Guardrail visual rules list" className="space-y-2">
-                        {guardrailsValidationResult.rules.map((rule): ReactElement => (
-                            <li
-                                className="rounded border border-slate-200 bg-slate-50 p-2 text-xs"
-                                key={rule.id}
-                            >
-                                <div className="mb-1 flex flex-wrap items-center gap-2">
-                                    <span className="font-semibold text-slate-900">
-                                        {rule.source} → {rule.target}
-                                    </span>
-                                    <span
-                                        className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                                            rule.mode === "allow"
-                                                ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                                                : "border-rose-300 bg-rose-50 text-rose-700"
-                                        }`}
-                                    >
-                                        {rule.mode}
-                                    </span>
-                                </div>
-                                <p className="text-slate-700">
-                                    {rule.mode === "allow"
-                                        ? "Import direction is explicitly allowed."
-                                        : "Import direction is explicitly forbidden."}
-                                </p>
-                            </li>
-                        ))}
+                        {guardrailsValidationResult.rules.map(
+                            (rule): ReactElement => (
+                                <li
+                                    className="rounded border border-slate-200 bg-slate-50 p-2 text-xs"
+                                    key={rule.id}
+                                >
+                                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                                        <span className="font-semibold text-slate-900">
+                                            {rule.source} → {rule.target}
+                                        </span>
+                                        <span
+                                            className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                                                rule.mode === "allow"
+                                                    ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                                                    : "border-rose-300 bg-rose-50 text-rose-700"
+                                            }`}
+                                        >
+                                            {rule.mode}
+                                        </span>
+                                    </div>
+                                    <p className="text-slate-700">
+                                        {rule.mode === "allow"
+                                            ? "Import direction is explicitly allowed."
+                                            : "Import direction is explicitly forbidden."}
+                                    </p>
+                                </li>
+                            ),
+                        )}
                     </ul>
                     <Alert color="primary" title="Guardrails apply status" variant="flat">
                         {guardrailsApplyStatus}

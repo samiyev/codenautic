@@ -23,10 +23,7 @@ class MockEventSource {
         mockSources.push(this)
     }
 
-    public addEventListener(
-        type: string,
-        listener: (event: MessageEvent<string>) => void,
-    ): void {
+    public addEventListener(type: string, listener: (event: MessageEvent<string>) => void): void {
         const previousListeners = this.listeners[type]
 
         if (previousListeners === undefined) {
@@ -72,7 +69,9 @@ afterEach((): void => {
 
 describe("SseStreamViewer", (): void => {
     it("отображает progress и обычные события из потока", (): void => {
-        renderWithProviders(<SseStreamViewer eventSourceUrl="/api/v1/stream" title="Review stream" />)
+        renderWithProviders(
+            <SseStreamViewer eventSourceUrl="/api/v1/stream" title="Review stream" />,
+        )
 
         const source = mockSources.at(0)
         expect(source).not.toBeUndefined()
@@ -96,7 +95,9 @@ describe("SseStreamViewer", (): void => {
 
     it("переподключается после временной ошибки", async (): Promise<void> => {
         vi.useFakeTimers()
-        renderWithProviders(<SseStreamViewer eventSourceUrl="/api/v1/stream" title="Review stream" />)
+        renderWithProviders(
+            <SseStreamViewer eventSourceUrl="/api/v1/stream" title="Review stream" />,
+        )
 
         const firstSource = mockSources.at(0)
         expect(firstSource).not.toBeUndefined()
@@ -123,7 +124,11 @@ describe("SseStreamViewer", (): void => {
         expect(mockSources).toHaveLength(0)
 
         renderResult.rerender(
-            <SseStreamViewer autoStart={false} eventSourceUrl="/api/v1/stream" title="Review stream" />,
+            <SseStreamViewer
+                autoStart={false}
+                eventSourceUrl="/api/v1/stream"
+                title="Review stream"
+            />,
         )
 
         await act(async (): Promise<void> => {
