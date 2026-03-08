@@ -128,7 +128,7 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
     const primarySeed = selectedSeeds[0]
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Impact analysis panel</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Select files to inspect blast radius, affected tests/consumers, and aggregated risk
@@ -164,14 +164,14 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
                 )}
             </ul>
 
-            <div className="mt-3 rounded border border-cyan-200 bg-cyan-500/10 p-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-cyan-900">
+            <div className="mt-3 rounded border border-primary/30 bg-primary/10 p-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-on-primary">
                     Aggregated risk score
                 </p>
-                <p className="text-lg font-semibold text-cyan-900">
+                <p className="text-lg font-semibold text-on-primary">
                     {String(aggregatedImpact.riskScore)}
                 </p>
-                <p className="text-xs text-cyan-800">
+                <p className="text-xs text-on-primary">
                     Selected files: {String(selectedSeeds.length)}
                 </p>
             </div>
@@ -211,7 +211,7 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
 
             <button
                 aria-label="Apply impact focus"
-                className="mt-3 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={primarySeed === undefined}
                 onClick={(): void => {
                     if (primarySeed === undefined) {

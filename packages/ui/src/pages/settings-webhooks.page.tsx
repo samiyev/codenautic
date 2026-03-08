@@ -486,8 +486,8 @@ export function SettingsWebhooksPage(): ReactElement {
 
                                         return (
                                             <article
-                                                className={`absolute left-0 top-0 w-full border-b border-slate-100 px-3 py-3 ${
-                                                    isActive ? "bg-primary/10/50" : "bg-white"
+                                                className={`absolute left-0 top-0 w-full border-b border-border px-3 py-3 ${
+                                                    isActive ? "bg-primary/10/50" : "bg-surface"
                                                 }`}
                                                 key={webhook.id}
                                                 style={{
@@ -601,7 +601,7 @@ export function SettingsWebhooksPage(): ReactElement {
 
                                         return (
                                             <article
-                                                className="absolute left-0 top-0 w-full border-b border-slate-100 px-3 py-3"
+                                                className="absolute left-0 top-0 w-full border-b border-border px-3 py-3"
                                                 key={log.id}
                                                 style={{
                                                     height: `${virtualItem.size}px`,

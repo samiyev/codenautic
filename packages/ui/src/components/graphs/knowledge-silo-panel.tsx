@@ -37,7 +37,7 @@ function resolveRiskClassName(riskScore: number): string {
         return "border-danger/40 bg-danger/20 text-danger"
     }
     if (riskScore >= 45) {
-        return "border-amber-300 bg-warning/20 text-amber-900"
+        return "border-warning/40 bg-warning/20 text-on-warning"
     }
     return "border-success/40 bg-success/20 text-success"
 }
@@ -45,7 +45,7 @@ function resolveRiskClassName(riskScore: number): string {
 function resolveEntryClassName(isActive: boolean): string {
     return [
         "w-full rounded-lg border p-2 text-left transition",
-        isActive ? "border-cyan-400 bg-cyan-50" : "border-border bg-surface hover:border-border",
+        isActive ? "border-primary bg-primary/10" : "border-border bg-surface hover:border-border",
     ].join(" ")
 }
 
@@ -57,7 +57,7 @@ function resolveEntryClassName(isActive: boolean): string {
  */
 export function KnowledgeSiloPanel(props: IKnowledgeSiloPanelProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Knowledge silo panel</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 High-risk ownership silos. Select a silo to focus related files in CodeCity.

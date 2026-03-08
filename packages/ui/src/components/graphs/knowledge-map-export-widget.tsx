@@ -53,7 +53,7 @@ export function KnowledgeMapExportWidget(props: IKnowledgeMapExportWidgetProps):
     }
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Knowledge map export</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Export knowledge map snapshot for architecture documentation with legend and
@@ -116,7 +116,7 @@ export function KnowledgeMapExportWidget(props: IKnowledgeMapExportWidgetProps):
             <div className="mt-3 flex flex-wrap gap-2">
                 <button
                     aria-label="Export knowledge map as SVG"
-                    className="rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                    className="rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                     onClick={handleSvgExport}
                     type="button"
                 >
@@ -124,7 +124,7 @@ export function KnowledgeMapExportWidget(props: IKnowledgeMapExportWidgetProps):
                 </button>
                 <button
                     aria-label="Export knowledge map as PNG"
-                    className="rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isPngExporting}
                     onClick={(): void => {
                         void handlePngExport()

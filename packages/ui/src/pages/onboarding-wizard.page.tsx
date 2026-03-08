@@ -547,7 +547,7 @@ function mapBulkStatusClasses(status: TBulkScanStatus): string {
     }
 
     if (status === "queued") {
-        return "border-border bg-white text-foreground"
+        return "border-border bg-surface text-foreground"
     }
 
     if (status === "paused") {
@@ -582,7 +582,7 @@ function mapBulkProgressClasses(status: TBulkScanStatus): string {
         return "bg-success"
     }
 
-    return "bg-slate-300"
+    return "bg-surface-muted"
 }
 
 function summarizeBulkScanJobs(jobs: ReadonlyArray<IBulkScanJob>): IBulkScanSummary {
@@ -1237,7 +1237,7 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
                                     type="button"
                                 >
                                     <div
-                                        className={`rounded-md px-2 py-2 ${isActive ? "bg-slate-900 text-white" : isCompleted ? "bg-surface-muted text-foreground" : "bg-surface text-muted-foreground"}`}
+                                        className={`rounded-md px-2 py-2 ${isActive ? "bg-foreground text-background" : isCompleted ? "bg-surface-muted text-foreground" : "bg-surface text-muted-foreground"}`}
                                     >
                                         <p className="text-xs font-semibold uppercase tracking-wider">
                                             Шаг {index + 1}
@@ -1802,7 +1802,7 @@ https://github.com/owner/repo-b`,
                                                                 {mapBulkStatusLabel(job.status)}
                                                             </span>
                                                         </div>
-                                                        <div className="mt-2 h-2 rounded-full bg-slate-200">
+                                                        <div className="mt-2 h-2 rounded-full bg-surface-muted">
                                                             <div
                                                                 aria-label={`scan progress bar ${job.repositoryUrl}`}
                                                                 aria-valuemin={0}

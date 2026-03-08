@@ -263,7 +263,7 @@ export function SettingsLlmProvidersPage(): ReactElement {
                 Configure provider credentials and model defaults for automated suggestion
                 generation.
             </p>
-            <div className="rounded-md border border-primary/30 bg-primary/10 p-3 text-sm text-blue-800">
+            <div className="rounded-md border border-primary/30 bg-primary/10 p-3 text-sm text-on-primary">
                 BYOK keys are masked in UI. Keep secrets in secure storage on save.
             </div>
 

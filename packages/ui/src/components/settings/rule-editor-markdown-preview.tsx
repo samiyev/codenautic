@@ -11,7 +11,7 @@ export interface IRuleEditorMarkdownPreviewProps {
 
 function CodeBlock(props: { readonly children?: ReactNode }): ReactElement {
     return (
-        <pre className="overflow-x-auto rounded-md border border-border bg-slate-900 p-3 text-sm text-slate-100">
+        <pre className="overflow-x-auto rounded-md border border-border bg-code-surface p-3 text-sm text-foreground">
             {props.children}
         </pre>
     )

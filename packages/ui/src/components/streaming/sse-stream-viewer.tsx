@@ -178,7 +178,7 @@ export function SseStreamViewer(props: ISSEStreamViewerProps): ReactElement {
                         <p className="text-sm text-foreground">
                             Progress: {formatProgressLabel(progressCurrent, progressTotal)}
                         </p>
-                        <div className="h-2 rounded-full bg-slate-200">
+                        <div className="h-2 rounded-full bg-surface-muted">
                             <div
                                 aria-label="Stream progress"
                                 aria-valuemax={100}

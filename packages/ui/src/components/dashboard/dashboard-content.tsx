@@ -57,10 +57,10 @@ export function DashboardContent(props: IDashboardContentProps): ReactElement {
                     <CardBody>
                         {hasCriticalSignals ? (
                             <Alert className="mb-4" color="warning">
-                                <p className="mb-1 text-sm font-semibold text-amber-900">
+                                <p className="mb-1 text-sm font-semibold text-on-warning">
                                     Ops notice
                                 </p>
-                                <p className="text-sm text-amber-900/90">
+                                <p className="text-sm text-on-warning/90">
                                     Есть критические сигналы, проверьте вкладку CCR Management.
                                 </p>
                             </Alert>

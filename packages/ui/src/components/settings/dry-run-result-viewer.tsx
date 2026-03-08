@@ -30,7 +30,7 @@ interface IDryRunResultViewerProps {
  */
 export function DryRunResultViewer(props: IDryRunResultViewerProps): ReactElement {
     return (
-        <section className="space-y-3 rounded-xl border border-border bg-white p-4">
+        <section className="space-y-3 rounded-xl border border-border bg-surface p-4">
             <h2 className="text-base font-semibold text-foreground">Dry-run results</h2>
             <p className="text-sm text-muted-foreground">
                 Preview review findings before switching cadence or running full automation.

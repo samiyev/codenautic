@@ -461,7 +461,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
         return (
             <section className="w-full rounded-lg border border-border bg-surface p-3">
                 <div
-                    className="rounded-lg border border-amber-300 bg-warning/10 px-3 py-2 text-sm text-warning"
+                    className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning"
                     role="status"
                 >
                     {renderCapability.reason}
@@ -481,7 +481,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
 
                             return (
                                 <article
-                                    className="rounded border border-border bg-white px-2 py-1 text-[11px] text-foreground"
+                                    className="rounded border border-border bg-surface px-2 py-1 text-[11px] text-foreground"
                                     key={file.id}
                                     style={{
                                         gridColumn: `span ${String(columnSpan)} / span ${String(columnSpan)}`,
@@ -509,7 +509,8 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
     return (
         <section
             aria-label={props.title}
-            className="relative w-full overflow-hidden rounded-lg border border-border bg-slate-950/95"
+            className="relative w-full overflow-hidden rounded-lg border border-border bg-hud-surface/95"
+            data-dark-hud=""
             style={{ height: `${String(props.height ?? 420)}px` }}
         >
             <div className="absolute left-3 top-3 z-10 flex gap-2">
@@ -520,8 +521,8 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                             aria-pressed={cameraPreset === option.id}
                             className={`rounded-md border px-2 py-1 text-xs font-medium transition ${
                                 cameraPreset === option.id
-                                    ? "border-cyan-300 bg-cyan-500/20 text-cyan-100"
-                                    : "border-slate-500 bg-slate-900/70 text-slate-300 hover:border-border hover:text-slate-100"
+                                    ? "border-primary/40 bg-primary/20 text-primary-foreground"
+                                    : "border-hud-border bg-hud-surface/70 text-hud-text-muted hover:border-border hover:text-hud-text"
                             }`}
                             key={option.id}
                             onClick={(): void => {
@@ -535,21 +536,21 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                 )}
             </div>
             {navigationBreadcrumbPaths.length > 0 ? (
-                <aside className="absolute left-3 top-14 z-10 max-w-lg rounded-md border border-cyan-400/50 bg-slate-900/90 px-3 py-2 text-xs text-slate-100 shadow-lg">
-                    <p className="font-semibold text-cyan-200">
+                <aside className="absolute left-3 top-14 z-10 max-w-lg rounded-md border border-primary/50 bg-hud-surface/90 px-3 py-2 text-xs text-hud-text shadow-lg">
+                    <p className="font-semibold text-hud-accent">
                         {props.navigationLabel !== undefined
                             ? `Root-cause trail: ${props.navigationLabel}`
                             : "Root-cause trail"}
                     </p>
-                    <p className="mt-1 text-slate-300">{navigationBreadcrumbPaths.join(" -> ")}</p>
+                    <p className="mt-1 text-hud-text-muted">{navigationBreadcrumbPaths.join(" -> ")}</p>
                 </aside>
             ) : null}
-            <div className="absolute right-3 top-3 z-10 w-72 rounded-md border border-slate-500/50 bg-slate-900/90 p-2.5 text-xs text-slate-100 shadow-lg">
+            <div className="absolute right-3 top-3 z-10 w-72 rounded-md border border-hud-border bg-hud-surface/90 p-2.5 text-xs text-hud-text shadow-lg">
                 <div className="flex items-center justify-between">
-                    <p className="font-semibold text-cyan-200">City time-lapse</p>
+                    <p className="font-semibold text-hud-accent">City time-lapse</p>
                     <button
                         aria-label={isTimelinePlaying ? "Pause timeline" : "Play timeline"}
-                        className="rounded border border-slate-400 px-2 py-0.5 text-xs text-slate-100 hover:border-cyan-300"
+                        className="rounded border border-hud-border px-2 py-0.5 text-xs text-hud-text hover:border-primary/40"
                         onClick={(): void => {
                             setIsTimelinePlaying((isPlaying): boolean => !isPlaying)
                         }}
@@ -558,10 +559,10 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                         {isTimelinePlaying ? "Pause" : "Play"}
                     </button>
                 </div>
-                <p className="mt-2 text-slate-300">{currentSnapshot?.label ?? "Commit #1"}</p>
+                <p className="mt-2 text-hud-text-muted">{currentSnapshot?.label ?? "Commit #1"}</p>
                 <input
                     aria-label="CodeCity timeline"
-                    className="mt-2 w-full accent-cyan-400"
+                    className="mt-2 w-full accent-primary"
                     max={Math.max(0, snapshots.length - 1)}
                     min={0}
                     onChange={(event: ChangeEvent<HTMLInputElement>): void => {
@@ -576,21 +577,21 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                     type="range"
                     value={timelineIndex}
                 />
-                <p className="mt-1 text-slate-400">
+                <p className="mt-1 text-hud-text-muted">
                     Files: {String(currentSnapshot?.files.length ?? 0)} /{" "}
                     {String(props.files.length)}
                 </p>
                 {causalTimelineEvents.length > 0 ? (
-                    <div className="mt-3 border-t border-slate-700/70 pt-2">
+                    <div className="mt-3 border-t border-hud-border pt-2">
                         <div className="flex items-center justify-between">
-                            <p className="font-semibold text-cyan-200">Causal replay</p>
+                            <p className="font-semibold text-hud-accent">Causal replay</p>
                             <button
                                 aria-label={
                                     isCausalReplayPlaying
                                         ? "Pause causal replay"
                                         : "Play causal replay"
                                 }
-                                className="rounded border border-slate-400 px-2 py-0.5 text-xs text-slate-100 hover:border-cyan-300"
+                                className="rounded border border-hud-border px-2 py-0.5 text-xs text-hud-text hover:border-primary/40"
                                 onClick={(): void => {
                                     setIsCausalReplayPlaying((isPlaying): boolean => !isPlaying)
                                 }}
@@ -599,10 +600,10 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                                 {isCausalReplayPlaying ? "Pause" : "Play"}
                             </button>
                         </div>
-                        <p className="mt-2 break-all text-slate-300">{currentCausalEventLabel}</p>
+                        <p className="mt-2 break-all text-hud-text-muted">{currentCausalEventLabel}</p>
                         <input
                             aria-label="Causal timeline"
-                            className="mt-2 w-full accent-cyan-400"
+                            className="mt-2 w-full accent-primary"
                             max={Math.max(0, causalTimelineEvents.length - 1)}
                             min={0}
                             onChange={(event: ChangeEvent<HTMLInputElement>): void => {
@@ -625,8 +626,8 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                                         aria-pressed={causalReplaySpeed === speed}
                                         className={`rounded border px-2 py-0.5 text-[11px] transition ${
                                             causalReplaySpeed === speed
-                                                ? "border-cyan-300 bg-cyan-500/20 text-cyan-100"
-                                                : "border-slate-500 bg-slate-900/70 text-slate-300 hover:border-border hover:text-slate-100"
+                                                ? "border-primary/40 bg-primary/20 text-primary-foreground"
+                                                : "border-hud-border bg-hud-surface/70 text-hud-text-muted hover:border-border hover:text-hud-text"
                                         }`}
                                         key={speed}
                                         onClick={(): void => {
@@ -639,7 +640,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                                 ),
                             )}
                         </div>
-                        <p className="mt-1 text-slate-400">
+                        <p className="mt-1 text-hud-text-muted">
                             Events:{" "}
                             {String(Math.min(causalReplayIndex + 1, causalTimelineEvents.length))} /{" "}
                             {String(causalTimelineEvents.length)}
@@ -648,10 +649,10 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                 ) : null}
             </div>
             {hoveredFile !== undefined ? (
-                <aside className="absolute bottom-3 left-3 z-10 rounded-md border border-cyan-400/50 bg-slate-900/90 px-3 py-2 text-xs text-slate-100 shadow-lg">
-                    <p className="font-semibold text-cyan-200">Hover preview</p>
+                <aside className="absolute bottom-3 left-3 z-10 rounded-md border border-primary/50 bg-hud-surface/90 px-3 py-2 text-xs text-hud-text shadow-lg">
+                    <p className="font-semibold text-hud-accent">Hover preview</p>
                     <p className="mt-1">{hoveredFile.path}</p>
-                    <p className="mt-1 text-slate-300">
+                    <p className="mt-1 text-hud-text-muted">
                         LOC {String(hoveredFile.loc ?? 0)} · Complexity{" "}
                         {String(hoveredFile.complexity ?? 0)} · Coverage{" "}
                         {String(hoveredFile.coverage ?? 0)}%
@@ -659,12 +660,12 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                 </aside>
             ) : null}
             {selectedFile !== undefined ? (
-                <aside className="absolute right-3 top-14 z-10 w-72 rounded-lg border border-slate-400/40 bg-slate-900/95 p-3 text-sm text-slate-100 shadow-xl">
+                <aside className="absolute right-3 top-14 z-10 w-72 rounded-lg border border-hud-border bg-hud-surface/95 p-3 text-sm text-hud-text shadow-xl">
                     <div className="flex items-start justify-between gap-3">
-                        <p className="font-semibold text-cyan-200">File details</p>
+                        <p className="font-semibold text-hud-accent">File details</p>
                         <button
                             aria-label="Close file details panel"
-                            className="rounded border border-slate-500 px-2 py-0.5 text-xs text-slate-200 hover:border-border"
+                            className="rounded border border-hud-border px-2 py-0.5 text-xs text-hud-text hover:border-border"
                             onClick={(): void => {
                                 setSelectedFileId(undefined)
                             }}
@@ -673,23 +674,23 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                             Close
                         </button>
                     </div>
-                    <p className="mt-2 break-all text-xs text-slate-300">{selectedFile.path}</p>
+                    <p className="mt-2 break-all text-xs text-hud-text-muted">{selectedFile.path}</p>
                     <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                        <div className="rounded border border-slate-700 bg-slate-900/70 p-2">
-                            <dt className="text-slate-400">LOC</dt>
-                            <dd className="mt-1 font-semibold text-slate-100">
+                        <div className="rounded border border-hud-border bg-hud-surface/70 p-2">
+                            <dt className="text-hud-text-muted">LOC</dt>
+                            <dd className="mt-1 font-semibold text-hud-text">
                                 {String(selectedFile.loc ?? 0)}
                             </dd>
                         </div>
-                        <div className="rounded border border-slate-700 bg-slate-900/70 p-2">
-                            <dt className="text-slate-400">Complexity</dt>
-                            <dd className="mt-1 font-semibold text-slate-100">
+                        <div className="rounded border border-hud-border bg-hud-surface/70 p-2">
+                            <dt className="text-hud-text-muted">Complexity</dt>
+                            <dd className="mt-1 font-semibold text-hud-text">
                                 {String(selectedFile.complexity ?? 0)}
                             </dd>
                         </div>
-                        <div className="col-span-2 rounded border border-slate-700 bg-slate-900/70 p-2">
-                            <dt className="text-slate-400">Coverage</dt>
-                            <dd className="mt-1 font-semibold text-slate-100">
+                        <div className="col-span-2 rounded border border-hud-border bg-hud-surface/70 p-2">
+                            <dt className="text-hud-text-muted">Coverage</dt>
+                            <dd className="mt-1 font-semibold text-hud-text">
                                 {String(selectedFile.coverage ?? 0)}%
                             </dd>
                         </div>
@@ -698,7 +699,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
             ) : null}
             <Suspense
                 fallback={
-                    <div className="flex h-full items-center justify-center text-sm text-slate-300">
+                    <div className="flex h-full items-center justify-center text-sm text-hud-text-muted">
                         Loading 3D scene...
                     </div>
                 }

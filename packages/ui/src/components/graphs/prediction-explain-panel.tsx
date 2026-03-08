@@ -54,7 +54,7 @@ export function PredictionExplainPanel(props: IPredictionExplainPanelProps): Rea
         props.entries[0]
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Prediction explain panel</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Click prediction entries to inspect why this file is forecasted as a hotspot.
@@ -64,7 +64,7 @@ export function PredictionExplainPanel(props: IPredictionExplainPanelProps): Rea
                 {props.entries.slice(0, 6).map((entry): ReactElement => {
                     const isActive = selectedEntry?.fileId === entry.fileId
                     const className = isActive
-                        ? "border-cyan-400 bg-cyan-50"
+                        ? "border-primary bg-primary/10"
                         : "border-border bg-surface hover:border-border"
                     return (
                         <button

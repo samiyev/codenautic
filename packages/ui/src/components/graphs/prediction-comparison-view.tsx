@@ -34,7 +34,7 @@ export function PredictionComparisonView(props: IPredictionComparisonViewProps):
         props.snapshots[0]
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Prediction comparison view</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Compare historical forecasts with what actually happened.
@@ -48,7 +48,7 @@ export function PredictionComparisonView(props: IPredictionComparisonViewProps):
                             aria-label={`Inspect prediction comparison ${snapshot.periodLabel}`}
                             className={`w-full rounded border p-2 text-left text-xs transition ${
                                 isActive
-                                    ? "border-cyan-400 bg-cyan-50 text-cyan-900"
+                                    ? "border-primary bg-primary/10 text-on-primary"
                                     : "border-border bg-surface text-foreground hover:border-border"
                             }`}
                             key={snapshot.id}

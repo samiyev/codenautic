@@ -149,7 +149,7 @@ export function ReportTemplateEditor(): ReactElement {
                         <span className="font-semibold text-foreground">Template name</span>
                         <input
                             aria-label="Template name"
-                            className="w-full rounded border border-border bg-white px-2 py-1 text-sm text-foreground"
+                            className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                             type="text"
                             value={templateName}
                             onChange={(event: ChangeEvent<HTMLInputElement>): void => {
@@ -161,7 +161,7 @@ export function ReportTemplateEditor(): ReactElement {
                         <span className="font-semibold text-foreground">Brand logo URL</span>
                         <input
                             aria-label="Template brand logo"
-                            className="w-full rounded border border-border bg-white px-2 py-1 text-sm text-foreground"
+                            className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                             type="text"
                             value={brandLogoUrl}
                             onChange={(event: ChangeEvent<HTMLInputElement>): void => {
@@ -173,7 +173,7 @@ export function ReportTemplateEditor(): ReactElement {
                         <span className="font-semibold text-foreground">Accent color</span>
                         <input
                             aria-label="Template accent color"
-                            className="h-9 w-full rounded border border-border bg-white px-2 py-1"
+                            className="h-9 w-full rounded border border-border bg-surface px-2 py-1"
                             type="color"
                             value={brandAccentColor}
                             onChange={(event: ChangeEvent<HTMLInputElement>): void => {

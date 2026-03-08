@@ -130,7 +130,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
     }
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Simulation panel</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Toggle before/after state and compare projected CodeCity metrics for selected
@@ -140,7 +140,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
             <div className="mt-3 inline-flex rounded-lg border border-border bg-surface p-1">
                 <button
                     aria-pressed={mode === "before"}
-                    className={`rounded px-2 py-1 text-xs font-semibold ${mode === "before" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground"}`}
+                    className={`rounded px-2 py-1 text-xs font-semibold ${mode === "before" ? "bg-surface text-foreground shadow-sm" : "text-muted-foreground"}`}
                     onClick={(): void => {
                         setMode("before")
                     }}
@@ -150,7 +150,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
                 </button>
                 <button
                     aria-pressed={mode === "after"}
-                    className={`rounded px-2 py-1 text-xs font-semibold ${mode === "after" ? "bg-cyan-500/20 text-cyan-900 shadow-sm" : "text-muted-foreground"}`}
+                    className={`rounded px-2 py-1 text-xs font-semibold ${mode === "after" ? "bg-primary/20 text-on-primary shadow-sm" : "text-muted-foreground"}`}
                     onClick={(): void => {
                         setMode("after")
                     }}
@@ -233,7 +233,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
 
             <button
                 aria-label="Preview refactoring simulation"
-                className="mt-3 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={selectedTargets.length === 0}
                 onClick={(): void => {
                     props.onPreviewScenario?.({

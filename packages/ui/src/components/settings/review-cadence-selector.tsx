@@ -50,7 +50,7 @@ function mapReviewModeToLabel(mode: TRepoReviewMode): string {
  */
 export function ReviewCadenceSelector(props: IReviewCadenceSelectorProps): ReactElement {
     return (
-        <section className="space-y-3 rounded-xl border border-border bg-white p-4">
+        <section className="space-y-3 rounded-xl border border-border bg-surface p-4">
             <h2 className="text-base font-semibold text-foreground">Review cadence settings</h2>
             <p className="text-sm text-muted-foreground">
                 Choose how code review is executed for repository updates.

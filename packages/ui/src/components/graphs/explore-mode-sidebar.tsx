@@ -57,7 +57,7 @@ export function ExploreModeSidebar(props: IExploreModeSidebarProps): ReactElemen
     }
 
     return (
-        <aside className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <aside className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Explore mode sidebar</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Recommended exploration paths with role-aware filtering.
@@ -103,7 +103,7 @@ export function ExploreModeSidebar(props: IExploreModeSidebarProps): ReactElemen
                                 </div>
                                 <button
                                     aria-label={`Navigate path ${path.title}`}
-                                    className="rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                                    className="rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                     onClick={(): void => {
                                         props.onNavigatePath(path)
                                     }}

@@ -585,7 +585,7 @@ function resolveArchitectureDifferenceBadgeClass(status: TArchitectureDiffStatus
         return "border-success/40 bg-success/10 text-success"
     }
     if (status === "missing") {
-        return "border-amber-300 bg-warning/10 text-warning"
+        return "border-warning/40 bg-warning/10 text-warning"
     }
     return "border-danger/40 bg-danger/10 text-danger"
 }
@@ -1214,7 +1214,7 @@ export function SettingsContractValidationPage(): ReactElement {
                 <CardBody>
                     <pre
                         aria-label="Blueprint syntax highlight preview"
-                        className="overflow-x-auto rounded-md border border-border bg-slate-950 p-3 text-xs leading-6"
+                        className="overflow-x-auto rounded-md border border-border bg-code-surface p-3 text-xs leading-6"
                     >
                         {blueprintHighlightLines.map(
                             (line): ReactElement => (
@@ -1223,7 +1223,7 @@ export function SettingsContractValidationPage(): ReactElement {
                                     style={{ paddingLeft: `${String(line.indent)}px` }}
                                 >
                                     {line.comment === undefined ? null : (
-                                        <span className="text-slate-400">{line.comment}</span>
+                                        <span className="text-muted-foreground">{line.comment}</span>
                                     )}
                                     {line.key === undefined ? null : (
                                         <span className="text-sky-300">{line.key}</span>
@@ -1256,7 +1256,7 @@ export function SettingsContractValidationPage(): ReactElement {
                                     key={node.id}
                                     style={{ marginLeft: `${String(node.depth * 12)}px` }}
                                 >
-                                    <span className="rounded border border-border bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
+                                    <span className="rounded border border-border bg-surface px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
                                         {node.kind}
                                     </span>
                                     <span className="font-semibold text-foreground">
@@ -1368,7 +1368,7 @@ export function SettingsContractValidationPage(): ReactElement {
                                             <span className="font-semibold text-foreground">
                                                 {violation.rule}
                                             </span>
-                                            <span className="rounded border border-border bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
+                                            <span className="rounded border border-border bg-surface px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
                                                 {violation.severity}
                                             </span>
                                         </div>
@@ -1386,7 +1386,7 @@ export function SettingsContractValidationPage(): ReactElement {
                     </Alert>
                     <pre
                         aria-label="Drift report export payload"
-                        className="overflow-x-auto rounded-md border border-border bg-slate-950 p-3 text-xs leading-6 text-emerald-200"
+                        className="overflow-x-auto rounded-md border border-border bg-code-surface p-3 text-xs leading-6 text-emerald-200"
                     >
                         {driftExportPayload}
                     </pre>
@@ -1543,7 +1543,7 @@ export function SettingsContractValidationPage(): ReactElement {
                         {architectureDifferences.map(
                             (difference): ReactElement => (
                                 <li
-                                    className="rounded border border-border bg-white p-2 text-xs"
+                                    className="rounded border border-border bg-surface p-2 text-xs"
                                     key={difference.id}
                                 >
                                     <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -1650,7 +1650,7 @@ export function SettingsContractValidationPage(): ReactElement {
                             </span>
                             <select
                                 aria-label="Drift alert severity threshold"
-                                className="w-full rounded border border-border bg-white px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                                 value={driftAlertSeverityThreshold}
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
@@ -1676,7 +1676,7 @@ export function SettingsContractValidationPage(): ReactElement {
                             </span>
                             <input
                                 aria-label="Drift alert violation threshold"
-                                className="w-full rounded border border-border bg-white px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                                 min={0}
                                 type="number"
                                 value={String(driftAlertViolationThreshold)}

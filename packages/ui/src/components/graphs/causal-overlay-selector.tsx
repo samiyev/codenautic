@@ -51,8 +51,8 @@ function resolveOverlayButtonClass(
     return [
         "rounded-md border px-3 py-1.5 text-xs font-semibold transition",
         isActive
-            ? "border-cyan-300 bg-cyan-50 text-cyan-700"
-            : "border-border bg-white text-foreground hover:border-border",
+            ? "border-primary/40 bg-primary/10 text-primary"
+            : "border-border bg-surface text-foreground hover:border-border",
     ].join(" ")
 }
 
@@ -82,7 +82,7 @@ export function CausalOverlaySelector(props: ICausalOverlaySelectorProps): React
                     </span>
                     <select
                         aria-label="Causal overlay"
-                        className="w-full rounded-md border border-border bg-white px-2.5 py-1.5 text-sm"
+                        className="w-full rounded-md border border-border bg-surface px-2.5 py-1.5 text-sm"
                         id="causal-overlay-selector"
                         value={props.value}
                         onChange={handleSelectChange}

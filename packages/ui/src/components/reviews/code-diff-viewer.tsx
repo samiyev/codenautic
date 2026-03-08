@@ -104,7 +104,7 @@ function getLineStyleByType(type: TCcrDiffLineType): string {
         return "bg-success/10 border-l-4 border-success/40"
     }
 
-    return "bg-white"
+    return "bg-surface"
 }
 
 function getLineNumber(lineValue: number | undefined): string {
@@ -120,11 +120,11 @@ function CodeDiffLine(props: ICodeLineProps): ReactElement {
     const lineNumber = isLeft ? props.line.leftLine : props.line.rightLine
     const lineClassName = isLeft
         ? props.diffType === "added"
-            ? "bg-surface-muted text-slate-300"
-            : "bg-white text-foreground"
+            ? "bg-surface-muted text-muted-foreground"
+            : "bg-surface text-foreground"
         : props.diffType === "removed"
-          ? "bg-surface-muted text-slate-300"
-          : "bg-white text-foreground"
+          ? "bg-surface-muted text-muted-foreground"
+          : "bg-surface text-foreground"
 
     const code = shouldRenderCode ? renderHighlightedCode(text) : null
 

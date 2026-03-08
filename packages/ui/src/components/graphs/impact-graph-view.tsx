@@ -148,7 +148,7 @@ export function ImpactGraphView(props: IImpactGraphViewProps): ReactElement {
     }
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Impact graph view</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Dependency graph for impact propagation with animated edges and collapsible nodes.
@@ -200,7 +200,7 @@ export function ImpactGraphView(props: IImpactGraphViewProps): ReactElement {
                                     </button>
                                     <button
                                         aria-label={`Inspect impact node ${node.label}`}
-                                        className="rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800"
+                                        className="rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary"
                                         onClick={(): void => {
                                             props.onFocusNode?.(node)
                                         }}

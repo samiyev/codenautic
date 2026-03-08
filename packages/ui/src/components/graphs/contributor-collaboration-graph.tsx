@@ -228,7 +228,7 @@ export function ContributorCollaborationGraph(
     }
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Contributor collaboration graph</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Force-directed view of co-authoring links. Node size reflects commit volume.

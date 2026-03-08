@@ -1104,8 +1104,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         <button
                                             className={`w-full rounded-lg border px-3 py-2 text-left text-sm ${
                                                 isActive
-                                                    ? "border-primary/30 bg-primary/10 text-blue-900"
-                                                    : "border-border bg-white text-foreground"
+                                                    ? "border-primary/30 bg-primary/10 text-on-primary"
+                                                    : "border-border bg-surface text-foreground"
                                             }`}
                                             key={file.filePath}
                                             onClick={(): void => {
@@ -1225,7 +1225,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 </label>
                                 <select
                                     aria-label="Review history window"
-                                    className="rounded border border-border bg-white px-2 py-1 text-xs text-foreground"
+                                    className="rounded border border-border bg-surface px-2 py-1 text-xs text-foreground"
                                     id="review-history-window"
                                     value={selectedReviewHistoryWindow}
                                     onChange={(event): void => {
@@ -1257,7 +1257,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 {hottestReviewHistoryEntries.map(
                                     (entry): ReactElement => (
                                         <li
-                                            className="rounded border border-border bg-white px-2 py-1 text-xs text-foreground"
+                                            className="rounded border border-border bg-surface px-2 py-1 text-xs text-foreground"
                                             key={`review-history-${entry.filePath}`}
                                         >
                                             <span className="font-semibold">{entry.filePath}</span>{" "}
@@ -1298,7 +1298,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                                 <li key={filePath}>
                                                     <button
                                                         aria-label={`Open neighborhood file ${filePath}`}
-                                                        className="w-full rounded border border-border bg-white px-2 py-1 text-left text-xs text-foreground hover:bg-surface-muted"
+                                                        className="w-full rounded border border-border bg-surface px-2 py-1 text-left text-xs text-foreground hover:bg-surface-muted"
                                                         type="button"
                                                         onClick={(): void => {
                                                             setActiveFilePath(filePath)
@@ -1312,7 +1312,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     </ul>
                                 )}
                                 <div className="mt-3 grid gap-2 md:grid-cols-2">
-                                    <div className="rounded border border-border bg-white p-2">
+                                    <div className="rounded border border-border bg-surface p-2">
                                         <p className="text-xs font-semibold text-foreground">
                                             Dependencies
                                         </p>
@@ -1334,7 +1334,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                             )}
                                         </ul>
                                     </div>
-                                    <div className="rounded border border-border bg-white p-2">
+                                    <div className="rounded border border-border bg-surface p-2">
                                         <p className="text-xs font-semibold text-foreground">
                                             Recent changes
                                         </p>
@@ -1438,8 +1438,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                                 aria-label={`Open trace for ${traceItem.id}`}
                                                 className={`w-full rounded-lg border px-3 py-2 text-left text-xs transition ${
                                                     isActive
-                                                        ? "border-primary/30 bg-primary/10 text-blue-900"
-                                                        : "border-border bg-white text-foreground hover:bg-surface"
+                                                        ? "border-primary/30 bg-primary/10 text-on-primary"
+                                                        : "border-border bg-surface text-foreground hover:bg-surface"
                                                 }`}
                                                 type="button"
                                                 onClick={(): void => {
@@ -1480,7 +1480,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         {activeSafeGuardTraceItem.steps.map(
                                             (step): ReactElement => (
                                                 <li
-                                                    className="rounded-md border border-border bg-white p-2"
+                                                    className="rounded-md border border-border bg-surface p-2"
                                                     key={`${activeSafeGuardTraceItem.id}-${step.filterId}`}
                                                 >
                                                     <p className="font-semibold">
@@ -1590,7 +1590,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 {activeTraceFeedbackHistory.map(
                                     (feedbackRecord): ReactElement => (
                                         <li
-                                            className="rounded-md border border-border bg-white p-2 text-xs text-foreground"
+                                            className="rounded-md border border-border bg-surface p-2 text-xs text-foreground"
                                             key={feedbackRecord.id}
                                         >
                                             <p className="font-semibold">

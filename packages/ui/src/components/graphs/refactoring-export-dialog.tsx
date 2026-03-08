@@ -76,7 +76,7 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
     }
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Refactoring export dialog</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Export selected refactoring tasks as Jira tickets or GitHub issues with editable
@@ -85,7 +85,7 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
 
             <button
                 aria-label="Open refactoring export dialog"
-                className="mt-3 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                 onClick={(): void => {
                     setIsDialogOpen(true)
                 }}
@@ -143,7 +143,7 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
                         {props.targets.slice(0, 6).map(
                             (target): ReactElement => (
                                 <li
-                                    className="flex items-start gap-2 rounded border border-border bg-white p-2"
+                                    className="flex items-start gap-2 rounded border border-border bg-surface p-2"
                                     key={target.id}
                                 >
                                     <input
@@ -170,7 +170,7 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
 
                     <button
                         aria-label="Export refactoring plan"
-                        className="mt-3 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                         disabled={selectedTargets.length === 0}
                         onClick={(): void => {
                             props.onExport?.({

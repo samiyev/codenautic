@@ -77,7 +77,7 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
     }
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">ROI calculator widget</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Select files and tune risk/effort weights to simulate expected refactoring ROI.
@@ -143,19 +143,19 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
                 />
             </label>
 
-            <div className="mt-3 rounded border border-cyan-200 bg-cyan-500/10 p-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-cyan-900">
+            <div className="mt-3 rounded border border-primary/30 bg-primary/10 p-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-on-primary">
                     Estimated ROI score
                 </p>
-                <p className="text-lg font-semibold text-cyan-900">{String(scenarioRoiScore)}</p>
-                <p className="text-xs text-cyan-800">
+                <p className="text-lg font-semibold text-on-primary">{String(scenarioRoiScore)}</p>
+                <p className="text-xs text-on-primary">
                     Selected files: {String(selectedTargets.length)}
                 </p>
             </div>
 
             <button
                 aria-label="Apply ROI scenario"
-                className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={selectedTargets.length === 0}
                 onClick={(): void => {
                     props.onApplyScenario?.(selectedTargets.map((target): string => target.fileId))

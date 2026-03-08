@@ -51,7 +51,7 @@ function resolveReportStatusBadgeClass(status: TReportStatus): string {
         return "border-success/40 bg-success/10 text-success"
     }
     if (status === "queued") {
-        return "border-amber-300 bg-warning/10 text-warning"
+        return "border-warning/40 bg-warning/10 text-warning"
     }
     return "border-danger/40 bg-danger/10 text-danger"
 }
@@ -152,7 +152,7 @@ export function ReportListPage(): ReactElement {
                             <span className="font-semibold text-foreground">Report type</span>
                             <select
                                 aria-label="Report list type filter"
-                                className="w-full rounded border border-border bg-white px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                                 value={reportTypeFilter}
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
@@ -176,7 +176,7 @@ export function ReportListPage(): ReactElement {
                             <span className="font-semibold text-foreground">Date from</span>
                             <input
                                 aria-label="Report list date from"
-                                className="w-full rounded border border-border bg-white px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                                 type="date"
                                 value={dateFrom}
                                 onChange={handleDateFromChange}
@@ -186,7 +186,7 @@ export function ReportListPage(): ReactElement {
                             <span className="font-semibold text-foreground">Date to</span>
                             <input
                                 aria-label="Report list date to"
-                                className="w-full rounded border border-border bg-white px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                                 type="date"
                                 value={dateTo}
                                 onChange={handleDateToChange}

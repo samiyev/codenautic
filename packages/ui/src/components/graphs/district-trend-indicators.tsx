@@ -59,7 +59,7 @@ function resolveTrendBadgeClassName(trend: TDistrictTrendDirection): string {
 
 function resolveRowClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-cyan-400 bg-cyan-50"
+        ? "border-primary bg-primary/10"
         : "border-border bg-surface hover:border-border"
     return `w-full rounded-lg border p-2 text-left transition ${baseClassName}`
 }
@@ -159,7 +159,7 @@ function TrendDirectionIcon(props: { readonly trend: TDistrictTrendDirection }):
  */
 export function DistrictTrendIndicators(props: IDistrictTrendIndicatorsProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">District trend indicators</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 CodeCity districts show improvement or degradation using trend arrows: green up and

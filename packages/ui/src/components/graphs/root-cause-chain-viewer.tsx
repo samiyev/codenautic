@@ -107,8 +107,8 @@ export function RootCauseChainViewer(props: IRootCauseChainViewerProps): ReactEl
                             aria-label={`Open causal issue ${issue.title}`}
                             className={`w-full rounded-md border px-3 py-2 text-left transition ${
                                 selectedIssue.id === issue.id
-                                    ? "border-cyan-300 bg-cyan-50"
-                                    : "border-border bg-white hover:border-border"
+                                    ? "border-primary/40 bg-primary/10"
+                                    : "border-border bg-surface hover:border-border"
                             }`}
                             key={issue.id}
                             onClick={(): void => {
@@ -132,7 +132,7 @@ export function RootCauseChainViewer(props: IRootCauseChainViewerProps): ReactEl
 
             <div className="space-y-3">
                 <p className="text-sm font-semibold text-foreground">Causal chain</p>
-                <div className="rounded-md border border-border bg-white p-3">
+                <div className="rounded-md border border-border bg-surface p-3">
                     <div className="space-y-2">
                         {selectedIssue.chain.map(
                             (node, index): ReactElement => (
@@ -145,7 +145,7 @@ export function RootCauseChainViewer(props: IRootCauseChainViewerProps): ReactEl
                                         aria-label={`Open chain node ${node.label}`}
                                         className={`w-full rounded border px-2 py-1.5 text-left text-sm transition ${
                                             selectedNode?.id === node.id
-                                                ? "border-cyan-300 bg-cyan-50"
+                                                ? "border-primary/40 bg-primary/10"
                                                 : "border-border bg-surface hover:border-border"
                                         }`}
                                         onClick={(): void => {

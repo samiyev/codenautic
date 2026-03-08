@@ -35,7 +35,7 @@ function resolveBusFactorBadgeClassName(busFactor: number): string {
         return "border-danger/40 bg-danger/20 text-danger"
     }
     if (busFactor === 2) {
-        return "border-amber-300 bg-warning/20 text-amber-900"
+        return "border-warning/40 bg-warning/20 text-on-warning"
     }
     return "border-success/40 bg-success/20 text-success"
 }
@@ -53,7 +53,7 @@ function resolveBusFactorRiskLabel(busFactor: number): string {
 function resolveEntryClassName(isActive: boolean): string {
     return [
         "w-full rounded-lg border p-2 text-left transition",
-        isActive ? "border-cyan-400 bg-cyan-50" : "border-border bg-surface hover:border-border",
+        isActive ? "border-primary bg-primary/10" : "border-border bg-surface hover:border-border",
     ].join(" ")
 }
 
@@ -65,7 +65,7 @@ function resolveEntryClassName(isActive: boolean): string {
  */
 export function CityBusFactorOverlay(props: ICityBusFactorOverlayProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Bus factor overlay</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 District risk map: red means single owner, green means distributed ownership.

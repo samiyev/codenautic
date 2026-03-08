@@ -65,7 +65,7 @@ export function ConfigurationEditor(props: IConfigurationEditorProps): ReactElem
 
     return (
         <form
-            className="space-y-3 rounded-xl border border-border bg-white p-4"
+            className="space-y-3 rounded-xl border border-border bg-surface p-4"
             onSubmit={props.onSave}
         >
             <h2 className="text-base font-semibold text-foreground">Repository config</h2>

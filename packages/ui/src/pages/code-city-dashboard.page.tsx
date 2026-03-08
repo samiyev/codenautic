@@ -3134,7 +3134,7 @@ export function CodeCityDashboardPage(props: ICodeCityDashboardPageProps = {}): 
             return undefined
         }
 
-        return "ring-2 ring-cyan-400/80 ring-offset-2 ring-offset-slate-100"
+        return "ring-2 ring-primary/80 ring-offset-2 ring-offset-surface"
     }
 
     return (

@@ -40,7 +40,7 @@ function resolvePriorityClassName(priority: TCityRefactoringPriority): string {
         return "border-danger/40 bg-danger/15 text-danger"
     }
     if (priority === "high") {
-        return "border-amber-300 bg-warning/15 text-amber-900"
+        return "border-warning/40 bg-warning/15 text-on-warning"
     }
     return "border-sky-300 bg-sky-500/15 text-sky-800"
 }
@@ -53,7 +53,7 @@ function resolvePriorityClassName(priority: TCityRefactoringPriority): string {
  */
 export function CityRefactoringOverlay(props: ICityRefactoringOverlayProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">City refactoring overlay</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Buildings prioritized by refactoring score. Click entry to inspect details.
@@ -83,7 +83,7 @@ export function CityRefactoringOverlay(props: ICityRefactoringOverlayProps): Rea
                             </div>
                             <button
                                 aria-label={`Inspect refactoring overlay ${entry.label}`}
-                                className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                                className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                 onClick={(): void => {
                                     props.onSelectEntry?.(entry)
                                 }}

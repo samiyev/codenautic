@@ -84,7 +84,7 @@ function ErrorFallback(props: IErrorFallbackProps): ReactElement {
                 </p>
                 <div className="mt-6 flex flex-wrap items-center gap-2">
                     <Button
-                        className="rounded-full bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                        className="rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background transition hover:bg-foreground/80"
                         onPress={(): void => {
                             window.location.assign("/")
                         }}
@@ -114,7 +114,7 @@ function ErrorFallback(props: IErrorFallbackProps): ReactElement {
                 <p className="mt-4 text-base text-danger">{resolvedError.message}</p>
                 <div className="mt-6 flex flex-wrap items-center gap-2">
                     <Button
-                        className="rounded-full bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                        className="rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background transition hover:bg-foreground/80"
                         onPress={props.reset}
                     >
                         Повторить

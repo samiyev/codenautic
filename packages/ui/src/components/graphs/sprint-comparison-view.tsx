@@ -51,7 +51,7 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
         props.snapshots[0]
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Sprint comparison view</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Side-by-side before/after sprint comparison with metric deltas and improvement
@@ -66,7 +66,7 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
                             aria-label={`Inspect sprint comparison ${snapshot.title}`}
                             className={`w-full rounded border p-2 text-left text-xs transition ${
                                 isActive
-                                    ? "border-cyan-400 bg-cyan-50 text-cyan-900"
+                                    ? "border-primary bg-primary/10 text-on-primary"
                                     : "border-border bg-surface text-foreground hover:border-border"
                             }`}
                             key={snapshot.id}
@@ -115,9 +115,9 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
                                     before {String(metric.beforeValue)} to after{" "}
                                     {String(metric.afterValue)}
                                 </p>
-                                <div className="mt-1 h-1.5 overflow-hidden rounded bg-slate-200">
+                                <div className="mt-1 h-1.5 overflow-hidden rounded bg-surface-muted">
                                     <div
-                                        className="h-full rounded bg-cyan-500 transition-all duration-500"
+                                        className="h-full rounded bg-primary transition-all duration-500"
                                         style={{ width: `${String(progressWidth)}%` }}
                                     />
                                 </div>

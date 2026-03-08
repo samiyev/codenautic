@@ -154,7 +154,7 @@ export function ReportViewerPage(): ReactElement {
                             <span className="font-semibold text-foreground">Chart metric</span>
                             <select
                                 aria-label="Report chart metric"
-                                className="w-full rounded border border-border bg-white px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                                 value={selectedMetric}
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value

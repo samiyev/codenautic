@@ -40,7 +40,7 @@ function resolveSeverityClassName(severity: THotAreaSeverity): string {
         return "border-danger/40 bg-danger/15 text-danger"
     }
     if (severity === "high") {
-        return "border-amber-300 bg-warning/15 text-amber-900"
+        return "border-warning/40 bg-warning/15 text-on-warning"
     }
     return "border-sky-300 bg-sky-500/15 text-sky-800"
 }
@@ -53,7 +53,7 @@ function resolveSeverityClassName(severity: THotAreaSeverity): string {
  */
 export function HotAreaHighlights(props: IHotAreaHighlightsProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Hot area highlights</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Critical city zones with short diagnostics labels.
@@ -85,7 +85,7 @@ export function HotAreaHighlights(props: IHotAreaHighlightsProps): ReactElement 
                             </div>
                             <button
                                 aria-label={`Focus hot area ${highlight.label}`}
-                                className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                                className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                 onClick={(): void => {
                                     props.onFocusHotArea?.(highlight)
                                 }}

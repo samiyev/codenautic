@@ -247,7 +247,7 @@ function RepositoryScanErrorRecovery(props: {
             : `Проанализировано файлов до ошибки: ${props.scanError.partialFilesScanned} из ${props.scanError.totalFiles}`
 
     return (
-        <section className="mt-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-rose-900">
+        <section className="mt-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-on-danger">
             <p className="text-xs font-semibold uppercase tracking-[0.1em] text-danger">
                 Ошибка сканирования
             </p>
@@ -297,7 +297,7 @@ function RepositoriesEmptyState(): ReactElement {
                 архитектурный обзор.
             </p>
             <Link
-                className="mt-4 inline-flex rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-sm text-white"
+                className="mt-4 inline-flex rounded-md border border-foreground bg-foreground px-4 py-2 text-sm text-background"
                 to="/onboarding"
             >
                 Начать onboarding

@@ -627,7 +627,7 @@ export function Header(props: IHeaderProps): ReactElement {
                             {hasNotifications ? (
                                 <span
                                     aria-hidden="true"
-                                    className="absolute -right-1.5 -top-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[10px] leading-none text-white"
+                                    className="absolute -right-1.5 -top-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[10px] leading-none text-danger-foreground"
                                 >
                                     {props.notificationCount}
                                 </span>
@@ -654,7 +654,7 @@ export function Header(props: IHeaderProps): ReactElement {
                 <div
                     aria-label="Global command palette"
                     aria-modal="true"
-                    className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-16"
+                    className="fixed inset-0 z-50 flex items-start justify-center bg-foreground/50 p-4 pt-16"
                     role="dialog"
                 >
                     <button

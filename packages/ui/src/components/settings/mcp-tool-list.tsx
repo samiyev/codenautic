@@ -20,7 +20,7 @@ interface IMcpToolListProps {
 export function MCPToolList(props: IMcpToolListProps): ReactElement {
     return (
         <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
+            <table className="min-w-full divide-y divide-border text-sm">
                 <thead className="bg-surface text-left text-muted-foreground">
                     <tr>
                         <th className="px-3 py-2 font-medium" scope="col">
@@ -37,7 +37,7 @@ export function MCPToolList(props: IMcpToolListProps): ReactElement {
                         </th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200">
+                <tbody className="divide-y divide-border">
                     {props.items.map(
                         (item): ReactElement => (
                             <tr key={item.toolId} data-testid="mcp-tool-row">

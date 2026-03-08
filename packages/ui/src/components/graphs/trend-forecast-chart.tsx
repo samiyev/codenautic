@@ -122,7 +122,7 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
     const forecastStartX = coordinates[forecastStartIndex]?.x ?? 0
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Trend forecast chart</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Historical quality trend with forecast zone and confidence interval bands.
@@ -181,7 +181,7 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
                             aria-label={`Inspect trend forecast point ${point.timestamp}`}
                             className={`w-full rounded border px-2 py-1 text-left text-xs transition ${
                                 isActive
-                                    ? "border-cyan-400 bg-cyan-50 text-cyan-900"
+                                    ? "border-primary bg-primary/10 text-on-primary"
                                     : "border-border bg-surface text-foreground hover:border-border"
                             }`}
                             key={point.id}

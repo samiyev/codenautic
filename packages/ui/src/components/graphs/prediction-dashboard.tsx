@@ -77,7 +77,7 @@ function resolveHotspotClassName(
     riskLevel: TCodeCityTreemapPredictionRiskLevel,
 ): string {
     const baseClassName = isActive
-        ? "border-cyan-400 bg-cyan-50"
+        ? "border-primary bg-primary/10"
         : "border-border bg-surface hover:border-border"
     const highRiskClassName = riskLevel === "high" ? "border-dashed" : ""
 
@@ -94,7 +94,7 @@ function resolveHotspotClassName(
  */
 export function PredictionDashboard(props: IPredictionDashboardProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Prediction dashboard</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Predicted hotspots, quality trend forecast, and bug-prone files with confidence

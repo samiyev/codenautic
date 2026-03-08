@@ -66,7 +66,7 @@ function resolvePredictedLabel(riskLevel: TCodeCityTreemapPredictionRiskLevel): 
  */
 export function PredictionAccuracyWidget(props: IPredictionAccuracyWidgetProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Prediction accuracy widget</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Track forecast accuracy over time with confusion matrix and predicted vs actual
@@ -92,7 +92,7 @@ export function PredictionAccuracyWidget(props: IPredictionAccuracyWidgetProps):
                 <p className="rounded border border-success/30 bg-success/10 px-2 py-1 text-xs text-success">
                     TP {String(props.matrix.truePositive)}
                 </p>
-                <p className="rounded border border-cyan-200 bg-cyan-50 px-2 py-1 text-xs text-cyan-800">
+                <p className="rounded border border-primary/30 bg-primary/10 px-2 py-1 text-xs text-on-primary">
                     TN {String(props.matrix.trueNegative)}
                 </p>
                 <p className="rounded border border-warning/30 bg-warning/10 px-2 py-1 text-xs text-warning">
@@ -111,7 +111,7 @@ export function PredictionAccuracyWidget(props: IPredictionAccuracyWidgetProps):
                             aria-label={`Inspect prediction accuracy case ${entry.label}`}
                             className={`w-full rounded border p-2 text-left text-xs transition ${
                                 isActive
-                                    ? "border-cyan-400 bg-cyan-50 text-cyan-900"
+                                    ? "border-primary bg-primary/10 text-on-primary"
                                     : "border-border bg-surface text-foreground hover:border-border"
                             }`}
                             key={entry.id}

@@ -82,7 +82,7 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
     }
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">What-if panel</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Select multiple files to simulate aggregated impact and blast radius before applying
@@ -119,11 +119,11 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
                 )}
             </ul>
 
-            <div className="mt-3 rounded border border-cyan-200 bg-cyan-500/10 p-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-cyan-900">
+            <div className="mt-3 rounded border border-primary/30 bg-primary/10 p-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-on-primary">
                     Aggregated scenario
                 </p>
-                <p className="text-xs text-cyan-800">
+                <p className="text-xs text-on-primary">
                     Files: {String(aggregatedScenario.fileIds.length)} · Impact score:{" "}
                     {String(aggregatedScenario.aggregatedScore)} · Total affected:{" "}
                     {String(aggregatedScenario.totalAffectedCount)}
@@ -132,7 +132,7 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
 
             <button
                 aria-label="Run what-if scenario"
-                className="mt-3 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={aggregatedScenario.fileIds.length === 0}
                 onClick={(): void => {
                     props.onRunScenario?.(aggregatedScenario)

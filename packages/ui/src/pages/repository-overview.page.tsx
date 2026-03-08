@@ -1718,7 +1718,7 @@ function RepositoryHealthScore(props: { score: number }): ReactElement {
                     aria-valuemax={100}
                     aria-valuemin={0}
                     aria-valuenow={score}
-                    className="h-2.5 w-full rounded-full bg-slate-200"
+                    className="h-2.5 w-full rounded-full bg-surface-muted"
                     role="meter"
                 >
                     <span
@@ -1971,11 +1971,11 @@ export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactEl
             </Card>
 
             {isRescheduleDialogOpen === true ? (
-                <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/60 p-4">
+                <div className="fixed inset-0 z-40 flex items-center justify-center bg-foreground/60 p-4">
                     <div
                         aria-labelledby="rescan-schedule-title"
                         aria-modal="true"
-                        className="w-full max-w-lg rounded-lg border border-border bg-white p-4"
+                        className="w-full max-w-lg rounded-lg border border-border bg-surface p-4"
                         role="dialog"
                     >
                         <div className="mb-3 flex items-center justify-between">

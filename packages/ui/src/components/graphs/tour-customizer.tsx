@@ -125,7 +125,7 @@ export function TourCustomizer(props: ITourCustomizerProps): ReactElement {
 
     if (props.isAdmin === false) {
         return (
-            <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+            <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
                 <p className="text-sm font-semibold text-foreground">Tour customizer</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                     Admin access is required to create and reorder custom tour steps.
@@ -135,7 +135,7 @@ export function TourCustomizer(props: ITourCustomizerProps): ReactElement {
     }
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Tour customizer</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Drag and drop step cards, edit stop descriptions, and add custom stops.
@@ -175,7 +175,7 @@ export function TourCustomizer(props: ITourCustomizerProps): ReactElement {
 
             <button
                 aria-label="Add custom tour stop"
-                className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                 onClick={handleAddStop}
                 type="button"
             >

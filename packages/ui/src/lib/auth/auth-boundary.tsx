@@ -510,7 +510,7 @@ function AuthLoginPanel(props: IAuthLoginPanelProps): ReactElement {
             <div className="mt-8 grid w-full max-w-sm gap-3">
                 {OAUTH_PROVIDERS.map((provider) => (
                     <Button
-                        className="rounded-xl border border-border bg-white px-4 py-3 text-sm font-semibold text-foreground transition hover:border-slate-400 hover:bg-surface-muted"
+                        className="rounded-xl border border-border bg-surface px-4 py-3 text-sm font-semibold text-foreground transition hover:border-border hover:bg-surface-muted"
                         key={provider}
                         onPress={(): void => {
                             void props.onOAuthSignIn(provider)
@@ -586,7 +586,7 @@ function AuthenticatedShell(props: IAuthenticatedShellProps): ReactElement {
                     <p className="text-sm text-muted-foreground">{props.userEmail}</p>
                 </div>
                 <Button
-                    className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                    className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition hover:bg-foreground/80"
                     onPress={(): void => {
                         void props.onLogout()
                     }}

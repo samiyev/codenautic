@@ -54,21 +54,21 @@ export interface ITeamLeaderboardProps {
 
 function resolveMetricButtonClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-cyan-400 bg-cyan-500/15 text-cyan-900"
-        : "border-border bg-white text-foreground hover:border-slate-400"
+        ? "border-primary bg-primary/100/15 text-on-primary"
+        : "border-border bg-surface text-foreground hover:border-border"
     return `rounded border px-2 py-1 text-xs font-semibold transition ${baseClassName}`
 }
 
 function resolvePeriodButtonClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-emerald-400 bg-success/15 text-emerald-900"
-        : "border-border bg-white text-foreground hover:border-slate-400"
+        ? "border-emerald-400 bg-success/15 text-on-success"
+        : "border-border bg-surface text-foreground hover:border-border"
     return `rounded border px-2 py-1 text-xs font-semibold uppercase transition ${baseClassName}`
 }
 
 function resolveRowClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-cyan-400 bg-cyan-50"
+        ? "border-primary bg-primary/10"
         : "border-border bg-surface hover:border-border"
     return `w-full rounded-lg border p-2 text-left transition ${baseClassName}`
 }
@@ -109,7 +109,7 @@ export function TeamLeaderboard(props: ITeamLeaderboardProps): ReactElement {
     }, [activeMetric, activePeriod, props.entries])
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Team leaderboard</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Team quality ranking with metric sorting and sprint/month/quarter toggles.

@@ -382,7 +382,7 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                         <p className="mb-2 text-sm font-semibold text-foreground">
                             {progressState.currentMessage}
                         </p>
-                        <div className="h-3 w-full rounded-full bg-slate-200">
+                        <div className="h-3 w-full rounded-full bg-surface-muted">
                             <div
                                 aria-label="scan progress bar"
                                 aria-valuemax={100}
@@ -413,7 +413,7 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                                             ? "border-success/30 bg-success/10"
                                             : phase.isActive
                                               ? "border-primary/30 bg-primary/10"
-                                              : "border-border bg-white"
+                                              : "border-border bg-surface"
                                     }`}
                                     key={phase.phase}
                                 >

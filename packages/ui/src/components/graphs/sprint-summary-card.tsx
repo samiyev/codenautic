@@ -56,7 +56,7 @@ function resolveDeltaClassName(deltaPercent: number): string {
 
 function resolveMetricRowClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-cyan-400 bg-cyan-50"
+        ? "border-primary bg-primary/10"
         : "border-border bg-surface hover:border-border"
     return `w-full rounded-lg border p-2 text-left transition ${baseClassName}`
 }
@@ -73,7 +73,7 @@ function formatDeltaPrefix(deltaPercent: number): string {
  */
 export function SprintSummaryCard(props: ISprintSummaryCardProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Sprint summary card</p>
             <p className="mt-1 text-xs text-muted-foreground">{props.model.sprintLabel}</p>
 

@@ -62,7 +62,7 @@ export function ReportScheduleDialog(): ReactElement {
                             <span className="font-semibold text-foreground">Recipients</span>
                             <input
                                 aria-label="Schedule recipients"
-                                className="w-full rounded border border-border bg-white px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                                 type="text"
                                 value={recipients}
                                 onChange={handleRecipientsChange}
@@ -72,7 +72,7 @@ export function ReportScheduleDialog(): ReactElement {
                             <span className="font-semibold text-foreground">Cron expression</span>
                             <input
                                 aria-label="Schedule cron expression"
-                                className="w-full rounded border border-border bg-white px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                                 type="text"
                                 value={cronExpression}
                                 onChange={handleCronChange}
@@ -82,7 +82,7 @@ export function ReportScheduleDialog(): ReactElement {
                             <span className="font-semibold text-foreground">Delivery format</span>
                             <select
                                 aria-label="Schedule format"
-                                className="w-full rounded border border-border bg-white px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                                 value={format}
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value

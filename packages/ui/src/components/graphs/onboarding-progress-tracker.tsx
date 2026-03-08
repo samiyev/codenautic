@@ -61,7 +61,7 @@ export function OnboardingProgressTracker(props: IOnboardingProgressTrackerProps
     const progressPercent = resolveProgressPercent(completedCount, totalCount)
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Onboarding progress tracker</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Track explored dashboard areas and module completion.
@@ -69,13 +69,13 @@ export function OnboardingProgressTracker(props: IOnboardingProgressTrackerProps
             <p className="mt-3 text-xs font-semibold text-foreground">
                 Explored areas: {String(completedCount)} / {String(totalCount)}
             </p>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-muted">
                 <div
                     aria-label="Onboarding progress"
                     aria-valuemax={100}
                     aria-valuemin={0}
                     aria-valuenow={progressPercent}
-                    className="h-full rounded-full bg-cyan-500 transition-[width]"
+                    className="h-full rounded-full bg-primary transition-[width]"
                     role="progressbar"
                     style={{ width: `${String(progressPercent)}%` }}
                 />

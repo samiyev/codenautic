@@ -58,9 +58,9 @@ function resolveHandoffBadgeClassName(severity: TOwnershipTransitionHandoffSever
         return "border-danger/40 bg-danger/15 text-danger"
     }
     if (severity === "watch") {
-        return "border-amber-300 bg-warning/15 text-amber-900"
+        return "border-warning/40 bg-warning/15 text-on-warning"
     }
-    return "border-success/40 bg-success/15 text-emerald-900"
+    return "border-success/40 bg-success/15 text-on-success"
 }
 
 function formatTransitionDate(changedAt: string): string {
@@ -84,7 +84,7 @@ function formatTransitionDate(changedAt: string): string {
  */
 export function OwnershipTransitionWidget(props: IOwnershipTransitionWidgetProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Ownership transition widget</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Timeline of ownership handoffs for files and modules with risk indicators.
@@ -98,7 +98,7 @@ export function OwnershipTransitionWidget(props: IOwnershipTransitionWidgetProps
                         <li
                             className={
                                 isActive
-                                    ? "rounded border border-cyan-300 bg-cyan-50 p-2"
+                                    ? "rounded border border-primary/40 bg-primary/10 p-2"
                                     : "rounded border border-border bg-surface p-2"
                             }
                             key={event.id}
@@ -129,7 +129,7 @@ export function OwnershipTransitionWidget(props: IOwnershipTransitionWidgetProps
                             </div>
                             <button
                                 aria-label={`Inspect ownership transition ${event.scopeLabel}`}
-                                className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                                className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                 onClick={(): void => {
                                     props.onSelectEvent?.(event)
                                 }}

@@ -274,7 +274,7 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
     }
 
     return (
-        <div className="grid gap-3 rounded-lg border border-border bg-white p-3 md:grid-cols-4">
+        <div className="grid gap-3 rounded-lg border border-border bg-surface p-3 md:grid-cols-4">
             <input
                 aria-label="Search CCR"
                 className="rounded-lg border border-border px-3 py-2 text-sm outline-none"
@@ -339,7 +339,7 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
     const hasSelectedPreset = props.selectedPresetId.length > 0
 
     return (
-        <div className="grid gap-3 rounded-lg border border-border bg-white p-3 md:grid-cols-6">
+        <div className="grid gap-3 rounded-lg border border-border bg-surface p-3 md:grid-cols-6">
             <input
                 aria-label="Filter preset name"
                 className="rounded-lg border border-border px-3 py-2 text-sm outline-none md:col-span-2"

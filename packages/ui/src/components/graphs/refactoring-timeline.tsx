@@ -53,7 +53,7 @@ export function RefactoringTimeline(props: IRefactoringTimelineProps): ReactElem
     }, [props.tasks])
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Refactoring timeline</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Gantt-like plan for refactoring waves with explicit dependency links.
@@ -75,14 +75,14 @@ export function RefactoringTimeline(props: IRefactoringTimelineProps): ReactElem
                                         {String(task.startWeek + task.durationWeeks - 1)}
                                     </p>
                                 </div>
-                                <span className="rounded border border-cyan-300 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-900">
+                                <span className="rounded border border-primary/40 bg-primary/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-on-primary">
                                     {String(task.durationWeeks)}w
                                 </span>
                             </div>
 
-                            <div className="relative mt-2 h-6 rounded border border-border bg-white">
+                            <div className="relative mt-2 h-6 rounded border border-border bg-surface">
                                 <div
-                                    className="absolute bottom-1 top-1 rounded bg-cyan-500/35"
+                                    className="absolute bottom-1 top-1 rounded bg-primary/35"
                                     style={{
                                         left: `${String(startOffsetPercent)}%`,
                                         width: `${String(widthPercent)}%`,
@@ -99,7 +99,7 @@ export function RefactoringTimeline(props: IRefactoringTimelineProps): ReactElem
 
                             <button
                                 aria-label={`Inspect timeline task ${task.title}`}
-                                className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                                className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                 onClick={(): void => {
                                     props.onSelectTask?.(task)
                                 }}

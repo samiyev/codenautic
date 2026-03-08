@@ -42,7 +42,7 @@ export function SystemHealthPage(): ReactElement {
                     {t("system:unavailable")}
                 </p>
                 <Button
-                    className="mt-6 rounded-full bg-slate-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                    className="mt-6 rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background transition hover:bg-foreground/80"
                     onPress={(): void => {
                         void healthQuery.refetch()
                     }}
@@ -74,7 +74,7 @@ export function SystemHealthPage(): ReactElement {
             </p>
             <section
                 aria-label={t("system:premiumSectionTitle")}
-                className="mt-8 w-full rounded-2xl border border-border bg-white/80 p-5 text-left shadow-sm backdrop-blur"
+                className="mt-8 w-full rounded-2xl border border-border bg-surface/80 p-5 text-left shadow-sm backdrop-blur"
             >
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                     {t("system:premiumSectionTitle")}

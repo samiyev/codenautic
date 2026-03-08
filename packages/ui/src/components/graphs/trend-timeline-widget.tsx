@@ -44,7 +44,7 @@ export interface ITrendTimelineWidgetProps {
 
 function resolveEntryClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-cyan-400 bg-cyan-50"
+        ? "border-primary bg-primary/10"
         : "border-border bg-surface hover:border-border"
     return `w-full rounded-lg border p-2 text-left transition ${baseClassName}`
 }
@@ -75,7 +75,7 @@ function resolveSparklinePoints(points: ReadonlyArray<number>): string {
  */
 export function TrendTimelineWidget(props: ITrendTimelineWidgetProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Trend timeline widget</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Sprint-over-sprint trends with sparklines. Click a sprint to open detailed
@@ -113,7 +113,7 @@ export function TrendTimelineWidget(props: ITrendTimelineWidgetProps): ReactElem
                                     {entry.metrics.map((metric): ReactElement => {
                                         return (
                                             <div
-                                                className="rounded border border-border bg-white p-1.5"
+                                                className="rounded border border-border bg-surface p-1.5"
                                                 key={metric.label}
                                             >
                                                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">

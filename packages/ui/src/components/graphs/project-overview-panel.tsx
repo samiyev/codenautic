@@ -151,8 +151,8 @@ export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactEl
     const metrics = buildProjectOverviewMetrics(props.files)
 
     return (
-        <article className="rounded-lg border border-border bg-white p-3 shadow-sm">
-            <header className="border-b border-slate-100 pb-2">
+        <article className="rounded-lg border border-border bg-surface p-3 shadow-sm">
+            <header className="border-b border-border pb-2">
                 <p className="text-sm font-semibold text-foreground">Project overview</p>
                 <p className="text-xs text-muted-foreground">
                     {props.repositoryLabel} ({props.repositoryId})

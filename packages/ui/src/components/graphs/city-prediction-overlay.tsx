@@ -35,7 +35,7 @@ function resolveRiskBadgeClassName(riskLevel: TCodeCityTreemapPredictionRiskLeve
         return "border-danger/40 bg-danger/20 text-danger"
     }
     if (riskLevel === "medium") {
-        return "border-amber-300 bg-warning/20 text-amber-900"
+        return "border-warning/40 bg-warning/20 text-on-warning"
     }
     return "border-sky-300 bg-sky-500/20 text-sky-900"
 }
@@ -55,7 +55,7 @@ function resolveRowClassName(
     riskLevel: TCodeCityTreemapPredictionRiskLevel,
 ): string {
     const baseClassName = isActive
-        ? "border-cyan-400 bg-cyan-50"
+        ? "border-primary bg-primary/10"
         : "border-border bg-surface hover:border-border"
     const dashedClassName = riskLevel === "high" ? "border-dashed" : ""
 
@@ -72,7 +72,7 @@ function resolveRowClassName(
  */
 export function CityPredictionOverlay(props: ICityPredictionOverlayProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Prediction overlay</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Predicted hotspots are outlined on buildings. High-risk forecasts use dashed

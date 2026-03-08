@@ -368,7 +368,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                 onApply={handleCadenceSave}
                 onModeChange={handleCadenceModeChange}
             />
-            <section className="space-y-3 rounded-xl border border-border bg-white p-4">
+            <section className="space-y-3 rounded-xl border border-border bg-surface p-4">
                 <h2 className="text-base font-semibold text-foreground">CCR summary settings</h2>
                 <p className="text-sm text-muted-foreground">
                     Configure how CCR summary cards are generated and what sections they include.
@@ -511,7 +511,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                     })()
                 )}
             </section>
-            <section className="space-y-3 rounded-xl border border-border bg-white p-4">
+            <section className="space-y-3 rounded-xl border border-border bg-surface p-4">
                 <h2 className="text-base font-semibold text-foreground">IDE sync settings</h2>
                 <p className="text-sm text-muted-foreground">
                     Configure how CCR decisions and code insights are synced to IDE plugins.
@@ -589,7 +589,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                     Save IDE sync settings
                 </Button>
             </section>
-            <section className="space-y-3 rounded-xl border border-border bg-white p-4">
+            <section className="space-y-3 rounded-xl border border-border bg-surface p-4">
                 <h2 className="text-base font-semibold text-foreground">
                     MCP server control panel
                 </h2>
@@ -655,7 +655,7 @@ export function SettingsCodeReviewPage(): ReactElement {
             <form onSubmit={handlePathReset}>
                 <Button
                     type="submit"
-                    className="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm text-white"
+                    className="inline-flex rounded-md bg-foreground px-4 py-2 text-sm text-background"
                 >
                     Reset ignore paths
                 </Button>

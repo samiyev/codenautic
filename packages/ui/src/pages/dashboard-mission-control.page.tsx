@@ -989,8 +989,8 @@ export function DashboardMissionControlPage(): ReactElement {
 
             {opsBanner.isDegraded === true ? (
                 <Alert color="warning" className="space-y-1">
-                    <p className="text-sm font-semibold text-amber-900">Ops notice</p>
-                    <p className="text-sm text-amber-900/90">
+                    <p className="text-sm font-semibold text-on-warning">Ops notice</p>
+                    <p className="text-sm text-on-warning/90">
                         Provider health degraded in this window. Check settings and review queue for
                         mitigation.
                     </p>

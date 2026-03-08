@@ -39,7 +39,7 @@ export interface IAchievementsPanelProps {
 
 function resolveBadgeClassName(badge: TAchievementBadge): string {
     if (badge === "gold") {
-        return "border-amber-300 bg-warning/15 text-amber-900"
+        return "border-warning/40 bg-warning/15 text-on-warning"
     }
     if (badge === "silver") {
         return "border-border bg-surface-muted text-foreground"
@@ -59,7 +59,7 @@ function resolveBadgeLabel(badge: TAchievementBadge): string {
 
 function resolveRowClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-cyan-400 bg-cyan-50"
+        ? "border-primary bg-primary/10"
         : "border-border bg-surface hover:border-border"
     return `w-full rounded-lg border p-2 text-left transition ${baseClassName}`
 }
@@ -98,7 +98,7 @@ function BadgeIcon(props: { readonly badge: TAchievementBadge }): ReactElement {
  */
 export function AchievementsPanel(props: IAchievementsPanelProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Achievements panel</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Sprint achievements show key improvements and badge icons for top wins.

@@ -131,7 +131,7 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
     }
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Alert config dialog</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Configure prediction alerts by threshold, channel, delivery frequency and module
@@ -145,7 +145,7 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
                     </span>
                     <input
                         aria-label="Alert confidence threshold"
-                        className="w-full rounded border border-border bg-white px-2 py-1 text-xs"
+                        className="w-full rounded border border-border bg-surface px-2 py-1 text-xs"
                         min={1}
                         max={100}
                         onChange={(event: ChangeEvent<HTMLInputElement>): void => {
@@ -162,7 +162,7 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
                     </span>
                     <input
                         aria-label="Alert issue increase threshold"
-                        className="w-full rounded border border-border bg-white px-2 py-1 text-xs"
+                        className="w-full rounded border border-border bg-surface px-2 py-1 text-xs"
                         min={1}
                         max={20}
                         onChange={(event: ChangeEvent<HTMLInputElement>): void => {
@@ -203,7 +203,7 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
                 </span>
                 <select
                     aria-label="Alert frequency"
-                    className="w-full rounded border border-border bg-white px-2 py-1 text-xs"
+                    className="w-full rounded border border-border bg-surface px-2 py-1 text-xs"
                     onChange={(event: ChangeEvent<HTMLSelectElement>): void => {
                         const nextFrequency = event.currentTarget.value
                         if (
@@ -255,7 +255,7 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
 
             <button
                 aria-label="Save prediction alert configuration"
-                className="mt-3 rounded border border-cyan-300 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-900"
+                className="mt-3 rounded border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-on-primary"
                 onClick={handleSave}
                 type="button"
             >

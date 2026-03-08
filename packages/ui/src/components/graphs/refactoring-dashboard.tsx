@@ -81,7 +81,7 @@ function resolveRiskClassName(riskScore: number): string {
         return "border-danger/40 bg-danger/15 text-danger"
     }
     if (riskScore >= 50) {
-        return "border-amber-300 bg-warning/15 text-amber-900"
+        return "border-warning/40 bg-warning/15 text-on-warning"
     }
     return "border-success/40 bg-success/15 text-success"
 }
@@ -127,7 +127,7 @@ export function RefactoringDashboard(props: IRefactoringDashboardProps): ReactEl
     }
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">Refactoring dashboard</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Prioritized targets sorted by ROI, risk, or effort with module filtering.
@@ -196,16 +196,16 @@ export function RefactoringDashboard(props: IRefactoringDashboardProps): ReactEl
                                 </span>
                             </div>
                             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-foreground">
-                                <span className="rounded border border-border bg-white px-2 py-0.5">
+                                <span className="rounded border border-border bg-surface px-2 py-0.5">
                                     ROI {String(target.roiScore)}
                                 </span>
-                                <span className="rounded border border-border bg-white px-2 py-0.5">
+                                <span className="rounded border border-border bg-surface px-2 py-0.5">
                                     Effort {String(target.effortScore)}
                                 </span>
                             </div>
                             <button
                                 aria-label={`Inspect refactoring target ${target.title}`}
-                                className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                                className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                 onClick={(): void => {
                                     props.onSelectTarget?.(target)
                                 }}

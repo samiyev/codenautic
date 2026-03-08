@@ -104,7 +104,7 @@ function ReviewCommentNode(props: IReviewCommentNodeProps): ReactElement {
 
     return (
         <li className="space-y-2" style={{ paddingLeft: leftPadding }}>
-            <article className="rounded-lg border border-border bg-white p-3">
+            <article className="rounded-lg border border-border bg-surface p-3">
                 <div className="flex items-start justify-between gap-2">
                     <div>
                         <p className="text-sm font-semibold text-foreground">
@@ -166,7 +166,7 @@ function ReviewCommentNode(props: IReviewCommentNodeProps): ReactElement {
                             }}
                         />
                         <button
-                            className="rounded bg-slate-900 px-3 py-1.5 text-xs text-white"
+                            className="rounded bg-foreground px-3 py-1.5 text-xs text-background"
                             type="button"
                             onClick={addReply}
                         >

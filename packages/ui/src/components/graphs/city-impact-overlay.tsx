@@ -35,7 +35,7 @@ function resolveIntensityClassName(intensity: number): string {
         return "border-danger/40 bg-danger/20 text-danger"
     }
     if (intensity >= 45) {
-        return "border-amber-300 bg-warning/20 text-amber-900"
+        return "border-warning/40 bg-warning/20 text-on-warning"
     }
     return "border-success/40 bg-success/20 text-success"
 }
@@ -48,7 +48,7 @@ function resolveIntensityClassName(intensity: number): string {
  */
 export function CityImpactOverlay(props: ICityImpactOverlayProps): ReactElement {
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className="text-sm font-semibold text-foreground">City impact overlay</p>
             <p className="mt-1 text-xs text-muted-foreground">
                 Ripple view for impact propagation where color intensity represents blast radius.
@@ -76,9 +76,9 @@ export function CityImpactOverlay(props: ICityImpactOverlayProps): ReactElement 
                                     {String(entry.intensity)}%
                                 </span>
                             </div>
-                            <div className="mt-2 h-2 rounded-full bg-slate-200">
+                            <div className="mt-2 h-2 rounded-full bg-surface-muted">
                                 <div
-                                    className="h-full rounded-full bg-cyan-500/70"
+                                    className="h-full rounded-full bg-primary/70"
                                     style={{
                                         width: `${String(entry.intensity)}%`,
                                     }}
@@ -86,7 +86,7 @@ export function CityImpactOverlay(props: ICityImpactOverlayProps): ReactElement 
                             </div>
                             <button
                                 aria-label={`Inspect city impact ${entry.label}`}
-                                className="mt-2 rounded border border-cyan-300 bg-cyan-500/20 px-2 py-1 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                                className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                 onClick={(): void => {
                                     props.onSelectEntry?.(entry)
                                 }}

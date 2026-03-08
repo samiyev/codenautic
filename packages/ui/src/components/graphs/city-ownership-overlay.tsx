@@ -39,7 +39,7 @@ export interface ICityOwnershipOverlayProps {
 function resolveOwnerItemClassName(isActive: boolean): string {
     return [
         "w-full rounded-lg border p-2 text-left transition",
-        isActive ? "border-cyan-400 bg-cyan-50" : "border-border bg-surface hover:border-border",
+        isActive ? "border-primary bg-primary/10" : "border-border bg-surface hover:border-border",
     ].join(" ")
 }
 
@@ -55,7 +55,7 @@ export function CityOwnershipOverlay(props: ICityOwnershipOverlayProps): ReactEl
         : "Enable ownership colors"
 
     return (
-        <section className="rounded-lg border border-border bg-white p-3 shadow-sm">
+        <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                     <p className="text-sm font-semibold text-foreground">Ownership overlay</p>
@@ -66,7 +66,7 @@ export function CityOwnershipOverlay(props: ICityOwnershipOverlayProps): ReactEl
                 <button
                     aria-label={toggleButtonLabel}
                     aria-pressed={props.isEnabled}
-                    className="rounded-md border border-cyan-300 bg-cyan-500/15 px-3 py-1.5 text-xs font-semibold text-cyan-800 hover:border-cyan-400"
+                    className="rounded-md border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-on-primary hover:border-primary"
                     type="button"
                     onClick={(): void => {
                         props.onToggleEnabled?.(props.isEnabled === false)
