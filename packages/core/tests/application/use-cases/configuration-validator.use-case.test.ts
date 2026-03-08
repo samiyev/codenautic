@@ -10,8 +10,11 @@ describe("ConfigurationValidatorUseCase", () => {
             ignorePaths: [" src/** ", "dist/**"],
             maxSuggestionsPerFile: 7,
             maxSuggestionsPerCCR: 20,
+            autoCreateIssues: true,
             cadence: " standard ",
             customRuleIds: [" rule-1 ", "rule-2 "],
+            globalRuleIds: [" global-1 "],
+            organizationRuleIds: [" org-1 ", "org-2"],
             promptOverrides: {
                 categories: {
                     descriptions: {
@@ -36,6 +39,9 @@ describe("ConfigurationValidatorUseCase", () => {
         expect(result.isOk).toBe(true)
         expect(result.value.severityThreshold).toBe("HIGH")
         expect(result.value.ignorePaths).toEqual(["src/**", "dist/**"])
+        expect(result.value.autoCreateIssues).toBe(true)
+        expect(result.value.globalRuleIds).toEqual(["global-1"])
+        expect(result.value.organizationRuleIds).toEqual(["org-1", "org-2"])
         expect(result.value.promptOverrides).toEqual({
             categories: {
                 descriptions: {
@@ -74,6 +80,7 @@ describe("ConfigurationValidatorUseCase", () => {
 
         expect(result.isOk).toBe(true)
         expect(result.value.adapterFeature).toBe(true)
+        expect(result.value.autoCreateIssues).toBe(false)
         expect(result.value.nested).toEqual({enabled: true})
     })
 
@@ -97,8 +104,11 @@ describe("ConfigurationValidatorUseCase", () => {
             ignorePaths: [""],
             maxSuggestionsPerFile: 0,
             maxSuggestionsPerCCR: 0.5,
+            autoCreateIssues: "yes",
             cadence: " ",
             customRuleIds: [""],
+            globalRuleIds: [1],
+            organizationRuleIds: [""],
             promptOverrides: {
                 categories: {
                     descriptions: {
@@ -131,6 +141,18 @@ describe("ConfigurationValidatorUseCase", () => {
             message: "must be an integer greater than or equal to 1",
         })
         expect(result.error.fields).toContainEqual({
+            field: "autoCreateIssues",
+            message: "must be a boolean",
+        })
+        expect(result.error.fields).toContainEqual({
+            field: "globalRuleIds",
+            message: "must contain only non-empty strings",
+        })
+        expect(result.error.fields).toContainEqual({
+            field: "organizationRuleIds",
+            message: "must contain only non-empty strings",
+        })
+        expect(result.error.fields).toContainEqual({
             field: "promptOverrides.categories.descriptions.bug",
             message: "must be a non-empty string when provided",
         })
@@ -157,6 +179,7 @@ describe("ConfigurationValidatorUseCase", () => {
             maxSuggestionsPerCCR: 10,
             cadence: "standard",
             customRuleIds: ["rule-1"],
+            reviewDepthStrategy: " always-light ",
             directories: [
                 {
                     path: "src/core",
@@ -169,7 +192,8 @@ describe("ConfigurationValidatorUseCase", () => {
         })
 
         expect(result.isOk).toBe(true)
-        expect(result.value.reviewDepthStrategy).toBe("auto")
+        expect(result.value.reviewDepthStrategy).toBe("always-light")
+        expect(result.value.autoCreateIssues).toBe(false)
         expect(result.value.directories).toHaveLength(1)
         expect(result.value.directories?.[0]?.path).toBe("src/core")
         expect(result.value.directories?.[0]?.config.reviewDepthStrategy).toBe("always-heavy")
@@ -193,6 +217,7 @@ describe("ConfigurationValidatorUseCase", () => {
                         ignorePaths: [" docs/** "],
                         maxSuggestionsPerFile: 3,
                         maxSuggestionsPerCCR: 4,
+                        autoCreateIssues: true,
                         cadence: " urgent ",
                         customRuleIds: [" rule-x "],
                         reviewDepthStrategy: "always-light",
@@ -232,6 +257,7 @@ describe("ConfigurationValidatorUseCase", () => {
         expect(directoryConfig.ignorePaths).toEqual(["docs/**"])
         expect(directoryConfig.maxSuggestionsPerFile).toBe(3)
         expect(directoryConfig.maxSuggestionsPerCCR).toBe(4)
+        expect(directoryConfig.autoCreateIssues).toBe(true)
         expect(directoryConfig.cadence).toBe("urgent")
         expect(directoryConfig.customRuleIds).toEqual(["rule-x"])
         expect(directoryConfig.reviewDepthStrategy).toBe("always-light")
@@ -533,6 +559,29 @@ describe("ConfigurationValidatorUseCase", () => {
         }
     })
 
+    test("returns error when prompt override templates is not an object", async () => {
+        const useCase = new ConfigurationValidatorUseCase()
+        const result = await useCase.execute({
+            severityThreshold: "LOW",
+            ignorePaths: [],
+            maxSuggestionsPerFile: 1,
+            maxSuggestionsPerCCR: 2,
+            cadence: "standard",
+            customRuleIds: [],
+            promptOverrides: {
+                templates: "bad",
+            },
+        })
+
+        expect(result.isFail).toBe(true)
+        if (result.isFail) {
+            expect(result.error.fields).toContainEqual({
+                field: "promptOverrides.templates",
+                message: "must be an object with optional string fields",
+            })
+        }
+    })
+
     test("returns empty prompt overrides when nested sections are missing", async () => {
         const useCase = new ConfigurationValidatorUseCase()
         const result = await useCase.execute({
@@ -700,6 +749,7 @@ describe("ConfigurationValidatorUseCase", () => {
                         ignorePaths: "invalid",
                         maxSuggestionsPerFile: 0,
                         maxSuggestionsPerCCR: -1,
+                        autoCreateIssues: "yes",
                         cadence: " ",
                         customRuleIds: [""],
                         reviewDepthStrategy: "unknown",
@@ -722,6 +772,7 @@ describe("ConfigurationValidatorUseCase", () => {
         expect(config.ignorePaths).toBeUndefined()
         expect(config.maxSuggestionsPerFile).toBeUndefined()
         expect(config.maxSuggestionsPerCCR).toBeUndefined()
+        expect(config.autoCreateIssues).toBeUndefined()
         expect(config.cadence).toBeUndefined()
         expect(config.customRuleIds).toBeUndefined()
         expect(config.reviewDepthStrategy).toBeUndefined()

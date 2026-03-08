@@ -36,6 +36,7 @@ import {Result} from "../../../shared/result"
 import {
     INITIAL_STAGE_ATTEMPT,
     mergeExternalContext,
+    readReviewRuleSelectionConfig,
     readStringField,
 } from "./pipeline-stage-state.utils"
 import type {IReviewCcrDefaults} from "../../dto/config/system-defaults.dto"
@@ -179,11 +180,12 @@ export class ProcessCcrLevelReviewStageUseCase implements IPipelineStageUseCase 
     ): Promise<Result<string, StageError>> {
         const organizationId = readStringField(mergeRequest, "organizationId")
         const teamId = readStringField(mergeRequest, "teamId")
+        const ruleSelection = readReviewRuleSelectionConfig(config)
         const rulesContextResult = await resolveRuleContext({
             organizationId,
             teamId,
-            globalRuleIds: config["globalRuleIds"] as readonly string[] | undefined,
-            organizationRuleIds: config["organizationRuleIds"] as readonly string[] | undefined,
+            globalRuleIds: ruleSelection.globalRuleIds,
+            organizationRuleIds: ruleSelection.organizationRuleIds,
             getEnabledRulesUseCase: this.getEnabledRulesUseCase,
             libraryRuleRepository: this.libraryRuleRepository,
             ruleContextFormatterService: this.ruleContextFormatterService,

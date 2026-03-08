@@ -19,22 +19,6 @@ interface IConfigResolutionContext {
 
 const REVIEW_DEFAULTS_SETTINGS_KEY = "review.defaults"
 
-const DEFAULT_REVIEW_DEFAULTS: Readonly<Record<string, unknown>> = Object.freeze({
-    severityThreshold: "LOW",
-    ignorePaths: [],
-    maxSuggestionsPerFile: 10,
-    maxSuggestionsPerCCR: 50,
-    cadence: "automatic",
-    customRuleIds: [],
-    batchSize: 30,
-    applyFiltersToCustomRules: true,
-    descriptionMode: "COMPLEMENT",
-    newCommitsDescriptionMode: "CONCATENATE",
-    autoPauseThreshold: 20,
-    maxReviewsPerWindow: 10,
-    throttleWindowSeconds: 3600,
-})
-
 /**
  * Stage 3 use case. Resolves layered review configuration (default -> org -> repo).
  */
@@ -45,7 +29,7 @@ export class ResolveConfigStageUseCase implements IPipelineStageUseCase {
     private readonly repositoryConfigLoader: IRepositoryConfigLoader
     private readonly configMerger: ConfigurationMergerUseCase
     private readonly systemSettingsProvider?: ISystemSettingsProvider
-    private readonly defaultConfigFallback: Readonly<Record<string, unknown>>
+    private readonly defaultConfigFallback?: Readonly<Record<string, unknown>>
 
     /**
      * Creates resolve-config stage use case.
@@ -56,7 +40,7 @@ export class ResolveConfigStageUseCase implements IPipelineStageUseCase {
         repositoryConfigLoader: IRepositoryConfigLoader,
         configMerger: ConfigurationMergerUseCase = new ConfigurationMergerUseCase(),
         systemSettingsProvider?: ISystemSettingsProvider,
-        defaultConfigFallback: Readonly<Record<string, unknown>> = DEFAULT_REVIEW_DEFAULTS,
+        defaultConfigFallback?: Readonly<Record<string, unknown>>,
     ) {
         this.repositoryConfigLoader = repositoryConfigLoader
         this.configMerger = configMerger
@@ -276,18 +260,11 @@ export class ResolveConfigStageUseCase implements IPipelineStageUseCase {
      * @returns Default config layer or null.
      */
     private async loadDefaultLayer(): Promise<Partial<Record<string, unknown>> | null> {
-        let defaultLayer: Partial<Record<string, unknown>> | null = null
-
         if (this.repositoryConfigLoader.loadDefault !== undefined) {
-            try {
-                defaultLayer = await this.repositoryConfigLoader.loadDefault()
-            } catch {
-                defaultLayer = null
+            const defaultLayer = await this.repositoryConfigLoader.loadDefault()
+            if (defaultLayer !== null) {
+                return defaultLayer
             }
-        }
-
-        if (defaultLayer !== null) {
-            return defaultLayer
         }
 
         const settingsLayer = await this.loadDefaultLayerFromSettings()
@@ -295,7 +272,7 @@ export class ResolveConfigStageUseCase implements IPipelineStageUseCase {
             return settingsLayer
         }
 
-        return this.defaultConfigFallback
+        return this.defaultConfigFallback ?? null
     }
 
     /**
@@ -308,13 +285,9 @@ export class ResolveConfigStageUseCase implements IPipelineStageUseCase {
             return null
         }
 
-        try {
-            const payload = await this.systemSettingsProvider.get<unknown>(REVIEW_DEFAULTS_SETTINGS_KEY)
-            const record = this.readPlainObject(payload)
-            return record ?? null
-        } catch {
-            return null
-        }
+        const payload = await this.systemSettingsProvider.get<unknown>(REVIEW_DEFAULTS_SETTINGS_KEY)
+        const record = this.readPlainObject(payload)
+        return record ?? null
     }
 
     /**

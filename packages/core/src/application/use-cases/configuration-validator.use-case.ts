@@ -3,6 +3,7 @@ import {
     REVIEW_DEPTH_STRATEGY,
     type ReviewDepthStrategy,
     type IReviewConfigDTO,
+    type IReviewRuleSelectionDTO,
     type IReviewPromptOverridesDTO,
     type IReviewPromptOverrideCategoriesDTO,
     type IReviewPromptOverrideCategoryDescriptionsDTO,
@@ -33,8 +34,11 @@ const REVIEW_CONFIG_KEYS = [
     "ignorePaths",
     "maxSuggestionsPerFile",
     "maxSuggestionsPerCCR",
+    "autoCreateIssues",
     "cadence",
     "customRuleIds",
+    "globalRuleIds",
+    "organizationRuleIds",
     "reviewDepthStrategy",
     "directories",
     "promptOverrides",
@@ -120,7 +124,7 @@ export class ConfigurationValidatorUseCase
     private normalizeConfig(
         payload: Readonly<Record<string, unknown>>,
         fields: IValidationErrorField[],
-    ): ValidatedConfig | undefined {
+    ): IReviewConfigDTO | undefined {
         const severityThreshold = this.validateSeverityThreshold(payload["severityThreshold"], fields)
         const ignorePaths = this.validateStringArray(payload["ignorePaths"], "ignorePaths", fields)
         const maxSuggestionsPerFile = this.validatePositiveInteger(
@@ -133,8 +137,24 @@ export class ConfigurationValidatorUseCase
             "maxSuggestionsPerCCR",
             fields,
         )
+        const autoCreateIssues = this.validateBooleanWithDefault(
+            payload["autoCreateIssues"],
+            "autoCreateIssues",
+            false,
+            fields,
+        )
         const cadence = this.validateRequiredString(payload["cadence"], "cadence", fields)
         const customRuleIds = this.validateStringArray(payload["customRuleIds"], "customRuleIds", fields)
+        const globalRuleIds = this.validateOptionalStringArray(
+            payload["globalRuleIds"],
+            "globalRuleIds",
+            fields,
+        )
+        const organizationRuleIds = this.validateOptionalStringArray(
+            payload["organizationRuleIds"],
+            "organizationRuleIds",
+            fields,
+        )
         const reviewDepthStrategy = this.validateReviewDepthStrategy(payload["reviewDepthStrategy"], fields)
         const directories = this.validateDirectories(payload["directories"], fields)
         const promptOverrides = this.validatePromptOverrides(payload["promptOverrides"], fields)
@@ -144,6 +164,7 @@ export class ConfigurationValidatorUseCase
             ignorePaths,
             maxSuggestionsPerFile,
             maxSuggestionsPerCCR,
+            autoCreateIssues,
             cadence,
             customRuleIds,
             reviewDepthStrategy,
@@ -154,13 +175,16 @@ export class ConfigurationValidatorUseCase
             return undefined
         }
 
-        const normalizedConfig: ValidatedConfig = {
+        const normalizedConfig: IReviewConfigDTO = {
             severityThreshold: severityThreshold as string,
             ignorePaths: ignorePaths as readonly string[],
             maxSuggestionsPerFile: maxSuggestionsPerFile as number,
             maxSuggestionsPerCCR: maxSuggestionsPerCCR as number,
+            autoCreateIssues: autoCreateIssues as boolean,
             cadence: cadence as string,
             customRuleIds: customRuleIds as readonly string[],
+            ...(globalRuleIds === undefined ? {} : {globalRuleIds}),
+            ...(organizationRuleIds === undefined ? {} : {organizationRuleIds}),
             reviewDepthStrategy: reviewDepthStrategy as ReviewDepthStrategy,
             directories: directories as readonly IDirectoryConfig[],
             ...(promptOverrides === undefined ? {} : {promptOverrides}),
@@ -225,6 +249,36 @@ export class ConfigurationValidatorUseCase
     }
 
     /**
+     * Validates boolean field with explicit default value.
+     *
+     * @param value Raw value.
+     * @param fieldName Field name.
+     * @param defaultValue Default boolean value.
+     * @param fields Error accumulator.
+     * @returns Normalized boolean value.
+     */
+    private validateBooleanWithDefault(
+        value: unknown,
+        fieldName: string,
+        defaultValue: boolean,
+        fields: IValidationErrorField[],
+    ): boolean | undefined {
+        if (value === undefined) {
+            return defaultValue
+        }
+
+        if (typeof value !== "boolean") {
+            fields.push({
+                field: fieldName,
+                message: "must be a boolean",
+            })
+            return undefined
+        }
+
+        return value
+    }
+
+    /**
      * Validates positive integer field.
      *
      * @param value Raw value.
@@ -282,6 +336,26 @@ export class ConfigurationValidatorUseCase
         }
 
         return normalizedValues
+    }
+
+    /**
+     * Validates optional string array field and trims each item.
+     *
+     * @param value Raw value.
+     * @param fieldName Field name.
+     * @param fields Error accumulator.
+     * @returns Trimmed string array or undefined when field is omitted.
+     */
+    private validateOptionalStringArray(
+        value: unknown,
+        fieldName: keyof IReviewRuleSelectionDTO,
+        fields: IValidationErrorField[],
+    ): readonly string[] | undefined {
+        if (value === undefined) {
+            return undefined
+        }
+
+        return this.validateStringArray(value, fieldName, fields)
     }
 
     /**
@@ -426,6 +500,7 @@ export class ConfigurationValidatorUseCase
             ignorePaths?: readonly string[]
             maxSuggestionsPerFile?: number
             maxSuggestionsPerCCR?: number
+            autoCreateIssues?: boolean
             cadence?: string
             customRuleIds?: readonly string[]
             reviewDepthStrategy?: ReviewDepthStrategy
@@ -454,6 +529,13 @@ export class ConfigurationValidatorUseCase
             this.normalizeOptionalPositiveInteger(record["maxSuggestionsPerCCR"]),
             (nextValue) => {
                 result.maxSuggestionsPerCCR = nextValue
+            },
+        )
+
+        this.setOptionalNormalizedValue(
+            this.normalizeOptionalBoolean(record["autoCreateIssues"]),
+            (nextValue) => {
+                result.autoCreateIssues = nextValue
             },
         )
 
@@ -894,6 +976,24 @@ export class ConfigurationValidatorUseCase
         }
 
         if (typeof value !== "number" || Number.isInteger(value) === false || value < 1) {
+            return undefined
+        }
+
+        return value
+    }
+
+    /**
+     * Validates optional boolean.
+     *
+     * @param value Raw value.
+     * @returns Normalized boolean or undefined.
+     */
+    private normalizeOptionalBoolean(value: unknown): boolean | undefined {
+        if (value === undefined) {
+            return undefined
+        }
+
+        if (typeof value !== "boolean") {
             return undefined
         }
 

@@ -2,6 +2,7 @@ export {type IDiscardedSuggestionDTO} from "./discarded-suggestion.dto"
 export {
     REVIEW_DEPTH_STRATEGY,
     type IReviewConfigDTO,
+    type IReviewRuleSelectionDTO,
     type IReviewPromptOverridesDTO,
     type IReviewPromptOverrideCategoriesDTO,
     type IReviewPromptOverrideCategoryDescriptionsDTO,

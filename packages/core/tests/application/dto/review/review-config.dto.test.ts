@@ -36,14 +36,20 @@ describe("IReviewConfigDTO", () => {
             ignorePaths: ["dist/**", "vendor/**"],
             maxSuggestionsPerFile: 5,
             maxSuggestionsPerCCR: 30,
+            autoCreateIssues: true,
             cadence: "per_commit",
             customRuleIds: ["rule-1", "rule-2"],
+            globalRuleIds: ["global-1"],
+            organizationRuleIds: ["org-1"],
             promptOverrides,
         }
 
         expect(config.severityThreshold).toBe("HIGH")
         expect(config.ignorePaths).toEqual(["dist/**", "vendor/**"])
         expect(config.customRuleIds).toEqual(["rule-1", "rule-2"])
+        expect(config.autoCreateIssues).toBe(true)
+        expect(config.globalRuleIds).toEqual(["global-1"])
+        expect(config.organizationRuleIds).toEqual(["org-1"])
         expect(config.promptOverrides?.severity?.flags?.high).toBe("high guidance")
         expect(config.promptOverrides?.templates?.hallucinationCheck).toBe("hallucination guidance")
     })
@@ -59,6 +65,7 @@ describe("IReviewConfigDTO", () => {
         }
 
         expect(config.promptOverrides).toBeUndefined()
+        expect(config.autoCreateIssues).toBeUndefined()
         expect(config.maxSuggestionsPerCCR).toBe(20)
     })
 })

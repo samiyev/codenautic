@@ -5,6 +5,8 @@ import {
     mergeExternalContext,
     readBooleanField,
     readObjectField,
+    readReviewRuleSelectionConfig,
+    readStringArrayField,
     readStringField,
     resolveCurrentHeadCommitId,
 } from "../../../../src/application/use-cases/review/pipeline-stage-state.utils"
@@ -27,6 +29,33 @@ describe("pipeline-stage-state.utils", () => {
         expect(readObjectField({ctx: {a: 1}}, "ctx")).toEqual({a: 1})
         expect(readObjectField({ctx: null}, "ctx")).toBeUndefined()
         expect(readObjectField({ctx: []}, "ctx")).toBeUndefined()
+    })
+
+    test("readStringArrayField returns trimmed array and rejects invalid values", () => {
+        expect(readStringArrayField({ids: [" rule-1 ", "rule-2"]}, "ids")).toEqual([
+            "rule-1",
+            "rule-2",
+        ])
+        expect(readStringArrayField({ids: ["rule-1", "   "]}, "ids")).toBeUndefined()
+        expect(readStringArrayField({ids: "rule-1"}, "ids")).toBeUndefined()
+    })
+
+    test("readReviewRuleSelectionConfig returns only valid rule-selection fields", () => {
+        expect(
+            readReviewRuleSelectionConfig({
+                globalRuleIds: [" global-1 "],
+                organizationRuleIds: [" org-1 ", "org-2"],
+            }),
+        ).toEqual({
+            globalRuleIds: ["global-1"],
+            organizationRuleIds: ["org-1", "org-2"],
+        })
+        expect(
+            readReviewRuleSelectionConfig({
+                globalRuleIds: ["global-1", ""],
+                organizationRuleIds: "org-1",
+            }),
+        ).toEqual({})
     })
 
     test("resolveCurrentHeadCommitId prioritizes explicit head and fallback commits", () => {

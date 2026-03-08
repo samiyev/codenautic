@@ -32,8 +32,11 @@ describe("ValidateConfigStageUseCase", () => {
             ignorePaths: [" src/generated/** ", "dist/**"],
             maxSuggestionsPerFile: 7,
             maxSuggestionsPerCCR: 25,
+            autoCreateIssues: true,
             cadence: " balanced ",
             customRuleIds: [" rule-1 ", "rule-2"],
+            globalRuleIds: [" global-1 "],
+            organizationRuleIds: [" org-1 "],
             promptOverrides: {
                 categories: {
                     descriptions: {
@@ -54,8 +57,11 @@ describe("ValidateConfigStageUseCase", () => {
             ignorePaths: ["src/generated/**", "dist/**"],
             maxSuggestionsPerFile: 7,
             maxSuggestionsPerCCR: 25,
+            autoCreateIssues: true,
             cadence: "balanced",
             customRuleIds: ["rule-1", "rule-2"],
+            globalRuleIds: ["global-1"],
+            organizationRuleIds: ["org-1"],
             reviewDepthStrategy: "auto",
             directories: [],
             promptOverrides: {

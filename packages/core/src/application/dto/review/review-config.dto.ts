@@ -77,15 +77,24 @@ export type ValidatedConfig = IReviewConfigDTO & {
 }
 
 /**
+ * Explicit rule-selection layer for review config hierarchy.
+ */
+export interface IReviewRuleSelectionDTO {
+    readonly globalRuleIds?: readonly string[]
+    readonly organizationRuleIds?: readonly string[]
+}
+
+/**
  * Review configuration snapshot used across application boundaries.
  *
  * This DTO intentionally uses only primitive values and arrays of primitives.
  */
-export interface IReviewConfigDTO {
+export interface IReviewConfigDTO extends IReviewRuleSelectionDTO {
     readonly severityThreshold: string
     readonly ignorePaths: readonly string[]
     readonly maxSuggestionsPerFile: number
     readonly maxSuggestionsPerCCR: number
+    readonly autoCreateIssues?: boolean
     readonly cadence: string
     readonly customRuleIds: readonly string[]
     readonly reviewDepthStrategy?: ReviewDepthStrategy

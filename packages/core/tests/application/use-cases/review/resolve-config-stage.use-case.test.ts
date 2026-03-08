@@ -37,6 +37,16 @@ class InMemorySystemSettingsProvider implements ISystemSettingsProvider {
     }
 }
 
+class ThrowingSystemSettingsProvider implements ISystemSettingsProvider {
+    public get<T>(_key: string): Promise<T | undefined> {
+        return Promise.reject(new Error("settings unavailable"))
+    }
+
+    public getMany<T>(_keys: readonly string[]): Promise<ReadonlyMap<string, T>> {
+        return Promise.reject(new Error("settings unavailable"))
+    }
+}
+
 class InMemoryRepositoryConfigLoader implements IRepositoryConfigLoader {
     public defaultLayer: Partial<IReviewConfigDTO> | null = null
     public organizationLayer: Partial<IReviewConfigDTO> | null = null
@@ -192,9 +202,39 @@ describe("ResolveConfigStageUseCase", () => {
         expect(result.value.state.config["ignorePaths"]).toEqual(["generated/**"])
     })
 
-    test("falls back to hardcoded defaults when settings are missing", async () => {
+    test("fails when default config sources are missing", async () => {
         const loader = new InMemoryRepositoryConfigLoader()
         const useCase = new ResolveConfigStageUseCase(loader)
+        const state = createState({
+            repositoryId: "repo-1",
+            organizationId: "org-1",
+            teamId: "team-1",
+        })
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isFail).toBe(true)
+        expect(result.error.recoverable).toBe(false)
+        expect(result.error.message).toBe("Default review configuration layer is missing")
+    })
+
+    test("uses explicit compatibility fallback when configured", async () => {
+        const loader = new InMemoryRepositoryConfigLoader()
+        const useCase = new ResolveConfigStageUseCase(
+            loader,
+            undefined,
+            undefined,
+            {
+                severityThreshold: "LOW",
+                ignorePaths: [],
+                maxSuggestionsPerFile: 10,
+                maxSuggestionsPerCCR: 50,
+                cadence: "automatic",
+                customRuleIds: [],
+            },
+        )
         const state = createState({
             repositoryId: "repo-1",
             organizationId: "org-1",
@@ -269,5 +309,28 @@ describe("ResolveConfigStageUseCase", () => {
         expect(result.isFail).toBe(true)
         expect(result.error.recoverable).toBe(true)
         expect(result.error.message).toContain("resolve repository configuration")
+    })
+
+    test("returns recoverable stage error when settings provider throws", async () => {
+        const loader = new InMemoryRepositoryConfigLoader()
+        const useCase = new ResolveConfigStageUseCase(
+            loader,
+            undefined,
+            new ThrowingSystemSettingsProvider(),
+        )
+        const state = createState({
+            repositoryId: "repo-1",
+            organizationId: "org-1",
+            teamId: "team-1",
+        })
+
+        const result = await useCase.execute({
+            state,
+        })
+
+        expect(result.isFail).toBe(true)
+        expect(result.error.recoverable).toBe(true)
+        expect(result.error.message).toContain("resolve repository configuration")
+        expect(result.error.originalError?.message).toBe("settings unavailable")
     })
 })
