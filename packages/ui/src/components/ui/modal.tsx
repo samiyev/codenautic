@@ -1,8 +1,4 @@
-import type {
-    HTMLAttributes,
-    ReactElement,
-    ReactNode,
-} from "react"
+import type { ComponentProps, ReactElement, ReactNode } from "react"
 import {
     Modal as HeroUIModal,
     type ModalBodyProps as HeroUIModalBodyProps,
@@ -27,7 +23,15 @@ export function ModalContent(
         readonly children?: ReactNode
     },
 ): ReactElement {
-    return <HeroUIModal.Dialog {...props} />
+    const { children, ...dialogProps } = props
+
+    return (
+        <HeroUIModal.Backdrop>
+            <HeroUIModal.Container>
+                <HeroUIModal.Dialog {...dialogProps}>{children}</HeroUIModal.Dialog>
+            </HeroUIModal.Container>
+        </HeroUIModal.Backdrop>
+    )
 }
 
 /**
@@ -64,7 +68,7 @@ export function ModalFooter({
  * Прозрачный fallback для старого экспорта `ModalBackdrop`.
  */
 export function ModalBackdrop(
-    props: Omit<HTMLAttributes<HTMLDivElement>, "children">,
+    props: ComponentProps<typeof HeroUIModal.Backdrop>,
 ): ReactElement {
     return <HeroUIModal.Backdrop {...props} />
 }

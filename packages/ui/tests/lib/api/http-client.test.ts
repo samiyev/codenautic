@@ -119,6 +119,58 @@ describe("FetchHttpClient", (): void => {
 
         throw new Error("Ожидалась ошибка парсинга JSON")
     })
+
+    it("не ретраит localhost connection refused ошибки в dev-сценарии", async (): Promise<void> => {
+        const fetchSpy = vi
+            .spyOn(globalThis, "fetch")
+            .mockRejectedValue(new TypeError("Failed to fetch"))
+        const delaySpy = vi.fn(async (): Promise<void> => {})
+        const client = new FetchHttpClient(
+            {
+                baseUrl: "http://localhost:7120",
+                defaultHeaders: {},
+            },
+            {
+                delay: delaySpy,
+            },
+        )
+
+        await expect(
+            client.request({
+                method: "GET",
+                path: "/api/v1/auth/session",
+            }),
+        ).rejects.toBeInstanceOf(ApiNetworkError)
+        expect(fetchSpy).toHaveBeenCalledTimes(1)
+        expect(delaySpy).not.toHaveBeenCalled()
+    })
+
+    it("сохраняет network retry для non-local API host", async (): Promise<void> => {
+        const fetchSpy = vi
+            .spyOn(globalThis, "fetch")
+            .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+            .mockResolvedValueOnce(
+                new Response(JSON.stringify({ ok: true }), {
+                    status: 200,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }),
+            )
+        const delaySpy = vi.fn(async (): Promise<void> => {})
+        const client = new FetchHttpClient(API_CONFIG, {
+            delay: delaySpy,
+        })
+
+        await expect(
+            client.request<{ readonly ok: boolean }>({
+                method: "GET",
+                path: "/api/v1/health",
+            }),
+        ).resolves.toEqual({ ok: true })
+        expect(fetchSpy).toHaveBeenCalledTimes(2)
+        expect(delaySpy).toHaveBeenCalledTimes(1)
+    })
 })
 
 describe("createApiContracts", (): void => {

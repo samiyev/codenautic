@@ -16,7 +16,16 @@ describe("SettingsPage", (): void => {
     it("рендерит overview и quick setup ссылки", (): void => {
         renderWithProviders(<SettingsPage />)
 
-        expect(screen.getByRole("heading", { level: 1, name: "Settings" })).not.toBeNull()
+        const heading = screen.getByRole("heading", { level: 1, name: "Settings" })
+
+        expect(heading).not.toBeNull()
+        expect(heading.className).toContain("text-[var(--foreground)]")
+        expect(heading.className).not.toContain("text-slate-900")
+        expect(
+            screen.getByText(
+                "Configure providers, onboarding defaults, governance rules, and operational controls for your workspace.",
+            ),
+        ).not.toBeNull()
         expect(screen.getByText("Quick setup")).not.toBeNull()
         expect(screen.getByRole("link", { name: "Code Review configuration" })).not.toBeNull()
         expect(screen.getByRole("link", { name: "LLM providers" })).not.toBeNull()

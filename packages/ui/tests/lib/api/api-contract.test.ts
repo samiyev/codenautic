@@ -176,9 +176,12 @@ describe("UI API contract", (): void => {
         }) as unknown as typeof fetch
 
         const delay = vi.fn(async (): Promise<void> => Promise.resolve())
-        const httpClient = new FetchHttpClient(createApiConfig({ MODE: "development" }), {
-            delay,
-        })
+        const httpClient = new FetchHttpClient(
+            createApiConfig({ VITE_API_URL: "https://api.example" }),
+            {
+                delay,
+            },
+        )
 
         const response = await httpClient.request<{ status: string }>({
             method: "GET",
@@ -208,9 +211,12 @@ describe("UI API contract", (): void => {
         }) as unknown as typeof fetch
 
         const delay = vi.fn(async (): Promise<void> => Promise.resolve())
-        const httpClient = new FetchHttpClient(createApiConfig({ MODE: "development" }), {
-            delay,
-        })
+        const httpClient = new FetchHttpClient(
+            createApiConfig({ VITE_API_URL: "https://api.example" }),
+            {
+                delay,
+            },
+        )
 
         const response = await httpClient.request<{ status: string }>({
             method: "GET",
@@ -435,13 +441,16 @@ describe("UI API contract", (): void => {
         }) as unknown as typeof fetch
 
         const controller = new AbortController()
-        const httpClient = new FetchHttpClient(createApiConfig({ MODE: "development" }), {
-            retryPolicy: {
-                maxAttempts: 2,
-                baseDelayMs: 500,
-                maxDelayMs: 500,
+        const httpClient = new FetchHttpClient(
+            createApiConfig({ VITE_API_URL: "https://api.example" }),
+            {
+                retryPolicy: {
+                    maxAttempts: 2,
+                    baseDelayMs: 500,
+                    maxDelayMs: 500,
+                },
             },
-        })
+        )
 
         const requestPromise = httpClient.request({
             method: "GET",
@@ -466,11 +475,14 @@ describe("UI API contract", (): void => {
         const controller = new AbortController()
         controller.abort()
 
-        const httpClient = new FetchHttpClient(createApiConfig({ MODE: "development" }), {
-            retryPolicy: {
-                maxAttempts: 2,
+        const httpClient = new FetchHttpClient(
+            createApiConfig({ VITE_API_URL: "https://api.example" }),
+            {
+                retryPolicy: {
+                    maxAttempts: 2,
+                },
             },
-        })
+        )
 
         await expect(
             httpClient.request({
@@ -499,11 +511,14 @@ describe("UI API contract", (): void => {
             const controller = new AbortController()
             controller.abort()
 
-            const httpClient = new FetchHttpClient(createApiConfig({ MODE: "development" }), {
-                retryPolicy: {
-                    maxAttempts: 2,
+            const httpClient = new FetchHttpClient(
+                createApiConfig({ VITE_API_URL: "https://api.example" }),
+                {
+                    retryPolicy: {
+                        maxAttempts: 2,
+                    },
                 },
-            })
+            )
 
             await expect(
                 httpClient.request({
@@ -773,13 +788,16 @@ describe("UI API contract", (): void => {
         }) as unknown as typeof fetch
 
         const controller = new AbortController()
-        const httpClient = new FetchHttpClient(createApiConfig({ MODE: "development" }), {
-            retryPolicy: {
-                maxAttempts: 2,
-                baseDelayMs: 1,
-                maxDelayMs: 1,
+        const httpClient = new FetchHttpClient(
+            createApiConfig({ VITE_API_URL: "https://api.example" }),
+            {
+                retryPolicy: {
+                    maxAttempts: 2,
+                    baseDelayMs: 1,
+                    maxDelayMs: 1,
+                },
             },
-        })
+        )
 
         const response = await httpClient.request<{ status: string }>({
             method: "GET",

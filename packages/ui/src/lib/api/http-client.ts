@@ -273,6 +273,9 @@ export class FetchHttpClient implements IHttpClient {
         if (RETRYABLE_METHODS.has(method) !== true) {
             return false
         }
+        if (isLocalApiBaseUrl(this.config.baseUrl) === true && isConnectionRefusedLikeError(error)) {
+            return false
+        }
         return isRetryableNetworkError(error)
     }
 
@@ -465,6 +468,19 @@ function buildInvalidJsonResponseMessage(path: string, error: unknown): string {
     return `Invalid JSON response for ${path}`
 }
 
+function isLocalApiBaseUrl(baseUrl: string): boolean {
+    try {
+        const parsedUrl = new URL(baseUrl)
+        return (
+            parsedUrl.hostname === "localhost"
+            || parsedUrl.hostname === "127.0.0.1"
+            || parsedUrl.hostname === "::1"
+        )
+    } catch {
+        return false
+    }
+}
+
 /**
  * Преобразует частичный override retry-политики в полный объект.
  *
@@ -527,6 +543,20 @@ function isRetryableNetworkError(error: unknown): boolean {
 
     if (error instanceof Error) {
         return error.name === "NetworkError"
+    }
+
+    return false
+}
+
+function isConnectionRefusedLikeError(error: unknown): boolean {
+    if (error instanceof Error) {
+        const normalizedMessage = error.message.toLowerCase()
+        return (
+            normalizedMessage.includes("failed to fetch")
+            || normalizedMessage.includes("fetch failed")
+            || normalizedMessage.includes("err_connection_refused")
+            || normalizedMessage.includes("econnrefused")
+        )
     }
 
     return false

@@ -8,11 +8,14 @@ import { defineConfig } from "vite"
 import { loadUiServicePorts } from "./config/service-ports"
 import { createSecurityHeaders } from "./src/lib/security/security-headers"
 
-const securityHeaders = createSecurityHeaders()
 const servicePorts = loadUiServicePorts(__dirname)
 
 export default defineConfig(({ mode }) => {
     const analyzeBundle = mode === "analyze"
+    const serverSecurityHeaders = createSecurityHeaders({
+        allowDevRuntime: true,
+    })
+    const previewSecurityHeaders = createSecurityHeaders()
     const plugins = [
         TanStackRouterVite({
             routesDirectory: "./src/routes",
@@ -57,11 +60,11 @@ export default defineConfig(({ mode }) => {
         },
         server: {
             port: servicePorts.ui,
-            headers: securityHeaders,
+            headers: serverSecurityHeaders,
         },
         preview: {
             port: servicePorts.uiPreview,
-            headers: securityHeaders,
+            headers: previewSecurityHeaders,
         },
         build: {
             sourcemap: true,

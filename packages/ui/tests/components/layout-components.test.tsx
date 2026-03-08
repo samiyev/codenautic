@@ -351,13 +351,15 @@ describe("layout components", (): void => {
         renderWithProviders(
             <MobileSidebar isOpen={false} onOpenChange={onOpenChange} title="Menu" />,
         )
+
+        expect(screen.queryByText("Menu")).toBeNull()
         expect(onOpenChange).not.toHaveBeenCalled()
     })
 
     it("рендерит mobile sidebar в открытом состоянии", (): void => {
         const onOpenChange = vi.fn()
         renderWithProviders(<MobileSidebar isOpen onOpenChange={onOpenChange} title="Menu" />)
-        expect(screen.queryByText("Menu")).not.toBeNull()
+        expect(screen.getByText("Menu")).not.toBeNull()
         expect(onOpenChange).not.toHaveBeenCalled()
     })
 
@@ -452,8 +454,10 @@ describe("layout components", (): void => {
             }),
         )
 
-        expect(screen.getByText("Session expired")).not.toBeNull()
-        expect(screen.getByText(/Authentication failed with 401/)).not.toBeNull()
+        await waitFor((): void => {
+            expect(screen.getByText("Session expired")).not.toBeNull()
+            expect(screen.getByText(/Authentication failed with 401/)).not.toBeNull()
+        })
 
         await user.click(screen.getByRole("button", { name: "Re-authenticate" }))
 

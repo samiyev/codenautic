@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
@@ -14,17 +14,24 @@ describe("SettingsTokenUsagePage", (): void => {
         expect(screen.getByText("Usage freshness")).not.toBeNull()
         expect(screen.getByText("Explainability for token cost signal")).not.toBeNull()
 
+        const thirtyDayButton = screen.getByRole("button", { name: "30d" })
+        await user.click(thirtyDayButton)
+        await waitFor((): void => {
+            expect(thirtyDayButton.className).toContain("button--primary")
+        })
         await user.click(screen.getByRole("button", { name: "Open provenance" }))
-        expect(screen.getByText("Source data provenance")).not.toBeNull()
-        expect(screen.getByText("token-usage-range:7d (Last 7 days)")).not.toBeNull()
+        expect(await screen.findByText("Source data provenance")).not.toBeNull()
+        expect(await screen.findByText("token-usage-range:30d (Last 30 days)")).not.toBeNull()
+    })
 
-        await user.click(screen.getByRole("button", { name: "30d" }))
-        expect(screen.getByText("token-usage-range:30d (Last 30 days)")).not.toBeNull()
+    it("открывает explainability drawer и экспортирует snippet", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsTokenUsagePage />)
 
         await user.click(screen.getByRole("button", { name: "Why this score?" }))
-        expect(screen.getByText("Explainability")).not.toBeNull()
+        expect(await screen.findByText("Explainability")).not.toBeNull()
         await user.click(screen.getByRole("button", { name: "Export explanation snippet" }))
-        expect(screen.getByLabelText("Explainability export snippet")).not.toBeNull()
+        expect(await screen.findByLabelText("Explainability export snippet")).not.toBeNull()
     })
 
     it("показывает статус действий refresh/rescan", async (): Promise<void> => {

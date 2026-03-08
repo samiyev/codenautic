@@ -17,13 +17,19 @@ export function SettingsPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-slate-900">Settings</h1>
+            <header className="space-y-1">
+                <h1 className="text-2xl font-semibold text-[var(--foreground)]">Settings</h1>
+                <p className="text-sm text-[var(--foreground)]/70">
+                    Configure providers, onboarding defaults, governance rules, and operational
+                    controls for your workspace.
+                </p>
+            </header>
             <ActivationChecklist role={checklistRole} />
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold">Quick setup</p>
+                    <p className="text-base font-semibold text-[var(--foreground)]">Quick setup</p>
                 </CardHeader>
-                <CardBody className="space-y-2 text-sm text-slate-700">
+                <CardBody className="space-y-2 text-sm text-[var(--foreground)]/80">
                     <p>
                         Настройте review-политику, провайдеров и подключения через быстрые страницы
                         ниже.
@@ -31,7 +37,7 @@ export function SettingsPage(): ReactElement {
                     <ul className="space-y-1">
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-code-review"
                             >
                                 Code Review configuration
@@ -39,7 +45,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-appearance"
                             >
                                 Appearance settings
@@ -47,7 +53,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-notifications"
                             >
                                 Notification center
@@ -55,23 +61,23 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-llm-providers"
                             >
                                 LLM providers
                             </Link>
                         </li>
                         <li>
-                        <Link
-                            className="underline underline-offset-4"
+                            <Link
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-git-providers"
-                        >
+                            >
                                 Git providers
                             </Link>
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-integrations"
                             >
                                 Integrations
@@ -79,7 +85,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-webhooks"
                             >
                                 Webhook management
@@ -87,7 +93,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-token-usage"
                             >
                                 Token usage
@@ -95,7 +101,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-adoption-analytics"
                             >
                                 Usage & adoption analytics
@@ -103,7 +109,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-organization"
                             >
                                 Organization settings
@@ -111,7 +117,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-contract-validation"
                             >
                                 Import/export contract validation
@@ -119,7 +125,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-privacy-redaction"
                             >
                                 Privacy-safe export
@@ -127,7 +133,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-provider-degradation"
                             >
                                 Provider degradation mode
@@ -135,7 +141,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-concurrency"
                             >
                                 Concurrent config resolver
@@ -143,7 +149,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-jobs"
                             >
                                 Operations jobs monitor
@@ -151,7 +157,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-billing"
                             >
                                 Billing lifecycle
@@ -159,7 +165,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-team"
                             >
                                 Team management
@@ -167,7 +173,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-rules-library"
                             >
                                 Rules library
@@ -175,7 +181,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-audit-logs"
                             >
                                 Audit logs
@@ -183,7 +189,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-sso"
                             >
                                 SSO provider management
@@ -191,7 +197,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/settings-byok"
                             >
                                 BYOK management
@@ -199,7 +205,7 @@ export function SettingsPage(): ReactElement {
                         </li>
                         <li>
                             <Link
-                                className="underline underline-offset-4"
+                                className="font-medium text-[var(--foreground)] underline underline-offset-4"
                                 to="/onboarding"
                             >
                                 Start repository onboarding

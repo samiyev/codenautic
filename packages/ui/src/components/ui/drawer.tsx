@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactElement, HTMLAttributes, ReactNode } from "react"
+import type { ComponentProps, ReactElement, ReactNode } from "react"
 import { Modal } from "@heroui/react"
 
 /**
@@ -16,14 +16,18 @@ export function DrawerContent({
     children,
     className,
     ...props
-}: Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
+}: Omit<ComponentProps<typeof Modal.Dialog>, "children"> & {
     readonly children?: ReactNode
     readonly className?: string
 }): ReactElement {
     return (
-        <div className={className} {...props}>
-            {children}
-        </div>
+        <Modal.Backdrop>
+            <Modal.Container className="!items-stretch !justify-start !p-0">
+                <Modal.Dialog className={className} {...props}>
+                    {children}
+                </Modal.Dialog>
+            </Modal.Container>
+        </Modal.Backdrop>
     )
 }
 

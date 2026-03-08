@@ -1015,9 +1015,7 @@ function useThemeSyncFromApiEffect(args: {
             const selectedProfile = selectedThemeProfile.profile
             profileUpdatedAtRef.current = selectedProfile.updatedAtMs
             pendingLocalProfileUpdatedAtRef.current = undefined
-            if (selectedThemeProfile.source === "remote") {
-                lastSyncSignatureRef.current = `${selectedProfile.mode}:${selectedProfile.preset}`
-            }
+            lastSyncSignatureRef.current = `${selectedProfile.mode}:${selectedProfile.preset}`
 
             setThemeMode((_: ThemeMode): ThemeMode => {
                 if (selectedProfile.mode !== localProfile.mode) {

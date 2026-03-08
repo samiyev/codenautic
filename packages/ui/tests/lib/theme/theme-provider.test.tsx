@@ -70,4 +70,62 @@ describe("ThemeProvider", (): void => {
             expect(screen.getByTestId("theme-state")).toHaveTextContent(`dark:${remotePreset}`)
         })
     })
+
+    it("не пытается записать theme profile на первом mount, если backend недоступен", async (): Promise<void> => {
+        let getSettingsCalls = 0
+        let getPreferencesCalls = 0
+        let writeCalls = 0
+
+        localStorage.setItem("codenautic:ui:theme-mode", "system")
+        localStorage.setItem("codenautic:ui:theme-preset", THEME_PRESETS[0]?.id ?? "moonstone")
+        localStorage.removeItem("codenautic:ui:theme-profile-synced")
+
+        server.use(
+            http.get("http://localhost:7120/api/v1/user/settings", () => {
+                getSettingsCalls += 1
+                return HttpResponse.error()
+            }),
+            http.get("http://localhost:7120/api/v1/user/preferences", () => {
+                getPreferencesCalls += 1
+                return HttpResponse.error()
+            }),
+            http.put("http://localhost:7120/api/v1/user/settings", () => {
+                writeCalls += 1
+                return HttpResponse.json({})
+            }),
+            http.patch("http://localhost:7120/api/v1/user/settings", () => {
+                writeCalls += 1
+                return HttpResponse.json({})
+            }),
+            http.post("http://localhost:7120/api/v1/user/settings", () => {
+                writeCalls += 1
+                return HttpResponse.json({})
+            }),
+            http.put("http://localhost:7120/api/v1/user/preferences", () => {
+                writeCalls += 1
+                return HttpResponse.json({})
+            }),
+            http.patch("http://localhost:7120/api/v1/user/preferences", () => {
+                writeCalls += 1
+                return HttpResponse.json({})
+            }),
+            http.post("http://localhost:7120/api/v1/user/preferences", () => {
+                writeCalls += 1
+                return HttpResponse.json({})
+            }),
+        )
+
+        renderWithProviders(<ThemeStateProbe />)
+
+        await waitFor((): void => {
+            expect(getSettingsCalls).toBe(1)
+            expect(getPreferencesCalls).toBe(1)
+        })
+        await waitFor((): void => {
+            expect(writeCalls).toBe(0)
+        })
+        expect(screen.getByTestId("theme-state")).toHaveTextContent(
+            `system:${THEME_PRESETS[0]?.id ?? "moonstone"}`,
+        )
+    })
 })

@@ -1,13 +1,18 @@
-import type { ComponentProps, ReactElement, ReactNode } from "react"
+import { isValidElement, type ComponentProps, type ReactElement, type ReactNode } from "react"
 import {
-    Dropdown,
+    Dropdown as HeroUIDropdown,
     DropdownItem as HeroUIDropdownItem,
-    DropdownMenu,
-    DropdownSection,
+    DropdownMenu as HeroUIDropdownMenu,
+    DropdownPopover as HeroUIDropdownPopover,
+    DropdownSection as HeroUIDropdownSection,
     DropdownTrigger as HeroUIDropdownTrigger,
     type DropdownItemProps as HeroUIDropdownItemProps,
+    type DropdownMenuProps as HeroUIDropdownMenuProps,
+    type DropdownProps as HeroUIDropdownProps,
+    type DropdownSectionProps as HeroUIDropdownSectionProps,
 } from "@heroui/react"
 import type { ButtonProps } from "./button"
+import { Button } from "./button"
 
 /**
  * Legacy-совместимые props для DropdownItem.
@@ -18,6 +23,11 @@ export type DropdownItemProps = Omit<HeroUIDropdownItemProps, "color"> & {
 }
 
 type THeroUIDropdownTriggerProps = ComponentProps<typeof HeroUIDropdownTrigger>
+
+/**
+ * Legacy-совместимые свойства DropdownMenu.
+ */
+export type DropdownMenuProps<T extends object> = HeroUIDropdownMenuProps<T>
 
 /**
  * Legacy-совместимые свойства DropdownTrigger.
@@ -33,29 +43,125 @@ export interface IDropdownTriggerProps extends Omit<THeroUIDropdownTriggerProps,
     readonly variant?: ButtonProps["variant"]
 }
 
-/** Слой-обертка для Dropdown корня и структурных блоков. */
-export { Dropdown, DropdownMenu, DropdownSection }
+/**
+ * Типизированный guard для legacy-trigger с дочерним Button.
+ *
+ * @param value Узел React children.
+ * @returns `true`, если children является нашим Button-компонентом.
+ */
+function isButtonElement(value: ReactNode): value is ReactElement<ButtonProps, typeof Button> {
+    return isValidElement(value) && value.type === Button
+}
 
 /**
- * Trigger с поддержкой legacy-кнопочных props (`radius/size/variant`).
+ * Нормализует legacy visual props trigger-а в className.
+ *
+ * @param params Свойства визуального оформления trigger-а.
+ * @returns Склеенный className.
+ */
+function getTriggerClassName(params: {
+    readonly className: string | undefined
+    readonly color: ButtonProps["color"] | undefined
+    readonly radius: ButtonProps["radius"] | undefined
+    readonly size: ButtonProps["size"] | undefined
+    readonly variant: ButtonProps["variant"] | undefined
+}): string | undefined {
+    const classNames: string[] = []
+
+    if (params.className !== undefined && params.className.length > 0) {
+        classNames.push(params.className)
+    }
+
+    if (params.radius === "full") {
+        classNames.push("rounded-full")
+    }
+
+    if (params.size === "sm") {
+        classNames.push("min-h-8")
+    }
+
+    if (params.size === "md") {
+        classNames.push("min-h-10")
+    }
+
+    if (params.size === "lg") {
+        classNames.push("min-h-12")
+    }
+
+    if (params.variant === "light") {
+        classNames.push("bg-transparent")
+    }
+
+    if (params.color === "danger") {
+        classNames.push("text-red-600 hover:text-red-700")
+    }
+
+    if (classNames.length === 0) {
+        return undefined
+    }
+
+    return classNames.join(" ")
+}
+
+/** Слой-обертка для Dropdown корня и структурных блоков. */
+export const Dropdown = HeroUIDropdown
+export const DropdownSection = HeroUIDropdownSection
+
+/**
+ * Legacy-совместимый DropdownMenu, автоматически помещающий menu в popover HeroUI v3.
+ *
+ * @param props Свойства menu-компонента.
+ * @returns Popover + menu в одном legacy-компоненте.
+ */
+export function DropdownMenu<T extends object>(props: DropdownMenuProps<T>): ReactElement {
+    return (
+        <HeroUIDropdownPopover>
+            <HeroUIDropdownMenu {...props} />
+        </HeroUIDropdownPopover>
+    )
+}
+
+/**
+ * Trigger с поддержкой legacy-кнопочных props и Button-children без вложенных `<button>`.
  *
  * @param props Свойства trigger-компонента.
- * @returns DropdownTrigger с условной оберткой через Button.
+ * @returns DropdownTrigger с нормализованным содержимым.
  */
 export function DropdownTrigger(props: IDropdownTriggerProps): ReactElement {
     const {
         children,
-        className: _className,
-        color: _color,
-        disabled: _disabled,
-        isDisabled: _isDisabled,
-        radius: _radius,
-        size: _size,
-        variant: _variant,
+        className,
+        color,
+        disabled,
+        isDisabled,
+        radius,
+        size,
+        variant,
         ...triggerProps
     } = props
 
-    return <HeroUIDropdownTrigger {...triggerProps}>{children}</HeroUIDropdownTrigger>
+    const buttonChild = isButtonElement(children) ? children : undefined
+    const buttonChildProps = buttonChild?.props
+    const mergedDisabled = disabled ?? buttonChildProps?.disabled
+    const mergedIsDisabled = isDisabled ?? buttonChildProps?.isDisabled
+    const mergedClassName = getTriggerClassName({
+        className: className ?? buttonChildProps?.className,
+        color: color ?? buttonChildProps?.color,
+        radius: radius ?? buttonChildProps?.radius,
+        size: size ?? buttonChildProps?.size,
+        variant: variant ?? buttonChildProps?.variant,
+    })
+    const triggerChild = buttonChild?.props.children ?? children
+
+    return (
+        <HeroUIDropdownTrigger
+            {...triggerProps}
+            className={mergedClassName}
+            isDisabled={mergedDisabled === true || mergedIsDisabled === true}
+        >
+            {triggerChild}
+        </HeroUIDropdownTrigger>
+    )
 }
 
 /** Карточка DropdownItem с мягкой поддержкой legacy-`color`. */
@@ -67,4 +173,5 @@ export function DropdownItem(props: DropdownItemProps): ReactElement {
     return <HeroUIDropdownItem {...dropdownItemProps} className={mergedClassName} />
 }
 
-export type { DropdownProps, DropdownMenuProps, DropdownSectionProps } from "@heroui/react"
+export type DropdownProps = HeroUIDropdownProps
+export type DropdownSectionProps = HeroUIDropdownSectionProps
