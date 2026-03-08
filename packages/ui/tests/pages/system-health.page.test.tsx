@@ -11,7 +11,7 @@ import { renderWithProviders } from "../utils/render"
 describe("SystemHealthPage", (): void => {
     it("показывает загрузку и затем отрисовывает состояние API", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/health", async () => {
+            http.get("http://localhost:7120/api/v1/health", async () => {
                 await delay(80)
                 return HttpResponse.json({
                     status: "ok",
@@ -37,7 +37,7 @@ describe("SystemHealthPage", (): void => {
         let requestCount = 0
 
         server.use(
-            http.get("http://localhost:3000/api/v1/health", () => {
+            http.get("http://localhost:7120/api/v1/health", () => {
                 requestCount += 1
 
                 if (requestCount <= 3) {
@@ -82,14 +82,14 @@ describe("SystemHealthPage", (): void => {
 
     it("держит premium функции выключенными при ошибке flags backend", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/health", () => {
+            http.get("http://localhost:7120/api/v1/health", () => {
                 return HttpResponse.json({
                     status: "ok",
                     service: "api",
                     timestamp: "2026-03-02T10:00:00.000Z",
                 })
             }),
-            http.get("http://localhost:3000/api/v1/feature-flags", () => {
+            http.get("http://localhost:7120/api/v1/feature-flags", () => {
                 return HttpResponse.json(
                     {
                         message: "flags backend unavailable",

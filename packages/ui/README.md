@@ -115,6 +115,7 @@ bun add @codenautic/ui
 - **License policy**: только OSS-зависимости, допускающие коммерческое использование (MIT/Apache-2.0/BSD и аналоги).
 - **No paywall**: запрещены библиотеки, где критичные фичи доступны только в Pro/Enterprise.
 - **Icons (OSS-only policy)**:
+
 1. Primary icon library: `lucide-react` (дефолт для новых иконок в продуктовых экранах).
 2. Allowed secondary library: `@gravity-ui/icons` (если нужен стиль/иконка из примеров HeroUI).
 3. Optional fallback: `@iconify/react` только для редких brand/vendor иконок, когда нет эквивалента в primary.
@@ -266,11 +267,11 @@ CSS variables, OKLch color space. Toggle через `theme-toggle.tsx`.
 ## Разработка
 
 ```bash
-bun run dev            # Vite dev server
+bun run dev            # Vite dev server (port 7110)
 bun run build          # Vite build
 bun run build:analyze  # Vite build + rollup visualizer report
 bun run clean          # Очистка dist/ coverage/
-bun run preview        # Vite preview
+bun run preview        # Vite preview (port 7220)
 bun run lint           # Линтинг (eslint --fix)
 bun run format         # Форматирование (prettier)
 bun run format:check   # Проверка форматирования
@@ -279,11 +280,13 @@ bun run typecheck      # Проверка типов (tsc --noEmit)
 bun run test           # Тесты (vitest, happy-dom)
 bun run codegen        # OpenAPI → generated types
 bun run codegen:check  # Проверка синхронизации schema и generated types
-bun run storybook      # Storybook dev (port 6006)
+bun run storybook      # Storybook dev (port 7230)
 bun run build-storybook # Storybook build
 ```
 
 `dev` и `build` автоматически запускают `codegen`, чтобы DTO оставались актуальными после изменения `openapi/schema.yaml`.
+Сетевые порты UI и связанных сервисов централизованы в
+[`config/service-ports.json`](/Users/fozilbeksamiyev/projects/codenautic/config/service-ports.json).
 
 ---
 

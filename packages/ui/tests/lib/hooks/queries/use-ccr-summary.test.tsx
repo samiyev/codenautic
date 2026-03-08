@@ -52,7 +52,7 @@ async function triggerCcrSummaryGeneration(
 describe("useCCRSummary", (): void => {
     it("генерирует ccr summary и возвращает результат", async (): Promise<void> => {
         server.use(
-            http.post("http://localhost:3000/api/v1/repositories/repo-1/ccr-summary/generate", () => {
+            http.post("http://localhost:7120/api/v1/repositories/repo-1/ccr-summary/generate", () => {
                 return HttpResponse.json({
                     result: {
                         mode: "AUTO",

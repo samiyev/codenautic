@@ -208,7 +208,7 @@ async function deleteCustomRule(
 describe("useCustomRules", (): void => {
     it("загружает список custom rules", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/rules", () => {
+            http.get("http://localhost:7120/api/v1/rules", () => {
                 return HttpResponse.json({
                     rules: [BASE_RULE],
                     total: 1,
@@ -225,13 +225,13 @@ describe("useCustomRules", (): void => {
 
     it("создаёт правило с оптимистичным обновлением", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/rules", () => {
+            http.get("http://localhost:7120/api/v1/rules", () => {
                 return HttpResponse.json({
                     rules: [BASE_RULE],
                     total: 1,
                 })
             }),
-            http.post("http://localhost:3000/api/v1/rules", async () => {
+            http.post("http://localhost:7120/api/v1/rules", async () => {
                 return HttpResponse.json(
                     {
                         ...BASE_RULE,
@@ -256,13 +256,13 @@ describe("useCustomRules", (): void => {
 
     it("обновляет правило с оптимистичным обновлением", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/rules", () => {
+            http.get("http://localhost:7120/api/v1/rules", () => {
                 return HttpResponse.json({
                     rules: [BASE_RULE],
                     total: 1,
                 })
             }),
-            http.put("http://localhost:3000/api/v1/rules/rule-1", async () => {
+            http.put("http://localhost:7120/api/v1/rules/rule-1", async () => {
                 return HttpResponse.json(
                     {
                         ...BASE_RULE,
@@ -285,13 +285,13 @@ describe("useCustomRules", (): void => {
 
     it("удаляет правило с оптимистичным обновлением", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/rules", () => {
+            http.get("http://localhost:7120/api/v1/rules", () => {
                 return HttpResponse.json({
                     rules: [BASE_RULE],
                     total: 1,
                 })
             }),
-            http.delete("http://localhost:3000/api/v1/rules/rule-1", async () => {
+            http.delete("http://localhost:7120/api/v1/rules/rule-1", async () => {
                 return HttpResponse.json(
                     {
                         id: "rule-1",
@@ -313,7 +313,7 @@ describe("useCustomRules", (): void => {
         let currentRule: ICustomRule = BASE_RULE
 
         server.use(
-            http.get("http://localhost:3000/api/v1/rules", ({ request }) => {
+            http.get("http://localhost:7120/api/v1/rules", ({ request }) => {
                 const requestUrl = new URL(request.url)
                 const requestedScope = requestUrl.searchParams.get("scope")
                 const requestedStatus = requestUrl.searchParams.get("status")
@@ -325,7 +325,7 @@ describe("useCustomRules", (): void => {
                     total: matchesFilter ? 1 : 0,
                 })
             }),
-            http.put("http://localhost:3000/api/v1/rules/rule-1", async () => {
+            http.put("http://localhost:7120/api/v1/rules/rule-1", async () => {
                 currentRule = {
                     ...BASE_RULE,
                     scope: CUSTOM_RULE_SCOPE.ccr,

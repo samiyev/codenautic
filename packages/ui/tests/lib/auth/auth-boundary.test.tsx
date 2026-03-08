@@ -120,7 +120,7 @@ describe("AuthBoundary", (): void => {
         expect(startOAuth).toHaveBeenCalledTimes(1)
         expect(startOAuth).toHaveBeenCalledWith({
             provider: "github",
-            redirectUri: "http://localhost:3000/",
+            redirectUri: "http://localhost:7110/",
         })
         expect(onRedirect).toHaveBeenCalledWith("https://auth.example/github")
     })
@@ -154,7 +154,7 @@ describe("AuthBoundary", (): void => {
 
         expect(startOAuth).toHaveBeenCalledWith({
             provider: "github",
-            redirectUri: "http://localhost:3000/reviews?tab=open#details",
+            redirectUri: "http://localhost:7110/reviews?tab=open#details",
         })
     })
 
@@ -182,7 +182,7 @@ describe("AuthBoundary", (): void => {
 
         expect(startOAuth).toHaveBeenCalledWith({
             provider: "github",
-            redirectUri: "http://localhost:3000/",
+            redirectUri: "http://localhost:7110/",
         })
     })
 
@@ -214,7 +214,7 @@ describe("AuthBoundary", (): void => {
 
         expect(startOAuth).toHaveBeenCalledWith({
             provider: "github",
-            redirectUri: "http://localhost:3000/",
+            redirectUri: "http://localhost:7110/",
         })
     })
 
@@ -246,7 +246,7 @@ describe("AuthBoundary", (): void => {
 
         expect(startOAuth).toHaveBeenCalledWith({
             provider: "github",
-            redirectUri: "http://localhost:3000/",
+            redirectUri: "http://localhost:7110/",
         })
     })
 
@@ -274,7 +274,7 @@ describe("AuthBoundary", (): void => {
 
         expect(startOAuth).toHaveBeenCalledWith({
             provider: "github",
-            redirectUri: "http://localhost:3000/",
+            redirectUri: "http://localhost:7110/",
         })
     })
 
@@ -294,7 +294,7 @@ describe("AuthBoundary", (): void => {
         renderWithProviders(
             <AuthBoundary
                 authApi={api}
-                intendedDestination="http://localhost:3000/reviews?tab=active#panel"
+                intendedDestination="http://localhost:7110/reviews?tab=active#panel"
                 onRedirect={vi.fn()}
             >
                 <div>Private dashboard</div>
@@ -306,7 +306,7 @@ describe("AuthBoundary", (): void => {
 
         expect(startOAuth).toHaveBeenCalledWith({
             provider: "github",
-            redirectUri: "http://localhost:3000/reviews?tab=active#panel",
+            redirectUri: "http://localhost:7110/reviews?tab=active#panel",
         })
     })
 

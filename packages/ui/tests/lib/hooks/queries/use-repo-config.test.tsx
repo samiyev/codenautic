@@ -71,7 +71,7 @@ async function saveConfig(
 describe("useRepoConfig", (): void => {
     it("загружает repo config по repositoryId", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+            http.get("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
                 return HttpResponse.json({
                     config: {
                         repositoryId: "repo-1",
@@ -104,12 +104,12 @@ describe("useRepoConfig", (): void => {
         }
 
         server.use(
-            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+            http.get("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
                 return HttpResponse.json({
                     config: repositoryConfig,
                 })
             }),
-            http.put("http://localhost:3000/api/v1/repositories/repo-1/config", async () => {
+            http.put("http://localhost:7120/api/v1/repositories/repo-1/config", async () => {
                 repositoryConfig = {
                     repositoryId: "repo-1",
                     configYaml: "version: 2\nreview:\n  mode: AUTO\n",

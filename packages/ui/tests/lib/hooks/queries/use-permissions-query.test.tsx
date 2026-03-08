@@ -111,7 +111,7 @@ describe("usePermissionsQuery", (): void => {
     it("нормализует роли и повторно использует кэш для того же role key", async (): Promise<void> => {
         const requestRoles: string[] = []
         server.use(
-            http.get("http://localhost:3000/api/v1/permissions", ({ request }) => {
+            http.get("http://localhost:7120/api/v1/permissions", ({ request }) => {
                 const role = new URL(request.url).searchParams.get("role")
                 requestRoles.push(role ?? "anonymous")
                 return HttpResponse.json({
@@ -140,7 +140,7 @@ describe("usePermissionsQuery", (): void => {
         }
 
         server.use(
-            http.get("http://localhost:3000/api/v1/permissions", ({ request }) => {
+            http.get("http://localhost:7120/api/v1/permissions", ({ request }) => {
                 const role = new URL(request.url).searchParams.get("role") ?? "anonymous"
                 requestRoles.push(role)
 

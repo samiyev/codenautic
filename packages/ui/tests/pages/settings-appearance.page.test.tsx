@@ -165,7 +165,7 @@ describe("SettingsAppearancePage", (): void => {
         )
 
         server.use(
-            http.get("http://localhost:3000/api/v1/user/settings", () => {
+            http.get("http://localhost:7120/api/v1/user/settings", () => {
                 return HttpResponse.json({
                     appearance: {
                         themeLibrary: {
@@ -182,13 +182,13 @@ describe("SettingsAppearancePage", (): void => {
                     },
                 })
             }),
-            http.put("http://localhost:3000/api/v1/user/settings", () => {
+            http.put("http://localhost:7120/api/v1/user/settings", () => {
                 return HttpResponse.json({})
             }),
-            http.patch("http://localhost:3000/api/v1/user/settings", () => {
+            http.patch("http://localhost:7120/api/v1/user/settings", () => {
                 return HttpResponse.json({})
             }),
-            http.post("http://localhost:3000/api/v1/user/settings", () => {
+            http.post("http://localhost:7120/api/v1/user/settings", () => {
                 return HttpResponse.json({})
             }),
         )

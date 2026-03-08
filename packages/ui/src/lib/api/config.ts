@@ -29,7 +29,7 @@ interface IUiEnvSource {
     readonly VITE_API_URL?: unknown
 }
 
-const DEFAULT_API_URL = "http://localhost:3000"
+const DEFAULT_API_URL = `http://localhost:${String(__CODENAUTIC_API_PORT__)}`
 
 /**
  * Безопасно нормализует runtime env Vite в типизированную конфигурацию UI.

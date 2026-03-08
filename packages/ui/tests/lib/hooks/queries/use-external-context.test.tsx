@@ -106,13 +106,13 @@ async function refreshSource(
 describe("useExternalContext", (): void => {
     it("загружает список sources и preview выбранного source", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/context/sources", () => {
+            http.get("http://localhost:7120/api/v1/context/sources", () => {
                 return HttpResponse.json({
                     sources: [BASE_SOURCE],
                     total: 1,
                 })
             }),
-            http.get("http://localhost:3000/api/v1/context/sources/source-jira/preview", () => {
+            http.get("http://localhost:7120/api/v1/context/sources/source-jira/preview", () => {
                 return HttpResponse.json({
                     sourceId: BASE_SOURCE.id,
                     items: [
@@ -138,20 +138,20 @@ describe("useExternalContext", (): void => {
 
     it("обновляет source и применяет optimistic update", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/context/sources", () => {
+            http.get("http://localhost:7120/api/v1/context/sources", () => {
                 return HttpResponse.json({
                     sources: [BASE_SOURCE],
                     total: 1,
                 })
             }),
-            http.get("http://localhost:3000/api/v1/context/sources/source-jira/preview", () => {
+            http.get("http://localhost:7120/api/v1/context/sources/source-jira/preview", () => {
                 return HttpResponse.json({
                     sourceId: BASE_SOURCE.id,
                     items: [],
                     total: 0,
                 })
             }),
-            http.put("http://localhost:3000/api/v1/context/sources/source-jira", () => {
+            http.put("http://localhost:7120/api/v1/context/sources/source-jira", () => {
                 return HttpResponse.json({
                     source: {
                         ...BASE_SOURCE,
@@ -172,20 +172,20 @@ describe("useExternalContext", (): void => {
 
     it("запускает refresh source и обновляет статус", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/context/sources", () => {
+            http.get("http://localhost:7120/api/v1/context/sources", () => {
                 return HttpResponse.json({
                     sources: [BASE_SOURCE],
                     total: 1,
                 })
             }),
-            http.get("http://localhost:3000/api/v1/context/sources/source-jira/preview", () => {
+            http.get("http://localhost:7120/api/v1/context/sources/source-jira/preview", () => {
                 return HttpResponse.json({
                     sourceId: BASE_SOURCE.id,
                     items: [],
                     total: 0,
                 })
             }),
-            http.post("http://localhost:3000/api/v1/context/sources/source-jira/refresh", () => {
+            http.post("http://localhost:7120/api/v1/context/sources/source-jira/refresh", () => {
                 return HttpResponse.json({
                     sourceId: BASE_SOURCE.id,
                     accepted: true,

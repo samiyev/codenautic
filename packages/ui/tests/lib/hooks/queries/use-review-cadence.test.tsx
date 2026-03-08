@@ -44,7 +44,7 @@ async function saveCadence(
 describe("useReviewCadence", (): void => {
     it("сохраняет cadence mode через repo config endpoint", async (): Promise<void> => {
         server.use(
-            http.put("http://localhost:3000/api/v1/repositories/repo-1/config", async () => {
+            http.put("http://localhost:7120/api/v1/repositories/repo-1/config", async () => {
                 return HttpResponse.json({
                     config: {
                         repositoryId: "repo-1",

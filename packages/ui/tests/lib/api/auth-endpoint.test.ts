@@ -57,7 +57,7 @@ describe("AuthApi", (): void => {
         const api = new AuthApi(httpClient)
         const result = await api.startOAuth({
             provider: "github",
-            redirectUri: "http://localhost:5173/",
+            redirectUri: "http://localhost:7110/",
         })
 
         expect(result).toEqual(response)
@@ -66,7 +66,7 @@ describe("AuthApi", (): void => {
             path: "/api/v1/auth/oauth/start",
             body: {
                 provider: "github",
-                redirectUri: "http://localhost:5173/",
+                redirectUri: "http://localhost:7110/",
             },
             credentials: "include",
         })

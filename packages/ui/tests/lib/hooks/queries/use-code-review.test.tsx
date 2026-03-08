@@ -106,7 +106,7 @@ describe("useCodeReview", (): void => {
     it("загружает code review по ID", async (): Promise<void> => {
         let callCount = 0
         server.use(
-            http.get("http://localhost:3000/api/v1/reviews/:reviewId", ({ params }) => {
+            http.get("http://localhost:7120/api/v1/reviews/:reviewId", ({ params }) => {
                 callCount += 1
                 return HttpResponse.json({
                     reviewId: String(params.reviewId),
@@ -144,7 +144,7 @@ describe("useCodeReview", (): void => {
 
     it("триггерит новый review и показывает результат", async (): Promise<void> => {
         server.use(
-            http.post("http://localhost:3000/api/v1/reviews", () => {
+            http.post("http://localhost:7120/api/v1/reviews", () => {
                 return HttpResponse.json({
                     reviewId: "review-202",
                     status: "queued",
@@ -163,7 +163,7 @@ describe("useCodeReview", (): void => {
 
     it("отправляет feedback и показывает acceptedCount", async (): Promise<void> => {
         server.use(
-            http.post("http://localhost:3000/api/v1/reviews/:reviewId/feedback", () => {
+            http.post("http://localhost:7120/api/v1/reviews/:reviewId/feedback", () => {
                 return HttpResponse.json({
                     reviewId: "review-101",
                     acceptedCount: 1,

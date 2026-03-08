@@ -10,7 +10,7 @@ import { renderWithProviders } from "../utils/render"
 describe("settings code review page", (): void => {
     it("рендерит новый rule editor", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+            http.get("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
                 return HttpResponse.json({
                     config: {
                         repositoryId: "repo-1",
@@ -52,12 +52,12 @@ describe("settings code review page", (): void => {
         }
 
         server.use(
-            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+            http.get("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
                 return HttpResponse.json({
                     config: repositoryConfig,
                 })
             }),
-            http.put("http://localhost:3000/api/v1/repositories/repo-1/config", async ({ request }) => {
+            http.put("http://localhost:7120/api/v1/repositories/repo-1/config", async ({ request }) => {
                 const payload = (await request.json()) as {
                     readonly configYaml?: string
                     readonly ignorePatterns?: ReadonlyArray<string>
@@ -112,12 +112,12 @@ describe("settings code review page", (): void => {
         }
 
         server.use(
-            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+            http.get("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
                 return HttpResponse.json({
                     config: repositoryConfig,
                 })
             }),
-            http.put("http://localhost:3000/api/v1/repositories/repo-1/config", async ({ request }) => {
+            http.put("http://localhost:7120/api/v1/repositories/repo-1/config", async ({ request }) => {
                 const payload = (await request.json()) as {
                     readonly configYaml?: string
                     readonly ignorePatterns?: ReadonlyArray<string>
@@ -157,7 +157,7 @@ describe("settings code review page", (): void => {
     it("показывает dry-run results после запуска", async (): Promise<void> => {
         const user = userEvent.setup()
         server.use(
-            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+            http.get("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
                 return HttpResponse.json({
                     config: {
                         repositoryId: "repo-1",
@@ -167,7 +167,7 @@ describe("settings code review page", (): void => {
                     },
                 })
             }),
-            http.post("http://localhost:3000/api/v1/repositories/repo-1/dry-run", () => {
+            http.post("http://localhost:7120/api/v1/repositories/repo-1/dry-run", () => {
                 return HttpResponse.json({
                     result: {
                         mode: "MANUAL",
@@ -207,12 +207,12 @@ describe("settings code review page", (): void => {
         }
 
         server.use(
-            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+            http.get("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
                 return HttpResponse.json({
                     config: repositoryConfig,
                 })
             }),
-            http.put("http://localhost:3000/api/v1/repositories/repo-1/config", async ({ request }) => {
+            http.put("http://localhost:7120/api/v1/repositories/repo-1/config", async ({ request }) => {
                 const payload = (await request.json()) as {
                     readonly configYaml?: string
                     readonly ignorePatterns?: ReadonlyArray<string>
@@ -246,7 +246,7 @@ describe("settings code review page", (): void => {
     it("конфигурирует и сохраняет CCR summary settings", async (): Promise<void> => {
         const user = userEvent.setup()
         server.use(
-            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+            http.get("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
                 return HttpResponse.json({
                     config: {
                         repositoryId: "repo-1",
@@ -289,7 +289,7 @@ describe("settings code review page", (): void => {
     it("генерирует CCR summary preview через API", async (): Promise<void> => {
         const user = userEvent.setup()
         server.use(
-            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+            http.get("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
                 return HttpResponse.json({
                     config: {
                         repositoryId: "repo-1",
@@ -299,7 +299,7 @@ describe("settings code review page", (): void => {
                     },
                 })
             }),
-            http.post("http://localhost:3000/api/v1/repositories/repo-1/ccr-summary/generate", () => {
+            http.post("http://localhost:7120/api/v1/repositories/repo-1/ccr-summary/generate", () => {
                 return HttpResponse.json({
                     result: {
                         mode: "MANUAL",
@@ -328,7 +328,7 @@ describe("settings code review page", (): void => {
     it("конфигурирует и сохраняет IDE sync settings", async (): Promise<void> => {
         const user = userEvent.setup()
         server.use(
-            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+            http.get("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
                 return HttpResponse.json({
                     config: {
                         repositoryId: "repo-1",
@@ -355,7 +355,7 @@ describe("settings code review page", (): void => {
 
     it("показывает MCP server usage и stats", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/repositories/repo-1/config", () => {
+            http.get("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
                 return HttpResponse.json({
                     config: {
                         repositoryId: "repo-1",

@@ -23,7 +23,7 @@ describe("UI API contract", (): void => {
     it("использует дефолтный API URL в dev режиме", (): void => {
         const config = createApiConfig({ MODE: "development" })
 
-        expect(config.baseUrl).toBe("http://localhost:3000")
+        expect(config.baseUrl).toBe("http://localhost:7120")
         expect(config.defaultHeaders["Content-Type"]).toBe("application/json")
     })
 
@@ -65,7 +65,7 @@ describe("UI API contract", (): void => {
 
     it("бросает ошибку при невалидном абсолютном URL", (): void => {
         expect((): void => {
-            createApiConfig({ VITE_API_URL: "localhost:3000" })
+            createApiConfig({ VITE_API_URL: "localhost:7120" })
         }).toThrowError("VITE_API_URL должен использовать http или https")
     })
 
@@ -76,15 +76,15 @@ describe("UI API contract", (): void => {
     })
 
     it("нормализует VITE_API_URL без завершающего слеша", (): void => {
-        const config = createApiConfig({ VITE_API_URL: "http://localhost:3000/" })
+        const config = createApiConfig({ VITE_API_URL: "http://localhost:7120/" })
 
-        expect(config.baseUrl).toBe("http://localhost:3000")
+        expect(config.baseUrl).toBe("http://localhost:7120")
     })
 
     it("сохраняет VITE_API_URL без завершающего слеша без изменений", (): void => {
-        const config = createApiConfig({ VITE_API_URL: "http://localhost:3001" })
+        const config = createApiConfig({ VITE_API_URL: "http://localhost:7140" })
 
-        expect(config.baseUrl).toBe("http://localhost:3001")
+        expect(config.baseUrl).toBe("http://localhost:7140")
     })
 
     it("делает GET /api/v1/health и возвращает типизированный ответ", async (): Promise<void> => {
@@ -96,7 +96,7 @@ describe("UI API contract", (): void => {
                       ? input.toString()
                       : input.url
 
-            expect(requestedUrl).toBe("http://localhost:3000/api/v1/health")
+            expect(requestedUrl).toBe("http://localhost:7120/api/v1/health")
 
             return Promise.resolve(
                 new Response(

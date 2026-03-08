@@ -44,7 +44,7 @@ describe("ThemeProvider", (): void => {
         localStorage.removeItem("codenautic:ui:theme-profile-synced")
 
         server.use(
-            http.get("http://localhost:3000/api/v1/user/settings", () => {
+            http.get("http://localhost:7120/api/v1/user/settings", () => {
                 return HttpResponse.json({
                     theme: {
                         mode: "dark",
@@ -53,13 +53,13 @@ describe("ThemeProvider", (): void => {
                     updatedAt: "2026-03-06T12:00:00Z",
                 })
             }),
-            http.put("http://localhost:3000/api/v1/user/settings", () => {
+            http.put("http://localhost:7120/api/v1/user/settings", () => {
                 return HttpResponse.json({})
             }),
-            http.patch("http://localhost:3000/api/v1/user/settings", () => {
+            http.patch("http://localhost:7120/api/v1/user/settings", () => {
                 return HttpResponse.json({})
             }),
-            http.post("http://localhost:3000/api/v1/user/settings", () => {
+            http.post("http://localhost:7120/api/v1/user/settings", () => {
                 return HttpResponse.json({})
             }),
         )

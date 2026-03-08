@@ -17,7 +17,7 @@
         "lint": "eslint . --fix",
         "perf:check": "bun run build:analyze && bun ./scripts/check-performance-budgets.mjs",
         "preview": "vite preview",
-        "storybook": "storybook dev -p 6006",
+        "storybook": "bun ./scripts/run-storybook.mjs",
         "test": "vitest run",
         "typecheck": "tsc --noEmit"
     },

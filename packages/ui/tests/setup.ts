@@ -16,23 +16,31 @@ const originalProcessStdoutWrite = processRef?.stdout.write.bind(processRef.stdo
 const originalProcessStderrWrite = processRef?.stderr.write.bind(processRef.stderr)
 const DEFAULT_TEST_ELEMENT_WIDTH = 1024
 const DEFAULT_TEST_ELEMENT_HEIGHT = 768
+const TEST_APP_ORIGIN = "http://localhost:7110/"
 const RECHARTS_SIZE_WARNING = "of chart should be greater than 0"
 const CONTROLLED_STATE_WARNING = "WARN: A component changed from uncontrolled to controlled."
 const HEROUI_WARNING_PREFIX = "[HeroUI]"
 const PRESS_RESPONDER_WARNING = "A PressResponder was rendered without a pressable child."
 const UNRECOGNIZED_TAG_WARNING = "is unrecognized in this browser."
-const THREE_DUPLICATE_INSTANCE_WARNING = "THREE.WARNING: Multiple instances of Three.js being imported."
+const THREE_DUPLICATE_INSTANCE_WARNING =
+    "THREE.WARNING: Multiple instances of Three.js being imported."
 const SOCKET_HANG_UP_MESSAGE = "socket hang up"
 const LOCIZE_SUPPORT_MESSAGE = "i18next is maintained with support from Locize"
 const BENIGN_API_ERROR_MESSAGES = [
-    "GET http://localhost:3000/api/v1/user/settings",
-    "GET http://localhost:3000/api/v1/user/preferences",
-    "GET http://localhost:3000/api/v1/health",
-    "GET http://localhost:3000/api/v1/feature-flags",
+    "GET http://localhost:7120/api/v1/user/settings",
+    "GET http://localhost:7120/api/v1/user/preferences",
+    "GET http://localhost:7120/api/v1/health",
+    "GET http://localhost:7120/api/v1/feature-flags",
 ]
 const BENIGN_SOCKET_ERROR_CODES = new Set<string>(["ECONNRESET", "ECONNREFUSED"])
 let unhandledRejectionCleanup: (() => void) | undefined
 let processStreamCleanup: (() => void) | undefined
+
+interface IWindowWithHappyDom extends Window {
+    readonly happyDOM?: {
+        setURL: (url: string) => void
+    }
+}
 
 class TestResizeObserver implements ResizeObserver {
     private readonly callback: ResizeObserverCallback
@@ -165,6 +173,14 @@ function defineGlobalEventSource(value: typeof EventSource): void {
         writable: true,
         value,
     })
+}
+
+function resetTestWindowUrl(): void {
+    const testWindow = window as IWindowWithHappyDom
+
+    if (testWindow.happyDOM !== undefined) {
+        testWindow.happyDOM.setURL(TEST_APP_ORIGIN)
+    }
 }
 
 function defineTestBoundingClientRect(target: object): void {
@@ -442,6 +458,7 @@ beforeAll(async (): Promise<void> => {
         value: (): boolean => true,
     })
 
+    resetTestWindowUrl()
     sessionStorage.clear()
     localStorage.setItem(LOCALE_STORAGE_KEY, DEFAULT_LOCALE)
     await initializeI18n()
@@ -453,6 +470,7 @@ beforeAll(async (): Promise<void> => {
 afterEach(async (): Promise<void> => {
     cleanup()
     server.resetHandlers()
+    resetTestWindowUrl()
     sessionStorage.clear()
     localStorage.clear()
     localStorage.setItem(LOCALE_STORAGE_KEY, DEFAULT_LOCALE)

@@ -79,7 +79,7 @@ describe("login route", (): void => {
 
     it("показывает login panel и явное 403 состояние", async (): Promise<void> => {
         server.use(
-            http.get("http://localhost:3000/api/v1/auth/session", () => {
+            http.get("http://localhost:7120/api/v1/auth/session", () => {
                 return HttpResponse.json({
                     session: null,
                 })
@@ -104,7 +104,7 @@ describe("login route", (): void => {
 
         try {
             server.use(
-                http.get("http://localhost:3000/api/v1/auth/session", () => {
+                http.get("http://localhost:7120/api/v1/auth/session", () => {
                     return HttpResponse.json({
                         session: {
                             provider: "github",

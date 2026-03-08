@@ -45,7 +45,7 @@ async function triggerDryRun(
 describe("useDryRun", (): void => {
     it("запускает dry-run и возвращает результат", async (): Promise<void> => {
         server.use(
-            http.post("http://localhost:3000/api/v1/repositories/repo-1/dry-run", () => {
+            http.post("http://localhost:7120/api/v1/repositories/repo-1/dry-run", () => {
                 return HttpResponse.json({
                     result: {
                         mode: "AUTO",

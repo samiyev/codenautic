@@ -34,6 +34,7 @@
     },
     "include": [
         "src/**/*",
+        "config/**/*",
         "vite.config.ts",
         "vitest.config.ts",
         "postcss.config.mjs",

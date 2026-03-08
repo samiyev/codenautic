@@ -62,7 +62,7 @@ const { setupServer } = await import("msw/node")
  * Дефолтный мок health endpoint для UI-интеграционных тестов.
  */
 export const server = setupServer(
-    http.get("http://localhost:3000/api/v1/auth/session", () => {
+    http.get("http://localhost:7120/api/v1/auth/session", () => {
         return HttpResponse.json({
             session: {
                 provider: "github",
@@ -77,7 +77,7 @@ export const server = setupServer(
             },
         })
     }),
-    http.post("http://localhost:3000/api/v1/auth/session/refresh", () => {
+    http.post("http://localhost:7120/api/v1/auth/session/refresh", () => {
         return HttpResponse.json({
             session: {
                 provider: "github",
@@ -92,12 +92,12 @@ export const server = setupServer(
             },
         })
     }),
-    http.post("http://localhost:3000/api/v1/auth/logout", () => {
+    http.post("http://localhost:7120/api/v1/auth/logout", () => {
         return HttpResponse.json({
             loggedOut: true,
         })
     }),
-    http.post("http://localhost:3000/api/v1/auth/oauth/start", async ({ request }) => {
+    http.post("http://localhost:7120/api/v1/auth/oauth/start", async ({ request }) => {
         const payload = (await request.json()) as {
             readonly provider?: string
         }
@@ -108,26 +108,26 @@ export const server = setupServer(
             state: "msw-state",
         })
     }),
-    http.get("http://localhost:3000/api/v1/health", () => {
+    http.get("http://localhost:7120/api/v1/health", () => {
         return HttpResponse.json({
             status: "ok",
             service: "api",
             timestamp: "2026-03-02T00:00:00.000Z",
         })
     }),
-    http.get("http://localhost:3000/api/v1/feature-flags", () => {
+    http.get("http://localhost:7120/api/v1/feature-flags", () => {
         return HttpResponse.json({
             flags: {
                 premium_dashboard: true,
             },
         })
     }),
-    http.get("http://localhost:3000/api/v1/permissions", () => {
+    http.get("http://localhost:7120/api/v1/permissions", () => {
         return HttpResponse.json({
             permissions: ["review:read", "settings:read"],
         })
     }),
-    http.get("http://localhost:3000/api/v1/context/sources", () => {
+    http.get("http://localhost:7120/api/v1/context/sources", () => {
         return HttpResponse.json({
             total: 2,
             sources: [
@@ -150,14 +150,14 @@ export const server = setupServer(
             ],
         })
     }),
-    http.get("http://localhost:3000/api/v1/context/sources/:sourceId/preview", ({ params }) => {
+    http.get("http://localhost:7120/api/v1/context/sources/:sourceId/preview", ({ params }) => {
         return HttpResponse.json({
             sourceId: String(params.sourceId),
             status: "ok",
             items: [],
         })
     }),
-    http.put("http://localhost:3000/api/v1/context/sources/:sourceId", ({ params }) => {
+    http.put("http://localhost:7120/api/v1/context/sources/:sourceId", ({ params }) => {
         return HttpResponse.json({
             source: {
                 id: String(params.sourceId),
@@ -169,29 +169,29 @@ export const server = setupServer(
             },
         })
     }),
-    http.post("http://localhost:3000/api/v1/context/sources/:sourceId/refresh", ({ params }) => {
+    http.post("http://localhost:7120/api/v1/context/sources/:sourceId/refresh", ({ params }) => {
         return HttpResponse.json({
             sourceId: String(params.sourceId),
             status: "SYNCING",
         })
     }),
-    http.get("http://localhost:3000/api/v1/user/settings", () => {
+    http.get("http://localhost:7120/api/v1/user/settings", () => {
         return HttpResponse.json({
             updatedAtMs: "2026-03-02T00:00:00.000Z",
         })
     }),
-    http.get("http://localhost:3000/api/v1/user/preferences", () => {
+    http.get("http://localhost:7120/api/v1/user/preferences", () => {
         return HttpResponse.json({
             updatedAtMs: "2026-03-02T00:00:00.000Z",
         })
     }),
-    http.get("http://localhost:3000/api/v1/rules", () => {
+    http.get("http://localhost:7120/api/v1/rules", () => {
         return HttpResponse.json({
             rules: [],
             total: 0,
         })
     }),
-    http.post("http://localhost:3000/api/v1/rules", async ({ request }) => {
+    http.post("http://localhost:7120/api/v1/rules", async ({ request }) => {
         const payload = (await request.json()) as {
             readonly title?: string
             readonly rule?: string
@@ -213,7 +213,7 @@ export const server = setupServer(
             examples: payload.examples ?? [],
         })
     }),
-    http.get("http://localhost:3000/api/v1/rules/:ruleId", ({ params }) => {
+    http.get("http://localhost:7120/api/v1/rules/:ruleId", ({ params }) => {
         return HttpResponse.json({
             id: String(params.ruleId),
             title: "Default rule",
@@ -225,7 +225,7 @@ export const server = setupServer(
             examples: [],
         })
     }),
-    http.put("http://localhost:3000/api/v1/rules/:ruleId", ({ params }) => {
+    http.put("http://localhost:7120/api/v1/rules/:ruleId", ({ params }) => {
         return HttpResponse.json({
             id: String(params.ruleId),
             title: "Updated rule",
@@ -237,43 +237,43 @@ export const server = setupServer(
             examples: [],
         })
     }),
-    http.delete("http://localhost:3000/api/v1/rules/:ruleId", ({ params }) => {
+    http.delete("http://localhost:7120/api/v1/rules/:ruleId", ({ params }) => {
         return HttpResponse.json({
             id: String(params.ruleId),
             removed: true,
         })
     }),
-    http.post("http://localhost:3000/api/v1/user/settings", () => {
+    http.post("http://localhost:7120/api/v1/user/settings", () => {
         return HttpResponse.json({
             updated: true,
         })
     }),
-    http.post("http://localhost:3000/api/v1/user/preferences", () => {
+    http.post("http://localhost:7120/api/v1/user/preferences", () => {
         return HttpResponse.json({
             updated: true,
         })
     }),
-    http.patch("http://localhost:3000/api/v1/user/settings", () => {
+    http.patch("http://localhost:7120/api/v1/user/settings", () => {
         return HttpResponse.json({
             updated: true,
         })
     }),
-    http.patch("http://localhost:3000/api/v1/user/preferences", () => {
+    http.patch("http://localhost:7120/api/v1/user/preferences", () => {
         return HttpResponse.json({
             updated: true,
         })
     }),
-    http.put("http://localhost:3000/api/v1/user/settings", () => {
+    http.put("http://localhost:7120/api/v1/user/settings", () => {
         return HttpResponse.json({
             updated: true,
         })
     }),
-    http.put("http://localhost:3000/api/v1/user/preferences", () => {
+    http.put("http://localhost:7120/api/v1/user/preferences", () => {
         return HttpResponse.json({
             updated: true,
         })
     }),
-    http.get("http://localhost:3000/api/v1/reviews/:reviewId", ({ params }) => {
+    http.get("http://localhost:7120/api/v1/reviews/:reviewId", ({ params }) => {
         const reviewId = String(params.reviewId)
 
         return HttpResponse.json({
@@ -287,13 +287,13 @@ export const server = setupServer(
             },
         })
     }),
-    http.post("http://localhost:3000/api/v1/reviews", () => {
+    http.post("http://localhost:7120/api/v1/reviews", () => {
         return HttpResponse.json({
             reviewId: "review-default",
             status: "queued",
         })
     }),
-    http.post("http://localhost:3000/api/v1/reviews/:reviewId/feedback", ({ params }) => {
+    http.post("http://localhost:7120/api/v1/reviews/:reviewId/feedback", ({ params }) => {
         return HttpResponse.json({
             reviewId: String(params.reviewId),
             acceptedCount: 0,
