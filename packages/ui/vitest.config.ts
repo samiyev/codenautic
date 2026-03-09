@@ -1,5 +1,5 @@
 import path from "path"
-import react from "@vitejs/plugin-react"
+import react from "@vitejs/plugin-react-swc"
 import { defineConfig } from "vitest/config"
 
 import { loadUiServicePorts } from "./config/service-ports"
@@ -17,14 +17,33 @@ export default defineConfig({
     test: {
         environment: "happy-dom",
         globals: false,
+        globalSetup: ["./tests/global-setup.ts"],
         setupFiles: ["./tests/setup.ts"],
         include: ["tests/**/*.test.{ts,tsx}"],
+        deps: {
+            optimizer: {
+                web: {
+                    include: [
+                        "@heroui/react",
+                        "@heroui/styles",
+                        "@tanstack/react-query",
+                        "@tanstack/react-router",
+                        "@tanstack/react-virtual",
+                        "recharts",
+                        "react-hook-form",
+                        "lucide-react",
+                        "i18next",
+                        "react-i18next",
+                        "sonner",
+                    ],
+                },
+            },
+        },
         coverage: {
-            enabled: true,
             provider: "v8",
             thresholds: {
-                lines: 75,
-                functions: 75,
+                lines: 85,
+                functions: 85,
             },
             exclude: [
                 "**/dist/**",
@@ -35,6 +54,9 @@ export default defineConfig({
                 "**/mock-data/**",
                 "**/index.ts",
                 "**/*.types.ts",
+                "**/codecity-3d-scene-renderer.tsx",
+                "**/i18n/locales/**",
+                "**/components/icons/**",
             ],
         },
     },
