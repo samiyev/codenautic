@@ -1,3 +1,4 @@
+import i18next from "i18next"
 import { describe, expect, it } from "vitest"
 
 import {
@@ -7,35 +8,46 @@ import {
     searchAccessibleRoutes,
 } from "@/lib/navigation/route-guard-map"
 
+const t = i18next.getFixedT("ru", ["navigation"])
+
 describe("route guard map", (): void => {
     it("строит breadcrumbs для известных маршрутов", (): void => {
-        expect(getBreadcrumbs("/my-work")).toEqual(["Dashboard", "My Work"])
-        expect(getBreadcrumbs("/scan-error-recovery")).toEqual(["Dashboard", "Scan error recovery"])
-        expect(getBreadcrumbs("/session-recovery")).toEqual(["Dashboard", "Session recovery"])
-        expect(getBreadcrumbs("/help-diagnostics")).toEqual(["Dashboard", "Help & diagnostics"])
-        expect(getBreadcrumbs("/settings-adoption-analytics")).toEqual([
-            "Settings",
-            "Adoption analytics",
+        expect(getBreadcrumbs("/my-work", t)).toEqual(["Дашборд", "Мои задачи"])
+        expect(getBreadcrumbs("/scan-error-recovery", t)).toEqual([
+            "Дашборд",
+            "Восстановление после ошибки сканирования",
         ])
-        expect(getBreadcrumbs("/settings-team")).toEqual(["Settings", "Team"])
-        expect(getBreadcrumbs("/reviews/ccr-101")).toEqual(["Dashboard", "Reviews"])
+        expect(getBreadcrumbs("/session-recovery", t)).toEqual([
+            "Дашборд",
+            "Восстановление сессии",
+        ])
+        expect(getBreadcrumbs("/help-diagnostics", t)).toEqual([
+            "Дашборд",
+            "Помощь и диагностика",
+        ])
+        expect(getBreadcrumbs("/settings-adoption-analytics", t)).toEqual([
+            "Настройки",
+            "Аналитика внедрения",
+        ])
+        expect(getBreadcrumbs("/settings-team", t)).toEqual(["Настройки", "Команда"])
+        expect(getBreadcrumbs("/reviews/ccr-101", t)).toEqual(["Дашборд", "Ревью CCR"])
     })
 
     it("строит кликабельные breadcrumbs с путями для известных маршрутов", (): void => {
-        expect(getBreadcrumbsWithPaths("/settings-team")).toEqual([
-            { label: "Settings", path: "/settings" },
-            { label: "Team" },
+        expect(getBreadcrumbsWithPaths("/settings-team", t)).toEqual([
+            { label: "Настройки", path: "/settings" },
+            { label: "Команда" },
         ])
-        expect(getBreadcrumbsWithPaths("/reviews/ccr-101")).toEqual([
-            { label: "Dashboard", path: "/" },
-            { label: "Reviews" },
+        expect(getBreadcrumbsWithPaths("/reviews/ccr-101", t)).toEqual([
+            { label: "Дашборд", path: "/" },
+            { label: "Ревью CCR" },
         ])
     })
 
     it("возвращает fallback breadcrumbs для неизвестного маршрута", (): void => {
-        expect(getBreadcrumbsWithPaths("/unknown/path")).toEqual([
-            { label: "Dashboard", path: "/" },
-            { label: "Unknown route" },
+        expect(getBreadcrumbsWithPaths("/unknown/path", t)).toEqual([
+            { label: "Дашборд", path: "/" },
+            { label: "Неизвестный маршрут" },
         ])
     })
 
