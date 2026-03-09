@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next"
+
 import type { TOAuthProvider } from "./types"
 
 /**
@@ -20,7 +22,7 @@ export interface IAuthBoundaryLabels {
  * @param t Функция i18n перевода.
  * @returns Набор локализованных текстов.
  */
-export function createAuthBoundaryLabels(t: (key: string) => string): IAuthBoundaryLabels {
+export function createAuthBoundaryLabels(t: TFunction<ReadonlyArray<"auth" | "common">>): IAuthBoundaryLabels {
     return {
         appTitle: t("common:appTitle"),
         checkingSession: t("auth:checkingSession"),
