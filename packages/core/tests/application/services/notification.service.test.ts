@@ -119,4 +119,31 @@ describe("NotificationService", () => {
 
         expect(service.send(invalid)).rejects.toThrow("At least one recipient is required")
     })
+
+    test("normalizes optional dedupe key before dispatch", async () => {
+        const slack = new TestNotificationProvider(NOTIFICATION_CHANNEL.SLACK)
+        const service = new NotificationService({
+            providers: [slack],
+        })
+
+        await service.send({
+            ...createPayload(NOTIFICATION_CHANNEL.SLACK),
+            dedupeKey: "  review:1  ",
+        })
+
+        expect(slack.history[0]?.dedupeKey).toBe("review:1")
+    })
+
+    test("rejects empty dedupe key", () => {
+        const service = new NotificationService({
+            providers: [new TestNotificationProvider(NOTIFICATION_CHANNEL.WEBHOOK)],
+        })
+
+        expect(
+            service.send({
+                ...createPayload(NOTIFICATION_CHANNEL.WEBHOOK),
+                dedupeKey: "   ",
+            }),
+        ).rejects.toThrow("dedupeKey cannot be empty")
+    })
 })

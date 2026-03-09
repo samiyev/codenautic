@@ -106,6 +106,7 @@ function normalizeNotificationPayload(payload: INotificationPayload): INotificat
     const title = normalizeText(payload.title, "title")
     const body = normalizeText(payload.body, "body")
     const metadata = normalizeMetadata(payload.metadata)
+    const dedupeKey = normalizeOptionalText(payload.dedupeKey, "dedupeKey")
 
     return {
         channel,
@@ -114,6 +115,7 @@ function normalizeNotificationPayload(payload: INotificationPayload): INotificat
         title,
         body,
         metadata,
+        ...(dedupeKey !== undefined ? {dedupeKey} : {}),
         urgency,
     }
 }
@@ -226,4 +228,31 @@ function normalizeMetadata(
     }
 
     return {...metadata}
+}
+
+/**
+ * Validates optional normalized text values.
+ *
+ * @param value Raw text value.
+ * @param fieldName Field name for error messages.
+ * @returns Normalized text or undefined.
+ */
+function normalizeOptionalText(
+    value: string | undefined,
+    fieldName: "dedupeKey",
+): string | undefined {
+    if (value === undefined) {
+        return undefined
+    }
+
+    if (typeof value !== "string") {
+        throw new Error(`${fieldName} must be a string`)
+    }
+
+    const normalized = value.trim()
+    if (normalized.length === 0) {
+        throw new Error(`${fieldName} cannot be empty`)
+    }
+
+    return normalized
 }

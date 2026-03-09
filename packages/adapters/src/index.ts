@@ -120,13 +120,22 @@ export {
 } from "./context"
 export {
     NOTIFICATION_PROVIDER_FACTORY_ERROR_CODE,
+    SLACK_PROVIDER_ERROR_CODE,
     NOTIFICATION_TOKENS,
     NotificationProviderFactory,
     NotificationProviderFactoryError,
+    SlackProvider,
+    SlackProviderError,
     type INotificationProviderFactory,
     type INotificationProviderFactoryOptions,
     type IRegisterNotificationsModuleOptions,
+    type ISlackPostMessageRequest,
+    type ISlackPostMessageResponse,
+    type ISlackProviderErrorDetails,
+    type ISlackProviderOptions,
+    type ISlackWebApiClient,
     type NotificationProviderFactoryErrorCode,
+    type SlackProviderErrorCode,
     normalizeNotificationProviderChannel,
     registerNotificationsModule,
 } from "./notifications"

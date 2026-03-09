@@ -39,6 +39,11 @@ export interface INotificationPayload {
     readonly metadata?: Readonly<Record<string, unknown>>
 
     /**
+     * Optional stable deduplication key for idempotent delivery.
+     */
+    readonly dedupeKey?: string
+
+    /**
      * Notification urgency.
      */
     readonly urgency: NotificationUrgency

@@ -15,7 +15,7 @@
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
 | NOTIF-001 | Реализовать NotificationProviderFactory | DONE | Реализовано | Реализация: Фабрика провайдеров уведомлений. Готово, если: factory маршрутизирует каналы уведомлений в корректный provider, неизвестный канал и misconfiguration обрабатываются типизированной ошибкой без падения worker; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
-| NOTIF-002 | Реализовать slackProvider | TODO | Не начато | Реализация: Slack Web API + Events API integration. Готово, если: Slack provider гарантирует идемпотентную отправку по dedupe key, корректно обрабатывает 429 с backoff и не теряет сообщения при временной деградации API; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| NOTIF-002 | Реализовать slackProvider | DONE | Реализовано | Реализация: Slack Web API + Events API integration. Готово, если: Slack provider гарантирует идемпотентную отправку по dedupe key, корректно обрабатывает 429 с backoff и не теряет сообщения при временной деградации API; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 
 ---
 

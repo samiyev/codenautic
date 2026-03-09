@@ -60,6 +60,7 @@ export {type ICustomRuleRepository} from "./application/ports/outbound/custom-ru
 export {type ICategoryWeightProvider} from "./application/ports/outbound/rule/category-weight-provider.port"
 export {type ITeamRuleProvider} from "./application/ports/outbound/rule/team-rule-provider.port"
 export {type INotificationProvider} from "./application/ports/outbound/notification/notification-provider.port"
+export {type ISlackProvider} from "./application/ports/outbound/notification/slack-provider.port"
 export {type INotificationService} from "./application/ports/outbound/notification/notification-service.port"
 export {type IRepositoryScanner} from "./application/ports/outbound/scanning/repository-scanner"
 export {type IRepositoryIndexRepository} from "./application/ports/outbound/scanning/repository-index-repository"
@@ -183,7 +184,13 @@ export {
     type TreemapNodeType,
 } from "./application/dto/analytics"
 export {type IIssueHeatmapEntryDTO} from "./application/dto/analytics"
-export {type INotificationPayload} from "./application/dto/notifications"
+export {
+    SLACK_EVENT_ENVELOPE_TYPE,
+    type INotificationPayload,
+    type ISlackEventBodyDTO,
+    type ISlackEventEnvelopeDTO,
+    type SlackEventEnvelopeType,
+} from "./application/dto/notifications"
 export {
     type IRepositoryIndex,
     type ILanguageStat,
