@@ -19,7 +19,11 @@ export {
     type IAstParserFactoryOptions,
     type IAstParserErrorDetails,
     type IBaseParserOptions,
+    type ITypeScriptSourceCodeParserOptions,
+    type TypeScriptParserLanguage,
     normalizeAstParserLanguage,
+    assertTypeScriptParserLanguage,
+    TypeScriptSourceCodeParser,
 } from "./ast"
 export {
     GIT_ACL_ERROR_KIND,

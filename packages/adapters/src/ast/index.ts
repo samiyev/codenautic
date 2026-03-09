@@ -28,3 +28,9 @@ export {
     normalizeAstParserLanguage,
 } from "./ast-parser.factory"
 export {BaseParser, type IBaseParserOptions} from "./base-parser"
+export {
+    assertTypeScriptParserLanguage,
+    TypeScriptSourceCodeParser,
+    type ITypeScriptSourceCodeParserOptions,
+    type TypeScriptParserLanguage,
+} from "./typescript-source-code-parser"

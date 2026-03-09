@@ -1,6 +1,5 @@
 import JavaScript from "tree-sitter-javascript"
 import Parser from "tree-sitter"
-import TypeScript from "tree-sitter-typescript"
 
 import {
     AST_LANGUAGE,
@@ -13,6 +12,10 @@ import {
     AstParserFactoryError,
 } from "./ast-parser-factory.error"
 import {TreeSitterSourceCodeParser} from "./tree-sitter-source-code-parser"
+import {
+    assertTypeScriptParserLanguage,
+    TypeScriptSourceCodeParser,
+} from "./typescript-source-code-parser"
 
 type IAstParserCreator = () => ISourceCodeParser
 
@@ -68,16 +71,14 @@ const DEFAULT_AST_PARSER_CREATORS: Readonly<
     Partial<Record<SupportedLanguage, IAstParserCreator>>
 > = {
     [AST_LANGUAGE.TYPESCRIPT](): ISourceCodeParser {
-        return createTreeSitterParser(
-            AST_LANGUAGE.TYPESCRIPT,
-            TypeScript.typescript as unknown as Parser.Language,
-        )
+        return new TypeScriptSourceCodeParser({
+            language: assertTypeScriptParserLanguage(AST_LANGUAGE.TYPESCRIPT),
+        })
     },
     [AST_LANGUAGE.TSX](): ISourceCodeParser {
-        return createTreeSitterParser(
-            AST_LANGUAGE.TSX,
-            TypeScript.tsx as unknown as Parser.Language,
-        )
+        return new TypeScriptSourceCodeParser({
+            language: assertTypeScriptParserLanguage(AST_LANGUAGE.TSX),
+        })
     },
     [AST_LANGUAGE.JAVASCRIPT](): ISourceCodeParser {
         return createTreeSitterParser(
