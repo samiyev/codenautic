@@ -33,6 +33,7 @@ export {
     type CodeEdge,
     type CodeGraph,
     type CodeNode,
+    type CodeGraphEdgeType,
     type CodeGraphNodeMetadataValue,
     type ICodeGraphNode,
     type ICodeGraphEdge,

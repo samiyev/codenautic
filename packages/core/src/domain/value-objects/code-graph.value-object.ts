@@ -15,6 +15,7 @@ export const CODE_GRAPH_NODE_TYPE = {
 export const CODE_GRAPH_EDGE_TYPE = {
     CALLS: "CALLS",
     IMPORTS: "IMPORTS",
+    HAS_METHOD: "HAS_METHOD",
     EXTENDS: "EXTENDS",
     IMPLEMENTS: "IMPLEMENTS",
 } as const

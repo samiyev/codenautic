@@ -16,12 +16,24 @@ export {
     type IAstCodeGraphBuilderErrorDetails,
 } from "./ast-code-graph-builder.error"
 export {
+    AST_CODE_GRAPH_ENRICHER_ERROR_CODE,
+    AstCodeGraphEnricherError,
+    type AstCodeGraphEnricherErrorCode,
+    type IAstCodeGraphEnricherErrorDetails,
+} from "./ast-code-graph-enricher.error"
+export {
     AstCodeGraphBuilder,
     type IAstCodeGraphBuilder,
     type IAstCodeGraphBuilderBuildInput,
     type IAstCodeGraphBuilderOptions,
     type IAstCodeGraphBuildResult,
 } from "./ast-code-graph.builder"
+export {
+    AstCodeGraphEnricher,
+    type IAstCodeGraphEnricher,
+    type IAstCodeGraphEnrichmentInput,
+    type IAstCodeGraphEnrichmentResult,
+} from "./ast-code-graph.enricher"
 export {
     assertJavaScriptParserLanguage,
     JavaScriptSourceCodeParser,
