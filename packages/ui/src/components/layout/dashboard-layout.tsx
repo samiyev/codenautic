@@ -2,7 +2,7 @@ import { type ReactElement, type ReactNode, useEffect, useMemo, useState } from 
 import { useLocation, useNavigate } from "@tanstack/react-router"
 
 import {
-    getBreadcrumbs,
+    getBreadcrumbsWithPaths,
     isRouteAccessible,
     searchAccessibleRoutes,
 } from "@/lib/navigation/route-guard-map"
@@ -69,11 +69,11 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
     )
 
     const breadcrumbs = useMemo(
-        (): ReadonlyArray<string> => getBreadcrumbs(location.pathname),
+        () => getBreadcrumbsWithPaths(location.pathname),
         [location.pathname],
     )
 
-    const searchableRoutes = useMemo(
+    const commandPaletteRoutes = useMemo(
         () =>
             searchAccessibleRoutes("", routeGuardContext).map((route) => ({
                 label: route.label,
@@ -103,10 +103,16 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
             <Header
                 activeOrganizationId={orgSwitcher.activeOrganizationId}
                 breadcrumbs={breadcrumbs}
+                commandPaletteRoutes={commandPaletteRoutes}
+                onBreadcrumbNavigate={(to): void => {
+                    void navigate({ to })
+                }}
+                onCommandPaletteNavigate={(to): void => {
+                    void navigate({ to })
+                }}
                 onMobileMenuOpen={(): void => {
                     setIsMobileSidebarOpen(true)
                 }}
-                onOrganizationChange={orgSwitcher.handleOrganizationChange}
                 onOpenBilling={(): void => {
                     void navigate({ to: "/settings-billing" })
                 }}
@@ -116,15 +122,11 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
                 onOpenSettings={(): void => {
                     void navigate({ to: "/settings" })
                 }}
-                onSearchRouteNavigate={(to): void => {
-                    void navigate({ to })
-                }}
-                userEmail={props.userEmail}
-                userName={props.userName}
+                onOrganizationChange={orgSwitcher.handleOrganizationChange}
                 onSignOut={handleSignOut}
                 organizations={orgSwitcher.organizations}
-                searchRoutes={searchableRoutes}
-                title={props.title}
+                userEmail={props.userEmail}
+                userName={props.userName}
             />
             <MobileSidebar
                 isOpen={isMobileSidebarOpen}
