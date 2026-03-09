@@ -1,4 +1,15 @@
 export {
+    AST_LANGUAGE_DETECTION_ERROR_CODE,
+    AstLanguageDetectionError,
+    type AstLanguageDetectionErrorCode,
+    type IAstLanguageDetectionErrorDetails,
+} from "./ast-language-detection.error"
+export {
+    AstLanguageDetectionService,
+    type IAstLanguageDetectionInput,
+    type IAstLanguageDetectionService,
+} from "./ast-language-detection.service"
+export {
     AST_PARSER_ERROR_CODE,
     AstParserError,
     type AstParserErrorCode,
