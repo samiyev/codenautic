@@ -1,10 +1,18 @@
 export {
+    AST_PARSER_FACTORY_ERROR_CODE,
     AST_PARSER_ERROR_CODE,
+    AstParserFactory,
+    AstParserFactoryError,
     AstParserError,
     BaseParser,
+    type AstParserFactoryErrorCode,
     type AstParserErrorCode,
+    type IAstParserFactory,
+    type IAstParserFactoryErrorDetails,
+    type IAstParserFactoryOptions,
     type IAstParserErrorDetails,
     type IBaseParserOptions,
+    normalizeAstParserLanguage,
 } from "./ast"
 export {
     GIT_ACL_ERROR_KIND,
