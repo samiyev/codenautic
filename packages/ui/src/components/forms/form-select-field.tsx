@@ -1,14 +1,8 @@
 import { type ReactElement } from "react"
-import {
-    Controller,
-    type Control,
-    type ControllerProps,
-    type FieldPath,
-    type FieldValues,
-} from "react-hook-form"
+import { type FieldPath, type FieldValues } from "react-hook-form"
 import { Select, SelectItem } from "@/components/ui"
 
-import { pickFieldMessage } from "./form-field-utils"
+import { FormField, type IFormFieldProps } from "./form-field"
 
 /**
  * Возвращает выбранное значение из selection-структуры.
@@ -29,6 +23,12 @@ function getSelectedValue(keys: unknown): string | undefined {
     return typeof nextValue === "string" ? nextValue : undefined
 }
 
+/**
+ * Проверяет, является ли значение Set.
+ *
+ * @param value Проверяемое значение.
+ * @returns True если значение — Set.
+ */
 function isReadableSetOfString(value: unknown): value is ReadonlySet<unknown> {
     return value instanceof Set
 }
@@ -48,34 +48,14 @@ export interface IFormSelectOption {
 }
 
 /**
- * Правила валидации для select.
- */
-type FormSelectFieldRules<
-    TFormValues extends FieldValues,
-    TName extends FieldPath<TFormValues>,
-> = Omit<ControllerProps<TFormValues, TName>, "render" | "name" | "control">["rules"]
-
-/**
  * Свойства select-поля.
  */
 export interface IFormSelectFieldProps<
     TFormValues extends FieldValues,
     TName extends FieldPath<TFormValues>,
-> {
-    /** Контроллер формы. */
-    readonly control: Control<TFormValues>
-    /** Имя поля в форме. */
-    readonly name: TName
-    /** Заголовок поля. */
-    readonly label?: string
-    /** Подсказка под полем. */
-    readonly helperText?: string
-    /** Правила валидации. */
-    readonly rules?: FormSelectFieldRules<TFormValues, TName>
+> extends Omit<IFormFieldProps<TFormValues, TName>, "renderField" | "labelElement" | "gapClass"> {
     /** Список опций. */
     readonly options: ReadonlyArray<IFormSelectOption>
-    /** Идентификатор для accessibility. */
-    readonly id?: string
 }
 
 /**
@@ -88,73 +68,55 @@ export function FormSelectField<
     TFormValues extends FieldValues,
     TName extends FieldPath<TFormValues>,
 >(props: IFormSelectFieldProps<TFormValues, TName>): ReactElement {
-    const fieldId = props.id ?? String(props.name)
+    const { options, ...fieldProps } = props
 
     return (
-        <Controller
-            control={props.control}
-            name={props.name}
-            rules={props.rules}
-            render={({ field, fieldState }): ReactElement => {
-                const errorMessage = fieldState.error?.message
-                const hasError = errorMessage !== undefined
+        <FormField
+            {...fieldProps}
+            renderField={({
+                field,
+                hasError,
+                fieldId,
+                accessibilityLabel,
+                ariaDescribedBy,
+            }): ReactElement => {
                 const selectedKey = field.value === undefined ? undefined : String(field.value)
                 const selectedKeys =
                     selectedKey === undefined ? new Set<string>() : new Set([selectedKey])
-                const hasRequiredMarker = props.rules?.required !== undefined
-                const accessibilityLabel = props.label ?? String(props.name)
 
                 return (
-                    <div className="flex flex-col gap-1.5">
-                        {props.label === undefined ? null : (
-                            <label
-                                className="text-sm font-medium text-foreground"
-                                htmlFor={fieldId}
-                            >
-                                {props.label}
-                                {hasRequiredMarker ? <span aria-hidden="true"> *</span> : null}
-                            </label>
-                        )}
-                        <Select
-                            aria-describedby={
-                                hasError || props.helperText !== undefined
-                                    ? `${fieldId}-helper`
-                                    : undefined
-                            }
-                            aria-label={accessibilityLabel}
-                            aria-invalid={hasError}
-                            name={field.name}
-                            id={fieldId}
-                            isInvalid={hasError}
-                            selectedKeys={selectedKeys}
-                            onSelectionChange={(keys): void => {
-                                field.onChange(getSelectedValue(keys))
-                            }}
-                        >
-                            {props.options.map((option): ReactElement => {
-                                return (
-                                    <SelectItem
-                                        key={option.value}
-                                        isDisabled={option.isDisabled}
-                                        id={option.value}
-                                        value={option.value}
-                                    >
-                                        <div className="flex flex-col">
-                                            <span>{option.label}</span>
-                                            {option.description === undefined ? null : (
-                                                <span className="text-xs text-muted-foreground">
-                                                    {option.description}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </SelectItem>
-                                )
-                            })}
-                        </Select>
-                        <span id={`${fieldId}-helper`}>
-                            {pickFieldMessage(errorMessage, props.helperText)}
-                        </span>
-                    </div>
+                    <Select
+                        aria-describedby={ariaDescribedBy}
+                        aria-label={accessibilityLabel}
+                        aria-invalid={hasError}
+                        name={field.name}
+                        id={fieldId}
+                        isInvalid={hasError}
+                        selectedKeys={selectedKeys}
+                        onSelectionChange={(keys): void => {
+                            field.onChange(getSelectedValue(keys))
+                        }}
+                    >
+                        {options.map((option): ReactElement => {
+                            return (
+                                <SelectItem
+                                    key={option.value}
+                                    isDisabled={option.isDisabled}
+                                    id={option.value}
+                                    value={option.value}
+                                >
+                                    <div className="flex flex-col">
+                                        <span>{option.label}</span>
+                                        {option.description === undefined ? null : (
+                                            <span className="text-xs text-muted-foreground">
+                                                {option.description}
+                                            </span>
+                                        )}
+                                    </div>
+                                </SelectItem>
+                            )
+                        })}
+                    </Select>
                 )
             }}
         />

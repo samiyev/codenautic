@@ -1,3 +1,4 @@
+export { FormField } from "./form-field"
 export { FormCheckboxField } from "./form-checkbox-field"
 export { FormNumberField } from "./form-number-field"
 export { FormPasswordField } from "./form-password-field"

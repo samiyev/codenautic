@@ -1,41 +1,19 @@
 import { type ReactElement } from "react"
-import {
-    Controller,
-    type Control,
-    type ControllerProps,
-    type FieldPath,
-    type FieldValues,
-} from "react-hook-form"
+import { type FieldPath, type FieldValues } from "react-hook-form"
 import { Checkbox } from "@/components/ui"
 
-import { pickFieldMessage } from "./form-field-utils"
-
-/**
- * Правила валидации для checkbox.
- */
-type FormCheckboxFieldRules<
-    TFormValues extends FieldValues,
-    TName extends FieldPath<TFormValues>,
-> = Omit<ControllerProps<TFormValues, TName>, "render" | "name" | "control">["rules"]
+import { FormField, type IFormFieldProps } from "./form-field"
 
 /**
  * Свойства checkbox-поля.
  */
-export interface IFormCheckboxFieldProps<
+export type IFormCheckboxFieldProps<
     TFormValues extends FieldValues,
     TName extends FieldPath<TFormValues>,
-> {
-    /** Контроллер формы. */
-    readonly control: Control<TFormValues>
-    /** Имя поля в форме. */
-    readonly name: TName
-    /** Текст рядом с чекбоксом. */
-    readonly label?: string
-    /** Подсказка под полем. */
-    readonly helperText?: string
-    /** Правила валидации. */
-    readonly rules?: FormCheckboxFieldRules<TFormValues, TName>
-}
+> = Omit<
+    IFormFieldProps<TFormValues, TName>,
+    "renderField" | "labelElement" | "gapClass" | "hideLabel"
+>
 
 /**
  * HeroUI checkbox-field с RHF.
@@ -48,37 +26,29 @@ export function FormCheckboxField<
     TName extends FieldPath<TFormValues>,
 >(props: IFormCheckboxFieldProps<TFormValues, TName>): ReactElement {
     return (
-        <Controller
-            control={props.control}
-            name={props.name}
-            rules={props.rules}
-            render={({ field, fieldState }): ReactElement => {
-                const errorMessage = fieldState.error?.message
-                const hasError = errorMessage !== undefined
-                const helperId = `${String(props.name)}-helper`
-                const accessibilityLabel = props.label ?? String(props.name)
-
-                return (
-                    <div className="flex flex-col gap-1">
-                        <Checkbox
-                            aria-describedby={
-                                hasError || props.helperText !== undefined ? helperId : undefined
-                            }
-                            aria-label={accessibilityLabel}
-                            aria-invalid={hasError}
-                            isSelected={field.value === true}
-                            name={field.name}
-                            isInvalid={hasError}
-                            onValueChange={field.onChange}
-                        >
-                            {props.label}
-                        </Checkbox>
-                        <span id={helperId}>
-                            {pickFieldMessage(errorMessage, props.helperText)}
-                        </span>
-                    </div>
-                )
-            }}
+        <FormField
+            {...props}
+            gapClass="gap-1"
+            hideLabel={true}
+            showRequiredMarker={false}
+            renderField={({
+                field,
+                hasError,
+                accessibilityLabel,
+                ariaDescribedBy,
+            }): ReactElement => (
+                <Checkbox
+                    aria-describedby={ariaDescribedBy}
+                    aria-label={accessibilityLabel}
+                    aria-invalid={hasError}
+                    isSelected={field.value === true}
+                    name={field.name}
+                    isInvalid={hasError}
+                    onValueChange={field.onChange}
+                >
+                    {props.label}
+                </Checkbox>
+            )}
         />
     )
 }

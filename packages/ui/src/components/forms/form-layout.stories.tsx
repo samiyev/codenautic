@@ -26,10 +26,7 @@ export const Complete: TStory = {
         ),
         children: (
             <>
-                <FormSection
-                    heading="General"
-                    description="Basic review configuration."
-                >
+                <FormSection heading="General" description="Basic review configuration.">
                     <FormGroup withDivider>
                         <Input label="Max suggestions per CCR" placeholder="10" />
                         <Input label="Review timeout (ms)" placeholder="30000" />

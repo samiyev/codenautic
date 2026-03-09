@@ -20,9 +20,7 @@ export function FormGroup(props: IFormGroupProps): ReactElement {
     return (
         <>
             <div className="space-y-3">{props.children}</div>
-            {props.withDivider === true ? (
-                <hr className="border-border" />
-            ) : null}
+            {props.withDivider === true ? <hr className="border-border" /> : null}
         </>
     )
 }
