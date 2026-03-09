@@ -12,6 +12,32 @@ import {
     Vector3,
 } from "three"
 
+import {
+    BUILDING_COLOR_CRITICAL_COVERAGE,
+    BUILDING_COLOR_HIGH_COVERAGE,
+    BUILDING_COLOR_LOW_COVERAGE,
+    BUILDING_COLOR_MEDIUM_COVERAGE,
+    BUILDING_COLOR_UNDEFINED_COVERAGE,
+    BUG_EMISSION_COLOR_HIGH,
+    BUG_EMISSION_COLOR_LOW,
+    BUG_EMISSION_COLOR_MEDIUM,
+    CAUSAL_ARC_COLOR_DEFAULT,
+    CAUSAL_ARC_COLOR_DEPENDENCY,
+    CAUSAL_ARC_COLOR_OWNERSHIP,
+    IMPACT_EMISSIVE_CHANGED,
+    IMPACT_EMISSIVE_IMPACTED,
+    IMPACT_EMISSIVE_NEUTRAL,
+    IMPACT_EMISSIVE_RIPPLE,
+    SCENE_BACKGROUND,
+    SCENE_BREADCRUMB_EMISSIVE,
+    SCENE_BREADCRUMB_SPHERE,
+    SCENE_DISTRICT_FLOOR,
+    SCENE_DISTRICT_LABEL,
+    SCENE_GRID_DIVISION,
+    SCENE_GRID_LINE,
+    SCENE_NAVIGATION_TRAIL,
+} from "@/lib/constants/codecity-colors"
+
 import type {
     ICodeCity3DCausalCouplingDescriptor,
     ICodeCity3DSceneImpactedFileDescriptor,
@@ -217,12 +243,12 @@ const BASE_CAMERA_PRESETS: Readonly<Record<TCodeCityCameraPreset, ICameraPresetT
  */
 export function resolveCodeCityCausalArcColor(couplingType: TCodeCityCausalCouplingType): string {
     if (couplingType === "dependency") {
-        return "#fb923c"
+        return CAUSAL_ARC_COLOR_DEPENDENCY
     }
     if (couplingType === "ownership") {
-        return "#22c55e"
+        return CAUSAL_ARC_COLOR_OWNERSHIP
     }
-    return "#38bdf8"
+    return CAUSAL_ARC_COLOR_DEFAULT
 }
 
 /**
@@ -389,18 +415,18 @@ export function resolveCodeCityRenderBudget(
  */
 export function resolveCodeCityBuildingColor(coverage: number | undefined): string {
     if (coverage === undefined) {
-        return "#facc15"
+        return BUILDING_COLOR_UNDEFINED_COVERAGE
     }
     if (coverage >= 85) {
-        return "#22c55e"
+        return BUILDING_COLOR_HIGH_COVERAGE
     }
     if (coverage >= 65) {
-        return "#14b8a6"
+        return BUILDING_COLOR_MEDIUM_COVERAGE
     }
     if (coverage >= 45) {
-        return "#fb923c"
+        return BUILDING_COLOR_LOW_COVERAGE
     }
-    return "#ef4444"
+    return BUILDING_COLOR_CRITICAL_COVERAGE
 }
 
 /**
@@ -416,20 +442,20 @@ export function resolveCodeCityBugEmissionSettings(
 ): IBugEmissionSettings {
     if (totalBugCount >= 9) {
         return {
-            color: "#ef4444",
+            color: BUG_EMISSION_COLOR_HIGH,
             particleCount: 6,
             pulseStrength: recentBugCount > 0 ? 1 : 0.4,
         }
     }
     if (totalBugCount >= 5) {
         return {
-            color: "#f97316",
+            color: BUG_EMISSION_COLOR_MEDIUM,
             particleCount: 4,
             pulseStrength: recentBugCount > 0 ? 0.9 : 0.3,
         }
     }
     return {
-        color: "#facc15",
+        color: BUG_EMISSION_COLOR_LOW,
         particleCount: 2,
         pulseStrength: recentBugCount > 0 ? 0.75 : 0.2,
     }
@@ -896,7 +922,7 @@ export function resolveCodeCityBuildingImpactProfile(
     if (impactState === "changed") {
         return {
             baseIntensity: 0.3,
-            emissive: "#fb7185",
+            emissive: IMPACT_EMISSIVE_CHANGED,
             pulseAmplitude: 0.52,
             pulseSpeed: 3.8,
             rippleLift: 0,
@@ -906,7 +932,7 @@ export function resolveCodeCityBuildingImpactProfile(
     if (impactState === "impacted") {
         return {
             baseIntensity: 0.25,
-            emissive: "#22d3ee",
+            emissive: IMPACT_EMISSIVE_IMPACTED,
             pulseAmplitude: 0.38,
             pulseSpeed: 3.1,
             rippleLift: 0,
@@ -916,7 +942,7 @@ export function resolveCodeCityBuildingImpactProfile(
     if (impactState === "ripple") {
         return {
             baseIntensity: 0.12,
-            emissive: "#38bdf8",
+            emissive: IMPACT_EMISSIVE_RIPPLE,
             pulseAmplitude: 0.22,
             pulseSpeed: 2.4,
             rippleLift: 0.16,
@@ -925,7 +951,7 @@ export function resolveCodeCityBuildingImpactProfile(
 
     return {
         baseIntensity: 0,
-        emissive: "#0f172a",
+        emissive: IMPACT_EMISSIVE_NEUTRAL,
         pulseAmplitude: 0,
         pulseSpeed: 0,
         rippleLift: 0,
@@ -1536,11 +1562,11 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                     setSampledFps(Math.round(fps))
                 }}
             />
-            <color args={["#020617"]} attach="background" />
+            <color args={[SCENE_BACKGROUND]} attach="background" />
             <ambientLight intensity={0.55} />
             <directionalLight intensity={0.9} position={[18, 30, 12]} />
             <gridHelper
-                args={[100, 80, "#334155", "#1e293b"]}
+                args={[100, 80, SCENE_GRID_LINE, SCENE_GRID_DIVISION]}
                 visible={renderBudget.quality !== "low"}
             />
             {districts.map(
@@ -1549,7 +1575,7 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                         <mesh position={[district.x, -0.03, district.z]}>
                             <boxGeometry args={[district.width, 0.06, district.depth]} />
                             <meshStandardMaterial
-                                color="#0f172a"
+                                color={SCENE_DISTRICT_FLOOR}
                                 metalness={0.02}
                                 roughness={0.92}
                             />
@@ -1557,7 +1583,7 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                         <Text
                             anchorX="center"
                             anchorY="middle"
-                            color="#94a3b8"
+                            color={SCENE_DISTRICT_LABEL}
                             fontSize={Math.max(0.38, Math.min(0.95, district.width / 6))}
                             position={[district.x, 0.04, district.z]}
                             rotation={[-Math.PI / 2, 0, 0]}
@@ -1578,7 +1604,7 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
             )}
             {navigationTrailVectors.length >= 2 ? (
                 <Line
-                    color="#e2e8f0"
+                    color={SCENE_NAVIGATION_TRAIL}
                     dashScale={2}
                     dashSize={0.3}
                     dashed={true}
@@ -1597,8 +1623,8 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                     >
                         <sphereGeometry args={[0.16, 10, 10]} />
                         <meshStandardMaterial
-                            color="#f8fafc"
-                            emissive="#bae6fd"
+                            color={SCENE_BREADCRUMB_SPHERE}
+                            emissive={SCENE_BREADCRUMB_EMISSIVE}
                             emissiveIntensity={0.9}
                             toneMapped={false}
                         />

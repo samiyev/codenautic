@@ -1,5 +1,12 @@
 import type { ReactElement } from "react"
 
+import {
+    FORECAST_CONFIDENCE_FILL,
+    FORECAST_HISTORICAL_STROKE,
+    FORECAST_LINE_STROKE,
+    FORECAST_ZONE_FILL,
+} from "@/lib/constants/graph-colors"
+
 /**
  * Точка trend forecast chart.
  */
@@ -138,7 +145,7 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
                     viewBox={`0 0 ${String(chartWidth + horizontalPadding * 2)} ${String(chartHeight + verticalPadding * 2)}`}
                 >
                     <rect
-                        fill="#e2e8f0"
+                        fill={FORECAST_ZONE_FILL}
                         height={String(chartHeight)}
                         opacity="0.35"
                         width={String(chartWidth - forecastStartX)}
@@ -146,7 +153,7 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
                         y={String(verticalPadding)}
                     />
                     <polygon
-                        fill="#67e8f9"
+                        fill={FORECAST_CONFIDENCE_FILL}
                         opacity="0.35"
                         points={confidencePath}
                         transform={`translate(${String(horizontalPadding)} ${String(verticalPadding)})`}
@@ -154,14 +161,14 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
                     <path
                         d={historicalPath}
                         fill="none"
-                        stroke="#0f172a"
+                        stroke={FORECAST_HISTORICAL_STROKE}
                         strokeWidth="2"
                         transform={`translate(${String(horizontalPadding)} ${String(verticalPadding)})`}
                     />
                     <path
                         d={forecastPath}
                         fill="none"
-                        stroke="#0891b2"
+                        stroke={FORECAST_LINE_STROKE}
                         strokeDasharray="6 4"
                         strokeWidth="2"
                         transform={`translate(${String(horizontalPadding)} ${String(verticalPadding)})`}

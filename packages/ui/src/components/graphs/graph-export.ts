@@ -1,5 +1,17 @@
 import type { IGraphEdge, IGraphLayoutNode } from "@/components/graphs/xyflow-graph-layout"
 
+import {
+    GRAPH_EXPORT_BACKGROUND,
+    GRAPH_EXPORT_EDGE_LABEL,
+    GRAPH_EXPORT_EDGE_STROKE,
+    GRAPH_EXPORT_EMPTY_BACKGROUND,
+    GRAPH_EXPORT_EMPTY_TEXT,
+    GRAPH_EXPORT_NODE_FILL,
+    GRAPH_EXPORT_NODE_LABEL,
+    GRAPH_EXPORT_NODE_STROKE,
+    GRAPH_EXPORT_TITLE_TEXT,
+} from "@/lib/constants/graph-colors"
+
 interface IGraphSvgBounds {
     readonly height: number
     readonly minX: number
@@ -154,8 +166,8 @@ export function buildGraphSvg(
     if (nodes.length === 0) {
         return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${EMPTY_CANVAS_WIDTH}" height="${EMPTY_CANVAS_HEIGHT}" viewBox="0 0 ${EMPTY_CANVAS_WIDTH} ${EMPTY_CANVAS_HEIGHT}">
-  <rect width="${EMPTY_CANVAS_WIDTH}" height="${EMPTY_CANVAS_HEIGHT}" fill="#0f172a" />
-  <text x="${EMPTY_CANVAS_WIDTH / 2}" y="${EMPTY_CANVAS_HEIGHT / 2}" text-anchor="middle" fill="#f8fafc" font-size="16" font-family="Arial, sans-serif">No graph data</text>
+  <rect width="${EMPTY_CANVAS_WIDTH}" height="${EMPTY_CANVAS_HEIGHT}" fill="${GRAPH_EXPORT_EMPTY_BACKGROUND}" />
+  <text x="${EMPTY_CANVAS_WIDTH / 2}" y="${EMPTY_CANVAS_HEIGHT / 2}" text-anchor="middle" fill="${GRAPH_EXPORT_EMPTY_TEXT}" font-size="16" font-family="Arial, sans-serif">No graph data</text>
 </svg>`
     }
 
@@ -195,10 +207,10 @@ export function buildGraphSvg(
             const edgeLabelSvg =
                 edgeLabel.length === 0
                     ? ""
-                    : `<text x="${midX}" y="${midY - 6}" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Arial, sans-serif">${edgeLabel}</text>`
+                    : `<text x="${midX}" y="${midY - 6}" text-anchor="middle" fill="${GRAPH_EXPORT_EDGE_LABEL}" font-size="10" font-family="Arial, sans-serif">${edgeLabel}</text>`
 
             return `
-  <line x1="${sourceX}" y1="${sourceY}" x2="${targetX}" y2="${targetY}" stroke="#22c55e" stroke-width="2" stroke-linecap="round" />
+  <line x1="${sourceX}" y1="${sourceY}" x2="${targetX}" y2="${targetY}" stroke="${GRAPH_EXPORT_EDGE_STROKE}" stroke-width="2" stroke-linecap="round" />
   ${edgeLabelSvg}`
         })
         .join("\n")
@@ -210,16 +222,16 @@ export function buildGraphSvg(
             const label = escapeSvgText(node.label)
             return `
   <g>
-    <rect x="${x}" y="${y}" width="${node.width}" height="${node.height}" rx="12" fill="#111827" stroke="#38bdf8" stroke-width="1.5" />
-    <text x="${x + 12}" y="${y + 24}" fill="#e2e8f0" font-size="12" font-family="Arial, sans-serif">${label}</text>
+    <rect x="${x}" y="${y}" width="${node.width}" height="${node.height}" rx="12" fill="${GRAPH_EXPORT_NODE_FILL}" stroke="${GRAPH_EXPORT_NODE_STROKE}" stroke-width="1.5" />
+    <text x="${x + 12}" y="${y + 24}" fill="${GRAPH_EXPORT_NODE_LABEL}" font-size="12" font-family="Arial, sans-serif">${label}</text>
   </g>`
         })
         .join("\n")
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${graphWidth}" height="${graphHeight}" viewBox="0 0 ${graphWidth} ${graphHeight}">
-  <rect width="${graphWidth}" height="${graphHeight}" fill="#020617" />
-  <text x="${graphPadding}" y="32" fill="#e2e8f0" font-size="18" font-family="Arial, sans-serif">${escapeSvgText(title)}</text>
+  <rect width="${graphWidth}" height="${graphHeight}" fill="${GRAPH_EXPORT_BACKGROUND}" />
+  <text x="${graphPadding}" y="32" fill="${GRAPH_EXPORT_TITLE_TEXT}" font-size="18" font-family="Arial, sans-serif">${escapeSvgText(title)}</text>
 ${edgeSvg}
 ${nodeSvg}
 </svg>`

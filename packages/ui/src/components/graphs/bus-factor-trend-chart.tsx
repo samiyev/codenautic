@@ -1,13 +1,14 @@
 import type { ReactElement } from "react"
 import { useMemo } from "react"
 
+import { BUS_FACTOR_SERIES_COLORS } from "@/lib/constants/graph-colors"
+
 const SVG_WIDTH = 520
 const SVG_HEIGHT = 260
 const CHART_PADDING_LEFT = 34
 const CHART_PADDING_RIGHT = 16
 const CHART_PADDING_TOP = 16
 const CHART_PADDING_BOTTOM = 34
-const SERIES_COLORS = ["#0284c7", "#7c3aed", "#059669", "#d97706", "#dc2626"] as const
 
 /**
  * Точка тренда bus factor.
@@ -196,7 +197,7 @@ export function BusFactorTrendChart(props: IBusFactorTrendChartProps): ReactElem
                         y={CHART_PADDING_TOP}
                     />
                     {preparedSeries.map((series, seriesIndex): ReactElement => {
-                        const color = SERIES_COLORS[seriesIndex % SERIES_COLORS.length] ?? "#0284c7"
+                        const color = BUS_FACTOR_SERIES_COLORS[seriesIndex % BUS_FACTOR_SERIES_COLORS.length] ?? BUS_FACTOR_SERIES_COLORS[0]
                         return (
                             <g key={series.moduleId}>
                                 <path

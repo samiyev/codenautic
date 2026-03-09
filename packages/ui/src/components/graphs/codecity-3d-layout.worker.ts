@@ -1,5 +1,13 @@
 import type { ICodeCity3DSceneFileDescriptor } from "./codecity-3d-scene"
 
+import {
+    BUILDING_COLOR_CRITICAL_COVERAGE,
+    BUILDING_COLOR_HIGH_COVERAGE,
+    BUILDING_COLOR_LOW_COVERAGE,
+    BUILDING_COLOR_MEDIUM_COVERAGE,
+    BUILDING_COLOR_UNDEFINED_COVERAGE,
+} from "@/lib/constants/codecity-colors"
+
 interface ICodeCityBuildingMesh {
     readonly districtId: string
     readonly id: string
@@ -68,18 +76,18 @@ const MIN_DISTRICT_SPAN = 24
  */
 function resolveCodeCityBuildingColor(coverage: number | undefined): string {
     if (coverage === undefined) {
-        return "#facc15"
+        return BUILDING_COLOR_UNDEFINED_COVERAGE
     }
     if (coverage >= 85) {
-        return "#22c55e"
+        return BUILDING_COLOR_HIGH_COVERAGE
     }
     if (coverage >= 65) {
-        return "#14b8a6"
+        return BUILDING_COLOR_MEDIUM_COVERAGE
     }
     if (coverage >= 45) {
-        return "#fb923c"
+        return BUILDING_COLOR_LOW_COVERAGE
     }
-    return "#ef4444"
+    return BUILDING_COLOR_CRITICAL_COVERAGE
 }
 
 /**
