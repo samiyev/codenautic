@@ -1,0 +1,196 @@
+import { type ReactElement } from "react"
+
+import {
+    Bell,
+    ChevronRight,
+    Menu,
+    Search,
+} from "@/components/icons/app-icons"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
+import { Button } from "@/components/ui"
+import type { IBreadcrumbSegment } from "@/lib/navigation/route-guard-map"
+
+import { ThemeModeToggle } from "./theme-mode-toggle"
+import { UserMenu } from "./user-menu"
+
+/**
+ * Props for the content-area toolbar that replaces the old full-width Header.
+ */
+export interface IContentToolbarProps {
+    /** Clickable breadcrumb trail. */
+    readonly breadcrumbs?: ReadonlyArray<IBreadcrumbSegment>
+    /** Navigate when breadcrumb segment is clicked. */
+    readonly onBreadcrumbNavigate?: (path: string) => void
+    /** Open the global command palette. */
+    readonly onOpenCommandPalette?: () => void
+    /** Unread notification count. */
+    readonly notificationCount?: number
+    /** Open mobile navigation drawer. */
+    readonly onMobileMenuOpen?: () => void
+    /** User name for user menu. */
+    readonly userName?: string
+    /** User email for user menu. */
+    readonly userEmail?: string
+    /** Sign out action. */
+    readonly onSignOut?: () => void
+    /** Open Settings page. */
+    readonly onOpenSettings?: () => void
+    /** Open Billing page. */
+    readonly onOpenBilling?: () => void
+    /** Open Help & Diagnostics page. */
+    readonly onOpenHelp?: () => void
+}
+
+/**
+ * Compact toolbar rendered at the top of the content area.
+ * Contains breadcrumbs, search trigger, notifications, theme toggle, and user menu.
+ *
+ * @param props Toolbar configuration.
+ * @returns Content toolbar element.
+ */
+export function ContentToolbar(props: IContentToolbarProps): ReactElement {
+    const hasNotifications =
+        props.notificationCount !== undefined && props.notificationCount > 0
+
+    const lastBreadcrumb =
+        props.breadcrumbs !== undefined && props.breadcrumbs.length > 0
+            ? props.breadcrumbs[props.breadcrumbs.length - 1]
+            : undefined
+
+    return (
+        <div className="flex h-12 items-center gap-3 rounded-lg bg-sidebar-bg px-4 shadow-sm backdrop-blur">
+            {/* Mobile menu button */}
+            <div className="flex shrink-0 items-center md:hidden">
+                <Button
+                    isIconOnly
+                    aria-label="Open navigation menu"
+                    radius="full"
+                    size="sm"
+                    variant="light"
+                    onPress={props.onMobileMenuOpen}
+                >
+                    <Menu size={18} />
+                </Button>
+            </div>
+
+            {/* Desktop breadcrumbs */}
+            {props.breadcrumbs !== undefined && props.breadcrumbs.length > 0 ? (
+                <nav
+                    aria-label="Breadcrumb"
+                    className="hidden min-w-0 flex-1 md:flex"
+                >
+                    <ol className="flex items-center gap-1.5 text-sm">
+                        {props.breadcrumbs.map(
+                            (segment, index): ReactElement => {
+                                const isLast =
+                                    index ===
+                                    (props.breadcrumbs?.length ?? 0) - 1
+
+                                return (
+                                    <li
+                                        key={`${segment.label}-${String(index)}`}
+                                        className="flex items-center gap-1.5"
+                                    >
+                                        {index > 0 ? (
+                                            <ChevronRight
+                                                aria-hidden="true"
+                                                className="text-text-subtle"
+                                                size={14}
+                                            />
+                                        ) : null}
+                                        {segment.path !== undefined &&
+                                        !isLast ? (
+                                            <button
+                                                className="text-text-secondary transition-colors duration-150 hover:text-foreground"
+                                                type="button"
+                                                onClick={(): void => {
+                                                    props.onBreadcrumbNavigate?.(
+                                                        segment.path as string,
+                                                    )
+                                                }}
+                                            >
+                                                {segment.label}
+                                            </button>
+                                        ) : (
+                                            <span className="font-medium text-foreground">
+                                                {segment.label}
+                                            </span>
+                                        )}
+                                    </li>
+                                )
+                            },
+                        )}
+                    </ol>
+                </nav>
+            ) : (
+                <div className="hidden flex-1 md:block" />
+            )}
+
+            {/* Mobile breadcrumb (last segment only) */}
+            {lastBreadcrumb !== undefined ? (
+                <p className="flex-1 truncate text-sm text-text-secondary md:hidden">
+                    {lastBreadcrumb.label}
+                </p>
+            ) : (
+                <div className="flex-1 md:hidden" />
+            )}
+
+            {/* Actions */}
+            <div className="ml-auto flex shrink-0 items-center gap-2">
+                {/* Search trigger → opens Command Palette */}
+                <Button
+                    aria-label="Open command palette (⌘K)"
+                    className="hidden gap-1.5 px-2.5 sm:inline-flex"
+                    radius="md"
+                    size="sm"
+                    variant="flat"
+                    onPress={props.onOpenCommandPalette}
+                >
+                    <Search size={15} />
+                    <kbd
+                        className={`pointer-events-none rounded border border-border bg-surface px-1.5 py-0.5 ${TYPOGRAPHY.microHint} font-medium`}
+                    >
+                        ⌘K
+                    </kbd>
+                </Button>
+
+                <div
+                    aria-hidden="true"
+                    className="mx-1 hidden h-5 w-px bg-border sm:block"
+                />
+
+                {/* Notification bell */}
+                <Button
+                    isIconOnly
+                    aria-label={`Notifications (${String(props.notificationCount ?? 0)})`}
+                    radius="full"
+                    size="sm"
+                    variant="light"
+                >
+                    <span className="relative inline-flex">
+                        <Bell size={16} />
+                        {hasNotifications ? (
+                            <span
+                                aria-hidden="true"
+                                className="absolute -right-1.5 -top-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[10px] leading-none text-danger-foreground"
+                            >
+                                {props.notificationCount}
+                            </span>
+                        ) : null}
+                    </span>
+                </Button>
+
+                <ThemeModeToggle />
+
+                <UserMenu
+                    onOpenBilling={props.onOpenBilling}
+                    onOpenHelp={props.onOpenHelp}
+                    onOpenSettings={props.onOpenSettings}
+                    onSignOut={props.onSignOut}
+                    userEmail={props.userEmail}
+                    userName={props.userName}
+                />
+            </div>
+        </div>
+    )
+}
