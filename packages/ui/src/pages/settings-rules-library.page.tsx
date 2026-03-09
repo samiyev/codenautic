@@ -1,6 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TRuleCategory = "architecture" | "performance" | "security" | "style"
@@ -216,8 +217,8 @@ export function SettingsRulesLibraryPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Rules library</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Rules library</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Browse pre-built rules, import to your workspace, create custom policies and test
                 them on sample snippets.
             </p>
@@ -256,9 +257,7 @@ export function SettingsRulesLibraryPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">
-                        Browse pre-built rules
-                    </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Browse pre-built rules</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[1fr_220px]">
@@ -268,41 +267,34 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             value={searchQuery}
                             onValueChange={setSearchQuery}
                         />
-                        <div className="flex flex-col gap-1">
-                            <label
-                                className="text-sm text-text-tertiary"
-                                htmlFor="rules-category-filter"
-                            >
-                                Category
-                            </label>
-                            <select
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                                id="rules-category-filter"
-                                value={selectedCategory}
-                                onChange={(event): void => {
-                                    const value = event.currentTarget.value
-                                    if (
-                                        value === "all" ||
-                                        value === "security" ||
-                                        value === "architecture" ||
-                                        value === "performance" ||
-                                        value === "style"
-                                    ) {
-                                        setSelectedCategory(value)
-                                    }
-                                }}
-                            >
-                                {CATEGORY_OPTIONS.map(
-                                    (option): ReactElement => (
-                                        <option key={option} value={option}>
-                                            {option === "all"
-                                                ? "All categories"
-                                                : formatCategoryLabel(option)}
-                                        </option>
-                                    ),
-                                )}
-                            </select>
-                        </div>
+                        <select
+                            aria-label="Category"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                            id="rules-category-filter"
+                            value={selectedCategory}
+                            onChange={(event): void => {
+                                const value = event.currentTarget.value
+                                if (
+                                    value === "all" ||
+                                    value === "security" ||
+                                    value === "architecture" ||
+                                    value === "performance" ||
+                                    value === "style"
+                                ) {
+                                    setSelectedCategory(value)
+                                }
+                            }}
+                        >
+                            {CATEGORY_OPTIONS.map(
+                                (option): ReactElement => (
+                                    <option key={option} value={option}>
+                                        {option === "all"
+                                            ? "All categories"
+                                            : formatCategoryLabel(option)}
+                                    </option>
+                                ),
+                            )}
+                        </select>
                     </div>
 
                     <ul aria-label="Rules catalog" className="space-y-2">
@@ -358,9 +350,7 @@ export function SettingsRulesLibraryPage(): ReactElement {
             <div className="grid gap-4 xl:grid-cols-2">
                 <Card>
                     <CardHeader>
-                        <p className="text-base font-semibold text-foreground">
-                            Create custom rule
-                        </p>
+                        <p className={TYPOGRAPHY.sectionTitle}>Create custom rule</p>
                     </CardHeader>
                     <CardBody className="space-y-3">
                         <Input
@@ -375,35 +365,28 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             value={customDescription}
                             onValueChange={setCustomDescription}
                         />
-                        <div className="flex flex-col gap-1">
-                            <label
-                                className="text-sm text-text-tertiary"
-                                htmlFor="custom-rule-category"
-                            >
-                                Category
-                            </label>
-                            <select
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                                id="custom-rule-category"
-                                value={customCategory}
-                                onChange={(event): void => {
-                                    const nextCategory = event.currentTarget.value
-                                    if (
-                                        nextCategory === "security" ||
-                                        nextCategory === "architecture" ||
-                                        nextCategory === "performance" ||
-                                        nextCategory === "style"
-                                    ) {
-                                        setCustomCategory(nextCategory)
-                                    }
-                                }}
-                            >
-                                <option value="security">Security</option>
-                                <option value="architecture">Architecture</option>
-                                <option value="performance">Performance</option>
-                                <option value="style">Style</option>
-                            </select>
-                        </div>
+                        <select
+                            aria-label="Category"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                            id="custom-rule-category"
+                            value={customCategory}
+                            onChange={(event): void => {
+                                const nextCategory = event.currentTarget.value
+                                if (
+                                    nextCategory === "security" ||
+                                    nextCategory === "architecture" ||
+                                    nextCategory === "performance" ||
+                                    nextCategory === "style"
+                                ) {
+                                    setCustomCategory(nextCategory)
+                                }
+                            }}
+                        >
+                            <option value="security">Security</option>
+                            <option value="architecture">Architecture</option>
+                            <option value="performance">Performance</option>
+                            <option value="style">Style</option>
+                        </select>
                         <Input
                             label="Rule expression"
                             placeholder="deny(secret in diff)"
@@ -418,34 +401,30 @@ export function SettingsRulesLibraryPage(): ReactElement {
 
                 <Card>
                     <CardHeader>
-                        <p className="text-base font-semibold text-foreground">Test rules</p>
+                        <p className={TYPOGRAPHY.sectionTitle}>Test rules</p>
                     </CardHeader>
                     <CardBody className="space-y-3">
-                        <div className="flex flex-col gap-1">
-                            <label
-                                className="text-sm text-text-tertiary"
-                                htmlFor="rule-test-target"
-                            >
-                                Rule to test
-                            </label>
-                            <select
-                                aria-label="Rule to test"
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                                id="rule-test-target"
-                                value={testRuleId}
-                                onChange={(event): void => {
-                                    setTestRuleId(event.currentTarget.value)
-                                }}
-                            >
-                                {rules.map(
-                                    (rule): ReactElement => (
-                                        <option key={rule.id} value={rule.id}>
-                                            {rule.name}
-                                        </option>
-                                    ),
-                                )}
-                            </select>
-                        </div>
+                        <select
+                            aria-label="Rule to test"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                            id="rule-test-target"
+                            value={testRuleId}
+                            onChange={(event): void => {
+                                const nextValue = event.currentTarget.value
+                                if (nextValue.length === 0) {
+                                    return
+                                }
+                                setTestRuleId(nextValue)
+                            }}
+                        >
+                            {rules.map(
+                                (rule): ReactElement => (
+                                    <option key={rule.id} value={rule.id}>
+                                        {rule.name}
+                                    </option>
+                                ),
+                            )}
+                        </select>
                         <div className="flex flex-col gap-1">
                             <label
                                 className="text-sm text-text-tertiary"

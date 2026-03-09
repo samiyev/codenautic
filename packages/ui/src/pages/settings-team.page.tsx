@@ -1,6 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 import { getUiActionPolicy, useUiRole, type IUiActionPolicy } from "@/lib/permissions/ui-policy"
 
@@ -135,7 +136,7 @@ function TeamDirectoryCard(props: {
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">Teams</p>
+                <p className={TYPOGRAPHY.sectionTitle}>Teams</p>
             </CardHeader>
             <CardBody className="space-y-2">
                 {props.teams.map((team): ReactElement => {
@@ -185,7 +186,7 @@ function TeamMembersCard(props: {
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">Members</p>
+                <p className={TYPOGRAPHY.sectionTitle}>Members</p>
             </CardHeader>
             <CardBody className="space-y-3">
                 <div className="grid gap-3 md:grid-cols-[1fr_180px_auto]">
@@ -195,35 +196,31 @@ function TeamMembersCard(props: {
                         value={props.inviteEmail}
                         onValueChange={props.onInviteEmailChange}
                     />
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm text-text-tertiary" htmlFor="team-invite-role">
-                            Invite role
-                        </label>
-                        <select
-                            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                            id="team-invite-role"
-                            value={props.inviteRole}
-                            onChange={(event): void => {
-                                const nextRole = event.currentTarget.value
-                                if (
-                                    nextRole === "viewer" ||
-                                    nextRole === "developer" ||
-                                    nextRole === "lead" ||
-                                    nextRole === "admin"
-                                ) {
-                                    props.onInviteRoleChange(nextRole)
-                                }
-                            }}
-                        >
-                            {ROLE_OPTIONS.map(
-                                (role): ReactElement => (
-                                    <option key={role} value={role}>
-                                        {role}
-                                    </option>
-                                ),
-                            )}
-                        </select>
-                    </div>
+                    <select
+                        aria-label="Invite role"
+                        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                        id="team-invite-role"
+                        value={props.inviteRole}
+                        onChange={(event): void => {
+                            const nextRole = event.currentTarget.value
+                            if (
+                                nextRole === "viewer" ||
+                                nextRole === "developer" ||
+                                nextRole === "lead" ||
+                                nextRole === "admin"
+                            ) {
+                                props.onInviteRoleChange(nextRole)
+                            }
+                        }}
+                    >
+                        {ROLE_OPTIONS.map(
+                            (role): ReactElement => (
+                                <option key={role} value={role}>
+                                    {role}
+                                </option>
+                            ),
+                        )}
+                    </select>
                     <div className="flex items-end">
                         <Button
                             className="w-full md:w-auto"
@@ -252,7 +249,9 @@ function TeamMembersCard(props: {
                                         <p className="text-sm font-semibold text-foreground">
                                             {member.name}
                                         </p>
-                                        <p className="text-xs text-text-secondary">{member.email}</p>
+                                        <p className="text-xs text-text-secondary">
+                                            {member.email}
+                                        </p>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Chip
@@ -263,40 +262,32 @@ function TeamMembersCard(props: {
                                             {member.role}
                                         </Chip>
                                         {isRoleManagementHidden ? null : (
-                                            <>
-                                                <label
-                                                    className="text-xs text-text-secondary"
-                                                    htmlFor={`member-role-${member.id}`}
-                                                >
-                                                    Role
-                                                </label>
-                                                <select
-                                                    aria-label={`Role for member ${member.email}`}
-                                                    className="rounded-lg border border-border bg-surface px-2 py-1 text-xs"
-                                                    disabled={isRoleManagementDisabled}
-                                                    id={`member-role-${member.id}`}
-                                                    value={member.role}
-                                                    onChange={(event): void => {
-                                                        const nextRole = event.currentTarget.value
-                                                        if (
-                                                            nextRole === "viewer" ||
-                                                            nextRole === "developer" ||
-                                                            nextRole === "lead" ||
-                                                            nextRole === "admin"
-                                                        ) {
-                                                            props.onRoleUpdate(member.id, nextRole)
-                                                        }
-                                                    }}
-                                                >
-                                                    {ROLE_OPTIONS.map(
-                                                        (role): ReactElement => (
-                                                            <option key={role} value={role}>
-                                                                {role}
-                                                            </option>
-                                                        ),
-                                                    )}
-                                                </select>
-                                            </>
+                                            <select
+                                                aria-label={`Role for member ${member.email}`}
+                                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                                                disabled={isRoleManagementDisabled}
+                                                id={`member-role-${member.id}`}
+                                                value={member.role}
+                                                onChange={(event): void => {
+                                                    const nextRole = event.currentTarget.value
+                                                    if (
+                                                        nextRole === "viewer" ||
+                                                        nextRole === "developer" ||
+                                                        nextRole === "lead" ||
+                                                        nextRole === "admin"
+                                                    ) {
+                                                        props.onRoleUpdate(member.id, nextRole)
+                                                    }
+                                                }}
+                                            >
+                                                {ROLE_OPTIONS.map(
+                                                    (role): ReactElement => (
+                                                        <option key={role} value={role}>
+                                                            {role}
+                                                        </option>
+                                                    ),
+                                                )}
+                                            </select>
                                         )}
                                     </div>
                                 </div>
@@ -326,7 +317,7 @@ function TeamRepositoriesCard(props: {
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">Repository assignment</p>
+                <p className={TYPOGRAPHY.sectionTitle}>Repository assignment</p>
             </CardHeader>
             <CardBody className="space-y-2">
                 {props.repositories.map((repository): ReactElement => {
@@ -543,8 +534,8 @@ export function SettingsTeamPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Team management</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Team management</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Create teams, add members, assign repositories and control roles in one place.
             </p>
             <Alert color="primary" title={`RBAC preview role: ${activeUiRole}`} variant="flat">
@@ -553,7 +544,7 @@ export function SettingsTeamPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Create team</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Create team</p>
                 </CardHeader>
                 <CardBody className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
                     <Input

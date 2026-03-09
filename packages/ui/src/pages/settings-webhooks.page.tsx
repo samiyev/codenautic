@@ -4,6 +4,7 @@ import { useVirtualizer } from "@tanstack/react-virtual"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input, Switch } from "@/components/ui"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import {
     showToastError,
     showToastInfo,
@@ -379,16 +380,14 @@ export function SettingsWebhooksPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Webhook Management</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className={TYPOGRAPHY.pageTitle}>Webhook Management</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Create, rotate and monitor webhook endpoints with delivery logs.
             </p>
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">
-                        Create webhook endpoint
-                    </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Create webhook endpoint</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[1.2fr_1fr_auto]">
@@ -433,7 +432,7 @@ export function SettingsWebhooksPage(): ReactElement {
             <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
                 <Card>
                     <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-base font-semibold text-foreground">Webhook endpoints</p>
+                        <p className={TYPOGRAPHY.sectionTitle}>Webhook endpoints</p>
                         <div className="flex flex-wrap gap-2">
                             <Input
                                 className="min-w-[200px]"
@@ -443,7 +442,7 @@ export function SettingsWebhooksPage(): ReactElement {
                             />
                             <select
                                 aria-label="Filter webhooks by status"
-                                className="rounded-lg border border-border px-3 py-2 text-sm"
+                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                                 value={statusFilter}
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
@@ -574,7 +573,7 @@ export function SettingsWebhooksPage(): ReactElement {
 
                 <Card>
                     <CardHeader>
-                        <p className="text-base font-semibold text-foreground">
+                        <p className={TYPOGRAPHY.sectionTitle}>
                             Delivery logs{" "}
                             {activeEndpoint === undefined ? "" : `· ${activeEndpoint.id}`}
                         </p>

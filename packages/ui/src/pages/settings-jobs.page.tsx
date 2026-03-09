@@ -2,6 +2,7 @@ import { type ReactElement, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
 import { SystemStateCard } from "@/components/infrastructure/system-state-card"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TJobKind = "analytics" | "review" | "scan"
@@ -493,15 +494,15 @@ export function SettingsJobsPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Operations jobs monitor</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Operations jobs monitor</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Track review, scan and analytics jobs with ETA, retries, paused/stuck states,
                 operator recovery actions and audit history.
             </p>
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Live summary</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Live summary</p>
                 </CardHeader>
                 <CardBody className="flex flex-wrap gap-2">
                     <Chip size="sm" variant="flat">
@@ -518,188 +519,178 @@ export function SettingsJobsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">
-                        Timezone + schedule preview
-                    </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Timezone + schedule preview</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                        <label className="flex flex-col gap-1 text-sm text-text-tertiary">
-                            Schedule target
-                            <select
-                                aria-label="Schedule target"
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
-                                value={scheduleTarget}
-                                onChange={(event): void => {
-                                    const value = event.currentTarget.value
-                                    if (value === "rescan" || value === "report") {
-                                        setScheduleTarget(value)
-                                    }
-                                }}
-                            >
-                                <option value="rescan">Rescan schedule</option>
-                                <option value="report">Report schedule</option>
-                            </select>
-                        </label>
-                        <label className="flex flex-col gap-1 text-sm text-text-tertiary">
-                            User timezone
-                            <select
-                                aria-label="User timezone"
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
-                                value={userTimezone}
-                                onChange={(event): void => {
-                                    const value = event.currentTarget.value
-                                    if (
-                                        value === "UTC" ||
-                                        value === "Asia/Tashkent" ||
-                                        value === "Europe/Berlin" ||
-                                        value === "America/New_York"
-                                    ) {
-                                        setUserTimezone(value)
-                                    }
-                                }}
-                            >
-                                {TIMEZONE_OPTIONS.map(
-                                    (timezone): ReactElement => (
-                                        <option key={timezone} value={timezone}>
-                                            {timezone}
-                                        </option>
-                                    ),
-                                )}
-                            </select>
-                        </label>
-                        <label className="flex flex-col gap-1 text-sm text-text-tertiary">
-                            Org timezone override
-                            <select
-                                aria-label="Organization timezone override"
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
-                                value={orgTimezoneOverride}
-                                onChange={(event): void => {
-                                    const value = event.currentTarget.value
-                                    if (value === "inherit-user") {
-                                        setOrgTimezoneOverride("inherit-user")
-                                        return
-                                    }
-                                    if (
-                                        value === "UTC" ||
-                                        value === "Asia/Tashkent" ||
-                                        value === "Europe/Berlin" ||
-                                        value === "America/New_York"
-                                    ) {
-                                        setOrgTimezoneOverride(value)
-                                    }
-                                }}
-                            >
-                                <option value="inherit-user">inherit user timezone</option>
-                                {TIMEZONE_OPTIONS.map(
-                                    (timezone): ReactElement => (
-                                        <option key={`org-${timezone}`} value={timezone}>
-                                            {timezone}
-                                        </option>
-                                    ),
-                                )}
-                            </select>
-                        </label>
-                        <label className="flex flex-col gap-1 text-sm text-text-tertiary">
-                            Schedule frequency
-                            <select
-                                aria-label="Schedule frequency"
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
-                                value={activeSchedule.mode}
-                                onChange={(event): void => {
-                                    const value = event.currentTarget.value
-                                    if (value === "hourly" || value === "weekly") {
-                                        handleScheduleModeChange(value)
-                                    }
-                                }}
-                            >
-                                <option value="hourly">hourly</option>
-                                <option value="weekly">weekly</option>
-                            </select>
-                        </label>
+                        <select
+                            aria-label="Schedule target"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                            value={scheduleTarget}
+                            onChange={(event): void => {
+                                const value = event.currentTarget.value
+                                if (value === "rescan" || value === "report") {
+                                    setScheduleTarget(value)
+                                }
+                            }}
+                        >
+                            <option value="rescan">Rescan schedule</option>
+                            <option value="report">Report schedule</option>
+                        </select>
+                        <select
+                            aria-label="User timezone"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                            value={userTimezone}
+                            onChange={(event): void => {
+                                const value = event.currentTarget.value
+                                if (
+                                    value === "UTC" ||
+                                    value === "Asia/Tashkent" ||
+                                    value === "Europe/Berlin" ||
+                                    value === "America/New_York"
+                                ) {
+                                    setUserTimezone(value)
+                                }
+                            }}
+                        >
+                            {TIMEZONE_OPTIONS.map(
+                                (timezone): ReactElement => (
+                                    <option key={timezone} value={timezone}>
+                                        {timezone}
+                                    </option>
+                                ),
+                            )}
+                        </select>
+                        <select
+                            aria-label="Organization timezone override"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                            value={orgTimezoneOverride}
+                            onChange={(event): void => {
+                                const value = event.currentTarget.value
+                                if (value === "inherit-user") {
+                                    setOrgTimezoneOverride("inherit-user")
+                                    return
+                                }
+                                if (
+                                    value === "UTC" ||
+                                    value === "Asia/Tashkent" ||
+                                    value === "Europe/Berlin" ||
+                                    value === "America/New_York"
+                                ) {
+                                    setOrgTimezoneOverride(value)
+                                }
+                            }}
+                        >
+                            <option value="inherit-user">inherit user timezone</option>
+                            {TIMEZONE_OPTIONS.map(
+                                (timezone): ReactElement => (
+                                    <option key={`org-${timezone}`} value={timezone}>
+                                        {timezone}
+                                    </option>
+                                ),
+                            )}
+                        </select>
+                        <select
+                            aria-label="Schedule frequency"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                            value={activeSchedule.mode}
+                            onChange={(event): void => {
+                                const value = event.currentTarget.value
+                                if (value === "hourly" || value === "weekly") {
+                                    handleScheduleModeChange(value)
+                                }
+                            }}
+                        >
+                            <option value="hourly">hourly</option>
+                            <option value="weekly">weekly</option>
+                        </select>
                     </div>
 
                     <div className="grid gap-3 md:grid-cols-3">
                         {activeSchedule.mode === "hourly" ? (
-                            <label className="flex flex-col gap-1 text-sm text-text-tertiary">
-                                Interval hours
-                                <select
-                                    aria-label="Interval hours"
-                                    className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
-                                    value={String(activeSchedule.intervalHours)}
-                                    onChange={(event): void => {
-                                        handleIntervalChange(event.currentTarget.value)
-                                    }}
-                                >
-                                    <option value="1">1h</option>
-                                    <option value="2">2h</option>
-                                    <option value="6">6h</option>
-                                    <option value="12">12h</option>
-                                    <option value="24">24h</option>
-                                </select>
-                            </label>
+                            <select
+                                aria-label="Interval hours"
+                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                                value={String(activeSchedule.intervalHours)}
+                                onChange={(event): void => {
+                                    const value = event.currentTarget.value
+                                    if (value.length === 0) {
+                                        return
+                                    }
+                                    handleIntervalChange(value)
+                                }}
+                            >
+                                <option value="1">1h</option>
+                                <option value="2">2h</option>
+                                <option value="6">6h</option>
+                                <option value="12">12h</option>
+                                <option value="24">24h</option>
+                            </select>
                         ) : (
-                            <label className="flex flex-col gap-1 text-sm text-text-tertiary">
-                                Weekday
-                                <select
-                                    aria-label="Schedule weekday"
-                                    className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
-                                    value={String(activeSchedule.weekday)}
-                                    onChange={(event): void => {
-                                        handleWeekdayChange(event.currentTarget.value)
-                                    }}
-                                >
-                                    {WEEKDAY_OPTIONS.map(
-                                        (option): ReactElement => (
-                                            <option
-                                                key={`weekday-${String(option.value)}`}
-                                                value={String(option.value)}
-                                            >
-                                                {option.label}
-                                            </option>
-                                        ),
-                                    )}
-                                </select>
-                            </label>
+                            <select
+                                aria-label="Schedule weekday"
+                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                                value={String(activeSchedule.weekday)}
+                                onChange={(event): void => {
+                                    const value = event.currentTarget.value
+                                    if (value.length === 0) {
+                                        return
+                                    }
+                                    handleWeekdayChange(value)
+                                }}
+                            >
+                                {WEEKDAY_OPTIONS.map(
+                                    (option): ReactElement => (
+                                        <option
+                                            key={`weekday-${String(option.value)}`}
+                                            value={String(option.value)}
+                                        >
+                                            {option.label}
+                                        </option>
+                                    ),
+                                )}
+                            </select>
                         )}
-                        <label className="flex flex-col gap-1 text-sm text-text-tertiary">
-                            Hour
-                            <select
-                                aria-label="Schedule hour"
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
-                                value={String(activeSchedule.hour)}
-                                onChange={(event): void => {
-                                    handleHourChange(event.currentTarget.value)
-                                }}
-                            >
-                                {Array.from({ length: 24 }).map(
-                                    (_entry, hour): ReactElement => (
-                                        <option key={`hour-${String(hour)}`} value={String(hour)}>
-                                            {String(hour).padStart(2, "0")}
-                                        </option>
-                                    ),
-                                )}
-                            </select>
-                        </label>
-                        <label className="flex flex-col gap-1 text-sm text-text-tertiary">
-                            Minute
-                            <select
-                                aria-label="Schedule minute"
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
-                                value={String(activeSchedule.minute)}
-                                onChange={(event): void => {
-                                    handleMinuteChange(event.currentTarget.value)
-                                }}
-                            >
-                                {["0", "5", "10", "15", "30", "45"].map(
-                                    (minute): ReactElement => (
-                                        <option key={`minute-${minute}`} value={minute}>
-                                            {minute.padStart(2, "0")}
-                                        </option>
-                                    ),
-                                )}
-                            </select>
-                        </label>
+                        <select
+                            aria-label="Schedule hour"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                            value={String(activeSchedule.hour)}
+                            onChange={(event): void => {
+                                const value = event.currentTarget.value
+                                if (value.length === 0) {
+                                    return
+                                }
+                                handleHourChange(value)
+                            }}
+                        >
+                            {Array.from({ length: 24 }).map(
+                                (_entry, hour): ReactElement => (
+                                    <option key={`hour-${String(hour)}`} value={String(hour)}>
+                                        {String(hour).padStart(2, "0")}
+                                    </option>
+                                ),
+                            )}
+                        </select>
+                        <select
+                            aria-label="Schedule minute"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                            value={String(activeSchedule.minute)}
+                            onChange={(event): void => {
+                                const value = event.currentTarget.value
+                                if (value.length === 0) {
+                                    return
+                                }
+                                handleMinuteChange(value)
+                            }}
+                        >
+                            {["0", "5", "10", "15", "30", "45"].map(
+                                (minute): ReactElement => (
+                                    <option key={`minute-${minute}`} value={minute}>
+                                        {minute.padStart(2, "0")}
+                                    </option>
+                                ),
+                            )}
+                        </select>
                     </div>
 
                     <Alert color="warning" title="Timezone application boundary" variant="flat">
@@ -742,7 +733,7 @@ export function SettingsJobsPage(): ReactElement {
             <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
                 <Card>
                     <CardHeader>
-                        <p className="text-base font-semibold text-foreground">Jobs</p>
+                        <p className={TYPOGRAPHY.sectionTitle}>Jobs</p>
                     </CardHeader>
                     <CardBody className="space-y-2">
                         <ul aria-label="Operations jobs list" className="space-y-2">
@@ -822,9 +813,7 @@ export function SettingsJobsPage(): ReactElement {
                 <div className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <p className="text-base font-semibold text-foreground">
-                                Error drill-down
-                            </p>
+                            <p className={TYPOGRAPHY.sectionTitle}>Error drill-down</p>
                         </CardHeader>
                         <CardBody className="space-y-2">
                             {activeJob === undefined ? (
@@ -865,9 +854,7 @@ export function SettingsJobsPage(): ReactElement {
 
                     <Card>
                         <CardHeader>
-                            <p className="text-base font-semibold text-foreground">
-                                Recovery audit trail
-                            </p>
+                            <p className={TYPOGRAPHY.sectionTitle}>Recovery audit trail</p>
                         </CardHeader>
                         <CardBody className="space-y-2">
                             <ul aria-label="Jobs audit trail list" className="space-y-2">

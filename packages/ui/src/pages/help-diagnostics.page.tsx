@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Textarea } from "@/components/ui"
 import { SystemStateCard } from "@/components/infrastructure/system-state-card"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { useExternalContext, useFeatureFlagsQuery } from "@/lib/hooks/queries"
 
 type TArticleCategory = "auth" | "incidents" | "network" | "providers" | "rendering"
@@ -340,7 +341,7 @@ function buildSuggestedActions(
  */
 export function HelpDiagnosticsPage(): ReactElement {
     const navigate = useNavigate()
-    const featureFlags = useFeatureFlagsQuery()
+    const { featureFlagsQuery: featureFlags } = useFeatureFlagsQuery()
     const externalContext = useExternalContext({
         previewEnabled: false,
     })
@@ -458,8 +459,8 @@ export function HelpDiagnosticsPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Help & diagnostics center</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Help & diagnostics center</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Search help knowledge base, run diagnostics checks, and generate a redacted support
                 bundle without losing workflow context.
             </p>
@@ -472,7 +473,7 @@ export function HelpDiagnosticsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Knowledge base search</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Knowledge base search</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[1fr_220px]">
@@ -492,7 +493,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                             Category
                             <select
                                 aria-label="Help category"
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                                 value={category}
                                 onChange={(event): void => {
                                     const value = event.currentTarget.value
@@ -558,7 +559,7 @@ export function HelpDiagnosticsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Diagnostics checks</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Diagnostics checks</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -681,7 +682,7 @@ export function HelpDiagnosticsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Support bundle</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Support bundle</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <Button size="sm" variant="flat" onPress={handleGenerateSupportBundle}>

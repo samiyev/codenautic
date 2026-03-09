@@ -250,10 +250,7 @@ export function DashboardMissionControlPage(): ReactElement {
         [opsBanner.isDegraded, range],
     )
 
-    const activePreset = useMemo(
-        () => resolveDashboardLayoutPreset(layoutPreset),
-        [layoutPreset],
-    )
+    const activePreset = useMemo(() => resolveDashboardLayoutPreset(layoutPreset), [layoutPreset])
 
     if (mockModule === null) {
         return <DashboardSkeleton />
@@ -411,9 +408,7 @@ export function DashboardMissionControlPage(): ReactElement {
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                         <p className={TYPOGRAPHY.sectionTitle}>Explore</p>
-                        <ul className="space-y-1.5">
-                            {renderExploreLinks()}
-                        </ul>
+                        <ul className="space-y-1.5">{renderExploreLinks()}</ul>
                     </div>
                     <div className="space-y-2">
                         <p className={TYPOGRAPHY.sectionTitle}>Signals</p>
@@ -449,7 +444,7 @@ export function DashboardMissionControlPage(): ReactElement {
                                 Layout preset
                                 <select
                                     aria-label="Layout preset"
-                                    className="rounded-lg border border-border px-3 py-2 text-sm"
+                                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                                     value={layoutPreset}
                                     onChange={(event): void => {
                                         const nextPreset = event.currentTarget.value
@@ -500,11 +495,7 @@ export function DashboardMissionControlPage(): ReactElement {
                                 >
                                     Save personalization
                                 </Button>
-                                <Button
-                                    size="sm"
-                                    variant="flat"
-                                    onPress={handleGenerateShareLink}
-                                >
+                                <Button size="sm" variant="flat" onPress={handleGenerateShareLink}>
                                     Generate share link
                                 </Button>
                             </div>

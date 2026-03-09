@@ -7,6 +7,7 @@ import {
     LLM_PROVIDER_OPTIONS,
     type ILlmProviderFormValues,
 } from "@/components/settings/settings-form-schemas"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { LlmProviderForm } from "@/components/settings/llm-provider-form"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
 
@@ -171,7 +172,7 @@ function renderProviderCard(
     return (
         <Card key={provider}>
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">{provider}</p>
+                <p className={TYPOGRAPHY.sectionTitle}>{provider}</p>
             </CardHeader>
             <CardBody className="space-y-3">
                 <LlmProviderForm
@@ -258,8 +259,8 @@ export function SettingsLlmProvidersPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">LLM Providers</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className={TYPOGRAPHY.pageTitle}>LLM Providers</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Configure provider credentials and model defaults for automated suggestion
                 generation.
             </p>

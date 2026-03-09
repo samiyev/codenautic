@@ -25,6 +25,7 @@ import type {
     ICcrWorkspaceDiffFile,
     ICcrWorkspaceReviewCommentThread,
 } from "@/lib/api/endpoints/ccr-workspace.endpoint"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { useCodeReview } from "@/lib/hooks/queries"
 import { getUiActionPolicy, useUiRole } from "@/lib/permissions/ui-policy"
 import {
@@ -985,7 +986,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                     <div className="flex items-start justify-between gap-3">
                         <div>
                             <p className="text-sm text-muted-foreground">CCR review</p>
-                            <h1 className="text-2xl font-semibold text-foreground">{ccr.title}</h1>
+                            <h1 className={TYPOGRAPHY.pageTitle}>{ccr.title}</h1>
                             <p className="text-sm text-foreground">
                                 {ccr.id} · {ccr.repository} · {ccr.team} · {ccr.status}
                             </p>
@@ -1053,10 +1054,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     {reviewFinishPolicy.reason ?? "insufficient role permissions"}
                                 </p>
                             ) : (
-                                <StyledLink
-                                    className="text-sm"
-                                    to="/reviews"
-                                >
+                                <StyledLink className="text-sm" to="/reviews">
                                     Finish review
                                 </StyledLink>
                             )}
@@ -1224,7 +1222,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 </label>
                                 <select
                                     aria-label="Review history window"
-                                    className="rounded border border-border bg-surface px-2 py-1 text-xs text-foreground"
+                                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                                     id="review-history-window"
                                     value={selectedReviewHistoryWindow}
                                     onChange={(event): void => {

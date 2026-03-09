@@ -2,6 +2,7 @@ import { type ChangeEvent, type ReactElement, useMemo, useState } from "react"
 import { useNavigate } from "@tanstack/react-router"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TReportType = "architecture" | "delivery" | "quality"
@@ -129,8 +130,8 @@ export function ReportListPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Report list</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Report list</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Browse generated reports, apply filters, and trigger lifecycle actions.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -144,7 +145,7 @@ export function ReportListPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Report filters</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Report filters</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-3">
@@ -152,7 +153,7 @@ export function ReportListPage(): ReactElement {
                             <span className="font-semibold text-foreground">Report type</span>
                             <select
                                 aria-label="Report list type filter"
-                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                                 value={reportTypeFilter}
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
@@ -201,7 +202,7 @@ export function ReportListPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Generated reports</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Generated reports</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     {filteredReports.length === 0 ? (

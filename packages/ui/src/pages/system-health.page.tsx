@@ -1,6 +1,8 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
+import { TYPOGRAPHY } from "@/lib/constants/typography"
+import { PAGE_LAYOUT } from "@/lib/constants/spacing"
 import { FEATURE_FLAG_KEYS } from "@/lib/feature-flags/feature-flags"
 import { isFeatureFlagEnabled, useFeatureFlagsQuery, useHealthQuery } from "@/lib/hooks/queries"
 import { formatLocalizedDateTime, getCurrentLocale } from "@/lib/i18n/i18n"
@@ -14,8 +16,8 @@ import { Button } from "@/components/ui"
 export function SystemHealthPage(): ReactElement {
     const { t, i18n } = useTranslation(["common", "system"])
     const locale = getCurrentLocale(i18n)
-    const healthQuery = useHealthQuery()
-    const featureFlagsQuery = useFeatureFlagsQuery()
+    const { healthQuery } = useHealthQuery()
+    const { featureFlagsQuery } = useFeatureFlagsQuery()
     const isPremiumDashboardEnabled = isFeatureFlagEnabled(
         featureFlagsQuery,
         FEATURE_FLAG_KEYS.premiumDashboard,
@@ -24,11 +26,8 @@ export function SystemHealthPage(): ReactElement {
     const isPending = healthQuery.isPending
     if (isPending === true) {
         return (
-            <section
-                aria-busy="true"
-                className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8"
-            >
-                <h1 className="text-3xl font-semibold tracking-tight">{t("common:appTitle")}</h1>
+            <section aria-busy="true" className={PAGE_LAYOUT.centered}>
+                <h1 className={TYPOGRAPHY.splash}>{t("common:appTitle")}</h1>
                 <p className="mt-4 text-base text-muted-foreground">{t("common:loading")}</p>
             </section>
         )
@@ -36,8 +35,8 @@ export function SystemHealthPage(): ReactElement {
 
     if (healthQuery.error !== null && healthQuery.error !== undefined) {
         return (
-            <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
-                <h1 className="text-3xl font-semibold tracking-tight">{t("common:appTitle")}</h1>
+            <section className={PAGE_LAYOUT.centered}>
+                <h1 className={TYPOGRAPHY.splash}>{t("common:appTitle")}</h1>
                 <p aria-live="assertive" className="mt-4 text-base text-danger" role="alert">
                     {t("system:unavailable")}
                 </p>
@@ -58,11 +57,9 @@ export function SystemHealthPage(): ReactElement {
     const localizedTimestamp = formatLocalizedDateTime(healthData.timestamp, locale)
 
     return (
-        <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
-            <h1 className="text-3xl font-semibold tracking-tight">{t("common:appTitle")}</h1>
-            <p className="mt-3 text-sm uppercase tracking-[0.2em] text-muted-foreground">
-                {t("system:healthStatus")}
-            </p>
+        <section className={PAGE_LAYOUT.centered}>
+            <h1 className={TYPOGRAPHY.splash}>{t("common:appTitle")}</h1>
+            <p className={`mt-3 ${TYPOGRAPHY.overline}`}>{t("system:healthStatus")}</p>
             <p className="mt-2 text-4xl font-bold text-success">{healthData.status}</p>
             <p className="mt-4 text-sm text-muted-foreground">
                 {t("system:service")}:{" "}
@@ -76,9 +73,7 @@ export function SystemHealthPage(): ReactElement {
                 aria-label={t("system:premiumSectionTitle")}
                 className="mt-8 w-full rounded-2xl border border-border bg-surface/80 p-5 text-left shadow-sm backdrop-blur"
             >
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                    {t("system:premiumSectionTitle")}
-                </p>
+                <p className={TYPOGRAPHY.overline}>{t("system:premiumSectionTitle")}</p>
                 <p
                     className={`mt-2 text-base font-semibold ${
                         isPremiumDashboardEnabled === true ? "text-success" : "text-warning"

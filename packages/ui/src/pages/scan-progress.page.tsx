@@ -2,6 +2,7 @@ import type { ReactElement } from "react"
 import { useEffect, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 const PHASES = ["queue", "clone", "analysis", "indexing", "report"] as const
 const DEFAULT_JOB_ID = "scan-job-local"
@@ -362,8 +363,8 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Scan Progress</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className={TYPOGRAPHY.pageTitle}>Scan Progress</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Отслеживайте жизненный цикл скана "{jobId}" в реальном времени.
             </p>
             {batchRepositoriesCount > 1 ? (

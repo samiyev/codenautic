@@ -1,6 +1,8 @@
 import { type ChangeEvent, type ReactElement, useEffect, useMemo, useState } from "react"
+import type React from "react"
 
 import type { ICcrWorkspaceRow } from "@/lib/api/endpoints/ccr-workspace.endpoint"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { FOCUS_REVIEWS_FILTERS_EVENT } from "@/lib/keyboard/shortcut-registry"
 import { useCcrWorkspace } from "@/lib/hooks/queries"
 import { ReviewsContent, type IReviewRow } from "@/components/reviews/reviews-content"
@@ -264,13 +266,13 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
         handleInputChange("search", event.currentTarget.value)
     }
 
-    const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>): void => {
-        const name = event.currentTarget.name
-        if (isCcrFilterField(name) === false) {
-            return
+    const handleSelectChange = (
+        name: TCcrFilterField,
+    ): ((event: ChangeEvent<HTMLSelectElement>) => void) => {
+        return (event: ChangeEvent<HTMLSelectElement>): void => {
+            const nextValue = event.currentTarget.value
+            handleInputChange(name, nextValue)
         }
-
-        handleInputChange(name, event.currentTarget.value)
     }
 
     return (
@@ -285,10 +287,9 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
             />
             <select
                 aria-label="Filter by team"
-                className="rounded-lg border border-border px-3 py-2 text-sm"
-                name="team"
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                 value={props.filterState.team}
-                onChange={handleSelectChange}
+                onChange={handleSelectChange("team")}
             >
                 <option value="all">All teams</option>
                 {props.teamOptions.map(
@@ -301,10 +302,9 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
             </select>
             <select
                 aria-label="Filter by repository"
-                className="rounded-lg border border-border px-3 py-2 text-sm"
-                name="repository"
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                 value={props.filterState.repository}
-                onChange={handleSelectChange}
+                onChange={handleSelectChange("repository")}
             >
                 <option value="all">All repos</option>
                 {props.repositoryOptions.map(
@@ -317,10 +317,9 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
             </select>
             <select
                 aria-label="Filter by status"
-                className="rounded-lg border border-border px-3 py-2 text-sm"
-                name="status"
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                 value={props.filterState.status}
-                onChange={handleSelectChange}
+                onChange={handleSelectChange("status")}
             >
                 <option value="all">All statuses</option>
                 {props.statusOptions.map(
@@ -351,7 +350,7 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
             />
             <select
                 aria-label="Saved filter presets"
-                className="rounded-lg border border-border px-3 py-2 text-sm md:col-span-2"
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground md:col-span-2"
                 value={props.selectedPresetId}
                 onChange={(event): void => {
                     props.onFieldChange("selected", event.currentTarget.value)
@@ -605,8 +604,8 @@ export function CcrManagementPage(props: ICcrManagementPageProps): ReactElement 
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">CCR Management</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className={TYPOGRAPHY.pageTitle}>CCR Management</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Filters are synced with URL. Shareable state for search, status, team and
                 repository.
             </p>

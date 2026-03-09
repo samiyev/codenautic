@@ -4,6 +4,7 @@ import { ContextPreview } from "@/components/settings/context-preview"
 import { ContextSourceCard } from "@/components/settings/context-source-card"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
 import { Button, Card, CardBody, CardHeader, Chip, Input, Switch } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { useExternalContext } from "@/lib/hooks/queries/use-external-context"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
@@ -403,17 +404,15 @@ export function SettingsIntegrationsPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Integrations</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className={TYPOGRAPHY.pageTitle}>Integrations</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Configure Jira, Linear, Sentry and Slack connections for issues, alerts and
                 notifications.
             </p>
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">
-                        Connection health summary
-                    </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Connection health summary</p>
                 </CardHeader>
                 <CardBody className="grid gap-2 text-sm sm:grid-cols-3">
                     <p className="rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-success">
@@ -434,7 +433,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                         <Card key={integration.provider}>
                             <CardHeader className="flex flex-wrap items-center justify-between gap-2">
                                 <div>
-                                    <p className="text-base font-semibold text-foreground">
+                                    <p className={TYPOGRAPHY.sectionTitle}>
                                         {integration.provider}
                                     </p>
                                     <p className="text-sm text-muted-foreground">
@@ -537,9 +536,7 @@ export function SettingsIntegrationsPage(): ReactElement {
             <Card>
                 <CardHeader>
                     <div>
-                        <p className="text-base font-semibold text-foreground">
-                            External Context Sources
-                        </p>
+                        <p className={TYPOGRAPHY.sectionTitle}>External Context Sources</p>
                         <p className="text-sm text-muted-foreground">
                             Manage indexed sources and inspect loaded context snippets.
                         </p>

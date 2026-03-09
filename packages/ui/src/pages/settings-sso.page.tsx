@@ -1,6 +1,7 @@
 import { type ReactElement, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Input, Textarea } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 interface ISamlConfigState {
@@ -126,8 +127,8 @@ export function SettingsSsoPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">SSO provider management</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>SSO provider management</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Configure SAML and OIDC providers, validate required fields, and run test SSO checks
                 before rollout.
             </p>
@@ -135,9 +136,7 @@ export function SettingsSsoPage(): ReactElement {
             <div className="grid gap-4 xl:grid-cols-2">
                 <Card>
                     <CardHeader>
-                        <p className="text-base font-semibold text-foreground">
-                            SAML configuration
-                        </p>
+                        <p className={TYPOGRAPHY.sectionTitle}>SAML configuration</p>
                     </CardHeader>
                     <CardBody className="space-y-3">
                         <Input
@@ -201,9 +200,7 @@ export function SettingsSsoPage(): ReactElement {
 
                 <Card>
                     <CardHeader>
-                        <p className="text-base font-semibold text-foreground">
-                            OIDC configuration
-                        </p>
+                        <p className={TYPOGRAPHY.sectionTitle}>OIDC configuration</p>
                     </CardHeader>
                     <CardBody className="space-y-3">
                         <Input

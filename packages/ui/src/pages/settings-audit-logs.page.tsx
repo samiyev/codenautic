@@ -2,6 +2,7 @@ import { type ReactElement, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastSuccess } from "@/lib/notifications/toast"
 
 type TAuditAction =
@@ -279,88 +280,76 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Audit logs</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Audit logs</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Review change history, filter by actor and action, inspect selected date range, and
                 export filtered results.
             </p>
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Filters</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Filters</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[1fr_1fr_180px_180px_auto]">
-                        <div className="flex flex-col gap-1">
-                            <label
-                                className="text-sm text-text-tertiary"
-                                htmlFor="audit-filter-actor"
-                            >
-                                Filter by actor
-                            </label>
-                            <select
-                                aria-label="Filter by actor"
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                                id="audit-filter-actor"
-                                value={filters.actor}
-                                onChange={(event): void => {
+                        <select
+                            aria-label="Filter by actor"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                            id="audit-filter-actor"
+                            value={filters.actor}
+                            onChange={(event): void => {
+                                const nextValue = event.currentTarget.value
+                                if (nextValue.length === 0) {
+                                    return
+                                }
+                                setFilters(
+                                    (previous): IAuditFilters => ({
+                                        ...previous,
+                                        actor: nextValue,
+                                    }),
+                                )
+                            }}
+                        >
+                            <option value="all">All actors</option>
+                            {actorOptions.map(
+                                (actor): ReactElement => (
+                                    <option key={actor} value={actor}>
+                                        {actor}
+                                    </option>
+                                ),
+                            )}
+                        </select>
+                        <select
+                            aria-label="Filter by action"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                            id="audit-filter-action"
+                            value={filters.action}
+                            onChange={(event): void => {
+                                const nextValue = event.currentTarget.value
+                                if (
+                                    nextValue === "all" ||
+                                    nextValue === "integration.connected" ||
+                                    nextValue === "member.invited" ||
+                                    nextValue === "policy.updated" ||
+                                    nextValue === "role.changed" ||
+                                    nextValue === "schedule.updated"
+                                ) {
                                     setFilters(
                                         (previous): IAuditFilters => ({
                                             ...previous,
-                                            actor: event.currentTarget.value,
+                                            action: nextValue,
                                         }),
                                     )
-                                }}
-                            >
-                                <option value="all">All actors</option>
-                                {actorOptions.map(
-                                    (actor): ReactElement => (
-                                        <option key={actor} value={actor}>
-                                            {actor}
-                                        </option>
-                                    ),
-                                )}
-                            </select>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <label
-                                className="text-sm text-text-tertiary"
-                                htmlFor="audit-filter-action"
-                            >
-                                Filter by action
-                            </label>
-                            <select
-                                aria-label="Filter by action"
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                                id="audit-filter-action"
-                                value={filters.action}
-                                onChange={(event): void => {
-                                    const nextValue = event.currentTarget.value
-                                    if (
-                                        nextValue === "all" ||
-                                        nextValue === "integration.connected" ||
-                                        nextValue === "member.invited" ||
-                                        nextValue === "policy.updated" ||
-                                        nextValue === "role.changed" ||
-                                        nextValue === "schedule.updated"
-                                    ) {
-                                        setFilters(
-                                            (previous): IAuditFilters => ({
-                                                ...previous,
-                                                action: nextValue,
-                                            }),
-                                        )
-                                    }
-                                }}
-                            >
-                                <option value="all">All actions</option>
-                                <option value="member.invited">Member invited</option>
-                                <option value="role.changed">Role changed</option>
-                                <option value="integration.connected">Integration connected</option>
-                                <option value="policy.updated">Policy updated</option>
-                                <option value="schedule.updated">Schedule updated</option>
-                            </select>
-                        </div>
+                                }
+                            }}
+                        >
+                            <option value="all">All actions</option>
+                            <option value="member.invited">Member invited</option>
+                            <option value="role.changed">Role changed</option>
+                            <option value="integration.connected">Integration connected</option>
+                            <option value="policy.updated">Policy updated</option>
+                            <option value="schedule.updated">Schedule updated</option>
+                        </select>
                         <div className="flex flex-col gap-1">
                             <label
                                 className="text-sm text-text-tertiary"
@@ -432,7 +421,7 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
 
             <Card>
                 <CardHeader className="flex items-center justify-between">
-                    <p className="text-base font-semibold text-foreground">Changes list</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Changes list</p>
                     <Chip size="sm" variant="flat">
                         {filteredLogs.length} entries
                     </Chip>

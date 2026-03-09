@@ -2,6 +2,7 @@ import { type ReactElement } from "react"
 import { useNavigate } from "@tanstack/react-router"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
  * Route-level экран восстановления пользовательской сессии.
@@ -13,8 +14,8 @@ export function SessionRecoveryPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Session recovery flow</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Session recovery flow</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Restore authentication and continue from saved workflow state after session expiry.
             </p>
 
@@ -25,7 +26,7 @@ export function SessionRecoveryPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Recovery steps</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Recovery steps</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <ol className="list-decimal space-y-2 pl-5 text-sm text-foreground/85">

@@ -1,140 +1,29 @@
-import { type ChangeEvent, type ReactElement, useEffect, useState } from "react"
+import { createRangeValues } from "./repository-overview-utils"
+import type {
+    IArchitectureSummary,
+    IRepositoryFileDependencyProfile,
+    IRepositoryFunctionCallProfile,
+    IRepositoryOverviewProfile,
+    IRepositoryPackageDependencyProfile,
+    IRescanScheduleOption,
+    IRescanScheduleValues,
+    IRescanWeekdayOption,
+} from "./repository-overview-types"
 
-import {
-    FileDependencyGraph,
-    type IFileDependencyNode,
-    type IFileDependencyRelation,
-} from "@/components/graphs/file-dependency-graph"
-import { CodeCityTreemap } from "@/components/graphs/codecity-treemap"
-import {
-    FunctionClassCallGraph,
-    type IFunctionCallNode,
-    type IFunctionCallRelation,
-} from "@/components/graphs/function-class-call-graph"
-import {
-    PackageDependencyGraph,
-    type IPackageDependencyNode,
-    type IPackageDependencyRelation,
-} from "@/components/graphs/package-dependency-graph"
-import { Alert, Button, Card, CardBody, CardHeader, Chip, StyledLink } from "@/components/ui"
-import { type IMetricGridMetric, MetricsGrid } from "@/components/dashboard/metrics-grid"
+/**
+ * Допустимые значения часов для выбора в расписании (0-23).
+ */
+export const RESCAN_HOUR_OPTIONS: ReadonlyArray<number> = createRangeValues(24)
 
-type TRepositoryRisk = "critical" | "high" | "low"
-type THighlight = "danger" | "warning" | "success"
-type TRescanScheduleMode = "manual" | "hourly" | "daily" | "weekly" | "custom"
+/**
+ * Допустимые значения минут для выбора в расписании (0-59).
+ */
+export const RESCAN_MINUTE_OPTIONS: ReadonlyArray<number> = createRangeValues(60)
 
-interface IArchitectureSummary {
-    /** Компонент архитектуры. */
-    readonly area: string
-    /** Оценка риска (low/high/critical). */
-    readonly risk: TRepositoryRisk
-    /** Короткое описание текущего состояния. */
-    readonly summary: string
-}
-
-interface ITechStackItem {
-    /** Название технологии. */
-    readonly name: string
-    /** Версия (если указана). */
-    readonly version: string
-    /** Описание применённости. */
-    readonly note: string
-}
-
-interface IRepositoryOverviewProfile {
-    /** Уникальный идентификатор (`owner/repo`). */
-    readonly id: string
-    /** Владелец репозитория. */
-    readonly owner: string
-    /** Имя репозитория. */
-    readonly name: string
-    /** Основная ветка. */
-    readonly branch: string
-    /** Время последнего скана. */
-    readonly lastScanAt: string
-    /** Количество проанализированных файлов. */
-    readonly filesScanned: number
-    /** Количество найденных инцидентов по качеству. */
-    readonly totalFindings: number
-    /** Уровень health score по последнему скану. */
-    readonly healthScore: number
-    /** Архитектурное резюме по слоям. */
-    readonly architectureSummary: ReadonlyArray<IArchitectureSummary>
-    /** Ключевые KPI. */
-    readonly keyMetrics: ReadonlyArray<IMetricGridMetric>
-    /** Используемый стек. */
-    readonly techStack: ReadonlyArray<ITechStackItem>
-    /** Значение расписания скана по умолчанию (cron). */
-    readonly defaultRescanCron: string
-}
-
-interface IRepositoryFileDependencyProfile {
-    /** Список файлов репозитория для отображения в графе зависимостей. */
-    readonly files: ReadonlyArray<IFileDependencyNode>
-    /** Список зависимостей между файлами в репозитории. */
-    readonly dependencies: ReadonlyArray<IFileDependencyRelation>
-}
-
-interface IRepositoryFunctionCallProfile {
-    /** Сущности (функции и классы) для отображения в call-graph. */
-    readonly nodes: ReadonlyArray<IFunctionCallNode>
-    /** Связи вызовов между сущностями. */
-    readonly callRelations: ReadonlyArray<IFunctionCallRelation>
-}
-
-interface IRepositoryPackageDependencyProfile {
-    /** Список пакетов в виде зависимых модулей. */
-    readonly nodes: ReadonlyArray<IPackageDependencyNode>
-    /** Связи между модулями/пакетами. */
-    readonly packageRelations: ReadonlyArray<IPackageDependencyRelation>
-}
-
-interface IRescanScheduleValues {
-    /** Режим расписания. */
-    readonly mode: TRescanScheduleMode
-    /** Минута запуска (0-59). */
-    readonly minute: number
-    /** Час запуска (0-23). */
-    readonly hour: number
-    /** День недели (0-6, 0 — Sunday). */
-    readonly weekday: number
-    /** Кастомное cron-выражение для режима `custom`. */
-    readonly customCron: string
-}
-
-interface IRescanScheduleChangePayload {
-    /** Идентификатор репозитория. */
-    readonly repositoryId: string
-    /** Итоговое cron-выражение после сохранения. */
-    readonly cronExpression: string
-    /** Режим расписания после сохранения. */
-    readonly mode: TRescanScheduleMode
-}
-
-interface IRescanScheduleOption {
-    /** Значение режима. */
-    readonly value: TRescanScheduleMode
-    /** Человекочитаемая метка. */
-    readonly label: string
-}
-
-interface IRescanWeekdayOption {
-    /** Число дня недели для cron (0–6). */
-    readonly value: number
-    /** Название дня. */
-    readonly label: string
-}
-
-interface IRepositoryOverviewProps {
-    /** ID репозитория (`owner/repo`). */
-    readonly repositoryId: string
-    /** Колбек после сохранения расписания рескана. */
-    readonly onRescanScheduleChange?: (payload: IRescanScheduleChangePayload) => void
-}
-
-const RESCAN_HOUR_OPTIONS: ReadonlyArray<number> = createRangeValues(24)
-const RESCAN_MINUTE_OPTIONS: ReadonlyArray<number> = createRangeValues(60)
-const RESCAN_FREQUENCY_OPTIONS: ReadonlyArray<IRescanScheduleOption> = [
+/**
+ * Опции выбора режима расписания рескана.
+ */
+export const RESCAN_FREQUENCY_OPTIONS: ReadonlyArray<IRescanScheduleOption> = [
     {
         label: "По требованию",
         value: "manual",
@@ -157,7 +46,10 @@ const RESCAN_FREQUENCY_OPTIONS: ReadonlyArray<IRescanScheduleOption> = [
     },
 ]
 
-const RESCAN_WEEKDAY_OPTIONS: ReadonlyArray<IRescanWeekdayOption> = [
+/**
+ * Опции выбора дня недели для расписания.
+ */
+export const RESCAN_WEEKDAY_OPTIONS: ReadonlyArray<IRescanWeekdayOption> = [
     { label: "Воскресенье", value: 0 },
     { label: "Понедельник", value: 1 },
     { label: "Вторник", value: 2 },
@@ -167,7 +59,10 @@ const RESCAN_WEEKDAY_OPTIONS: ReadonlyArray<IRescanWeekdayOption> = [
     { label: "Суббота", value: 6 },
 ]
 
-const DEFAULT_RESCAN_VALUES: IRescanScheduleValues = {
+/**
+ * Значения расписания по умолчанию (ручной режим).
+ */
+export const DEFAULT_RESCAN_VALUES: IRescanScheduleValues = {
     customCron: "",
     hour: 8,
     minute: 0,
@@ -175,7 +70,10 @@ const DEFAULT_RESCAN_VALUES: IRescanScheduleValues = {
     weekday: 1,
 } as const
 
-const WEEKDAYS_TO_LABELS: Readonly<Record<number, string>> = {
+/**
+ * Маппинг числового дня недели в русскоязычную метку.
+ */
+export const WEEKDAYS_TO_LABELS: Readonly<Record<number, string>> = {
     0: "Воскресенье",
     1: "Понедельник",
     2: "Вторник",
@@ -185,7 +83,10 @@ const WEEKDAYS_TO_LABELS: Readonly<Record<number, string>> = {
     6: "Суббота",
 }
 
-const REPOSITORY_OVERVIEWS: ReadonlyArray<IRepositoryOverviewProfile> = [
+/**
+ * Демо-данные профилей overview репозиториев.
+ */
+export const REPOSITORY_OVERVIEWS: ReadonlyArray<IRepositoryOverviewProfile> = [
     {
         architectureSummary: [
             {
@@ -437,7 +338,10 @@ const REPOSITORY_OVERVIEWS: ReadonlyArray<IRepositoryOverviewProfile> = [
     },
 ]
 
-const FALLBACK_ARCHITECTURE_SUMMARY: ReadonlyArray<IArchitectureSummary> = [
+/**
+ * Fallback для архитектурного резюме при отсутствии данных.
+ */
+export const FALLBACK_ARCHITECTURE_SUMMARY: ReadonlyArray<IArchitectureSummary> = [
     {
         area: "Repository overview",
         risk: "critical",
@@ -445,7 +349,10 @@ const FALLBACK_ARCHITECTURE_SUMMARY: ReadonlyArray<IArchitectureSummary> = [
     },
 ]
 
-const FILE_DEPENDENCY_VIEWS: Readonly<Record<string, IRepositoryFileDependencyProfile>> = {
+/**
+ * Демо-данные файловых зависимостей по репозиториям.
+ */
+export const FILE_DEPENDENCY_VIEWS: Readonly<Record<string, IRepositoryFileDependencyProfile>> = {
     "platform-team/api-gateway": {
         dependencies: [
             {
@@ -671,7 +578,10 @@ const FILE_DEPENDENCY_VIEWS: Readonly<Record<string, IRepositoryFileDependencyPr
     },
 } as const
 
-const FUNCTION_CLASS_CALL_VIEWS: Readonly<Record<string, IRepositoryFunctionCallProfile>> = {
+/**
+ * Демо-данные графа вызовов функций и классов по репозиториям.
+ */
+export const FUNCTION_CLASS_CALL_VIEWS: Readonly<Record<string, IRepositoryFunctionCallProfile>> = {
     "platform-team/api-gateway": {
         callRelations: [
             {
@@ -1064,7 +974,12 @@ const FUNCTION_CLASS_CALL_VIEWS: Readonly<Record<string, IRepositoryFunctionCall
     },
 } as const
 
-const PACKAGE_DEPENDENCY_VIEWS: Readonly<Record<string, IRepositoryPackageDependencyProfile>> = {
+/**
+ * Демо-данные графа зависимостей пакетов по репозиториям.
+ */
+export const PACKAGE_DEPENDENCY_VIEWS: Readonly<
+    Record<string, IRepositoryPackageDependencyProfile>
+> = {
     "platform-team/api-gateway": {
         packageRelations: [
             {
@@ -1389,22 +1304,34 @@ const PACKAGE_DEPENDENCY_VIEWS: Readonly<Record<string, IRepositoryPackageDepend
     },
 } as const
 
-const FALLBACK_FILE_DEPENDENCIES: IRepositoryFileDependencyProfile = {
+/**
+ * Fallback для отсутствующих файловых зависимостей.
+ */
+export const FALLBACK_FILE_DEPENDENCIES: IRepositoryFileDependencyProfile = {
     dependencies: [],
     files: [],
 }
 
-const FALLBACK_FUNCTION_CALL_GRAPH: IRepositoryFunctionCallProfile = {
+/**
+ * Fallback для отсутствующего графа вызовов.
+ */
+export const FALLBACK_FUNCTION_CALL_GRAPH: IRepositoryFunctionCallProfile = {
     callRelations: [],
     nodes: [],
 }
 
-const FALLBACK_PACKAGE_DEPENDENCIES: IRepositoryPackageDependencyProfile = {
+/**
+ * Fallback для отсутствующих зависимостей пакетов.
+ */
+export const FALLBACK_PACKAGE_DEPENDENCIES: IRepositoryPackageDependencyProfile = {
     nodes: [],
     packageRelations: [],
 }
 
-const FILE_ISSUE_HEATMAP_COUNTS: Readonly<Record<string, number>> = {
+/**
+ * Демо-данные количества issues по файлам для heatmap.
+ */
+export const FILE_ISSUE_HEATMAP_COUNTS: Readonly<Record<string, number>> = {
     "src/api/auth.ts": 4,
     "src/api/repository.ts": 2,
     "src/api/server.ts": 3,
@@ -1427,754 +1354,41 @@ const FILE_ISSUE_HEATMAP_COUNTS: Readonly<Record<string, number>> = {
     "src/main.tsx": 1,
 }
 
-function clampScore(rawScore: number): number {
-    if (rawScore < 0) {
-        return 0
-    }
-
-    if (rawScore > 100) {
-        return 100
-    }
-
-    return rawScore
-}
-
-function mapRiskToChipColor(risk: TRepositoryRisk): THighlight {
-    if (risk === "low") {
-        return "success"
-    }
-
-    if (risk === "high") {
-        return "warning"
-    }
-
-    return "danger"
-}
-
-function mapRiskToLabel(risk: TRepositoryRisk): string {
-    if (risk === "low") {
-        return "low"
-    }
-
-    if (risk === "high") {
-        return "high"
-    }
-
-    return "critical"
-}
-
-function getRepositoryOverviewById(repositoryId: string): IRepositoryOverviewProfile | undefined {
-    return REPOSITORY_OVERVIEWS.find((entry): boolean => entry.id === repositoryId)
-}
-
-function getRepositoryFileDependencies(repositoryId: string): IRepositoryFileDependencyProfile {
+/**
+ * Возвращает профиль файловых зависимостей по ID репозитория.
+ *
+ * @param repositoryId Идентификатор репозитория.
+ * @returns Профиль зависимостей или fallback.
+ */
+export function getRepositoryFileDependencies(
+    repositoryId: string,
+): IRepositoryFileDependencyProfile {
     const repositoryDependencies = FILE_DEPENDENCY_VIEWS[repositoryId]
     return repositoryDependencies ?? FALLBACK_FILE_DEPENDENCIES
 }
 
-function getRepositoryFunctionCallGraph(repositoryId: string): IRepositoryFunctionCallProfile {
+/**
+ * Возвращает профиль call-graph по ID репозитория.
+ *
+ * @param repositoryId Идентификатор репозитория.
+ * @returns Профиль вызовов или fallback.
+ */
+export function getRepositoryFunctionCallGraph(
+    repositoryId: string,
+): IRepositoryFunctionCallProfile {
     const functionGraph = FUNCTION_CLASS_CALL_VIEWS[repositoryId]
     return functionGraph ?? FALLBACK_FUNCTION_CALL_GRAPH
 }
 
-function getRepositoryPackageDependencyGraph(
+/**
+ * Возвращает профиль зависимостей пакетов по ID репозитория.
+ *
+ * @param repositoryId Идентификатор репозитория.
+ * @returns Профиль пакетных зависимостей или fallback.
+ */
+export function getRepositoryPackageDependencyGraph(
     repositoryId: string,
 ): IRepositoryPackageDependencyProfile {
     const packageGraph = PACKAGE_DEPENDENCY_VIEWS[repositoryId]
     return packageGraph ?? FALLBACK_PACKAGE_DEPENDENCIES
-}
-
-function resolveIssueCountValue(value?: number): number {
-    if (typeof value !== "number" || Number.isNaN(value) || value < 0) {
-        return 0
-    }
-
-    return Math.floor(value)
-}
-
-function resolveCodeCityTreemapFiles(
-    files: ReadonlyArray<IFileDependencyNode>,
-): ReadonlyArray<IFileDependencyNode & { issueCount: number }> {
-    return files.map((file): IFileDependencyNode & { issueCount: number } => ({
-        ...file,
-        issueCount: resolveIssueCountValue(FILE_ISSUE_HEATMAP_COUNTS[file.id]),
-    }))
-}
-
-function formatOverviewTimestamp(raw: string): string {
-    const date = new Date(raw)
-    if (Number.isNaN(date.getTime()) === true) {
-        return "—"
-    }
-
-    return date.toLocaleString([], {
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        month: "2-digit",
-        second: "2-digit",
-        year: "numeric",
-    })
-}
-
-function createRangeValues(limit: number): ReadonlyArray<number> {
-    const values: number[] = []
-    for (let index = 0; index < limit; index += 1) {
-        values.push(index)
-    }
-    return values
-}
-
-function padCronValue(value: number): string {
-    return String(value).padStart(2, "0")
-}
-
-function parseCronNumber(value: string, min: number, max: number, fallback: number): number {
-    const parsed = Number.parseInt(value, 10)
-    if (Number.isNaN(parsed) === true || parsed < min || parsed > max) {
-        return fallback
-    }
-    return parsed
-}
-
-function getRepositoryDefaultSchedule(canonicalRepositoryId: string): string {
-    const repository = getRepositoryOverviewById(canonicalRepositoryId)
-    return repository?.defaultRescanCron ?? "manual"
-}
-
-function isCronManual(cronExpression: string): boolean {
-    return cronExpression.trim() === "manual"
-}
-
-function createRescanScheduleFromCron(cronExpression: string): IRescanScheduleValues {
-    if (isCronManual(cronExpression)) {
-        return DEFAULT_RESCAN_VALUES
-    }
-
-    const values = cronExpression
-        .trim()
-        .split(/\s+/)
-        .filter((value): boolean => value.length > 0)
-    if (values.length !== 5) {
-        return {
-            ...DEFAULT_RESCAN_VALUES,
-            mode: "custom",
-            customCron: cronExpression.trim(),
-        }
-    }
-
-    const minuteToken = values[0] ?? "0"
-    const hourToken = values[1] ?? "0"
-    const weekDayToken = values[4] ?? "0"
-    const minute = parseCronNumber(minuteToken, 0, 59, 0)
-    const hour = parseCronNumber(hourToken, 0, 23, 0)
-    const weekDay = parseCronNumber(weekDayToken, 0, 6, 0)
-    const isHourPattern =
-        values[1] === "*" && values[2] === "*" && values[3] === "*" && values[4] === "*"
-
-    if (isHourPattern === true) {
-        return {
-            ...DEFAULT_RESCAN_VALUES,
-            customCron: "",
-            mode: "hourly",
-            minute,
-        }
-    }
-
-    const isDailyPattern = values[2] === "*" && values[3] === "*" && values[4] === "*"
-    if (isDailyPattern === true) {
-        return {
-            ...DEFAULT_RESCAN_VALUES,
-            customCron: "",
-            hour,
-            mode: "daily",
-            minute,
-        }
-    }
-
-    const isWeeklyPattern = values[2] === "*" && values[3] === "*"
-    if (isWeeklyPattern === true) {
-        return {
-            ...DEFAULT_RESCAN_VALUES,
-            customCron: "",
-            hour,
-            mode: "weekly",
-            minute,
-            weekday: weekDay,
-        }
-    }
-
-    return {
-        ...DEFAULT_RESCAN_VALUES,
-        customCron: cronExpression.trim(),
-        mode: "custom",
-    }
-}
-
-function createCronExpressionFromReschedule(values: IRescanScheduleValues): string {
-    if (values.mode === "manual") {
-        return "manual"
-    }
-
-    if (values.mode === "hourly") {
-        return `${values.minute} * * * *`
-    }
-
-    if (values.mode === "daily") {
-        return `${values.minute} ${values.hour} * * *`
-    }
-
-    if (values.mode === "weekly") {
-        return `${values.minute} ${values.hour} * * ${values.weekday}`
-    }
-
-    if (values.customCron.trim().length === 0) {
-        return "manual"
-    }
-
-    return values.customCron.trim().replace(/\s+/g, " ")
-}
-
-function getRescanSummaryLabel(values: IRescanScheduleValues): string {
-    if (values.mode === "manual") {
-        return "По требованию"
-    }
-
-    if (values.mode === "hourly") {
-        return `Ежечасно в :${padCronValue(values.minute)}`
-    }
-
-    if (values.mode === "daily") {
-        return `Ежедневно в ${padCronValue(values.hour)}:${padCronValue(values.minute)}`
-    }
-
-    if (values.mode === "weekly") {
-        const weekdayLabel = WEEKDAYS_TO_LABELS[values.weekday]
-        return `Еженедельно, ${weekdayLabel} в ${padCronValue(values.hour)}:${padCronValue(values.minute)}`
-    }
-
-    if (values.customCron.trim().length === 0) {
-        return "Кастомный cron не задан"
-    }
-
-    return `Кастомный cron: ${values.customCron.trim()}`
-}
-
-function isRescanScheduleMode(value: string): value is TRescanScheduleMode {
-    return RESCAN_FREQUENCY_OPTIONS.some((entry): boolean => entry.value === value)
-}
-
-function resolveHealthChipColor(score: number): THighlight {
-    if (score >= 85) {
-        return "success"
-    }
-
-    if (score >= 70) {
-        return "warning"
-    }
-
-    return "danger"
-}
-
-function resolveHealthLabel(score: number): string {
-    if (score >= 85) {
-        return "Healthy"
-    }
-
-    if (score >= 70) {
-        return "Degraded"
-    }
-
-    return "At risk"
-}
-
-function RepositoryHealthScore(props: { score: number }): ReactElement {
-    const score = clampScore(props.score)
-    const chipColor = resolveHealthChipColor(score)
-    const progressColor =
-        chipColor === "success"
-            ? "bg-success"
-            : chipColor === "warning"
-              ? "bg-warning"
-              : "bg-danger"
-
-    return (
-        <section
-            aria-label="Repository health score"
-            className="rounded-lg border border-border p-3"
-        >
-            <div className="flex items-end justify-between">
-                <p className="text-sm font-semibold text-foreground">Health score</p>
-                <Chip color={chipColor} size="sm">
-                    {resolveHealthLabel(score)}
-                </Chip>
-            </div>
-            <div className="mt-3">
-                <div className="mb-1 text-3xl font-semibold text-foreground">{score}</div>
-                <div
-                    aria-label={`Health score ${score}`}
-                    aria-valuemax={100}
-                    aria-valuemin={0}
-                    aria-valuenow={score}
-                    className="h-2.5 w-full rounded-full bg-surface-muted"
-                    role="meter"
-                >
-                    <span
-                        className={`block h-2.5 rounded-full ${progressColor}`}
-                        style={{ width: `${score}%` }}
-                    />
-                </div>
-            </div>
-        </section>
-    )
-}
-
-function TechnologyStackList(props: { stack: ReadonlyArray<ITechStackItem> }): ReactElement {
-    return (
-        <Card>
-            <CardHeader>
-                <p className="text-sm font-semibold text-foreground">Tech stack</p>
-            </CardHeader>
-            <CardBody className="space-y-3">
-                {props.stack.map(
-                    (entry): ReactElement => (
-                        <div className="space-y-0.5" key={`${entry.name}-${entry.version}`}>
-                            <p className="text-sm font-semibold text-foreground">
-                                {entry.name} <span className="font-normal">{entry.version}</span>
-                            </p>
-                            <p className="text-sm text-muted-foreground">{entry.note}</p>
-                        </div>
-                    ),
-                )}
-            </CardBody>
-        </Card>
-    )
-}
-
-function ArchitectureSummaryList(props: {
-    lines: ReadonlyArray<IArchitectureSummary>
-}): ReactElement {
-    return (
-        <Card>
-            <CardHeader>
-                <p className="text-sm font-semibold text-foreground">Architecture summary</p>
-            </CardHeader>
-            <CardBody className="space-y-3">
-                {props.lines.map((line): ReactElement => {
-                    const chipColor = mapRiskToChipColor(line.risk)
-                    return (
-                        <section className="rounded-lg border border-border p-3" key={line.area}>
-                            <div className="mb-1 flex items-center gap-2">
-                                <Chip color={chipColor} size="sm">
-                                    {mapRiskToLabel(line.risk)}
-                                </Chip>
-                                <p className="text-sm font-semibold text-foreground">{line.area}</p>
-                            </div>
-                            <p className="text-sm text-muted-foreground">{line.summary}</p>
-                        </section>
-                    )
-                })}
-            </CardBody>
-        </Card>
-    )
-}
-
-function RepositoryOverviewNotFound(props: { repositoryId: string }): ReactElement {
-    return (
-        <section className="space-y-3">
-            <Alert color="warning">Скан-результат репозитория не найден</Alert>
-            <p className="text-sm text-foreground">
-                Не найдено overview для ID:{" "}
-                <span className="font-semibold">{props.repositoryId}</span>.
-            </p>
-            <StyledLink className="text-sm" to="/repositories">
-                К списку репозиториев
-            </StyledLink>
-        </section>
-    )
-}
-
-/**
- * Подробный dashboard по одному репозиторию после скана.
- *
- * @param props Идентификатор репозитория.
- * @returns Страница с метриками, архитектурным резюме и health score.
- */
-export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactElement {
-    const repository = getRepositoryOverviewById(props.repositoryId)
-    const defaultReschedule = createRescanScheduleFromCron(
-        getRepositoryDefaultSchedule(props.repositoryId),
-    )
-
-    const [isRescheduleDialogOpen, setIsRescheduleDialogOpen] = useState<boolean>(false)
-    const [currentReschedule, setCurrentReschedule] =
-        useState<IRescanScheduleValues>(defaultReschedule)
-    const [draftReschedule, setDraftReschedule] = useState<IRescanScheduleValues>(defaultReschedule)
-
-    useEffect((): void => {
-        const nextReschedule = createRescanScheduleFromCron(
-            getRepositoryDefaultSchedule(props.repositoryId),
-        )
-        setCurrentReschedule(nextReschedule)
-        setDraftReschedule(nextReschedule)
-    }, [props.repositoryId])
-
-    const currentCron = createCronExpressionFromReschedule(currentReschedule)
-    const draftCron = createCronExpressionFromReschedule(draftReschedule)
-    const isSaveButtonDisabled =
-        draftReschedule.mode === "custom" && draftReschedule.customCron.trim().length === 0
-
-    const openRescheduleDialog = (): void => {
-        setDraftReschedule(currentReschedule)
-        setIsRescheduleDialogOpen(true)
-    }
-
-    const closeRescheduleDialog = (): void => {
-        setIsRescheduleDialogOpen(false)
-    }
-
-    const saveReschedule = (): void => {
-        if (isSaveButtonDisabled === true) {
-            return
-        }
-
-        const next = createRescanScheduleFromCron(draftCron)
-        setCurrentReschedule(next)
-        setIsRescheduleDialogOpen(false)
-
-        if (props.onRescanScheduleChange !== undefined) {
-            props.onRescanScheduleChange({
-                cronExpression: createCronExpressionFromReschedule(next),
-                mode: next.mode,
-                repositoryId: props.repositoryId,
-            })
-        }
-    }
-
-    const updateRescheduleMode = (event: ChangeEvent<HTMLSelectElement>): void => {
-        const nextMode = event.currentTarget.value
-        if (isRescanScheduleMode(nextMode) === false) {
-            return
-        }
-
-        setDraftReschedule(
-            (previous): IRescanScheduleValues => ({
-                ...previous,
-                mode: nextMode,
-            }),
-        )
-    }
-
-    const updateRescheduleMinute = (event: ChangeEvent<HTMLSelectElement>): void => {
-        const nextMinute = parseCronNumber(event.currentTarget.value, 0, 59, draftReschedule.minute)
-        setDraftReschedule(
-            (previous): IRescanScheduleValues => ({
-                ...previous,
-                minute: nextMinute,
-            }),
-        )
-    }
-
-    const updateRescheduleHour = (event: ChangeEvent<HTMLSelectElement>): void => {
-        const nextHour = parseCronNumber(event.currentTarget.value, 0, 23, draftReschedule.hour)
-        setDraftReschedule(
-            (previous): IRescanScheduleValues => ({
-                ...previous,
-                hour: nextHour,
-            }),
-        )
-    }
-
-    const updateRescheduleWeekday = (event: ChangeEvent<HTMLSelectElement>): void => {
-        const nextWeekday = parseCronNumber(
-            event.currentTarget.value,
-            0,
-            6,
-            draftReschedule.weekday,
-        )
-        setDraftReschedule(
-            (previous): IRescanScheduleValues => ({
-                ...previous,
-                weekday: nextWeekday,
-            }),
-        )
-    }
-
-    const updateRescheduleCustomCron = (event: ChangeEvent<HTMLInputElement>): void => {
-        const nextCustomCron = event.currentTarget.value
-        setDraftReschedule(
-            (previous): IRescanScheduleValues => ({
-                ...previous,
-                customCron: nextCustomCron,
-            }),
-        )
-    }
-
-    if (repository === undefined) {
-        return <RepositoryOverviewNotFound repositoryId={props.repositoryId} />
-    }
-
-    const fallbackSummary =
-        repository.architectureSummary.length === 0
-            ? FALLBACK_ARCHITECTURE_SUMMARY
-            : repository.architectureSummary
-    const fileDependencyGraph = getRepositoryFileDependencies(repository.id)
-    const functionCallGraph = getRepositoryFunctionCallGraph(repository.id)
-    const packageDependencyGraph = getRepositoryPackageDependencyGraph(repository.id)
-
-    return (
-        <section className="space-y-4">
-            <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Post-scan dashboard</p>
-                <h1 className="text-2xl font-semibold text-foreground">
-                    {repository.owner}/{repository.name}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                    Отображение health score, архитектуры и ключевых метрик после последнего
-                    сканирования.
-                </p>
-            </div>
-
-            <Card>
-                <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Scan snapshot</p>
-                </CardHeader>
-                <CardBody className="grid gap-4 lg:grid-cols-2">
-                    <div className="space-y-2">
-                        <p className="text-sm text-foreground">Branch: {repository.branch}</p>
-                        <p className="text-sm text-foreground">
-                            Last scan: {formatOverviewTimestamp(repository.lastScanAt)}
-                        </p>
-                        <p className="text-sm text-foreground">
-                            Scanned files: {repository.filesScanned}
-                        </p>
-                        <p className="text-sm text-foreground">
-                            Total findings: {repository.totalFindings}
-                        </p>
-                        <p className="text-sm text-foreground">
-                            Rescan schedule: {getRescanSummaryLabel(currentReschedule)}
-                        </p>
-                        <p className="text-sm font-mono text-foreground">Cron: {currentCron}</p>
-                        <Button
-                            onPress={openRescheduleDialog}
-                            className="mt-1"
-                            color="primary"
-                            type="button"
-                        >
-                            Настроить расписание рескана
-                        </Button>
-                    </div>
-                    <RepositoryHealthScore score={repository.healthScore} />
-                </CardBody>
-            </Card>
-
-            {isRescheduleDialogOpen === true ? (
-                <div className="fixed inset-0 z-40 flex items-center justify-center bg-foreground/60 p-4">
-                    <div
-                        aria-labelledby="rescan-schedule-title"
-                        aria-modal="true"
-                        className="w-full max-w-lg rounded-lg border border-border bg-surface p-4"
-                        role="dialog"
-                    >
-                        <div className="mb-3 flex items-center justify-between">
-                            <h2 className="text-lg font-semibold" id="rescan-schedule-title">
-                                Настройка периодического рескана
-                            </h2>
-                            <button
-                                aria-label="Закрыть"
-                                className="rounded-md border border-border px-3 py-1 text-sm"
-                                onClick={closeRescheduleDialog}
-                                type="button"
-                            >
-                                ×
-                            </button>
-                        </div>
-
-                        <p className="mb-4 text-sm text-muted-foreground">
-                            Последний scan: {formatOverviewTimestamp(repository.lastScanAt)}
-                        </p>
-
-                        <div className="space-y-2">
-                            <label className="text-sm text-foreground" htmlFor="rescan-mode">
-                                Режим
-                            </label>
-                            <select
-                                aria-label="Режим расписания рескана"
-                                className="w-full rounded-md border border-border px-3 py-2"
-                                id="rescan-mode"
-                                onChange={updateRescheduleMode}
-                                value={draftReschedule.mode}
-                            >
-                                {RESCAN_FREQUENCY_OPTIONS.map(
-                                    (entry): ReactElement => (
-                                        <option value={entry.value} key={entry.value}>
-                                            {entry.label}
-                                        </option>
-                                    ),
-                                )}
-                            </select>
-                        </div>
-
-                        {draftReschedule.mode !== "manual" && draftReschedule.mode !== "custom" ? (
-                            <>
-                                <div className="mt-3 space-y-2">
-                                    <label
-                                        className="text-sm text-foreground"
-                                        htmlFor="rescan-minute"
-                                    >
-                                        Минуты
-                                    </label>
-                                    <select
-                                        aria-label="Минута"
-                                        className="w-full rounded-md border border-border px-3 py-2"
-                                        id="rescan-minute"
-                                        onChange={updateRescheduleMinute}
-                                        value={draftReschedule.minute}
-                                    >
-                                        {RESCAN_MINUTE_OPTIONS.map(
-                                            (minute): ReactElement => (
-                                                <option value={minute} key={`minute-${minute}`}>
-                                                    {padCronValue(minute)}
-                                                </option>
-                                            ),
-                                        )}
-                                    </select>
-                                </div>
-
-                                {draftReschedule.mode !== "hourly" ? (
-                                    <div className="mt-3 space-y-2">
-                                        <label
-                                            className="text-sm text-foreground"
-                                            htmlFor="rescan-hour"
-                                        >
-                                            Час
-                                        </label>
-                                        <select
-                                            aria-label="Час"
-                                            className="w-full rounded-md border border-border px-3 py-2"
-                                            id="rescan-hour"
-                                            onChange={updateRescheduleHour}
-                                            value={draftReschedule.hour}
-                                        >
-                                            {RESCAN_HOUR_OPTIONS.map(
-                                                (hour): ReactElement => (
-                                                    <option value={hour} key={`hour-${hour}`}>
-                                                        {padCronValue(hour)}
-                                                    </option>
-                                                ),
-                                            )}
-                                        </select>
-                                    </div>
-                                ) : null}
-                            </>
-                        ) : null}
-
-                        {draftReschedule.mode === "weekly" ? (
-                            <div className="mt-3 space-y-2">
-                                <label className="text-sm text-foreground" htmlFor="rescan-weekday">
-                                    День недели
-                                </label>
-                                <select
-                                    aria-label="День недели"
-                                    className="w-full rounded-md border border-border px-3 py-2"
-                                    id="rescan-weekday"
-                                    onChange={updateRescheduleWeekday}
-                                    value={draftReschedule.weekday}
-                                >
-                                    {RESCAN_WEEKDAY_OPTIONS.map(
-                                        (option): ReactElement => (
-                                            <option value={option.value} key={option.value}>
-                                                {option.label}
-                                            </option>
-                                        ),
-                                    )}
-                                </select>
-                            </div>
-                        ) : null}
-
-                        {draftReschedule.mode === "custom" ? (
-                            <div className="mt-3 space-y-2">
-                                <label
-                                    className="text-sm text-foreground"
-                                    htmlFor="rescan-custom-cron"
-                                >
-                                    Cron-выражение
-                                </label>
-                                <input
-                                    aria-label="Кастомное cron-выражение"
-                                    className="w-full rounded-md border border-border px-3 py-2"
-                                    id="rescan-custom-cron"
-                                    onChange={updateRescheduleCustomCron}
-                                    value={draftReschedule.customCron}
-                                    type="text"
-                                />
-                            </div>
-                        ) : null}
-
-                        <p className="mt-4 rounded bg-surface p-2 text-xs text-foreground">
-                            Cron preview: <code>{draftCron}</code>
-                        </p>
-
-                        <div className="mt-4 flex justify-end gap-2">
-                            <Button
-                                color="default"
-                                onPress={closeRescheduleDialog}
-                                type="button"
-                                variant="light"
-                            >
-                                Отменить
-                            </Button>
-                            <Button
-                                color="primary"
-                                isDisabled={isSaveButtonDisabled}
-                                onPress={saveReschedule}
-                                type="button"
-                            >
-                                Сохранить расписание
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            ) : null}
-
-            <section aria-label="Key metrics">
-                <MetricsGrid metrics={repository.keyMetrics} />
-            </section>
-
-            <div className="grid gap-4 md:grid-cols-2">
-                <ArchitectureSummaryList lines={fallbackSummary} />
-                <TechnologyStackList stack={repository.techStack} />
-            </div>
-
-            <FileDependencyGraph
-                dependencies={fileDependencyGraph.dependencies}
-                files={fileDependencyGraph.files}
-                height="460px"
-                showControls
-                showMiniMap
-                title="File dependency graph"
-            />
-            <FunctionClassCallGraph
-                callRelations={functionCallGraph.callRelations}
-                height="420px"
-                nodes={functionCallGraph.nodes}
-                showControls
-                showMiniMap
-                title="Function/Class call graph"
-            />
-            <PackageDependencyGraph
-                height="420px"
-                nodes={packageDependencyGraph.nodes}
-                relations={packageDependencyGraph.packageRelations}
-                showControls
-                showMiniMap
-                title="Package dependency graph"
-            />
-            <CodeCityTreemap
-                files={resolveCodeCityTreemapFiles(fileDependencyGraph.files)}
-                height="440px"
-                title="CodeCity treemap"
-            />
-        </section>
-    )
 }

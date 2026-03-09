@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { ReportScheduleDialog } from "@/components/reports/report-schedule-dialog"
 import { ReportTemplateEditor } from "@/components/reports/report-template-editor"
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TReportType = "architecture" | "delivery" | "quality"
@@ -151,8 +152,8 @@ export function ReportGeneratorPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Report generator</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Report generator</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Configure report type, sections, date range and output format before generation.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -182,7 +183,7 @@ export function ReportGeneratorPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Report configuration</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Report configuration</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-2">
@@ -190,7 +191,7 @@ export function ReportGeneratorPage(): ReactElement {
                             <span className="font-semibold text-foreground">Report type</span>
                             <select
                                 aria-label="Report type"
-                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                                 value={reportType}
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
@@ -212,7 +213,7 @@ export function ReportGeneratorPage(): ReactElement {
                             <span className="font-semibold text-foreground">Output format</span>
                             <select
                                 aria-label="Report format"
-                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                                 value={reportFormat}
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
@@ -290,7 +291,7 @@ export function ReportGeneratorPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Report preview</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Report preview</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <Alert color="primary" title="Preview status" variant="flat">

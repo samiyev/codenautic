@@ -1,0 +1,94 @@
+import type { ReactElement } from "react"
+
+import { ExploreModeSidebar } from "@/components/graphs/explore-mode-sidebar"
+import { HotAreaHighlights } from "@/components/graphs/hot-area-highlights"
+import { OnboardingProgressTracker } from "@/components/graphs/onboarding-progress-tracker"
+import { ProjectOverviewPanel } from "@/components/graphs/project-overview-panel"
+import { Card, CardBody, CardHeader } from "@/components/ui"
+
+import type { ICodeCityDashboardState } from "../use-code-city-dashboard-state"
+
+/**
+ * Параметры секции обзора.
+ */
+export interface IOverviewSectionProps {
+    /** Состояние дашборда. */
+    readonly state: ICodeCityDashboardState
+}
+
+/**
+ * Секция обзора: ProjectOverview, ExploreModeSidebar, HotAreaHighlights, OnboardingTracker.
+ *
+ * @param props Конфигурация.
+ * @returns Секция обзора.
+ */
+export function OverviewSection({ state }: IOverviewSectionProps): ReactElement {
+    return (
+        <>
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-foreground">Project overview panel</p>
+                </CardHeader>
+                <CardBody>
+                    <ProjectOverviewPanel
+                        files={state.currentProfile.files}
+                        repositoryId={state.currentProfile.id}
+                        repositoryLabel={state.currentProfile.label}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-foreground">Explore mode sidebar</p>
+                </CardHeader>
+                <CardBody>
+                    <ExploreModeSidebar
+                        onNavigatePath={(path): void => {
+                            state.markAreaExplored("explore")
+                            state.markAreaExplored("city-3d")
+                            state.setExploreNavigationFocus({
+                                activeFileId: path.fileChainIds.at(0),
+                                chainFileIds: path.fileChainIds,
+                                title: path.title,
+                            })
+                        }}
+                        paths={state.exploreModePaths}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-foreground">Hot area highlights</p>
+                </CardHeader>
+                <CardBody>
+                    <HotAreaHighlights
+                        highlights={state.hotAreaHighlights}
+                        onFocusHotArea={(highlight): void => {
+                            state.markAreaExplored("hot-areas")
+                            state.markAreaExplored("city-3d")
+                            state.setHighlightedFileId(highlight.fileId)
+                            state.setExploreNavigationFocus({
+                                activeFileId: highlight.fileId,
+                                chainFileIds: [highlight.fileId],
+                                title: `Hot area: ${highlight.label}`,
+                            })
+                        }}
+                    />
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <p className="text-sm font-semibold text-foreground">
+                        Onboarding progress tracker
+                    </p>
+                </CardHeader>
+                <CardBody>
+                    <OnboardingProgressTracker modules={state.onboardingProgressModules} />
+                </CardBody>
+            </Card>
+        </>
+    )
+}

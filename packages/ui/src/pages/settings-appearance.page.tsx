@@ -1,102 +1,36 @@
 import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { ThemeToggle } from "@/components/layout/theme-toggle"
-import { Button, Card, CardBody, CardHeader, Chip, Input } from "@/components/ui"
+import {
+    Button,
+    Card,
+    CardBody,
+    CardHeader,
+    Chip,
+    Input,
+} from "@/components/ui"
+import { NATIVE_FORM } from "@/lib/constants/spacing"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import {
     readThemeLibraryProfileState,
     writeThemeLibraryProfileState,
     type IThemeLibraryProfileTheme,
 } from "@/lib/theme/theme-library-profile-sync"
 import { type ThemeMode, type ThemePresetId, useThemeMode } from "@/lib/theme/theme-provider"
+import {
+    SURFACE_TONES,
+    DEFAULT_SURFACE_TONE_ID,
+    isSurfaceToneId,
+    getSurfaceTone,
+    resolveSurfaceTonePalette,
+    type TSurfaceToneId,
+} from "@/lib/theme/theme-surface-tones"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
-type TBasePaletteId = "cool" | "neutral" | "warm"
-
-interface IBasePalette {
-    /** Цвет фона приложения. */
-    readonly background: string
-    /** Цвет границы интерфейсных блоков. */
-    readonly border: string
-    /** Основной цвет текста. */
-    readonly foreground: string
-    /** Базовый цвет поверхностей. */
-    readonly surface: string
-    /** Приглушенный цвет поверхностей. */
-    readonly surfaceMuted: string
-}
-
-interface IBasePaletteConfig {
-    /** Описание palette. */
-    readonly description: string
-    /** Цвета для dark режима. */
-    readonly dark: IBasePalette
-    /** Идентификатор палитры. */
-    readonly id: TBasePaletteId
-    /** Подпись палитры. */
-    readonly label: string
-    /** Цвета для light режима. */
-    readonly light: IBasePalette
-}
-
-const BASE_PALETTES: ReadonlyArray<IBasePaletteConfig> = [
-    {
-        dark: {
-            background: "#101520",
-            border: "#364257",
-            foreground: "#eaf0ff",
-            surface: "#1a2233",
-            surfaceMuted: "#232d42",
-        },
-        description: "Balanced slate tones for neutral focus",
-        id: "neutral",
-        label: "Neutral",
-        light: {
-            background: "#f4f6fa",
-            border: "#d5deea",
-            foreground: "#1e2533",
-            surface: "#ffffff",
-            surfaceMuted: "#edf2f8",
-        },
-    },
-    {
-        dark: {
-            background: "#18140f",
-            border: "#4f3d2a",
-            foreground: "#f6ecdf",
-            surface: "#231c14",
-            surfaceMuted: "#32281d",
-        },
-        description: "Warm paper-like palette for softer visual comfort",
-        id: "warm",
-        label: "Warm",
-        light: {
-            background: "#faf4ec",
-            border: "#e5d5c0",
-            foreground: "#2e251b",
-            surface: "#fffaf3",
-            surfaceMuted: "#f3e7d8",
-        },
-    },
-    {
-        dark: {
-            background: "#0f1723",
-            border: "#304a64",
-            foreground: "#dff2ff",
-            surface: "#162334",
-            surfaceMuted: "#203246",
-        },
-        description: "Cool contrast palette with crisp blues",
-        id: "cool",
-        label: "Cool",
-        light: {
-            background: "#edf6ff",
-            border: "#c8dcf0",
-            foreground: "#1a2a3d",
-            surface: "#f7fbff",
-            surfaceMuted: "#e4eff8",
-        },
-    },
-]
+/**
+ * @deprecated Алиас для TSurfaceToneId. Используй TSurfaceToneId напрямую.
+ */
+type TBasePaletteId = TSurfaceToneId
 
 const APPEARANCE_STORAGE_PREFIX = "codenautic:ui:appearance"
 const APPEARANCE_ACCENT_STORAGE_KEY = `${APPEARANCE_STORAGE_PREFIX}:accent`
@@ -110,7 +44,6 @@ const APPEARANCE_LIBRARY_SYNC_STORAGE_KEY = `${APPEARANCE_STORAGE_PREFIX}:librar
 
 const DEFAULT_ACCENT_COLOR = "#5f6dff"
 const DEFAULT_ACCENT_INTENSITY = 76
-const DEFAULT_BASE_PALETTE: TBasePaletteId = "neutral"
 const DEFAULT_GLOBAL_RADIUS = 14
 const DEFAULT_FORM_RADIUS = 12
 const MIN_INTENSITY = 40
@@ -231,25 +164,11 @@ function readStoredNumber(storageKey: string, fallback: number, min: number, max
 
 function readStoredBasePalette(storageKey: string, fallback: TBasePaletteId): TBasePaletteId {
     const rawValue = readLocalStorageItem(storageKey)
-    if (rawValue === "neutral" || rawValue === "warm" || rawValue === "cool") {
+    if (isSurfaceToneId(rawValue)) {
         return rawValue
     }
 
     return fallback
-}
-
-function getPaletteDefinition(basePaletteId: TBasePaletteId): IBasePaletteConfig {
-    const matchingPalette = BASE_PALETTES.find((palette): boolean => palette.id === basePaletteId)
-    if (matchingPalette !== undefined) {
-        return matchingPalette
-    }
-
-    const fallbackPalette = BASE_PALETTES[0]
-    if (fallbackPalette === undefined) {
-        throw new Error("BASE_PALETTES must contain at least one palette")
-    }
-
-    return fallbackPalette
 }
 
 function getRgbComponents(hex: string): {
@@ -300,7 +219,28 @@ function toLinearChannel(channel: number): number {
     return ((normalizedChannel + 0.055) / 1.055) ** 2.4
 }
 
+/**
+ * Извлекает Lightness из OKLCH строки.
+ *
+ * @param oklchColor OKLCH-строка (oklch(L C H)).
+ * @returns Lightness (0-1) или undefined если не удалось распарсить.
+ */
+function parseOklchLightness(oklchColor: string): number | undefined {
+    const match = oklchColor.match(/oklch\(\s*([\d.]+)/)
+    if (match === null || match[1] === undefined) {
+        return undefined
+    }
+
+    const lightness = parseFloat(match[1])
+    return Number.isNaN(lightness) ? undefined : lightness
+}
+
 function getRelativeLuminance(color: string): number {
+    const oklchLightness = parseOklchLightness(color)
+    if (oklchLightness !== undefined) {
+        return oklchLightness ** 3
+    }
+
     const { r, g, b } = getRgbComponents(color)
     const linearRed = toLinearChannel(r)
     const linearGreen = toLinearChannel(g)
@@ -373,8 +313,11 @@ function isThemePresetIdValue(
     return availablePresetIds.includes(value as ThemePresetId)
 }
 
+/**
+ * @deprecated Используй isSurfaceToneId.
+ */
 function isBasePaletteValue(value: unknown): value is TBasePaletteId {
-    return value === "cool" || value === "neutral" || value === "warm"
+    return isSurfaceToneId(value)
 }
 
 function parseThemeLibraryItem(
@@ -643,7 +586,7 @@ export function SettingsAppearancePage(): ReactElement {
         ),
     )
     const [basePaletteId, setBasePaletteId] = useState<TBasePaletteId>(() =>
-        readStoredBasePalette(APPEARANCE_BASE_PALETTE_STORAGE_KEY, DEFAULT_BASE_PALETTE),
+        readStoredBasePalette(APPEARANCE_BASE_PALETTE_STORAGE_KEY, DEFAULT_SURFACE_TONE_ID),
     )
     const [globalRadius, setGlobalRadius] = useState<number>(() =>
         readStoredNumber(
@@ -685,10 +628,10 @@ export function SettingsAppearancePage(): ReactElement {
         ThemePresetId | undefined
     >(undefined)
 
-    const activeBasePalette = useMemo((): IBasePalette => {
-        const definition = getPaletteDefinition(basePaletteId)
-        return resolvedMode === "dark" ? definition.dark : definition.light
-    }, [basePaletteId, resolvedMode])
+    const activeBasePalette = useMemo(
+        () => resolveSurfaceTonePalette(basePaletteId, resolvedMode),
+        [basePaletteId, resolvedMode],
+    )
 
     const effectiveAccentColor = useMemo(
         (): string => createEffectiveAccentColor(accentColor, accentIntensity, resolvedMode),
@@ -1178,7 +1121,7 @@ export function SettingsAppearancePage(): ReactElement {
         }
         setAccentColor(DEFAULT_ACCENT_COLOR)
         setAccentIntensity(DEFAULT_ACCENT_INTENSITY)
-        setBasePaletteId(DEFAULT_BASE_PALETTE)
+        setBasePaletteId(DEFAULT_SURFACE_TONE_ID)
         setGlobalRadius(DEFAULT_GLOBAL_RADIUS)
         setFormRadius(DEFAULT_FORM_RADIUS)
         markThemeLibraryDirty()
@@ -1201,15 +1144,15 @@ export function SettingsAppearancePage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Appearance settings</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Appearance settings</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Switch theme mode and presets in one place. All changes are applied immediately
                 without page reload.
             </p>
 
             <Card>
                 <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-base font-semibold text-foreground">Theme controls</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Theme controls</p>
                     <Button variant="flat" onPress={handleResetTheme}>
                         Reset to default
                     </Button>
@@ -1305,7 +1248,7 @@ export function SettingsAppearancePage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Advanced controls</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Advanced controls</p>
                 </CardHeader>
                 <CardBody className="space-y-4">
                     <div className="grid gap-4 xl:grid-cols-2">
@@ -1352,27 +1295,25 @@ export function SettingsAppearancePage(): ReactElement {
                                 className="flex flex-wrap gap-2"
                                 role="group"
                             >
-                                {BASE_PALETTES.map(
-                                    (palette): ReactElement => (
+                                {SURFACE_TONES.map(
+                                    (tone): ReactElement => (
                                         <Button
-                                            key={palette.id}
-                                            aria-pressed={basePaletteId === palette.id}
+                                            key={tone.id}
+                                            aria-pressed={basePaletteId === tone.id}
                                             radius="full"
                                             size="sm"
-                                            variant={
-                                                basePaletteId === palette.id ? "solid" : "flat"
-                                            }
+                                            variant={basePaletteId === tone.id ? "solid" : "flat"}
                                             onPress={(): void => {
-                                                setBasePaletteId(palette.id)
+                                                setBasePaletteId(tone.id)
                                             }}
                                         >
-                                            {palette.label}
+                                            {tone.label}
                                         </Button>
                                     ),
                                 )}
                             </div>
                             <p className="text-xs text-text-secondary">
-                                {getPaletteDefinition(basePaletteId).description}
+                                {getSurfaceTone(basePaletteId).description}
                             </p>
                         </div>
                     </div>
@@ -1444,7 +1385,7 @@ export function SettingsAppearancePage(): ReactElement {
 
             <Card>
                 <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-base font-semibold text-foreground">Theme library</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Theme library</p>
                     <Chip
                         color={
                             librarySyncStatus === "synced"
@@ -1496,14 +1437,16 @@ export function SettingsAppearancePage(): ReactElement {
                             </label>
                             <select
                                 aria-label="Theme library selection"
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm"
+                                className={NATIVE_FORM.select}
                                 id="theme-library-selected"
                                 value={selectedThemeId}
                                 onChange={(event): void => {
                                     setSelectedThemeId(event.currentTarget.value)
                                 }}
                             >
-                                <option value="">Select theme</option>
+                                {selectedThemeId.length === 0 ? (
+                                    <option value="">Select theme</option>
+                                ) : null}
                                 {themeLibrary.map(
                                     (themeItem): ReactElement => (
                                         <option key={themeItem.id} value={themeItem.id}>
@@ -1581,7 +1524,7 @@ export function SettingsAppearancePage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Live preview</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Live preview</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-3">

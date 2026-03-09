@@ -2,6 +2,7 @@ import { type ReactElement } from "react"
 import { useNavigate } from "@tanstack/react-router"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
  * Route-level экран для восстановления после ошибок scan pipeline.
@@ -13,8 +14,8 @@ export function ScanErrorRecoveryPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Scan error recovery</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Scan error recovery</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Recover failed repository scans using safe retry steps and diagnostics links.
             </p>
 
@@ -24,7 +25,7 @@ export function ScanErrorRecoveryPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Recommended steps</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Recommended steps</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <ol className="list-decimal space-y-2 pl-5 text-sm text-foreground/85">

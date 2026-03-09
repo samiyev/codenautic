@@ -14,6 +14,7 @@ import {
 
 import { AiSummaryWidget } from "@/components/reports/ai-summary-widget"
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { ChartContainer } from "@/components/charts/chart-container"
 import { CHART_GRID_DASH, CHART_STROKE_WIDTH } from "@/lib/constants/chart-constants"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -112,8 +113,8 @@ export function ReportViewerPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Report viewer</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Report viewer</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 View generated reports in-browser, inspect interactive charts, and export/share
                 report artifacts.
             </p>
@@ -144,7 +145,7 @@ export function ReportViewerPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Generated report</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Generated report</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <Alert color="success" title="Report summary" variant="flat">
@@ -155,7 +156,7 @@ export function ReportViewerPage(): ReactElement {
                             <span className="font-semibold text-foreground">Chart metric</span>
                             <select
                                 aria-label="Report chart metric"
-                                className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
+                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                                 value={selectedMetric}
                                 onChange={(event): void => {
                                     const nextValue = event.currentTarget.value
@@ -201,9 +202,9 @@ export function ReportViewerPage(): ReactElement {
                                 name={metricLabel}
                                 stroke="var(--chart-primary)"
                                 strokeWidth={CHART_STROKE_WIDTH}
-                                    type="monotone"
-                                />
-                            </LineChart>
+                                type="monotone"
+                            />
+                        </LineChart>
                     </ChartContainer>
                     <ChartContainer aria-label="Report sections distribution chart" height="xl">
                         <BarChart

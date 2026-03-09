@@ -1,6 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TPlanName = "enterprise" | "pro" | "starter"
@@ -255,8 +256,8 @@ export function SettingsBillingPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Billing lifecycle</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Billing lifecycle</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Manage trial/active/past-due/canceled states, feature entitlements, and plan
                 transitions with explicit outcomes.
             </p>
@@ -273,9 +274,7 @@ export function SettingsBillingPage(): ReactElement {
 
             <Card>
                 <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-base font-semibold text-foreground">
-                        Current billing snapshot
-                    </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Current billing snapshot</p>
                     <Chip
                         color={mapStatusChipColor(billingSnapshot.status)}
                         size="sm"
@@ -290,16 +289,9 @@ export function SettingsBillingPage(): ReactElement {
                     </p>
                     <div className="grid gap-3 md:grid-cols-2">
                         <div className="space-y-1">
-                            <label
-                                className="text-sm text-text-tertiary"
-                                htmlFor="billing-plan-select"
-                            >
-                                Plan
-                            </label>
                             <select
                                 aria-label="Billing plan"
-                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                                id="billing-plan-select"
+                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                                 value={draftPlan}
                                 onChange={(event): void => {
                                     const nextPlan = event.currentTarget.value
@@ -318,16 +310,9 @@ export function SettingsBillingPage(): ReactElement {
                             </select>
                         </div>
                         <div className="space-y-1">
-                            <label
-                                className="text-sm text-text-tertiary"
-                                htmlFor="billing-status-select"
-                            >
-                                Billing status
-                            </label>
                             <select
                                 aria-label="Billing status"
-                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                                id="billing-status-select"
+                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                                 value={draftStatus}
                                 onChange={(event): void => {
                                     const nextStatus = event.currentTarget.value
@@ -364,9 +349,7 @@ export function SettingsBillingPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">
-                        Premium feature lock/unlock state
-                    </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Premium feature lock/unlock state</p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     <ul aria-label="Entitlement features list" className="space-y-2">
@@ -402,7 +385,7 @@ export function SettingsBillingPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Plan change history</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Plan change history</p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     <ul aria-label="Billing history list" className="space-y-2">

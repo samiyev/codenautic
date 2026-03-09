@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ChangeEvent, type ReactElement } fro
 
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { InfiniteScrollContainer } from "@/components/infrastructure/infinite-scroll-container"
 import { useFilterPersistence } from "@/lib/hooks/use-filter-persistence"
 
@@ -344,12 +345,12 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
         handleFilterChange("search", event.currentTarget.value)
     }
 
-    const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>): void => {
-        const name = event.currentTarget.name
-        const value = event.currentTarget.value
-
-        if (name === "severity" || name === "status") {
-            handleFilterChange(name, value)
+    const handleSelectChange = (
+        name: IIssueTrackingFilterField,
+    ): ((event: ChangeEvent<HTMLSelectElement>) => void) => {
+        return (event: ChangeEvent<HTMLSelectElement>): void => {
+            const nextValue = event.currentTarget.value
+            handleFilterChange(name, nextValue)
         }
     }
 
@@ -359,7 +360,7 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Issues tracking</h1>
+            <h1 className={TYPOGRAPHY.pageTitle}>Issues tracking</h1>
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">Issues tracking</p>
@@ -375,10 +376,9 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
                         />
                         <select
                             aria-label="Filter by status"
-                            className="rounded-lg border border-border px-3 py-2 text-sm"
-                            name="status"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                             value={filters.status}
-                            onChange={handleSelectChange}
+                            onChange={handleSelectChange("status")}
                         >
                             <option value="all">All statuses</option>
                             {ISSUE_STATUS_OPTIONS.map(
@@ -391,10 +391,9 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
                         </select>
                         <select
                             aria-label="Filter by severity"
-                            className="rounded-lg border border-border px-3 py-2 text-sm"
-                            name="severity"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                             value={filters.severity}
-                            onChange={handleSelectChange}
+                            onChange={handleSelectChange("severity")}
                         >
                             <option value="all">All severities</option>
                             {ISSUE_SEVERITY_OPTIONS.map(

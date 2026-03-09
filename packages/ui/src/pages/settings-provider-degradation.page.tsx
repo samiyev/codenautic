@@ -1,6 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 import {
     PROVIDER_DEGRADATION_EVENT,
@@ -121,8 +122,8 @@ export function SettingsProviderDegradationPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Provider degradation mode</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Provider degradation mode</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Monitor affected features, keep critical actions in queue/retry mode and provide
                 quick incident runbook access.
             </p>
@@ -139,7 +140,7 @@ export function SettingsProviderDegradationPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Incident controls</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Incident controls</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -186,9 +187,7 @@ export function SettingsProviderDegradationPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">
-                        Queue & retry for critical actions
-                    </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Queue & retry for critical actions</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="flex gap-2">

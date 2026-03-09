@@ -1,6 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 type TAnalyticsRange = "30d" | "7d" | "90d"
 type TFunnelStageId =
@@ -145,8 +146,8 @@ export function SettingsAdoptionAnalyticsPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Usage & adoption analytics</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Usage & adoption analytics</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Understand time-to-first-value funnel, drop-offs, active users, and workflow health
                 by transparent event definitions.
             </p>
@@ -171,9 +172,7 @@ export function SettingsAdoptionAnalyticsPage(): ReactElement {
             <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                     <CardHeader>
-                        <p className="text-base font-semibold text-foreground">
-                            Value realization KPIs
-                        </p>
+                        <p className={TYPOGRAPHY.sectionTitle}>Value realization KPIs</p>
                     </CardHeader>
                     <CardBody className="space-y-2">
                         <p className="text-sm text-foreground">
@@ -190,7 +189,7 @@ export function SettingsAdoptionAnalyticsPage(): ReactElement {
 
                 <Card>
                     <CardHeader>
-                        <p className="text-base font-semibold text-foreground">Workflow health</p>
+                        <p className={TYPOGRAPHY.sectionTitle}>Workflow health</p>
                     </CardHeader>
                     <CardBody className="space-y-2">
                         <ul aria-label="Workflow health list" className="space-y-2">
@@ -212,7 +211,9 @@ export function SettingsAdoptionAnalyticsPage(): ReactElement {
                                                 {item.health}
                                             </Chip>
                                         </div>
-                                        <p className="text-xs text-text-secondary">{item.summary}</p>
+                                        <p className="text-xs text-text-secondary">
+                                            {item.summary}
+                                        </p>
                                     </li>
                                 ),
                             )}
@@ -223,7 +224,7 @@ export function SettingsAdoptionAnalyticsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Adoption funnel</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Adoption funnel</p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     <ul aria-label="Adoption funnel list" className="space-y-2">

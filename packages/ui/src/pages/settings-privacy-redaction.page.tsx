@@ -1,6 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Textarea } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TSensitiveType = "api_key" | "email" | "secret" | "token"
@@ -115,8 +116,8 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Privacy-safe export</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Privacy-safe export</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Detect and redact secrets/PII before copy, export or share operations.
             </p>
 
@@ -132,7 +133,7 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Source content</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Source content</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <Textarea
@@ -152,7 +153,7 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Detection summary</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Detection summary</p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     {hasSensitiveData ? (
@@ -179,7 +180,7 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Redacted preview</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Redacted preview</p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     <Textarea

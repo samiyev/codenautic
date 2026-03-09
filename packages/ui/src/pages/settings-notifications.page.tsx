@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input, Switch } from "@/components/ui"
 import { useAuthAccess } from "@/lib/auth/auth-access"
 import { resolveDeepLinkGuard } from "@/lib/navigation/deep-link-guard"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 import { useUiRole } from "@/lib/permissions/ui-policy"
 import type { TTenantId } from "@/lib/access/access-types"
@@ -444,15 +445,15 @@ export function SettingsNotificationsPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Notification center</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Notification center</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Unified inbox for review, drift and prediction events with channel-level delivery
                 controls.
             </p>
 
             <Card>
                 <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-base font-semibold text-foreground">Inbox</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Inbox</p>
                     <Button
                         isDisabled={unreadCount === 0}
                         size="sm"
@@ -511,16 +512,10 @@ export function SettingsNotificationsPage(): ReactElement {
                             </div>
                         </Alert>
                     )}
-                    <div className="flex flex-col gap-1 md:max-w-[260px]">
-                        <label
-                            className="text-sm text-text-tertiary"
-                            htmlFor="notifications-event-type-filter"
-                        >
-                            Filter event type
-                        </label>
+                    <div className="md:max-w-[260px]">
                         <select
                             aria-label="Filter event type"
-                            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                             id="notifications-event-type-filter"
                             value={eventTypeFilter}
                             onChange={(event): void => {
@@ -618,7 +613,7 @@ export function SettingsNotificationsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Delivery preferences</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Delivery preferences</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     {(["slack", "discord", "teams", "inApp"] as const).map(
@@ -681,7 +676,7 @@ export function SettingsNotificationsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">In-app mute rules</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>In-app mute rules</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary">
@@ -753,7 +748,7 @@ export function SettingsNotificationsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Bulk action audit</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Bulk action audit</p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     {bulkAudit.length === 0 ? (

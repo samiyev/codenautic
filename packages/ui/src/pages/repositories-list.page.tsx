@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router"
 
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 type TRepositoryStatus = "error" | "ready" | "scanning"
 
@@ -354,7 +355,7 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
     if (repositories.length === 0) {
         return (
             <section className="space-y-4">
-                <h1 className="text-2xl font-semibold text-foreground">Onboarded repositories</h1>
+                <h1 className={TYPOGRAPHY.pageTitle}>Onboarded repositories</h1>
                 <p className="text-sm text-muted-foreground">
                     Отслеживайте подключенные репозитории и состояние их сканирования.
                 </p>
@@ -365,8 +366,8 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Onboarded repositories</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className={TYPOGRAPHY.pageTitle}>Onboarded repositories</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Отслеживайте подключенные репозитории и состояние их сканирования.
             </p>
 
@@ -383,9 +384,9 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
                         />
                         <select
                             aria-label="Фильтр по статусу"
-                            className="rounded-lg border border-border px-3 py-2 text-sm outline-none"
-                            onChange={handleStatusFilter}
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                             value={status}
+                            onChange={handleStatusFilter}
                         >
                             <option value="all">Все</option>
                             <option value="ready">Готов</option>
@@ -394,13 +395,13 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
                         </select>
                         <select
                             aria-label="Сортировка"
-                            className="rounded-lg border border-border px-3 py-2 text-sm outline-none"
-                            onChange={handleSortChange}
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                             value={sortBy}
+                            onChange={handleSortChange}
                         >
                             {SORT_OPTIONS.map(
                                 (option): ReactElement => (
-                                    <option value={option.value} key={option.value}>
+                                    <option key={option.value} value={option.value}>
                                         {option.label}
                                     </option>
                                 ),

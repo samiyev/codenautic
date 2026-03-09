@@ -1,6 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input, Switch } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TByokProvider = "anthropic" | "github" | "gitlab" | "openai"
@@ -257,49 +258,44 @@ export function SettingsByokPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">BYOK management</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>BYOK management</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Add provider keys, keep secrets masked in UI, rotate safely and monitor usage.
             </p>
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Add API key</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Add API key</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[180px_1fr_1fr_auto]">
-                        <div className="flex flex-col gap-1">
-                            <label className="text-sm text-text-tertiary" htmlFor="byok-provider">
-                                Provider
-                            </label>
-                            <select
-                                aria-label="Provider"
-                                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                                id="byok-provider"
-                                value={form.provider}
-                                onChange={(event): void => {
-                                    const nextProvider = event.currentTarget.value
-                                    if (
-                                        nextProvider === "openai" ||
-                                        nextProvider === "anthropic" ||
-                                        nextProvider === "github" ||
-                                        nextProvider === "gitlab"
-                                    ) {
-                                        setForm(
-                                            (previous): ICreateKeyFormState => ({
-                                                ...previous,
-                                                provider: nextProvider,
-                                            }),
-                                        )
-                                    }
-                                }}
-                            >
-                                <option value="openai">OpenAI</option>
-                                <option value="anthropic">Anthropic</option>
-                                <option value="github">GitHub</option>
-                                <option value="gitlab">GitLab</option>
-                            </select>
-                        </div>
+                        <select
+                            aria-label="Provider"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                            id="byok-provider"
+                            value={form.provider}
+                            onChange={(event): void => {
+                                const nextProvider = event.currentTarget.value
+                                if (
+                                    nextProvider === "openai" ||
+                                    nextProvider === "anthropic" ||
+                                    nextProvider === "github" ||
+                                    nextProvider === "gitlab"
+                                ) {
+                                    setForm(
+                                        (previous): ICreateKeyFormState => ({
+                                            ...previous,
+                                            provider: nextProvider,
+                                        }),
+                                    )
+                                }
+                            }}
+                        >
+                            <option value="openai">OpenAI</option>
+                            <option value="anthropic">Anthropic</option>
+                            <option value="github">GitHub</option>
+                            <option value="gitlab">GitLab</option>
+                        </select>
                         <Input
                             label="Key label"
                             placeholder="openai-prod-main"
@@ -380,7 +376,7 @@ export function SettingsByokPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Provider usage stats</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Provider usage stats</p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     {providerUsage.map(
@@ -404,7 +400,7 @@ export function SettingsByokPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Configured keys</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Configured keys</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     {keys.length === 0 ? (

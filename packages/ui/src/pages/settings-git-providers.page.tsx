@@ -6,6 +6,7 @@ import {
     type IGitProviderConnection,
 } from "@/lib/api/endpoints/git-providers.endpoint"
 import { useGitProviders } from "@/lib/hooks/queries"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { GitProvidersList } from "@/components/settings/git-providers-list"
 import type { IGitProviderCardProps } from "@/components/settings/git-provider-card"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
@@ -111,8 +112,8 @@ export function SettingsGitProvidersPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Git Providers</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className={TYPOGRAPHY.pageTitle}>Git Providers</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Настройка OAuth/чтение репозиториев и webhook-интеграций.
             </p>
             <GitProvidersList providers={providerCards} />

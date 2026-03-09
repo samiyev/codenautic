@@ -16,6 +16,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TPlanName = "enterprise" | "pro" | "starter"
@@ -202,7 +203,7 @@ function OrganizationProfileCard(props: {
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">Organization profile</p>
+                <p className={TYPOGRAPHY.sectionTitle}>Organization profile</p>
             </CardHeader>
             <CardBody className="space-y-3">
                 <div className="grid gap-3 md:grid-cols-3">
@@ -256,7 +257,7 @@ function BillingCard(props: {
     return (
         <Card>
             <CardHeader className="flex items-center justify-between">
-                <p className="text-base font-semibold text-foreground">Billing</p>
+                <p className={TYPOGRAPHY.sectionTitle}>Billing</p>
                 <Chip color={mapBillingStatusColor(props.billing.status)} size="sm" variant="flat">
                     {props.billing.status}
                 </Chip>
@@ -282,11 +283,9 @@ function BillingCard(props: {
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                    <label className="text-sm text-foreground" htmlFor="billing-plan-select">
-                        Plan
-                    </label>
                     <select
-                        className="rounded-lg border border-border px-3 py-2 text-sm"
+                        aria-label="Plan"
+                        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                         id="billing-plan-select"
                         value={props.billing.plan}
                         onChange={(event): void => {
@@ -330,7 +329,7 @@ function MembersCard(props: {
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">Members</p>
+                <p className={TYPOGRAPHY.sectionTitle}>Members</p>
             </CardHeader>
             <CardBody className="space-y-3">
                 <div className="grid gap-3 md:grid-cols-[1fr_180px_auto]">
@@ -340,32 +339,28 @@ function MembersCard(props: {
                         placeholder="new.member@acme.dev"
                         value={props.inviteEmail}
                     />
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm text-foreground" htmlFor="invite-role-select">
-                            Role
-                        </label>
-                        <select
-                            className="rounded-lg border border-border px-3 py-2 text-sm"
-                            id="invite-role-select"
-                            value={props.inviteRole}
-                            onChange={(event): void => {
-                                const role = event.currentTarget.value
-                                if (
-                                    role === "viewer" ||
-                                    role === "developer" ||
-                                    role === "lead" ||
-                                    role === "admin"
-                                ) {
-                                    props.onInviteRoleChange(role)
-                                }
-                            }}
-                        >
-                            <option value="viewer">viewer</option>
-                            <option value="developer">developer</option>
-                            <option value="lead">lead</option>
-                            <option value="admin">admin</option>
-                        </select>
-                    </div>
+                    <select
+                        aria-label="Role"
+                        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                        id="invite-role-select"
+                        value={props.inviteRole}
+                        onChange={(event): void => {
+                            const role = event.currentTarget.value
+                            if (
+                                role === "viewer" ||
+                                role === "developer" ||
+                                role === "lead" ||
+                                role === "admin"
+                            ) {
+                                props.onInviteRoleChange(role)
+                            }
+                        }}
+                    >
+                        <option value="viewer">viewer</option>
+                        <option value="developer">developer</option>
+                        <option value="lead">lead</option>
+                        <option value="admin">admin</option>
+                    </select>
                     <div className="flex items-end">
                         <Button onPress={props.onInvite}>Invite member</Button>
                     </div>
@@ -394,7 +389,8 @@ function MembersCard(props: {
                                                 {member.role}
                                             </Chip>
                                             <select
-                                                className="rounded border border-border px-2 py-1 text-xs"
+                                                aria-label={`Role for ${member.email}`}
+                                                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                                                 value={member.role}
                                                 onChange={(event): void => {
                                                     const role = event.currentTarget.value
@@ -446,7 +442,7 @@ function ByokCard(props: {
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">BYOK</p>
+                <p className={TYPOGRAPHY.sectionTitle}>BYOK</p>
             </CardHeader>
             <CardBody className="space-y-3">
                 <p className="text-sm text-muted-foreground">
@@ -483,7 +479,7 @@ function AuditLogsCard(props: { readonly logs: ReadonlyArray<IAuditLogEntry> }):
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">Audit logs (latest)</p>
+                <p className={TYPOGRAPHY.sectionTitle}>Audit logs (latest)</p>
             </CardHeader>
             <CardBody>
                 <Table aria-label="Organization audit logs">
@@ -639,8 +635,8 @@ export function SettingsOrganizationPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Organization Settings</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className={TYPOGRAPHY.pageTitle}>Organization Settings</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Manage organization profile, billing, members, BYOK and audit history.
             </p>
 

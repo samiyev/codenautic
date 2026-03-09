@@ -12,6 +12,7 @@ import {
 } from "@/components/dashboard/dashboard-date-range-filter"
 import { type IMetricGridMetric, MetricsGrid } from "@/components/dashboard/metrics-grid"
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 type TUsageTab = "by-ccr" | "by-developer" | "by-model"
 type TModelName = "claude-3-7-sonnet" | "gpt-4.1-mini" | "gpt-4o-mini" | "mistral-small-latest"
@@ -275,7 +276,7 @@ function UsageTable(props: {
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">{props.title}</p>
+                <p className={TYPOGRAPHY.sectionTitle}>{props.title}</p>
             </CardHeader>
             <CardBody>
                 <EnterpriseDataTable
@@ -441,8 +442,8 @@ export function SettingsTokenUsagePage(): ReactElement {
         <section className="space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-semibold text-foreground">Token Usage</h1>
-                    <p className="text-sm text-muted-foreground">
+                    <h1 className={TYPOGRAPHY.pageTitle}>Token Usage</h1>
+                    <p className={TYPOGRAPHY.pageSubtitle}>
                         Usage by model, developer and CCR with estimated cost over selected date
                         range.
                     </p>

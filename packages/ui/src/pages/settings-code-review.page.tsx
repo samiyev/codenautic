@@ -1,4 +1,4 @@
-import { type ChangeEvent, type FormEvent, type ReactElement, useEffect, useState } from "react"
+import { type FormEvent, type ReactElement, useEffect, useState } from "react"
 
 import { Button } from "@/components/ui"
 import { FormLayout } from "@/components/forms/form-layout"
@@ -83,14 +83,6 @@ const DEFAULT_MCP_TOOL_USAGE_STATS: ReadonlyArray<IMcpToolListItem> = [
         errorCount: 6,
     },
 ] as const
-
-function isRepoReviewMode(value: string): value is TRepoReviewMode {
-    return (
-        value === REPO_REVIEW_MODE.manual ||
-        value === REPO_REVIEW_MODE.auto ||
-        value === REPO_REVIEW_MODE.autoPause
-    )
-}
 
 /**
  * Страница настроек code-review.
@@ -230,14 +222,8 @@ export function SettingsCodeReviewPage(): ReactElement {
         })
     }
 
-    const handleReviewModeChange = (
-        event: ChangeEvent<HTMLSelectElement | HTMLInputElement>,
-    ): void => {
-        const nextReviewMode = event.currentTarget.value
-        if (isRepoReviewMode(nextReviewMode) !== true) {
-            return
-        }
-        setReviewMode(nextReviewMode)
+    const handleReviewModeChange = (value: TRepoReviewMode): void => {
+        setReviewMode(value)
     }
 
     const handleRepositoryConfigSave = (event: FormEvent): void => {
@@ -421,33 +407,28 @@ export function SettingsCodeReviewPage(): ReactElement {
                     </label>
                 </FormGroup>
                 <FormGroup>
-                    <label
-                        className="space-y-1 text-sm text-foreground"
-                        htmlFor="ccr-summary-detail-level"
+                    <select
+                        aria-label="Summary detail level"
+                        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                        id="ccr-summary-detail-level"
+                        value={ccrSummarySettings.detailLevel}
+                        onChange={(event): void => {
+                            const nextLevel = event.currentTarget.value
+                            if (nextLevel.length === 0) {
+                                return
+                            }
+                            setCcrSummarySettings(
+                                (prev): ICcrSummarySettings => ({
+                                    ...prev,
+                                    detailLevel: nextLevel as TCcrSummaryDetailLevel,
+                                }),
+                            )
+                        }}
                     >
-                        <span className="block font-medium text-foreground">
-                            Summary detail level
-                        </span>
-                        <select
-                            id="ccr-summary-detail-level"
-                            className="w-full rounded-md border border-border px-3 py-2"
-                            value={ccrSummarySettings.detailLevel}
-                            onChange={(event): void => {
-                                const nextLevel =
-                                    event.currentTarget.value as TCcrSummaryDetailLevel
-                                setCcrSummarySettings(
-                                    (prev): ICcrSummarySettings => ({
-                                        ...prev,
-                                        detailLevel: nextLevel,
-                                    }),
-                                )
-                            }}
-                        >
-                            <option value={CCR_SUMMARY_DETAIL_LEVEL.concise}>Concise</option>
-                            <option value={CCR_SUMMARY_DETAIL_LEVEL.standard}>Standard</option>
-                            <option value={CCR_SUMMARY_DETAIL_LEVEL.deep}>Deep</option>
-                        </select>
-                    </label>
+                        <option value={CCR_SUMMARY_DETAIL_LEVEL.concise}>Concise</option>
+                        <option value={CCR_SUMMARY_DETAIL_LEVEL.standard}>Standard</option>
+                        <option value={CCR_SUMMARY_DETAIL_LEVEL.deep}>Deep</option>
+                    </select>
                     <SuggestionLimitConfig
                         value={ccrSummarySettings.maxSuggestions}
                         onChange={(nextValue): void => {
@@ -538,33 +519,28 @@ export function SettingsCodeReviewPage(): ReactElement {
                         />
                         Enable IDE plugin sync
                     </label>
-                    <label
-                        className="space-y-1 text-sm text-foreground"
-                        htmlFor="ide-sync-provider"
+                    <select
+                        aria-label="IDE provider scope"
+                        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                        id="ide-sync-provider"
+                        value={ideSyncSettings.provider}
+                        onChange={(event): void => {
+                            const nextProvider = event.currentTarget.value
+                            if (nextProvider.length === 0) {
+                                return
+                            }
+                            setIdeSyncSettings(
+                                (prev): IIdeSyncSettings => ({
+                                    ...prev,
+                                    provider: nextProvider as TIdeSyncProvider,
+                                }),
+                            )
+                        }}
                     >
-                        <span className="block font-medium text-foreground">
-                            IDE provider scope
-                        </span>
-                        <select
-                            id="ide-sync-provider"
-                            className="w-full rounded-md border border-border px-3 py-2"
-                            value={ideSyncSettings.provider}
-                            onChange={(event): void => {
-                                const nextProvider =
-                                    event.currentTarget.value as TIdeSyncProvider
-                                setIdeSyncSettings(
-                                    (prev): IIdeSyncSettings => ({
-                                        ...prev,
-                                        provider: nextProvider,
-                                    }),
-                                )
-                            }}
-                        >
-                            <option value={IDE_SYNC_PROVIDER.vscode}>VS Code</option>
-                            <option value={IDE_SYNC_PROVIDER.jetbrains}>JetBrains</option>
-                            <option value={IDE_SYNC_PROVIDER.both}>Both</option>
-                        </select>
-                    </label>
+                        <option value={IDE_SYNC_PROVIDER.vscode}>VS Code</option>
+                        <option value={IDE_SYNC_PROVIDER.jetbrains}>JetBrains</option>
+                        <option value={IDE_SYNC_PROVIDER.both}>Both</option>
+                    </select>
                 </FormGroup>
                 <FormGroup>
                     <label className="flex items-center gap-2 text-sm text-foreground">

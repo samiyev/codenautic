@@ -15,6 +15,7 @@ import {
     ModalHeader,
     Switch,
 } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TSeverity = "high" | "low" | "medium"
@@ -249,14 +250,14 @@ export function SettingsConcurrencyPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">Concurrent config resolver</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>Concurrent config resolver</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Optimistic concurrency flow for admin settings with explicit conflict outcomes.
             </p>
 
             <Card>
                 <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-base font-semibold text-foreground">Snapshot versions</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Snapshot versions</p>
                     <div className="flex gap-2">
                         <Chip size="sm" variant="flat">
                             Local etag: {localDraft.etag}
@@ -282,42 +283,34 @@ export function SettingsConcurrencyPage(): ReactElement {
                             )
                         }}
                     />
-                    <div className="space-y-1">
-                        <label
-                            className="text-sm text-text-tertiary"
-                            htmlFor="concurrency-severity"
-                        >
-                            Severity threshold
-                        </label>
-                        <select
-                            aria-label="Concurrency severity threshold"
-                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                            id="concurrency-severity"
-                            value={localDraft.values.severityThreshold}
-                            onChange={(event): void => {
-                                const nextValue = event.currentTarget.value
-                                if (
-                                    nextValue === "low" ||
-                                    nextValue === "medium" ||
-                                    nextValue === "high"
-                                ) {
-                                    setLocalDraft(
-                                        (previous): IAdminConfigSnapshot => ({
-                                            ...previous,
-                                            values: {
-                                                ...previous.values,
-                                                severityThreshold: nextValue,
-                                            },
-                                        }),
-                                    )
-                                }
-                            }}
-                        >
-                            <option value="low">low</option>
-                            <option value="medium">medium</option>
-                            <option value="high">high</option>
-                        </select>
-                    </div>
+                    <select
+                        aria-label="Concurrency severity threshold"
+                        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
+                        id="concurrency-severity"
+                        value={localDraft.values.severityThreshold}
+                        onChange={(event): void => {
+                            const nextValue = event.currentTarget.value
+                            if (
+                                nextValue === "low" ||
+                                nextValue === "medium" ||
+                                nextValue === "high"
+                            ) {
+                                setLocalDraft(
+                                    (previous): IAdminConfigSnapshot => ({
+                                        ...previous,
+                                        values: {
+                                            ...previous.values,
+                                            severityThreshold: nextValue,
+                                        },
+                                    }),
+                                )
+                            }
+                        }}
+                    >
+                        <option value="low">low</option>
+                        <option value="medium">medium</option>
+                        <option value="high">high</option>
+                    </select>
                     <Switch
                         aria-label="Require reviewer approval"
                         isSelected={localDraft.values.requireReviewerApproval}
@@ -346,9 +339,7 @@ export function SettingsConcurrencyPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">
-                        Conflict resolution audit
-                    </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Conflict resolution audit</p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     {audit.length === 0 ? (

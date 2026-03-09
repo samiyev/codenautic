@@ -2,6 +2,7 @@ import { type ReactElement, useEffect, useMemo, useState } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
 import { SystemStateCard } from "@/components/infrastructure/system-state-card"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TTriageCategory =
@@ -509,17 +510,15 @@ export function MyWorkPage(): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h1 className="text-2xl font-semibold text-foreground">My Work / Triage</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className={TYPOGRAPHY.pageTitle}>My Work / Triage</h1>
+            <p className={TYPOGRAPHY.pageSubtitle}>
                 Unified hub for assigned CCRs, critical issues, inbox notifications, stuck jobs and
                 pending approvals with ownership + escalation model.
             </p>
 
             <Card>
                 <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-base font-semibold text-foreground">
-                        Scope and ownership controls
-                    </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Scope and ownership controls</p>
                     <Chip size="sm" variant="flat">
                         Keyboard: Alt+1 mine · Alt+2 team · Alt+3 repo
                     </Chip>
@@ -528,7 +527,7 @@ export function MyWorkPage(): ReactElement {
                     <div className="flex flex-wrap gap-2">
                         <select
                             aria-label="Triage scope"
-                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm md:max-w-[220px]"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground md:max-w-[220px]"
                             value={scope}
                             onChange={(event): void => {
                                 const nextScope = event.currentTarget.value
@@ -548,7 +547,7 @@ export function MyWorkPage(): ReactElement {
 
                         <select
                             aria-label="Reviewer role"
-                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm md:max-w-[220px]"
+                            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground md:max-w-[220px]"
                             value={reviewerRole}
                             onChange={(event): void => {
                                 const nextRole = event.currentTarget.value
@@ -582,7 +581,7 @@ export function MyWorkPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Unified triage list</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Unified triage list</p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     {filteredItems.length === 0 ? (
@@ -759,7 +758,7 @@ export function MyWorkPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-base font-semibold text-foreground">Ownership audit trail</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>Ownership audit trail</p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     {auditTrail.length === 0 ? (
