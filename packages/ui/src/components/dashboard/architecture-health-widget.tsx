@@ -27,7 +27,10 @@ export function ArchitectureHealthWidget(props: IArchitectureHealthWidgetProps):
     const radarData = [
         { metric: "Health", value: props.healthScore },
         { metric: "DDD", value: props.dddCompliance },
-        { metric: "Layer rules", value: Math.max(0, 100 - props.layerViolations * VIOLATION_SCORE_MULTIPLIER) },
+        {
+            metric: "Layer rules",
+            value: Math.max(0, 100 - props.layerViolations * VIOLATION_SCORE_MULTIPLIER),
+        },
     ]
 
     return (

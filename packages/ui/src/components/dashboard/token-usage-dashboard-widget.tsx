@@ -1,6 +1,16 @@
 import type { ReactElement } from "react"
 
-import { Area, AreaChart, CartesianGrid, Pie, PieChart, Tooltip, XAxis, YAxis, Cell } from "recharts"
+import {
+    Area,
+    AreaChart,
+    CartesianGrid,
+    Pie,
+    PieChart,
+    Tooltip,
+    XAxis,
+    YAxis,
+    Cell,
+} from "recharts"
 
 import { Card, CardBody, CardHeader } from "@/components/ui"
 import { EmptyState } from "@/components/states/empty-state"

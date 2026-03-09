@@ -45,11 +45,7 @@ export function DashboardZone(props: IDashboardZoneProps): ReactElement | null {
                 }}
             >
                 <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center">
-                    {isExpanded ? (
-                        <ChevronDown size={14} />
-                    ) : (
-                        <ChevronRight size={14} />
-                    )}
+                    {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                 </span>
                 <span className={TYPOGRAPHY.sectionTitle}>{props.title}</span>
             </button>

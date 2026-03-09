@@ -1,7 +1,14 @@
 import type { ReactElement } from "react"
 import { motion } from "motion/react"
 
-import { Alert, Card, CardBody, CardHeader, StyledLink, type IStyledLinkProps } from "@/components/ui"
+import {
+    Alert,
+    Card,
+    CardBody,
+    CardHeader,
+    StyledLink,
+    type IStyledLinkProps,
+} from "@/components/ui"
 import { StaggerContainer, STAGGER_ITEM_VARIANTS } from "@/lib/motion"
 import { EmptyState } from "@/components/states/empty-state"
 import { ActivityTimeline, type IActivityTimelineEntry } from "./activity-timeline"
@@ -73,11 +80,7 @@ export function DashboardContent(props: IDashboardContentProps): ReactElement {
                                 title="Queue is empty"
                             />
                         ) : (
-                            <StaggerContainer
-                                ariaLabel="Work queue"
-                                as="ul"
-                                className="space-y-2"
-                            >
+                            <StaggerContainer ariaLabel="Work queue" as="ul" className="space-y-2">
                                 {props.workQueue.map(
                                     (item): ReactElement => (
                                         <motion.li

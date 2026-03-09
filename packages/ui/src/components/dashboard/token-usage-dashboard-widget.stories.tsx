@@ -1,9 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 
-import type {
-    ITokenUsageModelPoint,
-    ITokenUsageTrendPoint,
-} from "./token-usage-dashboard-widget"
+import type { ITokenUsageModelPoint, ITokenUsageTrendPoint } from "./token-usage-dashboard-widget"
 import { TokenUsageDashboardWidget } from "./token-usage-dashboard-widget"
 
 const meta: Meta<typeof TokenUsageDashboardWidget> = {

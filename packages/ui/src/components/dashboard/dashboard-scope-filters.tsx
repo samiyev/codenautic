@@ -110,9 +110,7 @@ export function DashboardScopeFilters(props: IDashboardScopeFiltersProps): React
                 aria-label="Team scope"
                 selectedKeys={new Set([props.teamScope])}
                 size="sm"
-                onSelectionChange={createScopeChangeHandler<TTeamScope>(
-                    props.onTeamScopeChange,
-                )}
+                onSelectionChange={createScopeChangeHandler<TTeamScope>(props.onTeamScopeChange)}
             >
                 {TEAM_OPTIONS.map(
                     (option): ReactElement => (
@@ -122,10 +120,7 @@ export function DashboardScopeFilters(props: IDashboardScopeFiltersProps): React
                     ),
                 )}
             </Select>
-            <DashboardDateRangeFilter
-                value={props.dateRange}
-                onChange={props.onDateRangeChange}
-            />
+            <DashboardDateRangeFilter value={props.dateRange} onChange={props.onDateRangeChange} />
         </div>
     )
 }

@@ -28,9 +28,7 @@ export const CollapsedByDefault: TStory = {
     args: {
         title: "Advanced Metrics",
         defaultExpanded: false,
-        children: (
-            <div className="h-32 rounded-lg bg-surface-muted" />
-        ),
+        children: <div className="h-32 rounded-lg bg-surface-muted" />,
     },
 }
 
