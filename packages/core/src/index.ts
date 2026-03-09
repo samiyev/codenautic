@@ -334,6 +334,8 @@ export {
     type ExternalContextSource,
     type IExternalContext,
     type ILinearIssue,
+    type ILinearProjectContext,
+    type ILinearSubIssue,
     type IJiraTicket,
     type ISentryError,
     type IReviewResultDTO,

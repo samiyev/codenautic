@@ -19,6 +19,23 @@ export {
     type IJiraSearchIssuesRequest,
 } from "./jira-provider"
 export {
+    LinearProvider,
+    type ILinearApiClient,
+    type ILinearApiResponse,
+    type ILinearGetIssueRequest,
+    type ILinearGraphqlError,
+    type ILinearGraphqlErrorExtensions,
+    type ILinearIssueQueryResponse,
+    type ILinearProviderOptions,
+    type ILinearResponseHeaders,
+    type ILinearSearchIssuesPage,
+    type ILinearSearchIssuesRequest,
+} from "./linear-provider"
+export {
     JiraProviderError,
     type IJiraProviderErrorDetails,
 } from "./jira-provider.error"
+export {
+    LinearProviderError,
+    type ILinearProviderErrorDetails,
+} from "./linear-provider.error"

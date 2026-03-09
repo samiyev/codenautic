@@ -67,10 +67,101 @@ export interface IJiraTicket {
 /**
  * External issue model for Linear platform.
  */
-export interface ILinearIssue {
+export interface ILinearProjectContext {
+    /**
+     * Linear project identifier.
+     */
     readonly id: string
+
+    /**
+     * Human-readable project name.
+     */
+    readonly name: string
+
+    /**
+     * Optional normalized project description.
+     */
+    readonly description?: string
+
+    /**
+     * Optional normalized project state label.
+     */
+    readonly state?: string
+
+    /**
+     * Optional normalized project priority label.
+     */
+    readonly priority?: string
+}
+
+/**
+ * External sub-issue model for Linear platform.
+ */
+export interface ILinearSubIssue {
+    /**
+     * Stable sub-issue identifier.
+     */
+    readonly id: string
+
+    /**
+     * Human-readable sub-issue title.
+     */
     readonly title: string
+
+    /**
+     * Current workflow state label.
+     */
     readonly state: string
+
+    /**
+     * Optional normalized sub-issue priority label.
+     */
+    readonly priority?: string
+}
+
+/**
+ * External issue model for Linear platform.
+ */
+export interface ILinearIssue {
+    /**
+     * Stable issue identifier.
+     */
+    readonly id: string
+
+    /**
+     * Human-readable issue title.
+     */
+    readonly title: string
+
+    /**
+     * Current workflow state label.
+     */
+    readonly state: string
+
+    /**
+     * Optional normalized issue description.
+     */
+    readonly description?: string
+
+    /**
+     * Optional normalized priority label.
+     */
+    readonly priority?: string
+
+    /**
+     * Optional cycle name when issue belongs to a cycle.
+     */
+    readonly cycle?: string
+
+    /**
+     * Optional parent project context.
+     */
+    readonly project?: ILinearProjectContext
+
+    /**
+     * Optional normalized list of child issues.
+     */
+    readonly subIssues?: readonly ILinearSubIssue[]
 }
 
 /**

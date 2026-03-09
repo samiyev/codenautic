@@ -3,6 +3,7 @@ import {describe, expect, test} from "bun:test"
 import type {
     IExternalContext,
     IJiraTicket,
+    ILinearIssue,
 } from "../../../../src/application/dto/review/external-context.dto"
 
 describe("IExternalContext review DTO", () => {
@@ -33,5 +34,53 @@ describe("IExternalContext review DTO", () => {
         expect(ticket.description).toBe("Review pipeline depends on updated DTO mappings.")
         expect(ticket.sprint).toBe("Sprint 42")
         expect(payload.source).toBe("JIRA")
+    })
+
+    test("supports enriched Linear issue payload with project and sub-issue context", () => {
+        const issue: ILinearIssue = {
+            id: "ENG-204",
+            title: "Stabilize external context sync",
+            state: "In Progress",
+            description: "Provider should preserve project and sub-issue context from Linear.",
+            priority: "High",
+            cycle: "Cycle 14",
+            project: {
+                id: "project-42",
+                name: "Context Platform",
+                description: "Keeps review enrichment adapters in sync.",
+                state: "started",
+                priority: "Urgent",
+            },
+            subIssues: [
+                {
+                    id: "ENG-205",
+                    title: "Map child issue priority",
+                    state: "Todo",
+                    priority: "Normal",
+                },
+            ],
+        }
+        const payload: IExternalContext = {
+            source: "LINEAR",
+            data: {
+                issue,
+                cycle: issue.cycle,
+                project: issue.project,
+                subIssues: issue.subIssues,
+            },
+            fetchedAt: new Date("2026-03-09T13:00:00.000Z"),
+        }
+
+        expect(issue.priority).toBe("High")
+        expect(issue.project?.name).toBe("Context Platform")
+        expect(issue.subIssues).toEqual([
+            {
+                id: "ENG-205",
+                title: "Map child issue priority",
+                state: "Todo",
+                priority: "Normal",
+            },
+        ])
+        expect(payload.source).toBe("LINEAR")
     })
 })

@@ -1,4 +1,10 @@
-import type {IExternalContext, IJiraTicket, ILinearIssue} from "@codenautic/core"
+import type {
+    IExternalContext,
+    IJiraTicket,
+    ILinearIssue,
+    ILinearProjectContext,
+    ILinearSubIssue,
+} from "@codenautic/core"
 
 const DEFAULT_FETCHED_AT = new Date(0)
 const EMPTY_RECORD: Readonly<Record<string, unknown>> = {}
@@ -40,13 +46,21 @@ export function mapExternalJiraTicket(payload: unknown): IJiraTicket {
  */
 export function mapExternalLinearIssue(payload: unknown): ILinearIssue {
     const root = toRecord(payload) ?? EMPTY_RECORD
-    const state = toRecord(root["state"])
-    const status = toRecord(root["status"])
+    const description = resolveLinearDescription(root)
+    const priority = resolveLinearPriority(root)
+    const cycle = resolveLinearCycle(root)
+    const project = resolveLinearProject(root)
+    const subIssues = resolveLinearSubIssues(root)
 
     return {
-        id: readIdentifier(root, ["id", "identifier", "issueId"], "UNKNOWN"),
+        id: readIdentifier(root, ["identifier", "id", "issueId"], "UNKNOWN"),
         title: readText(root, ["title", "name"], "(no title)"),
-        state: readText(state, ["name"], readText(status, ["name"], readText(root, ["state"], "unknown"))),
+        state: resolveRequiredLinearState(root),
+        ...(description !== undefined ? {description} : {}),
+        ...(priority !== undefined ? {priority} : {}),
+        ...(cycle !== undefined ? {cycle} : {}),
+        ...(project !== undefined ? {project} : {}),
+        ...(subIssues !== undefined ? {subIssues} : {}),
     }
 }
 
@@ -81,12 +95,16 @@ export function mapJiraContext(payload: unknown): IExternalContext {
  */
 export function mapLinearContext(payload: unknown): IExternalContext {
     const root = toRecord(payload) ?? EMPTY_RECORD
+    const issue = mapExternalLinearIssue(payload)
+    const cycle = issue.cycle ?? resolveLinearCycle(root)
 
     return {
         source: "LINEAR",
         data: {
-            issue: mapExternalLinearIssue(payload),
-            cycle: resolveLinearCycle(root),
+            issue,
+            ...(cycle !== undefined ? {cycle} : {}),
+            ...(issue.project !== undefined ? {project: issue.project} : {}),
+            ...(issue.subIssues !== undefined ? {subIssues: issue.subIssues} : {}),
         },
         fetchedAt: resolveFetchedAt(root),
     }
@@ -194,7 +212,198 @@ function resolveLinearCycle(root: Readonly<Record<string, unknown>>): string | u
         return cycleName
     }
 
-    return readText(root, ["cycleName"])
+    const fallbackCycleName = readText(root, ["cycleName"])
+    return fallbackCycleName.length > 0 ? fallbackCycleName : undefined
+}
+
+/**
+ * Resolves normalized Linear description from common payload locations.
+ *
+ * @param root Linear root payload.
+ * @returns Plain-text description when available.
+ */
+function resolveLinearDescription(root: Readonly<Record<string, unknown>>): string | undefined {
+    return extractRichText(root["description"] ?? root["body"] ?? root["content"])
+}
+
+/**
+ * Resolves normalized Linear state label.
+ *
+ * @param root Linear root payload.
+ * @returns State label or undefined.
+ */
+function resolveOptionalLinearState(root: Readonly<Record<string, unknown>>): string | undefined {
+    const state = toRecord(root["state"])
+    const status = toRecord(root["status"])
+    const resolvedState = readText(
+        state,
+        ["name", "type"],
+        readText(status, ["name", "type"], readText(root, ["state"], "")),
+    )
+
+    return resolvedState.length > 0 ? resolvedState : undefined
+}
+
+/**
+ * Resolves required Linear state label with deterministic fallback.
+ *
+ * @param root Linear root payload.
+ * @returns State label.
+ */
+function resolveRequiredLinearState(root: Readonly<Record<string, unknown>>): string {
+    return resolveOptionalLinearState(root) ?? "unknown"
+}
+
+/**
+ * Resolves normalized Linear priority label from label or numeric representation.
+ *
+ * @param root Linear root payload.
+ * @returns Priority label when available.
+ */
+function resolveLinearPriority(root: Readonly<Record<string, unknown>>): string | undefined {
+    const priorityLabel = readText(root, ["priorityLabel"])
+    if (priorityLabel.length > 0) {
+        return priorityLabel
+    }
+
+    return normalizeLinearPriority(root["priority"])
+}
+
+/**
+ * Resolves Linear project context from payload.
+ *
+ * @param root Linear root payload.
+ * @returns Normalized project context when available.
+ */
+function resolveLinearProject(
+    root: Readonly<Record<string, unknown>>,
+): ILinearProjectContext | undefined {
+    const project = toRecord(root["project"])
+    if (project === null) {
+        return undefined
+    }
+
+    const id = readIdentifier(project, ["id", "projectId", "slugId"], readText(project, ["name"]))
+    const name = readText(project, ["name", "title"], id)
+
+    if (id.length === 0 || name.length === 0) {
+        return undefined
+    }
+
+    const description = resolveLinearDescription(project)
+    const state = resolveOptionalLinearState(project) ?? readText(project, ["state"])
+    const priority = resolveLinearPriority(project)
+
+    return {
+        id,
+        name,
+        ...(description !== undefined ? {description} : {}),
+        ...(state.length > 0 ? {state} : {}),
+        ...(priority !== undefined ? {priority} : {}),
+    }
+}
+
+/**
+ * Resolves normalized Linear child issues from connection or array payloads.
+ *
+ * @param root Linear root payload.
+ * @returns Normalized child issues when available.
+ */
+function resolveLinearSubIssues(
+    root: Readonly<Record<string, unknown>>,
+): readonly ILinearSubIssue[] | undefined {
+    const children = toRecord(root["children"])
+    const candidates: readonly unknown[] = [
+        ...toArray(children?.["nodes"]),
+        ...toArray(root["subIssues"]),
+    ]
+
+    const subIssues = candidates.flatMap((candidate) => {
+        const subIssue = mapLinearSubIssue(candidate)
+        return subIssue === undefined ? [] : [subIssue]
+    })
+
+    return subIssues.length > 0 ? deduplicateLinearSubIssues(subIssues) : undefined
+}
+
+/**
+ * Maps a single child issue payload to normalized summary DTO.
+ *
+ * @param payload Child issue payload.
+ * @returns Normalized sub-issue summary.
+ */
+function mapLinearSubIssue(payload: unknown): ILinearSubIssue | undefined {
+    const root = toRecord(payload)
+    if (root === null) {
+        return undefined
+    }
+
+    const id = readIdentifier(root, ["identifier", "id", "issueId"], "UNKNOWN")
+    const title = readText(root, ["title", "name"], "(no title)")
+
+    if (id === "UNKNOWN" && title === "(no title)") {
+        return undefined
+    }
+
+    const priority = resolveLinearPriority(root)
+
+    return {
+        id,
+        title,
+        state: resolveRequiredLinearState(root),
+        ...(priority !== undefined ? {priority} : {}),
+    }
+}
+
+/**
+ * Deduplicates child issues by identifier while preserving original order.
+ *
+ * @param subIssues Normalized child issues.
+ * @returns Deduplicated child issues.
+ */
+function deduplicateLinearSubIssues(
+    subIssues: readonly ILinearSubIssue[],
+): readonly ILinearSubIssue[] {
+    const seen = new Set<string>()
+
+    return subIssues.filter((subIssue) => {
+        if (seen.has(subIssue.id)) {
+            return false
+        }
+
+        seen.add(subIssue.id)
+        return true
+    })
+}
+
+/**
+ * Maps Linear numeric priority to deterministic text label.
+ *
+ * @param value Numeric or textual priority candidate.
+ * @returns Priority label when available.
+ */
+function normalizeLinearPriority(value: unknown): string | undefined {
+    if (typeof value === "string") {
+        const normalized = value.trim()
+        return normalized.length > 0 ? normalized : undefined
+    }
+
+    if (typeof value !== "number" || Number.isFinite(value) === false) {
+        return undefined
+    }
+
+    switch (value) {
+        case 1:
+            return "Urgent"
+        case 2:
+            return "High"
+        case 3:
+            return "Normal"
+        case 4:
+            return "Low"
+        default:
+            return undefined
+    }
 }
 
 /**

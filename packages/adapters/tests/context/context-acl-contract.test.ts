@@ -77,6 +77,7 @@ describe("Context ACL contract", () => {
             id: "LIN-77",
             title: "Refactor review stage",
             state: "Started",
+            cycle: "Cycle 12",
         })
     })
 
@@ -211,6 +212,7 @@ describe("Context ACL contract", () => {
             id: "LIN-200",
             title: "Review cleanup",
             state: "In Review",
+            cycle: "Cycle Object",
         })
         expect((context.data as {cycle?: string}).cycle).toBe("Cycle Object")
     })
@@ -232,6 +234,227 @@ describe("Context ACL contract", () => {
             id: "LIN-404",
             title: "Name fallback",
             state: "Backlog",
+        })
+    })
+
+    test("maps Linear description, priority, project and sub-issues into deterministic DTO fields", () => {
+        const issue = mapExternalLinearIssue({
+            identifier: "  ENG-204  ",
+            title: "  Stabilize external context sync  ",
+            description: "  Preserve project and child issue context.  ",
+            priorityLabel: "  High  ",
+            cycle: {
+                name: "  Cycle 14  ",
+            },
+            project: {
+                id: "project-42",
+                name: "  Context Platform  ",
+                description: "  Keeps review enrichment adapters in sync.  ",
+                state: "  started  ",
+                priorityLabel: "  Urgent  ",
+            },
+            children: {
+                nodes: [
+                    {
+                        identifier: "ENG-205",
+                        title: "  Map child issue priority  ",
+                        state: {
+                            name: "  Todo  ",
+                        },
+                        priority: 3,
+                    },
+                ],
+            },
+        })
+        const context = mapLinearContext({
+            identifier: "ENG-204",
+            title: "Stabilize external context sync",
+            description: "Preserve project and child issue context.",
+            priorityLabel: "High",
+            cycle: {
+                name: "Cycle 14",
+            },
+            project: {
+                id: "project-42",
+                name: "Context Platform",
+                description: "Keeps review enrichment adapters in sync.",
+                state: "started",
+                priorityLabel: "Urgent",
+            },
+            children: {
+                nodes: [
+                    {
+                        identifier: "ENG-205",
+                        title: "Map child issue priority",
+                        state: {
+                            name: "Todo",
+                        },
+                        priorityLabel: "Normal",
+                    },
+                ],
+            },
+        })
+
+        expect(issue).toEqual({
+            id: "ENG-204",
+            title: "Stabilize external context sync",
+            state: "unknown",
+            description: "Preserve project and child issue context.",
+            priority: "High",
+            cycle: "Cycle 14",
+            project: {
+                id: "project-42",
+                name: "Context Platform",
+                description: "Keeps review enrichment adapters in sync.",
+                state: "started",
+                priority: "Urgent",
+            },
+            subIssues: [
+                {
+                    id: "ENG-205",
+                    title: "Map child issue priority",
+                    state: "Todo",
+                    priority: "Normal",
+                },
+            ],
+        })
+        expect(context).toEqual({
+            source: "LINEAR",
+            data: {
+                issue: {
+                    id: "ENG-204",
+                    title: "Stabilize external context sync",
+                    state: "unknown",
+                    description: "Preserve project and child issue context.",
+                    priority: "High",
+                    cycle: "Cycle 14",
+                    project: {
+                        id: "project-42",
+                        name: "Context Platform",
+                        description: "Keeps review enrichment adapters in sync.",
+                        state: "started",
+                        priority: "Urgent",
+                    },
+                    subIssues: [
+                        {
+                            id: "ENG-205",
+                            title: "Map child issue priority",
+                            state: "Todo",
+                            priority: "Normal",
+                        },
+                    ],
+                },
+                cycle: "Cycle 14",
+                project: {
+                    id: "project-42",
+                    name: "Context Platform",
+                    description: "Keeps review enrichment adapters in sync.",
+                    state: "started",
+                    priority: "Urgent",
+                },
+                subIssues: [
+                    {
+                        id: "ENG-205",
+                        title: "Map child issue priority",
+                        state: "Todo",
+                        priority: "Normal",
+                    },
+                ],
+            },
+            fetchedAt: new Date(0),
+        })
+    })
+
+    test("maps Linear state and priority from nested fallbacks and ignores invalid child entries", () => {
+        const issue = mapExternalLinearIssue({
+            id: "LIN-501",
+            title: "Linear fallback handling",
+            state: {
+                name: "   ",
+                type: "started",
+            },
+            priority: 2,
+            project: {
+                id: "project-77",
+                name: "Provider Runtime",
+                description: "   ",
+                priority: 4,
+            },
+            subIssues: [
+                null,
+                {
+                    issueId: 778,
+                    name: "  Search fallback  ",
+                    status: {
+                        name: "  Backlog  ",
+                    },
+                    priority: 1,
+                },
+                {
+                    id: "   ",
+                    title: "   ",
+                },
+            ],
+        })
+
+        expect(issue).toEqual({
+            id: "LIN-501",
+            title: "Linear fallback handling",
+            state: "started",
+            priority: "High",
+            project: {
+                id: "project-77",
+                name: "Provider Runtime",
+                priority: "Low",
+            },
+            subIssues: [
+                {
+                    id: "778",
+                    title: "Search fallback",
+                    state: "Backlog",
+                    priority: "Urgent",
+                },
+            ],
+        })
+    })
+
+    test("drops empty Linear project context, deduplicates child issues and ignores blank priorities", () => {
+        const issue = mapExternalLinearIssue({
+            id: "LIN-700",
+            title: "Linear dedupe coverage",
+            state: "Todo",
+            project: {
+                id: "   ",
+                name: "   ",
+                priorityLabel: "   ",
+            },
+            subIssues: [
+                {
+                    identifier: "SUB-1",
+                    title: "First child",
+                    state: "Todo",
+                    priorityLabel: "   ",
+                },
+                {
+                    identifier: "SUB-1",
+                    title: "Duplicate child",
+                    state: "Done",
+                    priority: 0,
+                },
+            ],
+        })
+
+        expect(issue).toEqual({
+            id: "LIN-700",
+            title: "Linear dedupe coverage",
+            state: "Todo",
+            subIssues: [
+                {
+                    id: "SUB-1",
+                    title: "First child",
+                    state: "Todo",
+                },
+            ],
         })
     })
 
@@ -547,6 +770,7 @@ describe("Context ACL contract", () => {
                     id: "L-1",
                     title: "Context",
                     state: "Done",
+                    cycle: "Cycle Alpha",
                 },
                 cycle: "Cycle Alpha",
             },
@@ -620,7 +844,6 @@ describe("Context ACL contract", () => {
             "ticket",
         ])
         expect(Object.keys(linear.data as Record<string, unknown>).sort()).toEqual([
-            "cycle",
             "issue",
         ])
     })

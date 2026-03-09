@@ -24,6 +24,8 @@ export {
     type IExternalContext,
     type IJiraTicket,
     type ILinearIssue,
+    type ILinearProjectContext,
+    type ILinearSubIssue,
     type ISentryError,
 } from "./external-context.dto"
 export {
