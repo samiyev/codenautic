@@ -7,7 +7,6 @@ import { DURATION, EASING, useReducedMotion } from "@/lib/motion"
 
 import { BrandMark } from "./brand-mark"
 import { SidebarNav } from "./sidebar-nav"
-import { SettingsNav } from "./settings-nav"
 
 /**
  * Sidebar component props.
@@ -69,8 +68,6 @@ export function Sidebar(props: ISidebarProps): ReactElement {
                 <div className="mb-3 px-2">{props.headerSlot}</div>
             ) : null}
             <SidebarNav isCollapsed={isCollapsed} onNavigate={props.onNavigate} />
-            <hr className="my-3 border-border" />
-            <SettingsNav isCollapsed={isCollapsed} onNavigate={props.onNavigate} />
         </>
     )
 
