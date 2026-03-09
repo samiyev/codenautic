@@ -5,6 +5,7 @@ import {
     getPresetById,
     resolveThemeMode,
     applyThemeTokens,
+    applySurfaceTone,
 } from "@/lib/theme/theme-css-applicator"
 import { THEME_PRESETS } from "@/lib/theme/theme-presets"
 
@@ -110,5 +111,32 @@ describe("applyThemeTokens", (): void => {
 
         const bgValue = document.documentElement.style.getPropertyValue("--background")
         expect(bgValue.length).toBeGreaterThan(0)
+    })
+})
+
+describe("applySurfaceTone", (): void => {
+    beforeEach((): void => {
+        document.documentElement.style.cssText = ""
+    })
+
+    it("when applying neutral tone in light mode, then sets surface CSS variables", (): void => {
+        applySurfaceTone("light", "neutral")
+
+        const bgValue = document.documentElement.style.getPropertyValue("--background")
+        expect(bgValue.length).toBeGreaterThan(0)
+    })
+
+    it("when applying warm tone in dark mode, then sets surface CSS variables", (): void => {
+        applySurfaceTone("dark", "warm")
+
+        const surfaceValue = document.documentElement.style.getPropertyValue("--surface")
+        expect(surfaceValue.length).toBeGreaterThan(0)
+    })
+
+    it("when applying cool tone, then sets border variable", (): void => {
+        applySurfaceTone("light", "cool")
+
+        const borderValue = document.documentElement.style.getPropertyValue("--border")
+        expect(borderValue.length).toBeGreaterThan(0)
     })
 })

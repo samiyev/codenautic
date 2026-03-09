@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react"
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { useKeyboardShortcuts } from "@/lib/hooks/use-keyboard-shortcuts"
 import type { IShortcutDefinition } from "@/lib/keyboard/shortcut-registry"

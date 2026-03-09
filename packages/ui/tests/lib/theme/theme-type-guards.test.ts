@@ -178,4 +178,88 @@ describe("readThemeSettingsPayload", (): void => {
 
         expect(result.preset).toBe("forest")
     })
+
+    it("when raw has nested settings with mode, then returns nested mode", (): void => {
+        const result = readThemeSettingsPayload({ settings: { mode: "dark" } })
+
+        expect(result.mode).toBe("dark")
+    })
+
+    it("when raw has nested preferences with preset, then returns nested preset", (): void => {
+        const result = readThemeSettingsPayload({ preferences: { preset: "cobalt" } })
+
+        expect(result.preset).toBe("cobalt")
+    })
+
+    it("when raw has nested data with themeMode, then returns nested mode", (): void => {
+        const result = readThemeSettingsPayload({ data: { themeMode: "light" } })
+
+        expect(result.mode).toBe("light")
+    })
+
+    it("when nested path contains non-record value, then skips it", (): void => {
+        const result = readThemeSettingsPayload({ theme: "not-object", settings: { mode: "dark" } })
+
+        expect(result.mode).toBe("dark")
+    })
+
+    it("when nested path has unrecognized values, then returns empty", (): void => {
+        const result = readThemeSettingsPayload({ theme: { foo: "bar" } })
+
+        expect(result).toEqual({})
+    })
+
+    it("when raw is undefined, then returns empty payload", (): void => {
+        expect(readThemeSettingsPayload(undefined)).toEqual({})
+    })
+
+    it("when raw is a number, then returns empty payload", (): void => {
+        expect(readThemeSettingsPayload(42)).toEqual({})
+    })
+})
+
+describe("toThemeProfile edge cases", (): void => {
+    const fallback: IThemeProfile = {
+        mode: "system",
+        preset: "moonstone",
+        updatedAtMs: 100,
+    }
+
+    it("when updatedAtMs is NaN, then parseUpdatedAtValue returns default 0", (): void => {
+        const result = toThemeProfile(
+            { mode: "dark", preset: "cobalt", updatedAtMs: NaN },
+            fallback,
+        )
+
+        expect(result.updatedAtMs).toBe(THEME_PROFILE_DEFAULT_UPDATED_AT_MS)
+    })
+
+    it("when updatedAtMs is Infinity, then parseUpdatedAtValue returns default 0", (): void => {
+        const result = toThemeProfile(
+            { mode: "dark", preset: "cobalt", updatedAtMs: Infinity },
+            fallback,
+        )
+
+        expect(result.updatedAtMs).toBe(THEME_PROFILE_DEFAULT_UPDATED_AT_MS)
+    })
+
+    it("when value is null, then returns fallback", (): void => {
+        expect(toThemeProfile(null, fallback)).toEqual(fallback)
+    })
+
+    it("when value is empty object, then uses all fallback values", (): void => {
+        const result = toThemeProfile({}, fallback)
+
+        expect(result.mode).toBe(fallback.mode)
+        expect(result.preset).toBe(fallback.preset)
+    })
+
+    it("when updatedAtMs is a valid date string, then parses it", (): void => {
+        const result = toThemeProfile(
+            { mode: "dark", preset: "cobalt", updatedAtMs: "2024-06-15T12:00:00Z" },
+            fallback,
+        )
+
+        expect(result.updatedAtMs).toBeGreaterThan(0)
+    })
 })

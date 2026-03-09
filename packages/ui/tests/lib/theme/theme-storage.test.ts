@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
     getWindowLocalStorage,
@@ -37,6 +37,34 @@ describe("readLocalStorageItem", (): void => {
     it("when key does not exist, then returns undefined", (): void => {
         expect(readLocalStorageItem("missing-key")).toBeUndefined()
     })
+
+    it("when localStorage.getItem throws, then returns undefined", (): void => {
+        const original = window.localStorage
+        const throwingStorage = {
+            ...original,
+            getItem: (): never => {
+                throw new Error("Storage error")
+            },
+            setItem: original.setItem.bind(original),
+            removeItem: original.removeItem.bind(original),
+            clear: original.clear.bind(original),
+            key: original.key.bind(original),
+            get length(): number {
+                return original.length
+            },
+        }
+        Object.defineProperty(window, "localStorage", {
+            configurable: true,
+            value: throwingStorage,
+        })
+
+        expect(readLocalStorageItem("key")).toBeUndefined()
+
+        Object.defineProperty(window, "localStorage", {
+            configurable: true,
+            value: original,
+        })
+    })
 })
 
 describe("writeLocalStorageItem", (): void => {
@@ -48,6 +76,36 @@ describe("writeLocalStorageItem", (): void => {
         writeLocalStorageItem("write-key", "write-value")
 
         expect(localStorage.getItem("write-key")).toBe("write-value")
+    })
+
+    it("when localStorage.setItem throws, then does not throw", (): void => {
+        const original = window.localStorage
+        const throwingStorage = {
+            ...original,
+            getItem: original.getItem.bind(original),
+            setItem: (): never => {
+                throw new Error("Storage full")
+            },
+            removeItem: original.removeItem.bind(original),
+            clear: original.clear.bind(original),
+            key: original.key.bind(original),
+            get length(): number {
+                return original.length
+            },
+        }
+        Object.defineProperty(window, "localStorage", {
+            configurable: true,
+            value: throwingStorage,
+        })
+
+        expect((): void => {
+            writeLocalStorageItem("key", "value")
+        }).not.toThrow()
+
+        Object.defineProperty(window, "localStorage", {
+            configurable: true,
+            value: original,
+        })
     })
 })
 
@@ -125,6 +183,28 @@ describe("readThemeProfileSyncState", (): void => {
 
         expect(readThemeProfileSyncState()).toBeUndefined()
     })
+
+    it("when preset is invalid in stored state, then returns undefined", (): void => {
+        const state = { mode: "dark", preset: "nonexistent-preset", updatedAtMs: 0 }
+        localStorage.setItem(THEME_PROFILE_STORAGE_SYNC_KEY, JSON.stringify(state))
+
+        expect(readThemeProfileSyncState()).toBeUndefined()
+    })
+
+    it("when stored state has string updatedAtMs, then parses date", (): void => {
+        const state = {
+            mode: "light",
+            preset: "moonstone",
+            updatedAtMs: "2024-01-01T00:00:00.000Z",
+        }
+        localStorage.setItem(THEME_PROFILE_STORAGE_SYNC_KEY, JSON.stringify(state))
+
+        const result = readThemeProfileSyncState()
+
+        expect(result).toBeDefined()
+        expect(result?.mode).toBe("light")
+        expect(result?.updatedAtMs).toBeGreaterThan(0)
+    })
 })
 
 describe("writeThemeProfileSyncState", (): void => {
@@ -157,5 +237,11 @@ describe("resolveSystemTheme", (): void => {
         const mockQuery = { matches: false } as MediaQueryList
 
         expect(resolveSystemTheme(mockQuery)).toBe("light")
+    })
+
+    it("when no mediaQuery argument passed, then uses window.matchMedia", (): void => {
+        const result = resolveSystemTheme()
+
+        expect(result === "light" || result === "dark").toBe(true)
     })
 })

@@ -24,6 +24,6 @@ describe("settings adoption analytics route", (): void => {
         expect(
             screen.getAllByRole("navigation", { name: "Main navigation" }).length,
         ).toBeGreaterThan(1)
-        expect(screen.getByText("Adoption Analytics")).not.toBeNull()
+        expect(screen.getAllByText("Аналитика внедрения").length).toBeGreaterThan(0)
     })
 })
