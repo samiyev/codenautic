@@ -12,7 +12,7 @@ import { Sidebar } from "./sidebar"
 
 /**
  * Creates a minimal TanStack Router instance for Storybook isolation.
- * SidebarNav and SettingsNav call useLocation/useNavigate internally.
+ * SidebarNav calls useLocation/useNavigate internally.
  */
 const withRouter: Decorator = (storyFn): ReactElement => {
     const rootRoute = createRootRoute()

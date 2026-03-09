@@ -13,7 +13,6 @@ import {
     SidebarNav,
     ThemeToggle,
 } from "@/components/layout"
-import { SettingsNav } from "@/components/layout/settings-nav"
 
 const mockNavigate = vi.fn()
 let currentRoute = "/"
@@ -543,13 +542,20 @@ describe("layout components", (): void => {
         })
     })
 
-    it("рендерит секции настроек", (): void => {
-        renderWithProviders(<SettingsNav />)
+    it("глобальный sidebar не содержит settings sub-navigation", (): void => {
+        renderWithProviders(
+            <Sidebar
+                isCollapsed={false}
+                title="Navigation"
+            />,
+            {
+                defaultThemeMode: "light" as ThemeMode,
+            },
+        )
 
-        expect(screen.queryByText("Settings")).not.toBeNull()
-        expect(screen.queryByRole("button", { name: /General/ })).not.toBeNull()
-        expect(screen.queryByRole("button", { name: /LLM Providers/ })).not.toBeNull()
-        expect(screen.queryByRole("button", { name: /Code Review/ })).not.toBeNull()
-        expect(screen.queryByRole("button", { name: /Git Providers/ })).not.toBeNull()
+        expect(screen.queryByRole("button", { name: /Settings/ })).not.toBeNull()
+        expect(screen.queryByRole("button", { name: /LLM Providers/ })).toBeNull()
+        expect(screen.queryByRole("button", { name: /Code Review/ })).toBeNull()
+        expect(screen.queryByRole("button", { name: /Git Providers/ })).toBeNull()
     })
 })
