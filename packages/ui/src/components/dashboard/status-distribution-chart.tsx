@@ -1,8 +1,9 @@
 import type { ReactElement } from "react"
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
+import { Cell, Pie, PieChart, Tooltip } from "recharts"
 
 import { Chip } from "@/components/ui"
 import { RechartsChartWrapper } from "@/components/charts/recharts-chart-wrapper"
+import { ChartContainer } from "@/components/charts/chart-container"
 
 /**
  * Строка для Recharts.
@@ -54,26 +55,24 @@ export function StatusDistributionChart(props: IStatusDistributionChartProps): R
         >
             {({ displayData }): ReactElement => (
                 <>
-                    <div className="h-72">
-                        <ResponsiveContainer height="100%" minHeight={1} minWidth={1} width="100%">
-                            <PieChart>
-                                <Pie
-                                    data={displayData}
-                                    dataKey="count"
-                                    nameKey="status"
-                                    outerRadius={80}
-                                    paddingAngle={2}
-                                >
-                                    {displayData.map(
-                                        (point): ReactElement => (
-                                            <Cell key={point.status} fill={point.color} />
-                                        ),
-                                    )}
-                                </Pie>
-                                <Tooltip />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
+                    <ChartContainer height="xl">
+                        <PieChart>
+                            <Pie
+                                data={displayData}
+                                dataKey="count"
+                                nameKey="status"
+                                outerRadius={80}
+                                paddingAngle={2}
+                            >
+                                {displayData.map(
+                                    (point): ReactElement => (
+                                        <Cell key={point.status} fill={point.color} />
+                                    ),
+                                )}
+                            </Pie>
+                            <Tooltip />
+                        </PieChart>
+                    </ChartContainer>
                     <div className="mt-2 flex flex-wrap gap-2" aria-label="Status legend">
                         {displayData.map(
                             (point): ReactElement => (

@@ -1,8 +1,7 @@
 import type { ReactElement } from "react"
 import { motion } from "motion/react"
 
-import { Link } from "@tanstack/react-router"
-import { Alert, Card, CardBody, CardHeader } from "@/components/ui"
+import { Alert, Card, CardBody, CardHeader, StyledLink, type IStyledLinkProps } from "@/components/ui"
 import { StaggerContainer, STAGGER_ITEM_VARIANTS } from "@/lib/motion"
 import { EmptyState } from "@/components/states/empty-state"
 import { ActivityTimeline, type IActivityTimelineEntry } from "./activity-timeline"
@@ -19,8 +18,8 @@ export interface IWorkQueueItem {
     readonly id: string
     /** Название очереди или задачи. */
     readonly title: string
-    /** Направление для deep-link. */
-    readonly route: string
+    /** Направление для deep-link (должно совпадать с зарегистрированным маршрутом). */
+    readonly route: IStyledLinkProps["to"]
     /** Поддерживающий текст. */
     readonly description: string
 }
@@ -51,7 +50,7 @@ export function DashboardContent(props: IDashboardContentProps): ReactElement {
     return (
         <section className="grid gap-4 lg:grid-cols-[2fr_1fr]">
             <div className="space-y-4">
-                <Card>
+                <Card className="border-l-2 border-l-danger">
                     <CardHeader>
                         <h3 className="text-base font-semibold text-foreground">
                             Signals & Work Queue
@@ -92,12 +91,12 @@ export function DashboardContent(props: IDashboardContentProps): ReactElement {
                                             <p className="text-sm text-muted-foreground">
                                                 {item.description}
                                             </p>
-                                            <Link
-                                                className="mt-2 inline-block text-sm text-foreground underline underline-offset-4"
+                                            <StyledLink
+                                                className="mt-2 inline-block text-sm text-foreground"
                                                 to={item.route}
                                             >
                                                 Open {item.id}
-                                            </Link>
+                                            </StyledLink>
                                         </motion.li>
                                     ),
                                 )}

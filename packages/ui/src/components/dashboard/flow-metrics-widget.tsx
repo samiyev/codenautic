@@ -1,18 +1,12 @@
 import type { ReactElement } from "react"
 
-import {
-    Legend,
-    Line,
-    LineChart,
-    CartesianGrid,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from "recharts"
+import { Legend, Line, LineChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts"
 
 import { Card, CardBody, CardHeader, Chip } from "@/components/ui"
 import { EmptyState } from "@/components/states/empty-state"
+import { ChartContainer } from "@/components/charts/chart-container"
+import { CHART_GRID_DASH, CHART_STROKE_WIDTH } from "@/lib/constants/chart-constants"
+import { CHART_DATA_TRANSITION } from "@/lib/motion"
 
 interface IFlowMetricsPoint {
     /** Метка периода. */
@@ -40,7 +34,7 @@ interface IFlowMetricsWidgetProps {
  */
 export function FlowMetricsWidget(props: IFlowMetricsWidgetProps): ReactElement {
     return (
-        <Card>
+        <Card className="border-l-2 border-l-secondary">
             <CardHeader className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-base font-semibold text-foreground">Flow metrics</p>
                 <div className="flex flex-wrap items-center gap-2">
@@ -62,36 +56,31 @@ export function FlowMetricsWidget(props: IFlowMetricsWidgetProps): ReactElement 
                         title="No data"
                     />
                 ) : (
-                    <div className="h-64 w-full">
-                        <ResponsiveContainer
-                            height="100%"
-                            minHeight={1}
-                            minWidth={1}
-                            width="100%"
-                        >
-                            <LineChart data={props.points}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="window" />
-                                <YAxis />
-                                <Tooltip />
-                                <Legend />
-                                <Line
-                                    dataKey="flowEfficiency"
-                                    name="Flow efficiency"
-                                    stroke="var(--chart-primary)"
-                                    strokeWidth={2}
-                                    type="monotone"
-                                />
-                                <Line
-                                    dataKey="deliveryCapacity"
-                                    name="Delivery capacity"
-                                    stroke="var(--chart-secondary)"
-                                    strokeWidth={2}
-                                    type="monotone"
-                                />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
+                    <ChartContainer height="lg">
+                        <LineChart data={props.points}>
+                            <CartesianGrid strokeDasharray={CHART_GRID_DASH} />
+                            <XAxis dataKey="window" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Line
+                                {...CHART_DATA_TRANSITION}
+                                dataKey="flowEfficiency"
+                                name="Flow efficiency"
+                                stroke="var(--chart-primary)"
+                                strokeWidth={CHART_STROKE_WIDTH}
+                                type="monotone"
+                            />
+                            <Line
+                                {...CHART_DATA_TRANSITION}
+                                dataKey="deliveryCapacity"
+                                name="Delivery capacity"
+                                stroke="var(--chart-secondary)"
+                                strokeWidth={CHART_STROKE_WIDTH}
+                                type="monotone"
+                            />
+                        </LineChart>
+                    </ChartContainer>
                 )}
             </CardBody>
         </Card>

@@ -5,6 +5,7 @@ import {
     DashboardDateRangeFilter,
     type TDashboardDateRange,
 } from "@/components/dashboard/dashboard-date-range-filter"
+import { createScopeChangeHandler } from "@/components/dashboard/scope-filter-utils"
 
 /**
  * Organization scope options.
@@ -79,16 +80,7 @@ export function DashboardScopeFilters(props: IDashboardScopeFiltersProps): React
                 aria-label="Organization scope"
                 selectedKeys={new Set([props.orgScope])}
                 size="sm"
-                onSelectionChange={(keys): void => {
-                    if (keys === "all") {
-                        return
-                    }
-                    const next = keys.values().next()
-                    if (next.done === true) {
-                        return
-                    }
-                    props.onOrgScopeChange(next.value as TOrgScope)
-                }}
+                onSelectionChange={createScopeChangeHandler<TOrgScope>(props.onOrgScopeChange)}
             >
                 {ORG_OPTIONS.map(
                     (option): ReactElement => (
@@ -102,16 +94,9 @@ export function DashboardScopeFilters(props: IDashboardScopeFiltersProps): React
                 aria-label="Repository scope"
                 selectedKeys={new Set([props.repositoryScope])}
                 size="sm"
-                onSelectionChange={(keys): void => {
-                    if (keys === "all") {
-                        return
-                    }
-                    const next = keys.values().next()
-                    if (next.done === true) {
-                        return
-                    }
-                    props.onRepositoryScopeChange(next.value as TRepositoryScope)
-                }}
+                onSelectionChange={createScopeChangeHandler<TRepositoryScope>(
+                    props.onRepositoryScopeChange,
+                )}
             >
                 {REPO_OPTIONS.map(
                     (option): ReactElement => (
@@ -125,16 +110,9 @@ export function DashboardScopeFilters(props: IDashboardScopeFiltersProps): React
                 aria-label="Team scope"
                 selectedKeys={new Set([props.teamScope])}
                 size="sm"
-                onSelectionChange={(keys): void => {
-                    if (keys === "all") {
-                        return
-                    }
-                    const next = keys.values().next()
-                    if (next.done === true) {
-                        return
-                    }
-                    props.onTeamScopeChange(next.value as TTeamScope)
-                }}
+                onSelectionChange={createScopeChangeHandler<TTeamScope>(
+                    props.onTeamScopeChange,
+                )}
             >
                 {TEAM_OPTIONS.map(
                     (option): ReactElement => (

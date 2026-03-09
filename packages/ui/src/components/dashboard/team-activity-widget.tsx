@@ -1,9 +1,12 @@
 import type { ReactElement } from "react"
 
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts"
 
 import { Card, CardBody, CardHeader } from "@/components/ui"
 import { EmptyState } from "@/components/states/empty-state"
+import { ChartContainer } from "@/components/charts/chart-container"
+import { CHART_GRID_DASH } from "@/lib/constants/chart-constants"
+import { CHART_DATA_TRANSITION } from "@/lib/motion"
 
 interface ITeamActivityPoint {
     /** Имя разработчика. */
@@ -25,7 +28,7 @@ interface ITeamActivityWidgetProps {
  */
 export function TeamActivityWidget(props: ITeamActivityWidgetProps): ReactElement {
     return (
-        <Card>
+        <Card className="border-l-2 border-l-secondary">
             <CardHeader>
                 <p className="text-base font-semibold text-foreground">Team activity</p>
             </CardHeader>
@@ -39,27 +42,21 @@ export function TeamActivityWidget(props: ITeamActivityWidgetProps): ReactElemen
                         title="No data"
                     />
                 ) : (
-                    <div className="h-64 w-full">
-                        <ResponsiveContainer
-                            height="100%"
-                            minHeight={1}
-                            minWidth={1}
-                            width="100%"
-                        >
-                            <BarChart data={props.points}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="developer" />
-                                <YAxis />
-                                <Tooltip />
-                                <Bar
-                                    dataKey="ccrMerged"
-                                    fill="var(--chart-primary)"
-                                    name="CCR merged"
-                                    radius={[6, 6, 0, 0]}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
+                    <ChartContainer height="lg">
+                        <BarChart data={props.points}>
+                            <CartesianGrid strokeDasharray={CHART_GRID_DASH} />
+                            <XAxis dataKey="developer" />
+                            <YAxis />
+                            <Tooltip />
+                            <Bar
+                                {...CHART_DATA_TRANSITION}
+                                dataKey="ccrMerged"
+                                fill="var(--chart-primary)"
+                                name="CCR merged"
+                                radius={[6, 6, 0, 0]}
+                            />
+                        </BarChart>
+                    </ChartContainer>
                 )}
             </CardBody>
         </Card>

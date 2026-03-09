@@ -56,7 +56,7 @@ export function ActivityTimeline(props: IActivityTimelineProps): ReactElement {
     const groupedEntries = groupItemsByDay(props.items)
 
     return (
-        <Card>
+        <Card className="border-l-2 border-l-danger">
             <CardHeader>
                 <h2 className="text-base font-semibold text-foreground">Recent activity</h2>
             </CardHeader>

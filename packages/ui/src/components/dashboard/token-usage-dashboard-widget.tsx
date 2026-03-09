@@ -1,20 +1,16 @@
 import type { ReactElement } from "react"
 
-import {
-    Area,
-    AreaChart,
-    CartesianGrid,
-    Pie,
-    PieChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-    Cell,
-} from "recharts"
+import { Area, AreaChart, CartesianGrid, Pie, PieChart, Tooltip, XAxis, YAxis, Cell } from "recharts"
 
 import { Card, CardBody, CardHeader } from "@/components/ui"
 import { EmptyState } from "@/components/states/empty-state"
+import { ChartContainer } from "@/components/charts/chart-container"
+import {
+    CHART_FALLBACK_COLOR,
+    CHART_GRID_DASH,
+    PIE_OUTER_RADIUS,
+} from "@/lib/constants/chart-constants"
+import { CHART_DATA_TRANSITION } from "@/lib/motion"
 
 interface ITokenUsageModelPoint {
     /** Название модели. */
@@ -53,7 +49,7 @@ const PIE_COLORS = [
  */
 export function TokenUsageDashboardWidget(props: ITokenUsageDashboardWidgetProps): ReactElement {
     return (
-        <Card>
+        <Card className="border-l-2 border-l-secondary">
             <CardHeader>
                 <p className="text-base font-semibold text-foreground">Token usage dashboard</p>
             </CardHeader>
@@ -68,60 +64,48 @@ export function TokenUsageDashboardWidget(props: ITokenUsageDashboardWidgetProps
                     />
                 ) : (
                     <div className="grid gap-3 lg:grid-cols-2">
-                        <div className="h-56 w-full">
-                            <ResponsiveContainer
-                                height="100%"
-                                minHeight={1}
-                                minWidth={1}
-                                width="100%"
-                            >
-                                <PieChart>
-                                    <Pie
-                                        cx="50%"
-                                        cy="50%"
-                                        data={props.byModel}
-                                        dataKey="tokens"
-                                        nameKey="model"
-                                        outerRadius={84}
-                                    >
-                                        {props.byModel.map(
-                                            (entry, index): ReactElement => (
-                                                <Cell
-                                                    fill={
-                                                        PIE_COLORS[index % PIE_COLORS.length] ??
-                                                        "#2563eb"
-                                                    }
-                                                    key={entry.model}
-                                                />
-                                            ),
-                                        )}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                        <div className="h-56 w-full">
-                            <ResponsiveContainer
-                                height="100%"
-                                minHeight={1}
-                                minWidth={1}
-                                width="100%"
-                            >
-                                <AreaChart data={props.costTrend}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="period" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Area
-                                        dataKey="costUsd"
-                                        fill="var(--chart-primary-light)"
-                                        name="Cost USD"
-                                        stroke="var(--chart-primary)"
-                                        type="monotone"
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
+                        <ChartContainer height="sm">
+                            <PieChart>
+                                <Pie
+                                    {...CHART_DATA_TRANSITION}
+                                    cx="50%"
+                                    cy="50%"
+                                    data={props.byModel}
+                                    dataKey="tokens"
+                                    nameKey="model"
+                                    outerRadius={PIE_OUTER_RADIUS}
+                                >
+                                    {props.byModel.map(
+                                        (entry, index): ReactElement => (
+                                            <Cell
+                                                fill={
+                                                    PIE_COLORS[index % PIE_COLORS.length] ??
+                                                    CHART_FALLBACK_COLOR
+                                                }
+                                                key={entry.model}
+                                            />
+                                        ),
+                                    )}
+                                </Pie>
+                                <Tooltip />
+                            </PieChart>
+                        </ChartContainer>
+                        <ChartContainer height="sm">
+                            <AreaChart data={props.costTrend}>
+                                <CartesianGrid strokeDasharray={CHART_GRID_DASH} />
+                                <XAxis dataKey="period" />
+                                <YAxis />
+                                <Tooltip />
+                                <Area
+                                    {...CHART_DATA_TRANSITION}
+                                    dataKey="costUsd"
+                                    fill="var(--chart-primary-light)"
+                                    name="Cost USD"
+                                    stroke="var(--chart-primary)"
+                                    type="monotone"
+                                />
+                            </AreaChart>
+                        </ChartContainer>
                     </div>
                 )}
             </CardBody>
