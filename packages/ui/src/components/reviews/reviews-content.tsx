@@ -6,7 +6,6 @@ import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data
 import { InfiniteScrollContainer } from "@/components/infrastructure/infinite-scroll-container"
 import { ReviewsFilters } from "./reviews-filters"
 import { type IReviewRow } from "./reviews-table"
-import { type TReviewStatus } from "@/lib/types/ccr-types"
 import { ReviewStatusBadge } from "./review-status-badge"
 
 /**
