@@ -1,0 +1,12 @@
+{
+    "healthStatus": "API status",
+    "service": "Service",
+    "timestamp": "Timestamp",
+    "unavailable": "Failed to fetch API status",
+    "noData": "No API status data",
+    "premiumSectionTitle": "Premium insights",
+    "premiumEnabled": "Premium features are enabled",
+    "premiumDisabled": "Premium features are disabled",
+    "premiumEnabledDescription": "Advanced dashboard widgets are available for this account.",
+    "premiumDisabledDescription": "Feature flags backend is unavailable or premium access is not granted."
+}

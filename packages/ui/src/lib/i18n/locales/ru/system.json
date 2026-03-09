@@ -1,0 +1,12 @@
+{
+    "healthStatus": "Состояние API",
+    "service": "Сервис",
+    "timestamp": "Время",
+    "unavailable": "Не удалось получить статус API",
+    "noData": "Нет данных о состоянии API",
+    "premiumSectionTitle": "Premium возможности",
+    "premiumEnabled": "Premium функции включены",
+    "premiumDisabled": "Premium функции выключены",
+    "premiumEnabledDescription": "Для аккаунта доступны расширенные виджеты dashboard.",
+    "premiumDisabledDescription": "Сервис feature flags недоступен или premium-доступ не выдан."
+}

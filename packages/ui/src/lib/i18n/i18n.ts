@@ -2,73 +2,15 @@ import i18n, { type i18n as II18n } from "i18next"
 import LanguageDetector from "i18next-browser-languagedetector"
 import { initReactI18next } from "react-i18next"
 
+import { I18N_NAMESPACES, I18N_RESOURCES } from "./i18n-resources"
+import "./i18n-types"
+
 export const SUPPORTED_LOCALES = ["en", "ru"] as const
 
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number]
 
 export const DEFAULT_LOCALE: SupportedLocale = "ru"
 export const LOCALE_STORAGE_KEY = "codenautic.ui.locale"
-
-const resources = {
-    en: {
-        common: {
-            appTitle: "CodeNautic Runtime",
-            retry: "Retry",
-            loading: "Checking API availability...",
-        },
-        system: {
-            healthStatus: "API status",
-            service: "Service",
-            timestamp: "Timestamp",
-            unavailable: "Failed to fetch API status",
-            noData: "No API status data",
-            premiumSectionTitle: "Premium insights",
-            premiumEnabled: "Premium features are enabled",
-            premiumDisabled: "Premium features are disabled",
-            premiumEnabledDescription: "Advanced dashboard widgets are available for this account.",
-            premiumDisabledDescription:
-                "Feature flags backend is unavailable or premium access is not granted.",
-        },
-        auth: {
-            checkingSession: "Checking current session...",
-            loginTitle: "Sign in to open dashboard",
-            oauthStartFailed: "Failed to start OAuth authorization. Please try again.",
-            logout: "Log out",
-            logoutFailed: "Failed to complete logout. Please try again.",
-            unauthorizedState: "Authorization required (401). Sign in to continue.",
-            forbiddenState: "Access denied (403). Your account has no access to this resource.",
-        },
-    },
-    ru: {
-        common: {
-            appTitle: "CodeNautic Runtime",
-            retry: "Повторить проверку",
-            loading: "Проверяем доступность API...",
-        },
-        system: {
-            healthStatus: "Состояние API",
-            service: "Сервис",
-            timestamp: "Время",
-            unavailable: "Не удалось получить статус API",
-            noData: "Нет данных о состоянии API",
-            premiumSectionTitle: "Premium возможности",
-            premiumEnabled: "Premium функции включены",
-            premiumDisabled: "Premium функции выключены",
-            premiumEnabledDescription: "Для аккаунта доступны расширенные виджеты dashboard.",
-            premiumDisabledDescription:
-                "Сервис feature flags недоступен или premium-доступ не выдан.",
-        },
-        auth: {
-            checkingSession: "Проверяем активную сессию...",
-            loginTitle: "Войдите, чтобы открыть dashboard",
-            oauthStartFailed: "Не удалось начать OAuth авторизацию. Повторите попытку.",
-            logout: "Выйти",
-            logoutFailed: "Не удалось завершить сессию. Повторите попытку.",
-            unauthorizedState: "Требуется авторизация (401). Войдите, чтобы продолжить.",
-            forbiddenState: "Доступ запрещён (403). У аккаунта нет прав на этот ресурс.",
-        },
-    },
-} as const
 
 let initializationPromise: Promise<void> | null = null
 
@@ -151,6 +93,12 @@ export function formatLocalizedNumber(value: number, locale: SupportedLocale): s
     return new Intl.NumberFormat(locale).format(value)
 }
 
+/**
+ * Инициализирует конкретный экземпляр i18n с ресурсами из JSON.
+ *
+ * @param instance Экземпляр i18n для инициализации.
+ * @returns Promise завершения инициализации.
+ */
 async function initializeInstance(instance: II18n): Promise<void> {
     if (instance.isInitialized) {
         return
@@ -158,11 +106,11 @@ async function initializeInstance(instance: II18n): Promise<void> {
 
     instance.use(LanguageDetector).use(initReactI18next)
     await instance.init({
-        resources,
+        resources: I18N_RESOURCES,
         fallbackLng: DEFAULT_LOCALE,
         supportedLngs: SUPPORTED_LOCALES,
         defaultNS: "common",
-        ns: ["common", "system", "auth"],
+        ns: [...I18N_NAMESPACES],
         interpolation: {
             escapeValue: false,
         },
