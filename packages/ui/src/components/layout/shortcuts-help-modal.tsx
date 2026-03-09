@@ -50,10 +50,7 @@ export function ShortcutsHelpModal(props: IShortcutsHelpModalProps): ReactElemen
                         }}
                     />
                     <p className="text-xs text-text-subtle">Press ? for help.</p>
-                    <ul
-                        aria-label="Shortcuts list"
-                        className="max-h-72 space-y-2 overflow-y-auto"
-                    >
+                    <ul aria-label="Shortcuts list" className="max-h-72 space-y-2 overflow-y-auto">
                         {props.shortcuts.map(
                             (shortcut): ReactElement => (
                                 <li

@@ -1,6 +1,7 @@
 import { type ReactElement, type RefObject, useEffect, useMemo, useRef, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { DURATION, EASING, useReducedMotion } from "@/lib/motion"
 
 /**
@@ -475,9 +476,7 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
                                                 key={item.id}
                                                 aria-selected={isActive}
                                                 className={`grid grid-cols-[1fr_auto] items-center gap-2 px-3 py-2 text-sm transition-colors duration-150 ${
-                                                    isActive
-                                                        ? "bg-primary/10"
-                                                        : "bg-transparent"
+                                                    isActive ? "bg-primary/10" : "bg-transparent"
                                                 }`}
                                                 id={createCommandPaletteOptionId(
                                                     item.id,
@@ -498,7 +497,9 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
                                                     <span className="font-medium">
                                                         {item.label}
                                                     </span>
-                                                    <span className="ml-2 text-[11px] text-text-subtle">
+                                                    <span
+                                                        className={`ml-2 ${TYPOGRAPHY.microHint}`}
+                                                    >
                                                         {item.path}
                                                     </span>
                                                 </button>
@@ -520,7 +521,7 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
                         )
                     )}
                 </div>
-                <p className="mt-2 text-[11px] text-text-subtle">
+                <p className={`mt-2 ${TYPOGRAPHY.microHint}`}>
                     Use Arrow keys, Enter to open, and Esc to close.
                 </p>
             </div>

@@ -73,10 +73,7 @@ export const DeepBreadcrumbs: TStory = {
 export const WithNotifications: TStory = {
     args: {
         userName: "Maria Ivanova",
-        breadcrumbs: [
-            { label: "Dashboard", path: "/" },
-            { label: "Reviews" },
-        ],
+        breadcrumbs: [{ label: "Dashboard", path: "/" }, { label: "Reviews" }],
         notificationCount: 12,
     },
 }

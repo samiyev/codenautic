@@ -31,11 +31,7 @@ export function NotificationAlerts(props: INotificationAlertsProps): ReactElemen
     return (
         <>
             <AnimatedAlert isVisible={props.shortcutConflicts.length > 0}>
-                <Alert
-                    color="warning"
-                    title="Keyboard shortcut conflicts detected"
-                    variant="flat"
-                >
+                <Alert color="warning" title="Keyboard shortcut conflicts detected" variant="flat">
                     {props.shortcutConflicts
                         .map((conflict): string => {
                             return `${conflict.signature}: ${conflict.ids.join(", ")}`
