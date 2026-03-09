@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "@tanstack/react-router"
 
 import { useKeyboardShortcuts } from "@/lib/hooks/use-keyboard-shortcuts"
 import {
-    FOCUS_GLOBAL_SEARCH_EVENT,
     FOCUS_REVIEWS_FILTERS_EVENT,
     OPEN_COMMAND_PALETTE_EVENT,
     type IShortcutConflict,
@@ -63,11 +62,11 @@ export function useDashboardShortcuts(): IDashboardShortcutsResult {
             },
             {
                 handler: (): void => {
-                    window.dispatchEvent(new CustomEvent(FOCUS_GLOBAL_SEARCH_EVENT))
+                    window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT))
                 },
-                id: "focus-global-search",
+                id: "open-command-palette-slash",
                 keys: "slash",
-                label: "Focus global search",
+                label: "Open command palette",
                 scope: "global",
             },
             {

@@ -1,18 +1,30 @@
 import { type ReactElement, useEffect, useRef, useState } from "react"
 
-import { Bell, Menu, Rocket } from "@/components/icons/app-icons"
-import { Button } from "@/components/ui"
 import {
-    FOCUS_GLOBAL_SEARCH_EVENT,
-    OPEN_COMMAND_PALETTE_EVENT,
-} from "@/lib/keyboard/shortcut-registry"
+    Bell,
+    Building2,
+    ChevronDown,
+    ChevronRight,
+    Menu,
+    Rocket,
+    Search,
+} from "@/components/icons/app-icons"
+import {
+    Button,
+    Dropdown,
+    DropdownItem,
+    DropdownMenu,
+    DropdownTrigger,
+} from "@/components/ui"
+import { OPEN_COMMAND_PALETTE_EVENT } from "@/lib/keyboard/shortcut-registry"
+import type { IBreadcrumbSegment } from "@/lib/navigation/route-guard-map"
 
 import { CommandPalette, type ICommandPaletteRouteOption } from "./command-palette"
 import { ThemeModeToggle } from "./theme-mode-toggle"
 import { UserMenu } from "./user-menu"
 
 /**
- * Organization option for header switcher.
+ * Organization option for header workspace switcher.
  */
 export interface IHeaderOrganizationOption {
     /** Organization/tenant identifier. */
@@ -22,31 +34,9 @@ export interface IHeaderOrganizationOption {
 }
 
 /**
- * Role option for RBAC preview.
- */
-export interface IHeaderRoleOption {
-    /** Technical role id. */
-    readonly id: string
-    /** Human-readable role label. */
-    readonly label: string
-}
-
-/**
- * Route option for global search.
- */
-export interface IHeaderSearchRouteOption {
-    /** Route label. */
-    readonly label: string
-    /** Route path. */
-    readonly path: string
-}
-
-/**
- * Header component props.
+ * Header component props for the mission-control style navbar.
  */
 export interface IHeaderProps {
-    /** Title in the center of navbar. */
-    readonly title?: string
     /** Unread notification count. */
     readonly notificationCount?: number
     /** User name. */
@@ -55,26 +45,22 @@ export interface IHeaderProps {
     readonly userEmail?: string
     /** Sign out action. */
     readonly onSignOut?: () => void
-    /** Open mobile navigation. */
+    /** Open mobile navigation drawer. */
     readonly onMobileMenuOpen?: () => void
     /** Available tenant/workspace options. */
     readonly organizations?: ReadonlyArray<IHeaderOrganizationOption>
-    /** Active organization. */
+    /** Active organization ID. */
     readonly activeOrganizationId?: string
     /** Organization change handler. */
     readonly onOrganizationChange?: (organizationId: string) => void
-    /** Available RBAC role options. */
-    readonly roleOptions?: ReadonlyArray<IHeaderRoleOption>
-    /** Active role. */
-    readonly activeRoleId?: string
-    /** Role change handler. */
-    readonly onRoleChange?: (roleId: string) => void
-    /** Breadcrumb trail. */
-    readonly breadcrumbs?: ReadonlyArray<string>
-    /** Available routes for global search. */
-    readonly searchRoutes?: ReadonlyArray<IHeaderSearchRouteOption>
-    /** Navigate to selected route. */
-    readonly onSearchRouteNavigate?: (path: string) => void
+    /** Clickable breadcrumb trail. */
+    readonly breadcrumbs?: ReadonlyArray<IBreadcrumbSegment>
+    /** Navigate when breadcrumb segment is clicked. */
+    readonly onBreadcrumbNavigate?: (path: string) => void
+    /** Available routes for command palette. */
+    readonly commandPaletteRoutes?: ReadonlyArray<ICommandPaletteRouteOption>
+    /** Navigate to selected command palette route. */
+    readonly onCommandPaletteNavigate?: (path: string) => void
     /** Open Settings page. */
     readonly onOpenSettings?: () => void
     /** Open Billing page. */
@@ -84,28 +70,23 @@ export interface IHeaderProps {
 }
 
 /**
- * Application header with logo, search, org/role switchers, and controls.
- * Command palette is extracted to its own component.
- * Theme preset selection moved to /settings-appearance.
+ * Application header with 3-zone layout: brand, breadcrumbs, and controls.
+ * Search is unified through Command Palette (Ctrl+K).
+ * Workspace switching uses HeroUI Dropdown instead of native select.
  *
  * @param props Header configuration.
- * @returns Navbar with theme toggle, user menu, and command palette.
+ * @returns Sticky navbar with breadcrumbs, workspace switcher, and user controls.
  */
 export function Header(props: IHeaderProps): ReactElement {
-    const [searchQuery, setSearchQuery] = useState("")
     const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false)
-    const searchInputRef = useRef<HTMLInputElement | null>(null)
     const commandPaletteInvokerRef = useRef<HTMLElement | null>(null)
-    const hasNotifications = props.notificationCount !== undefined && props.notificationCount > 0
-    const activeOrganization = props.organizations?.find((organization): boolean => {
-        return organization.id === props.activeOrganizationId
-    })
-    const activeRole = props.roleOptions?.find((role): boolean => {
-        return role.id === props.activeRoleId
-    })
 
-    const commandPaletteRoutes: ReadonlyArray<ICommandPaletteRouteOption> =
-        props.searchRoutes ?? []
+    const hasNotifications =
+        props.notificationCount !== undefined && props.notificationCount > 0
+
+    const activeOrganization = props.organizations?.find(
+        (organization): boolean => organization.id === props.activeOrganizationId,
+    )
 
     const openCommandPalette = (): void => {
         if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
@@ -150,168 +131,184 @@ export function Header(props: IHeaderProps): ReactElement {
         const handleOpenCommandPalette = (): void => {
             openCommandPalette()
         }
-        const handleFocusGlobalSearch = (): void => {
-            searchInputRef.current?.focus()
-            searchInputRef.current?.select()
-        }
 
         window.addEventListener(
             OPEN_COMMAND_PALETTE_EVENT,
             handleOpenCommandPalette as EventListener,
         )
-        window.addEventListener(FOCUS_GLOBAL_SEARCH_EVENT, handleFocusGlobalSearch as EventListener)
 
         return (): void => {
             window.removeEventListener(
                 OPEN_COMMAND_PALETTE_EVENT,
                 handleOpenCommandPalette as EventListener,
             )
-            window.removeEventListener(
-                FOCUS_GLOBAL_SEARCH_EVENT,
-                handleFocusGlobalSearch as EventListener,
-            )
         }
     }, [openCommandPalette])
 
+    const lastBreadcrumb =
+        props.breadcrumbs !== undefined && props.breadcrumbs.length > 0
+            ? props.breadcrumbs[props.breadcrumbs.length - 1]
+            : undefined
+
     return (
-        <div className="border-b border-border bg-header-bg backdrop-blur">
-            <div className="mx-auto flex h-16 items-center gap-3 px-3">
-                <div className={props.title === undefined ? "md:hidden" : "hidden md:flex"}>
-                    <Button
-                        isIconOnly
-                        radius="full"
-                        variant="light"
-                        aria-label="Open navigation menu"
-                        onPress={props.onMobileMenuOpen}
-                    >
-                        <Menu size={20} />
-                    </Button>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Rocket aria-hidden="true" className="text-primary" size={20} />
-                    <p className="text-base font-bold tracking-tight text-foreground">CodeNautic</p>
-                </div>
-                <div className="mx-auto hidden md:block">
-                    {props.title !== undefined ? (
-                        <div className="space-y-0.5">
-                            <p className="text-sm font-medium text-text-tertiary">{props.title}</p>
-                            {props.breadcrumbs === undefined ? null : (
-                                <p className="text-[11px] text-text-subtle">
-                                    {props.breadcrumbs.join(" / ")}
-                                </p>
-                            )}
-                        </div>
-                    ) : null}
-                </div>
-                {props.searchRoutes === undefined ? null : (
-                    <div className="hidden min-w-[230px] md:block">
-                        <input
-                            aria-label="Global route search"
-                            className="w-full rounded-md border border-border bg-surface px-2 py-1 text-xs text-foreground transition-shadow duration-200 focus:shadow-md"
-                            placeholder="Global search (Ctrl+K)"
-                            ref={searchInputRef}
-                            type="text"
-                            value={searchQuery}
-                            onChange={(event): void => {
-                                setSearchQuery(event.currentTarget.value)
-                            }}
-                            onKeyDown={(event): void => {
-                                if (event.key !== "Enter") {
-                                    return
-                                }
-
-                                const normalizedQuery = searchQuery.trim().toLowerCase()
-                                if (normalizedQuery.length === 0) {
-                                    openCommandPalette()
-                                    return
-                                }
-
-                                const matchedRoute = props.searchRoutes?.find(
-                                    (route): boolean => {
-                                        return `${route.label} ${route.path}`
-                                            .toLowerCase()
-                                            .includes(normalizedQuery)
-                                    },
-                                )
-
-                                if (matchedRoute !== undefined) {
-                                    props.onSearchRouteNavigate?.(matchedRoute.path)
-                                    setSearchQuery("")
-                                }
-                            }}
+        <header className="sticky top-0 z-40 border-b border-border bg-header-bg backdrop-blur">
+            <div className="mx-auto flex h-16 items-center gap-3 px-4">
+                {/* Zone 1: Brand */}
+                <div className="flex shrink-0 items-center gap-2">
+                    <div className="md:hidden">
+                        <Button
+                            isIconOnly
+                            radius="full"
+                            variant="light"
+                            aria-label="Open navigation menu"
+                            onPress={props.onMobileMenuOpen}
+                        >
+                            <Menu size={20} />
+                        </Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Rocket
+                            aria-hidden="true"
+                            className="text-primary"
+                            size={20}
                         />
+                        <p className="hidden font-display text-sm font-semibold tracking-tight text-foreground sm:block">
+                            CodeNautic
+                        </p>
                     </div>
+                </div>
+
+                {/* Zone 2: Breadcrumbs */}
+                {props.breadcrumbs !== undefined && props.breadcrumbs.length > 0 ? (
+                    <nav
+                        aria-label="Breadcrumb"
+                        className="hidden min-w-0 flex-1 md:flex"
+                    >
+                        <ol className="flex items-center gap-1.5 text-sm">
+                            {props.breadcrumbs.map(
+                                (segment, index): ReactElement => {
+                                    const isLast =
+                                        index === (props.breadcrumbs?.length ?? 0) - 1
+
+                                    return (
+                                        <li
+                                            key={`${segment.label}-${String(index)}`}
+                                            className="flex items-center gap-1.5"
+                                        >
+                                            {index > 0 ? (
+                                                <ChevronRight
+                                                    aria-hidden="true"
+                                                    className="text-text-subtle"
+                                                    size={14}
+                                                />
+                                            ) : null}
+                                            {segment.path !== undefined && !isLast ? (
+                                                <button
+                                                    className="text-text-secondary transition-colors duration-150 hover:text-foreground"
+                                                    type="button"
+                                                    onClick={(): void => {
+                                                        props.onBreadcrumbNavigate?.(
+                                                            segment.path as string,
+                                                        )
+                                                    }}
+                                                >
+                                                    {segment.label}
+                                                </button>
+                                            ) : (
+                                                <span className="font-medium text-foreground">
+                                                    {segment.label}
+                                                </span>
+                                            )}
+                                        </li>
+                                    )
+                                },
+                            )}
+                        </ol>
+                    </nav>
+                ) : (
+                    <div className="hidden flex-1 md:block" />
                 )}
-                {props.organizations === undefined && props.roleOptions === undefined ? null : (
-                    <div className="hidden items-start gap-2 md:flex">
-                        {props.organizations === undefined ? null : (
-                            <div className="min-w-[180px]">
-                                <label
-                                    className="text-[11px] uppercase tracking-[0.08em] text-text-subtle"
-                                    htmlFor="header-organization-switcher"
-                                >
-                                    Workspace
-                                </label>
-                                <select
-                                    aria-label="Organization workspace switcher"
-                                    className="mt-0.5 w-full rounded-md border border-border bg-surface px-2 py-1 text-xs text-foreground"
-                                    id="header-organization-switcher"
-                                    value={props.activeOrganizationId}
-                                    onChange={(event): void => {
-                                        props.onOrganizationChange?.(event.currentTarget.value)
-                                    }}
-                                >
-                                    {props.organizations.map(
-                                        (organization): ReactElement => (
-                                            <option key={organization.id} value={organization.id}>
-                                                {organization.label}
-                                            </option>
-                                        ),
-                                    )}
-                                </select>
-                                <p className="text-[11px] text-text-subtle">
-                                    Current: {activeOrganization?.label ?? "Unknown workspace"}
-                                </p>
-                            </div>
-                        )}
-                        {props.roleOptions === undefined ? null : (
-                            <div className="min-w-[140px]">
-                                <label
-                                    className="text-[11px] uppercase tracking-[0.08em] text-text-subtle"
-                                    htmlFor="header-rbac-role-switcher"
-                                >
-                                    Role preview
-                                </label>
-                                <select
-                                    aria-label="RBAC role switcher"
-                                    className="mt-0.5 w-full rounded-md border border-border bg-surface px-2 py-1 text-xs text-foreground"
-                                    id="header-rbac-role-switcher"
-                                    value={props.activeRoleId}
-                                    onChange={(event): void => {
-                                        props.onRoleChange?.(event.currentTarget.value)
-                                    }}
-                                >
-                                    {props.roleOptions.map(
-                                        (role): ReactElement => (
-                                            <option key={role.id} value={role.id}>
-                                                {role.label}
-                                            </option>
-                                        ),
-                                    )}
-                                </select>
-                                <p className="text-[11px] text-text-subtle">
-                                    Active: {activeRole?.label ?? "Unknown role"}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                )}
-                <div className="ml-auto flex items-center gap-2">
+
+                {/* Zone 3: Actions + Controls */}
+                <div className="ml-auto flex shrink-0 items-center gap-2">
+                    {/* Search trigger → opens Command Palette */}
+                    <Button
+                        aria-label="Open command palette (⌘K)"
+                        className="hidden gap-1.5 px-2.5 sm:inline-flex"
+                        radius="md"
+                        size="sm"
+                        variant="flat"
+                        onPress={openCommandPalette}
+                    >
+                        <Search size={15} />
+                        <kbd className="pointer-events-none rounded border border-border bg-surface px-1.5 py-0.5 text-[11px] font-medium text-text-subtle">
+                            ⌘K
+                        </kbd>
+                    </Button>
+
+                    {/* Workspace switcher (HeroUI Dropdown) */}
+                    {props.organizations !== undefined ? (
+                        <Dropdown>
+                            <DropdownTrigger
+                                className="hidden sm:inline-flex"
+                                size="sm"
+                                variant="light"
+                            >
+                                <span className="inline-flex items-center gap-1.5">
+                                    <Building2
+                                        aria-hidden="true"
+                                        className="text-text-subtle"
+                                        size={15}
+                                    />
+                                    <span className="text-sm text-foreground">
+                                        {activeOrganization?.label ?? "Workspace"}
+                                    </span>
+                                    <ChevronDown
+                                        aria-hidden="true"
+                                        className="text-text-subtle"
+                                        size={14}
+                                    />
+                                </span>
+                            </DropdownTrigger>
+                            <DropdownMenu
+                                aria-label="Workspace switcher"
+                                selectionMode="single"
+                                selectedKeys={
+                                    props.activeOrganizationId !== undefined
+                                        ? new Set([props.activeOrganizationId])
+                                        : new Set<string>()
+                                }
+                                onSelectionChange={(keys): void => {
+                                    const selected = [...keys][0]
+                                    if (typeof selected === "string") {
+                                        props.onOrganizationChange?.(selected)
+                                    }
+                                }}
+                            >
+                                {props.organizations.map(
+                                    (organization): ReactElement => (
+                                        <DropdownItem key={organization.id}>
+                                            {organization.label}
+                                        </DropdownItem>
+                                    ),
+                                )}
+                            </DropdownMenu>
+                        </Dropdown>
+                    ) : null}
+
+                    {/* Divider between actions and controls */}
+                    <div
+                        aria-hidden="true"
+                        className="mx-1 hidden h-5 w-px bg-border sm:block"
+                    />
+
+                    {/* Notification bell */}
                     <Button
                         isIconOnly
+                        aria-label={`Notifications (${String(props.notificationCount ?? 0)})`}
                         radius="full"
+                        size="sm"
                         variant="light"
-                        aria-label={`Notifications (${props.notificationCount ?? 0})`}
                     >
                         <span className="relative inline-flex">
                             <Bell size={16} />
@@ -325,7 +322,9 @@ export function Header(props: IHeaderProps): ReactElement {
                             ) : null}
                         </span>
                     </Button>
+
                     <ThemeModeToggle />
+
                     <UserMenu
                         onOpenBilling={props.onOpenBilling}
                         onOpenHelp={props.onOpenHelp}
@@ -336,20 +335,25 @@ export function Header(props: IHeaderProps): ReactElement {
                     />
                 </div>
             </div>
-            {props.title === undefined ? null : (
-                <div className="border-t border-border px-3 py-2 md:hidden">
-                    <p className="text-sm text-text-tertiary">{props.title}</p>
+
+            {/* Mobile breadcrumb (last segment only) */}
+            {lastBreadcrumb !== undefined ? (
+                <div className="border-t border-border px-4 py-2 md:hidden">
+                    <p className="text-sm text-text-secondary">
+                        {lastBreadcrumb.label}
+                    </p>
                 </div>
-            )}
+            ) : null}
+
             <CommandPalette
                 invokerRef={commandPaletteInvokerRef}
                 isOpen={isCommandPaletteOpen}
                 onClose={closeCommandPalette}
                 onNavigate={(path): void => {
-                    props.onSearchRouteNavigate?.(path)
+                    props.onCommandPaletteNavigate?.(path)
                 }}
-                routes={commandPaletteRoutes}
+                routes={props.commandPaletteRoutes ?? []}
             />
-        </div>
+        </header>
     )
 }

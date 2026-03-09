@@ -46,21 +46,26 @@ function DashboardLayoutHarness(props: ILayoutHarnessProps): ReactElement {
 }
 
 describe("layout components", (): void => {
-    it("рендерит Header с брендом и темным режимом переключателя", (): void => {
+    it("рендерит Header с брендом, breadcrumbs, и темным режимом переключателя", (): void => {
         const onOrganizationChange = vi.fn()
-        const onRoleChange = vi.fn()
-        const onSearchRouteNavigate = vi.fn()
+        const onCommandPaletteNavigate = vi.fn()
         renderWithProviders(
             <Header
                 activeOrganizationId="platform-team"
-                activeRoleId="admin"
+                breadcrumbs={[
+                    { label: "Dashboard", path: "/" },
+                    { label: "Reviews" },
+                ]}
+                commandPaletteRoutes={[
+                    { label: "Dashboard", path: "/" },
+                    { label: "Settings home", path: "/settings" },
+                ]}
                 notificationCount={3}
                 onMobileMenuOpen={(): void => {
                     return undefined
                 }}
+                onCommandPaletteNavigate={onCommandPaletteNavigate}
                 onOrganizationChange={onOrganizationChange}
-                onRoleChange={onRoleChange}
-                onSearchRouteNavigate={onSearchRouteNavigate}
                 organizations={[
                     {
                         id: "platform-team",
@@ -71,27 +76,6 @@ describe("layout components", (): void => {
                         label: "Frontend Team",
                     },
                 ]}
-                roleOptions={[
-                    {
-                        id: "viewer",
-                        label: "Viewer",
-                    },
-                    {
-                        id: "admin",
-                        label: "Admin",
-                    },
-                ]}
-                searchRoutes={[
-                    {
-                        label: "Dashboard",
-                        path: "/",
-                    },
-                    {
-                        label: "Settings home",
-                        path: "/settings",
-                    },
-                ]}
-                title="Reviews"
                 userEmail="reviewer@example.com"
                 userName="Reviewer"
             />,
@@ -106,69 +90,70 @@ describe("layout components", (): void => {
         expect(screen.queryByRole("button", { name: "Notifications (3)" })).not.toBeNull()
         expect(screen.queryByRole("radiogroup", { name: "Theme mode" })).not.toBeNull()
         expect(screen.queryAllByText("Reviewer").length).toBeGreaterThan(0)
-        expect(
-            screen.getByRole("combobox", { name: "Organization workspace switcher" }),
-        ).not.toBeNull()
-        expect(screen.getByText("Current: Platform Team")).not.toBeNull()
-        expect(screen.getByRole("combobox", { name: "RBAC role switcher" })).not.toBeNull()
-        expect(screen.getByText("Active: Admin")).not.toBeNull()
-        expect(screen.getByLabelText("Global route search")).not.toBeNull()
+        expect(screen.queryByText("Platform Team")).not.toBeNull()
+        expect(screen.queryByRole("navigation", { name: "Breadcrumb" })).not.toBeNull()
         expect(onOrganizationChange).not.toHaveBeenCalled()
-        expect(onRoleChange).not.toHaveBeenCalled()
-        expect(onSearchRouteNavigate).not.toHaveBeenCalled()
+        expect(onCommandPaletteNavigate).not.toHaveBeenCalled()
     })
 
-    it("выполняет global search submit и вызывает route navigate callback", async (): Promise<void> => {
+    it("вызывает breadcrumb navigation callback для промежуточного сегмента", async (): Promise<void> => {
         const user = userEvent.setup()
-        const onSearchRouteNavigate = vi.fn()
+        const onBreadcrumbNavigate = vi.fn()
 
         renderWithProviders(
             <Header
-                onSearchRouteNavigate={onSearchRouteNavigate}
-                searchRoutes={[
-                    {
-                        label: "Dashboard",
-                        path: "/",
-                    },
-                    {
-                        label: "Settings home",
-                        path: "/settings",
-                    },
+                breadcrumbs={[
+                    { label: "Dashboard", path: "/" },
+                    { label: "Settings", path: "/settings" },
+                    { label: "Team" },
                 ]}
+                onBreadcrumbNavigate={onBreadcrumbNavigate}
             />,
         )
 
-        const searchInput = screen.getByLabelText("Global route search")
-        await user.type(searchInput, "settings{enter}")
+        await user.click(screen.getByRole("button", { name: "Settings" }))
 
-        expect(onSearchRouteNavigate).toHaveBeenCalledWith("/settings")
+        expect(onBreadcrumbNavigate).toHaveBeenCalledWith("/settings")
+    })
+
+    it("открывает command palette через кнопку search trigger", async (): Promise<void> => {
+        const user = userEvent.setup()
+        const onCommandPaletteNavigate = vi.fn()
+
+        renderWithProviders(
+            <Header
+                commandPaletteRoutes={[
+                    { label: "Dashboard", path: "/" },
+                    { label: "Settings home", path: "/settings" },
+                ]}
+                onCommandPaletteNavigate={onCommandPaletteNavigate}
+            />,
+        )
+
+        const searchTrigger = screen.getByRole("button", {
+            name: "Open command palette (⌘K)",
+        })
+        await user.click(searchTrigger)
+
+        expect(screen.getByRole("dialog", { name: "Global command palette" })).not.toBeNull()
     })
 
     it("открывает command palette через Ctrl+K и выполняет действие клавиатурой", async (): Promise<void> => {
         const user = userEvent.setup()
-        const onSearchRouteNavigate = vi.fn()
+        const onCommandPaletteNavigate = vi.fn()
 
         renderWithProviders(
             <Header
-                onSearchRouteNavigate={onSearchRouteNavigate}
-                searchRoutes={[
-                    {
-                        label: "Dashboard",
-                        path: "/",
-                    },
-                    {
-                        label: "CCR Management",
-                        path: "/reviews",
-                    },
+                commandPaletteRoutes={[
+                    { label: "Dashboard", path: "/" },
+                    { label: "CCR Management", path: "/reviews" },
                     {
                         label: "Provider Degradation",
                         path: "/settings-provider-degradation",
                     },
-                    {
-                        label: "Help and diagnostics",
-                        path: "/help-diagnostics",
-                    },
+                    { label: "Help and diagnostics", path: "/help-diagnostics" },
                 ]}
+                onCommandPaletteNavigate={onCommandPaletteNavigate}
             />,
         )
 
@@ -179,7 +164,7 @@ describe("layout components", (): void => {
         await user.type(paletteSearch, "diagnostics")
         await user.keyboard("{Enter}")
 
-        expect(onSearchRouteNavigate).toHaveBeenCalledWith("/help-diagnostics")
+        expect(onCommandPaletteNavigate).toHaveBeenCalledWith("/help-diagnostics")
     })
 
     it("поддерживает aria-activedescendant при навигации по command palette", async (): Promise<void> => {
@@ -187,19 +172,10 @@ describe("layout components", (): void => {
 
         renderWithProviders(
             <Header
-                searchRoutes={[
-                    {
-                        label: "Dashboard",
-                        path: "/",
-                    },
-                    {
-                        label: "CCR Management",
-                        path: "/reviews",
-                    },
-                    {
-                        label: "Help and diagnostics",
-                        path: "/help-diagnostics",
-                    },
+                commandPaletteRoutes={[
+                    { label: "Dashboard", path: "/" },
+                    { label: "CCR Management", path: "/reviews" },
+                    { label: "Help and diagnostics", path: "/help-diagnostics" },
                 ]}
             />,
         )
@@ -231,11 +207,8 @@ describe("layout components", (): void => {
 
         renderWithProviders(
             <Header
-                searchRoutes={[
-                    {
-                        label: "Dashboard",
-                        path: "/",
-                    },
+                commandPaletteRoutes={[
+                    { label: "Dashboard", path: "/" },
                 ]}
             />,
         )
@@ -403,13 +376,12 @@ describe("layout components", (): void => {
 
         expect(screen.queryAllByText("Dev").length).toBeGreaterThan(0)
         expect(screen.queryByText("Panel content")).not.toBeNull()
-        expect(screen.queryAllByText("Техстатус").length).toBeGreaterThan(0)
     })
 
-    it("переключает организацию и применяет tenant route guard", async (): Promise<void> => {
-        const user = userEvent.setup()
+    it("применяет tenant route guard при сохранённом tenant mismatch", async (): Promise<void> => {
         mockNavigate.mockClear()
         currentRoute = "/settings-team"
+        window.localStorage.setItem("codenautic:tenant:active", "frontend-team")
 
         renderWithProviders(
             <DashboardLayoutHarness>
@@ -420,12 +392,11 @@ describe("layout components", (): void => {
             },
         )
 
-        const switcher = screen.getByRole("combobox", { name: "Organization workspace switcher" })
-        await user.selectOptions(switcher, "frontend-team")
-
         await waitFor(() => {
             expect(mockNavigate).toHaveBeenCalled()
         })
+
+        window.localStorage.removeItem("codenautic:tenant:active")
     })
 
     it("показывает forced re-auth modal и восстанавливает pending intent", async (): Promise<void> => {

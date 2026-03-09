@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react"
 
-import type { IHeaderOrganizationOption, IHeaderRoleOption, IHeaderSearchRouteOption } from "./header"
+import type { ICommandPaletteRouteOption } from "./command-palette"
+import type { IHeaderOrganizationOption } from "./header"
+import type { IBreadcrumbSegment } from "@/lib/navigation/route-guard-map"
 import { Header } from "./header"
 
 const meta: Meta<typeof Header> = {
@@ -18,13 +20,7 @@ const MOCK_ORGANIZATIONS: ReadonlyArray<IHeaderOrganizationOption> = [
     { id: "org-3", label: "Initech" },
 ]
 
-const MOCK_ROLES: ReadonlyArray<IHeaderRoleOption> = [
-    { id: "admin", label: "Admin" },
-    { id: "developer", label: "Developer" },
-    { id: "viewer", label: "Viewer" },
-]
-
-const MOCK_SEARCH_ROUTES: ReadonlyArray<IHeaderSearchRouteOption> = [
+const MOCK_COMMAND_PALETTE_ROUTES: ReadonlyArray<ICommandPaletteRouteOption> = [
     { label: "Dashboard", path: "/" },
     { label: "CCR Management", path: "/reviews" },
     { label: "Issues", path: "/issues" },
@@ -33,18 +29,26 @@ const MOCK_SEARCH_ROUTES: ReadonlyArray<IHeaderSearchRouteOption> = [
     { label: "Reports", path: "/reports" },
 ]
 
+const MOCK_SETTINGS_BREADCRUMBS: ReadonlyArray<IBreadcrumbSegment> = [
+    { label: "Settings", path: "/settings" },
+    { label: "Privacy Export" },
+]
+
+const MOCK_DEEP_BREADCRUMBS: ReadonlyArray<IBreadcrumbSegment> = [
+    { label: "Dashboard", path: "/" },
+    { label: "Reports", path: "/reports" },
+    { label: "Generator" },
+]
+
 export const Default: TStory = {
     args: {
-        title: "Dashboard",
         userName: "Alex Petrov",
         userEmail: "alex@codenautic.com",
         notificationCount: 3,
-        breadcrumbs: ["Home", "Dashboard"],
+        breadcrumbs: MOCK_SETTINGS_BREADCRUMBS,
         organizations: MOCK_ORGANIZATIONS,
         activeOrganizationId: "org-1",
-        roleOptions: MOCK_ROLES,
-        activeRoleId: "developer",
-        searchRoutes: MOCK_SEARCH_ROUTES,
+        commandPaletteRoutes: MOCK_COMMAND_PALETTE_ROUTES,
     },
 }
 
@@ -54,11 +58,25 @@ export const Minimal: TStory = {
     },
 }
 
-export const WithNotifications: TStory = {
+export const DeepBreadcrumbs: TStory = {
     args: {
-        title: "CCR Management",
         userName: "Maria Ivanova",
         userEmail: "maria@codenautic.com",
+        breadcrumbs: MOCK_DEEP_BREADCRUMBS,
+        notificationCount: 0,
+        organizations: MOCK_ORGANIZATIONS,
+        activeOrganizationId: "org-2",
+        commandPaletteRoutes: MOCK_COMMAND_PALETTE_ROUTES,
+    },
+}
+
+export const WithNotifications: TStory = {
+    args: {
+        userName: "Maria Ivanova",
+        breadcrumbs: [
+            { label: "Dashboard", path: "/" },
+            { label: "Reviews" },
+        ],
         notificationCount: 12,
     },
 }
