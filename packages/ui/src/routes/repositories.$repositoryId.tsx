@@ -10,7 +10,7 @@ const LazyRepositoryOverviewPage = lazy(
     async (): Promise<{
         default: (props: { repositoryId: string }) => ReactElement
     }> => {
-        const pageModule = await import("@/pages/repository-overview.page")
+        const pageModule = await import("@/pages/repository-overview")
         return {
             default: (props): ReactElement => (
                 <pageModule.RepositoryOverviewPage repositoryId={props.repositoryId} />

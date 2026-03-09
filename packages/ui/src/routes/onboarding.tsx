@@ -25,7 +25,7 @@ const LazyOnboardingWizardPage = lazy(
             onScanStart: (payload: IOnboardingScanStartPayload) => void
         }) => ReactElement
     }> => {
-        const pageModule = await import("@/pages/onboarding-wizard.page")
+        const pageModule = await import("@/pages/onboarding-wizard")
         return {
             default: pageModule.OnboardingWizardPage,
         }

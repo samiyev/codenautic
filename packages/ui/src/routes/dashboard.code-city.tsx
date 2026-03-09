@@ -10,7 +10,7 @@ const LazyCodeCityDashboardPage = lazy(
     async (): Promise<{
         default: () => ReactElement
     }> => {
-        const pageModule = await import("@/pages/code-city-dashboard.page")
+        const pageModule = await import("@/pages/code-city-dashboard")
 
         return {
             default: (): ReactElement => <pageModule.CodeCityDashboardPage />,

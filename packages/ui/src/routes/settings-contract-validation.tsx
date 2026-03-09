@@ -8,7 +8,7 @@ import { createFileRoute } from "@tanstack/react-router"
 
 const LazySettingsContractValidationPage = lazy(
     async (): Promise<{ default: () => ReactElement }> => {
-        const pageModule = await import("@/pages/settings-contract-validation.page")
+        const pageModule = await import("@/pages/settings-contract-validation")
         return {
             default: pageModule.SettingsContractValidationPage,
         }
