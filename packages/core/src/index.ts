@@ -65,6 +65,7 @@ export {type INotificationService} from "./application/ports/outbound/notificati
 export {type IRepositoryScanner} from "./application/ports/outbound/scanning/repository-scanner"
 export {type IRepositoryIndexRepository} from "./application/ports/outbound/scanning/repository-index-repository"
 export {type IScanProgressRepository} from "./application/ports/outbound/scanning/scan-progress-repository"
+export {type ISourceCodeParser, type ISourceCodeParseRequest} from "./application/ports/outbound/scanning/source-code-parser.port"
 export {type IPromptConfigurationRepository} from "./application/ports/outbound/prompt-configuration-repository.port"
 export {type IPromptTemplateRepository} from "./application/ports/outbound/prompt-template-repository.port"
 export {type ITeamRepository} from "./application/ports/outbound/team-repository.port"
@@ -154,6 +155,23 @@ export {
     type IDeleteSystemSettingOutput,
 } from "./application/dto/common/system-setting.dto"
 export {type IFileMetricsDTO} from "./application/dto/analytics"
+export {
+    AST_FUNCTION_KIND,
+    AST_IMPORT_KIND,
+    AST_LANGUAGE,
+    type AstFunctionKind,
+    type AstImportKind,
+    type IAstCallDTO,
+    type IAstClassDTO,
+    type IAstEnumDTO,
+    type IAstFunctionDTO,
+    type IAstImportDTO,
+    type IAstInterfaceDTO,
+    type IAstSourceLocationDTO,
+    type IAstTypeAliasDTO,
+    type IParsedSourceFileDTO,
+    type SupportedLanguage,
+} from "./application/dto/ast"
 export {
     ANALYTICS_GROUP_BY,
     type IAnalyticsAggregatedMetrics,

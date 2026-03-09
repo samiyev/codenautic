@@ -36,6 +36,7 @@ import type {ITeamRuleProvider} from "../../src/application/ports/outbound/rule/
 import type {IRepositoryIndexRepository} from "../../src/application/ports/outbound/scanning/repository-index-repository"
 import type {IRepositoryScanner} from "../../src/application/ports/outbound/scanning/repository-scanner"
 import type {IScanProgressRepository} from "../../src/application/ports/outbound/scanning/scan-progress-repository"
+import type {ISourceCodeParser} from "../../src/application/ports/outbound/scanning/source-code-parser.port"
 import type {ITaskRepository} from "../../src/application/ports/outbound/task-repository.port"
 import type {ITeamRepository} from "../../src/application/ports/outbound/team-repository.port"
 import type {IUserRepository} from "../../src/application/ports/outbound/user-repository.port"
@@ -161,6 +162,8 @@ describe("TOKENS", () => {
             TOKENS.Scanning.RepositoryScanner
         const scanProgressRepositoryToken: InjectionToken<IScanProgressRepository> =
             TOKENS.Scanning.ScanProgressRepository
+        const sourceCodeParserToken: InjectionToken<ISourceCodeParser> =
+            TOKENS.Scanning.SourceCodeParser
         const taskRepositoryToken: InjectionToken<ITaskRepository> = TOKENS.Task.Repository
         const teamRepositoryToken: InjectionToken<ITeamRepository> = TOKENS.Team.Repository
         const userRepositoryToken: InjectionToken<IUserRepository> = TOKENS.User.Repository
@@ -203,6 +206,7 @@ describe("TOKENS", () => {
             repositoryIndexRepositoryToken,
             repositoryScannerToken,
             scanProgressRepositoryToken,
+            sourceCodeParserToken,
             taskRepositoryToken,
             teamRepositoryToken,
             userRepositoryToken,

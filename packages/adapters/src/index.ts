@@ -1,4 +1,12 @@
 export {
+    AST_PARSER_ERROR_CODE,
+    AstParserError,
+    BaseParser,
+    type AstParserErrorCode,
+    type IAstParserErrorDetails,
+    type IBaseParserOptions,
+} from "./ast"
+export {
     GIT_ACL_ERROR_KIND,
     GIT_PROVIDER_FACTORY_ERROR_CODE,
     GIT_PROVIDER_TYPE,
