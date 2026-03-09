@@ -1,9 +1,10 @@
-import type { ReactElement } from "react"
 import {
     Checkbox as HeroUICheckbox,
     type CheckboxProps as HeroUICheckboxProps,
     type CheckboxGroupProps,
 } from "@heroui/react"
+
+import { createToggleWrapper } from "./create-toggle-wrapper"
 
 /**
  * Свойства Checkbox с поддержкой legacy callback `onValueChange`.
@@ -17,19 +18,11 @@ export interface ICheckboxProps extends Omit<HeroUICheckboxProps, "onChange"> {
 
 /**
  * Обертка Checkbox с поддержкой `onValueChange` для обратной совместимости.
- *
- * @param props Свойства компонента.
- * @returns HeroUI Checkbox.
+ * Создана через generic factory `createToggleWrapper`.
  */
-export function Checkbox(props: ICheckboxProps): ReactElement {
-    const { children, isInvalid, onValueChange, ...checkboxProps } = props
-
-    return (
-        <HeroUICheckbox {...checkboxProps} isInvalid={isInvalid} onChange={onValueChange}>
-            {children}
-        </HeroUICheckbox>
-    )
-}
+export const Checkbox = createToggleWrapper<HeroUICheckboxProps>({
+    Component: HeroUICheckbox,
+})
 
 export type { ICheckboxProps as CheckboxProps }
 export type { CheckboxGroupProps }

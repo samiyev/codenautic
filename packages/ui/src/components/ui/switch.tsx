@@ -1,5 +1,6 @@
-import type { ReactElement } from "react"
 import { Switch as HeroUISwitch, type SwitchProps as HeroUISwitchProps } from "@heroui/react"
+
+import { createToggleWrapper } from "./create-toggle-wrapper"
 
 /**
  * Свойства Switch с поддержкой legacy callback `onValueChange`.
@@ -13,22 +14,11 @@ interface ISwitchProps extends HeroUISwitchProps {
 
 /**
  * Обертка Switch с обратной совместимостью `onValueChange`.
- *
- * @param props Свойства переключателя.
- * @returns HeroUI Switch.
+ * Создана через generic factory `createToggleWrapper`.
  */
-export function Switch(props: ISwitchProps): ReactElement {
-    const { children, isInvalid, onValueChange, ...switchProps } = props
-
-    return (
-        <HeroUISwitch
-            {...switchProps}
-            data-invalid={isInvalid === true ? "true" : undefined}
-            onChange={onValueChange}
-        >
-            {children}
-        </HeroUISwitch>
-    )
-}
+export const Switch = createToggleWrapper<HeroUISwitchProps>({
+    Component: HeroUISwitch,
+    invalidAsDataAttr: true,
+})
 
 export type { ISwitchProps as SwitchProps }

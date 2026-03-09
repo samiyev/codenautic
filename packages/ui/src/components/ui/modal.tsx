@@ -11,12 +11,21 @@ import {
 } from "@heroui/react"
 
 /**
- * Совместимый с legacy API root-модальный компонент.
+ * Adapter HeroUI Modal wrapper.
+ *
+ * Value-add over raw HeroUI Modal:
+ * - Re-exports HeroUI Modal as-is for `<Modal isOpen onOpenChange>` API.
+ * - Provides `ModalContent` that composes Backdrop → Container → Dialog internally,
+ *   matching the legacy single-wrapper pattern (`<ModalContent>children</ModalContent>`)
+ *   instead of requiring three nested HeroUI sub-components.
+ * - `ModalHeader`, `ModalBody`, `ModalFooter`, `ModalBackdrop` — thin passthrough wrappers
+ *   that accept `readonly children` (legacy compat) and delegate to HeroUI sub-components.
  */
 export const Modal = HeroUIModal
 
 /**
  * Legacy `ModalContent` wrapper.
+ * Composes HeroUI Backdrop + Container + Dialog into a single component.
  */
 export function ModalContent(
     props: Omit<HeroUIModalDialogProps, "children"> & {

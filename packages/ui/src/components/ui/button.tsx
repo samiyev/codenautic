@@ -92,7 +92,15 @@ function getButtonVariant(
 }
 
 /**
- * Button с поддержкой legacy-атрибутов.
+ * Extended HeroUI Button wrapper.
+ *
+ * Value-add over raw HeroUI Button:
+ * - Legacy variant mapping: `solid` → default, `light` → ghost, `flat` → secondary, `bordered` → outline.
+ * - `disabled` → `isDisabled` bridge for legacy callsites.
+ * - `isLoading` prop sets `aria-busy` and disables the button.
+ * - `startContent` / `endContent` slots rendered via inline flex.
+ * - `radius="full"` applied as className (HeroUI v3 removed radius prop).
+ * - `color` mapped to HeroUI variant when explicit `variant` is not provided.
  *
  * @param props Свойства кнопки.
  * @returns HeroUI button с fallback-поддержкой.
