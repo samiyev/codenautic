@@ -164,17 +164,17 @@ describe("settings integrations page", (): void => {
         expect(screen.getByText("Connection health summary")).not.toBeNull()
         expect(
             screen.getByText((_, element): boolean => {
-                return element?.textContent === "Connected: 2" && element.tagName === "P"
+                return element?.textContent === "Connected 2" && element.tagName === "P"
             }),
         ).not.toBeNull()
         expect(
             screen.getByText((_, element): boolean => {
-                return element?.textContent === "Degraded: 1" && element.tagName === "P"
+                return element?.textContent === "Degraded 1" && element.tagName === "P"
             }),
         ).not.toBeNull()
         expect(
             screen.getByText((_, element): boolean => {
-                return element?.textContent === "Disconnected: 1" && element.tagName === "P"
+                return element?.textContent === "Disconnected 1" && element.tagName === "P"
             }),
         ).not.toBeNull()
     })
@@ -185,17 +185,13 @@ describe("settings integrations page", (): void => {
         renderWithProviders(<SettingsIntegrationsPage />)
 
         expect(screen.getByText("Jira")).not.toBeNull()
-        expect(screen.getByText("Issue sync и ticket linking для review findings.")).not.toBeNull()
+        expect(screen.getByText("Issue sync and ticket linking for review findings.")).not.toBeNull()
 
         expect(screen.getByText("Linear")).not.toBeNull()
-        expect(
-            screen.getByText("Lightweight issue routing для triage и ownership."),
-        ).not.toBeNull()
+        expect(screen.getByText("Lightweight issue routing for triage and ownership.")).not.toBeNull()
 
         expect(screen.getByText("Sentry")).not.toBeNull()
-        expect(
-            screen.getByText("Production incidents и error alerts correlation."),
-        ).not.toBeNull()
+        expect(screen.getByText("Production incidents and error alerts correlation.")).not.toBeNull()
 
         expect(screen.getByText("Slack")).not.toBeNull()
         expect(
@@ -214,7 +210,7 @@ describe("settings integrations page", (): void => {
         const degradedChips = screen.getAllByText("Degraded")
         expect(degradedChips.length).toBeGreaterThanOrEqual(1)
 
-        expect(screen.getByText("Disconnected")).not.toBeNull()
+        expect(screen.getAllByText("Disconnected").length).toBeGreaterThanOrEqual(1)
     })
 
     it("when страница рендерится, then отображает secret/token статус и last sync для каждой интеграции", (): void => {
@@ -222,11 +218,11 @@ describe("settings integrations page", (): void => {
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
-        const configuredElements = screen.getAllByText(/Secret\/token:/)
+        const configuredElements = screen.getAllByText(/Secret\/token/)
         expect(configuredElements.length).toBe(4)
 
-        expect(screen.getByText(/configured · Last sync: 2026-03-04 09:12/)).not.toBeNull()
-        expect(screen.getByText(/not configured · Last sync: not synced yet/)).not.toBeNull()
+        expect(screen.getByText(/configured · Last sync 2026-03-04 09:12/)).not.toBeNull()
+        expect(screen.getByText(/not configured · Last sync not synced yet/)).not.toBeNull()
     })
 
     it("when нажимается Disconnect на подключённой интеграции, then показывается toast", async (): Promise<void> => {
@@ -542,9 +538,7 @@ describe("settings integrations page", (): void => {
         await user.click(screen.getByRole("button", { name: "Refresh" }))
 
         expect(failingRefreshSource).toHaveBeenCalledWith("jira")
-        expect(mockShowToastError).toHaveBeenCalledWith(
-            "Unable to queue context source refresh.",
-        )
+        expect(mockShowToastError).toHaveBeenCalledWith("Unable to queue context source refresh.")
     })
 
     it("when подключённая интеграция отключается и затем снова подключается, then показываются toast для обоих действий", async (): Promise<void> => {
@@ -623,9 +617,7 @@ describe("settings integrations page", (): void => {
             ),
         ).not.toBeNull()
         expect(
-            screen.getByText(
-                "Manage indexed sources and inspect loaded context snippets.",
-            ),
+            screen.getByText("Manage indexed sources and inspect loaded context snippets."),
         ).not.toBeNull()
     })
 

@@ -424,11 +424,7 @@ describe("settings code review page", (): void => {
         await user.click(screen.getByRole("button", { name: "Reset ignore paths" }))
 
         await waitFor((): void => {
-            expect(repositoryConfig.ignorePatterns).toEqual([
-                "/dist",
-                "/node_modules",
-                "/coverage",
-            ])
+            expect(repositoryConfig.ignorePatterns).toEqual(["/dist", "/node_modules", "/coverage"])
         })
     })
 

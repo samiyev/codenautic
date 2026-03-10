@@ -23,14 +23,14 @@ describe("SystemHealthPage", (): void => {
 
         renderWithProviders(<SystemHealthPage />)
 
-        const pendingMessage = screen.getByText("Проверяем доступность API...")
-        expect(pendingMessage.textContent).toBe("Проверяем доступность API...")
+        const pendingMessage = screen.getByText("Checking API availability...")
+        expect(pendingMessage.textContent).toBe("Checking API availability...")
 
         const statusMessage = await screen.findByText("ok")
         expect(statusMessage.textContent).toBe("ok")
 
-        const premiumEnabled = await screen.findByText("Premium функции включены")
-        expect(premiumEnabled.textContent).toBe("Premium функции включены")
+        const premiumEnabled = await screen.findByText("Premium features are enabled")
+        expect(premiumEnabled.textContent).toBe("Premium features are enabled")
     })
 
     it("показывает ошибку и позволяет повторить запрос", async (): Promise<void> => {
@@ -70,9 +70,9 @@ describe("SystemHealthPage", (): void => {
         renderWithProviders(<SystemHealthPage />, { queryClient })
 
         const alert = await screen.findByRole("alert")
-        expect(alert.textContent).toBe("Не удалось получить статус API")
+        expect(alert.textContent).toBe("Failed to fetch API status")
 
-        const retryButton = screen.getByRole("button", { name: "Повторить проверку" })
+        const retryButton = screen.getByRole("button", { name: "Retry" })
         await user.click(retryButton)
 
         const statusMessage = await screen.findByText("ok")
@@ -103,14 +103,14 @@ describe("SystemHealthPage", (): void => {
 
         renderWithProviders(<SystemHealthPage />)
 
-        const premiumDisabled = await screen.findByText("Premium функции выключены")
-        expect(premiumDisabled.textContent).toBe("Premium функции выключены")
+        const premiumDisabled = await screen.findByText("Premium features are disabled")
+        expect(premiumDisabled.textContent).toBe("Premium features are disabled")
 
         const premiumHint = screen.getByText(
-            "Сервис feature flags недоступен или premium-доступ не выдан.",
+            "Feature flags backend is unavailable or premium access is not granted.",
         )
         expect(premiumHint.textContent).toBe(
-            "Сервис feature flags недоступен или premium-доступ не выдан.",
+            "Feature flags backend is unavailable or premium access is not granted.",
         )
     })
 })

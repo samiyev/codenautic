@@ -16,7 +16,7 @@ describe("ReportViewerPage", (): void => {
         expect(screen.getByLabelText("Report trend chart")).not.toBeNull()
         expect(screen.getByLabelText("Report sections distribution chart")).not.toBeNull()
 
-        await user.selectOptions(screen.getByLabelText("Report chart metric"), "deliveryVelocity")
+        await user.selectOptions(screen.getByLabelText("Chart metric"), "deliveryVelocity")
         await user.click(screen.getByRole("button", { name: "Download PDF" }))
         await waitFor(() => {
             expect(screen.getByText("Download prepared in PDF format.")).not.toBeNull()

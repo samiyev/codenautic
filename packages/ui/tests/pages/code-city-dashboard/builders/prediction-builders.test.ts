@@ -250,10 +250,7 @@ describe("buildPredictionConfusionMatrix", (): void => {
         const matrix = buildPredictionConfusionMatrix(entries)
 
         const total =
-            matrix.truePositive +
-            matrix.trueNegative +
-            matrix.falsePositive +
-            matrix.falseNegative
+            matrix.truePositive + matrix.trueNegative + matrix.falsePositive + matrix.falseNegative
         expect(total).toBe(8)
     })
 
@@ -421,7 +418,13 @@ describe("buildPredictionDashboardHotspots", (): void => {
             },
         ]
         const overlayEntries: ICityPredictionOverlayEntry[] = [
-            { fileId: "f1", riskLevel: "high", confidenceScore: 90, label: "src/high.ts", reason: "test" },
+            {
+                fileId: "f1",
+                riskLevel: "high",
+                confidenceScore: 90,
+                label: "src/high.ts",
+                reason: "test",
+            },
         ]
 
         const hotspots = buildPredictionDashboardHotspots(files, overlayEntries)
@@ -434,7 +437,13 @@ describe("buildPredictionDashboardHotspots", (): void => {
     it("when overlay entry references missing file, then uses default issue increase", (): void => {
         const files: ICodeCityTreemapFileDescriptor[] = []
         const overlayEntries: ICityPredictionOverlayEntry[] = [
-            { fileId: "missing", riskLevel: "medium", confidenceScore: 70, label: "missing.ts", reason: "test" },
+            {
+                fileId: "missing",
+                riskLevel: "medium",
+                confidenceScore: 70,
+                label: "missing.ts",
+                reason: "test",
+            },
         ]
 
         const hotspots = buildPredictionDashboardHotspots(files, overlayEntries)
@@ -448,11 +457,15 @@ describe("buildPredictionDashboardHotspots", (): void => {
     })
 
     it("when risk is 'low', then predicted issue increase is 1", (): void => {
-        const files: ICodeCityTreemapFileDescriptor[] = [
-            { id: "f1", path: "src/low.ts", loc: 10 },
-        ]
+        const files: ICodeCityTreemapFileDescriptor[] = [{ id: "f1", path: "src/low.ts", loc: 10 }]
         const overlayEntries: ICityPredictionOverlayEntry[] = [
-            { fileId: "f1", riskLevel: "low", confidenceScore: 50, label: "src/low.ts", reason: "low" },
+            {
+                fileId: "f1",
+                riskLevel: "low",
+                confidenceScore: 50,
+                label: "src/low.ts",
+                reason: "low",
+            },
         ]
 
         const hotspots = buildPredictionDashboardHotspots(files, overlayEntries)
@@ -465,7 +478,13 @@ describe("buildPredictionDashboardHotspots", (): void => {
             { id: "f1", path: "src/med.ts", loc: 100, bugIntroductions: { "30d": 0 } },
         ]
         const overlayEntries: ICityPredictionOverlayEntry[] = [
-            { fileId: "f1", riskLevel: "medium", confidenceScore: 70, label: "src/med.ts", reason: "med" },
+            {
+                fileId: "f1",
+                riskLevel: "medium",
+                confidenceScore: 70,
+                label: "src/med.ts",
+                reason: "med",
+            },
         ]
 
         const hotspots = buildPredictionDashboardHotspots(files, overlayEntries)
@@ -478,7 +497,13 @@ describe("buildPredictionDashboardHotspots", (): void => {
             { id: "f1", path: "src/med.ts", loc: 100, bugIntroductions: { "30d": 7 } },
         ]
         const overlayEntries: ICityPredictionOverlayEntry[] = [
-            { fileId: "f1", riskLevel: "medium", confidenceScore: 70, label: "src/med.ts", reason: "med" },
+            {
+                fileId: "f1",
+                riskLevel: "medium",
+                confidenceScore: 70,
+                label: "src/med.ts",
+                reason: "med",
+            },
         ]
 
         const hotspots = buildPredictionDashboardHotspots(files, overlayEntries)
@@ -529,9 +554,7 @@ describe("buildPredictionQualityTrendPoints", (): void => {
     })
 
     it("when given single point, then returns single trend point", (): void => {
-        const single: IHealthTrendPoint[] = [
-            { timestamp: "2026-01-01T00:00:00Z", healthScore: 50 },
-        ]
+        const single: IHealthTrendPoint[] = [{ timestamp: "2026-01-01T00:00:00Z", healthScore: 50 }]
 
         const points = buildPredictionQualityTrendPoints(single)
 
@@ -560,9 +583,7 @@ describe("buildPredictionQualityTrendPoints", (): void => {
     })
 
     it("when timestamp is invalid, then uses raw timestamp as label", (): void => {
-        const invalidTrend: IHealthTrendPoint[] = [
-            { timestamp: "not-a-date", healthScore: 80 },
-        ]
+        const invalidTrend: IHealthTrendPoint[] = [{ timestamp: "not-a-date", healthScore: 80 }]
 
         const points = buildPredictionQualityTrendPoints(invalidTrend)
 
@@ -680,8 +701,20 @@ describe("buildPredictionAccuracyCases", (): void => {
 
     it("when given files and entries, then returns accuracy cases", (): void => {
         const entries: ICityPredictionOverlayEntry[] = [
-            { fileId: "f1", riskLevel: "high", confidenceScore: 90, label: "src/review.ts", reason: "r" },
-            { fileId: "f2", riskLevel: "low", confidenceScore: 50, label: "src/utils.ts", reason: "r" },
+            {
+                fileId: "f1",
+                riskLevel: "high",
+                confidenceScore: 90,
+                label: "src/review.ts",
+                reason: "r",
+            },
+            {
+                fileId: "f2",
+                riskLevel: "low",
+                confidenceScore: 50,
+                label: "src/utils.ts",
+                reason: "r",
+            },
         ]
 
         const cases = buildPredictionAccuracyCases(files, entries)
@@ -692,7 +725,13 @@ describe("buildPredictionAccuracyCases", (): void => {
 
     it("when file has bugIntroductions > 1, then outcome is 'incident'", (): void => {
         const entries: ICityPredictionOverlayEntry[] = [
-            { fileId: "f1", riskLevel: "high", confidenceScore: 90, label: "src/review.ts", reason: "r" },
+            {
+                fileId: "f1",
+                riskLevel: "high",
+                confidenceScore: 90,
+                label: "src/review.ts",
+                reason: "r",
+            },
         ]
 
         const cases = buildPredictionAccuracyCases(files, entries)
@@ -713,7 +752,13 @@ describe("buildPredictionAccuracyCases", (): void => {
 
     it("when entry references missing file, then uses defaults", (): void => {
         const entries: ICityPredictionOverlayEntry[] = [
-            { fileId: "missing", riskLevel: "low", confidenceScore: 50, label: "missing.ts", reason: "r" },
+            {
+                fileId: "missing",
+                riskLevel: "low",
+                confidenceScore: 50,
+                label: "missing.ts",
+                reason: "r",
+            },
         ]
 
         const cases = buildPredictionAccuracyCases([], entries)
@@ -751,9 +796,7 @@ describe("buildPredictionAlertModules", (): void => {
     })
 
     it("when path has no segments, then uses full path", (): void => {
-        const files: ICodeCityTreemapFileDescriptor[] = [
-            { id: "f1", path: "review.ts", loc: 100 },
-        ]
+        const files: ICodeCityTreemapFileDescriptor[] = [{ id: "f1", path: "review.ts", loc: 100 }]
 
         const modules = buildPredictionAlertModules(files)
 
@@ -832,14 +875,38 @@ describe("resolvePredictionAlertFocusFileId", (): void => {
 describe("buildPredictionComparisonSnapshots", (): void => {
     it("when given files and entries, then returns 3 period snapshots", (): void => {
         const files: ICodeCityTreemapFileDescriptor[] = [
-            { id: "f1", path: "src/review.ts", loc: 200, bugIntroductions: { "30d": 5 }, complexity: 20 },
+            {
+                id: "f1",
+                path: "src/review.ts",
+                loc: 200,
+                bugIntroductions: { "30d": 5 },
+                complexity: 20,
+            },
             { id: "f2", path: "src/utils.ts", loc: 100, bugIntroductions: { "30d": 1 } },
             { id: "f3", path: "src/service.ts", loc: 150 },
         ]
         const entries: ICityPredictionOverlayEntry[] = [
-            { fileId: "f1", riskLevel: "high", confidenceScore: 90, label: "src/review.ts", reason: "r" },
-            { fileId: "f2", riskLevel: "medium", confidenceScore: 70, label: "src/utils.ts", reason: "r" },
-            { fileId: "f3", riskLevel: "low", confidenceScore: 50, label: "src/service.ts", reason: "r" },
+            {
+                fileId: "f1",
+                riskLevel: "high",
+                confidenceScore: 90,
+                label: "src/review.ts",
+                reason: "r",
+            },
+            {
+                fileId: "f2",
+                riskLevel: "medium",
+                confidenceScore: 70,
+                label: "src/utils.ts",
+                reason: "r",
+            },
+            {
+                fileId: "f3",
+                riskLevel: "low",
+                confidenceScore: 50,
+                label: "src/service.ts",
+                reason: "r",
+            },
         ]
 
         const snapshots = buildPredictionComparisonSnapshots(files, entries)
@@ -874,9 +941,7 @@ describe("buildPredictionComparisonSnapshots", (): void => {
         const entries: ICityPredictionOverlayEntry[] = [
             { fileId: "f1", riskLevel: "high", confidenceScore: 90, label: "hot.ts", reason: "r" },
         ]
-        const files: ICodeCityTreemapFileDescriptor[] = [
-            { id: "f1", path: "src/hot.ts", loc: 200 },
-        ]
+        const files: ICodeCityTreemapFileDescriptor[] = [{ id: "f1", path: "src/hot.ts", loc: 200 }]
 
         const snapshots = buildPredictionComparisonSnapshots(files, entries)
 
@@ -892,7 +957,13 @@ describe("buildPredictionBugProneFiles", (): void => {
             { id: "f3", path: "src/mid.ts", loc: 150, bugIntroductions: { "30d": 3 } },
         ]
         const overlayEntries: ICityPredictionOverlayEntry[] = [
-            { fileId: "f2", riskLevel: "high", confidenceScore: 90, label: "src/high.ts", reason: "r" },
+            {
+                fileId: "f2",
+                riskLevel: "high",
+                confidenceScore: 90,
+                label: "src/high.ts",
+                reason: "r",
+            },
         ]
 
         const bugProne = buildPredictionBugProneFiles(files, overlayEntries)
@@ -908,12 +979,20 @@ describe("buildPredictionBugProneFiles", (): void => {
     it("when files have same bugIntroductions, then sorts by confidence", (): void => {
         const files: ICodeCityTreemapFileDescriptor[] = [
             { id: "f1", path: "src/a.ts", loc: 100, bugIntroductions: { "30d": 3 }, complexity: 5 },
-            { id: "f2", path: "src/b.ts", loc: 100, bugIntroductions: { "30d": 3 }, complexity: 20 },
+            {
+                id: "f2",
+                path: "src/b.ts",
+                loc: 100,
+                bugIntroductions: { "30d": 3 },
+                complexity: 20,
+            },
         ]
 
         const bugProne = buildPredictionBugProneFiles(files, [])
 
-        expect(bugProne[0]?.confidenceScore).toBeGreaterThanOrEqual(bugProne[1]?.confidenceScore ?? 0)
+        expect(bugProne[0]?.confidenceScore).toBeGreaterThanOrEqual(
+            bugProne[1]?.confidenceScore ?? 0,
+        )
     })
 
     it("when file has no bugIntroductions, then defaults to 0", (): void => {
@@ -931,7 +1010,13 @@ describe("buildPredictionBugProneFiles", (): void => {
             { id: "f1", path: "src/file.ts", loc: 100 },
         ]
         const overlayEntries: ICityPredictionOverlayEntry[] = [
-            { fileId: "f1", riskLevel: "high", confidenceScore: 92, label: "src/file.ts", reason: "r" },
+            {
+                fileId: "f1",
+                riskLevel: "high",
+                confidenceScore: 92,
+                label: "src/file.ts",
+                reason: "r",
+            },
         ]
 
         const bugProne = buildPredictionBugProneFiles(files, overlayEntries)
@@ -956,10 +1041,23 @@ describe("buildPredictionBugProneFiles", (): void => {
 describe("buildPredictionExplainEntries", (): void => {
     it("when given files and overlay entries, then returns explain entries", (): void => {
         const files: ICodeCityTreemapFileDescriptor[] = [
-            { id: "f1", path: "src/review.ts", loc: 200, complexity: 15, churn: 5, bugIntroductions: { "30d": 3 } },
+            {
+                id: "f1",
+                path: "src/review.ts",
+                loc: 200,
+                complexity: 15,
+                churn: 5,
+                bugIntroductions: { "30d": 3 },
+            },
         ]
         const overlayEntries: ICityPredictionOverlayEntry[] = [
-            { fileId: "f1", riskLevel: "high", confidenceScore: 90, label: "src/review.ts", reason: "high risk" },
+            {
+                fileId: "f1",
+                riskLevel: "high",
+                confidenceScore: 90,
+                label: "src/review.ts",
+                reason: "high risk",
+            },
         ]
 
         const entries = buildPredictionExplainEntries(files, overlayEntries)
@@ -972,7 +1070,13 @@ describe("buildPredictionExplainEntries", (): void => {
 
     it("when overlay entry references missing file, then uses zero defaults", (): void => {
         const overlayEntries: ICityPredictionOverlayEntry[] = [
-            { fileId: "missing", riskLevel: "low", confidenceScore: 50, label: "missing.ts", reason: "r" },
+            {
+                fileId: "missing",
+                riskLevel: "low",
+                confidenceScore: 50,
+                label: "missing.ts",
+                reason: "r",
+            },
         ]
 
         const entries = buildPredictionExplainEntries([], overlayEntries)
@@ -1021,8 +1125,22 @@ describe("buildPredictionOverlayEntries — additional edge cases", (): void => 
 
     it("when entries have same risk, then sorts by confidence descending", (): void => {
         const files: ICodeCityTreemapFileDescriptor[] = [
-            { id: "f1", path: "src/a.ts", loc: 100, bugIntroductions: { "30d": 5 }, complexity: 30, churn: 10 },
-            { id: "f2", path: "src/b.ts", loc: 100, bugIntroductions: { "30d": 6 }, complexity: 30, churn: 10 },
+            {
+                id: "f1",
+                path: "src/a.ts",
+                loc: 100,
+                bugIntroductions: { "30d": 5 },
+                complexity: 30,
+                churn: 10,
+            },
+            {
+                id: "f2",
+                path: "src/b.ts",
+                loc: 100,
+                bugIntroductions: { "30d": 6 },
+                complexity: 30,
+                churn: 10,
+            },
         ]
 
         const entries = buildPredictionOverlayEntries(files)
@@ -1031,9 +1149,7 @@ describe("buildPredictionOverlayEntries — additional edge cases", (): void => 
     })
 
     it("when single file, then returns single entry", (): void => {
-        const files: ICodeCityTreemapFileDescriptor[] = [
-            { id: "f1", path: "src/only.ts", loc: 50 },
-        ]
+        const files: ICodeCityTreemapFileDescriptor[] = [{ id: "f1", path: "src/only.ts", loc: 50 }]
 
         const entries = buildPredictionOverlayEntries(files)
 

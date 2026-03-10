@@ -59,10 +59,7 @@ describe("onboarding-templates", (): void => {
         })
 
         it("when given 2 URLs, then second job is error with details", (): void => {
-            const urls = [
-                "https://github.com/org/repo1",
-                "https://github.com/org/repo2",
-            ]
+            const urls = ["https://github.com/org/repo1", "https://github.com/org/repo2"]
             const result = createBulkScanJobs(urls)
 
             expect(result).toHaveLength(2)
@@ -335,9 +332,9 @@ describe("onboarding-templates", (): void => {
         })
 
         it("when notifyEmail differs, then returns false", (): void => {
-            expect(
-                isTemplateStateEqual(base, { ...base, notifyEmail: "other@example.com" }),
-            ).toBe(false)
+            expect(isTemplateStateEqual(base, { ...base, notifyEmail: "other@example.com" })).toBe(
+                false,
+            )
         })
 
         it("when tags length differs, then returns false", (): void => {
@@ -345,15 +342,13 @@ describe("onboarding-templates", (): void => {
         })
 
         it("when tags content differs, then returns false", (): void => {
-            expect(
-                isTemplateStateEqual(base, { ...base, tags: ["security", "different"] }),
-            ).toBe(false)
+            expect(isTemplateStateEqual(base, { ...base, tags: ["security", "different"] })).toBe(
+                false,
+            )
         })
 
         it("when tags are empty on both, then returns true", (): void => {
-            expect(
-                isTemplateStateEqual({ ...base, tags: [] }, { ...base, tags: [] }),
-            ).toBe(true)
+            expect(isTemplateStateEqual({ ...base, tags: [] }, { ...base, tags: [] })).toBe(true)
         })
     })
 

@@ -91,7 +91,10 @@ describe("SettingsTeamPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsTeamPage />)
 
-        await user.type(screen.getByRole("textbox", { name: "Invite member by email" }), "bad-email")
+        await user.type(
+            screen.getByRole("textbox", { name: "Invite member by email" }),
+            "bad-email",
+        )
         await user.click(screen.getByRole("button", { name: "Add member" }))
 
         expect(screen.queryByText("bad-email")).toBeNull()

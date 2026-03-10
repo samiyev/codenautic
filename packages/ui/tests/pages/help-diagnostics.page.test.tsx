@@ -12,17 +12,17 @@ describe("HelpDiagnosticsPage", (): void => {
 
         expect(screen.getByText("Help & diagnostics center")).not.toBeNull()
 
-        await user.type(screen.getByRole("textbox", { name: "Help search" }), "provider")
+        await user.type(screen.getByRole("textbox", { name: "Search" }), "provider")
         await user.selectOptions(
-            screen.getByRole("combobox", { name: "Help category" }),
+            screen.getByRole("combobox", { name: "Category" }),
             "providers",
         )
 
         expect(screen.getByText("Provider outage playbook")).not.toBeNull()
         expect(screen.getAllByRole("link", { name: "Open article / diagnostics" }).length).toBe(1)
 
-        await user.clear(screen.getByRole("textbox", { name: "Help search" }))
-        await user.type(screen.getByRole("textbox", { name: "Help search" }), "no-match-query")
+        await user.clear(screen.getByRole("textbox", { name: "Search" }))
+        await user.type(screen.getByRole("textbox", { name: "Search" }), "no-match-query")
         expect(screen.getByText("No matching help content")).not.toBeNull()
     })
 
@@ -72,8 +72,8 @@ describe("HelpDiagnosticsPage", (): void => {
         const flagsCheck = checks.find((check): boolean => check.id === "diag-flags")
 
         expect(providerCheck?.status).toBe("pending")
-        expect(providerCheck?.details).toContain("still loading")
+        expect(providerCheck?.detailsKey).toContain("providerLoading")
         expect(flagsCheck?.status).toBe("pending")
-        expect(flagsCheck?.details).toContain("still loading")
+        expect(flagsCheck?.detailsKey).toContain("featureFlagsLoading")
     })
 })

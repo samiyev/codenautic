@@ -17,7 +17,7 @@ describe("SettingsPrivacyRedactionPage", (): void => {
 
         await user.click(screen.getByRole("button", { name: "Confirm safe export" }))
         await waitFor(() => {
-            expect(screen.getByText(/Export blocked/)).not.toBeNull()
+            expect(screen.getByText(/Export blocked:/)).not.toBeNull()
         })
 
         await user.click(screen.getByRole("button", { name: "Apply redaction suggestions" }))
@@ -47,7 +47,7 @@ describe("SettingsPrivacyRedactionPage", (): void => {
 
         await user.click(screen.getByRole("button", { name: "Confirm safe export" }))
         await waitFor(() => {
-            expect(screen.getByText(/Export blocked/)).not.toBeNull()
+            expect(screen.getByText(/Export blocked:/)).not.toBeNull()
         })
     })
 

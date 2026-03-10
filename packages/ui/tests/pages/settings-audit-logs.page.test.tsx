@@ -68,7 +68,7 @@ describe("SettingsAuditLogsPage", (): void => {
         const exportButtons = screen.getAllByRole("button", { name: "Export CSV" })
         const primaryExportButton = exportButtons[0]
         if (primaryExportButton === undefined) {
-            throw new Error("Export CSV button not found")
+            throw new Error("Экспорт CSV button not found")
         }
         await user.click(primaryExportButton)
         expect(screen.getByText("Exported 1 rows to CSV.")).not.toBeNull()

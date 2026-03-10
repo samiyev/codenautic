@@ -15,11 +15,11 @@ describe("ReportListPage", (): void => {
         expect(screen.getByRole("button", { name: "Open generator" })).not.toBeNull()
         expect(screen.getAllByRole("button", { name: "Open viewer" }).length).toBeGreaterThan(0)
 
-        await user.selectOptions(screen.getByLabelText("Report list type filter"), "architecture")
+        await user.selectOptions(screen.getByLabelText("Report type"), "architecture")
         expect(screen.getByText("Architecture Weekly Snapshot")).not.toBeNull()
         expect(screen.queryByText("Delivery Throughput Pulse")).toBeNull()
 
-        await user.selectOptions(screen.getByLabelText("Report list type filter"), "all")
+        await user.selectOptions(screen.getByLabelText("Report type"), "all")
         await user.click(screen.getByRole("button", { name: "Regenerate report-001" }))
         await waitFor(() => {
             expect(screen.getByText("Regeneration queued for report report-001.")).not.toBeNull()
@@ -32,7 +32,7 @@ describe("ReportListPage", (): void => {
             expect(screen.queryByLabelText("Report row report-003")).toBeNull()
         })
 
-        await user.type(screen.getByLabelText("Report list date from"), "2026-03-06")
+        await user.type(screen.getByLabelText("Date from"), "2026-03-06")
         expect(screen.getByText("Architecture Drift Mid-Sprint")).not.toBeNull()
     })
 })

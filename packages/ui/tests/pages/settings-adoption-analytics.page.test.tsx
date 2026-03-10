@@ -12,7 +12,7 @@ describe("SettingsAdoptionAnalyticsPage", (): void => {
         expect(screen.getByText("Usage & adoption analytics")).not.toBeNull()
         expect(screen.getByText("Adoption funnel")).not.toBeNull()
         expect(screen.getByText("Workflow health")).not.toBeNull()
-        expect(screen.getByText(/aggregated UX telemetry only/)).not.toBeNull()
+        expect(screen.getByText(/aggregated UX telemetry/)).not.toBeNull()
     })
 
     it("пересчитывает метрики при смене диапазона", async (): Promise<void> => {

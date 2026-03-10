@@ -37,31 +37,31 @@ describe("repositories list page", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<RepositoriesListPage repositories={repositories} />)
 
-        await user.type(screen.getByLabelText("Поиск репозитория"), "api")
+        await user.type(screen.getByLabelText("Search repository"), "api")
         expect(
             await screen.findByRole("link", {
-                name: "Открыть обзор репозитория platform-team/api-gateway",
+                name: "Open repository overview platform-team/api-gateway",
             }),
         ).not.toBeNull()
         expect(
             screen.queryByRole("link", {
-                name: "Открыть обзор репозитория frontend-team/ui-dashboard",
+                name: "Open repository overview frontend-team/ui-dashboard",
             }),
         ).toBeNull()
 
-        await user.selectOptions(screen.getByLabelText("Фильтр по статусу"), "error")
+        await user.selectOptions(screen.getByLabelText("Filter by status"), "error")
         expect(screen.queryByRole("link", { name: /platform-team\/api-gateway/u })).toBeNull()
-        expect(screen.queryByText("Результатов по заданным фильтрам не найдено.")).not.toBeNull()
+        expect(screen.queryByText("No results found for the given filters.")).not.toBeNull()
     })
 
     it("меняет порядок сортировки", async (): Promise<void> => {
         const user = userEvent.setup()
         renderWithProviders(<RepositoriesListPage repositories={repositories} />)
-        await user.selectOptions(screen.getByLabelText("Сортировка"), "lastScanAt")
+        await user.selectOptions(screen.getByLabelText("Sort"), "lastScanAt")
 
         expect(
             await screen.findByRole("link", {
-                name: "Открыть обзор репозитория backend-core/payment-worker",
+                name: "Open repository overview backend-core/payment-worker",
             }),
         ).not.toBeNull()
     })
@@ -69,9 +69,9 @@ describe("repositories list page", (): void => {
     it("показывает empty state и CTA для пустого onboarding", (): void => {
         renderWithProviders(<RepositoriesListPage repositories={[]} />)
 
-        expect(screen.getByText("Нет подключенных репозиториев")).not.toBeNull()
-        expect(screen.getByRole("link", { name: "Начать onboarding" })).not.toBeNull()
-        expect(screen.getByRole("link", { name: "Начать onboarding" })).toHaveAttribute(
+        expect(screen.getByText("No connected repositories")).not.toBeNull()
+        expect(screen.getByRole("link", { name: "Start onboarding" })).not.toBeNull()
+        expect(screen.getByRole("link", { name: "Start onboarding" })).toHaveAttribute(
             "href",
             "/onboarding",
         )
@@ -106,19 +106,19 @@ describe("repositories list page", (): void => {
             />,
         )
 
-        expect(screen.queryAllByText("Ошибка").length).toBeGreaterThan(0)
+        expect(screen.queryAllByText("Scan error").length).toBeGreaterThan(0)
         expect(
-            await screen.findByText("Проанализировано файлов до ошибки: 41 из 112"),
+            await screen.findByText("Files analyzed before error: 41 of 112"),
         ).not.toBeNull()
 
-        const detailsTrigger = await screen.findByText("Подробнее об ошибке")
+        const detailsTrigger = await screen.findByText("Error details")
         await user.click(detailsTrigger)
 
         expect(
             await screen.findByText("Ошибка на этапе индексации: недоступен пакет react-markdown"),
         ).not.toBeNull()
 
-        await user.click(screen.getByRole("button", { name: "Повторить сканирование" }))
+        await user.click(screen.getByRole("button", { name: "Retry scan" }))
         expect(onRetryScan).toHaveBeenCalledWith("backend-core/payment-worker")
     })
 })

@@ -263,7 +263,11 @@ describe("buildTeamLeaderboardEntries", (): void => {
             { fileId: "f1", ownerId: "bob" },
         ]
 
-        const entries = buildTeamLeaderboardEntries(testFiles, sameQualityContributors, sameOwnership)
+        const entries = buildTeamLeaderboardEntries(
+            testFiles,
+            sameQualityContributors,
+            sameOwnership,
+        )
 
         expect(entries).toHaveLength(2)
     })
@@ -475,7 +479,14 @@ describe("buildDistrictTrendIndicators — edge cases", (): void => {
 
     it("when multiple districts, then sorted by delta magnitude", (): void => {
         const files: ICodeCityTreemapFileDescriptor[] = [
-            { id: "f1", path: "aaa/file.ts", loc: 100, complexity: 50, churn: 10, bugIntroductions: { "30d": 5 } },
+            {
+                id: "f1",
+                path: "aaa/file.ts",
+                loc: 100,
+                complexity: 50,
+                churn: 10,
+                bugIntroductions: { "30d": 5 },
+            },
             { id: "f2", path: "bbb/file.ts", loc: 100, complexity: 5, churn: 1 },
             { id: "f3", path: "ccc/file.ts", loc: 100, complexity: 20, churn: 5 },
         ]

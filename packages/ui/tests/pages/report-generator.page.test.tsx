@@ -15,11 +15,11 @@ describe("ReportGeneratorPage", (): void => {
         expect(screen.getByRole("button", { name: "Open latest report" })).not.toBeNull()
 
         await user.selectOptions(screen.getByLabelText("Report type"), "delivery")
-        await user.selectOptions(screen.getByLabelText("Report format"), "html")
-        await user.clear(screen.getByLabelText("Report date range start"))
-        await user.type(screen.getByLabelText("Report date range start"), "2026-02-01")
-        await user.clear(screen.getByLabelText("Report date range end"))
-        await user.type(screen.getByLabelText("Report date range end"), "2026-02-28")
+        await user.selectOptions(screen.getByLabelText("Output format"), "html")
+        await user.clear(screen.getByLabelText("Start date"))
+        await user.type(screen.getByLabelText("Start date"), "2026-02-01")
+        await user.clear(screen.getByLabelText("End date"))
+        await user.type(screen.getByLabelText("End date"), "2026-02-28")
 
         await user.click(screen.getByRole("button", { name: "Preview report" }))
         await waitFor(() => {
@@ -51,8 +51,8 @@ describe("ReportGeneratorPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<ReportGeneratorPage />)
 
-        await user.clear(screen.getByLabelText("Report date range start"))
-        await user.clear(screen.getByLabelText("Report date range end"))
+        await user.clear(screen.getByLabelText("Start date"))
+        await user.clear(screen.getByLabelText("End date"))
 
         await user.click(screen.getByRole("button", { name: "Preview report" }))
         await waitFor((): void => {
@@ -64,14 +64,12 @@ describe("ReportGeneratorPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<ReportGeneratorPage />)
 
-        await user.clear(screen.getByLabelText("Report date range start"))
-        await user.clear(screen.getByLabelText("Report date range end"))
+        await user.clear(screen.getByLabelText("Start date"))
+        await user.clear(screen.getByLabelText("End date"))
 
         await user.click(screen.getByRole("button", { name: "Generate report" }))
         await waitFor((): void => {
-            expect(
-                screen.getByText(/Generation blocked: Date range is required\./),
-            ).not.toBeNull()
+            expect(screen.getByText(/Generation blocked: Date range is required\./)).not.toBeNull()
         })
     })
 
@@ -79,10 +77,10 @@ describe("ReportGeneratorPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<ReportGeneratorPage />)
 
-        await user.clear(screen.getByLabelText("Report date range start"))
-        await user.type(screen.getByLabelText("Report date range start"), "2026-03-01")
-        await user.clear(screen.getByLabelText("Report date range end"))
-        await user.type(screen.getByLabelText("Report date range end"), "2026-01-01")
+        await user.clear(screen.getByLabelText("Start date"))
+        await user.type(screen.getByLabelText("Start date"), "2026-03-01")
+        await user.clear(screen.getByLabelText("End date"))
+        await user.type(screen.getByLabelText("End date"), "2026-01-01")
 
         await user.click(screen.getByRole("button", { name: "Preview report" }))
         await waitFor((): void => {
@@ -96,17 +94,15 @@ describe("ReportGeneratorPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<ReportGeneratorPage />)
 
-        await user.clear(screen.getByLabelText("Report date range start"))
-        await user.type(screen.getByLabelText("Report date range start"), "2026-03-01")
-        await user.clear(screen.getByLabelText("Report date range end"))
-        await user.type(screen.getByLabelText("Report date range end"), "2026-01-01")
+        await user.clear(screen.getByLabelText("Start date"))
+        await user.type(screen.getByLabelText("Start date"), "2026-03-01")
+        await user.clear(screen.getByLabelText("End date"))
+        await user.type(screen.getByLabelText("End date"), "2026-01-01")
 
         await user.click(screen.getByRole("button", { name: "Generate report" }))
         await waitFor((): void => {
             expect(
-                screen.getByText(
-                    /Generation blocked: Start date cannot be after end date\./,
-                ),
+                screen.getByText(/Generation blocked: Start date cannot be after end date\./),
             ).not.toBeNull()
         })
     })
@@ -121,9 +117,7 @@ describe("ReportGeneratorPage", (): void => {
         await user.click(screen.getByRole("button", { name: "Preview report" }))
         await waitFor((): void => {
             expect(
-                screen.getByText(
-                    /Preview blocked: select at least one report section\./,
-                ),
+                screen.getByText(/Preview blocked: select at least one report section\./),
             ).not.toBeNull()
         })
     })
@@ -138,9 +132,7 @@ describe("ReportGeneratorPage", (): void => {
         await user.click(screen.getByRole("button", { name: "Generate report" }))
         await waitFor((): void => {
             expect(
-                screen.getByText(
-                    /Generation blocked: select at least one report section\./,
-                ),
+                screen.getByText(/Generation blocked: select at least one report section\./),
             ).not.toBeNull()
         })
     })
@@ -152,9 +144,7 @@ describe("ReportGeneratorPage", (): void => {
         await user.click(screen.getByLabelText("Report section executive-summary"))
         await user.click(screen.getByLabelText("Report section risk-hotspots"))
 
-        expect(
-            screen.getByText("Select at least one section to build preview."),
-        ).not.toBeNull()
+        expect(screen.getByText("Select at least one section to build preview.")).not.toBeNull()
     })
 
     it("toggle section добавляет и удаляет секцию из selected list", async (): Promise<void> => {
@@ -189,7 +179,7 @@ describe("ReportGeneratorPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<ReportGeneratorPage />)
 
-        await user.selectOptions(screen.getByLabelText("Report format"), "png")
+        await user.selectOptions(screen.getByLabelText("Output format"), "png")
 
         const payload = screen.getByLabelText("Report preview payload")
         expect(payload.textContent).toContain('"format": "png"')
@@ -218,13 +208,10 @@ describe("ReportGeneratorPage", (): void => {
         const dialog = screen.getByRole("dialog", { name: "Report schedule dialog" })
         expect(dialog).not.toBeNull()
 
-        await user.clear(within(dialog).getByLabelText("Schedule recipients"))
-        await user.type(
-            within(dialog).getByLabelText("Schedule recipients"),
-            "dev@codenautic.app",
-        )
+        await user.clear(within(dialog).getByLabelText("Recipients"))
+        await user.type(within(dialog).getByLabelText("Recipients"), "dev@codenautic.app")
 
-        await user.selectOptions(within(dialog).getByLabelText("Schedule format"), "html")
+        await user.selectOptions(within(dialog).getByLabelText("Delivery format"), "html")
 
         const previewText = within(dialog).getByLabelText("Schedule preview value")
         expect(previewText.textContent).toContain("dev@codenautic.app")
@@ -244,9 +231,7 @@ describe("ReportGeneratorPage", (): void => {
         const templateSections = screen.getByRole("list", { name: "Template sections list" })
         expect(within(templateSections).getByText("Executive summary")).not.toBeNull()
 
-        await user.click(
-            screen.getByLabelText("Template section enabled executive-summary"),
-        )
+        await user.click(screen.getByLabelText("Template section enabled executive-summary"))
 
         const previewSummary = screen.getByLabelText("Template preview summary")
         expect(previewSummary.textContent).not.toContain("Executive summary")
@@ -266,9 +251,7 @@ describe("ReportGeneratorPage", (): void => {
         const previewSummary = screen.getByLabelText("Template preview summary")
         expect(previewSummary.textContent).toContain("Architecture signals -> Executive summary")
 
-        await user.click(
-            screen.getByRole("button", { name: "Move up section executive-summary" }),
-        )
+        await user.click(screen.getByRole("button", { name: "Move up section executive-summary" }))
         expect(previewSummary.textContent).toContain("Executive summary -> Architecture signals")
     })
 })

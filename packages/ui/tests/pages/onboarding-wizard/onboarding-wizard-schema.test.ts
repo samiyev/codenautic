@@ -25,8 +25,8 @@ describe("ONBOARDING_FORM_SCHEMA", (): void => {
 
         expect(result.success).toBe(false)
         if (result.success === false) {
-            const urlIssue = result.error.issues.find(
-                (issue): boolean => issue.path.includes("repositoryUrl"),
+            const urlIssue = result.error.issues.find((issue): boolean =>
+                issue.path.includes("repositoryUrl"),
             )
             expect(urlIssue?.message).toBe("Введите URL репозитория")
         }
@@ -41,8 +41,8 @@ describe("ONBOARDING_FORM_SCHEMA", (): void => {
 
         expect(result.success).toBe(false)
         if (result.success === false) {
-            const urlIssue = result.error.issues.find(
-                (issue): boolean => issue.path.includes("repositoryUrl"),
+            const urlIssue = result.error.issues.find((issue): boolean =>
+                issue.path.includes("repositoryUrl"),
             )
             expect(urlIssue?.message).toBe("Введите корректный URL репозитория")
         }
@@ -58,8 +58,8 @@ describe("ONBOARDING_FORM_SCHEMA", (): void => {
 
         expect(result.success).toBe(false)
         if (result.success === false) {
-            const bulkIssue = result.error.issues.find(
-                (issue): boolean => issue.path.includes("repositoryUrlList"),
+            const bulkIssue = result.error.issues.find((issue): boolean =>
+                issue.path.includes("repositoryUrlList"),
             )
             expect(bulkIssue?.message).toBe("Добавьте минимум один корректный URL репозитория")
         }
@@ -96,8 +96,8 @@ describe("ONBOARDING_FORM_SCHEMA", (): void => {
 
         expect(result.success).toBe(false)
         if (result.success === false) {
-            const bulkIssues = result.error.issues.filter(
-                (issue): boolean => issue.path.includes("repositoryUrlList"),
+            const bulkIssues = result.error.issues.filter((issue): boolean =>
+                issue.path.includes("repositoryUrlList"),
             )
             expect(bulkIssues.length).toBe(2)
             expect(bulkIssues.some((i): boolean => i.message.includes("минимум один"))).toBe(true)
@@ -199,15 +199,14 @@ describe("ONBOARDING_FORM_SCHEMA", (): void => {
         const values = {
             ...DEFAULT_ONBOARDING_VALUES,
             onboardingMode: "bulk" as const,
-            repositoryUrlList:
-                "https://github.com/org/repo\nbad1\nbad2\nbad3\nbad4\nbad5",
+            repositoryUrlList: "https://github.com/org/repo\nbad1\nbad2\nbad3\nbad4\nbad5",
         }
         const result = ONBOARDING_FORM_SCHEMA.safeParse(values)
 
         expect(result.success).toBe(false)
         if (result.success === false) {
-            const invalidIssue = result.error.issues.find(
-                (issue): boolean => issue.message.startsWith("Некорректные ссылки"),
+            const invalidIssue = result.error.issues.find((issue): boolean =>
+                issue.message.startsWith("Некорректные ссылки"),
             )
             expect(invalidIssue).toBeDefined()
             expect(invalidIssue?.message).toContain("bad1")

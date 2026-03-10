@@ -16,42 +16,41 @@ describe("SettingsPage", (): void => {
     it("renders overview heading and description", (): void => {
         renderWithProviders(<SettingsPage />)
 
-        const heading = screen.getByRole("heading", { level: 1, name: "Настройки" })
+        const heading = screen.getByRole("heading", { level: 1, name: "Settings" })
 
         expect(heading).not.toBeNull()
         expect(heading.className).toContain("text-foreground")
         expect(
-            screen.getAllByText(
-                "Настройки рабочего пространства, внешний вид и уведомления.",
-            ).length,
+            screen.getAllByText("Workspace defaults, appearance, and notification preferences.")
+                .length,
         ).toBeGreaterThan(0)
     })
 
     it("renders grouped settings cards with canonical labels", (): void => {
         renderWithProviders(<SettingsPage />)
 
-        expect(screen.getByText("Провайдеры")).not.toBeNull()
-        expect(screen.getByText("Безопасность и соответствие")).not.toBeNull()
-        expect(screen.getByText("Операции")).not.toBeNull()
-        expect(screen.getByText("Биллинг и использование")).not.toBeNull()
-        expect(screen.getAllByText("Организация").length).toBeGreaterThan(0)
+        expect(screen.getByText("Providers")).not.toBeNull()
+        expect(screen.getByText("Security & Compliance")).not.toBeNull()
+        expect(screen.getByText("Operations")).not.toBeNull()
+        expect(screen.getByText("Billing & Usage")).not.toBeNull()
+        expect(screen.getAllByText("Organization").length).toBeGreaterThan(0)
         expect(screen.getAllByText("Code Review").length).toBeGreaterThan(0)
     })
 
     it("renders navigation links from shared data", (): void => {
         renderWithProviders(<SettingsPage />)
 
-        expect(screen.getByRole("link", { name: "LLM провайдеры" })).not.toBeNull()
-        expect(screen.getByRole("link", { name: "Git провайдеры" })).not.toBeNull()
+        expect(screen.getByRole("link", { name: "LLM Providers" })).not.toBeNull()
+        expect(screen.getByRole("link", { name: "Git Providers" })).not.toBeNull()
         expect(screen.getByRole("link", { name: "Webhooks" })).not.toBeNull()
-        expect(screen.getByRole("link", { name: "Журнал аудита" })).not.toBeNull()
+        expect(screen.getByRole("link", { name: "Audit Logs" })).not.toBeNull()
         expect(screen.getByRole("link", { name: "SSO" })).not.toBeNull()
     })
 
     it("filters out General self-link from the General group", (): void => {
         renderWithProviders(<SettingsPage />)
 
-        const generalLinks = screen.queryAllByRole("link", { name: "Общие" })
+        const generalLinks = screen.queryAllByRole("link", { name: "General" })
         expect(generalLinks.length).toBe(0)
     })
 })

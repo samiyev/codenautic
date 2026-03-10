@@ -26,7 +26,7 @@ describe("SettingsNotificationsPage", (): void => {
         await waitFor(() => {
             expect(screen.getByText("Deep-link guard")).not.toBeNull()
         })
-        expect(screen.getByText(/Deep-link allowed and sanitized/)).not.toBeNull()
+        expect(screen.getByText(/Deep-link allowed and sanitized to/)).not.toBeNull()
 
         await user.selectOptions(
             screen.getByRole("combobox", { name: "Filter event type" }),

@@ -7,7 +7,7 @@ import { renderWithProviders } from "../utils/render"
 
 async function moveToRepositoryStep(user: ReturnType<typeof userEvent.setup>): Promise<void> {
     await user.click(screen.getByRole("button", { name: "Connect provider" }))
-    await user.click(screen.getByRole("button", { name: "Далее" }))
+    await user.click(screen.getByRole("button", { name: "Next" }))
 }
 
 describe("OnboardingWizardPage", (): void => {
@@ -17,14 +17,14 @@ describe("OnboardingWizardPage", (): void => {
         renderWithProviders(<OnboardingWizardPage />)
         await moveToRepositoryStep(user)
 
-        const repositoryInput = screen.getByRole("textbox", { name: "URL репозитория" })
-        const nextButton = screen.getByRole("button", { name: "Далее" })
+        const repositoryInput = screen.getByRole("textbox", { name: "Repository URL" })
+        const nextButton = screen.getByRole("button", { name: "Next" })
 
         await user.type(repositoryInput, "bad-url")
         await user.click(nextButton)
 
         expect(screen.queryByText("Введите корректный URL репозитория")).not.toBeNull()
-        expect(screen.queryByRole("button", { name: "Запустить сканирование" })).toBeNull()
+        expect(screen.queryByRole("button", { name: "Launch scan" })).toBeNull()
     })
 
     it("валидирует второй шаг и проводит пользователя к обзору перед запуском", async (): Promise<void> => {
@@ -32,21 +32,21 @@ describe("OnboardingWizardPage", (): void => {
         renderWithProviders(<OnboardingWizardPage />)
         await moveToRepositoryStep(user)
 
-        const repositoryInput = screen.getByRole("textbox", { name: "URL репозитория" })
+        const repositoryInput = screen.getByRole("textbox", { name: "Repository URL" })
         await user.type(repositoryInput, "https://github.com/example/repository")
-        await user.click(screen.getByRole("button", { name: "Далее" }))
-        expect(screen.queryByText("Проверьте выбранные настройки:")).not.toBeNull()
+        await user.click(screen.getByRole("button", { name: "Next" }))
+        expect(screen.queryByText("Review the selected settings:")).not.toBeNull()
 
-        const workersInput = screen.getByRole("spinbutton", { name: "Количество воркеров" })
+        const workersInput = screen.getByRole("spinbutton", { name: "Worker count" })
         await user.clear(workersInput)
         await user.type(workersInput, "0")
-        await user.click(screen.getByRole("button", { name: "Запустить сканирование" }))
+        await user.click(screen.getByRole("button", { name: "Launch scan" }))
 
-        expect(screen.queryByText(/Количество воркеров/u)).not.toBeNull()
+        expect(screen.queryByText(/Worker count/u)).not.toBeNull()
 
         await user.clear(workersInput)
         await user.type(workersInput, "8")
-        await user.click(screen.getByRole("button", { name: "Запустить сканирование" }))
+        await user.click(screen.getByRole("button", { name: "Launch scan" }))
     })
 
     it("запускает сканирование с выбранными параметрами", async (): Promise<void> => {
@@ -57,11 +57,11 @@ describe("OnboardingWizardPage", (): void => {
         await moveToRepositoryStep(user)
 
         await user.type(
-            screen.getByRole("textbox", { name: "URL репозитория" }),
+            screen.getByRole("textbox", { name: "Repository URL" }),
             "https://github.com/example/repository",
         )
-        await user.click(screen.getByRole("button", { name: "Далее" }))
-        await user.click(screen.getByRole("button", { name: "Запустить сканирование" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
+        await user.click(screen.getByRole("button", { name: "Launch scan" }))
 
         expect(onScanStart).toHaveBeenCalledTimes(1)
         expect(onScanStart.mock.calls.at(0)?.at(0)).toMatchObject({
@@ -81,17 +81,17 @@ describe("OnboardingWizardPage", (): void => {
         renderWithProviders(<OnboardingWizardPage />)
         await moveToRepositoryStep(user)
 
-        await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
+        await user.click(screen.getByRole("radio", { name: "Bulk onboarding" }))
         await user.type(
             screen.getByRole("textbox", {
-                name: "Список репозиториев (по одной ссылке на строку)",
+                name: "Repository list (one link per line)",
             }),
             "https://github.com/org/first\ninvalid-url",
         )
-        await user.click(screen.getByRole("button", { name: "Далее" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
 
-        expect(screen.queryByText("Некорректные ссылки: 2: invalid-url")).not.toBeNull()
-        expect(screen.queryByText(/Выбрано/u)).not.toBeNull()
+        expect(screen.queryByText(/Некорректные ссылки:.*invalid-url/)).not.toBeNull()
+        expect(screen.queryByText(/Selected/u)).not.toBeNull()
     })
 
     it("запускает bulk onboarding по общему шаблону и показывает ошибочный репозиторий", async (): Promise<void> => {
@@ -101,15 +101,15 @@ describe("OnboardingWizardPage", (): void => {
         renderWithProviders(<OnboardingWizardPage onScanStart={onScanStart} />)
         await moveToRepositoryStep(user)
 
-        await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
+        await user.click(screen.getByRole("radio", { name: "Bulk onboarding" }))
         await user.type(
             screen.getByRole("textbox", {
-                name: "Список репозиториев (по одной ссылке на строку)",
+                name: "Repository list (one link per line)",
             }),
             "https://github.com/org/first\nhttps://github.com/org/second",
         )
-        await user.click(screen.getByRole("button", { name: "Далее" }))
-        await user.click(screen.getByRole("button", { name: "Запустить сканирование" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
+        await user.click(screen.getByRole("button", { name: "Launch scan" }))
 
         expect(onScanStart).toHaveBeenCalledTimes(1)
         expect(onScanStart.mock.calls.at(0)?.at(0)).toMatchObject({
@@ -122,7 +122,7 @@ describe("OnboardingWizardPage", (): void => {
             notifyEmail: "",
             targetRepositories: ["https://github.com/org/first", "https://github.com/org/second"],
         })
-        expect(screen.queryByText("Прогресс массового сканирования")).not.toBeNull()
+        expect(screen.queryByText("Bulk scan progress")).not.toBeNull()
         expect(
             screen.queryByText("Сканирование прервано: ошибка доступа к репозиторию"),
         ).not.toBeNull()
@@ -136,17 +136,17 @@ describe("OnboardingWizardPage", (): void => {
         await moveToRepositoryStep(user)
 
         await user.type(
-            screen.getByRole("textbox", { name: "URL репозитория" }),
+            screen.getByRole("textbox", { name: "Repository URL" }),
             "https://github.com/example/repository",
         )
-        await user.click(screen.getByRole("button", { name: "Далее" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
 
         await user.click(await screen.findByRole("radio", { name: "Security Baseline — v1.2.0" }))
-        expect(screen.queryByText("Что будет применено")).not.toBeNull()
+        expect(screen.queryByText("What will be applied")).not.toBeNull()
 
-        await user.click(screen.getByRole("button", { name: "Применить шаблон" }))
+        await user.click(screen.getByRole("button", { name: "Apply template" }))
         expect(screen.queryAllByText(/Mode:/u).length).toBeGreaterThan(0)
-        await user.click(screen.getByRole("button", { name: "Запустить сканирование" }))
+        await user.click(screen.getByRole("button", { name: "Launch scan" }))
 
         expect(onScanStart).toHaveBeenCalledTimes(1)
         expect(onScanStart.mock.calls.at(0)?.at(0)).toMatchObject({
@@ -174,26 +174,26 @@ describe("OnboardingWizardPage", (): void => {
         await moveToRepositoryStep(user)
 
         await user.type(
-            screen.getByRole("textbox", { name: "URL репозитория" }),
+            screen.getByRole("textbox", { name: "Repository URL" }),
             "https://github.com/example/repository",
         )
-        await user.click(screen.getByRole("button", { name: "Далее" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
 
-        const workersInput = screen.getByRole("spinbutton", { name: "Количество воркеров" })
+        const workersInput = screen.getByRole("spinbutton", { name: "Worker count" })
         await user.clear(workersInput)
         await user.type(workersInput, "2")
 
         await user.click(await screen.findByRole("radio", { name: "Quality Scan — v1.0.1" }))
-        await user.click(screen.getByRole("button", { name: "Применить шаблон" }))
+        await user.click(screen.getByRole("button", { name: "Apply template" }))
         expect(
             screen.getByRole<HTMLInputElement>("spinbutton", {
-                name: "Количество воркеров",
+                name: "Worker count",
             }).value,
         ).toBe("6")
 
-        await user.click(screen.getByText("Применённые шаблоны (audit log)"))
-        await user.click(screen.getByRole("button", { name: "Откатить последнее применение" }))
-        expect(screen.queryByText("Применённые шаблоны (audit log)")).not.toBeNull()
+        await user.click(screen.getByText("Applied templates (audit log)"))
+        await user.click(screen.getByRole("button", { name: "Rollback last application" }))
+        expect(screen.queryByText("Applied templates (audit log)")).not.toBeNull()
     })
 
     it("навигация назад возвращает на предыдущий шаг", async (): Promise<void> => {
@@ -202,19 +202,19 @@ describe("OnboardingWizardPage", (): void => {
         renderWithProviders(<OnboardingWizardPage />)
         await moveToRepositoryStep(user)
 
-        expect(screen.queryByText("URL репозитория")).not.toBeNull()
+        expect(screen.queryByText("Repository URL")).not.toBeNull()
 
-        const backButton = screen.getByRole("button", { name: "Назад" })
+        const backButton = screen.getByRole("button", { name: "Back" })
         await user.click(backButton)
 
-        expect(screen.queryByText("Git-провайдер")).not.toBeNull()
-        expect(screen.queryByText("URL репозитория")).toBeNull()
+        expect(screen.queryByText("Git provider")).not.toBeNull()
+        expect(screen.queryByText("Repository URL")).toBeNull()
     })
 
     it("кнопка 'Назад' заблокирована на первом шаге", async (): Promise<void> => {
         renderWithProviders(<OnboardingWizardPage />)
 
-        const backButton = screen.getByRole("button", { name: "Назад" })
+        const backButton = screen.getByRole("button", { name: "Back" })
         expect(backButton).toHaveAttribute("disabled")
     })
 
@@ -225,18 +225,18 @@ describe("OnboardingWizardPage", (): void => {
         await moveToRepositoryStep(user)
 
         await user.type(
-            screen.getByRole("textbox", { name: "URL репозитория" }),
+            screen.getByRole("textbox", { name: "Repository URL" }),
             "https://github.com/example/repository",
         )
-        await user.click(screen.getByRole("button", { name: "Далее" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
 
-        expect(screen.queryByText("Проверьте выбранные настройки:")).not.toBeNull()
+        expect(screen.queryByText("Review the selected settings:")).not.toBeNull()
 
-        const stepOneButton = screen.getByRole("button", { name: /Шаг 1/u })
+        const stepOneButton = screen.getByRole("button", { name: /Step 1/u })
         await user.click(stepOneButton)
 
-        expect(screen.queryByText("Git-провайдер")).not.toBeNull()
-        expect(screen.queryByText("Проверьте выбранные настройки:")).toBeNull()
+        expect(screen.queryByText("Git provider")).not.toBeNull()
+        expect(screen.queryByText("Review the selected settings:")).toBeNull()
     })
 
     it("финальный шаг отображает кнопку 'Запустить сканирование' вместо 'Далее'", async (): Promise<void> => {
@@ -246,15 +246,13 @@ describe("OnboardingWizardPage", (): void => {
         await moveToRepositoryStep(user)
 
         await user.type(
-            screen.getByRole("textbox", { name: "URL репозитория" }),
+            screen.getByRole("textbox", { name: "Repository URL" }),
             "https://github.com/example/repository",
         )
-        await user.click(screen.getByRole("button", { name: "Далее" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
 
-        expect(screen.queryByRole("button", { name: "Далее" })).toBeNull()
-        expect(
-            screen.queryByRole("button", { name: "Запустить сканирование" }),
-        ).not.toBeNull()
+        expect(screen.queryByRole("button", { name: "Next" })).toBeNull()
+        expect(screen.queryByRole("button", { name: "Launch scan" })).not.toBeNull()
     })
 
     it("не пускает на следующий шаг без подключения провайдера", async (): Promise<void> => {
@@ -262,10 +260,10 @@ describe("OnboardingWizardPage", (): void => {
 
         renderWithProviders(<OnboardingWizardPage />)
 
-        await user.click(screen.getByRole("button", { name: "Далее" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
 
-        expect(screen.queryByText("Сначала подключите Git-провайдера.")).not.toBeNull()
-        expect(screen.queryByText("URL репозитория")).toBeNull()
+        expect(screen.queryByText("Connect the Git provider first.")).not.toBeNull()
+        expect(screen.queryByText("Repository URL")).toBeNull()
     })
 
     it("показывает пустое состояние в bulk-режиме при отсутствии URL", async (): Promise<void> => {
@@ -274,11 +272,9 @@ describe("OnboardingWizardPage", (): void => {
         renderWithProviders(<OnboardingWizardPage />)
         await moveToRepositoryStep(user)
 
-        await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
+        await user.click(screen.getByRole("radio", { name: "Bulk onboarding" }))
 
-        expect(
-            screen.queryByText("Добавьте URL репозиториев в поле выше."),
-        ).not.toBeNull()
+        expect(screen.queryByText("Add repository URLs in the field above.")).not.toBeNull()
     })
 
     it("поддерживает выбор/снятие всех репозиториев в bulk-режиме", async (): Promise<void> => {
@@ -287,21 +283,21 @@ describe("OnboardingWizardPage", (): void => {
         renderWithProviders(<OnboardingWizardPage />)
         await moveToRepositoryStep(user)
 
-        await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
+        await user.click(screen.getByRole("radio", { name: "Bulk onboarding" }))
         await user.type(
             screen.getByRole("textbox", {
-                name: "Список репозиториев (по одной ссылке на строку)",
+                name: "Repository list (one link per line)",
             }),
             "https://github.com/org/repo-a\nhttps://github.com/org/repo-b",
         )
 
-        expect(screen.queryByText(/Выбрано/u)).not.toBeNull()
+        expect(screen.queryByText(/Selected/u)).not.toBeNull()
 
-        await user.click(screen.getByRole("button", { name: "Снять все" }))
-        expect(screen.queryByText(/Выбрано/u)).not.toBeNull()
+        await user.click(screen.getByRole("button", { name: "Deselect all" }))
+        expect(screen.queryByText(/Selected/u)).not.toBeNull()
 
-        await user.click(screen.getByRole("button", { name: "Выбрать все" }))
-        expect(screen.queryByText(/Выбрано/u)).not.toBeNull()
+        await user.click(screen.getByRole("button", { name: "Select all" }))
+        expect(screen.queryByText(/Selected/u)).not.toBeNull()
     })
 
     it("поддерживает паузу и возобновление bulk-задач", async (): Promise<void> => {
@@ -311,23 +307,23 @@ describe("OnboardingWizardPage", (): void => {
         renderWithProviders(<OnboardingWizardPage onScanStart={onScanStart} />)
         await moveToRepositoryStep(user)
 
-        await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
+        await user.click(screen.getByRole("radio", { name: "Bulk onboarding" }))
         await user.type(
             screen.getByRole("textbox", {
-                name: "Список репозиториев (по одной ссылке на строку)",
+                name: "Repository list (one link per line)",
             }),
             "https://github.com/org/first\nhttps://github.com/org/second\nhttps://github.com/org/third",
         )
-        await user.click(screen.getByRole("button", { name: "Далее" }))
-        await user.click(screen.getByRole("button", { name: "Запустить сканирование" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
+        await user.click(screen.getByRole("button", { name: "Launch scan" }))
 
-        expect(screen.queryByText("Прогресс массового сканирования")).not.toBeNull()
+        expect(screen.queryByText("Bulk scan progress")).not.toBeNull()
 
-        await user.click(screen.getByRole("button", { name: "Пауза" }))
-        expect(screen.queryAllByText("Пауза").length).toBeGreaterThan(0)
+        await user.click(screen.getByRole("button", { name: "Pause" }))
+        expect(screen.queryAllByText("Paused").length).toBeGreaterThan(0)
 
-        await user.click(screen.getByRole("button", { name: "Возобновить" }))
-        expect(screen.queryAllByText("В процессе").length).toBeGreaterThan(0)
+        await user.click(screen.getByRole("button", { name: "Resume" }))
+        expect(screen.queryAllByText("Running").length).toBeGreaterThan(0)
     })
 
     it("поддерживает отмену всех bulk-задач", async (): Promise<void> => {
@@ -337,18 +333,18 @@ describe("OnboardingWizardPage", (): void => {
         renderWithProviders(<OnboardingWizardPage onScanStart={onScanStart} />)
         await moveToRepositoryStep(user)
 
-        await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
+        await user.click(screen.getByRole("radio", { name: "Bulk onboarding" }))
         await user.type(
             screen.getByRole("textbox", {
-                name: "Список репозиториев (по одной ссылке на строку)",
+                name: "Repository list (one link per line)",
             }),
             "https://github.com/org/first\nhttps://github.com/org/second\nhttps://github.com/org/third",
         )
-        await user.click(screen.getByRole("button", { name: "Далее" }))
-        await user.click(screen.getByRole("button", { name: "Запустить сканирование" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
+        await user.click(screen.getByRole("button", { name: "Launch scan" }))
 
-        await user.click(screen.getByRole("button", { name: "Отменить все" }))
-        expect(screen.queryAllByText("Отменено").length).toBeGreaterThan(0)
+        await user.click(screen.getByRole("button", { name: "Cancel all" }))
+        expect(screen.queryAllByText("Cancelled").length).toBeGreaterThan(0)
     })
 
     it("позволяет retry ошибочной bulk-задачи", async (): Promise<void> => {
@@ -358,20 +354,20 @@ describe("OnboardingWizardPage", (): void => {
         renderWithProviders(<OnboardingWizardPage onScanStart={onScanStart} />)
         await moveToRepositoryStep(user)
 
-        await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
+        await user.click(screen.getByRole("radio", { name: "Bulk onboarding" }))
         await user.type(
             screen.getByRole("textbox", {
-                name: "Список репозиториев (по одной ссылке на строку)",
+                name: "Repository list (one link per line)",
             }),
             "https://github.com/org/first\nhttps://github.com/org/second",
         )
-        await user.click(screen.getByRole("button", { name: "Далее" }))
-        await user.click(screen.getByRole("button", { name: "Запустить сканирование" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
+        await user.click(screen.getByRole("button", { name: "Launch scan" }))
 
         expect(screen.queryByRole("button", { name: "Retry" })).not.toBeNull()
         await user.click(screen.getByRole("button", { name: "Retry" }))
 
-        expect(screen.queryByText("Сканирование прервано: ошибка доступа к репозиторию")).toBeNull()
+        expect(screen.queryByText("Scan aborted: repository access error")).toBeNull()
     })
 
     it("позволяет отменить отдельную running bulk-задачу", async (): Promise<void> => {
@@ -381,21 +377,21 @@ describe("OnboardingWizardPage", (): void => {
         renderWithProviders(<OnboardingWizardPage onScanStart={onScanStart} />)
         await moveToRepositoryStep(user)
 
-        await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
+        await user.click(screen.getByRole("radio", { name: "Bulk onboarding" }))
         await user.type(
             screen.getByRole("textbox", {
-                name: "Список репозиториев (по одной ссылке на строку)",
+                name: "Repository list (one link per line)",
             }),
             "https://github.com/org/first\nhttps://github.com/org/second\nhttps://github.com/org/third",
         )
-        await user.click(screen.getByRole("button", { name: "Далее" }))
-        await user.click(screen.getByRole("button", { name: "Запустить сканирование" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
+        await user.click(screen.getByRole("button", { name: "Launch scan" }))
 
-        const cancelButtons = screen.queryAllByRole("button", { name: "Отменить" })
+        const cancelButtons = screen.queryAllByRole("button", { name: "Cancel" })
         expect(cancelButtons.length).toBeGreaterThan(0)
 
         await user.click(cancelButtons[0] as HTMLElement)
-        expect(screen.queryAllByText("Отменено").length).toBeGreaterThan(0)
+        expect(screen.queryAllByText("Cancelled").length).toBeGreaterThan(0)
     })
 
     it("не пускает в bulk-режиме без выбора ни одного репозитория", async (): Promise<void> => {
@@ -404,18 +400,16 @@ describe("OnboardingWizardPage", (): void => {
         renderWithProviders(<OnboardingWizardPage />)
         await moveToRepositoryStep(user)
 
-        await user.click(screen.getByRole("radio", { name: "Массовый onboarding (bulk)" }))
+        await user.click(screen.getByRole("radio", { name: "Bulk onboarding" }))
         await user.type(
             screen.getByRole("textbox", {
-                name: "Список репозиториев (по одной ссылке на строку)",
+                name: "Repository list (one link per line)",
             }),
             "https://github.com/org/repo-a",
         )
-        await user.click(screen.getByRole("button", { name: "Снять все" }))
-        await user.click(screen.getByRole("button", { name: "Далее" }))
+        await user.click(screen.getByRole("button", { name: "Deselect all" }))
+        await user.click(screen.getByRole("button", { name: "Next" }))
 
-        expect(
-            screen.queryByText("Выберите хотя бы один репозиторий для запуска."),
-        ).not.toBeNull()
+        expect(screen.queryByText("Select at least one repository to launch.")).not.toBeNull()
     })
 })

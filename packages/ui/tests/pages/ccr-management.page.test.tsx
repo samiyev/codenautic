@@ -165,14 +165,9 @@ describe("ccr management page — фильтрация и UI", (): void => {
             />,
         )
 
-        await user.selectOptions(
-            screen.getByRole("combobox", { name: "Filter by status" }),
-            "new",
-        )
+        await user.selectOptions(screen.getByRole("combobox", { name: "Filter by status" }), "new")
 
-        expect(onFilterChange).toHaveBeenCalledWith(
-            expect.objectContaining({ status: "new" }),
-        )
+        expect(onFilterChange).toHaveBeenCalledWith(expect.objectContaining({ status: "new" }))
     })
 
     it("когда репозиторий фильтр изменен, onFilterChange вызывается", async (): Promise<void> => {
@@ -217,7 +212,7 @@ describe("ccr management page — фильтрация и UI", (): void => {
         await user.type(searchInput, "auth")
 
         expect(onFilterChange).toHaveBeenCalledWith(
-            expect.objectContaining({ search: expect.stringContaining("a") }),
+            expect.objectContaining({ search: expect.stringContaining("a") as string }),
         )
     })
 
@@ -232,17 +227,25 @@ describe("ccr management page — фильтрация и UI", (): void => {
             />,
         )
 
-        const searchInput = screen.getByPlaceholderText("Search title / id / repo / assignee") as HTMLInputElement
-        expect(searchInput.value).toBe("auth")
+        const searchInput = screen.getByPlaceholderText(
+            "Search title / id / repo / assignee",
+        )
+        expect((searchInput as HTMLInputElement).value).toBe("auth")
 
-        const statusSelect = screen.getByRole("combobox", { name: "Filter by status" }) as HTMLSelectElement
-        expect(statusSelect.value).toBe("new")
+        const statusSelect = screen.getByRole("combobox", {
+            name: "Filter by status",
+        })
+        expect((statusSelect as HTMLInputElement).value).toBe("new")
 
-        const teamSelect = screen.getByRole("combobox", { name: "Filter by team" }) as HTMLSelectElement
-        expect(teamSelect.value).toBe("runtime")
+        const teamSelect = screen.getByRole("combobox", {
+            name: "Filter by team",
+        })
+        expect((teamSelect as HTMLInputElement).value).toBe("runtime")
 
-        const repoSelect = screen.getByRole("combobox", { name: "Filter by repository" }) as HTMLSelectElement
-        expect(repoSelect.value).toBe("repo-core")
+        const repoSelect = screen.getByRole("combobox", {
+            name: "Filter by repository",
+        })
+        expect((repoSelect as HTMLInputElement).value).toBe("repo-core")
     })
 
     it("когда страница рендерится, отображает heading и subtitle", (): void => {
@@ -257,9 +260,7 @@ describe("ccr management page — фильтрация и UI", (): void => {
         )
 
         expect(screen.getByRole("heading", { level: 1, name: "CCR Management" })).not.toBeNull()
-        expect(
-            screen.getByText(/Filters are synced with URL/),
-        ).not.toBeNull()
+        expect(screen.getByText(/Filters are synced with URL/)).not.toBeNull()
     })
 
     it("когда FOCUS_REVIEWS_FILTERS_EVENT срабатывает, фокусирует search input", async (): Promise<void> => {
@@ -312,7 +313,11 @@ describe("ccr management page — preset edge cases", (): void => {
             CCR_FILTER_PRESETS_STORAGE_KEY,
             JSON.stringify([
                 { id: "", name: "", filters: {} },
-                { id: "valid-id", name: "Valid preset", filters: { search: "", status: "all", team: "all", repository: "all" } },
+                {
+                    id: "valid-id",
+                    name: "Valid preset",
+                    filters: { search: "", status: "all", team: "all", repository: "all" },
+                },
                 "not-an-object",
                 { id: "no-name" },
                 { id: "no-filters", name: "No Filters", filters: { search: 123 } },
@@ -377,7 +382,7 @@ describe("ccr management page — preset edge cases", (): void => {
     })
 
     it("когда apply нажат без выбранного пресета, ничего не происходит", async (): Promise<void> => {
-        const user = userEvent.setup()
+        const _user = userEvent.setup()
         const onFilterChange = vi.fn()
 
         renderWithProviders(
@@ -395,7 +400,7 @@ describe("ccr management page — preset edge cases", (): void => {
     })
 
     it("когда update нажат без выбранного пресета, ничего не происходит", async (): Promise<void> => {
-        const user = userEvent.setup()
+        const _user = userEvent.setup()
 
         renderWithProviders(
             <CcrManagementPage
@@ -412,7 +417,7 @@ describe("ccr management page — preset edge cases", (): void => {
     })
 
     it("когда delete нажат без выбранного пресета, ничего не происходит", async (): Promise<void> => {
-        const user = userEvent.setup()
+        const _user = userEvent.setup()
 
         renderWithProviders(
             <CcrManagementPage

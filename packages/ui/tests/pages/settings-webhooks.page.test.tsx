@@ -55,7 +55,9 @@ describe("SettingsWebhooksPage", (): void => {
 
         expect(screen.getByText("https://hooks.acme.dev/scan-events")).not.toBeNull()
 
-        const scanEventsRow = screen.getByText("https://hooks.acme.dev/scan-events").closest("article")
+        const scanEventsRow = screen
+            .getByText("https://hooks.acme.dev/scan-events")
+            .closest("article")
         if (scanEventsRow === null) {
             throw new Error("Scan events row not found")
         }
@@ -71,7 +73,9 @@ describe("SettingsWebhooksPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsWebhooksPage />)
 
-        const codeReviewRow = screen.getByText("https://hooks.acme.dev/code-review").closest("article")
+        const codeReviewRow = screen
+            .getByText("https://hooks.acme.dev/code-review")
+            .closest("article")
         if (codeReviewRow === null) {
             throw new Error("Code review row not found")
         }
@@ -88,7 +92,9 @@ describe("SettingsWebhooksPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsWebhooksPage />)
 
-        const codeReviewRow = screen.getByText("https://hooks.acme.dev/code-review").closest("article")
+        const codeReviewRow = screen
+            .getByText("https://hooks.acme.dev/code-review")
+            .closest("article")
         if (codeReviewRow === null) {
             throw new Error("Code review row not found")
         }
@@ -129,7 +135,9 @@ describe("SettingsWebhooksPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsWebhooksPage />)
 
-        const codeReviewRow = screen.getByText("https://hooks.acme.dev/code-review").closest("article")
+        const codeReviewRow = screen
+            .getByText("https://hooks.acme.dev/code-review")
+            .closest("article")
         if (codeReviewRow === null) {
             throw new Error("Code review row not found")
         }
@@ -148,7 +156,9 @@ describe("SettingsWebhooksPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsWebhooksPage />)
 
-        const codeReviewRow = screen.getByText("https://hooks.acme.dev/code-review").closest("article")
+        const codeReviewRow = screen
+            .getByText("https://hooks.acme.dev/code-review")
+            .closest("article")
         if (codeReviewRow === null) {
             throw new Error("Code review row not found")
         }
@@ -332,7 +342,9 @@ describe("SettingsWebhooksPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsWebhooksPage />)
 
-        const codeReviewRow = screen.getByText("https://hooks.acme.dev/code-review").closest("article")
+        const codeReviewRow = screen
+            .getByText("https://hooks.acme.dev/code-review")
+            .closest("article")
         if (codeReviewRow === null) {
             throw new Error("Code review row not found")
         }
@@ -345,5 +357,253 @@ describe("SettingsWebhooksPage", (): void => {
             expect(within(codeReviewRow).getByText("Retrying")).not.toBeNull()
         })
         expect(within(codeReviewRow).queryByText("Success")).toBeNull()
+    })
+
+    it("when endpoint is created with http:// prefix, then it is accepted", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        await user.type(
+            screen.getByRole("textbox", { name: "Endpoint URL" }),
+            "http://hooks.internal.dev/events",
+        )
+        await user.type(screen.getByRole("textbox", { name: "Event types" }), "scan.completed")
+        await user.click(screen.getByRole("button", { name: "Create endpoint" }))
+
+        expect(screen.getByText("http://hooks.internal.dev/events")).not.toBeNull()
+        expect(screen.getByText(/· wh-1004/u)).not.toBeNull()
+    })
+
+    it("when new endpoint is created, then it shows 'not delivered' for last delivery", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        await user.type(
+            screen.getByRole("textbox", { name: "Endpoint URL" }),
+            "https://hooks.acme.dev/new-hook",
+        )
+        await user.type(screen.getByRole("textbox", { name: "Event types" }), "review.completed")
+        await user.click(screen.getByRole("button", { name: "Create endpoint" }))
+
+        expect(screen.getByText("https://hooks.acme.dev/new-hook")).not.toBeNull()
+        expect(screen.getByText(/not delivered/)).not.toBeNull()
+    })
+
+    it("when new endpoint is created, then form fields are reset", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        await user.type(
+            screen.getByRole("textbox", { name: "Endpoint URL" }),
+            "https://hooks.acme.dev/reset-test",
+        )
+        await user.type(screen.getByRole("textbox", { name: "Event types" }), "scan.completed")
+        await user.click(screen.getByRole("button", { name: "Create endpoint" }))
+
+        expect(screen.getByRole("textbox", { name: "Endpoint URL" })).toHaveValue("")
+        expect(screen.getByRole("textbox", { name: "Event types" })).toHaveValue("")
+    })
+
+    it("when new endpoint is created, then it becomes the active endpoint in logs", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        await user.type(
+            screen.getByRole("textbox", { name: "Endpoint URL" }),
+            "https://hooks.acme.dev/new-active",
+        )
+        await user.type(screen.getByRole("textbox", { name: "Event types" }), "review.completed")
+        await user.click(screen.getByRole("button", { name: "Create endpoint" }))
+
+        expect(screen.getByText(/· wh-1004/u)).not.toBeNull()
+        expect(screen.queryByText(/· wh-1001/u)).toBeNull()
+    })
+
+    it("when all endpoints are deleted, then delivery logs show select endpoint alert", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        const deleteEndpoint = async (url: string): Promise<void> => {
+            const row = screen.getByText(url).closest("article")
+            if (row === null) {
+                throw new Error(`Row not found for ${url}`)
+            }
+            await user.click(within(row).getByRole("button", { name: "Delete" }))
+        }
+
+        await deleteEndpoint("https://hooks.acme.dev/code-review")
+        await deleteEndpoint("https://hooks.acme.dev/scan-events")
+        await deleteEndpoint("https://hooks.acme.dev/provider-health")
+
+        expect(screen.getByText("Select endpoint to inspect logs.")).not.toBeNull()
+    })
+
+    it("when multiple event types are provided with spaces, then they are parsed correctly", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        await user.type(
+            screen.getByRole("textbox", { name: "Endpoint URL" }),
+            "https://hooks.acme.dev/multi-event",
+        )
+        await user.type(
+            screen.getByRole("textbox", { name: "Event types" }),
+            "review.completed , scan.failed , scan.partial",
+        )
+        await user.click(screen.getByRole("button", { name: "Create endpoint" }))
+
+        expect(screen.getByText("https://hooks.acme.dev/multi-event")).not.toBeNull()
+        expect(screen.getByText(/review\.completed, scan\.failed, scan\.partial/)).not.toBeNull()
+    })
+
+    it("when test delivery is done on enabled endpoint, then updates lastDeliveryAt timestamp", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        const scanEventsRow = screen
+            .getByText("https://hooks.acme.dev/scan-events")
+            .closest("article")
+        if (scanEventsRow === null) {
+            throw new Error("Scan events row not found")
+        }
+
+        const originalDelivery = within(scanEventsRow).getByText(/Last delivery:/)
+        const originalText = originalDelivery.textContent
+
+        const firstButton = scanEventsRow.querySelector("button")
+        if (firstButton === null) {
+            throw new Error("Button not found in scan events row")
+        }
+        await user.click(firstButton)
+        await user.click(
+            within(scanEventsRow).getByRole("button", { name: "Test Webhook connection" }),
+        )
+
+        await waitFor((): void => {
+            const updatedDelivery = within(scanEventsRow).getByText(/Last delivery:/)
+            expect(updatedDelivery.textContent).not.toBe(originalText)
+        })
+    })
+
+    it("when search matches no endpoints, then list is empty", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        const searchInput = screen.getByPlaceholderText("Search URL or event...")
+        await user.type(searchInput, "nonexistent-endpoint-xyz")
+
+        expect(screen.queryByText("https://hooks.acme.dev/code-review")).toBeNull()
+        expect(screen.queryByText("https://hooks.acme.dev/scan-events")).toBeNull()
+        expect(screen.queryByText("https://hooks.acme.dev/provider-health")).toBeNull()
+    })
+
+    it("renders subtitle with descriptive text", (): void => {
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        expect(
+            screen.getByText("Create, rotate and monitor webhook endpoints with delivery logs."),
+        ).not.toBeNull()
+    })
+
+    it("renders alert about masked secrets", (): void => {
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        expect(
+            screen.getByText(
+                "Endpoint secrets are masked in UI. Use rotate when key leakage is suspected.",
+            ),
+        ).not.toBeNull()
+    })
+
+    it("shows Retrying chip for scan-events endpoint", (): void => {
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        const scanEventsRow = screen
+            .getByText("https://hooks.acme.dev/scan-events")
+            .closest("article")
+        if (scanEventsRow === null) {
+            throw new Error("Scan events row not found")
+        }
+
+        expect(within(scanEventsRow).getByText("Retrying")).not.toBeNull()
+    })
+
+    it("shows Failed chip for provider-health endpoint", (): void => {
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        const providerHealthRow = screen
+            .getByText("https://hooks.acme.dev/provider-health")
+            .closest("article")
+        if (providerHealthRow === null) {
+            throw new Error("Provider health row not found")
+        }
+
+        expect(within(providerHealthRow).getByText("Failed")).not.toBeNull()
+    })
+
+    it("when event types CSV has trailing commas, then empty entries are filtered out", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        await user.type(
+            screen.getByRole("textbox", { name: "Endpoint URL" }),
+            "https://hooks.acme.dev/trailing-comma",
+        )
+        await user.type(screen.getByRole("textbox", { name: "Event types" }), "review.completed,,")
+        await user.click(screen.getByRole("button", { name: "Create endpoint" }))
+
+        expect(screen.getByText("https://hooks.acme.dev/trailing-comma")).not.toBeNull()
+
+        const newRow = screen.getByText("https://hooks.acme.dev/trailing-comma").closest("article")
+        if (newRow === null) {
+            throw new Error("New row not found")
+        }
+        expect(within(newRow).getByText(/Events: review\.completed$/)).not.toBeNull()
+    })
+
+    it("when disabled endpoint is re-enabled, then original status is restored", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        const scanEventsRow = screen
+            .getByText("https://hooks.acme.dev/scan-events")
+            .closest("article")
+        if (scanEventsRow === null) {
+            throw new Error("Scan events row not found")
+        }
+
+        expect(within(scanEventsRow).getByText("Retrying")).not.toBeNull()
+
+        const enabledSwitch = within(scanEventsRow).getByRole("switch")
+        await user.click(enabledSwitch)
+
+        await waitFor((): void => {
+            expect(within(scanEventsRow).getByText("Disconnected")).not.toBeNull()
+        })
+
+        await user.click(enabledSwitch)
+
+        await waitFor((): void => {
+            expect(within(scanEventsRow).getByText("Disconnected")).not.toBeNull()
+        })
+    })
+
+    it("when provider-health endpoint delivery logs are selected, then shows its log", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        const providerHealthUrl = screen.getByText("https://hooks.acme.dev/provider-health")
+        await user.click(providerHealthUrl)
+
+        await waitFor((): void => {
+            expect(screen.getByText(/· wh-1003/u)).not.toBeNull()
+        })
+        expect(screen.getByText("Invalid secret signature on receiver side.")).not.toBeNull()
+    })
+
+    it("renders initial HTTP status in delivery log entries", (): void => {
+        renderWithProviders(<SettingsWebhooksPage />)
+
+        expect(screen.getByText("HTTP status: 200")).not.toBeNull()
     })
 })

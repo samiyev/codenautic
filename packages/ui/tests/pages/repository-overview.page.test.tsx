@@ -259,9 +259,7 @@ describe("repository overview page", (): void => {
     it("настраивает custom cron и блокирует кнопку при пустом вводе", async (): Promise<void> => {
         const user = userEvent.setup()
 
-        renderWithProviders(
-            <RepositoryOverviewPage repositoryId="frontend-team/ui-dashboard" />,
-        )
+        renderWithProviders(<RepositoryOverviewPage repositoryId="frontend-team/ui-dashboard" />)
 
         await user.click(screen.getByRole("button", { name: "Настроить расписание рескана" }))
         await user.selectOptions(

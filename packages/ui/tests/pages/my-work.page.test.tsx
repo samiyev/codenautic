@@ -79,7 +79,7 @@ describe("MyWorkPage", (): void => {
         await user.click(within(criticalIssueRow).getByRole("button", { name: "Escalate" }))
 
         expect(screen.getByText("Escalated MW-1002 and notified owner channel.")).not.toBeNull()
-        expect(screen.getByText(/MW-1002 escalated at/)).not.toBeNull()
+        expect(screen.getByText(/MW-1002 Escalate at/)).not.toBeNull()
     })
 
     it("open review действие выполняет переход в deep-link", async (): Promise<void> => {

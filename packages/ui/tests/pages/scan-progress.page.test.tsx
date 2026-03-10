@@ -59,7 +59,7 @@ describe("ScanProgressPage", (): void => {
         expect(screen.getByText("clone")).not.toBeNull()
         expect(screen.getByText("Подготовка seed-данных")).not.toBeNull()
         expect(screen.getAllByText("Считывание репозитория").length).toBeGreaterThan(0)
-        expect(screen.getByText("Прогресс: 34%")).not.toBeNull()
+        expect(screen.getByText("Progress: 34%")).not.toBeNull()
     })
 
     it("добавляет обновления из EventSource потока", async (): Promise<void> => {
@@ -123,6 +123,6 @@ describe("ScanProgressPage", (): void => {
 
         expect(screen.getAllByText("Сборка отчёта").length).toBeGreaterThan(0)
         expect(screen.getByText("Отчёт получен")).not.toBeNull()
-        expect(screen.getByText("Прогресс: 56%")).not.toBeNull()
+        expect(screen.getByText("Progress: 56%")).not.toBeNull()
     })
 })

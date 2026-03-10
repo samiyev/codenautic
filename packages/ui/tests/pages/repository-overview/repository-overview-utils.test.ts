@@ -371,9 +371,7 @@ describe("getRepositoryDefaultSchedule", (): void => {
 
 describe("resolveCodeCityTreemapFiles", (): void => {
     it("when given files, then adds issueCount to each", (): void => {
-        const files = [
-            { id: "test-file-1", label: "test.ts", path: "src/test.ts", weight: 10 },
-        ]
+        const files = [{ id: "test-file-1", label: "test.ts", path: "src/test.ts", weight: 10 }]
         const result = resolveCodeCityTreemapFiles(files)
 
         expect(result).toHaveLength(1)

@@ -418,13 +418,7 @@ describe("buildKnowledgeMapExportModel", (): void => {
         }
         const busFactorEntries = buildBusFactorOverlayEntries(twoOwnerFiles, twoOwnerOwnership)
 
-        const model = buildKnowledgeMapExportModel(
-            profile,
-            "complexity",
-            [],
-            busFactorEntries,
-            [],
-        )
+        const model = buildKnowledgeMapExportModel(profile, "complexity", [], busFactorEntries, [])
 
         const elevatedDistricts = model.districts.filter((d) => d.riskLabel === "Elevated")
         expect(elevatedDistricts.length).toBeGreaterThanOrEqual(1)
@@ -461,13 +455,7 @@ describe("buildKnowledgeMapExportModel", (): void => {
         }
         const busFactorEntries = buildBusFactorOverlayEntries(manyFiles, threeOwnership)
 
-        const model = buildKnowledgeMapExportModel(
-            profile,
-            "complexity",
-            [],
-            busFactorEntries,
-            [],
-        )
+        const model = buildKnowledgeMapExportModel(profile, "complexity", [], busFactorEntries, [])
 
         expect(model.districts.some((d) => d.riskLabel === "Healthy")).toBe(true)
     })
@@ -551,9 +539,7 @@ describe("buildOwnershipTransitionEvents", (): void => {
     it("when even index, then scope type is 'file'", (): void => {
         const events = buildOwnershipTransitionEvents(testFiles, testContributors, testOwnership)
 
-        const sortedByChangedAt = [...events].sort((a, b) =>
-            a.id.localeCompare(b.id),
-        )
+        const sortedByChangedAt = [...events].sort((a, b) => a.id.localeCompare(b.id))
         const firstEvent = sortedByChangedAt.find((e) => e.id.includes("-0"))
         if (firstEvent !== undefined) {
             expect(firstEvent.scopeType).toBe("file")
@@ -592,24 +578,17 @@ describe("buildOwnershipTransitionEvents", (): void => {
     })
 
     it("when more than 6 ownership entries, then processes at most 6", (): void => {
-        const manyFiles: ICodeCityTreemapFileDescriptor[] = Array.from(
-            { length: 8 },
-            (_, i) => ({
-                id: `f${String(i)}`,
-                path: `src/file${String(i)}.ts`,
-                loc: 100,
-            }),
-        )
+        const manyFiles: ICodeCityTreemapFileDescriptor[] = Array.from({ length: 8 }, (_, i) => ({
+            id: `f${String(i)}`,
+            path: `src/file${String(i)}.ts`,
+            loc: 100,
+        }))
         const manyOwnership = manyFiles.map((f) => ({
             fileId: f.id,
             ownerId: "alice",
         }))
 
-        const events = buildOwnershipTransitionEvents(
-            manyFiles,
-            testContributors,
-            manyOwnership,
-        )
+        const events = buildOwnershipTransitionEvents(manyFiles, testContributors, manyOwnership)
 
         expect(events.length).toBeLessThanOrEqual(6)
     })
@@ -629,7 +608,13 @@ describe("buildOwnershipTransitionEvents", (): void => {
     it("when critical severity with module scope, then reason mentions module transfer", (): void => {
         const criticalFiles: ICodeCityTreemapFileDescriptor[] = [
             { id: "f1", path: "src/a.ts", loc: 100, bugIntroductions: { "30d": 0 } },
-            { id: "f2", path: "src/b.ts", loc: 100, bugIntroductions: { "30d": 6 }, complexity: 35 },
+            {
+                id: "f2",
+                path: "src/b.ts",
+                loc: 100,
+                bugIntroductions: { "30d": 6 },
+                complexity: 35,
+            },
         ]
         const own = [
             { fileId: "f1", ownerId: "alice" },
@@ -648,7 +633,13 @@ describe("buildOwnershipTransitionEvents", (): void => {
 
     it("when critical severity with file scope, then reason mentions file transfer", (): void => {
         const criticalFiles: ICodeCityTreemapFileDescriptor[] = [
-            { id: "f1", path: "src/hot.ts", loc: 200, bugIntroductions: { "30d": 10 }, complexity: 40 },
+            {
+                id: "f1",
+                path: "src/hot.ts",
+                loc: 200,
+                bugIntroductions: { "30d": 10 },
+                complexity: 40,
+            },
         ]
         const own = [{ fileId: "f1", ownerId: "alice" }]
 
