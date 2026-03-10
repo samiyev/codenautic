@@ -1,4 +1,5 @@
 import { type ReactElement, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button, Card, CardBody, CardHeader, Input } from "@/components/ui"
 import { XyFlowGraph } from "@/components/graphs/xyflow-graph"
@@ -237,13 +238,14 @@ function calculateImpactPathHighlight(
  * @param props Пропсы графа.
  */
 export function FunctionClassCallGraph(props: IFunctionCallGraphProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [state, setState] = useState<IFunctionCallGraphState>({
         query: "",
         selectedNodeId: undefined,
         showImpactPaths: false,
     })
-    const title = props.title ?? "Function/Class call graph"
-    const emptyStateLabel = props.emptyStateLabel ?? "No function or class call relationships yet."
+    const title = props.title ?? t("code-city:functionCallGraph.defaultTitle")
+    const emptyStateLabel = props.emptyStateLabel ?? t("code-city:functionCallGraph.defaultEmptyState")
     const graphData = useMemo(
         (): IFunctionCallGraphData => buildFunctionCallGraphData(props.nodes, props.callRelations),
         [props.callRelations, props.nodes],
@@ -316,8 +318,8 @@ export function FunctionClassCallGraph(props: IFunctionCallGraphProps): ReactEle
                 </div>
                 <div className="flex min-w-0 gap-2">
                     <Input
-                        aria-label="Filter function/class nodes"
-                        placeholder="Filter by function or class"
+                        aria-label={t("code-city:functionCallGraph.ariaLabelFilter")}
+                        placeholder={t("code-city:functionCallGraph.placeholderFilter")}
                         value={state.query}
                         onValueChange={(nextQuery): void => {
                             setState((previousState) => ({
@@ -337,7 +339,7 @@ export function FunctionClassCallGraph(props: IFunctionCallGraphProps): ReactEle
                                 }))
                             }}
                         >
-                            Reset
+                            {t("code-city:functionCallGraph.reset")}
                         </Button>
                     ) : null}
                     <Button
@@ -351,7 +353,7 @@ export function FunctionClassCallGraph(props: IFunctionCallGraphProps): ReactEle
                             }))
                         }}
                     >
-                        Highlight impact paths
+                        {t("code-city:functionCallGraph.highlightImpactPaths")}
                     </Button>
                 </div>
             </CardHeader>
@@ -383,21 +385,21 @@ export function FunctionClassCallGraph(props: IFunctionCallGraphProps): ReactEle
                     aria-live="polite"
                     className="rounded-xl border border-default-200 bg-content2 p-4"
                 >
-                    <h4 className="text-sm font-semibold text-foreground">Node details</h4>
+                    <h4 className="text-sm font-semibold text-foreground">{t("code-city:functionCallGraph.nodeDetails")}</h4>
                     {selectedNode === undefined || selectedCallStats === undefined ? (
                         <p className="mt-2 text-sm text-foreground-500">
-                            Select a node to inspect call relationships.
+                            {t("code-city:functionCallGraph.selectNodePrompt")}
                         </p>
                     ) : (
                         <div className="mt-2 space-y-1 text-sm text-foreground-700">
-                            <p>{`Name: ${selectedNode.name}`}</p>
-                            <p>{`Kind: ${selectedNode.kind}`}</p>
-                            <p>{`Source file: ${selectedNode.file ?? "n/a"}`}</p>
-                            <p>{`Complexity: ${selectedNode.complexity ?? "n/a"}`}</p>
-                            <p>{`Incoming calls: ${selectedCallStats.incoming}`}</p>
-                            <p>{`Outgoing calls: ${selectedCallStats.outgoing}`}</p>
-                            <p>{`Impact path nodes: ${impactPathHighlight.nodeIds.length}`}</p>
-                            <p>{`Impact path edges: ${impactPathHighlight.edgeIds.length}`}</p>
+                            <p>{t("code-city:functionCallGraph.name", { value: selectedNode.name })}</p>
+                            <p>{t("code-city:functionCallGraph.kind", { value: selectedNode.kind })}</p>
+                            <p>{t("code-city:functionCallGraph.sourceFile", { value: selectedNode.file ?? "n/a" })}</p>
+                            <p>{t("code-city:functionCallGraph.complexity", { value: selectedNode.complexity ?? "n/a" })}</p>
+                            <p>{t("code-city:functionCallGraph.incomingCalls", { value: selectedCallStats.incoming })}</p>
+                            <p>{t("code-city:functionCallGraph.outgoingCalls", { value: selectedCallStats.outgoing })}</p>
+                            <p>{t("code-city:functionCallGraph.impactPathNodes", { value: impactPathHighlight.nodeIds.length })}</p>
+                            <p>{t("code-city:functionCallGraph.impactPathEdges", { value: impactPathHighlight.edgeIds.length })}</p>
                         </div>
                     )}
                 </section>

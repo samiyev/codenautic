@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 const DEFAULT_HEIGHT = 260
 const SVG_WIDTH = 360
@@ -109,7 +110,8 @@ function mapY(value: number, maxValue: number): number {
  * Side-panel scatter visualizing churn vs complexity with clickable points.
  */
 export function ChurnComplexityScatter(props: IChurnComplexityScatterProps): ReactElement {
-    const title = props.title ?? "Churn vs complexity scatter"
+    const { t } = useTranslation(["code-city"])
+    const title = props.title ?? t("code-city:churnComplexity.defaultTitle")
     const height = props.height ?? DEFAULT_HEIGHT
     const points = resolvePoints(props.files)
 
@@ -118,7 +120,7 @@ export function ChurnComplexityScatter(props: IChurnComplexityScatterProps): Rea
             <div aria-label={title} className="rounded-md border border-default-200 p-3">
                 <p className="text-sm font-semibold">{title}</p>
                 <p className="text-sm text-foreground-500">
-                    Not enough churn/complexity data for scatter plot.
+                    {t("code-city:churnComplexity.emptyState")}
                 </p>
             </div>
         )
@@ -137,10 +139,10 @@ export function ChurnComplexityScatter(props: IChurnComplexityScatterProps): Rea
         <div aria-label={title} className="space-y-2 rounded-md border border-default-200 p-3">
             <p className="text-sm font-semibold">{title}</p>
             <p className="text-xs text-foreground-500">
-                Click a point to highlight the file on CodeCity treemap.
+                {t("code-city:churnComplexity.description")}
             </p>
             <svg
-                aria-label="Churn vs complexity scatter plot"
+                aria-label={t("code-city:churnComplexity.ariaLabelScatter")}
                 className="w-full"
                 style={{ height }}
                 viewBox={`0 0 ${String(SVG_WIDTH)} ${String(SVG_HEIGHT)}`}
@@ -175,7 +177,7 @@ export function ChurnComplexityScatter(props: IChurnComplexityScatterProps): Rea
                     x={PADDING_LEFT}
                     y={14}
                 >
-                    High complexity
+                    {t("code-city:churnComplexity.highComplexity")}
                 </text>
                 <text
                     fill="hsl(var(--nextui-colors-foreground-500))"
@@ -183,7 +185,7 @@ export function ChurnComplexityScatter(props: IChurnComplexityScatterProps): Rea
                     x={SVG_WIDTH - PADDING_RIGHT - 72}
                     y={14}
                 >
-                    Low complexity
+                    {t("code-city:churnComplexity.lowComplexity")}
                 </text>
                 <text
                     fill="hsl(var(--nextui-colors-foreground-500))"
@@ -191,7 +193,7 @@ export function ChurnComplexityScatter(props: IChurnComplexityScatterProps): Rea
                     x={PADDING_LEFT}
                     y={SVG_HEIGHT - 10}
                 >
-                    Low churn
+                    {t("code-city:churnComplexity.lowChurn")}
                 </text>
                 <text
                     fill="hsl(var(--nextui-colors-foreground-500))"
@@ -199,7 +201,7 @@ export function ChurnComplexityScatter(props: IChurnComplexityScatterProps): Rea
                     x={SVG_WIDTH - PADDING_RIGHT - 58}
                     y={SVG_HEIGHT - 10}
                 >
-                    High churn
+                    {t("code-city:churnComplexity.highChurn")}
                 </text>
                 {points.map((point): ReactElement => {
                     const isSelected = props.selectedFileId === point.fileId
@@ -208,7 +210,7 @@ export function ChurnComplexityScatter(props: IChurnComplexityScatterProps): Rea
 
                     return (
                         <g
-                            aria-label={`Churn point ${point.fileName}`}
+                            aria-label={t("code-city:churnComplexity.ariaLabelPoint", { fileName: point.fileName })}
                             className="cursor-pointer"
                             data-selected={isSelected ? "true" : "false"}
                             key={point.fileId}
@@ -236,16 +238,14 @@ export function ChurnComplexityScatter(props: IChurnComplexityScatterProps): Rea
                     )
                 })}
             </svg>
-            <p aria-label="Scatter quadrants" className="text-xs text-foreground-500">
-                Quadrants: Q1 high churn/high complexity, Q2 low churn/high complexity, Q3 low
-                churn/low complexity, Q4 high churn/low complexity.
+            <p aria-label={t("code-city:churnComplexity.ariaLabelQuadrants")} className="text-xs text-foreground-500">
+                {t("code-city:churnComplexity.quadrantsDescription")}
             </p>
             {selectedPoint === undefined ? (
-                <p className="text-xs text-foreground-500">No point selected.</p>
+                <p className="text-xs text-foreground-500">{t("code-city:churnComplexity.noPointSelected")}</p>
             ) : (
                 <p className="text-xs text-foreground-500">
-                    Selected: {selectedPoint.fileName} (churn {selectedPoint.churn}, complexity{" "}
-                    {selectedPoint.complexity})
+                    {t("code-city:churnComplexity.selectedPoint", { fileName: selectedPoint.fileName, churn: selectedPoint.churn, complexity: selectedPoint.complexity })}
                 </p>
             )}
         </div>

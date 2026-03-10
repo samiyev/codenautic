@@ -1,5 +1,6 @@
 import type { ChangeEvent, ReactElement } from "react"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 
@@ -74,6 +75,7 @@ function normalizeThreshold(value: number, fallback: number): number {
  * @returns React-компонент alert-конфигуратора.
  */
 export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [confidenceThreshold, setConfidenceThreshold] = useState<number>(
         props.defaultValue?.confidenceThreshold ?? DEFAULT_CONFIDENCE_THRESHOLD,
     )
@@ -134,19 +136,18 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Alert config dialog</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:alertConfigComp.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Configure prediction alerts by threshold, channel, delivery frequency and module
-                scope.
+                {t("code-city:alertConfigComp.description")}
             </p>
 
             <div className="mt-3 grid gap-2 md:grid-cols-2">
                 <label className="space-y-1">
                     <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Confidence threshold
+                        {t("code-city:alertConfigComp.confidenceThreshold")}
                     </span>
                     <input
-                        aria-label="Alert confidence threshold"
+                        aria-label={t("code-city:alertConfigComp.ariaConfidenceThreshold")}
                         className="w-full rounded border border-border bg-surface px-2 py-1 text-xs"
                         min={1}
                         max={100}
@@ -160,10 +161,10 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
 
                 <label className="space-y-1">
                     <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Issue increase threshold
+                        {t("code-city:alertConfigComp.issueIncreaseThreshold")}
                     </span>
                     <input
-                        aria-label="Alert issue increase threshold"
+                        aria-label={t("code-city:alertConfigComp.ariaIssueIncreaseThreshold")}
                         className="w-full rounded border border-border bg-surface px-2 py-1 text-xs"
                         min={1}
                         max={20}
@@ -176,9 +177,9 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
                 </label>
             </div>
 
-            <fieldset aria-label="Alert channels" className="mt-3 space-y-1">
+            <fieldset aria-label={t("code-city:alertConfigComp.ariaChannels")} className="mt-3 space-y-1">
                 <legend className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Channels
+                    {t("code-city:alertConfigComp.channels")}
                 </legend>
                 {(["slack", "email", "webhook"] as const).map((channel): ReactElement => {
                     return (
@@ -201,10 +202,10 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
 
             <label className="mt-3 block space-y-1">
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Delivery frequency
+                    {t("code-city:alertConfigComp.deliveryFrequency")}
                 </span>
                 <select
-                    aria-label="Alert frequency"
+                    aria-label={t("code-city:alertConfigComp.ariaFrequency")}
                     className={NATIVE_FORM.select}
                     value={frequency}
                     onChange={(event): void => {
@@ -218,15 +219,15 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
                         }
                     }}
                 >
-                    <option value="realtime">realtime</option>
-                    <option value="daily">daily</option>
-                    <option value="weekly">weekly</option>
+                    <option value="realtime">{t("code-city:alertConfigComp.frequencyOptions.realtime")}</option>
+                    <option value="daily">{t("code-city:alertConfigComp.frequencyOptions.daily")}</option>
+                    <option value="weekly">{t("code-city:alertConfigComp.frequencyOptions.weekly")}</option>
                 </select>
             </label>
 
-            <fieldset aria-label="Alert modules" className="mt-3 space-y-1">
+            <fieldset aria-label={t("code-city:alertConfigComp.ariaModules")} className="mt-3 space-y-1">
                 <legend className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Per-module granularity
+                    {t("code-city:alertConfigComp.perModuleGranularity")}
                 </legend>
                 {props.modules.map((module): ReactElement => {
                     return (
@@ -256,12 +257,12 @@ export function AlertConfigDialog(props: IAlertConfigDialogProps): ReactElement 
             </fieldset>
 
             <button
-                aria-label="Save prediction alert configuration"
+                aria-label={t("code-city:alertConfigComp.ariaSave")}
                 className="mt-3 rounded border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-on-primary"
                 onClick={handleSave}
                 type="button"
             >
-                Save alert config
+                {t("code-city:alertConfigComp.saveAlertConfig")}
             </button>
         </section>
     )

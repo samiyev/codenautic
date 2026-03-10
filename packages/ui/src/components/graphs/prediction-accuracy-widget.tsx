@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { TCodeCityTreemapPredictionRiskLevel } from "@/components/graphs/codecity-treemap"
 
@@ -48,14 +49,14 @@ export interface IPredictionAccuracyWidgetProps {
     readonly onSelectCase?: (entry: IPredictionAccuracyCase) => void
 }
 
-function resolvePredictedLabel(riskLevel: TCodeCityTreemapPredictionRiskLevel): string {
+function resolvePredictedLabelKey(riskLevel: TCodeCityTreemapPredictionRiskLevel): string {
     if (riskLevel === "high") {
-        return "incident"
+        return "code-city:predictionAccuracy.predictedIncident"
     }
     if (riskLevel === "medium") {
-        return "monitor"
+        return "code-city:predictionAccuracy.predictedMonitor"
     }
-    return "stable"
+    return "code-city:predictionAccuracy.predictedStable"
 }
 
 /**
@@ -65,15 +66,15 @@ function resolvePredictedLabel(riskLevel: TCodeCityTreemapPredictionRiskLevel): 
  * @returns React-компонент виджета.
  */
 export function PredictionAccuracyWidget(props: IPredictionAccuracyWidgetProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Prediction accuracy widget</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:predictionAccuracy.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Track forecast accuracy over time with confusion matrix and predicted vs actual
-                cases.
+                {t("code-city:predictionAccuracy.description")}
             </p>
 
-            <div aria-label="Prediction accuracy trend" className="mt-3 space-y-1">
+            <div aria-label={t("code-city:predictionAccuracy.ariaLabelTrend")} className="mt-3 space-y-1">
                 {props.points.map((point): ReactElement => {
                     return (
                         <p className="text-xs text-foreground" key={point.timestamp}>
@@ -86,7 +87,7 @@ export function PredictionAccuracyWidget(props: IPredictionAccuracyWidgetProps):
             </div>
 
             <div
-                aria-label="Prediction confusion matrix"
+                aria-label={t("code-city:predictionAccuracy.ariaLabelMatrix")}
                 className="mt-3 grid grid-cols-2 gap-2 rounded border border-border bg-surface p-2"
             >
                 <p className="rounded border border-success/30 bg-success/10 px-2 py-1 text-xs text-success">
@@ -103,12 +104,12 @@ export function PredictionAccuracyWidget(props: IPredictionAccuracyWidgetProps):
                 </p>
             </div>
 
-            <div aria-label="Prediction accuracy cases" className="mt-3 space-y-2">
+            <div aria-label={t("code-city:predictionAccuracy.ariaLabelCases")} className="mt-3 space-y-2">
                 {props.cases.slice(0, 4).map((entry): ReactElement => {
                     const isActive = props.activeCaseId === entry.id
                     return (
                         <button
-                            aria-label={`Inspect prediction accuracy case ${entry.label}`}
+                            aria-label={t("code-city:predictionAccuracy.ariaLabelInspect", { label: entry.label })}
                             className={`w-full rounded border p-2 text-left text-xs transition ${
                                 isActive
                                     ? "border-primary bg-primary/10 text-on-primary"
@@ -120,8 +121,7 @@ export function PredictionAccuracyWidget(props: IPredictionAccuracyWidgetProps):
                             }}
                             type="button"
                         >
-                            We predicted {resolvePredictedLabel(entry.predictedRiskLevel)} on{" "}
-                            {entry.label}, actual result: {entry.actualOutcome}.
+                            {t("code-city:predictionAccuracy.caseText", { predicted: (t as unknown as (key: string) => string)(resolvePredictedLabelKey(entry.predictedRiskLevel)), label: entry.label, outcome: entry.actualOutcome })}
                         </button>
                     )
                 })}

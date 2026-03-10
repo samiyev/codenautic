@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 /**
  * Снимок comparison для prediction history.
@@ -29,23 +30,24 @@ export interface IPredictionComparisonViewProps {
  * @returns React-компонент comparison view.
  */
 export function PredictionComparisonView(props: IPredictionComparisonViewProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const selectedSnapshot =
         props.snapshots.find((snapshot): boolean => snapshot.id === props.activeSnapshotId) ??
         props.snapshots[0]
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Prediction comparison view</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:predictionComparison.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Compare historical forecasts with what actually happened.
+                {t("code-city:predictionComparison.description")}
             </p>
 
-            <div aria-label="Prediction comparison snapshots" className="mt-3 space-y-2">
+            <div aria-label={t("code-city:predictionComparison.ariaLabelSnapshots")} className="mt-3 space-y-2">
                 {props.snapshots.map((snapshot): ReactElement => {
                     const isActive = snapshot.id === selectedSnapshot?.id
                     return (
                         <button
-                            aria-label={`Inspect prediction comparison ${snapshot.periodLabel}`}
+                            aria-label={t("code-city:predictionComparison.ariaLabelInspect", { periodLabel: snapshot.periodLabel })}
                             className={`w-full rounded border p-2 text-left text-xs transition ${
                                 isActive
                                     ? "border-primary bg-primary/10 text-on-primary"
@@ -57,24 +59,22 @@ export function PredictionComparisonView(props: IPredictionComparisonViewProps):
                             }}
                             type="button"
                         >
-                            {snapshot.periodLabel}: predicted {String(snapshot.predictedHotspots)},
-                            actual {String(snapshot.actualHotspots)}, accuracy{" "}
-                            {String(snapshot.accuracyScore)}%
+                            {t("code-city:predictionComparison.snapshotText", { periodLabel: snapshot.periodLabel, predicted: String(snapshot.predictedHotspots), actual: String(snapshot.actualHotspots), accuracy: String(snapshot.accuracyScore) })}
                         </button>
                     )
                 })}
             </div>
 
             <div
-                aria-label="Prediction comparison summary"
+                aria-label={t("code-city:predictionComparison.ariaLabelSummary")}
                 className="mt-3 rounded border border-border bg-surface p-2"
             >
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    What happened since prediction
+                    {t("code-city:predictionComparison.whatHappened")}
                 </p>
                 <p className="mt-1 text-xs text-foreground">
                     {selectedSnapshot === undefined
-                        ? "No comparison snapshot selected."
+                        ? t("code-city:predictionComparison.noSnapshot")
                         : selectedSnapshot.summary}
                 </p>
             </div>

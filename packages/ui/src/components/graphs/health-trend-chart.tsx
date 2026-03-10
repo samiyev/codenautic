@@ -1,5 +1,6 @@
 import type { ReactElement } from "react"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 
@@ -69,7 +70,8 @@ function mapY(score: number): number {
  * Health trend chart with period selector and event annotations.
  */
 export function HealthTrendChart(props: IHealthTrendChartProps): ReactElement {
-    const title = props.title ?? "Health trend chart"
+    const { t } = useTranslation(["code-city"])
+    const title = props.title ?? t("code-city:healthTrendComp.title")
     const [period, setPeriod] = useState<IHealthTrendPeriod>("90d")
 
     const preparedPoints = useMemo((): ReadonlyArray<IHealthTrendPoint> => {
@@ -159,7 +161,7 @@ export function HealthTrendChart(props: IHealthTrendChartProps): ReactElement {
         return (
             <div aria-label={title} className="rounded-md border border-default-200 p-3">
                 <p className="text-sm font-semibold">{title}</p>
-                <p className="text-sm text-foreground-500">No health trend data.</p>
+                <p className="text-sm text-foreground-500">{t("code-city:healthTrendComp.noData")}</p>
             </div>
         )
     }
@@ -169,10 +171,10 @@ export function HealthTrendChart(props: IHealthTrendChartProps): ReactElement {
             <div className="flex flex-wrap items-end gap-2">
                 <p className="text-sm font-semibold">{title}</p>
                 <label className="text-xs text-foreground-500" htmlFor="health-trend-period">
-                    Period
+                    {t("code-city:healthTrendComp.period")}
                 </label>
                 <select
-                    aria-label="Health trend period"
+                    aria-label={t("code-city:healthTrendComp.ariaPeriod")}
                     className={`w-28 ${NATIVE_FORM.select}`}
                     id="health-trend-period"
                     value={period}
@@ -195,7 +197,7 @@ export function HealthTrendChart(props: IHealthTrendChartProps): ReactElement {
                 </select>
             </div>
             <svg
-                aria-label="Health trend line chart"
+                aria-label={t("code-city:healthTrendComp.ariaChart")}
                 className="w-full"
                 style={{ height: 260 }}
                 viewBox={`0 0 ${String(SVG_WIDTH)} ${String(SVG_HEIGHT)}`}
@@ -239,7 +241,7 @@ export function HealthTrendChart(props: IHealthTrendChartProps): ReactElement {
                                         y2={PADDING_TOP + 8}
                                     />
                                     <text
-                                        aria-label={`Health event ${point.annotation}`}
+                                        aria-label={t("code-city:healthTrendComp.ariaEvent", { annotation: point.annotation })}
                                         fill="hsl(12, 90%, 55%)"
                                         fontSize="9"
                                         x={x + 3}
@@ -254,8 +256,8 @@ export function HealthTrendChart(props: IHealthTrendChartProps): ReactElement {
                 })}
             </svg>
             {stats === undefined ? null : (
-                <p aria-label="Health trend stats" className="text-xs text-foreground-500">
-                    Avg {stats.avg}, min {stats.min}, max {stats.max}
+                <p aria-label={t("code-city:healthTrendComp.ariaStats")} className="text-xs text-foreground-500">
+                    {t("code-city:healthTrendComp.stats", { avg: stats.avg, min: stats.min, max: stats.max })}
                 </p>
             )}
         </div>

@@ -1,4 +1,5 @@
 import { type ReactElement, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button, Card, CardBody, CardHeader, Input } from "@/components/ui"
 import { XyFlowGraph } from "@/components/graphs/xyflow-graph"
@@ -162,8 +163,12 @@ function filterFileDependencyData(
 }
 
 /** Формирует заголовок метрики из узлов и рёбер. */
-function createSummaryText(nodesCount: number, edgesCount: number): string {
-    return `Nodes: ${nodesCount}, edges: ${edgesCount}`
+function createSummaryText(
+    nodesCount: number,
+    edgesCount: number,
+    tFn: (key: string, options?: Record<string, unknown>) => string,
+): string {
+    return tFn("code-city:fileDependency.summary", { nodes: nodesCount, edges: edgesCount })
 }
 
 /** Возвращает входящие/исходящие связи для выбранного узла. */
@@ -236,13 +241,14 @@ function calculateImpactPathHighlight(
  * @param props Пропсы графа.
  */
 export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [state, setState] = useState<IFileDependencyGraphState>({
         query: "",
         selectedNodeId: undefined,
         showImpactPaths: false,
     })
-    const title = props.title ?? "File dependency graph"
-    const emptyStateLabel = props.emptyStateLabel ?? "No file dependencies yet."
+    const title = props.title ?? t("code-city:fileDependency.defaultTitle")
+    const emptyStateLabel = props.emptyStateLabel ?? t("code-city:fileDependency.defaultEmptyState")
     const graphData = useMemo(
         (): IFileDependencyGraphData =>
             buildFileDependencyGraphData(props.files, props.dependencies),
@@ -268,6 +274,7 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
     const summaryText = createSummaryText(
         visibleGraphData.nodes.length,
         visibleGraphData.edges.length,
+        t as unknown as (key: string, options?: Record<string, unknown>) => string,
     )
     const filesById = useMemo((): ReadonlyMap<string, IFileDependencyNode> => {
         const nextMap = new Map<string, IFileDependencyNode>()
@@ -315,8 +322,8 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
                 </div>
                 <div className="flex min-w-0 gap-2">
                     <Input
-                        aria-label="Filter files"
-                        placeholder="Filter files by path"
+                        aria-label={t("code-city:fileDependency.ariaLabelFilterFiles")}
+                        placeholder={t("code-city:fileDependency.placeholderFilter")}
                         value={state.query}
                         onValueChange={(nextQuery): void => {
                             setState((previousState) => ({
@@ -336,7 +343,7 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
                                 }))
                             }}
                         >
-                            Reset
+                            {t("code-city:fileDependency.reset")}
                         </Button>
                     ) : null}
                     <Button
@@ -350,7 +357,7 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
                             }))
                         }}
                     >
-                        Highlight impact paths
+                        {t("code-city:fileDependency.highlightImpactPaths")}
                     </Button>
                 </div>
             </CardHeader>
@@ -360,7 +367,7 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
                 ) : (
                     <XyFlowGraph
                         graphTitle={title}
-                        ariaLabel="File dependencies graph"
+                        ariaLabel={t("code-city:fileDependency.ariaLabelGraph")}
                         nodes={state.query.length > 0 ? visibleGraphData.nodes : layoutedNodes}
                         edges={visibleGraphData.edges}
                         height={props.height}
@@ -393,21 +400,21 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
                     aria-live="polite"
                     className="rounded-xl border border-default-200 bg-content2 p-4"
                 >
-                    <h4 className="text-sm font-semibold text-foreground">Node details</h4>
+                    <h4 className="text-sm font-semibold text-foreground">{t("code-city:fileDependency.nodeDetails")}</h4>
                     {selectedFile === undefined || selectedDependencyStats === undefined ? (
                         <p className="mt-2 text-sm text-foreground-500">
-                            Select a node to inspect dependencies.
+                            {t("code-city:fileDependency.selectNodePrompt")}
                         </p>
                     ) : (
                         <div className="mt-2 space-y-1 text-sm text-foreground-700">
-                            <p>{`Path: ${selectedFile.path}`}</p>
-                            <p>{`Node id: ${selectedFile.id}`}</p>
-                            <p>{`Complexity: ${selectedFile.complexity ?? "n/a"}`}</p>
-                            <p>{`Churn: ${selectedFile.churn ?? "n/a"}`}</p>
-                            <p>{`Incoming deps: ${selectedDependencyStats.incoming}`}</p>
-                            <p>{`Outgoing deps: ${selectedDependencyStats.outgoing}`}</p>
-                            <p>{`Impact path nodes: ${impactPathHighlight.nodeIds.length}`}</p>
-                            <p>{`Impact path edges: ${impactPathHighlight.edgeIds.length}`}</p>
+                            <p>{t("code-city:fileDependency.path", { value: selectedFile.path })}</p>
+                            <p>{t("code-city:fileDependency.nodeId", { value: selectedFile.id })}</p>
+                            <p>{t("code-city:fileDependency.complexity", { value: selectedFile.complexity ?? "n/a" })}</p>
+                            <p>{t("code-city:fileDependency.churn", { value: selectedFile.churn ?? "n/a" })}</p>
+                            <p>{t("code-city:fileDependency.incomingDeps", { value: selectedDependencyStats.incoming })}</p>
+                            <p>{t("code-city:fileDependency.outgoingDeps", { value: selectedDependencyStats.outgoing })}</p>
+                            <p>{t("code-city:fileDependency.impactPathNodes", { value: impactPathHighlight.nodeIds.length })}</p>
+                            <p>{t("code-city:fileDependency.impactPathEdges", { value: impactPathHighlight.edgeIds.length })}</p>
                         </div>
                     )}
                 </section>

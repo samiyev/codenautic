@@ -1,5 +1,6 @@
 import type { ReactElement } from "react"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -96,6 +97,7 @@ function readScoreBySelection(
  * @returns React-компонент leaderboard.
  */
 export function TeamLeaderboard(props: ITeamLeaderboardProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [activeMetric, setActiveMetric] = useState<TTeamLeaderboardMetric>("quality")
     const [activePeriod, setActivePeriod] = useState<TTeamLeaderboardPeriod>("sprint")
 
@@ -112,12 +114,12 @@ export function TeamLeaderboard(props: ITeamLeaderboardProps): ReactElement {
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Team leaderboard</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:teamLeaderboard.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Team quality ranking with metric sorting and sprint/month/quarter toggles.
+                {t("code-city:teamLeaderboard.description")}
             </p>
 
-            <div aria-label="Leaderboard metric" className="mt-3 flex flex-wrap gap-2">
+            <div aria-label={t("code-city:teamLeaderboard.ariaLabelMetric")} className="mt-3 flex flex-wrap gap-2">
                 <button
                     className={resolveMetricButtonClassName(activeMetric === "quality")}
                     onClick={(): void => {
@@ -125,7 +127,7 @@ export function TeamLeaderboard(props: ITeamLeaderboardProps): ReactElement {
                     }}
                     type="button"
                 >
-                    Metric quality
+                    {t("code-city:teamLeaderboard.metricQuality")}
                 </button>
                 <button
                     className={resolveMetricButtonClassName(activeMetric === "velocity")}
@@ -134,7 +136,7 @@ export function TeamLeaderboard(props: ITeamLeaderboardProps): ReactElement {
                     }}
                     type="button"
                 >
-                    Metric velocity
+                    {t("code-city:teamLeaderboard.metricVelocity")}
                 </button>
                 <button
                     className={resolveMetricButtonClassName(activeMetric === "ownership")}
@@ -143,11 +145,11 @@ export function TeamLeaderboard(props: ITeamLeaderboardProps): ReactElement {
                     }}
                     type="button"
                 >
-                    Metric ownership
+                    {t("code-city:teamLeaderboard.metricOwnership")}
                 </button>
             </div>
 
-            <div aria-label="Leaderboard period" className="mt-2 flex flex-wrap gap-2">
+            <div aria-label={t("code-city:teamLeaderboard.ariaLabelPeriod")} className="mt-2 flex flex-wrap gap-2">
                 <button
                     className={resolvePeriodButtonClassName(activePeriod === "sprint")}
                     onClick={(): void => {
@@ -155,7 +157,7 @@ export function TeamLeaderboard(props: ITeamLeaderboardProps): ReactElement {
                     }}
                     type="button"
                 >
-                    Sprint
+                    {t("code-city:teamLeaderboard.periodSprint")}
                 </button>
                 <button
                     className={resolvePeriodButtonClassName(activePeriod === "month")}
@@ -164,7 +166,7 @@ export function TeamLeaderboard(props: ITeamLeaderboardProps): ReactElement {
                     }}
                     type="button"
                 >
-                    Month
+                    {t("code-city:teamLeaderboard.periodMonth")}
                 </button>
                 <button
                     className={resolvePeriodButtonClassName(activePeriod === "quarter")}
@@ -173,18 +175,18 @@ export function TeamLeaderboard(props: ITeamLeaderboardProps): ReactElement {
                     }}
                     type="button"
                 >
-                    Quarter
+                    {t("code-city:teamLeaderboard.periodQuarter")}
                 </button>
             </div>
 
-            <ol aria-label="Team leaderboard ranking" className="mt-3 space-y-2">
+            <ol aria-label={t("code-city:teamLeaderboard.ariaLabelRanking")} className="mt-3 space-y-2">
                 {orderedEntries.map((entry, index): ReactElement => {
                     const isActive = props.activeOwnerId === entry.ownerId
                     const score = readScoreBySelection(entry, activeMetric, activePeriod)
                     return (
                         <li key={entry.ownerId}>
                             <button
-                                aria-label={`Inspect leaderboard contributor ${entry.ownerName}`}
+                                aria-label={t("code-city:teamLeaderboard.ariaLabelInspect", { ownerName: entry.ownerName })}
                                 className={resolveRowClassName(isActive)}
                                 onClick={(): void => {
                                     props.onSelectEntry?.(entry)
@@ -197,7 +199,7 @@ export function TeamLeaderboard(props: ITeamLeaderboardProps): ReactElement {
                                             {String(index + 1)}. {entry.ownerName}
                                         </p>
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            Score {String(score)} · {entry.fileIds.length} files
+                                            {t("code-city:teamLeaderboard.scoreMeta", { score: String(score), files: String(entry.fileIds.length) })}
                                         </p>
                                     </div>
                                     <span

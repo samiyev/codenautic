@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { TCodeCityTreemapPredictionRiskLevel } from "@/components/graphs/codecity-treemap"
 
@@ -32,14 +33,14 @@ export interface IPredictionExplainPanelProps {
     readonly onSelectEntry?: (entry: IPredictionExplainPanelEntry) => void
 }
 
-function resolveRiskLabel(riskLevel: TCodeCityTreemapPredictionRiskLevel): string {
+function resolveRiskLabelKey(riskLevel: TCodeCityTreemapPredictionRiskLevel): string {
     if (riskLevel === "high") {
-        return "High"
+        return "code-city:predictionExplain.riskHigh"
     }
     if (riskLevel === "medium") {
-        return "Medium"
+        return "code-city:predictionExplain.riskMedium"
     }
-    return "Low"
+    return "code-city:predictionExplain.riskLow"
 }
 
 /**
@@ -49,18 +50,19 @@ function resolveRiskLabel(riskLevel: TCodeCityTreemapPredictionRiskLevel): strin
  * @returns React-компонент explain-панели.
  */
 export function PredictionExplainPanel(props: IPredictionExplainPanelProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const selectedEntry =
         props.entries.find((entry): boolean => entry.fileId === props.activeFileId) ??
         props.entries[0]
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Prediction explain panel</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:predictionExplain.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Click prediction entries to inspect why this file is forecasted as a hotspot.
+                {t("code-city:predictionExplain.description")}
             </p>
 
-            <div aria-label="Prediction explain entries" className="mt-3 space-y-2">
+            <div aria-label={t("code-city:predictionExplain.ariaLabelEntries")} className="mt-3 space-y-2">
                 {props.entries.slice(0, 6).map((entry): ReactElement => {
                     const isActive = selectedEntry?.fileId === entry.fileId
                     const className = isActive
@@ -68,7 +70,7 @@ export function PredictionExplainPanel(props: IPredictionExplainPanelProps): Rea
                         : "border-border bg-surface hover:border-border"
                     return (
                         <button
-                            aria-label={`Inspect prediction explanation for ${entry.label}`}
+                            aria-label={t("code-city:predictionExplain.ariaLabelInspect", { label: entry.label })}
                             className={`w-full rounded-lg border p-2 text-left transition ${className}`}
                             key={entry.fileId}
                             onClick={(): void => {
@@ -78,8 +80,7 @@ export function PredictionExplainPanel(props: IPredictionExplainPanelProps): Rea
                         >
                             <p className="text-sm font-semibold text-foreground">{entry.label}</p>
                             <p className="mt-1 text-xs text-muted-foreground">
-                                Risk {resolveRiskLabel(entry.riskLevel)} · Confidence{" "}
-                                {String(entry.confidenceScore)}%
+                                {t("code-city:predictionExplain.riskAndConfidence", { risk: (t as unknown as (key: string) => string)(resolveRiskLabelKey(entry.riskLevel)), confidence: String(entry.confidenceScore) })}
                             </p>
                         </button>
                     )
@@ -87,15 +88,15 @@ export function PredictionExplainPanel(props: IPredictionExplainPanelProps): Rea
             </div>
 
             <div
-                aria-label="Prediction explanation details"
+                aria-label={t("code-city:predictionExplain.ariaLabelDetails")}
                 className="mt-3 rounded border border-border bg-surface p-2"
             >
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Why this file is predicted to become a hotspot
+                    {t("code-city:predictionExplain.whyHotspot")}
                 </p>
                 <p className="mt-1 text-xs text-foreground">
                     {selectedEntry === undefined
-                        ? "No prediction selected."
+                        ? t("code-city:predictionExplain.noSelection")
                         : `${selectedEntry.reason}. ${selectedEntry.explanation}`}
                 </p>
             </div>

@@ -1,4 +1,5 @@
 import { type ReactElement, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import {
     Background,
     Controls,
@@ -58,6 +59,7 @@ const VIEWPORT_PAN_STEP = 160
 
 /** Панель ручных контролов для управления видом графа. */
 function XYFlowViewportControls(): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const flowInstance = useReactFlow()
 
     const moveViewport = (deltaX: number, deltaY: number): void => {
@@ -79,7 +81,7 @@ function XYFlowViewportControls(): ReactElement {
         >
             <div className="flex gap-1">
                 <button
-                    aria-label="Zoom in"
+                    aria-label={t("code-city:xyflowRenderer.ariaZoomIn")}
                     className="rounded border border-border px-2 py-1 text-sm"
                     onClick={(): void => {
                         void flowInstance.zoomIn({ duration: 180 })
@@ -89,7 +91,7 @@ function XYFlowViewportControls(): ReactElement {
                     +
                 </button>
                 <button
-                    aria-label="Zoom out"
+                    aria-label={t("code-city:xyflowRenderer.ariaZoomOut")}
                     className="rounded border border-border px-2 py-1 text-sm"
                     onClick={(): void => {
                         void flowInstance.zoomOut({ duration: 180 })
@@ -99,20 +101,20 @@ function XYFlowViewportControls(): ReactElement {
                     -
                 </button>
                 <button
-                    aria-label="Reset zoom"
+                    aria-label={t("code-city:xyflowRenderer.ariaResetZoom")}
                     className="rounded border border-border px-2 py-1 text-xs"
                     onClick={(): void => {
                         void flowInstance.fitView({ padding: 0.15, duration: 220 })
                     }}
                     type="button"
                 >
-                    fit
+                    {t("code-city:xyflowRenderer.fit")}
                 </button>
             </div>
             <div className="grid grid-cols-3 gap-1">
                 <span />
                 <button
-                    aria-label="Pan up"
+                    aria-label={t("code-city:xyflowRenderer.ariaPanUp")}
                     className="rounded border border-border px-2 py-1 text-sm"
                     onClick={(): void => {
                         moveViewport(0, VIEWPORT_PAN_STEP)
@@ -123,7 +125,7 @@ function XYFlowViewportControls(): ReactElement {
                 </button>
                 <span />
                 <button
-                    aria-label="Pan left"
+                    aria-label={t("code-city:xyflowRenderer.ariaPanLeft")}
                     className="rounded border border-border px-2 py-1 text-sm"
                     onClick={(): void => {
                         moveViewport(VIEWPORT_PAN_STEP, 0)
@@ -134,7 +136,7 @@ function XYFlowViewportControls(): ReactElement {
                 </button>
                 <span />
                 <button
-                    aria-label="Pan right"
+                    aria-label={t("code-city:xyflowRenderer.ariaPanRight")}
                     className="rounded border border-border px-2 py-1 text-sm"
                     onClick={(): void => {
                         moveViewport(-VIEWPORT_PAN_STEP, 0)
@@ -145,7 +147,7 @@ function XYFlowViewportControls(): ReactElement {
                 </button>
                 <span />
                 <button
-                    aria-label="Pan down"
+                    aria-label={t("code-city:xyflowRenderer.ariaPanDown")}
                     className="rounded border border-border px-2 py-1 text-sm"
                     onClick={(): void => {
                         moveViewport(0, -VIEWPORT_PAN_STEP)
@@ -166,6 +168,7 @@ function XYFlowExportControls(props: {
     readonly nodes: ReadonlyArray<IGraphLayoutNode>
     readonly edges: ReadonlyArray<IGraphEdge>
 }): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [isExportingPng, setIsExportingPng] = useState<boolean>(false)
     const canExport = props.nodes.length > 0
     const exportTitle = props.graphTitle.trim().length > 0 ? props.graphTitle : "graph"
@@ -176,7 +179,7 @@ function XYFlowExportControls(props: {
             position="top-right"
         >
             <button
-                aria-label="Export graph as SVG"
+                aria-label={t("code-city:xyflowRenderer.ariaExportSvg")}
                 className="rounded border border-border px-2 py-1 text-xs"
                 disabled={canExport !== true}
                 onClick={(): void => {
@@ -187,10 +190,10 @@ function XYFlowExportControls(props: {
                 }}
                 type="button"
             >
-                Export SVG
+                {t("code-city:xyflowRenderer.exportSvg")}
             </button>
             <button
-                aria-label="Export graph as PNG"
+                aria-label={t("code-city:xyflowRenderer.ariaExportPng")}
                 className="rounded border border-border px-2 py-1 text-xs disabled:opacity-50"
                 disabled={canExport !== true || isExportingPng === true}
                 onClick={(): void => {
@@ -204,7 +207,7 @@ function XYFlowExportControls(props: {
                 }}
                 type="button"
             >
-                {isExportingPng === true ? "Exporting..." : "Export PNG"}
+                {isExportingPng === true ? t("code-city:xyflowRenderer.exportingPng") : t("code-city:xyflowRenderer.exportPng")}
             </button>
         </Panel>
     )

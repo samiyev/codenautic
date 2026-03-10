@@ -1,4 +1,5 @@
 import { useMemo, useState, type ChangeEvent, type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { IRefactoringTargetDescriptor } from "@/components/graphs/refactoring-dashboard"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -39,6 +40,7 @@ export interface IRefactoringExportDialogProps {
  * @returns React-компонент export dialog.
  */
 export function RefactoringExportDialog(props: IRefactoringExportDialogProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [destination, setDestination] = useState<TRefactoringExportDestination>("jira")
     const [templateTitle, setTemplateTitle] = useState<string>("Refactor {{title}} in {{module}}")
@@ -71,31 +73,30 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Refactoring export dialog</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:refactoringExportComp.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Export selected refactoring tasks as Jira tickets or GitHub issues with editable
-                templates.
+                {t("code-city:refactoringExportComp.description")}
             </p>
 
             <button
-                aria-label="Open refactoring export dialog"
+                aria-label={t("code-city:refactoringExportComp.ariaOpenDialog")}
                 className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                 onClick={(): void => {
                     setIsDialogOpen(true)
                 }}
                 type="button"
             >
-                Open export dialog
+                {t("code-city:refactoringExportComp.openDialog")}
             </button>
 
             {isDialogOpen ? (
                 <div className="mt-3 rounded border border-border bg-surface p-3">
                     <label className="block space-y-1" htmlFor="refactor-export-destination">
                         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                            Destination
+                            {t("code-city:refactoringExportComp.destination")}
                         </span>
                         <select
-                            aria-label="Refactoring export destination"
+                            aria-label={t("code-city:refactoringExportComp.ariaDestination")}
                             className={NATIVE_FORM.select}
                             id="refactor-export-destination"
                             value={destination}
@@ -106,17 +107,17 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
                                 }
                             }}
                         >
-                            <option value="jira">Jira</option>
-                            <option value="github">GitHub Issues</option>
+                            <option value="jira">{t("code-city:refactoringExportComp.destinationOptions.jira")}</option>
+                            <option value="github">{t("code-city:refactoringExportComp.destinationOptions.github")}</option>
                         </select>
                     </label>
 
                     <label className="mt-2 block space-y-1" htmlFor="refactor-export-title">
                         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                            Template title
+                            {t("code-city:refactoringExportComp.templateTitle")}
                         </span>
                         <input
-                            aria-label="Refactoring export template title"
+                            aria-label={t("code-city:refactoringExportComp.ariaTemplateTitle")}
                             className="w-full rounded border border-border px-2 py-1.5 text-sm"
                             id="refactor-export-title"
                             onChange={handleTemplateTitleChange}
@@ -127,10 +128,10 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
 
                     <label className="mt-2 block space-y-1" htmlFor="refactor-export-body">
                         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                            Template body
+                            {t("code-city:refactoringExportComp.templateBody")}
                         </span>
                         <textarea
-                            aria-label="Refactoring export template body"
+                            aria-label={t("code-city:refactoringExportComp.ariaTemplateBody")}
                             className="min-h-[88px] w-full rounded border border-border px-2 py-1.5 text-sm"
                             id="refactor-export-body"
                             onChange={handleTemplateBodyChange}
@@ -146,7 +147,7 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
                                     key={target.id}
                                 >
                                     <input
-                                        aria-label={`Select export target ${target.title}`}
+                                        aria-label={t("code-city:refactoringExportComp.ariaSelectTarget", { title: target.title })}
                                         checked={selectedTargetIds.includes(target.id)}
                                         className="mt-0.5 h-4 w-4 rounded border-border"
                                         onChange={(): void => {
@@ -159,7 +160,7 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
                                             {target.title}
                                         </p>
                                         <p className="text-xs text-muted-foreground">
-                                            Module {target.module} · ROI {String(target.roiScore)}
+                                            {t("code-city:refactoringExportComp.moduleRoi", { module: target.module, roi: target.roiScore })}
                                         </p>
                                     </div>
                                 </li>
@@ -168,7 +169,7 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
                     </ul>
 
                     <button
-                        aria-label="Export refactoring plan"
+                        aria-label={t("code-city:refactoringExportComp.ariaExportPlan")}
                         className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                         disabled={selectedTargets.length === 0}
                         onClick={(): void => {
@@ -179,13 +180,13 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
                                 templateTitle,
                             })
                             setLastExportLabel(
-                                `Exported ${String(selectedTargets.length)} task(s) to ${destination}`,
+                                t("code-city:refactoringExportComp.exportedTasks", { count: selectedTargets.length, destination }),
                             )
                             setIsDialogOpen(false)
                         }}
                         type="button"
                     >
-                        Export plan
+                        {t("code-city:refactoringExportComp.exportPlan")}
                     </button>
                 </div>
             ) : null}

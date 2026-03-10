@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -58,21 +59,22 @@ function resolveEntryClassName(isActive: boolean): string {
  * @returns React-компонент knowledge silo панели.
  */
 export function KnowledgeSiloPanel(props: IKnowledgeSiloPanelProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Knowledge silo panel</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:knowledgeSiloComp.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                High-risk ownership silos. Select a silo to focus related files in CodeCity.
+                {t("code-city:knowledgeSiloComp.description")}
             </p>
 
-            <ul aria-label="Knowledge silos" className="mt-3 space-y-2">
+            <ul aria-label={t("code-city:knowledgeSiloComp.ariaList")} className="mt-3 space-y-2">
                 {props.entries.map((entry): ReactElement => {
                     const isActive = props.activeSiloId === entry.siloId
 
                     return (
                         <li key={entry.siloId}>
                             <button
-                                aria-label={`Inspect knowledge silo ${entry.siloLabel}`}
+                                aria-label={t("code-city:knowledgeSiloComp.ariaInspect", { label: entry.siloLabel })}
                                 className={resolveEntryClassName(isActive)}
                                 type="button"
                                 onClick={(): void => {
@@ -85,14 +87,13 @@ export function KnowledgeSiloPanel(props: IKnowledgeSiloPanelProps): ReactElemen
                                             {entry.siloLabel}
                                         </p>
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            Contributors: {String(entry.contributorCount)} · Files:{" "}
-                                            {String(entry.fileCount)}
+                                            {t("code-city:knowledgeSiloComp.contributorsFiles", { contributors: entry.contributorCount, files: entry.fileCount })}
                                         </p>
                                     </div>
                                     <span
                                         className={`rounded border px-2 py-0.5 ${TYPOGRAPHY.micro} ${resolveRiskClassName(entry.riskScore)}`}
                                     >
-                                        Risk {String(entry.riskScore)}
+                                        {t("code-city:knowledgeSiloComp.riskLabel", { score: entry.riskScore })}
                                     </span>
                                 </div>
                             </button>

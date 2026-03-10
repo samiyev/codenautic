@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 /**
  * Метрика before/after для sprint comparison.
@@ -46,24 +47,24 @@ function resolveDeltaClassName(delta: number): string {
  * @returns React-компонент sprint comparison.
  */
 export function SprintComparisonView(props: ISprintComparisonViewProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const selectedSnapshot =
         props.snapshots.find((snapshot): boolean => snapshot.id === props.activeSnapshotId) ??
         props.snapshots[0]
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Sprint comparison view</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:sprintComparison.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Side-by-side before/after sprint comparison with metric deltas and improvement
-                score.
+                {t("code-city:sprintComparison.description")}
             </p>
 
-            <div aria-label="Sprint comparison snapshots" className="mt-3 space-y-2">
+            <div aria-label={t("code-city:sprintComparison.ariaLabelSnapshots")} className="mt-3 space-y-2">
                 {props.snapshots.map((snapshot): ReactElement => {
                     const isActive = snapshot.id === selectedSnapshot?.id
                     return (
                         <button
-                            aria-label={`Inspect sprint comparison ${snapshot.title}`}
+                            aria-label={t("code-city:sprintComparison.ariaLabelInspect", { title: snapshot.title })}
                             className={`w-full rounded border p-2 text-left text-xs transition ${
                                 isActive
                                     ? "border-primary bg-primary/10 text-on-primary"
@@ -75,18 +76,18 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
                             }}
                             type="button"
                         >
-                            {snapshot.title} · improvement {String(snapshot.improvementScore)}%
+                            {t("code-city:sprintComparison.snapshotText", { title: snapshot.title, score: String(snapshot.improvementScore) })}
                         </button>
                     )
                 })}
             </div>
 
             <div
-                aria-label="Sprint comparison metrics"
+                aria-label={t("code-city:sprintComparison.ariaLabelMetrics")}
                 className="mt-3 rounded border border-border bg-surface p-2"
             >
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Before vs after metrics
+                    {t("code-city:sprintComparison.beforeVsAfter")}
                 </p>
                 <div className="mt-2 space-y-2">
                     {(selectedSnapshot?.metrics ?? []).map((metric): ReactElement => {
@@ -112,8 +113,7 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
                                     </p>
                                 </div>
                                 <p className="mt-1 text-xs text-muted-foreground">
-                                    before {String(metric.beforeValue)} to after{" "}
-                                    {String(metric.afterValue)}
+                                    {t("code-city:sprintComparison.beforeToAfter", { before: String(metric.beforeValue), after: String(metric.afterValue) })}
                                 </p>
                                 <div className="mt-1 h-1.5 overflow-hidden rounded bg-surface-muted">
                                     <div

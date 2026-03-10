@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 /**
  * Опция файла для what-if сценария.
@@ -45,6 +46,7 @@ export interface IWhatIfPanelProps {
  * @returns React-компонент what-if panel.
  */
 export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [selectedOptionIds, setSelectedOptionIds] = useState<ReadonlyArray<string>>([])
 
     const selectedOptions = useMemo((): ReadonlyArray<IWhatIfOption> => {
@@ -83,10 +85,9 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">What-if panel</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:whatIf.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Select multiple files to simulate aggregated impact and blast radius before applying
-                changes.
+                {t("code-city:whatIf.description")}
             </p>
 
             <ul className="mt-3 space-y-2">
@@ -97,7 +98,7 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
                             key={option.id}
                         >
                             <input
-                                aria-label={`Select what-if option ${option.label}`}
+                                aria-label={t("code-city:whatIf.ariaLabelSelectOption", { label: option.label })}
                                 checked={selectedOptionIds.includes(option.id)}
                                 className="mt-0.5 h-4 w-4 rounded border-border"
                                 onChange={(): void => {
@@ -110,8 +111,7 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
                                     {option.label}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                    Impact {String(option.impactScore)} · Affected{" "}
-                                    {String(option.affectedCount)}
+                                    {t("code-city:whatIf.optionMeta", { impact: String(option.impactScore), affected: String(option.affectedCount) })}
                                 </p>
                             </div>
                         </li>
@@ -121,17 +121,15 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
 
             <div className="mt-3 rounded border border-primary/30 bg-primary/10 p-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-on-primary">
-                    Aggregated scenario
+                    {t("code-city:whatIf.aggregatedScenario")}
                 </p>
                 <p className="text-xs text-on-primary">
-                    Files: {String(aggregatedScenario.fileIds.length)} · Impact score:{" "}
-                    {String(aggregatedScenario.aggregatedScore)} · Total affected:{" "}
-                    {String(aggregatedScenario.totalAffectedCount)}
+                    {t("code-city:whatIf.aggregatedMeta", { files: String(aggregatedScenario.fileIds.length), score: String(aggregatedScenario.aggregatedScore), affected: String(aggregatedScenario.totalAffectedCount) })}
                 </p>
             </div>
 
             <button
-                aria-label="Run what-if scenario"
+                aria-label={t("code-city:whatIf.ariaLabelRun")}
                 className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={aggregatedScenario.fileIds.length === 0}
                 onClick={(): void => {
@@ -139,7 +137,7 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
                 }}
                 type="button"
             >
-                Run scenario
+                {t("code-city:whatIf.runScenario")}
             </button>
         </section>
     )

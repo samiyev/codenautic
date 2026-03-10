@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -39,14 +40,14 @@ export interface IDistrictTrendIndicatorsProps {
     readonly onSelectEntry?: (entry: IDistrictTrendIndicatorEntry) => void
 }
 
-function resolveTrendLabel(trend: TDistrictTrendDirection): string {
+function resolveTrendLabelKey(trend: TDistrictTrendDirection): string {
     if (trend === "improving") {
-        return "Improving"
+        return "code-city:districtTrendComp.improving"
     }
     if (trend === "degrading") {
-        return "Degrading"
+        return "code-city:districtTrendComp.degrading"
     }
-    return "Stable"
+    return "code-city:districtTrendComp.stable"
 }
 
 function resolveTrendBadgeClassName(trend: TDistrictTrendDirection): string {
@@ -66,15 +67,14 @@ function resolveRowClassName(isActive: boolean): string {
     return `w-full rounded-lg border p-2 text-left transition ${baseClassName}`
 }
 
-function resolveDeltaCopy(trend: TDistrictTrendDirection, deltaPercentage: number): string {
-    const absoluteValue = Math.abs(deltaPercentage)
+function resolveDeltaCopyKey(trend: TDistrictTrendDirection): string {
     if (trend === "improving") {
-        return `${String(absoluteValue)}% better`
+        return "code-city:districtTrendComp.better"
     }
     if (trend === "degrading") {
-        return `${String(absoluteValue)}% worse`
+        return "code-city:districtTrendComp.worse"
     }
-    return `${String(absoluteValue)}% shift`
+    return "code-city:districtTrendComp.shift"
 }
 
 function TrendDirectionIcon(props: { readonly trend: TDistrictTrendDirection }): ReactElement {
@@ -160,22 +160,22 @@ function TrendDirectionIcon(props: { readonly trend: TDistrictTrendDirection }):
  * @returns React-компонент district indicators.
  */
 export function DistrictTrendIndicators(props: IDistrictTrendIndicatorsProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">District trend indicators</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:districtTrendComp.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                CodeCity districts show improvement or degradation using trend arrows: green up and
-                red down.
+                {t("code-city:districtTrendComp.description")}
             </p>
 
-            <ul aria-label="District trend indicators" className="mt-3 space-y-2">
+            <ul aria-label={t("code-city:districtTrendComp.ariaList")} className="mt-3 space-y-2">
                 {props.entries.map((entry): ReactElement => {
                     const isActive = props.activeDistrictId === entry.districtId
-                    const trendLabel = resolveTrendLabel(entry.trend)
+                    const trendLabel = (t as unknown as (key: string) => string)(resolveTrendLabelKey(entry.trend))
                     return (
                         <li key={entry.districtId}>
                             <button
-                                aria-label={`Inspect district trend ${entry.districtLabel}`}
+                                aria-label={t("code-city:districtTrendComp.ariaInspect", { label: entry.districtLabel })}
                                 className={resolveRowClassName(isActive)}
                                 onClick={(): void => {
                                     props.onSelectEntry?.(entry)
@@ -188,8 +188,8 @@ export function DistrictTrendIndicators(props: IDistrictTrendIndicatorsProps): R
                                             {entry.districtLabel}
                                         </p>
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            {String(entry.fileCount)} files ·{" "}
-                                            {resolveDeltaCopy(entry.trend, entry.deltaPercentage)}
+                                            {t("code-city:districtTrendComp.filesCount", { count: entry.fileCount })} ·{" "}
+                                            {(t as unknown as (key: string, options: Record<string, unknown>) => string)(resolveDeltaCopyKey(entry.trend), { value: Math.abs(entry.deltaPercentage) })}
                                         </p>
                                     </div>
                                     <span

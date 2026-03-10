@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -54,11 +55,15 @@ function resolveSeverityClassName(severity: THotAreaSeverity): string {
  * @returns React-компонент виджета.
  */
 export function HotAreaHighlights(props: IHotAreaHighlightsProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
+
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Hot area highlights</p>
+            <p className="text-sm font-semibold text-foreground">
+                {t("code-city:hotAreaHighlights.title")}
+            </p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Critical city zones with short diagnostics labels.
+                {t("code-city:hotAreaHighlights.description")}
             </p>
             <ul className="mt-3 space-y-2">
                 {props.highlights.map(
@@ -86,14 +91,16 @@ export function HotAreaHighlights(props: IHotAreaHighlightsProps): ReactElement 
                                 </span>
                             </div>
                             <button
-                                aria-label={`Focus hot area ${highlight.label}`}
+                                aria-label={t("code-city:hotAreaHighlights.focusAriaLabel", {
+                                    label: highlight.label,
+                                })}
                                 className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                 onClick={(): void => {
                                     props.onFocusHotArea?.(highlight)
                                 }}
                                 type="button"
                             >
-                                Focus in city
+                                {t("code-city:hotAreaHighlights.focusButton")}
                             </button>
                         </li>
                     ),

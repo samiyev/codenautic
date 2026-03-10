@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -74,33 +75,34 @@ function formatDeltaPrefix(deltaPercent: number): string {
  * @returns React-компонент summary card.
  */
 export function SprintSummaryCard(props: ISprintSummaryCardProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Sprint summary card</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:sprintSummary.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">{props.model.sprintLabel}</p>
 
             <div className="mt-3 grid grid-cols-2 gap-2">
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>Achievements</p>
+                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>{t("code-city:sprintSummary.achievements")}</p>
                     <p className="mt-1 text-sm font-semibold text-foreground">
                         {String(props.model.achievementsCount)}
                     </p>
                 </div>
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>Overall score</p>
+                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>{t("code-city:sprintSummary.overallScore")}</p>
                     <p className="mt-1 text-sm font-semibold text-foreground">
                         {String(props.model.overallImprovementScore)}
                     </p>
                 </div>
             </div>
 
-            <ul aria-label="Sprint summary metrics" className="mt-3 space-y-2">
+            <ul aria-label={t("code-city:sprintSummary.ariaLabelMetrics")} className="mt-3 space-y-2">
                 {props.model.metrics.map((metric): ReactElement => {
                     const isActive = props.activeMetricId === metric.id
                     return (
                         <li key={metric.id}>
                             <button
-                                aria-label={`Inspect sprint summary metric ${metric.label}`}
+                                aria-label={t("code-city:sprintSummary.ariaLabelInspect", { label: metric.label })}
                                 className={resolveMetricRowClassName(isActive)}
                                 onClick={(): void => {
                                     props.onSelectMetric?.(metric)

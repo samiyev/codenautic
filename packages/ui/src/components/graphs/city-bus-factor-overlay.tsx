@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -42,14 +43,14 @@ function resolveBusFactorBadgeClassName(busFactor: number): string {
     return "border-success/40 bg-success/20 text-success"
 }
 
-function resolveBusFactorRiskLabel(busFactor: number): string {
+function resolveBusFactorRiskKey(busFactor: number): string {
     if (busFactor <= 1) {
-        return "Critical"
+        return "code-city:cityBusFactor.riskCritical"
     }
     if (busFactor === 2) {
-        return "Elevated"
+        return "code-city:cityBusFactor.riskElevated"
     }
-    return "Healthy"
+    return "code-city:cityBusFactor.riskHealthy"
 }
 
 function resolveEntryClassName(isActive: boolean): string {
@@ -66,22 +67,23 @@ function resolveEntryClassName(isActive: boolean): string {
  * @returns React-компонент bus factor overlay.
  */
 export function CityBusFactorOverlay(props: ICityBusFactorOverlayProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Bus factor overlay</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:cityBusFactor.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                District risk map: red means single owner, green means distributed ownership.
+                {t("code-city:cityBusFactor.description")}
             </p>
 
-            <ul aria-label="Bus factor districts" className="mt-3 grid gap-2 sm:grid-cols-2">
+            <ul aria-label={t("code-city:cityBusFactor.ariaLabelDistricts")} className="mt-3 grid gap-2 sm:grid-cols-2">
                 {props.entries.map((entry): ReactElement => {
-                    const riskLabel = resolveBusFactorRiskLabel(entry.busFactor)
+                    const riskLabel = (t as unknown as (key: string) => string)(resolveBusFactorRiskKey(entry.busFactor))
                     const isActive = props.activeDistrictId === entry.districtId
 
                     return (
                         <li key={entry.districtId}>
                             <button
-                                aria-label={`Inspect bus factor district ${entry.districtLabel}`}
+                                aria-label={t("code-city:cityBusFactor.ariaLabelInspect", { districtLabel: entry.districtLabel })}
                                 className={resolveEntryClassName(isActive)}
                                 type="button"
                                 onClick={(): void => {
@@ -94,8 +96,7 @@ export function CityBusFactorOverlay(props: ICityBusFactorOverlayProps): ReactEl
                                             {entry.districtLabel}
                                         </p>
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            Files: {String(entry.fileCount)} · Bus factor:{" "}
-                                            {String(entry.busFactor)}
+                                            {t("code-city:cityBusFactor.filesAndBusFactor", { fileCount: String(entry.fileCount), busFactor: String(entry.busFactor) })}
                                         </p>
                                     </div>
                                     <span

@@ -1,4 +1,5 @@
 import { useMemo, useState, type ChangeEvent, type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { IRefactoringTargetDescriptor } from "@/components/graphs/refactoring-dashboard"
 
@@ -45,6 +46,7 @@ function calculateScenarioRoiScore(
  * @returns React-компонент калькулятора.
  */
 export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [selectedTargetIds, setSelectedTargetIds] = useState<ReadonlyArray<string>>([])
     const [riskWeight, setRiskWeight] = useState<number>(50)
     const [effortWeight, setEffortWeight] = useState<number>(50)
@@ -78,9 +80,9 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">ROI calculator widget</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:roiCalculator.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Select files and tune risk/effort weights to simulate expected refactoring ROI.
+                {t("code-city:roiCalculator.description")}
             </p>
 
             <ul className="mt-3 space-y-2">
@@ -91,7 +93,7 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
                             key={target.id}
                         >
                             <input
-                                aria-label={`Select ROI target ${target.title}`}
+                                aria-label={t("code-city:roiCalculator.ariaLabelSelectTarget", { title: target.title })}
                                 checked={selectedTargetIds.includes(target.id)}
                                 className="mt-0.5 h-4 w-4 rounded border-border"
                                 onChange={(): void => {
@@ -104,8 +106,7 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
                                     {target.title}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                    ROI {String(target.roiScore)} · Risk {String(target.riskScore)}{" "}
-                                    · Effort {String(target.effortScore)}
+                                    {t("code-city:roiCalculator.targetMeta", { roi: String(target.roiScore), risk: String(target.riskScore), effort: String(target.effortScore) })}
                                 </p>
                             </div>
                         </li>
@@ -115,10 +116,10 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
 
             <label className="mt-3 block space-y-1" htmlFor="roi-risk-weight">
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Risk weight: {String(riskWeight)}%
+                    {t("code-city:roiCalculator.riskWeight", { value: String(riskWeight) })}
                 </span>
                 <input
-                    aria-label="ROI risk weight"
+                    aria-label={t("code-city:roiCalculator.ariaLabelRiskWeight")}
                     id="roi-risk-weight"
                     max={100}
                     min={0}
@@ -130,10 +131,10 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
 
             <label className="mt-2 block space-y-1" htmlFor="roi-effort-weight">
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Effort weight: {String(effortWeight)}%
+                    {t("code-city:roiCalculator.effortWeight", { value: String(effortWeight) })}
                 </span>
                 <input
-                    aria-label="ROI effort weight"
+                    aria-label={t("code-city:roiCalculator.ariaLabelEffortWeight")}
                     id="roi-effort-weight"
                     max={100}
                     min={0}
@@ -145,16 +146,16 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
 
             <div className="mt-3 rounded border border-primary/30 bg-primary/10 p-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-on-primary">
-                    Estimated ROI score
+                    {t("code-city:roiCalculator.estimatedRoiScore")}
                 </p>
                 <p className="text-lg font-semibold text-on-primary">{String(scenarioRoiScore)}</p>
                 <p className="text-xs text-on-primary">
-                    Selected files: {String(selectedTargets.length)}
+                    {t("code-city:roiCalculator.selectedFiles", { count: selectedTargets.length })}
                 </p>
             </div>
 
             <button
-                aria-label="Apply ROI scenario"
+                aria-label={t("code-city:roiCalculator.ariaLabelApply")}
                 className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={selectedTargets.length === 0}
                 onClick={(): void => {
@@ -162,7 +163,7 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
                 }}
                 type="button"
             >
-                Apply scenario
+                {t("code-city:roiCalculator.applyScenario")}
             </button>
         </section>
     )

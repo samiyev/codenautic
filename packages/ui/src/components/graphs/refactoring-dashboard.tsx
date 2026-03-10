@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -96,6 +97,7 @@ function resolveRiskClassName(riskScore: number): string {
  * @returns React-компонент dashboard.
  */
 export function RefactoringDashboard(props: IRefactoringDashboardProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [sortKey, setSortKey] = useState<TRefactoringDashboardSortKey>("roi")
     const [moduleFilter, setModuleFilter] = useState<string>("all")
 
@@ -120,18 +122,18 @@ export function RefactoringDashboard(props: IRefactoringDashboardProps): ReactEl
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Refactoring dashboard</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:refactoringComp.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Prioritized targets sorted by ROI, risk, or effort with module filtering.
+                {t("code-city:refactoringComp.description")}
             </p>
 
             <div className="mt-3 grid gap-2 md:grid-cols-2">
                 <label className="space-y-1" htmlFor="refactor-sort">
                     <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Sort by
+                        {t("code-city:refactoringComp.sortBy")}
                     </span>
                     <select
-                        aria-label="Refactoring sort"
+                        aria-label={t("code-city:refactoringComp.ariaSort")}
                         className={NATIVE_FORM.select}
                         id="refactor-sort"
                         value={sortKey}
@@ -146,18 +148,18 @@ export function RefactoringDashboard(props: IRefactoringDashboardProps): ReactEl
                             }
                         }}
                     >
-                        <option value="roi">ROI</option>
-                        <option value="risk">Risk</option>
-                        <option value="effort">Effort</option>
+                        <option value="roi">{t("code-city:refactoringComp.sortOptions.roi")}</option>
+                        <option value="risk">{t("code-city:refactoringComp.sortOptions.risk")}</option>
+                        <option value="effort">{t("code-city:refactoringComp.sortOptions.effort")}</option>
                     </select>
                 </label>
 
                 <label className="space-y-1" htmlFor="refactor-module-filter">
                     <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Module filter
+                        {t("code-city:refactoringComp.moduleFilter")}
                     </span>
                     <select
-                        aria-label="Refactoring module filter"
+                        aria-label={t("code-city:refactoringComp.ariaModuleFilter")}
                         className={NATIVE_FORM.select}
                         id="refactor-module-filter"
                         value={moduleFilter}
@@ -189,32 +191,32 @@ export function RefactoringDashboard(props: IRefactoringDashboardProps): ReactEl
                                         {target.description}
                                     </p>
                                     <p className={`mt-1 ${TYPOGRAPHY.micro} text-muted-foreground`}>
-                                        Module: {target.module}
+                                        {t("code-city:refactoringComp.modulePrefix", { name: target.module })}
                                     </p>
                                 </div>
                                 <span
                                     className={`rounded border px-2 py-0.5 ${TYPOGRAPHY.micro} ${resolveRiskClassName(target.riskScore)}`}
                                 >
-                                    Risk {String(target.riskScore)}
+                                    {t("code-city:refactoringComp.riskLabel", { score: target.riskScore })}
                                 </span>
                             </div>
                             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-foreground">
                                 <span className="rounded border border-border bg-surface px-2 py-0.5">
-                                    ROI {String(target.roiScore)}
+                                    {t("code-city:refactoringComp.roiLabel", { score: target.roiScore })}
                                 </span>
                                 <span className="rounded border border-border bg-surface px-2 py-0.5">
-                                    Effort {String(target.effortScore)}
+                                    {t("code-city:refactoringComp.effortLabel", { score: target.effortScore })}
                                 </span>
                             </div>
                             <button
-                                aria-label={`Inspect refactoring target ${target.title}`}
+                                aria-label={t("code-city:refactoringComp.ariaInspectTarget", { title: target.title })}
                                 className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                 onClick={(): void => {
                                     props.onSelectTarget?.(target)
                                 }}
                                 type="button"
                             >
-                                Inspect target
+                                {t("code-city:refactoringComp.inspectTarget")}
                             </button>
                         </li>
                     ),

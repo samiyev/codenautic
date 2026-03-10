@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -76,21 +77,21 @@ function resolveSparklinePoints(points: ReadonlyArray<number>): string {
  * @returns React-компонент timeline.
  */
 export function TrendTimelineWidget(props: ITrendTimelineWidgetProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Trend timeline widget</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:trendTimeline.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Sprint-over-sprint trends with sparklines. Click a sprint to open detailed
-                comparison.
+                {t("code-city:trendTimeline.description")}
             </p>
 
-            <ul aria-label="Trend timeline entries" className="mt-3 space-y-2">
+            <ul aria-label={t("code-city:trendTimeline.ariaLabelEntries")} className="mt-3 space-y-2">
                 {props.entries.map((entry): ReactElement => {
                     const isActive = props.activeEntryId === entry.id
                     return (
                         <li key={entry.id}>
                             <button
-                                aria-label={`Inspect trend timeline sprint ${entry.sprintLabel}`}
+                                aria-label={t("code-city:trendTimeline.ariaLabelInspect", { sprintLabel: entry.sprintLabel })}
                                 className={resolveEntryClassName(isActive)}
                                 onClick={(): void => {
                                     props.onSelectEntry?.(entry)

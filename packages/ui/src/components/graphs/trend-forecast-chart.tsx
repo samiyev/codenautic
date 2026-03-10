@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import {
     FORECAST_CONFIDENCE_FILL,
@@ -96,6 +97,7 @@ function pointsToPath(points: ReadonlyArray<{ readonly x: number; readonly y: nu
  * @returns React-компонент прогнозного тренда.
  */
 export function TrendForecastChart(props: ITrendForecastChartProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const chartWidth = 320
     const chartHeight = 120
     const horizontalPadding = 12
@@ -130,13 +132,13 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Trend forecast chart</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:trendForecast.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Historical quality trend with forecast zone and confidence interval bands.
+                {t("code-city:trendForecast.description")}
             </p>
 
             <div
-                aria-label="Trend forecast visualization"
+                aria-label={t("code-city:trendForecast.ariaLabelVisualization")}
                 className="mt-3 rounded border border-border bg-surface p-2"
             >
                 <svg
@@ -177,15 +179,15 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
             </div>
 
             <p className="mt-2 text-xs text-muted-foreground">
-                Forecast zone shaded in slate, confidence interval shown in cyan band.
+                {t("code-city:trendForecast.forecastZoneNote")}
             </p>
 
-            <div aria-label="Trend forecast points" className="mt-3 space-y-1">
+            <div aria-label={t("code-city:trendForecast.ariaLabelPoints")} className="mt-3 space-y-1">
                 {props.points.map((point): ReactElement => {
                     const isActive = point.id === props.activePointId
                     return (
                         <button
-                            aria-label={`Inspect trend forecast point ${point.timestamp}`}
+                            aria-label={t("code-city:trendForecast.ariaLabelInspect", { timestamp: point.timestamp })}
                             className={`w-full rounded border px-2 py-1 text-left text-xs transition ${
                                 isActive
                                     ? "border-primary bg-primary/10 text-on-primary"
@@ -197,9 +199,7 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
                             }}
                             type="button"
                         >
-                            {point.timestamp}: {String(point.historicalScore)} to{" "}
-                            {String(point.forecastScore)} (CI {String(point.confidenceLow)}-
-                            {String(point.confidenceHigh)})
+                            {t("code-city:trendForecast.pointText", { timestamp: point.timestamp, historical: String(point.historicalScore), forecast: String(point.forecastScore), low: String(point.confidenceLow), high: String(point.confidenceHigh) })}
                         </button>
                     )
                 })}

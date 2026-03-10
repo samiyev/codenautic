@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type DragEvent, type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { IGuidedTourStep } from "@/components/graphs/guided-tour-overlay"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -55,6 +56,7 @@ function reorderStepsByIds(
  * @returns React-компонент кастомайзера.
  */
 export function TourCustomizer(props: ITourCustomizerProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [draftTitle, setDraftTitle] = useState<string>("")
     const [draftDescription, setDraftDescription] = useState<string>("")
     const [draggingStepId, setDraggingStepId] = useState<string | undefined>()
@@ -127,9 +129,11 @@ export function TourCustomizer(props: ITourCustomizerProps): ReactElement {
     if (props.isAdmin === false) {
         return (
             <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-                <p className="text-sm font-semibold text-foreground">Tour customizer</p>
+                <p className="text-sm font-semibold text-foreground">
+                    {t("code-city:tourCustomizer.title")}
+                </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                    Admin access is required to create and reorder custom tour steps.
+                    {t("code-city:tourCustomizer.adminRequiredDescription")}
                 </p>
             </section>
         )
@@ -137,50 +141,52 @@ export function TourCustomizer(props: ITourCustomizerProps): ReactElement {
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Tour customizer</p>
+            <p className="text-sm font-semibold text-foreground">
+                {t("code-city:tourCustomizer.title")}
+            </p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Drag and drop step cards, edit stop descriptions, and add custom stops.
+                {t("code-city:tourCustomizer.description")}
             </p>
 
             <label className="mt-3 block space-y-1" htmlFor="tour-stop-title">
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Stop title
+                    {t("code-city:tourCustomizer.stopTitleLabel")}
                 </span>
                 <input
-                    aria-label="Tour stop title"
+                    aria-label={t("code-city:tourCustomizer.stopTitleAriaLabel")}
                     className="w-full rounded-lg border border-border px-2 py-1.5 text-sm"
                     id="tour-stop-title"
                     onChange={(event): void => {
                         setDraftTitle(event.currentTarget.value)
                     }}
-                    placeholder="Add custom stop title"
+                    placeholder={t("code-city:tourCustomizer.stopTitlePlaceholder")}
                     value={draftTitle}
                 />
             </label>
 
             <label className="mt-2 block space-y-1" htmlFor="tour-stop-description">
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Stop description
+                    {t("code-city:tourCustomizer.stopDescriptionLabel")}
                 </span>
                 <textarea
-                    aria-label="Tour stop description"
+                    aria-label={t("code-city:tourCustomizer.stopDescriptionAriaLabel")}
                     className="min-h-20 w-full rounded-lg border border-border px-2 py-1.5 text-sm"
                     id="tour-stop-description"
                     onChange={(event): void => {
                         setDraftDescription(event.currentTarget.value)
                     }}
-                    placeholder="Describe what developer should inspect on this stop"
+                    placeholder={t("code-city:tourCustomizer.stopDescriptionPlaceholder")}
                     value={draftDescription}
                 />
             </label>
 
             <button
-                aria-label="Add custom tour stop"
+                aria-label={t("code-city:tourCustomizer.addStopAriaLabel")}
                 className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                 onClick={handleAddStop}
                 type="button"
             >
-                Add stop
+                {t("code-city:tourCustomizer.addStopButton")}
             </button>
 
             <ul className="mt-3 space-y-2">
@@ -201,15 +207,19 @@ export function TourCustomizer(props: ITourCustomizerProps): ReactElement {
                             }}
                         >
                             <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
-                                Step ID: {step.id}
+                                {t("code-city:tourCustomizer.stepIdPrefix")} {step.id}
                             </p>
                             <label
                                 className="mt-1 block space-y-1"
                                 htmlFor={`step-title-${step.id}`}
                             >
-                                <span className="text-xs text-muted-foreground">Title</span>
+                                <span className="text-xs text-muted-foreground">
+                                    {t("code-city:tourCustomizer.titleLabel")}
+                                </span>
                                 <input
-                                    aria-label={`Tour step title ${step.id}`}
+                                    aria-label={t("code-city:tourCustomizer.stepTitleAriaLabel", {
+                                        id: step.id,
+                                    })}
                                     className="w-full rounded border border-border px-2 py-1 text-sm"
                                     id={`step-title-${step.id}`}
                                     onChange={(event): void => {
@@ -222,9 +232,14 @@ export function TourCustomizer(props: ITourCustomizerProps): ReactElement {
                                 className="mt-1 block space-y-1"
                                 htmlFor={`step-description-${step.id}`}
                             >
-                                <span className="text-xs text-muted-foreground">Description</span>
+                                <span className="text-xs text-muted-foreground">
+                                    {t("code-city:tourCustomizer.descriptionLabel")}
+                                </span>
                                 <textarea
-                                    aria-label={`Tour step description ${step.id}`}
+                                    aria-label={t(
+                                        "code-city:tourCustomizer.stepDescriptionAriaLabel",
+                                        { id: step.id },
+                                    )}
                                     className="min-h-16 w-full rounded border border-border px-2 py-1 text-sm"
                                     id={`step-description-${step.id}`}
                                     onChange={(event): void => {

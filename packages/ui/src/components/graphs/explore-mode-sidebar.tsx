@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 
@@ -35,6 +36,7 @@ export interface IExploreModeSidebarProps {
  * @returns React-компонент sidebar.
  */
 export function ExploreModeSidebar(props: IExploreModeSidebarProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [roleFilter, setRoleFilter] = useState<string>("all")
 
     const roleOptions = useMemo((): ReadonlyArray<string> => {
@@ -56,17 +58,19 @@ export function ExploreModeSidebar(props: IExploreModeSidebarProps): ReactElemen
 
     return (
         <aside className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Explore mode sidebar</p>
+            <p className="text-sm font-semibold text-foreground">
+                {t("code-city:exploreSidebar.title")}
+            </p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Recommended exploration paths with role-aware filtering.
+                {t("code-city:exploreSidebar.description")}
             </p>
 
             <label className="mt-3 block space-y-1" htmlFor="explore-role-filter">
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Filter by role
+                    {t("code-city:exploreSidebar.filterByRole")}
                 </span>
                 <select
-                    aria-label="Explore role filter"
+                    aria-label={t("code-city:exploreSidebar.filterAriaLabel")}
                     className={NATIVE_FORM.select}
                     id="explore-role-filter"
                     value={roleFilter}
@@ -97,19 +101,22 @@ export function ExploreModeSidebar(props: IExploreModeSidebarProps): ReactElemen
                                         {path.description}
                                     </p>
                                     <p className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">
-                                        Role: {path.role} · Files:{" "}
+                                        {t("code-city:exploreSidebar.rolePrefix")} {path.role} ·{" "}
+                                        {t("code-city:exploreSidebar.filesPrefix")}{" "}
                                         {String(path.fileChainIds.length)}
                                     </p>
                                 </div>
                                 <button
-                                    aria-label={`Navigate path ${path.title}`}
+                                    aria-label={t("code-city:exploreSidebar.navigateAriaLabel", {
+                                        title: path.title,
+                                    })}
                                     className="rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                     onClick={(): void => {
                                         props.onNavigatePath(path)
                                     }}
                                     type="button"
                                 >
-                                    Navigate
+                                    {t("code-city:exploreSidebar.navigateButton")}
                                 </button>
                             </div>
                         </li>

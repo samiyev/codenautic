@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -125,6 +126,7 @@ function resolveVisibleNodes(
  * @returns React-компонент impact graph.
  */
 export function ImpactGraphView(props: IImpactGraphViewProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [collapsedNodeIds, setCollapsedNodeIds] = useState<ReadonlyArray<string>>([])
 
     const visibleNodes = useMemo((): ReadonlyArray<IImpactGraphNode> => {
@@ -151,9 +153,9 @@ export function ImpactGraphView(props: IImpactGraphViewProps): ReactElement {
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Impact graph view</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:impactGraphComp.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Dependency graph for impact propagation with animated edges and collapsible nodes.
+                {t("code-city:impactGraphComp.description")}
             </p>
 
             <ul className="mt-3 space-y-1 rounded border border-border bg-surface p-2">
@@ -183,29 +185,29 @@ export function ImpactGraphView(props: IImpactGraphViewProps): ReactElement {
                                         {node.label}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                        Impact score {String(node.impactScore)}
+                                        {t("code-city:impactGraphComp.impactScore", { score: String(node.impactScore) })}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <button
-                                        aria-label={`Toggle impact node ${node.label}`}
+                                        aria-label={t("code-city:impactGraphComp.ariaToggleNode", { label: node.label })}
                                         className="rounded border border-border px-2 py-1 text-xs font-semibold text-foreground"
                                         onClick={(): void => {
                                             toggleCollapse(node.id)
                                         }}
                                         type="button"
                                     >
-                                        {isCollapsed ? "Expand" : "Collapse"}
+                                        {isCollapsed ? t("code-city:impactGraphComp.expand") : t("code-city:impactGraphComp.collapse")}
                                     </button>
                                     <button
-                                        aria-label={`Inspect impact node ${node.label}`}
+                                        aria-label={t("code-city:impactGraphComp.ariaInspectNode", { label: node.label })}
                                         className="rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary"
                                         onClick={(): void => {
                                             props.onFocusNode?.(node)
                                         }}
                                         type="button"
                                     >
-                                        Focus
+                                        {t("code-city:impactGraphComp.focus")}
                                     </button>
                                 </div>
                             </div>

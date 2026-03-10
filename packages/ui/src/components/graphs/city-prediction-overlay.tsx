@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { TCodeCityTreemapPredictionRiskLevel } from "@/components/graphs/codecity-treemap"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -41,14 +42,14 @@ function resolveRiskBadgeClassName(riskLevel: TCodeCityTreemapPredictionRiskLeve
     return "border-sky-300 bg-sky-500/20 text-sky-900"
 }
 
-function resolveRiskLabel(riskLevel: TCodeCityTreemapPredictionRiskLevel): string {
+function resolveRiskLabelKey(riskLevel: TCodeCityTreemapPredictionRiskLevel): string {
     if (riskLevel === "high") {
-        return "High risk forecast"
+        return "code-city:cityPrediction.highRisk"
     }
     if (riskLevel === "medium") {
-        return "Medium risk forecast"
+        return "code-city:cityPrediction.mediumRisk"
     }
-    return "Low risk forecast"
+    return "code-city:cityPrediction.lowRisk"
 }
 
 function resolveRowClassName(
@@ -72,23 +73,23 @@ function resolveRowClassName(
  * @returns React-компонент prediction overlay.
  */
 export function CityPredictionOverlay(props: ICityPredictionOverlayProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Prediction overlay</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:cityPrediction.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Predicted hotspots are outlined on buildings. High-risk forecasts use dashed
-                borders.
+                {t("code-city:cityPrediction.description")}
             </p>
 
-            <ul aria-label="Prediction hotspots" className="mt-3 space-y-2">
+            <ul aria-label={t("code-city:cityPrediction.ariaLabelHotspots")} className="mt-3 space-y-2">
                 {props.entries.map((entry): ReactElement => {
                     const isActive = props.activeFileId === entry.fileId
-                    const riskLabel = resolveRiskLabel(entry.riskLevel)
+                    const riskLabel = (t as unknown as (key: string) => string)(resolveRiskLabelKey(entry.riskLevel))
 
                     return (
                         <li key={entry.fileId}>
                             <button
-                                aria-label={`Inspect prediction hotspot ${entry.label}`}
+                                aria-label={t("code-city:cityPrediction.ariaLabelInspect", { label: entry.label })}
                                 className={resolveRowClassName(isActive, entry.riskLevel)}
                                 onClick={(): void => {
                                     props.onSelectEntry?.(entry)
@@ -101,8 +102,7 @@ export function CityPredictionOverlay(props: ICityPredictionOverlayProps): React
                                             {entry.label}
                                         </p>
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            Confidence {String(entry.confidenceScore)}% ·{" "}
-                                            {entry.reason}
+                                            {t("code-city:cityPrediction.confidence", { score: String(entry.confidenceScore), reason: entry.reason })}
                                         </p>
                                     </div>
                                     <span

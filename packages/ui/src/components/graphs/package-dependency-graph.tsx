@@ -1,4 +1,5 @@
 import { type ReactElement, useEffect, useMemo, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button, Card, CardBody, CardHeader, Input } from "@/components/ui"
 import { XyFlowGraph } from "@/components/graphs/xyflow-graph"
@@ -623,8 +624,9 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
     const clusterDetailTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | undefined>(
         undefined,
     )
-    const title = props.title ?? "Package dependency graph"
-    const emptyStateLabel = props.emptyStateLabel ?? "No package dependencies yet."
+    const { t } = useTranslation(["code-city"])
+    const title = props.title ?? t("code-city:packageDependency.defaultTitle")
+    const emptyStateLabel = props.emptyStateLabel ?? t("code-city:packageDependency.defaultEmptyState")
     const packageNodesById = useMemo((): ReadonlyMap<string, IPackageDependencyNode> => {
         const nextMap = new Map<string, IPackageDependencyNode>()
         for (const node of props.nodes) {
@@ -775,8 +777,8 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                 </div>
                 <div className="flex min-w-0 gap-2">
                     <Input
-                        aria-label="Filter packages"
-                        placeholder="Filter packages by name"
+                        aria-label={t("code-city:packageDependency.ariaLabelFilter")}
+                        placeholder={t("code-city:packageDependency.placeholderFilter")}
                         value={state.query}
                         onValueChange={(nextQuery): void => {
                             setState(
@@ -800,7 +802,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                             }}
                             variant="flat"
                         >
-                            Clear relation filters
+                            {t("code-city:packageDependency.clearRelationFilters")}
                         </Button>
                     ) : null}
                     {state.query.length > 0 ? (
@@ -816,7 +818,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                             }}
                             variant="flat"
                         >
-                            Reset
+                            {t("code-city:packageDependency.reset")}
                         </Button>
                     ) : null}
                     <Button
@@ -832,7 +834,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         }}
                         variant={state.showImpactPaths ? "flat" : "bordered"}
                     >
-                        Highlight impact paths
+                        {t("code-city:packageDependency.highlightImpactPaths")}
                     </Button>
                     <Button
                         color="default"
@@ -860,8 +862,8 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         variant="flat"
                     >
                         {state.viewMode === "clustered"
-                            ? "Switch to detailed view"
-                            : "Switch to clustered view"}
+                            ? t("code-city:packageDependency.switchToDetailed")
+                            : t("code-city:packageDependency.switchToClustered")}
                     </Button>
                     <Button
                         color={state.focusPathOnly ? "primary" : "default"}
@@ -876,7 +878,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         }}
                         variant={state.focusPathOnly ? "flat" : "bordered"}
                     >
-                        Focus path
+                        {t("code-city:packageDependency.focusPath")}
                     </Button>
                     <Button
                         color="default"
@@ -921,7 +923,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         }}
                         variant="flat"
                     >
-                        {state.lodMode === "details" ? "LOD: details" : "LOD: overview"}
+                        {state.lodMode === "details" ? t("code-city:packageDependency.lodDetails") : t("code-city:packageDependency.lodOverview")}
                     </Button>
                     {hugeGraphFallbackMode ? (
                         <Button
@@ -938,8 +940,8 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                             variant="flat"
                         >
                             {state.forceGraphRenderInHugeMode
-                                ? "Use huge-graph fallback"
-                                : "Render budgeted graph"}
+                                ? t("code-city:packageDependency.useHugeGraphFallback")
+                                : t("code-city:packageDependency.renderBudgetedGraph")}
                         </Button>
                     ) : null}
                     {state.viewMode === "clustered" && selectedClusterLayer !== undefined ? (
@@ -959,8 +961,8 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                             variant="light"
                         >
                             {state.expandedLayerIds.includes(selectedClusterLayer)
-                                ? `Collapse ${selectedClusterLayer}`
-                                : `Expand ${selectedClusterLayer}`}
+                                ? t("code-city:packageDependency.collapse", { layer: selectedClusterLayer })
+                                : t("code-city:packageDependency.expand", { layer: selectedClusterLayer })}
                         </Button>
                     ) : null}
                 </div>
@@ -997,13 +999,12 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
             <CardBody className="gap-4">
                 {state.viewMode === "clustered" ? (
                     <p className="text-xs text-foreground-500">
-                        Cluster mode groups packages by layer and allows on-demand expansion with
-                        LOD controls.
+                        {t("code-city:packageDependency.clusterMode")}
                     </p>
                 ) : null}
                 {state.isClusterDetailLoading ? (
                     <p aria-live="polite" className="text-xs text-foreground-500">
-                        Loading cluster details...
+                        {t("code-city:packageDependency.loadingClusterDetails")}
                     </p>
                 ) : null}
                 {hugeGraphFallbackMode && state.forceGraphRenderInHugeMode !== true ? (
@@ -1012,7 +1013,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         className="space-y-3 rounded-xl border border-warning-300 bg-warning-50 p-4"
                     >
                         <p className="text-sm text-warning-800">
-                            {`Graph is too large for full render (${props.nodes.length} nodes, ${filteredRelations.length} relations). Using fallback view with sampled paths and top hubs.`}
+                            {t("code-city:packageDependency.hugeGraphWarning", { nodes: String(props.nodes.length), relations: String(filteredRelations.length) })}
                         </p>
                         <div className="flex flex-wrap gap-2">
                             <Button
@@ -1028,12 +1029,12 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                 size="sm"
                                 variant="flat"
                             >
-                                Export fallback JSON
+                                {t("code-city:packageDependency.exportFallbackJson")}
                             </Button>
                         </div>
                         <div className="grid gap-3 md:grid-cols-2">
                             <section className="rounded-lg border border-default-200 bg-content1 p-3">
-                                <h5 className="text-sm font-semibold text-foreground">Top hubs</h5>
+                                <h5 className="text-sm font-semibold text-foreground">{t("code-city:packageDependency.topHubs")}</h5>
                                 <ul className="mt-2 space-y-1 text-xs text-foreground-700">
                                     {hugeGraphFallbackData.topHubs.map(
                                         (hub): ReactElement => (
@@ -1046,7 +1047,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                             </section>
                             <section className="rounded-lg border border-default-200 bg-content1 p-3">
                                 <h5 className="text-sm font-semibold text-foreground">
-                                    Sampled paths
+                                    {t("code-city:packageDependency.sampledPaths")}
                                 </h5>
                                 <ul className="mt-2 space-y-1 text-xs text-foreground-700">
                                     {hugeGraphFallbackData.pathRows.map(
@@ -1097,29 +1098,29 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                     aria-live="polite"
                     className="rounded-xl border border-default-200 bg-content2 p-4"
                 >
-                    <h4 className="text-sm font-semibold text-foreground">Node details</h4>
+                    <h4 className="text-sm font-semibold text-foreground">{t("code-city:packageDependency.nodeDetails")}</h4>
                     {selectedNode !== undefined && selectedRelationStats !== undefined ? (
                         <div className="mt-2 space-y-1 text-sm text-foreground-700">
-                            <p>{`Name: ${selectedNode.name}`}</p>
-                            <p>{`Layer: ${selectedNode.layer}`}</p>
-                            <p>{`Size: ${selectedNode.size ?? "n/a"}`}</p>
-                            <p>{`Incoming relations: ${selectedRelationStats.incoming}`}</p>
-                            <p>{`Outgoing relations: ${selectedRelationStats.outgoing}`}</p>
-                            <p>{`Impact path nodes: ${impactPathHighlight.nodeIds.length}`}</p>
-                            <p>{`Impact path edges: ${impactPathHighlight.edgeIds.length}`}</p>
+                            <p>{t("code-city:packageDependency.name", { value: selectedNode.name })}</p>
+                            <p>{t("code-city:packageDependency.layer", { value: selectedNode.layer })}</p>
+                            <p>{t("code-city:packageDependency.size", { value: selectedNode.size ?? "n/a" })}</p>
+                            <p>{t("code-city:packageDependency.incomingRelations", { value: selectedRelationStats.incoming })}</p>
+                            <p>{t("code-city:packageDependency.outgoingRelations", { value: selectedRelationStats.outgoing })}</p>
+                            <p>{t("code-city:packageDependency.impactPathNodes", { value: impactPathHighlight.nodeIds.length })}</p>
+                            <p>{t("code-city:packageDependency.impactPathEdges", { value: impactPathHighlight.edgeIds.length })}</p>
                         </div>
                     ) : selectedClusterLayer !== undefined &&
                       selectedClusterMembers !== undefined ? (
                         <div className="mt-2 space-y-1 text-sm text-foreground-700">
-                            <p>{`Cluster layer: ${selectedClusterLayer}`}</p>
-                            <p>{`Packages in cluster: ${selectedClusterMembers.length}`}</p>
-                            <p>{`Expanded: ${state.expandedLayerIds.includes(selectedClusterLayer) ? "yes" : "no"}`}</p>
-                            <p>{`LOD mode: ${state.lodMode}`}</p>
-                            <p>{`Focus path only: ${state.focusPathOnly ? "yes" : "no"}`}</p>
+                            <p>{t("code-city:packageDependency.clusterLayer", { value: selectedClusterLayer })}</p>
+                            <p>{t("code-city:packageDependency.packagesInCluster", { value: selectedClusterMembers.length })}</p>
+                            <p>{t("code-city:packageDependency.expanded", { value: state.expandedLayerIds.includes(selectedClusterLayer) ? t("code-city:packageDependency.yes") : t("code-city:packageDependency.no") })}</p>
+                            <p>{t("code-city:packageDependency.lodMode", { value: state.lodMode })}</p>
+                            <p>{t("code-city:packageDependency.focusPathOnly", { value: state.focusPathOnly ? t("code-city:packageDependency.yes") : t("code-city:packageDependency.no") })}</p>
                         </div>
                     ) : (
                         <p className="mt-2 text-sm text-foreground-500">
-                            Select a node to inspect package relationships.
+                            {t("code-city:packageDependency.selectNodePrompt")}
                         </p>
                     )}
                 </section>

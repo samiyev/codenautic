@@ -1,4 +1,5 @@
 import { type KeyboardEvent, type ReactElement, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -6,10 +7,8 @@ import { ResponsiveContainer, Treemap } from "recharts"
 
 const DEFAULT_HEIGHT = "420px"
 const DEFAULT_METRIC: ICodeCityTreemapMetric = "complexity"
-const DEFAULT_EMPTY_LABEL = "No file data for CodeCity treemap yet."
 const DEFAULT_METRIC_SELECTOR_ID = "codecity-metric-selector"
 const DEFAULT_BUG_HEAT_SELECTOR_ID = "codecity-bug-heat-selector"
-const DEFAULT_COMPARISON_LABEL = "previous snapshot"
 const DEFAULT_TEMPORAL_COUPLING_OVERLAY_ENABLED = true
 const DEFAULT_BUG_HEAT_RANGE: ICodeCityBugHeatRange = "30d"
 const CODE_CITY_COMPARISON_MARKER_HEIGHT = 4
@@ -27,20 +26,20 @@ type ICodeCityBugHeatRange = (typeof CODE_CITY_BUG_HEAT_RANGES)[number]
 type ICodeCityTreemapImpactLevel = (typeof CODE_CITY_IMPACT_LEVELS)[number]
 export type TCodeCityTreemapPredictionRiskLevel = "low" | "medium" | "high"
 
-const CODE_CITY_METRIC_LABELS: Record<ICodeCityTreemapMetric, string> = {
-    complexity: "Complexity",
-    coverage: "Coverage",
-    churn: "Churn",
+const CODE_CITY_METRIC_LABEL_KEYS: Record<ICodeCityTreemapMetric, string> = {
+    complexity: "code-city:treemap.metrics.complexity",
+    coverage: "code-city:treemap.metrics.coverage",
+    churn: "code-city:treemap.metrics.churn",
 }
-const CODE_CITY_BUG_HEAT_RANGE_LABELS: Record<ICodeCityBugHeatRange, string> = {
-    "7d": "Last 7d",
-    "30d": "Last 30d",
-    "90d": "Last 90d",
+const CODE_CITY_BUG_HEAT_RANGE_LABEL_KEYS: Record<ICodeCityBugHeatRange, string> = {
+    "7d": "code-city:treemap.bugHeatRanges.7d",
+    "30d": "code-city:treemap.bugHeatRanges.30d",
+    "90d": "code-city:treemap.bugHeatRanges.90d",
 }
-const CODE_CITY_IMPACT_LABELS: Record<ICodeCityTreemapImpactLevel, string> = {
-    changed: "Changed",
-    impacted: "Impacted",
-    ripple: "Ripple",
+const CODE_CITY_IMPACT_LABEL_KEYS: Record<ICodeCityTreemapImpactLevel, string> = {
+    changed: "code-city:treemap.impactLabels.changed",
+    impacted: "code-city:treemap.impactLabels.impacted",
+    ripple: "code-city:treemap.impactLabels.ripple",
 }
 const CODE_CITY_IMPACT_PRIORITIES: Record<ICodeCityTreemapImpactLevel, number> = {
     changed: 3,
@@ -175,6 +174,8 @@ interface ICodeCityTreemapTreemapContentProps {
     readonly fill?: string
     readonly onPackageSelect?: (packageName: string) => void
     readonly payload?: ICodeCityTreemapTreemapNodePayload
+    readonly ariaOpenPackageLabel?: (name: string) => string
+    readonly ariaFileLabel?: (name: string) => string
     readonly x?: number
     readonly y?: number
     readonly width?: number
@@ -659,23 +660,8 @@ function resolveViewSummary(
     }
 }
 
-function resolveComparisonSummaryLabel(
-    summary: ICodeCityTreemapComparisonSummary,
-    comparisonLabel: string,
-): string {
-    const formattedDelta = formatComparisonDeltaLabel(summary.locDelta)
-    return [
-        `Compared with ${comparisonLabel}`,
-        `LOC ${summary.currentLoc} vs ${summary.comparedLoc}`,
-        `Δ${formattedDelta}`,
-        `added ${summary.addedFiles}`,
-        `removed ${summary.removedFiles}`,
-        `changed ${summary.changedFiles}`,
-    ].join(", ")
-}
-
-function resolveMetricLabel(metric: ICodeCityTreemapMetric): string {
-    return CODE_CITY_METRIC_LABELS[metric]
+function resolveMetricLabelKey(metric: ICodeCityTreemapMetric): string {
+    return CODE_CITY_METRIC_LABEL_KEYS[metric]
 }
 
 function resolveMetricColor(range: ICodeCityTreemapMetricRange, value: number): string {
@@ -799,7 +785,7 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
 
     return (
         <g
-            aria-label={isPackage ? `Open package ${nodeName}` : `File ${nodeName}`}
+            aria-label={isPackage ? (props.ariaOpenPackageLabel?.(nodeName) ?? `Open package ${nodeName}`) : (props.ariaFileLabel?.(nodeName) ?? `File ${nodeName}`)}
             className={isPackage === true ? "cursor-pointer" : ""}
             onBlur={isPackage === false ? handleFileMouseLeave : undefined}
             onFocus={isPackage === false ? handleFileMouseEnter : undefined}
@@ -1196,9 +1182,11 @@ export function buildCodeCityTreemapData(
  * @param props Пропсы визуализации.
  */
 export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
-    const title = props.title ?? "CodeCity treemap"
-    const emptyStateLabel = props.emptyStateLabel ?? DEFAULT_EMPTY_LABEL
-    const comparisonLabel = props.comparisonLabel ?? DEFAULT_COMPARISON_LABEL
+    const { t } = useTranslation(["code-city"])
+    const tDynamic = t as unknown as (key: string) => string
+    const title = props.title ?? t("code-city:treemap.title")
+    const emptyStateLabel = props.emptyStateLabel ?? t("code-city:treemap.emptyState")
+    const comparisonLabel = props.comparisonLabel ?? t("code-city:treemap.comparisonLabel")
     const height = props.height ?? DEFAULT_HEIGHT
     const [metric, setMetric] = useState<ICodeCityTreemapMetric>(
         props.defaultMetric ?? DEFAULT_METRIC,
@@ -1276,7 +1264,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         [fileOverlayPoints, props.temporalCouplings],
     )
     const issueSummary = summary.issueSummary
-    const issueSummaryText = `Issues: ${issueSummary.totalIssues} in ${issueSummary.filesWithIssues} files`
+    const issueSummaryText = t("code-city:treemap.issueSummary", { total: issueSummary.totalIssues, files: issueSummary.filesWithIssues })
     const bugHeatSummary = treemapData.bugHeatSummary
     const hasAnyBugHeatData = props.files.some((file): boolean => {
         if (file.bugIntroductions === undefined) {
@@ -1289,35 +1277,43 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     })
     const bugHeatSummaryText =
         bugHeatSummary.maxBugIntroductions > 0
-            ? `Bug introductions: ${bugHeatSummary.totalBugIntroductions} in ${bugHeatSummary.filesWithBugIntroductions} files`
-            : "No bug introductions for selected range."
-    const metricLabel = resolveMetricLabel(metric)
+            ? t("code-city:treemap.bugIntroductions", { total: bugHeatSummary.totalBugIntroductions, files: bugHeatSummary.filesWithBugIntroductions })
+            : t("code-city:treemap.noBugIntroductions")
+    const metricLabel = tDynamic(resolveMetricLabelKey(metric))
     const hasIssueHeatmap = issueSummary.maxIssuesPerFile > 0
     const comparisonSummary = treemapData.comparisonSummary
     const hasComparison = comparisonSummary.hasComparisonData
     const comparisonSummaryText = hasComparison
-        ? resolveComparisonSummaryLabel(comparisonSummary, comparisonLabel)
+        ? t("code-city:treemap.comparedWith", {
+              label: comparisonLabel,
+              current: comparisonSummary.currentLoc,
+              compared: comparisonSummary.comparedLoc,
+              delta: formatComparisonDeltaLabel(comparisonSummary.locDelta),
+              added: comparisonSummary.addedFiles,
+              removed: comparisonSummary.removedFiles,
+              changed: comparisonSummary.changedFiles,
+          })
         : undefined
     const selectorId = `${DEFAULT_METRIC_SELECTOR_ID}-${title.toLowerCase().replaceAll(" ", "-")}`
     const bugHeatSelectorId = `${DEFAULT_BUG_HEAT_SELECTOR_ID}-${title.toLowerCase().replaceAll(" ", "-")}`
     const impactSummary = summary.impactSummary
-    const impactSummaryText = `Changed: ${impactSummary.changed}, Impacted: ${impactSummary.impacted}, Ripple: ${impactSummary.ripple}`
+    const impactSummaryText = t("code-city:treemap.impactSummary", { changed: impactSummary.changed, impacted: impactSummary.impacted, ripple: impactSummary.ripple })
     const showBackButton = selectedPackage !== undefined
-    const summaryText = `Packages: ${summary.packageCount}, Files: ${summary.files}, LOC: ${summary.loc}`
+    const summaryText = t("code-city:treemap.summaryText", { packages: summary.packageCount, files: summary.files, loc: summary.loc })
     const breadcrumbText =
-        selectedPackage === undefined ? "All packages" : `All packages / ${selectedPackage}`
+        selectedPackage === undefined ? t("code-city:treemap.breadcrumbAll") : t("code-city:treemap.breadcrumbPackage", { package: selectedPackage })
     const hasTemporalCouplings = temporalCouplingLines.length > 0
     const temporalCouplingToggleLabel = isTemporalCouplingOverlayEnabled
-        ? "Hide temporal coupling overlay"
-        : "Show temporal coupling overlay"
+        ? t("code-city:treemap.hideTemporalCoupling")
+        : t("code-city:treemap.showTemporalCoupling")
     const temporalCouplingSummaryText = hasTemporalCouplings
-        ? `Temporal couplings: ${temporalCouplingLines.length} links`
-        : "No temporal couplings for current package selection."
+        ? t("code-city:treemap.temporalCouplingLinks", { count: temporalCouplingLines.length })
+        : t("code-city:treemap.noTemporalCouplings")
     const enableLeafTabStops = summary.files <= MAX_KEYBOARD_FILE_TAB_STOPS
     const tooltipTitle =
         hoveredFile === undefined
-            ? "Hover a file for quick metrics and quick link."
-            : `File details for ${hoveredFile.fileName}`
+            ? t("code-city:treemap.tooltipHint")
+            : t("code-city:treemap.tooltipTitle", { name: hoveredFile.fileName })
 
     const handleResetSelection = (): void => {
         setSelectedPackage(undefined)
@@ -1348,7 +1344,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     const handleBugHeatRangeChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
         setBugHeatRange(resolveBugHeatRange(event.currentTarget.value))
     }
-    const metricRangeText = `Min ${treemapData.metricRange.min} — Max ${treemapData.metricRange.max}`
+    const metricRangeText = t("code-city:treemap.metricRange", { min: treemapData.metricRange.min, max: treemapData.metricRange.max })
 
     if (treemapData.packages.length === 0) {
         return (
@@ -1368,7 +1364,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
             <Card aria-label={title}>
                 <CardHeader>
                     <h3 className="text-lg font-semibold">{title}</h3>
-                    <p className="text-sm text-foreground-500">No files for selected package.</p>
+                    <p className="text-sm text-foreground-500">{t("code-city:treemap.noFilesForPackage")}</p>
                     <Button onPress={handleResetSelection}>Back</Button>
                 </CardHeader>
                 <CardBody>
@@ -1395,10 +1391,10 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                 <div className="flex flex-col gap-2">
                     <h3 className="text-lg font-semibold">{title}</h3>
                     <p className="text-sm text-foreground-500">{summaryText}</p>
-                    <p aria-label="Code city breadcrumb" className="text-xs text-foreground-500">
+                    <p aria-label={t("code-city:treemap.ariaBreadcrumb")} className="text-xs text-foreground-500">
                         {breadcrumbText}
                     </p>
-                    <p className="text-sm text-foreground-500">Color metric: {metricLabel}</p>
+                    <p className="text-sm text-foreground-500">{t("code-city:treemap.colorMetric", { metric: metricLabel })}</p>
                     <div className="flex flex-wrap items-end gap-2">
                         {showBackButton ? (
                             <Button onPress={handleResetSelection} size="sm">
@@ -1406,10 +1402,10 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                             </Button>
                         ) : null}
                         <label className="text-sm" htmlFor={selectorId}>
-                            Metric
+                            {t("code-city:treemap.metricSelectorLabel")}
                         </label>
                         <select
-                            aria-label="Metric"
+                            aria-label={t("code-city:treemap.ariaMetric")}
                             className={`w-36 ${NATIVE_FORM.select}`}
                             id={selectorId}
                             value={metric}
@@ -1418,7 +1414,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                             {CODE_CITY_METRICS.map(
                                 (metricName): ReactElement => (
                                     <option key={metricName} value={metricName}>
-                                        {resolveMetricLabel(metricName)}
+                                        {tDynamic(resolveMetricLabelKey(metricName))}
                                     </option>
                                 ),
                             )}
@@ -1426,10 +1422,10 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                         {hasAnyBugHeatData ? (
                             <>
                                 <label className="text-sm" htmlFor={bugHeatSelectorId}>
-                                    Bug heat range
+                                    {t("code-city:treemap.bugHeatRangeLabel")}
                                 </label>
                                 <select
-                                    aria-label="Bug heat range"
+                                    aria-label={t("code-city:treemap.ariaBugHeatRange")}
                                     className={`w-32 ${NATIVE_FORM.select}`}
                                     id={bugHeatSelectorId}
                                     value={bugHeatRange}
@@ -1438,7 +1434,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                     {CODE_CITY_BUG_HEAT_RANGES.map(
                                         (range): ReactElement => (
                                             <option key={range} value={range}>
-                                                {CODE_CITY_BUG_HEAT_RANGE_LABELS[range]}
+                                                {tDynamic(CODE_CITY_BUG_HEAT_RANGE_LABEL_KEYS[range])}
                                             </option>
                                         ),
                                     )}
@@ -1448,9 +1444,9 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                     </div>
                     <div
                         className="flex items-center gap-2 text-xs text-foreground-500"
-                        aria-label="Metric legend"
+                        aria-label={t("code-city:treemap.ariaMetricLegend")}
                     >
-                        <span>Low</span>
+                        <span>{t("code-city:treemap.legendLow")}</span>
                         <div
                             className="h-2 flex-1 rounded-full"
                             style={{
@@ -1458,15 +1454,15 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                     "linear-gradient(90deg, hsl(120, 80%, 44%), hsl(0, 78%, 44%))",
                             }}
                         />
-                        <span>High</span>
+                        <span>{t("code-city:treemap.legendHigh")}</span>
                         <span>{metricRangeText}</span>
                     </div>
                     {hasIssueHeatmap ? (
                         <div
-                            aria-label="Issue heatmap legend"
+                            aria-label={t("code-city:treemap.ariaIssueHeatmapLegend")}
                             className="flex items-center gap-2 text-xs text-foreground-500"
                         >
-                            <span>Issue heatmap</span>
+                            <span>{t("code-city:treemap.issueHeatmap")}</span>
                             <div
                                 className="h-2 flex-1 rounded-full"
                                 style={{
@@ -1474,16 +1470,16 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                         "linear-gradient(90deg, hsl(120, 80%, 44%), hsl(0, 78%, 44%))",
                                 }}
                             />
-                            <span>Max issues: {issueSummary.maxIssuesPerFile}</span>
+                            <span>{t("code-city:treemap.maxIssues", { count: issueSummary.maxIssuesPerFile })}</span>
                             <span>{issueSummaryText}</span>
                         </div>
                     ) : null}
                     {hasAnyBugHeatData ? (
                         <div
-                            aria-label="Bug heat overlay legend"
+                            aria-label={t("code-city:treemap.ariaBugHeatLegend")}
                             className="flex items-center gap-2 text-xs text-foreground-500"
                         >
-                            <span>Bug heat overlay ({bugHeatRange})</span>
+                            <span>{t("code-city:treemap.bugHeatOverlay", { range: bugHeatRange })}</span>
                             <div
                                 className="h-2 flex-1 rounded-full"
                                 style={{
@@ -1491,13 +1487,13 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                         "linear-gradient(90deg, hsl(48, 94%, 56%), hsl(0, 94%, 56%))",
                                 }}
                             />
-                            <span>Max bugs: {bugHeatSummary.maxBugIntroductions}</span>
+                            <span>{t("code-city:treemap.maxBugs", { count: bugHeatSummary.maxBugIntroductions })}</span>
                             <span>{bugHeatSummaryText}</span>
                         </div>
                     ) : null}
                     {hasComparison ? (
                         <div
-                            aria-label="Comparison summary"
+                            aria-label={t("code-city:treemap.ariaComparisonSummary")}
                             className="text-xs text-foreground-500"
                         >
                             {comparisonSummaryText}
@@ -1505,7 +1501,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                     ) : null}
                     {impactSummary.changed + impactSummary.impacted + impactSummary.ripple > 0 ? (
                         <div
-                            aria-label="Impact legend"
+                            aria-label={t("code-city:treemap.ariaImpactLegend")}
                             className="flex flex-wrap items-center gap-3 text-xs text-foreground-500"
                         >
                             {CODE_CITY_IMPACT_LEVELS.map(
@@ -1518,7 +1514,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                                 backgroundColor: CODE_CITY_IMPACT_COLOR[impact],
                                             }}
                                         />
-                                        <span>{CODE_CITY_IMPACT_LABELS[impact]}</span>
+                                        <span>{tDynamic(CODE_CITY_IMPACT_LABEL_KEYS[impact])}</span>
                                     </div>
                                 ),
                             )}
@@ -1527,7 +1523,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                     ) : null}
                     {(props.temporalCouplings?.length ?? 0) > 0 ? (
                         <div
-                            aria-label="Temporal coupling controls"
+                            aria-label={t("code-city:treemap.ariaTemporalCouplingControls")}
                             className="flex flex-wrap items-center gap-3 text-xs text-foreground-500"
                         >
                             <Button
@@ -1545,7 +1541,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
             </CardHeader>
             <CardBody>
                 <div
-                    aria-label="Code city treemap"
+                    aria-label={t("code-city:treemap.ariaTreemap")}
                     className="relative"
                     style={{ height, width: "100%" }}
                 >
@@ -1568,6 +1564,8 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                     highlightedFileId: props.highlightedFileId,
                                     enableLeafTabStops,
                                     predictedRiskByFileId,
+                                    ariaOpenPackageLabel: (name: string): string => t("code-city:treemap.ariaOpenPackage", { name }),
+                                    ariaFileLabel: (name: string): string => t("code-city:treemap.ariaFile", { name }),
                                 })
                             }}
                             onClick={(node): void => {
@@ -1579,7 +1577,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                     </ResponsiveContainer>
                     {hasTemporalCouplings && isTemporalCouplingOverlayEnabled ? (
                         <svg
-                            aria-label="Temporal coupling overlay lines"
+                            aria-label={t("code-city:treemap.ariaTemporalCouplingOverlay")}
                             className="pointer-events-none absolute inset-0"
                             preserveAspectRatio="none"
                             viewBox="0 0 100 100"
@@ -1604,40 +1602,40 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                     ) : null}
                 </div>
                 <div
-                    aria-label="Code city file tooltip"
+                    aria-label={t("code-city:treemap.ariaTooltip")}
                     className="mt-3 rounded-md border border-default-200 bg-default-50 p-3"
                 >
                     <p className="mb-1 text-xs text-foreground-500">{tooltipTitle}</p>
                     {hoveredFile === undefined ? null : (
                         <div className="space-y-1 text-sm text-foreground-500">
                             <p>
-                                <span className="font-semibold">File:</span> {hoveredFile.fileName}
+                                <span className="font-semibold">{t("code-city:treemap.tooltipFile")}</span> {hoveredFile.fileName}
                             </p>
                             <p>
-                                <span className="font-semibold">Path:</span> {hoveredFile.path}
+                                <span className="font-semibold">{t("code-city:treemap.tooltipPath")}</span> {hoveredFile.path}
                             </p>
                             <p>
-                                <span className="font-semibold">LOC:</span> {hoveredFile.loc}
+                                <span className="font-semibold">{t("code-city:treemap.tooltipLoc")}</span> {hoveredFile.loc}
                             </p>
                             <p>
-                                <span className="font-semibold">Complexity:</span>{" "}
+                                <span className="font-semibold">{t("code-city:treemap.tooltipComplexity")}</span>{" "}
                                 {resolveNumberLabel(hoveredFile.complexity)}
                             </p>
                             <p>
-                                <span className="font-semibold">Coverage:</span>{" "}
+                                <span className="font-semibold">{t("code-city:treemap.tooltipCoverage")}</span>{" "}
                                 {resolveCoverageLabel(hoveredFile.coverage)}
                             </p>
                             <p>
-                                <span className="font-semibold">Last review:</span>{" "}
+                                <span className="font-semibold">{t("code-city:treemap.tooltipLastReview")}</span>{" "}
                                 {resolveLastReviewLabel(hoveredFile.lastReviewAt)}
                             </p>
                             <p>
-                                <span className="font-semibold">Issue count:</span>{" "}
+                                <span className="font-semibold">{t("code-city:treemap.tooltipIssueCount")}</span>{" "}
                                 {hoveredFile.issueCount}
                             </p>
                             {hoveredFile.comparisonDelta === undefined ? null : (
                                 <p>
-                                    <span className="font-semibold">LOC delta:</span>{" "}
+                                    <span className="font-semibold">{t("code-city:treemap.tooltipLocDelta")}</span>{" "}
                                     {formatComparisonDeltaLabel(hoveredFile.comparisonDelta)}
                                 </p>
                             )}
@@ -1647,7 +1645,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                     rel="noopener noreferrer"
                                     target="_blank"
                                 >
-                                    Open file
+                                    {t("code-city:treemap.openFile")}
                                 </a>
                             )}
                         </div>

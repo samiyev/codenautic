@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -58,22 +59,28 @@ function resolveModuleBadgeClassName(isComplete: boolean): string {
  * @returns React-компонент прогресса.
  */
 export function OnboardingProgressTracker(props: IOnboardingProgressTrackerProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const completedCount = props.modules.filter((module): boolean => module.isComplete).length
     const totalCount = props.modules.length
     const progressPercent = resolveProgressPercent(completedCount, totalCount)
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Onboarding progress tracker</p>
+            <p className="text-sm font-semibold text-foreground">
+                {t("code-city:onboardingTracker.title")}
+            </p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Track explored dashboard areas and module completion.
+                {t("code-city:onboardingTracker.description")}
             </p>
             <p className="mt-3 text-xs font-semibold text-foreground">
-                Explored areas: {String(completedCount)} / {String(totalCount)}
+                {t("code-city:onboardingTracker.exploredAreas", {
+                    completed: String(completedCount),
+                    total: String(totalCount),
+                })}
             </p>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-muted">
                 <div
-                    aria-label="Onboarding progress"
+                    aria-label={t("code-city:onboardingTracker.progressAriaLabel")}
                     aria-valuemax={100}
                     aria-valuemin={0}
                     aria-valuenow={progressPercent}
@@ -98,7 +105,9 @@ export function OnboardingProgressTracker(props: IOnboardingProgressTrackerProps
                                 <span
                                     className={`rounded border px-2 py-0.5 ${TYPOGRAPHY.micro} ${resolveModuleBadgeClassName(module.isComplete)}`}
                                 >
-                                    {module.isComplete ? "Complete" : "Pending"}
+                                    {module.isComplete
+                                        ? t("code-city:onboardingTracker.statusComplete")
+                                        : t("code-city:onboardingTracker.statusPending")}
                                 </span>
                             </div>
                         </li>

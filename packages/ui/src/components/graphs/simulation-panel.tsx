@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { IRefactoringTargetDescriptor } from "@/components/graphs/refactoring-dashboard"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -104,6 +105,7 @@ function formatDelta(value: number): string {
  * @returns React-компонент simulation panel.
  */
 export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [mode, setMode] = useState<TRefactoringSimulationMode>("before")
     const [selectedTargetIds, setSelectedTargetIds] = useState<ReadonlyArray<string>>(() => {
         return props.targets.slice(0, 2).map((target): string => target.id)
@@ -132,10 +134,9 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Simulation panel</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:simulationPanel.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Toggle before/after state and compare projected CodeCity metrics for selected
-                refactoring targets.
+                {t("code-city:simulationPanel.description")}
             </p>
 
             <div className="mt-3 inline-flex rounded-lg border border-border bg-surface p-1">
@@ -147,7 +148,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
                     }}
                     type="button"
                 >
-                    Before
+                    {t("code-city:simulationPanel.before")}
                 </button>
                 <button
                     aria-pressed={mode === "after"}
@@ -157,12 +158,12 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
                     }}
                     type="button"
                 >
-                    After
+                    {t("code-city:simulationPanel.after")}
                 </button>
             </div>
 
             <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Simulation mode: {mode}
+                {t("code-city:simulationPanel.simulationMode", { mode })}
             </p>
 
             <ul className="mt-3 space-y-2">
@@ -173,7 +174,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
                             key={target.id}
                         >
                             <input
-                                aria-label={`Select simulation target ${target.title}`}
+                                aria-label={t("code-city:simulationPanel.ariaLabelSelectTarget", { title: target.title })}
                                 checked={selectedTargetIds.includes(target.id)}
                                 className="mt-0.5 h-4 w-4 rounded border-border"
                                 onChange={(): void => {
@@ -186,8 +187,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
                                     {target.title}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                    ROI {String(target.roiScore)} · Risk {String(target.riskScore)}{" "}
-                                    · Effort {String(target.effortScore)}
+                                    {t("code-city:simulationPanel.targetMeta", { roi: String(target.roiScore), risk: String(target.riskScore), effort: String(target.effortScore) })}
                                 </p>
                             </div>
                         </li>
@@ -197,37 +197,36 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
 
             <div className="mt-3 grid gap-2 md:grid-cols-3">
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>Complexity</p>
+                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>{t("code-city:simulationPanel.complexity")}</p>
                     <p className="text-base font-semibold text-foreground">
                         {String(activeMetrics.complexity)}
                     </p>
                     <p className={TYPOGRAPHY.microMuted}>
-                        Delta {formatDelta(afterMetrics.complexity - beforeMetrics.complexity)}
+                        {t("code-city:simulationPanel.delta", { value: formatDelta(afterMetrics.complexity - beforeMetrics.complexity) })}
                     </p>
                 </div>
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>Risk</p>
+                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>{t("code-city:simulationPanel.risk")}</p>
                     <p className="text-base font-semibold text-foreground">
                         {String(activeMetrics.risk)}
                     </p>
                     <p className={TYPOGRAPHY.microMuted}>
-                        Delta {formatDelta(afterMetrics.risk - beforeMetrics.risk)}
+                        {t("code-city:simulationPanel.delta", { value: formatDelta(afterMetrics.risk - beforeMetrics.risk) })}
                     </p>
                 </div>
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>Maintainability</p>
+                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>{t("code-city:simulationPanel.maintainability")}</p>
                     <p className="text-base font-semibold text-foreground">
                         {String(activeMetrics.maintainability)}
                     </p>
                     <p className={TYPOGRAPHY.microMuted}>
-                        Delta{" "}
-                        {formatDelta(afterMetrics.maintainability - beforeMetrics.maintainability)}
+                        {t("code-city:simulationPanel.delta", { value: formatDelta(afterMetrics.maintainability - beforeMetrics.maintainability) })}
                     </p>
                 </div>
             </div>
 
             <button
-                aria-label="Preview refactoring simulation"
+                aria-label={t("code-city:simulationPanel.ariaLabelPreview")}
                 className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={selectedTargets.length === 0}
                 onClick={(): void => {
@@ -238,7 +237,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
                 }}
                 type="button"
             >
-                Preview in city
+                {t("code-city:simulationPanel.previewInCity")}
             </button>
         </section>
     )

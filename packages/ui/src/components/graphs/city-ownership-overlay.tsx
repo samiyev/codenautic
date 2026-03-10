@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Avatar } from "@/components/ui"
 
@@ -50,17 +51,18 @@ function resolveOwnerItemClassName(isActive: boolean): string {
  * @returns React-компонент ownership overlay.
  */
 export function CityOwnershipOverlay(props: ICityOwnershipOverlayProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const toggleButtonLabel = props.isEnabled
-        ? "Disable ownership colors"
-        : "Enable ownership colors"
+        ? t("code-city:cityOwnership.disableColors")
+        : t("code-city:cityOwnership.enableColors")
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                    <p className="text-sm font-semibold text-foreground">Ownership overlay</p>
+                    <p className="text-sm font-semibold text-foreground">{t("code-city:cityOwnership.title")}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                        Buildings are colored by primary owner. Select contributor to focus files.
+                        {t("code-city:cityOwnership.description")}
                     </p>
                 </div>
                 <button
@@ -76,7 +78,7 @@ export function CityOwnershipOverlay(props: ICityOwnershipOverlayProps): ReactEl
                 </button>
             </div>
 
-            <ul aria-label="Ownership legend" className="mt-3 grid gap-2 sm:grid-cols-2">
+            <ul aria-label={t("code-city:cityOwnership.ariaLabelLegend")} className="mt-3 grid gap-2 sm:grid-cols-2">
                 {props.owners.map((owner): ReactElement => {
                     const isActive = props.activeOwnerId === owner.ownerId
                     const fileCount = owner.fileIds.length
@@ -84,7 +86,7 @@ export function CityOwnershipOverlay(props: ICityOwnershipOverlayProps): ReactEl
                     return (
                         <li key={owner.ownerId}>
                             <button
-                                aria-label={`Focus ownership ${owner.ownerName}`}
+                                aria-label={t("code-city:cityOwnership.ariaLabelFocus", { ownerName: owner.ownerName })}
                                 className={resolveOwnerItemClassName(isActive)}
                                 type="button"
                                 onClick={(): void => {
@@ -103,7 +105,7 @@ export function CityOwnershipOverlay(props: ICityOwnershipOverlayProps): ReactEl
                                             {owner.ownerName}
                                         </p>
                                         <p className="text-xs text-muted-foreground">
-                                            Files: {String(fileCount)}
+                                            {t("code-city:cityOwnership.files", { count: fileCount })}
                                         </p>
                                     </div>
                                     <span

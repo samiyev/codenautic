@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 /**
  * Шаг guided tour в CodeCity.
@@ -37,6 +38,8 @@ export interface IGuidedTourOverlayProps {
  * @returns Панель guided tour или null, если тур не активен.
  */
 export function GuidedTourOverlay(props: IGuidedTourOverlayProps): ReactElement | null {
+    const { t } = useTranslation(["code-city"])
+
     if (props.isActive === false || props.steps.length === 0) {
         return null
     }
@@ -53,7 +56,7 @@ export function GuidedTourOverlay(props: IGuidedTourOverlayProps): ReactElement 
 
     return (
         <aside
-            aria-label="Guided tour overlay"
+            aria-label={t("code-city:guidedTour.overlayAriaLabel")}
             className="sticky top-3 z-20 rounded-lg border border-hud-border bg-hud-surface/95 p-3 text-sm text-hud-text shadow-xl"
             data-dark-hud=""
             role="dialog"
@@ -61,40 +64,49 @@ export function GuidedTourOverlay(props: IGuidedTourOverlayProps): ReactElement 
             <div className="flex items-start justify-between gap-3">
                 <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-hud-accent">
-                        Guided tour
+                        {t("code-city:guidedTour.title")}
                     </p>
                     <p className="mt-1 text-xs text-hud-text-muted">
-                        Step {String(normalizedStepIndex + 1)} of {String(props.steps.length)}
+                        {t("code-city:guidedTour.stepOf", {
+                            current: String(normalizedStepIndex + 1),
+                            total: String(props.steps.length),
+                        })}
                     </p>
                 </div>
                 <button
-                    aria-label="Skip guided tour"
+                    aria-label={t("code-city:guidedTour.skipAriaLabel")}
                     className="rounded border border-hud-border px-2 py-0.5 text-xs text-hud-text hover:border-hud-accent"
                     onClick={props.onSkip}
                     type="button"
                 >
-                    Skip
+                    {t("code-city:guidedTour.skipButton")}
                 </button>
             </div>
             <p className="mt-2 font-semibold text-hud-text">{currentStep.title}</p>
             <p className="mt-1 text-xs text-hud-text-muted">{currentStep.description}</p>
             <div className="mt-3 flex items-center justify-between gap-2">
                 <button
-                    aria-label="Previous tour step"
+                    aria-label={t("code-city:guidedTour.prevAriaLabel")}
                     className="rounded border border-hud-border px-2 py-1 text-xs text-hud-text hover:border-hud-accent disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isFirstStep}
                     onClick={props.onPrevious}
                     type="button"
                 >
-                    Prev
+                    {t("code-city:guidedTour.prevButton")}
                 </button>
                 <button
-                    aria-label={isLastStep ? "Finish guided tour" : "Next tour step"}
+                    aria-label={
+                        isLastStep
+                            ? t("code-city:guidedTour.finishAriaLabel")
+                            : t("code-city:guidedTour.nextAriaLabel")
+                    }
                     className="rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-hud-text hover:border-primary/30"
                     onClick={props.onNext}
                     type="button"
                 >
-                    {isLastStep ? "Finish" : "Next"}
+                    {isLastStep
+                        ? t("code-city:guidedTour.finishButton")
+                        : t("code-city:guidedTour.nextButton")}
                 </button>
             </div>
         </aside>

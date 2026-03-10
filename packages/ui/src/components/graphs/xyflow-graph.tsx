@@ -1,4 +1,5 @@
 import { type ReactElement, Suspense, lazy, useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { IGraphEdge, IGraphLayoutOptions, IGraphNode } from "./xyflow-graph-layout"
 
@@ -249,8 +250,9 @@ function shouldUseProgressiveRender(
  * @param props Конфигурация графа.
  */
 export function XyFlowGraph(props: IXYFlowGraphProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const graphHeight = props.height ?? DEFAULT_GRAPH_HEIGHT
-    const loadingLabel = props.loadingLabel ?? "Loading graph"
+    const loadingLabel = props.loadingLabel ?? t("code-city:xyflowGraph.loadingGraph")
     const scaleBudget = useMemo(
         (): IResolvedGraphScaleBudget => resolveScaleBudget(props.scaleBudget),
         [props.scaleBudget],
@@ -292,7 +294,7 @@ export function XyFlowGraph(props: IXYFlowGraphProps): ReactElement {
                     aria-live="polite"
                     className="rounded-lg border border-border bg-surface px-3 py-2 text-xs text-foreground"
                 >
-                    {`Graph is too large. Showing ${budgetedGraphSlice.nodes.length}/${props.nodes.length} nodes and ${budgetedGraphSlice.edges.length}/${props.edges.length} edges (trimmed ${budgetedGraphSlice.droppedNodes} nodes, ${budgetedGraphSlice.droppedEdges} edges). Use filters, reduce depth, or wait for clustering.`}
+                    {t("code-city:xyflowGraph.overBudgetMessage", { shownNodes: budgetedGraphSlice.nodes.length, totalNodes: props.nodes.length, shownEdges: budgetedGraphSlice.edges.length, totalEdges: props.edges.length, droppedNodes: budgetedGraphSlice.droppedNodes, droppedEdges: budgetedGraphSlice.droppedEdges })}
                 </div>
             ) : null}
             {progressiveRenderEnabled === true && isProgressiveRenderReady !== true ? (
@@ -301,7 +303,7 @@ export function XyFlowGraph(props: IXYFlowGraphProps): ReactElement {
                     className="flex items-center rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
                     style={{ height: graphHeight }}
                 >
-                    Rendering graph with scale budget...
+                    {t("code-city:xyflowGraph.renderingWithBudget")}
                 </div>
             ) : (
                 <Suspense fallback={<div aria-live="polite">{loadingLabel}</div>}>

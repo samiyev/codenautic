@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -49,11 +50,12 @@ function resolveIntensityClassName(intensity: number): string {
  * @returns React-компонент overlay.
  */
 export function CityImpactOverlay(props: ICityImpactOverlayProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">City impact overlay</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:cityImpact.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Ripple view for impact propagation where color intensity represents blast radius.
+                {t("code-city:cityImpact.description")}
             </p>
 
             <ul className="mt-3 space-y-2">
@@ -87,14 +89,14 @@ export function CityImpactOverlay(props: ICityImpactOverlayProps): ReactElement 
                                 />
                             </div>
                             <button
-                                aria-label={`Inspect city impact ${entry.label}`}
+                                aria-label={t("code-city:cityImpact.ariaLabelInspect", { label: entry.label })}
                                 className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                 onClick={(): void => {
                                     props.onSelectEntry?.(entry)
                                 }}
                                 type="button"
                             >
-                                Show ripple in city
+                                {t("code-city:cityImpact.showRipple")}
                             </button>
                         </li>
                     ),

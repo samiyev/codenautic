@@ -1,5 +1,6 @@
 import type { ReactElement } from "react"
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 import { BUS_FACTOR_SERIES_COLORS } from "@/lib/constants/graph-colors"
 
@@ -122,6 +123,7 @@ function resolveLatestBusFactor(points: ReadonlyArray<IBusFactorTrendPoint>): nu
  * @returns React-компонент bus factor trend chart.
  */
 export function BusFactorTrendChart(props: IBusFactorTrendChartProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const preparedSeries = useMemo((): ReadonlyArray<IBusFactorTrendSeries> => {
         return props.series
             .map((series): IBusFactorTrendSeries => {
@@ -164,27 +166,27 @@ export function BusFactorTrendChart(props: IBusFactorTrendChartProps): ReactElem
     if (preparedSeries.length === 0) {
         return (
             <div
-                aria-label="Bus factor trend chart"
+                aria-label={t("code-city:busFactorTrend.ariaLabel")}
                 className="rounded-md border border-default-200 p-3"
             >
-                <p className="text-sm font-semibold">Bus factor trend chart</p>
-                <p className="text-sm text-foreground-500">No bus factor trend data.</p>
+                <p className="text-sm font-semibold">{t("code-city:busFactorTrend.title")}</p>
+                <p className="text-sm text-foreground-500">{t("code-city:busFactorTrend.emptyState")}</p>
             </div>
         )
     }
 
     return (
         <section className="space-y-3 rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Bus factor trend chart</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:busFactorTrend.title")}</p>
             <p className="text-xs text-muted-foreground">
-                Module-level bus factor trend with team-change annotations.
+                {t("code-city:busFactorTrend.description")}
             </p>
             <div
-                aria-label="Bus factor trend chart"
+                aria-label={t("code-city:busFactorTrend.ariaLabel")}
                 className="grid gap-3 lg:grid-cols-[1.4fr_1fr]"
             >
                 <svg
-                    aria-label="Bus factor trend lines"
+                    aria-label={t("code-city:busFactorTrend.ariaLabelLines")}
                     className="h-auto w-full"
                     viewBox={`0 0 ${String(SVG_WIDTH)} ${String(SVG_HEIGHT)}`}
                 >
@@ -239,7 +241,7 @@ export function BusFactorTrendChart(props: IBusFactorTrendChartProps): ReactElem
                                                         y2={CHART_PADDING_TOP + 6}
                                                     />
                                                     <text
-                                                        aria-label={`Bus factor annotation ${series.moduleLabel} ${point.annotation}`}
+                                                        aria-label={t("code-city:busFactorTrend.ariaLabelAnnotation", { moduleLabel: series.moduleLabel, annotation: point.annotation })}
                                                         fill={color}
                                                         fontSize={9}
                                                         x={x + 3}
@@ -270,7 +272,7 @@ export function BusFactorTrendChart(props: IBusFactorTrendChartProps): ReactElem
                         )
                     })}
                 </svg>
-                <ul aria-label="Bus factor trend modules" className="space-y-2">
+                <ul aria-label={t("code-city:busFactorTrend.ariaLabelModules")} className="space-y-2">
                     {preparedSeries.map((series): ReactElement => {
                         const latestBusFactor = resolveLatestBusFactor(series.points)
                         const isActive = props.activeModuleId === series.moduleId
@@ -288,17 +290,17 @@ export function BusFactorTrendChart(props: IBusFactorTrendChartProps): ReactElem
                                     {series.moduleLabel}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                    Latest bus factor: {String(latestBusFactor ?? "n/a")}
+                                    {t("code-city:busFactorTrend.latestBusFactor", { value: String(latestBusFactor ?? "n/a") })}
                                 </p>
                                 <button
-                                    aria-label={`Inspect bus factor trend ${series.moduleLabel}`}
+                                    aria-label={t("code-city:busFactorTrend.ariaLabelInspect", { moduleLabel: series.moduleLabel })}
                                     className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                     onClick={(): void => {
                                         props.onSelectSeries?.(series)
                                     }}
                                     type="button"
                                 >
-                                    Focus module trend
+                                    {t("code-city:busFactorTrend.focusModuleTrend")}
                                 </button>
                             </li>
                         )

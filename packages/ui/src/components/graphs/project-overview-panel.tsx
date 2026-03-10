@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 /**
  * Минимальный file-дескриптор для проектного overview.
@@ -85,9 +86,13 @@ function resolveTechLabel(extension: string): string {
  * Формирует метрики архитектуры/стека/entry points из scan data.
  *
  * @param files Набор файлов.
+ * @param filesCountFormatter Функция форматирования количества файлов.
  * @returns Агрегированный overview для рендера.
  */
-function buildProjectOverviewMetrics(files: ReadonlyArray<IProjectOverviewFileDescriptor>): {
+function buildProjectOverviewMetrics(
+    files: ReadonlyArray<IProjectOverviewFileDescriptor>,
+    filesCountFormatter: (count: number) => string,
+): {
     readonly architectureSummary: ReadonlyArray<IOverviewMetricItem>
     readonly techStackSummary: ReadonlyArray<IOverviewMetricItem>
     readonly entryPoints: ReadonlyArray<string>
@@ -118,7 +123,7 @@ function buildProjectOverviewMetrics(files: ReadonlyArray<IProjectOverviewFileDe
         .map(([label, count]): IOverviewMetricItem => {
             return {
                 label,
-                value: `${String(count)} files`,
+                value: filesCountFormatter(count),
             }
         })
 
@@ -128,7 +133,7 @@ function buildProjectOverviewMetrics(files: ReadonlyArray<IProjectOverviewFileDe
         .map(([label, count]): IOverviewMetricItem => {
             return {
                 label,
-                value: `${String(count)} files`,
+                value: filesCountFormatter(count),
             }
         })
 
@@ -148,12 +153,19 @@ function buildProjectOverviewMetrics(files: ReadonlyArray<IProjectOverviewFileDe
  * @returns React-компонент overview панели.
  */
 export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactElement {
-    const metrics = buildProjectOverviewMetrics(props.files)
+    const { t } = useTranslation(["code-city"])
+
+    const filesCountFormatter = (count: number): string =>
+        t("code-city:projectOverview.filesCount", { count })
+
+    const metrics = buildProjectOverviewMetrics(props.files, filesCountFormatter)
 
     return (
         <article className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <header className="border-b border-border pb-2">
-                <p className="text-sm font-semibold text-foreground">Project overview</p>
+                <p className="text-sm font-semibold text-foreground">
+                    {t("code-city:projectOverview.title")}
+                </p>
                 <p className="text-xs text-muted-foreground">
                     {props.repositoryLabel} ({props.repositoryId})
                 </p>
@@ -161,7 +173,7 @@ export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactEl
 
             <section className="mt-3 space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Architecture summary
+                    {t("code-city:projectOverview.architectureSummary")}
                 </p>
                 <ul className="space-y-1 text-sm text-foreground">
                     {metrics.architectureSummary.map(
@@ -177,7 +189,7 @@ export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactEl
 
             <section className="mt-3 space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Tech stack
+                    {t("code-city:projectOverview.techStack")}
                 </p>
                 <ul className="space-y-1 text-sm text-foreground">
                     {metrics.techStackSummary.map(
@@ -193,7 +205,7 @@ export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactEl
 
             <section className="mt-3 space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Entry points
+                    {t("code-city:projectOverview.entryPoints")}
                 </p>
                 {metrics.entryPoints.length > 0 ? (
                     <ul className="space-y-1 text-xs text-foreground">
@@ -207,7 +219,7 @@ export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactEl
                     </ul>
                 ) : (
                     <p className="text-xs text-muted-foreground">
-                        No entry points detected in current scan.
+                        {t("code-city:projectOverview.noEntryPoints")}
                     </p>
                 )}
             </section>

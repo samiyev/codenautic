@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -45,14 +46,14 @@ export interface IOwnershipTransitionWidgetProps {
     readonly onSelectEvent?: (event: IOwnershipTransitionEvent) => void
 }
 
-function resolveHandoffLabel(severity: TOwnershipTransitionHandoffSeverity): string {
+function resolveHandoffLabelKey(severity: TOwnershipTransitionHandoffSeverity): string {
     if (severity === "critical") {
-        return "Critical handoff"
+        return "code-city:ownershipTransition.criticalHandoff"
     }
     if (severity === "watch") {
-        return "Watch handoff"
+        return "code-city:ownershipTransition.watchHandoff"
     }
-    return "Smooth handoff"
+    return "code-city:ownershipTransition.smoothHandoff"
 }
 
 function resolveHandoffBadgeClassName(severity: TOwnershipTransitionHandoffSeverity): string {
@@ -85,16 +86,17 @@ function formatTransitionDate(changedAt: string): string {
  * @returns React-компонент timeline.
  */
 export function OwnershipTransitionWidget(props: IOwnershipTransitionWidgetProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Ownership transition widget</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:ownershipTransition.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Timeline of ownership handoffs for files and modules with risk indicators.
+                {t("code-city:ownershipTransition.description")}
             </p>
-            <ul aria-label="Ownership transitions" className="mt-3 space-y-2">
+            <ul aria-label={t("code-city:ownershipTransition.ariaLabelTransitions")} className="mt-3 space-y-2">
                 {props.events.map((event): ReactElement => {
                     const isActive = props.activeEventId === event.id
-                    const scopeLabel = event.scopeType === "module" ? "Module" : "File"
+                    const scopeLabel = event.scopeType === "module" ? t("code-city:ownershipTransition.scopeModule") : t("code-city:ownershipTransition.scopeFile")
 
                     return (
                         <li
@@ -123,21 +125,21 @@ export function OwnershipTransitionWidget(props: IOwnershipTransitionWidgetProps
                                 <span
                                     className={`rounded border px-2 py-0.5 ${TYPOGRAPHY.micro} ${resolveHandoffBadgeClassName(event.handoffSeverity)}`}
                                 >
-                                    {resolveHandoffLabel(event.handoffSeverity)}
+                                    {(t as unknown as (key: string) => string)(resolveHandoffLabelKey(event.handoffSeverity))}
                                 </span>
                                 <span className="text-xs text-muted-foreground">
                                     {event.reason}
                                 </span>
                             </div>
                             <button
-                                aria-label={`Inspect ownership transition ${event.scopeLabel}`}
+                                aria-label={t("code-city:ownershipTransition.ariaLabelInspect", { scopeLabel: event.scopeLabel })}
                                 className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                 onClick={(): void => {
                                     props.onSelectEvent?.(event)
                                 }}
                                 type="button"
                             >
-                                Focus handoff
+                                {t("code-city:ownershipTransition.focusHandoff")}
                             </button>
                         </li>
                     )

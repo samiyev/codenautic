@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -54,11 +55,12 @@ function resolvePriorityClassName(priority: TCityRefactoringPriority): string {
  * @returns React-компонент overlay.
  */
 export function CityRefactoringOverlay(props: ICityRefactoringOverlayProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">City refactoring overlay</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:cityRefactoring.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Buildings prioritized by refactoring score. Click entry to inspect details.
+                {t("code-city:cityRefactoring.description")}
             </p>
 
             <ul className="mt-3 space-y-2">
@@ -84,14 +86,14 @@ export function CityRefactoringOverlay(props: ICityRefactoringOverlayProps): Rea
                                 </span>
                             </div>
                             <button
-                                aria-label={`Inspect refactoring overlay ${entry.label}`}
+                                aria-label={t("code-city:cityRefactoring.ariaLabelInspect", { label: entry.label })}
                                 className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                 onClick={(): void => {
                                     props.onSelectEntry?.(entry)
                                 }}
                                 type="button"
                             >
-                                Show in city
+                                {t("code-city:cityRefactoring.showInCity")}
                             </button>
                         </li>
                     ),

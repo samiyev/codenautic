@@ -1,5 +1,6 @@
 import type { KeyboardEvent, ReactElement } from "react"
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 /**
  * Узел графа контрибьютора.
@@ -207,6 +208,7 @@ function buildContributorGraphLayout(
 export function ContributorCollaborationGraph(
     props: IContributorCollaborationGraphProps,
 ): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const layoutById = useMemo(
         (): ReadonlyMap<string, IContributorNodeLayout> =>
             buildContributorGraphLayout(props.contributors, props.collaborations),
@@ -229,13 +231,13 @@ export function ContributorCollaborationGraph(
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Contributor collaboration graph</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:contributorCollaboration.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Force-directed view of co-authoring links. Node size reflects commit volume.
+                {t("code-city:contributorCollaboration.description")}
             </p>
-            <div aria-label="Contributor graph viewport" className="mt-3 overflow-x-auto">
+            <div aria-label={t("code-city:contributorCollaboration.ariaLabelViewport")} className="mt-3 overflow-x-auto">
                 <svg
-                    aria-label="Contributor collaboration graph"
+                    aria-label={t("code-city:contributorCollaboration.ariaLabelGraph")}
                     className="h-auto w-full min-w-[680px]"
                     viewBox={`0 0 ${String(LAYOUT_WIDTH)} ${String(LAYOUT_HEIGHT)}`}
                 >
@@ -268,7 +270,7 @@ export function ContributorCollaborationGraph(
 
                         return (
                             <g
-                                aria-label={`Focus contributor ${contributor.label}`}
+                                aria-label={t("code-city:contributorCollaboration.ariaLabelFocus", { label: contributor.label })}
                                 className="cursor-pointer"
                                 key={contributor.contributorId}
                                 role="button"

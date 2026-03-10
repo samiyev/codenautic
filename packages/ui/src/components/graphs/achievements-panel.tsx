@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -49,14 +50,14 @@ function resolveBadgeClassName(badge: TAchievementBadge): string {
     return "border-orange-300 bg-orange-100 text-orange-900"
 }
 
-function resolveBadgeLabel(badge: TAchievementBadge): string {
+function resolveBadgeLabelKey(badge: TAchievementBadge): string {
     if (badge === "gold") {
-        return "Gold badge"
+        return "code-city:achievementsComp.badges.gold"
     }
     if (badge === "silver") {
-        return "Silver badge"
+        return "code-city:achievementsComp.badges.silver"
     }
-    return "Bronze badge"
+    return "code-city:achievementsComp.badges.bronze"
 }
 
 function resolveRowClassName(isActive: boolean): string {
@@ -99,21 +100,22 @@ function BadgeIcon(props: { readonly badge: TAchievementBadge }): ReactElement {
  * @returns React-компонент achievements panel.
  */
 export function AchievementsPanel(props: IAchievementsPanelProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Achievements panel</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:achievementsComp.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Sprint achievements show key improvements and badge icons for top wins.
+                {t("code-city:achievementsComp.description")}
             </p>
 
-            <ul aria-label="Sprint achievements" className="mt-3 space-y-2">
+            <ul aria-label={t("code-city:achievementsComp.ariaList")} className="mt-3 space-y-2">
                 {props.achievements.map((entry): ReactElement => {
                     const isActive = props.activeAchievementId === entry.id
-                    const badgeLabel = resolveBadgeLabel(entry.badge)
+                    const badgeLabel = (t as unknown as (key: string) => string)(resolveBadgeLabelKey(entry.badge))
                     return (
                         <li key={entry.id}>
                             <button
-                                aria-label={`Inspect sprint achievement ${entry.title}`}
+                                aria-label={t("code-city:achievementsComp.ariaInspect", { title: entry.title })}
                                 className={resolveRowClassName(isActive)}
                                 onClick={(): void => {
                                     props.onSelectAchievement?.(entry)
@@ -129,7 +131,7 @@ export function AchievementsPanel(props: IAchievementsPanelProps): ReactElement 
                                             {entry.summary}
                                         </p>
                                         <p className="mt-1 text-xs font-semibold text-success">
-                                            Improvement {String(entry.improvementPercent)}%
+                                            {t("code-city:achievementsComp.improvement", { percent: String(entry.improvementPercent) })}
                                         </p>
                                     </div>
                                     <span

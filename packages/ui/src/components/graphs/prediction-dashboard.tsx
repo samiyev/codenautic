@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { TCodeCityTreemapPredictionRiskLevel } from "@/components/graphs/codecity-treemap"
 
@@ -62,14 +63,14 @@ export interface IPredictionDashboardProps {
     readonly onSelectHotspot?: (entry: IPredictionDashboardHotspotEntry) => void
 }
 
-function resolveRiskLabel(riskLevel: TCodeCityTreemapPredictionRiskLevel): string {
+function resolveRiskLabelKey(riskLevel: TCodeCityTreemapPredictionRiskLevel): string {
     if (riskLevel === "high") {
-        return "High"
+        return "code-city:predictionDashboard.riskHigh"
     }
     if (riskLevel === "medium") {
-        return "Medium"
+        return "code-city:predictionDashboard.riskMedium"
     }
-    return "Low"
+    return "code-city:predictionDashboard.riskLow"
 }
 
 function resolveHotspotClassName(
@@ -93,20 +94,20 @@ function resolveHotspotClassName(
  * @returns React-компонент prediction dashboard.
  */
 export function PredictionDashboard(props: IPredictionDashboardProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Prediction dashboard</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:predictionDashboard.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Predicted hotspots, quality trend forecast, and bug-prone files with confidence
-                scores.
+                {t("code-city:predictionDashboard.description")}
             </p>
 
-            <div aria-label="Prediction hotspots list" className="mt-3 space-y-2">
+            <div aria-label={t("code-city:predictionDashboard.ariaLabelHotspots")} className="mt-3 space-y-2">
                 {props.hotspots.slice(0, 4).map((entry): ReactElement => {
                     const isActive = props.activeHotspotId === entry.id
                     return (
                         <button
-                            aria-label={`Inspect prediction dashboard hotspot ${entry.label}`}
+                            aria-label={t("code-city:predictionDashboard.ariaLabelInspect", { label: entry.label })}
                             className={resolveHotspotClassName(isActive, entry.riskLevel)}
                             key={entry.id}
                             onClick={(): void => {
@@ -116,9 +117,7 @@ export function PredictionDashboard(props: IPredictionDashboardProps): ReactElem
                         >
                             <p className="text-sm font-semibold text-foreground">{entry.label}</p>
                             <p className="mt-1 text-xs text-muted-foreground">
-                                Risk {resolveRiskLabel(entry.riskLevel)} · Confidence{" "}
-                                {String(entry.confidenceScore)}% · Forecast +
-                                {String(entry.predictedIssueIncrease)} issues
+                                {t("code-city:predictionDashboard.hotspotMeta", { risk: (t as unknown as (key: string) => string)(resolveRiskLabelKey(entry.riskLevel)), confidence: String(entry.confidenceScore), increase: String(entry.predictedIssueIncrease) })}
                             </p>
                         </button>
                     )
@@ -126,11 +125,11 @@ export function PredictionDashboard(props: IPredictionDashboardProps): ReactElem
             </div>
 
             <div
-                aria-label="Prediction quality trend"
+                aria-label={t("code-city:predictionDashboard.ariaLabelQualityTrend")}
                 className="mt-3 rounded border border-border bg-surface p-2"
             >
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Quality trend forecast
+                    {t("code-city:predictionDashboard.qualityTrendForecast")}
                 </p>
                 <ul className="mt-1 space-y-1">
                     {props.qualityTrendPoints.map((point): ReactElement => {
@@ -145,11 +144,11 @@ export function PredictionDashboard(props: IPredictionDashboardProps): ReactElem
             </div>
 
             <div
-                aria-label="Prediction bug-prone files"
+                aria-label={t("code-city:predictionDashboard.ariaLabelBugProne")}
                 className="mt-2 rounded border border-border bg-surface p-2"
             >
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Bug-prone files
+                    {t("code-city:predictionDashboard.bugProneFiles")}
                 </p>
                 <ul className="mt-1 space-y-1">
                     {props.bugProneFiles.slice(0, 4).map((entry): ReactElement => {

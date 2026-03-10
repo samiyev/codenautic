@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -109,6 +110,7 @@ function aggregateImpact(selectedSeeds: ReadonlyArray<IImpactAnalysisSeed>): IIm
  * @returns React-компонент impact panel.
  */
 export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const [selectedSeedIds, setSelectedSeedIds] = useState<ReadonlyArray<string>>([])
 
     const selectedSeeds = useMemo((): ReadonlyArray<IImpactAnalysisSeed> => {
@@ -131,10 +133,9 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">Impact analysis panel</p>
+            <p className="text-sm font-semibold text-foreground">{t("code-city:impactAnalysisComp.title")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-                Select files to inspect blast radius, affected tests/consumers, and aggregated risk
-                score.
+                {t("code-city:impactAnalysisComp.description")}
             </p>
 
             <ul className="mt-3 space-y-2">
@@ -145,7 +146,7 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
                             key={seed.id}
                         >
                             <input
-                                aria-label={`Select impact file ${seed.label}`}
+                                aria-label={t("code-city:impactAnalysisComp.ariaSelectFile", { label: seed.label })}
                                 checked={selectedSeedIds.includes(seed.id)}
                                 className="mt-0.5 h-4 w-4 rounded border-border"
                                 onChange={(): void => {
@@ -158,7 +159,7 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
                                     {seed.label}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                    Individual risk {String(seed.riskScore)}
+                                    {t("code-city:impactAnalysisComp.individualRisk", { score: seed.riskScore })}
                                 </p>
                             </div>
                         </li>
@@ -168,45 +169,45 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
 
             <div className="mt-3 rounded border border-primary/30 bg-primary/10 p-2">
                 <p className="text-xs font-semibold uppercase tracking-wide text-on-primary">
-                    Aggregated risk score
+                    {t("code-city:impactAnalysisComp.aggregatedRiskScore")}
                 </p>
                 <p className="text-lg font-semibold text-on-primary">
                     {String(aggregatedImpact.riskScore)}
                 </p>
                 <p className="text-xs text-on-primary">
-                    Selected files: {String(selectedSeeds.length)}
+                    {t("code-city:impactAnalysisComp.selectedFiles", { count: selectedSeeds.length })}
                 </p>
             </div>
 
             <div className="mt-3 grid gap-2 md:grid-cols-3">
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>Affected files</p>
+                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>{t("code-city:impactAnalysisComp.affectedFiles")}</p>
                     <p className="mt-1 text-xs text-foreground">
                         {aggregatedImpact.affectedFiles.length === 0
-                            ? "none"
+                            ? t("code-city:impactAnalysisComp.none")
                             : aggregatedImpact.affectedFiles.join(", ")}
                     </p>
                 </div>
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>Affected tests</p>
+                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>{t("code-city:impactAnalysisComp.affectedTests")}</p>
                     <p className="mt-1 text-xs text-foreground">
                         {aggregatedImpact.affectedTests.length === 0
-                            ? "none"
+                            ? t("code-city:impactAnalysisComp.none")
                             : aggregatedImpact.affectedTests.join(", ")}
                     </p>
                 </div>
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>Consumers</p>
+                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>{t("code-city:impactAnalysisComp.consumers")}</p>
                     <p className="mt-1 text-xs text-foreground">
                         {aggregatedImpact.affectedConsumers.length === 0
-                            ? "none"
+                            ? t("code-city:impactAnalysisComp.none")
                             : aggregatedImpact.affectedConsumers.join(", ")}
                     </p>
                 </div>
             </div>
 
             <button
-                aria-label="Apply impact focus"
+                aria-label={t("code-city:impactAnalysisComp.ariaApplyFocus")}
                 className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={primarySeed === undefined}
                 onClick={(): void => {
@@ -222,7 +223,7 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
                 }}
                 type="button"
             >
-                Focus impact radius
+                {t("code-city:impactAnalysisComp.focusImpactRadius")}
             </button>
         </section>
     )
