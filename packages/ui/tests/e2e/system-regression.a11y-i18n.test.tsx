@@ -41,7 +41,7 @@ describe("system e2e regression suite: a11y + i18n", (): void => {
         expect(document.activeElement).not.toBe(document.body)
 
         renderWithProviders(<SettingsPage />)
-        expect(screen.getByRole("heading", { level: 1, name: "Настройки" })).not.toBeNull()
+        expect(screen.getByRole("heading", { level: 1, name: "Settings" })).not.toBeNull()
         await user.tab()
         expect(document.activeElement).not.toBe(document.body)
     })

@@ -42,8 +42,8 @@ export default defineConfig({
         coverage: {
             provider: "v8",
             thresholds: {
-                lines: 85,
-                functions: 85,
+                lines: 91,
+                functions: 93,
             },
             exclude: [
                 "**/dist/**",

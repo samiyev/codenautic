@@ -308,7 +308,7 @@ exports[`visual regression contract > фиксирует визуальный sh
         >
           Search
           <input
-            aria-label="Help search"
+            aria-label="Search"
             class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
             placeholder="Find article or issue type"
             value=""
@@ -319,7 +319,7 @@ exports[`visual regression contract > фиксирует визуальный sh
         >
           Category
           <select
-            aria-label="Help category"
+            aria-label="Category"
             class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground"
           >
             <option
@@ -370,7 +370,7 @@ exports[`visual regression contract > фиксирует визуальный sh
           <p
             class="text-xs text-text-secondary"
           >
-            Что проверить при истекшей сессии и ошибках доступа 401/403.
+            What to check when session expired and 401/403 access errors.
           </p>
           <a
             class="mt-1 inline-flex text-xs underline underline-offset-4"
@@ -390,7 +390,7 @@ exports[`visual regression contract > фиксирует визуальный sh
           <p
             class="text-xs text-text-secondary"
           >
-            Диагностика сетевых таймаутов и проблем с API недоступностью.
+            Diagnosing network timeouts and API unavailability issues.
           </p>
           <a
             class="mt-1 inline-flex text-xs underline underline-offset-4"
@@ -410,7 +410,7 @@ exports[`visual regression contract > фиксирует визуальный sh
           <p
             class="text-xs text-text-secondary"
           >
-            Проверка деградации LLM/Git провайдеров и fallback стратегий.
+            Checking LLM/Git provider degradation and fallback strategies.
           </p>
           <a
             class="mt-1 inline-flex text-xs underline underline-offset-4"
@@ -430,7 +430,7 @@ exports[`visual regression contract > фиксирует визуальный sh
           <p
             class="text-xs text-text-secondary"
           >
-            Как расследовать scan/review worker failures и перезапустить jobs.
+            How to investigate scan/review worker failures and restart jobs.
           </p>
           <a
             class="mt-1 inline-flex text-xs underline underline-offset-4"
@@ -450,7 +450,7 @@ exports[`visual regression contract > фиксирует визуальный sh
           <p
             class="text-xs text-text-secondary"
           >
-            Проверка readiness браузера и WebGL для CodeCity экранов.
+            Checking browser and WebGL readiness for CodeCity screens.
           </p>
           <a
             class="mt-1 inline-flex text-xs underline underline-offset-4"

@@ -10,7 +10,7 @@ describe("RouteSuspenseFallback", (): void => {
         const title = screen.getByRole("heading", { name: "CodeNautic Runtime" })
         expect(title.textContent).toBe("CodeNautic Runtime")
 
-        const loadingText = screen.getByText("Проверяем доступность API...")
-        expect(loadingText.textContent).toBe("Проверяем доступность API...")
+        const loadingText = screen.getByText("Checking API availability...")
+        expect(loadingText.textContent).toBe("Checking API availability...")
     })
 })
