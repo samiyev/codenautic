@@ -1,4 +1,5 @@
 import { type ReactElement, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -20,9 +21,10 @@ export interface IAiSummaryWidgetProps {
  * @returns UI с summary, regenerate и copy-to-clipboard действиями.
  */
 export function AiSummaryWidget(props: IAiSummaryWidgetProps): ReactElement {
+    const { t } = useTranslation(["reports"])
     const [summary, setSummary] = useState<string>(props.initialSummary)
     const [regenerationIndex, setRegenerationIndex] = useState<number>(0)
-    const [status, setStatus] = useState<string>("Summary ready.")
+    const [status, setStatus] = useState<string>(t("reports:aiSummary.summaryReady"))
 
     const handleRegenerate = (): void => {
         const nextIndex = (regenerationIndex + 1) % REGENERATED_SUMMARIES.length
@@ -30,33 +32,35 @@ export function AiSummaryWidget(props: IAiSummaryWidgetProps): ReactElement {
 
         setRegenerationIndex(nextIndex)
         setSummary(nextSummary)
-        setStatus("Summary regenerated.")
-        showToastInfo("AI summary regenerated.")
+        setStatus(t("reports:aiSummary.summaryRegenerated"))
+        showToastInfo(t("reports:aiSummary.summaryRegeneratedToast"))
     }
     const handleCopySummary = (): void => {
         const clipboard = globalThis.navigator.clipboard
         if (clipboard === undefined) {
-            setStatus("Clipboard API unavailable. Copy manually.")
-            showToastInfo("Clipboard API unavailable.")
+            setStatus(t("reports:aiSummary.clipboardUnavailable"))
+            showToastInfo(t("reports:aiSummary.clipboardUnavailableToast"))
             return
         }
 
         void clipboard
             .writeText(summary)
             .then((): void => {
-                setStatus("Summary copied to clipboard.")
-                showToastSuccess("AI summary copied.")
+                setStatus(t("reports:aiSummary.summaryCopied"))
+                showToastSuccess(t("reports:aiSummary.summaryCopiedToast"))
             })
             .catch((): void => {
-                setStatus("Failed to copy summary.")
-                showToastError("Failed to copy AI summary.")
+                setStatus(t("reports:aiSummary.copyFailed"))
+                showToastError(t("reports:aiSummary.copyFailedToast"))
             })
     }
 
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">AI summary widget</p>
+                <p className="text-base font-semibold text-foreground">
+                    {t("reports:aiSummary.title")}
+                </p>
             </CardHeader>
             <CardBody className="space-y-3">
                 <p
@@ -66,12 +70,18 @@ export function AiSummaryWidget(props: IAiSummaryWidgetProps): ReactElement {
                     {summary}
                 </p>
                 <div className="flex gap-2">
-                    <Button onPress={handleRegenerate}>Regenerate summary</Button>
+                    <Button onPress={handleRegenerate}>
+                        {t("reports:aiSummary.regenerateSummary")}
+                    </Button>
                     <Button variant="flat" onPress={handleCopySummary}>
-                        Copy summary
+                        {t("reports:aiSummary.copySummary")}
                     </Button>
                 </div>
-                <Alert color="primary" title="AI summary status" variant="flat">
+                <Alert
+                    color="primary"
+                    title={t("reports:aiSummary.statusTitle")}
+                    variant="flat"
+                >
                     {status}
                 </Alert>
             </CardBody>

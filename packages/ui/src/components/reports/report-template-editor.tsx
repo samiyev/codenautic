@@ -1,4 +1,5 @@
 import { type ChangeEvent, type DragEvent, type ReactElement, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { REPORT_DEFAULT_ACCENT_COLOR } from "@/lib/constants/graph-colors"
@@ -6,7 +7,7 @@ import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 interface ITemplateSection {
     readonly id: string
-    readonly title: string
+    readonly titleKey: string
     readonly enabled: boolean
 }
 
@@ -14,22 +15,22 @@ const DEFAULT_TEMPLATE_SECTIONS: ReadonlyArray<ITemplateSection> = [
     {
         enabled: true,
         id: "executive-summary",
-        title: "Executive summary",
+        titleKey: "reports:templateEditor.sectionExecutiveSummary",
     },
     {
         enabled: true,
         id: "architecture-signals",
-        title: "Architecture signals",
+        titleKey: "reports:templateEditor.sectionArchitectureSignals",
     },
     {
         enabled: true,
         id: "delivery-signals",
-        title: "Delivery signals",
+        titleKey: "reports:templateEditor.sectionDeliverySignals",
     },
     {
         enabled: true,
         id: "risks-and-actions",
-        title: "Risks and actions",
+        titleKey: "reports:templateEditor.sectionRisksAndActions",
     },
 ]
 
@@ -59,6 +60,7 @@ function reorderTemplateSections(
  * @returns UI template editor с section configuration и drag-and-drop reorder.
  */
 export function ReportTemplateEditor(): ReactElement {
+    const { t } = useTranslation(["reports"])
     const [templateName, setTemplateName] = useState<string>("Weekly engineering report")
     const [brandLogoUrl, setBrandLogoUrl] = useState<string>(
         "https://assets.codenautic.app/logo.svg",
@@ -67,17 +69,28 @@ export function ReportTemplateEditor(): ReactElement {
     const [sections, setSections] =
         useState<ReadonlyArray<ITemplateSection>>(DEFAULT_TEMPLATE_SECTIONS)
     const [draggedSectionId, setDraggedSectionId] = useState<string | undefined>()
-    const [status, setStatus] = useState<string>("No template changes saved yet.")
+    const [status, setStatus] = useState<string>(t("reports:templateEditor.noChangesYet"))
 
     const enabledSections = useMemo((): ReadonlyArray<ITemplateSection> => {
         return sections.filter((section): boolean => section.enabled)
     }, [sections])
     const templatePreviewSummary = useMemo((): string => {
         const enabledSectionTitles = enabledSections
-            .map((section): string => section.title)
+            .map(
+                (section): string =>
+                    (t as unknown as (key: string) => string)(section.titleKey),
+            )
             .join(" -> ")
-        return `Template: ${templateName} · Brand: ${brandLogoUrl} · Accent: ${brandAccentColor} · Sections: ${enabledSectionTitles}`
-    }, [brandAccentColor, brandLogoUrl, enabledSections, templateName])
+        return (t as unknown as (key: string, options: Record<string, string>) => string)(
+            "reports:templateEditor.templatePreview",
+            {
+                accent: brandAccentColor,
+                logo: brandLogoUrl,
+                name: templateName,
+                sections: enabledSectionTitles,
+            },
+        )
+    }, [brandAccentColor, brandLogoUrl, enabledSections, t, templateName])
 
     const handleSectionToggle = (sectionId: string): void => {
         setSections((currentSections): ReadonlyArray<ITemplateSection> => {
@@ -130,26 +143,33 @@ export function ReportTemplateEditor(): ReactElement {
             return reorderTemplateSections(currentSections, movedSectionId, targetSectionId)
         })
         setDraggedSectionId(undefined)
-        showToastInfo("Template section reordered.")
+        showToastInfo(t("reports:templateEditor.sectionReorderedToast"))
     }
     const handleSaveTemplate = (): void => {
         setStatus(
-            `Template saved: ${templateName} with ${String(enabledSections.length)} enabled sections.`,
+            (t as unknown as (key: string, options: Record<string, string>) => string)(
+                "reports:templateEditor.templateSaved",
+                { count: String(enabledSections.length), name: templateName },
+            ),
         )
-        showToastSuccess("Report template saved.")
+        showToastSuccess(t("reports:templateEditor.templateSavedToast"))
     }
 
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">Report template editor</p>
+                <p className="text-base font-semibold text-foreground">
+                    {t("reports:templateEditor.title")}
+                </p>
             </CardHeader>
             <CardBody className="space-y-3">
                 <div className="grid gap-3 md:grid-cols-3">
                     <label className="space-y-1 text-sm">
-                        <span className="font-semibold text-foreground">Template name</span>
+                        <span className="font-semibold text-foreground">
+                            {t("reports:templateEditor.templateNameLabel")}
+                        </span>
                         <input
-                            aria-label="Template name"
+                            aria-label={t("reports:templateEditor.templateNameLabel")}
                             className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                             type="text"
                             value={templateName}
@@ -159,9 +179,11 @@ export function ReportTemplateEditor(): ReactElement {
                         />
                     </label>
                     <label className="space-y-1 text-sm">
-                        <span className="font-semibold text-foreground">Brand logo URL</span>
+                        <span className="font-semibold text-foreground">
+                            {t("reports:templateEditor.brandLogoUrlLabel")}
+                        </span>
                         <input
-                            aria-label="Template brand logo"
+                            aria-label={t("reports:templateEditor.brandLogoUrlLabel")}
                             className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                             type="text"
                             value={brandLogoUrl}
@@ -171,9 +193,11 @@ export function ReportTemplateEditor(): ReactElement {
                         />
                     </label>
                     <label className="space-y-1 text-sm">
-                        <span className="font-semibold text-foreground">Accent color</span>
+                        <span className="font-semibold text-foreground">
+                            {t("reports:templateEditor.accentColorLabel")}
+                        </span>
                         <input
-                            aria-label="Template accent color"
+                            aria-label={t("reports:templateEditor.accentColorLabel")}
                             className="h-9 w-full rounded border border-border bg-surface px-2 py-1"
                             type="color"
                             value={brandAccentColor}
@@ -210,7 +234,9 @@ export function ReportTemplateEditor(): ReactElement {
                                         }}
                                     />
                                     <span className="text-sm font-semibold text-foreground">
-                                        {section.title}
+                                        {(t as unknown as (key: string) => string)(
+                                            section.titleKey,
+                                        )}
                                     </span>
                                     <Button
                                         size="sm"
@@ -219,7 +245,10 @@ export function ReportTemplateEditor(): ReactElement {
                                             handleMoveSection(section.id, "up")
                                         }}
                                     >
-                                        {`Move up section ${section.id}`}
+                                        {(t as unknown as (key: string, options: Record<string, string>) => string)(
+                                            "reports:templateEditor.moveUpSection",
+                                            { id: section.id },
+                                        )}
                                     </Button>
                                     <Button
                                         size="sm"
@@ -228,18 +257,31 @@ export function ReportTemplateEditor(): ReactElement {
                                             handleMoveSection(section.id, "down")
                                         }}
                                     >
-                                        {`Move down section ${section.id}`}
+                                        {(t as unknown as (key: string, options: Record<string, string>) => string)(
+                                            "reports:templateEditor.moveDownSection",
+                                            { id: section.id },
+                                        )}
                                     </Button>
                                 </div>
                             </li>
                         ),
                     )}
                 </ul>
-                <Alert color="primary" title="Template preview" variant="flat">
+                <Alert
+                    color="primary"
+                    title={t("reports:templateEditor.templatePreviewTitle")}
+                    variant="flat"
+                >
                     <span aria-label="Template preview summary">{templatePreviewSummary}</span>
                 </Alert>
-                <Button onPress={handleSaveTemplate}>Save template</Button>
-                <Alert color="primary" title="Template status" variant="flat">
+                <Button onPress={handleSaveTemplate}>
+                    {t("reports:templateEditor.saveTemplate")}
+                </Button>
+                <Alert
+                    color="primary"
+                    title={t("reports:templateEditor.templateStatusTitle")}
+                    variant="flat"
+                >
                     {status}
                 </Alert>
             </CardBody>

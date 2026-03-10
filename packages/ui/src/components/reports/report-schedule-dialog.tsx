@@ -1,4 +1,5 @@
 import { type ChangeEvent, type ReactElement, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -12,17 +13,27 @@ type TScheduleFormat = "pdf" | "png" | "html"
  * @returns UI c recipients, cron, format и preview schedule.
  */
 export function ReportScheduleDialog(): ReactElement {
+    const { t } = useTranslation(["reports"])
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [recipients, setRecipients] = useState<string>("team@codenautic.app")
     const [cronExpression, setCronExpression] = useState<string>("0 9 * * 1")
     const [format, setFormat] = useState<TScheduleFormat>("pdf")
-    const [status, setStatus] = useState<string>("No scheduled delivery configured yet.")
+    const [status, setStatus] = useState<string>(t("reports:scheduleDialog.noScheduleYet"))
 
     const schedulePreview = useMemo((): string => {
         const normalizedRecipients =
-            recipients.trim().length === 0 ? "no recipients" : recipients.trim()
-        return `Cron: ${cronExpression} · Recipients: ${normalizedRecipients} · Format: ${format.toUpperCase()}`
-    }, [cronExpression, format, recipients])
+            recipients.trim().length === 0
+                ? t("reports:scheduleDialog.noRecipients")
+                : recipients.trim()
+        return (t as unknown as (key: string, options: Record<string, string>) => string)(
+            "reports:scheduleDialog.schedulePreview",
+            {
+                cron: cronExpression,
+                format: format.toUpperCase(),
+                recipients: normalizedRecipients,
+            },
+        )
+    }, [cronExpression, format, recipients, t])
 
     const handleRecipientsChange = (event: ChangeEvent<HTMLInputElement>): void => {
         setRecipients(event.currentTarget.value)
@@ -32,25 +43,30 @@ export function ReportScheduleDialog(): ReactElement {
     }
     const handleSaveSchedule = (): void => {
         setStatus(
-            `Scheduled delivery saved (${format.toUpperCase()}) for cron "${cronExpression}".`,
+            (t as unknown as (key: string, options: Record<string, string>) => string)(
+                "reports:scheduleDialog.scheduleSaved",
+                { cron: cronExpression, format: format.toUpperCase() },
+            ),
         )
-        showToastSuccess("Report schedule saved.")
+        showToastSuccess(t("reports:scheduleDialog.scheduleSavedToast"))
     }
 
     return (
         <Card>
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">Report schedule</p>
+                <p className="text-base font-semibold text-foreground">
+                    {t("reports:scheduleDialog.title")}
+                </p>
             </CardHeader>
             <CardBody className="space-y-3">
                 <div className="flex gap-2">
                     <Button
                         onPress={(): void => {
                             setIsOpen(true)
-                            showToastInfo("Schedule dialog opened.")
+                            showToastInfo(t("reports:scheduleDialog.openedToast"))
                         }}
                     >
-                        Open schedule dialog
+                        {t("reports:scheduleDialog.openDialog")}
                     </Button>
                 </div>
                 {isOpen === false ? null : (
@@ -60,9 +76,11 @@ export function ReportScheduleDialog(): ReactElement {
                         role="dialog"
                     >
                         <label className="space-y-1 text-sm">
-                            <span className="font-semibold text-foreground">Recipients</span>
+                            <span className="font-semibold text-foreground">
+                                {t("reports:scheduleDialog.recipientsLabel")}
+                            </span>
                             <input
-                                aria-label="Schedule recipients"
+                                aria-label={t("reports:scheduleDialog.recipientsLabel")}
                                 className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                                 type="text"
                                 value={recipients}
@@ -70,9 +88,11 @@ export function ReportScheduleDialog(): ReactElement {
                             />
                         </label>
                         <label className="space-y-1 text-sm">
-                            <span className="font-semibold text-foreground">Cron expression</span>
+                            <span className="font-semibold text-foreground">
+                                {t("reports:scheduleDialog.cronExpressionLabel")}
+                            </span>
                             <input
-                                aria-label="Schedule cron expression"
+                                aria-label={t("reports:scheduleDialog.cronExpressionLabel")}
                                 className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                                 type="text"
                                 value={cronExpression}
@@ -80,9 +100,11 @@ export function ReportScheduleDialog(): ReactElement {
                             />
                         </label>
                         <label className="space-y-1 text-sm">
-                            <span className="font-semibold text-foreground">Delivery format</span>
+                            <span className="font-semibold text-foreground">
+                                {t("reports:scheduleDialog.deliveryFormatLabel")}
+                            </span>
                             <select
-                                aria-label="Schedule format"
+                                aria-label={t("reports:scheduleDialog.deliveryFormatLabel")}
                                 className={NATIVE_FORM.select}
                                 value={format}
                                 onChange={(event): void => {
@@ -101,23 +123,33 @@ export function ReportScheduleDialog(): ReactElement {
                                 <option value="html">html</option>
                             </select>
                         </label>
-                        <Alert color="primary" title="Schedule preview" variant="flat">
+                        <Alert
+                            color="primary"
+                            title={t("reports:scheduleDialog.schedulePreviewTitle")}
+                            variant="flat"
+                        >
                             <span aria-label="Schedule preview value">{schedulePreview}</span>
                         </Alert>
                         <div className="flex gap-2">
-                            <Button onPress={handleSaveSchedule}>Save schedule</Button>
+                            <Button onPress={handleSaveSchedule}>
+                                {t("reports:scheduleDialog.saveSchedule")}
+                            </Button>
                             <Button
                                 variant="flat"
                                 onPress={(): void => {
                                     setIsOpen(false)
                                 }}
                             >
-                                Close dialog
+                                {t("reports:scheduleDialog.closeDialog")}
                             </Button>
                         </div>
                     </div>
                 )}
-                <Alert color="primary" title="Schedule status" variant="flat">
+                <Alert
+                    color="primary"
+                    title={t("reports:scheduleDialog.scheduleStatusTitle")}
+                    variant="flat"
+                >
                     {status}
                 </Alert>
             </CardBody>
