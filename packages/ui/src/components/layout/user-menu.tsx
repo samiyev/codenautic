@@ -1,4 +1,6 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
+
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@/components/ui"
 import { Avatar } from "@/components/ui"
 
@@ -27,6 +29,8 @@ export interface IUserMenuProps {
  * @returns Блок с avatar и кнопкой sign out.
  */
 export function UserMenu(props: IUserMenuProps): ReactElement {
+    const { t } = useTranslation(["navigation"])
+    const defaultName = t("navigation:userMenu.defaultName")
     const initials = props.userName !== undefined ? props.userName.slice(0, 2).toUpperCase() : "CN"
 
     return (
@@ -38,23 +42,23 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
                 variant="light"
             >
                 <span className="inline-flex items-center gap-2 rounded-full">
-                    <Avatar label={props.userName ?? "User"} size="sm" />
+                    <Avatar label={props.userName ?? defaultName} size="sm" />
                     <span className="hidden text-xs font-medium sm:inline">
-                        {props.userName ?? "User"}
+                        {props.userName ?? defaultName}
                     </span>
                     <span className="sr-only">{initials}</span>
                 </span>
             </DropdownTrigger>
-            <DropdownMenu aria-label="User menu">
-                <DropdownItem key="name">{props.userName ?? "User"}</DropdownItem>
-                <DropdownItem key="email">{props.userEmail ?? "user@example.com"}</DropdownItem>
+            <DropdownMenu aria-label={t("navigation:userMenuAriaLabel")}>
+                <DropdownItem key="name">{props.userName ?? defaultName}</DropdownItem>
+                <DropdownItem key="email">{props.userEmail ?? t("navigation:userMenu.defaultEmail")}</DropdownItem>
                 <DropdownItem
                     key="settings"
                     onPress={(): void => {
                         props.onOpenSettings?.()
                     }}
                 >
-                    Open settings
+                    {t("navigation:userMenu.openSettings")}
                 </DropdownItem>
                 <DropdownItem
                     key="billing"
@@ -62,7 +66,7 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
                         props.onOpenBilling?.()
                     }}
                 >
-                    Open billing
+                    {t("navigation:userMenu.openBilling")}
                 </DropdownItem>
                 <DropdownItem
                     key="help"
@@ -70,7 +74,7 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
                         props.onOpenHelp?.()
                     }}
                 >
-                    Help & diagnostics
+                    {t("navigation:userMenu.helpDiagnostics")}
                 </DropdownItem>
                 {props.onSignOut === undefined ? null : (
                     <DropdownItem
@@ -85,7 +89,7 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
                             void signOut()
                         }}
                     >
-                        Sign out
+                        {t("navigation:userMenu.signOut")}
                     </DropdownItem>
                 )}
             </DropdownMenu>

@@ -1,4 +1,5 @@
 import { type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { IShortcutDescriptor } from "@/lib/keyboard/shortcut-registry"
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@/components/ui"
@@ -26,6 +27,7 @@ export interface IShortcutsHelpModalProps {
  * @returns Модальное окно keyboard shortcuts.
  */
 export function ShortcutsHelpModal(props: IShortcutsHelpModalProps): ReactElement {
+    const { t } = useTranslation(["navigation"])
     return (
         <Modal
             isOpen={props.isOpen}
@@ -37,20 +39,20 @@ export function ShortcutsHelpModal(props: IShortcutsHelpModalProps): ReactElemen
             }}
         >
             <ModalContent>
-                <ModalHeader>Keyboard shortcuts</ModalHeader>
+                <ModalHeader>{t("navigation:shortcuts.title")}</ModalHeader>
                 <ModalBody>
                     <input
-                        aria-label="Search shortcuts"
+                        aria-label={t("navigation:shortcuts.searchLabel")}
                         className="w-full rounded-md border border-border bg-surface px-2 py-1 text-sm text-foreground"
-                        placeholder="Search by key or action"
+                        placeholder={t("navigation:shortcuts.searchPlaceholder")}
                         type="text"
                         value={props.query}
                         onChange={(event): void => {
                             props.onQueryChange(event.currentTarget.value)
                         }}
                     />
-                    <p className="text-xs text-text-subtle">Press ? for help.</p>
-                    <ul aria-label="Shortcuts list" className="max-h-72 space-y-2 overflow-y-auto">
+                    <p className="text-xs text-text-subtle">{t("navigation:shortcuts.helpHint")}</p>
+                    <ul aria-label={t("navigation:shortcuts.listLabel")} className="max-h-72 space-y-2 overflow-y-auto">
                         {props.shortcuts.map(
                             (shortcut): ReactElement => (
                                 <li

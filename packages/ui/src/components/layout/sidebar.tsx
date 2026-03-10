@@ -1,4 +1,5 @@
 import type { ReactElement, ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 import { motion, AnimatePresence } from "motion/react"
 
 import { ChevronLeft, ChevronRight } from "@/components/icons/app-icons"
@@ -36,6 +37,7 @@ export interface ISidebarProps {
  * @returns Full-height sidebar navigation.
  */
 export function Sidebar(props: ISidebarProps): ReactElement {
+    const { t } = useTranslation(["navigation"])
     const isCollapsed = props.isCollapsed === true
     const prefersReducedMotion = useReducedMotion()
     const targetWidth = isCollapsed ? 48 : 240
@@ -48,11 +50,11 @@ export function Sidebar(props: ISidebarProps): ReactElement {
                     <span className="w-0 overflow-hidden" />
                 ) : (
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-text-subtle">
-                        {props.title ?? "Navigation"}
+                        {props.title ?? t("navigation:sidebarNav.title")}
                     </p>
                 )}
                 <Button
-                    aria-label={isCollapsed ? "Expand navigation" : "Collapse navigation"}
+                    aria-label={isCollapsed ? t("navigation:sidebarNav.expandAriaLabel") : t("navigation:sidebarNav.collapseAriaLabel")}
                     className="h-7 min-h-7 w-7 rounded-full px-0"
                     isIconOnly
                     radius="full"

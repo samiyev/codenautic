@@ -1,4 +1,5 @@
 import { type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import {
     Bell,
@@ -49,6 +50,7 @@ export interface IContentToolbarProps {
  * @returns Content toolbar element.
  */
 export function ContentToolbar(props: IContentToolbarProps): ReactElement {
+    const { t } = useTranslation(["navigation"])
     const hasNotifications =
         props.notificationCount !== undefined && props.notificationCount > 0
 
@@ -63,7 +65,7 @@ export function ContentToolbar(props: IContentToolbarProps): ReactElement {
             <div className="flex shrink-0 items-center md:hidden">
                 <Button
                     isIconOnly
-                    aria-label="Open navigation menu"
+                    aria-label={t("navigation:toolbar.openNavigationMenu")}
                     radius="full"
                     size="sm"
                     variant="light"
@@ -139,7 +141,7 @@ export function ContentToolbar(props: IContentToolbarProps): ReactElement {
             <div className="ml-auto flex shrink-0 items-center gap-2">
                 {/* Search trigger → opens Command Palette */}
                 <Button
-                    aria-label="Open command palette (⌘K)"
+                    aria-label={t("navigation:toolbar.openCommandPalette")}
                     className="hidden gap-1.5 px-2.5 sm:inline-flex"
                     radius="md"
                     size="sm"
@@ -162,7 +164,7 @@ export function ContentToolbar(props: IContentToolbarProps): ReactElement {
                 {/* Notification bell */}
                 <Button
                     isIconOnly
-                    aria-label={`Notifications (${String(props.notificationCount ?? 0)})`}
+                    aria-label={t("navigation:toolbar.notifications", { count: props.notificationCount ?? 0 })}
                     radius="full"
                     size="sm"
                     variant="light"

@@ -1,4 +1,5 @@
-import { type ReactElement, useCallback } from "react"
+import { type ReactElement, useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui"
 import { type SupportedLocale, useLocale } from "@/lib/i18n"
@@ -15,18 +16,17 @@ interface ILocaleOption {
     readonly ariaLabel: string
 }
 
-const LOCALE_OPTIONS: ReadonlyArray<ILocaleOption> = [
-    {
-        ariaLabel: "Русский язык",
-        shortLabel: "РУ",
-        value: "ru",
-    },
-    {
-        ariaLabel: "English language",
-        shortLabel: "EN",
-        value: "en",
-    },
-]
+const LOCALE_ARIA_KEYS: Record<SupportedLocale, string> = {
+    ru: "navigation:localeSwitcher.russianAriaLabel",
+    en: "navigation:localeSwitcher.englishAriaLabel",
+}
+
+const LOCALE_SHORT_LABELS: Record<SupportedLocale, string> = {
+    ru: "РУ",
+    en: "EN",
+}
+
+const LOCALE_VALUES: ReadonlyArray<SupportedLocale> = ["ru", "en"]
 
 /**
  * Props для компонента переключателя языка.
@@ -45,7 +45,18 @@ export interface ILocaleSwitcherProps {
  * @returns Переключатель языка.
  */
 export function LocaleSwitcher(props: ILocaleSwitcherProps): ReactElement {
+    const { t } = useTranslation(["navigation"])
     const { locale, setLocale } = useLocale()
+
+    const localeOptions = useMemo(
+        (): ReadonlyArray<ILocaleOption> =>
+            LOCALE_VALUES.map((value): ILocaleOption => ({
+                ariaLabel: (t as unknown as (key: string) => string)(LOCALE_ARIA_KEYS[value]),
+                shortLabel: LOCALE_SHORT_LABELS[value],
+                value,
+            })),
+        [t],
+    )
 
     const handleLocaleChange = useCallback(
         (nextLocale: SupportedLocale): void => {
@@ -57,11 +68,11 @@ export function LocaleSwitcher(props: ILocaleSwitcherProps): ReactElement {
     return (
         <div className={props.className}>
             <div
-                aria-label="Language switcher"
+                aria-label={t("navigation:localeSwitcher.ariaLabel")}
                 className="inline-flex items-center rounded-lg border border-border bg-header-bg p-0.5 backdrop-blur"
                 role="radiogroup"
             >
-                {LOCALE_OPTIONS.map((option): ReactElement => {
+                {localeOptions.map((option): ReactElement => {
                     const isSelected = option.value === locale
 
                     return (

@@ -1,33 +1,23 @@
-import { type ReactElement } from "react"
+import { type ReactElement, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Laptop, Moon, Sun } from "@/components/icons/app-icons"
 import { Button } from "@/components/ui"
 import { type ThemeMode, useThemeMode } from "@/lib/theme/theme-provider"
 
-const MODE_OPTIONS: ReadonlyArray<{
-    /** Mode value. */
-    readonly value: ThemeMode
-    /** Icon component. */
-    readonly Icon: typeof Moon
-    /** Accessible label. */
-    readonly ariaLabel: string
-}> = [
-    {
-        Icon: Moon,
-        ariaLabel: "Use dark theme",
-        value: "dark",
-    },
-    {
-        Icon: Laptop,
-        ariaLabel: "Use system theme",
-        value: "system",
-    },
-    {
-        Icon: Sun,
-        ariaLabel: "Use light theme",
-        value: "light",
-    },
-]
+const MODE_ICONS: Record<ThemeMode, typeof Moon> = {
+    dark: Moon,
+    system: Laptop,
+    light: Sun,
+}
+
+const MODE_ARIA_KEYS: Record<ThemeMode, string> = {
+    dark: "navigation:themeModeToggle.darkAriaLabel",
+    system: "navigation:themeModeToggle.systemAriaLabel",
+    light: "navigation:themeModeToggle.lightAriaLabel",
+}
+
+const MODE_VALUES: ReadonlyArray<ThemeMode> = ["dark", "system", "light"]
 
 /**
  * Props for compact theme mode toggle.
@@ -45,16 +35,27 @@ export interface IThemeModeToggleProps {
  * @returns Compact Dark/System/Light icon toggle.
  */
 export function ThemeModeToggle(props: IThemeModeToggleProps): ReactElement {
+    const { t } = useTranslation(["navigation"])
     const { mode, resolvedMode, setMode } = useThemeMode()
+
+    const modeOptions = useMemo(
+        () =>
+            MODE_VALUES.map((value) => ({
+                Icon: MODE_ICONS[value],
+                ariaLabel: (t as unknown as (key: string) => string)(MODE_ARIA_KEYS[value]),
+                value,
+            })),
+        [t],
+    )
 
     return (
         <div className={props.className}>
             <div
-                aria-label="Theme mode"
+                aria-label={t("navigation:themeModeToggle.ariaLabel")}
                 className="inline-flex items-center rounded-lg border border-border bg-header-bg p-0.5 backdrop-blur"
                 role="radiogroup"
             >
-                {MODE_OPTIONS.map((option): ReactElement => {
+                {modeOptions.map((option): ReactElement => {
                     const Icon = option.Icon
                     const isSelected = option.value === mode
 

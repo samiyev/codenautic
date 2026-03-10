@@ -1,6 +1,7 @@
 import { Drawer, DrawerBody, DrawerContent, DrawerHeader } from "@/components/ui"
 
 import type { ReactElement, ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Sidebar } from "./sidebar"
 
@@ -25,12 +26,14 @@ export interface IMobileSidebarProps {
  * @returns Mobile sidebar with close-on-nav behavior.
  */
 export function MobileSidebar(props: IMobileSidebarProps): ReactElement {
+    const { t } = useTranslation(["navigation"])
+
     return (
         <Drawer isOpen={props.isOpen} onOpenChange={props.onOpenChange}>
             <DrawerContent className="!m-0 !h-full !w-72 !rounded-none bg-surface text-foreground">
                 <DrawerHeader className="border-b border-border px-4 py-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-text-subtle">
-                        {props.title ?? "Navigation"}
+                        {props.title ?? t("navigation:sidebarNav.title")}
                     </p>
                 </DrawerHeader>
                 <DrawerBody>

@@ -1,4 +1,5 @@
 import { type ReactElement, useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import {
     Bell,
@@ -71,6 +72,7 @@ export interface IHeaderProps {
  * @returns Sticky navbar with breadcrumbs, workspace switcher, and user controls.
  */
 export function Header(props: IHeaderProps): ReactElement {
+    const { t } = useTranslation(["navigation"])
     const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false)
     const commandPaletteInvokerRef = useRef<HTMLElement | null>(null)
 
@@ -151,7 +153,7 @@ export function Header(props: IHeaderProps): ReactElement {
                         isIconOnly
                         radius="full"
                         variant="light"
-                        aria-label="Open navigation menu"
+                        aria-label={t("navigation:header.openNavigationMenu")}
                         onPress={props.onMobileMenuOpen}
                     >
                         <Menu size={20} />
@@ -207,7 +209,7 @@ export function Header(props: IHeaderProps): ReactElement {
                 <div className="ml-auto flex shrink-0 items-center gap-2">
                     {/* Search trigger → opens Command Palette */}
                     <Button
-                        aria-label="Open command palette (⌘K)"
+                        aria-label={t("navigation:header.openCommandPalette")}
                         className="hidden gap-1.5 px-2.5 sm:inline-flex"
                         radius="md"
                         size="sm"
@@ -237,7 +239,7 @@ export function Header(props: IHeaderProps): ReactElement {
                                         size={15}
                                     />
                                     <span className="text-sm text-foreground">
-                                        {activeOrganization?.label ?? "Workspace"}
+                                        {activeOrganization?.label ?? t("navigation:header.workspace")}
                                     </span>
                                     <ChevronDown
                                         aria-hidden="true"
@@ -247,7 +249,7 @@ export function Header(props: IHeaderProps): ReactElement {
                                 </span>
                             </DropdownTrigger>
                             <DropdownMenu
-                                aria-label="Workspace switcher"
+                                aria-label={t("navigation:header.workspaceSwitcher")}
                                 selectionMode="single"
                                 selectedKeys={
                                     props.activeOrganizationId !== undefined
@@ -278,7 +280,7 @@ export function Header(props: IHeaderProps): ReactElement {
                     {/* Notification bell */}
                     <Button
                         isIconOnly
-                        aria-label={`Notifications (${String(props.notificationCount ?? 0)})`}
+                        aria-label={t("navigation:header.notifications", { count: props.notificationCount ?? 0 })}
                         radius="full"
                         size="sm"
                         variant="light"
