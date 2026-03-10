@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState, type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import {
     ChatPanel,
@@ -111,18 +112,6 @@ const SAFEGUARD_FILTER_SEQUENCE: ReadonlyArray<TSafeGuardFilterId> = [
     "severity",
 ]
 
-const SAFEGUARD_FILTER_LABELS: Readonly<Record<TSafeGuardFilterId, string>> = {
-    dedup: "dedup",
-    hallucination: "hallucination",
-    severity: "severity",
-}
-
-const FEEDBACK_REASON_LABELS: Readonly<Record<TReviewerFeedbackReason, string>> = {
-    duplicate: "duplicate",
-    false_positive: "false positive",
-    irrelevant: "irrelevant",
-}
-
 const FEEDBACK_REJECTION_REASONS: Readonly<Record<TReviewerFeedbackReason, string>> = {
     duplicate: "No canonical finding was eligible for merge in the current safety window.",
     false_positive: "Evidence bundle confirms the finding and blocks false-positive dismissal.",
@@ -148,14 +137,6 @@ function buildExplainMessage(ccr: ICcrRowData): string {
 
 function buildSummaryMessage(ccr: ICcrRowData): string {
     return `Please summarize the key changes and risks in ${ccr.id}: ${ccr.title}.`
-}
-
-function buildAttachedFilesText(files: ReadonlyArray<string>): string {
-    if (files.length === 0) {
-        return "No attached files"
-    }
-
-    return files.join(", ")
 }
 
 function resolveDiffIssueCount(file: ICcrDiffFile): number {
@@ -457,16 +438,6 @@ function mapReviewDecisionBadge(reviewDecision: TReviewDecision): {
     }
 }
 
-function getSafeGuardStepStatusLabel(status: TSafeGuardStepStatus): string {
-    if (status === "applied") {
-        return "applied"
-    }
-    if (status === "filtered_out") {
-        return "filtered out"
-    }
-    return "passed"
-}
-
 function formatFeedbackTimestamp(rawTimestamp: string): string {
     const date = new Date(rawTimestamp)
     if (Number.isNaN(date.getTime())) {
@@ -563,6 +534,7 @@ function buildSafeGuardTraceItems(ccr: ICcrRowData): ReadonlyArray<ISafeGuardTra
 /** Страница страницы отдельного CCR review с авто-подставленным контекстом чата. */
 export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElement {
     const { ccr } = props
+    const { t } = useTranslation(["reviews"])
     const activeUiRole = useUiRole()
     const [reviewDecision, setReviewDecision] = useState<TReviewDecision>("pending")
     const [activeFilePath, setActiveFilePath] = useState<string | undefined>(ccr.attachedFiles[0])
@@ -583,9 +555,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     const [selectedReviewHistoryWindow, setSelectedReviewHistoryWindow] =
         useState<TReviewHistoryWindow>("30d")
     const [isReviewHistoryHeatmapEnabled, setReviewHistoryHeatmapEnabled] = useState<boolean>(false)
-    const [impactFocusStatus, setImpactFocusStatus] = useState<string>(
-        "No blast radius focus applied yet.",
-    )
+    const [impactFocusStatus, setImpactFocusStatus] = useState<string>("")
     const [feedbackHistory, setFeedbackHistory] = useState<ReadonlyArray<IReviewerFeedbackRecord>>([
         {
             createdAt: "2026-03-03T10:42:00Z",
@@ -831,6 +801,39 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
     }, [activeSafeGuardTraceItem, feedbackHistory])
     const latestActiveTraceFeedback = activeTraceFeedbackHistory[0]
 
+    const translatedDecisionLabels = useMemo(
+        (): Readonly<Record<TReviewDecision, string>> => ({
+            approved: t("reviews:detail.decisionApproved"),
+            pending: t("reviews:detail.decisionInProgress"),
+            rejected: t("reviews:detail.decisionRequestChanges"),
+        }),
+        [t],
+    )
+    const translatedSafeGuardStepLabels = useMemo(
+        (): Readonly<Record<TSafeGuardStepStatus, string>> => ({
+            applied: t("reviews:detail.stepApplied"),
+            filtered_out: t("reviews:detail.stepFilteredOut"),
+            passed: t("reviews:detail.stepPassed"),
+        }),
+        [t],
+    )
+    const translatedFilterLabels = useMemo(
+        (): Readonly<Record<TSafeGuardFilterId, string>> => ({
+            dedup: t("reviews:detail.filterDedup"),
+            hallucination: t("reviews:detail.filterHallucination"),
+            severity: t("reviews:detail.filterSeverity"),
+        }),
+        [t],
+    )
+    const translatedFeedbackReasonLabels = useMemo(
+        (): Readonly<Record<TReviewerFeedbackReason, string>> => ({
+            duplicate: t("reviews:detail.reasonDuplicate"),
+            false_positive: t("reviews:detail.reasonFalsePositive"),
+            irrelevant: t("reviews:detail.reasonIrrelevant"),
+        }),
+        [t],
+    )
+
     const quickActions = useMemo(
         (): ReadonlyArray<{
             readonly id: string
@@ -839,12 +842,12 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
         }> => [
             {
                 id: "explain-this-file",
-                label: "explain this file",
+                label: t("reviews:detail.quickActionExplainFile"),
                 message: buildExplainMessage(ccr),
             },
             {
                 id: "summarize-changes",
-                label: "summarize changes",
+                label: t("reviews:detail.quickActionSummarizeChanges"),
                 message: buildSummaryMessage(ccr),
             },
         ],
@@ -986,7 +989,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                 <CardHeader>
                     <div className="flex items-start justify-between gap-3">
                         <div>
-                            <p className="text-sm text-muted-foreground">CCR review</p>
+                            <p className="text-sm text-muted-foreground">{t("reviews:detail.ccrReview")}</p>
                             <h1 className={TYPOGRAPHY.pageTitle}>{ccr.title}</h1>
                             <p className="text-sm text-foreground">
                                 {ccr.id} · {ccr.repository} · {ccr.team} · {ccr.status}
@@ -999,12 +1002,12 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             {codeReview.codeReviewQuery.error === null ||
                             codeReview.codeReviewQuery.error === undefined ? null : (
                                 <p className="mt-1 text-xs text-warning">
-                                    Live review summary is unavailable, showing workspace fallback
-                                    data.
+                                    {t("reviews:detail.liveReviewUnavailable")}
                                 </p>
                             )}
                             <p className="mt-2 text-xs uppercase tracking-[0.08em] text-muted-foreground">
-                                Review decision: {decisionBadge.label}
+                                {t("reviews:detail.reviewDecisionLabel")}{" "}
+                                {translatedDecisionLabels[reviewDecision]}
                             </p>
                         </div>
                         <div className="flex flex-col items-end gap-2">
@@ -1020,7 +1023,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         type="button"
                                         variant={reviewDecision === "approved" ? "solid" : "light"}
                                     >
-                                        Approve review
+                                        {t("reviews:detail.approveReview")}
                                     </Button>
                                     <Button
                                         color="danger"
@@ -1032,7 +1035,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         type="button"
                                         variant={reviewDecision === "rejected" ? "solid" : "light"}
                                     >
-                                        Request changes
+                                        {t("reviews:detail.requestChanges")}
                                     </Button>
                                     <Button
                                         color="primary"
@@ -1044,19 +1047,19 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         type="button"
                                         variant={reviewDecision === "pending" ? "solid" : "light"}
                                     >
-                                        Save as in progress
+                                        {t("reviews:detail.saveAsInProgress")}
                                     </Button>
                                 </>
                             )}
                             {reviewFinishPolicy.visibility ===
                             "hidden" ? null : reviewFinishPolicy.visibility === "disabled" ? (
                                 <p className="text-sm text-muted-foreground">
-                                    Finish review unavailable:{" "}
-                                    {reviewFinishPolicy.reason ?? "insufficient role permissions"}
+                                    {t("reviews:detail.finishReviewUnavailable")}{" "}
+                                    {reviewFinishPolicy.reason ?? t("reviews:detail.insufficientRolePermissions")}
                                 </p>
                             ) : (
                                 <StyledLink className="text-sm" to="/reviews">
-                                    Finish review
+                                    {t("reviews:detail.finishReview")}
                                 </StyledLink>
                             )}
                         </div>
@@ -1065,21 +1068,24 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                 <CardBody className="space-y-2">
                     {reviewDecisionPolicy.reason === undefined ||
                     reviewDecisionPolicy.visibility === "enabled" ? null : (
-                        <Alert color="warning" title="Role-based restriction" variant="flat">
+                        <Alert color="warning" title={t("reviews:detail.roleBasedRestriction")} variant="flat">
                             {reviewDecisionPolicy.reason}
                         </Alert>
                     )}
                     <p className="text-sm text-foreground">
-                        <strong>Assignee:</strong> {ccr.assignee}
+                        <strong>{t("reviews:detail.assignee")}</strong> {ccr.assignee}
                     </p>
                     <p className="text-sm text-foreground">
-                        <strong>Comments:</strong> {ccr.comments}
+                        <strong>{t("reviews:detail.comments")}</strong> {ccr.comments}
                     </p>
                     <p className="text-sm text-foreground">
-                        <strong>Updated:</strong> {ccr.updatedAt}
+                        <strong>{t("reviews:detail.updated")}</strong> {ccr.updatedAt}
                     </p>
                     <p className="text-sm text-foreground">
-                        <strong>Attached files:</strong> {buildAttachedFilesText(ccr.attachedFiles)}
+                        <strong>{t("reviews:detail.attachedFiles")}</strong>{" "}
+                        {ccr.attachedFiles.length === 0
+                            ? t("reviews:detail.noAttachedFiles")
+                            : ccr.attachedFiles.join(", ")}
                     </p>
                 </CardBody>
             </Card>
@@ -1088,12 +1094,12 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                 <aside className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <p className="text-sm font-semibold text-foreground">Files tree</p>
+                            <p className="text-sm font-semibold text-foreground">{t("reviews:detail.filesTree")}</p>
                         </CardHeader>
                         <CardBody className="space-y-2">
                             {ccrDiffFiles.length === 0 ? (
                                 <p className="text-sm text-muted-foreground">
-                                    No diff files attached.
+                                    {t("reviews:detail.noDiffFiles")}
                                 </p>
                             ) : (
                                 ccrDiffFiles.map((file): ReactElement => {
@@ -1122,14 +1128,14 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                         <CardHeader>
                             <div className="flex w-full flex-wrap items-center justify-between gap-2">
                                 <p className="text-sm font-semibold text-foreground">
-                                    Review context sidebar
+                                    {t("reviews:detail.reviewContextSidebar")}
                                 </p>
                                 <Button
                                     aria-expanded={isReviewContextMiniMapExpanded}
                                     aria-label={
                                         isReviewContextMiniMapExpanded
-                                            ? "Collapse review context mini-map"
-                                            : "Expand review context mini-map"
+                                            ? t("reviews:detail.collapseReviewContextMiniMap")
+                                            : t("reviews:detail.expandReviewContextMiniMap")
                                     }
                                     size="sm"
                                     type="button"
@@ -1140,14 +1146,13 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         )
                                     }}
                                 >
-                                    {isReviewContextMiniMapExpanded ? "Collapse" : "Expand"}
+                                    {isReviewContextMiniMapExpanded ? t("reviews:detail.collapse") : t("reviews:detail.expand")}
                                 </Button>
                             </div>
                         </CardHeader>
                         <CardBody className="space-y-3">
                             <p className="text-xs text-muted-foreground">
-                                CodeCity mini-map highlights CCR context and syncs with active diff
-                                file.
+                                {t("reviews:detail.codeCityMiniMapHint")}
                             </p>
                             <CodeCityTreemap
                                 files={reviewContextTreemapFiles}
@@ -1157,8 +1162,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 onFileSelect={handleReviewContextMiniMapSelect}
                                 title={
                                     isReviewContextMiniMapExpanded
-                                        ? "CCR context CodeCity map (expanded)"
-                                        : "CCR context CodeCity mini-map"
+                                        ? t("reviews:detail.codeCityMapExpanded")
+                                        : t("reviews:detail.codeCityMiniMap")
                                 }
                             />
                             <p
@@ -1166,8 +1171,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 className="text-xs text-muted-foreground"
                             >
                                 {isReviewContextMiniMapExpanded
-                                    ? "Expanded CodeCity context map is active."
-                                    : "Mini-map mode is active. Click expand for detailed context."}
+                                    ? t("reviews:detail.expandedMapActive")
+                                    : t("reviews:detail.miniMapActive")}
                             </p>
                         </CardBody>
                     </Card>
@@ -1178,13 +1183,12 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                     <Card>
                         <CardHeader>
                             <p className="text-sm font-semibold text-foreground">
-                                CCR impact city view
+                                {t("reviews:detail.ccrImpactCityView")}
                             </p>
                         </CardHeader>
                         <CardBody className="space-y-3">
                             <p className="text-xs text-muted-foreground">
-                                Full CodeCity view with highlighted CCR files, blast radius
-                                controls, and neighborhood context for focused navigation.
+                                {t("reviews:detail.ccrImpactCityViewHint")}
                             </p>
                             <CodeCityTreemap
                                 fileColorById={reviewHistoryColorByFileId}
@@ -1193,14 +1197,14 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 highlightedFileId={reviewContextHighlightedFileId}
                                 impactedFiles={reviewContextImpactedFiles}
                                 onFileSelect={handleReviewContextMiniMapSelect}
-                                title="CCR impact CodeCity view"
+                                title={t("reviews:detail.ccrImpactCodeCityView")}
                             />
                             <div className="flex flex-wrap items-end gap-2">
                                 <Button
                                     aria-label={
                                         isReviewHistoryHeatmapEnabled
-                                            ? "Hide review history heatmap"
-                                            : "Show review history heatmap"
+                                            ? t("reviews:detail.hideReviewHistoryHeatmap")
+                                            : t("reviews:detail.showReviewHistoryHeatmap")
                                     }
                                     size="sm"
                                     type="button"
@@ -1212,17 +1216,17 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     }}
                                 >
                                     {isReviewHistoryHeatmapEnabled
-                                        ? "Hide review history heatmap"
-                                        : "Show review history heatmap"}
+                                        ? t("reviews:detail.hideReviewHistoryHeatmap")
+                                        : t("reviews:detail.showReviewHistoryHeatmap")}
                                 </Button>
                                 <label
                                     className="text-xs text-foreground"
                                     htmlFor="review-history-window"
                                 >
-                                    Review history window
+                                    {t("reviews:detail.reviewHistoryWindow")}
                                 </label>
                                 <select
-                                    aria-label="Review history window"
+                                    aria-label={t("reviews:detail.reviewHistoryWindow")}
                                     className={NATIVE_FORM.select}
                                     id="review-history-window"
                                     value={selectedReviewHistoryWindow}
@@ -1244,12 +1248,12 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             </div>
                             <Alert
                                 color={isReviewHistoryHeatmapEnabled ? "success" : "primary"}
-                                title="Review history heatmap"
+                                title={t("reviews:detail.reviewHistoryHeatmapTitle")}
                                 variant="flat"
                             >
                                 {isReviewHistoryHeatmapEnabled
-                                    ? `Review history heatmap is enabled. Window ${selectedReviewHistoryWindow}.`
-                                    : "Review history heatmap is disabled."}
+                                    ? t("reviews:detail.heatmapEnabled", { window: selectedReviewHistoryWindow })
+                                    : t("reviews:detail.heatmapDisabled")}
                             </Alert>
                             <ul aria-label="Review history heatmap list" className="space-y-1">
                                 {hottestReviewHistoryEntries.map(
@@ -1263,7 +1267,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                             {String(
                                                 entry.reviewsByWindow[selectedReviewHistoryWindow],
                                             )}
-                                            {entry.filePath === activeFilePath ? " · focused" : ""}
+                                            {entry.filePath === activeFilePath ? ` ${t("reviews:detail.focused")}` : ""}
                                         </li>
                                     ),
                                 )}
@@ -1272,19 +1276,22 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 onApplyImpact={handleApplyImpactFocus}
                                 seeds={reviewImpactSeeds}
                             />
-                            <Alert color="primary" title="Blast radius status" variant="flat">
-                                {impactFocusStatus}
+                            <Alert color="primary" title={t("reviews:detail.blastRadiusStatus")} variant="flat">
+                                {impactFocusStatus.length === 0
+                                    ? t("reviews:detail.noBlastRadiusFocus")
+                                    : impactFocusStatus}
                             </Alert>
                             <div className="rounded-lg border border-border bg-surface p-3">
                                 <p className="text-sm font-semibold text-foreground">
-                                    File neighborhood panel
+                                    {t("reviews:detail.fileNeighborhoodPanel")}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                    Focused file: {activeFilePath ?? "none selected"}
+                                    {t("reviews:detail.focusedFile")}{" "}
+                                    {activeFilePath ?? t("reviews:detail.noneSelected")}
                                 </p>
                                 {activeNeighborhoodFiles.length === 0 ? (
                                     <p className="mt-2 text-xs text-muted-foreground">
-                                        No neighboring files resolved for current selection.
+                                        {t("reviews:detail.noNeighboringFiles")}
                                     </p>
                                 ) : (
                                     <ul
@@ -1312,7 +1319,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 <div className="mt-3 grid gap-2 md:grid-cols-2">
                                     <div className="rounded border border-border bg-surface p-2">
                                         <p className="text-xs font-semibold text-foreground">
-                                            Dependencies
+                                            {t("reviews:detail.dependencies")}
                                         </p>
                                         <ul
                                             aria-label="Neighborhood dependency list"
@@ -1320,7 +1327,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         >
                                             {(activeNeighborhoodDetails?.dependencies.length ??
                                                 0) === 0 ? (
-                                                <li>none</li>
+                                                <li>{t("reviews:detail.none")}</li>
                                             ) : (
                                                 activeNeighborhoodDetails?.dependencies.map(
                                                     (dependencyPath): ReactElement => (
@@ -1334,7 +1341,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     </div>
                                     <div className="rounded border border-border bg-surface p-2">
                                         <p className="text-xs font-semibold text-foreground">
-                                            Recent changes
+                                            {t("reviews:detail.recentChanges")}
                                         </p>
                                         <ul
                                             aria-label="Neighborhood recent changes list"
@@ -1342,7 +1349,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         >
                                             {(activeNeighborhoodDetails?.recentChanges.length ??
                                                 0) === 0 ? (
-                                                <li>none</li>
+                                                <li>{t("reviews:detail.none")}</li>
                                             ) : (
                                                 activeNeighborhoodDetails?.recentChanges.map(
                                                     (changeRecord): ReactElement => (
@@ -1362,7 +1369,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                         <SseStreamViewer
                             autoStart={false}
                             eventSourceUrl={props.streamSourceUrl}
-                            title={`Live review stream · ${ccr.id}`}
+                            title={`${t("reviews:detail.liveReviewStreamTitle")} · ${ccr.id}`}
                             maxReconnectAttempts={2}
                         />
                     )}
@@ -1373,7 +1380,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                     <Card>
                         <CardHeader>
                             <p className="text-sm font-semibold text-foreground">
-                                Review risk indicator
+                                {t("reviews:detail.reviewRiskIndicator")}
                             </p>
                         </CardHeader>
                         <CardBody className="space-y-2">
@@ -1387,7 +1394,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     {reviewRiskIndicator.level.toUpperCase()}
                                 </Chip>
                                 <p className="text-xs text-foreground">
-                                    Risk score: {String(reviewRiskIndicator.score)}
+                                    {t("reviews:detail.riskScore")} {String(reviewRiskIndicator.score)}
                                 </p>
                             </div>
                             <ul
@@ -1403,28 +1410,29 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                         </CardBody>
                     </Card>
                     <Alert color={decisionBadge.color}>
-                        Review status: <strong>{decisionBadge.label}</strong>. Use actions in the
-                        header to finalize this CCR.
+                        {t("reviews:detail.reviewStatusMessage")}{" "}
+                        <strong>{translatedDecisionLabels[reviewDecision]}</strong>.{" "}
+                        {t("reviews:detail.reviewStatusHint")}
                     </Alert>
                     <Card>
                         <CardHeader>
                             <p className="text-sm font-semibold text-foreground">
-                                SafeGuard decision trace
+                                {t("reviews:detail.safeGuardDecisionTrace")}
                             </p>
                         </CardHeader>
                         <CardBody className="space-y-3">
                             <p className="text-sm text-foreground">
-                                Applied filters:{" "}
+                                {t("reviews:detail.appliedFilters")}{" "}
                                 {SAFEGUARD_FILTER_SEQUENCE.map((filter): string => {
-                                    return SAFEGUARD_FILTER_LABELS[filter]
+                                    return translatedFilterLabels[filter]
                                 }).join(", ")}
                             </p>
                             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                                 <Chip size="sm" variant="flat">
-                                    Visible: {visibleTraceCount}
+                                    {t("reviews:detail.visible")} {visibleTraceCount}
                                 </Chip>
                                 <Chip size="sm" variant="flat">
-                                    Filtered out: {filteredOutTraceCount}
+                                    {t("reviews:detail.filteredOut")} {filteredOutTraceCount}
                                 </Chip>
                             </div>
                             <ul aria-label="SafeGuard trace list" className="space-y-2">
@@ -1461,14 +1469,14 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         {activeSafeGuardTraceItem.remark}
                                     </p>
                                     <p className="mt-1 text-xs text-muted-foreground">
-                                        Decision:{" "}
+                                        {t("reviews:detail.decisionLabel")}{" "}
                                         {activeSafeGuardTraceItem.finalDecision === "shown"
-                                            ? "shown"
-                                            : "filtered out"}
+                                            ? t("reviews:detail.decisionShown")
+                                            : t("reviews:detail.decisionFilteredOut")}
                                     </p>
                                     {activeSafeGuardTraceItem.hiddenReason === undefined ? null : (
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            Hidden reason: {activeSafeGuardTraceItem.hiddenReason}
+                                            {t("reviews:detail.hiddenReason")} {activeSafeGuardTraceItem.hiddenReason}
                                         </p>
                                     )}
                                     <ul
@@ -1482,8 +1490,8 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                                     key={`${activeSafeGuardTraceItem.id}-${step.filterId}`}
                                                 >
                                                     <p className="font-semibold">
-                                                        {SAFEGUARD_FILTER_LABELS[step.filterId]} —{" "}
-                                                        {getSafeGuardStepStatusLabel(step.status)}
+                                                        {translatedFilterLabels[step.filterId]} —{" "}
+                                                        {translatedSafeGuardStepLabels[step.status]}
                                                     </p>
                                                     <p>{step.reason}</p>
                                                 </li>
@@ -1497,13 +1505,12 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                     <Card>
                         <CardHeader>
                             <p className="text-sm font-semibold text-foreground">
-                                Reviewer feedback learning loop
+                                {t("reviews:detail.reviewerFeedbackLearningLoop")}
                             </p>
                         </CardHeader>
                         <CardBody className="space-y-3">
                             <p className="text-sm text-foreground">
-                                Submit feedback in two clicks and track whether it was accepted or
-                                rejected.
+                                {t("reviews:detail.feedbackHint")}
                             </p>
                             <div className="flex flex-wrap gap-2">
                                 {(["false_positive", "irrelevant", "duplicate"] as const).map(
@@ -1512,7 +1519,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         return (
                                             <Button
                                                 key={reason}
-                                                aria-label={`Quick action ${FEEDBACK_REASON_LABELS[reason]}`}
+                                                aria-label={(t as unknown as (key: string, options: Record<string, string>) => string)("reviews:detail.quickActionAriaLabel", { reason: translatedFeedbackReasonLabels[reason] })}
                                                 size="sm"
                                                 type="button"
                                                 variant={isSelected ? "solid" : "flat"}
@@ -1520,7 +1527,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                                     setSelectedFeedbackReason(reason)
                                                 }}
                                             >
-                                                {FEEDBACK_REASON_LABELS[reason]}
+                                                {translatedFeedbackReasonLabels[reason]}
                                             </Button>
                                         )
                                     },
@@ -1528,7 +1535,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 <Button
-                                    aria-label="Accept feedback"
+                                    aria-label={t("reviews:detail.acceptFeedback")}
                                     color="success"
                                     size="sm"
                                     type="button"
@@ -1536,10 +1543,10 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         handleSubmitReviewerFeedback("accepted")
                                     }}
                                 >
-                                    Accept feedback
+                                    {t("reviews:detail.acceptFeedback")}
                                 </Button>
                                 <Button
-                                    aria-label="Reject feedback"
+                                    aria-label={t("reviews:detail.rejectFeedback")}
                                     color="danger"
                                     size="sm"
                                     type="button"
@@ -1547,39 +1554,38 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         handleSubmitReviewerFeedback("rejected")
                                     }}
                                 >
-                                    Reject feedback
+                                    {t("reviews:detail.rejectFeedback")}
                                 </Button>
                             </div>
                             {latestActiveTraceFeedback === undefined ? (
-                                <Alert color="warning" title="No feedback yet" variant="flat">
-                                    Select a reason and submit feedback for current SafeGuard trace.
+                                <Alert color="warning" title={t("reviews:detail.noFeedbackYetTitle")} variant="flat">
+                                    {t("reviews:detail.noFeedbackYetHint")}
                                 </Alert>
                             ) : (
                                 <div className="rounded-lg border border-border bg-surface p-3 text-xs text-foreground">
                                     <p>
-                                        Feedback status:{" "}
+                                        {t("reviews:detail.feedbackStatusLabel")}{" "}
                                         <strong>{latestActiveTraceFeedback.status}</strong>
                                     </p>
                                     <p>
-                                        Latest reason:{" "}
+                                        {t("reviews:detail.latestReasonLabel")}{" "}
                                         <strong>
                                             {
-                                                FEEDBACK_REASON_LABELS[
+                                                translatedFeedbackReasonLabels[
                                                     latestActiveTraceFeedback.reason
                                                 ]
                                             }
                                         </strong>
                                     </p>
                                     {latestActiveTraceFeedback.status === "rejected" ? (
-                                        <p>Rejection reason: {latestActiveTraceFeedback.details}</p>
+                                        <p>{t("reviews:detail.rejectionReasonLabel")} {latestActiveTraceFeedback.details}</p>
                                     ) : (
-                                        <p>Applied outcome: {latestActiveTraceFeedback.details}</p>
+                                        <p>{t("reviews:detail.appliedOutcomeLabel")} {latestActiveTraceFeedback.details}</p>
                                     )}
                                     {latestActiveTraceFeedback.linkedTraceId ===
                                     undefined ? null : (
                                         <p>
-                                            Linked to {latestActiveTraceFeedback.linkedTraceId}{" "}
-                                            history.
+                                            {t("reviews:detail.linkedTo", { traceId: latestActiveTraceFeedback.linkedTraceId })}
                                         </p>
                                     )}
                                 </div>
@@ -1595,11 +1601,11 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                                 {feedbackRecord.id} · {feedbackRecord.status}
                                             </p>
                                             <p>
-                                                reason:{" "}
-                                                {FEEDBACK_REASON_LABELS[feedbackRecord.reason]}
+                                                {t("reviews:detail.feedbackReasonLabel")}{" "}
+                                                {translatedFeedbackReasonLabels[feedbackRecord.reason]}
                                             </p>
                                             <p>
-                                                time:{" "}
+                                                {t("reviews:detail.feedbackTimeLabel")}{" "}
                                                 {formatFeedbackTimestamp(feedbackRecord.createdAt)}
                                             </p>
                                             <p>{feedbackRecord.details}</p>
@@ -1612,7 +1618,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                     <Card>
                         <CardHeader>
                             <p className="text-sm font-semibold text-foreground">
-                                Conversation threads
+                                {t("reviews:detail.conversationThreads")}
                             </p>
                         </CardHeader>
                         <CardBody className="p-0">
@@ -1630,17 +1636,17 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                         activeContextId={contextItem.id}
                         className="!static !inset-auto !z-auto !w-full !max-w-none !translate-x-0 !transform-none !border !border-border !shadow-none"
                         contextItems={[contextItem]}
-                        emptyStateText={`Ask anything about ${ccr.id} diff. Quick actions are available below.`}
-                        inputAriaLabel="Type a review question"
+                        emptyStateText={t("reviews:detail.chatEmptyState", { ccrId: ccr.id })}
+                        inputAriaLabel={t("reviews:detail.chatInputAriaLabel")}
                         isOpen
                         maxMessageLength={2500}
-                        messageListAriaLabel={`${ccr.id} chat messages`}
+                        messageListAriaLabel={(t as unknown as (key: string, options: Record<string, string>) => string)("reviews:detail.chatMessagesAriaLabel", { ccrId: ccr.id })}
                         messages={activeMessages}
                         onSendMessage={handleSendMessage}
-                        panelAriaLabel={`Conversation for ${ccr.id}`}
-                        placeholder={`Ask about ${ccr.id} changes...`}
+                        panelAriaLabel={t("reviews:detail.chatPanelAriaLabel", { ccrId: ccr.id })}
+                        placeholder={t("reviews:detail.chatPlaceholder", { ccrId: ccr.id })}
                         quickActions={quickActions}
-                        title={`Conversation · ${ccr.id}`}
+                        title={`${t("reviews:detail.chatTitle")} · ${ccr.id}`}
                     />
                 </aside>
             </div>

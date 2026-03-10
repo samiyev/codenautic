@@ -1,5 +1,6 @@
 import { type ChangeEvent, type ReactElement, useEffect, useMemo, useState } from "react"
 import type React from "react"
+import { useTranslation } from "react-i18next"
 
 import type { ICcrWorkspaceRow } from "@/lib/api/endpoints/ccr-workspace.endpoint"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -252,6 +253,8 @@ interface ICcrFilterPresetsPanelProps {
 }
 
 function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
+    const { t } = useTranslation(["reviews"])
+
     const handleInputChange = (name: TCcrFilterField, value: string): void => {
         props.onFilterChange({
             ...props.filterState,
@@ -275,20 +278,20 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
     return (
         <div className="grid gap-3 rounded-lg border border-border bg-surface p-3 md:grid-cols-4">
             <input
-                aria-label="Search CCR"
+                aria-label={t("reviews:management.searchAriaLabel")}
                 className="rounded-lg border border-border px-3 py-2 text-sm outline-none"
                 name="search"
-                placeholder="Search title / id / repo / assignee"
+                placeholder={t("reviews:management.searchPlaceholder")}
                 value={props.filterState.search}
                 onChange={handleSearchChange}
             />
             <select
-                aria-label="Filter by team"
+                aria-label={t("reviews:management.filterByTeam")}
                 className={NATIVE_FORM.select}
                 value={props.filterState.team}
                 onChange={handleSelectChange("team")}
             >
-                <option value="all">All teams</option>
+                <option value="all">{t("reviews:management.allTeams")}</option>
                 {props.teamOptions.map(
                     (team): ReactElement => (
                         <option key={team} value={team}>
@@ -298,12 +301,12 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
                 )}
             </select>
             <select
-                aria-label="Filter by repository"
+                aria-label={t("reviews:management.filterByRepository")}
                 className={NATIVE_FORM.select}
                 value={props.filterState.repository}
                 onChange={handleSelectChange("repository")}
             >
-                <option value="all">All repos</option>
+                <option value="all">{t("reviews:management.allRepos")}</option>
                 {props.repositoryOptions.map(
                     (repository): ReactElement => (
                         <option key={repository} value={repository}>
@@ -313,12 +316,12 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
                 )}
             </select>
             <select
-                aria-label="Filter by status"
+                aria-label={t("reviews:management.filterByStatus")}
                 className={NATIVE_FORM.select}
                 value={props.filterState.status}
                 onChange={handleSelectChange("status")}
             >
-                <option value="all">All statuses</option>
+                <option value="all">{t("reviews:management.allStatuses")}</option>
                 {props.statusOptions.map(
                     (status): ReactElement => (
                         <option key={status} value={status}>
@@ -332,28 +335,29 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
 }
 
 function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement {
+    const { t } = useTranslation(["reviews"])
     const hasSelectedPreset = props.selectedPresetId.length > 0
 
     return (
         <div className="grid gap-3 rounded-lg border border-border bg-surface p-3 md:grid-cols-6">
             <input
-                aria-label="Filter preset name"
+                aria-label={t("reviews:management.presetNameAriaLabel")}
                 className="rounded-lg border border-border px-3 py-2 text-sm outline-none md:col-span-2"
-                placeholder="Preset name"
+                placeholder={t("reviews:management.presetNamePlaceholder")}
                 value={props.presetName}
                 onChange={(event): void => {
                     props.onFieldChange("name", event.currentTarget.value)
                 }}
             />
             <select
-                aria-label="Saved filter presets"
+                aria-label={t("reviews:management.savedPresetsAriaLabel")}
                 className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground md:col-span-2"
                 value={props.selectedPresetId}
                 onChange={(event): void => {
                     props.onFieldChange("selected", event.currentTarget.value)
                 }}
             >
-                <option value="">Select preset</option>
+                <option value="">{t("reviews:management.selectPreset")}</option>
                 {props.presets.map(
                     (preset): ReactElement => (
                         <option key={preset.id} value={preset.id}>
@@ -367,7 +371,7 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
                 type="button"
                 onClick={props.onSavePreset}
             >
-                Save preset
+                {t("reviews:management.savePreset")}
             </button>
             <div className="grid grid-cols-3 gap-2 md:col-span-6">
                 <button
@@ -376,7 +380,7 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
                     type="button"
                     onClick={props.onApplyPreset}
                 >
-                    Apply preset
+                    {t("reviews:management.applyPreset")}
                 </button>
                 <button
                     className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-60"
@@ -384,7 +388,7 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
                     type="button"
                     onClick={props.onUpdatePreset}
                 >
-                    Update preset
+                    {t("reviews:management.updatePreset")}
                 </button>
                 <button
                     className="rounded-lg border border-danger/40 px-3 py-2 text-sm font-medium text-danger disabled:cursor-not-allowed disabled:opacity-60"
@@ -392,7 +396,7 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
                     type="button"
                     onClick={props.onDeletePreset}
                 >
-                    Delete preset
+                    {t("reviews:management.deletePreset")}
                 </button>
             </div>
         </div>
@@ -527,6 +531,7 @@ function useCcrFilters(rows: ReadonlyArray<ICcrRow>): {
  * @returns Список CCR с поиском, фильтрами и бесконечной подгрузкой.
  */
 export function CcrManagementPage(props: ICcrManagementPageProps): ReactElement {
+    const { t } = useTranslation(["reviews"])
     const ccrWorkspace = useCcrWorkspace()
     const [visibleItems, setVisibleItems] = useState<number>(PAGE_SIZE)
     const [searchState, setSearchState] = useState<ICcrFilters>({
@@ -601,15 +606,14 @@ export function CcrManagementPage(props: ICcrManagementPageProps): ReactElement 
 
     return (
         <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>CCR Management</h1>
+            <h1 className={TYPOGRAPHY.pageTitle}>{t("reviews:management.pageTitle")}</h1>
             <p className={TYPOGRAPHY.pageSubtitle}>
-                Filters are synced with URL. Shareable state for search, status, team and
-                repository.
+                {t("reviews:management.pageSubtitle")}
             </p>
             {ccrWorkspace.ccrListQuery.error === null ||
             ccrWorkspace.ccrListQuery.error === undefined ? null : (
                 <p className="text-xs text-warning">
-                    Workspace API unavailable, fallback dataset is shown.
+                    {t("reviews:management.workspaceApiUnavailable")}
                 </p>
             )}
             <CcrFiltersPanel
