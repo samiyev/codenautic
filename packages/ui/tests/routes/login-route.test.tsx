@@ -88,12 +88,12 @@ describe("login route", (): void => {
 
         renderRoute("/login?next=%2Freports&reason=403")
 
-        const loginTitle = await screen.findByText("Войдите, чтобы открыть dashboard")
-        expect(loginTitle.textContent).toBe("Войдите, чтобы открыть dashboard")
+        const loginTitle = await screen.findByText("Sign in to open dashboard")
+        expect(loginTitle.textContent).toBe("Sign in to open dashboard")
 
         const statusText = screen.getByRole("status")
         expect(statusText.textContent).toBe(
-            "Доступ запрещён (403). У аккаунта нет прав на этот ресурс.",
+            "Access denied (403). Your account has no access to this resource.",
         )
     })
 
