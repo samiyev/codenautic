@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { ExploreModeSidebar } from "@/components/graphs/explore-mode-sidebar"
 import { HotAreaHighlights } from "@/components/graphs/hot-area-highlights"
@@ -23,11 +24,15 @@ export interface IOverviewSectionProps {
  * @returns Секция обзора.
  */
 export function OverviewSection({ state }: IOverviewSectionProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
+
     return (
         <>
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Project overview panel</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:overview.projectOverviewPanel")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <ProjectOverviewPanel
@@ -40,7 +45,9 @@ export function OverviewSection({ state }: IOverviewSectionProps): ReactElement 
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Explore mode sidebar</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:overview.exploreModeSidebar")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <ExploreModeSidebar
@@ -60,7 +67,9 @@ export function OverviewSection({ state }: IOverviewSectionProps): ReactElement 
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Hot area highlights</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:overview.hotAreaHighlights")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <HotAreaHighlights
@@ -82,7 +91,7 @@ export function OverviewSection({ state }: IOverviewSectionProps): ReactElement 
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">
-                        Onboarding progress tracker
+                        {t("code-city:overview.onboardingProgressTracker")}
                     </p>
                 </CardHeader>
                 <CardBody>

@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { ChurnComplexityScatter } from "@/components/graphs/churn-complexity-scatter"
 import { CodeCity3DScene } from "@/components/graphs/codecity-3d-scene"
@@ -29,12 +30,14 @@ export interface IVisualizationSectionProps {
  * @returns Секция визуализации.
  */
 export function VisualizationSection({ state }: IVisualizationSectionProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
+
     return (
         <>
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">
-                        Cross-repository dependencies
+                        {t("code-city:visualization.crossRepositoryDependencies")}
                     </p>
                 </CardHeader>
                 <CardBody>
@@ -44,14 +47,16 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
                         relations={CODE_CITY_DASHBOARD_REPOSITORY_RELATIONS}
                         showControls={true}
                         showMiniMap={true}
-                        title="Cross-repository package dependencies"
+                        title={t("code-city:visualization.crossRepositoryPackageDependencies")}
                     />
                 </CardBody>
             </Card>
 
             <Card className={state.resolveTourCardClassName("city-3d")}>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">CodeCity 3D preview</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:visualization.codeCityPreview")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <CodeCity3DScene
@@ -81,7 +86,7 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">
-                        Churn vs complexity side panel
+                        {t("code-city:visualization.churnVsComplexitySidePanel")}
                     </p>
                 </CardHeader>
                 <CardBody>
@@ -95,7 +100,9 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Health trend timeline</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:visualization.healthTrendTimeline")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <HealthTrendChart points={state.currentProfile.healthTrend} />
@@ -104,7 +111,9 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
 
             <Card className={state.resolveTourCardClassName("root-cause")}>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Root cause chain viewer</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:visualization.rootCauseChainViewer")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <RootCauseChainViewer

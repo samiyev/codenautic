@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { CityImpactOverlay } from "@/components/graphs/city-impact-overlay"
 import { CityRefactoringOverlay } from "@/components/graphs/city-refactoring-overlay"
@@ -27,11 +28,15 @@ export interface IRefactoringSectionProps {
  * @returns Секция рефакторинга.
  */
 export function RefactoringSection({ state }: IRefactoringSectionProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
+
     return (
         <>
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Refactoring dashboard</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:refactoring.refactoringDashboard")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <RefactoringDashboard
@@ -51,7 +56,9 @@ export function RefactoringSection({ state }: IRefactoringSectionProps): ReactEl
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">ROI calculator widget</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:refactoring.roiCalculatorWidget")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <ROICalculatorWidget
@@ -63,7 +70,7 @@ export function RefactoringSection({ state }: IRefactoringSectionProps): ReactEl
                             state.setExploreNavigationFocus({
                                 activeFileId: primaryFileId,
                                 chainFileIds: fileIds,
-                                title: "ROI scenario",
+                                title: t("code-city:refactoring.roiScenario"),
                             })
                             state.markAreaExplored("city-3d")
                         }}
@@ -75,7 +82,7 @@ export function RefactoringSection({ state }: IRefactoringSectionProps): ReactEl
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">
-                        City refactoring overlay
+                        {t("code-city:refactoring.cityRefactoringOverlay")}
                     </p>
                 </CardHeader>
                 <CardBody>
@@ -96,7 +103,9 @@ export function RefactoringSection({ state }: IRefactoringSectionProps): ReactEl
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Simulation panel</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:refactoring.simulationPanel")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <SimulationPanel
@@ -110,8 +119,8 @@ export function RefactoringSection({ state }: IRefactoringSectionProps): ReactEl
                                 chainFileIds: scenario.fileIds,
                                 title:
                                     scenario.mode === "after"
-                                        ? "Simulation after refactoring"
-                                        : "Simulation baseline",
+                                        ? t("code-city:refactoring.simulationAfterRefactoring")
+                                        : t("code-city:refactoring.simulationBaseline"),
                             })
                             state.markAreaExplored("city-3d")
                         }}
@@ -122,7 +131,9 @@ export function RefactoringSection({ state }: IRefactoringSectionProps): ReactEl
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Refactoring timeline</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:refactoring.refactoringTimeline")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <RefactoringTimeline
@@ -143,7 +154,7 @@ export function RefactoringSection({ state }: IRefactoringSectionProps): ReactEl
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">
-                        Refactoring export dialog
+                        {t("code-city:refactoring.refactoringExportDialog")}
                     </p>
                 </CardHeader>
                 <CardBody>
@@ -167,7 +178,9 @@ export function RefactoringSection({ state }: IRefactoringSectionProps): ReactEl
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Impact analysis panel</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:refactoring.impactAnalysisPanel")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <ImpactAnalysisPanel
@@ -192,7 +205,9 @@ export function RefactoringSection({ state }: IRefactoringSectionProps): ReactEl
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">City impact overlay</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:refactoring.cityImpactOverlay")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <CityImpactOverlay

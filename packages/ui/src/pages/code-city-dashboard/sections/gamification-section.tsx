@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { AchievementsPanel } from "@/components/graphs/achievements-panel"
 import { SprintSummaryCard } from "@/components/graphs/sprint-summary-card"
@@ -23,11 +24,15 @@ export interface IGamificationSectionProps {
  * @returns Секция геймификации.
  */
 export function GamificationSection({ state }: IGamificationSectionProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
+
     return (
         <>
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Achievements panel</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:gamification.achievementsPanel")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <AchievementsPanel
@@ -52,7 +57,9 @@ export function GamificationSection({ state }: IGamificationSectionProps): React
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Team leaderboard</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:gamification.teamLeaderboard")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <TeamLeaderboard
@@ -77,7 +84,9 @@ export function GamificationSection({ state }: IGamificationSectionProps): React
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Sprint summary card</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:gamification.sprintSummaryCard")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <SprintSummaryCard
@@ -104,7 +113,9 @@ export function GamificationSection({ state }: IGamificationSectionProps): React
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Trend timeline widget</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:gamification.trendTimelineWidget")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <TrendTimelineWidget

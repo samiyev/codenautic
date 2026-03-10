@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { GuidedTourOverlay } from "@/components/graphs/guided-tour-overlay"
 import { TourCustomizer } from "@/components/graphs/tour-customizer"
@@ -21,6 +22,8 @@ export interface ITourSectionProps {
  * @returns Секция тура.
  */
 export function TourSection({ state }: ITourSectionProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
+
     return (
         <>
             <GuidedTourOverlay
@@ -33,7 +36,9 @@ export function TourSection({ state }: ITourSectionProps): ReactElement {
             />
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Tour customizer</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:tour.tourCustomizer")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <TourCustomizer

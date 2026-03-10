@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { CausalOverlaySelector } from "@/components/graphs/causal-overlay-selector"
 import { Card, CardBody, CardHeader } from "@/components/ui"
@@ -22,20 +23,24 @@ export interface IControlsSectionProps {
  * @returns Секция контролов.
  */
 export function ControlsSection({ state }: IControlsSectionProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
+
     return (
         <Card className={state.resolveTourCardClassName("controls")}>
             <CardHeader>
-                <p className="text-sm font-semibold text-foreground">CodeCity dashboard</p>
+                <p className="text-sm font-semibold text-foreground">
+                    {t("code-city:controls.dashboardTitle")}
+                </p>
             </CardHeader>
             <CardBody className="space-y-3">
                 <p className="text-sm text-muted-foreground">{state.currentProfile.description}</p>
                 <div className="grid gap-3 md:grid-cols-2">
                     <label className="space-y-1" htmlFor="dashboard-repository">
                         <span className="text-sm font-semibold text-foreground">
-                            Repository filter
+                            {t("code-city:controls.repositoryFilter")}
                         </span>
                         <select
-                            aria-label="Repository"
+                            aria-label={t("code-city:controls.repositoryAriaLabel")}
                             className={NATIVE_FORM.select}
                             id="dashboard-repository"
                             value={state.repositoryId}
@@ -52,10 +57,10 @@ export function ControlsSection({ state }: IControlsSectionProps): ReactElement 
                     </label>
                     <label className="space-y-1" htmlFor="dashboard-metric">
                         <span className="text-sm font-semibold text-foreground">
-                            Metric selector
+                            {t("code-city:controls.metricSelector")}
                         </span>
                         <select
-                            aria-label="Metric"
+                            aria-label={t("code-city:controls.metricAriaLabel")}
                             className={NATIVE_FORM.select}
                             id="dashboard-metric"
                             value={state.metric}

@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { DistrictTrendIndicators } from "@/components/graphs/district-trend-indicators"
 import { PredictionComparisonView } from "@/components/graphs/prediction-comparison-view"
@@ -22,12 +23,14 @@ export interface IComparisonSectionProps {
  * @returns Секция сравнений.
  */
 export function ComparisonSection({ state }: IComparisonSectionProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
+
     return (
         <>
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">
-                        Prediction comparison view
+                        {t("code-city:comparison.predictionComparisonView")}
                     </p>
                 </CardHeader>
                 <CardBody>
@@ -56,7 +59,9 @@ export function ComparisonSection({ state }: IComparisonSectionProps): ReactElem
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Sprint comparison view</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:comparison.sprintComparisonView")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <SprintComparisonView
@@ -85,7 +90,7 @@ export function ComparisonSection({ state }: IComparisonSectionProps): ReactElem
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">
-                        District trend indicators
+                        {t("code-city:comparison.districtTrendIndicators")}
                     </p>
                 </CardHeader>
                 <CardBody>

@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import {
     AlertConfigDialog,
@@ -28,11 +29,15 @@ export interface IPredictionSectionProps {
  * @returns Секция предсказаний.
  */
 export function PredictionSection({ state }: IPredictionSectionProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
+
     return (
         <>
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Prediction overlay</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:prediction.predictionOverlay")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <CityPredictionOverlay
@@ -56,7 +61,9 @@ export function PredictionSection({ state }: IPredictionSectionProps): ReactElem
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Prediction dashboard</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:prediction.predictionDashboard")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <PredictionDashboard
@@ -83,7 +90,7 @@ export function PredictionSection({ state }: IPredictionSectionProps): ReactElem
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">
-                        Prediction explain panel
+                        {t("code-city:prediction.predictionExplainPanel")}
                     </p>
                 </CardHeader>
                 <CardBody>
@@ -108,7 +115,9 @@ export function PredictionSection({ state }: IPredictionSectionProps): ReactElem
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Trend forecast chart</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:prediction.trendForecastChart")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <TrendForecastChart
@@ -136,7 +145,7 @@ export function PredictionSection({ state }: IPredictionSectionProps): ReactElem
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">
-                        Prediction accuracy widget
+                        {t("code-city:prediction.predictionAccuracyWidget")}
                     </p>
                 </CardHeader>
                 <CardBody>
@@ -164,7 +173,9 @@ export function PredictionSection({ state }: IPredictionSectionProps): ReactElem
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Alert config dialog</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:prediction.alertConfigDialog")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <AlertConfigDialog

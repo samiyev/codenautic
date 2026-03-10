@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { ChangeRiskGauge } from "@/components/graphs/change-risk-gauge"
 import { ImpactGraphView } from "@/components/graphs/impact-graph-view"
@@ -22,11 +23,15 @@ export interface IAnalysisSectionProps {
  * @returns Секция анализа.
  */
 export function AnalysisSection({ state }: IAnalysisSectionProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
+
     return (
         <>
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Change risk gauge</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:analysis.changeRiskGauge")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <ChangeRiskGauge
@@ -54,7 +59,9 @@ export function AnalysisSection({ state }: IAnalysisSectionProps): ReactElement 
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Impact graph view</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:analysis.impactGraphView")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <ImpactGraphView
@@ -75,7 +82,9 @@ export function AnalysisSection({ state }: IAnalysisSectionProps): ReactElement 
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">What-if panel</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:analysis.whatIfPanel")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <WhatIfPanel

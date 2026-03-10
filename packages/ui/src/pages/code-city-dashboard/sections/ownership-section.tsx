@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { BusFactorTrendChart } from "@/components/graphs/bus-factor-trend-chart"
 import { CityBusFactorOverlay } from "@/components/graphs/city-bus-factor-overlay"
@@ -26,11 +27,15 @@ export interface IOwnershipSectionProps {
  * @returns Секция ownership.
  */
 export function OwnershipSection({ state }: IOwnershipSectionProps): ReactElement {
+    const { t } = useTranslation(["code-city"])
+
     return (
         <>
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Ownership overlay</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:ownership.ownershipOverlay")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <CityOwnershipOverlay
@@ -62,7 +67,9 @@ export function OwnershipSection({ state }: IOwnershipSectionProps): ReactElemen
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Bus factor overlay</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:ownership.busFactorOverlay")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <CityBusFactorOverlay
@@ -85,7 +92,9 @@ export function OwnershipSection({ state }: IOwnershipSectionProps): ReactElemen
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Bus factor trend chart</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:ownership.busFactorTrendChart")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <BusFactorTrendChart
@@ -109,7 +118,9 @@ export function OwnershipSection({ state }: IOwnershipSectionProps): ReactElemen
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Knowledge silo panel</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:ownership.knowledgeSiloPanel")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <KnowledgeSiloPanel
@@ -132,7 +143,9 @@ export function OwnershipSection({ state }: IOwnershipSectionProps): ReactElemen
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">Knowledge map export</p>
+                    <p className="text-sm font-semibold text-foreground">
+                        {t("code-city:ownership.knowledgeMapExport")}
+                    </p>
                 </CardHeader>
                 <CardBody>
                     <KnowledgeMapExportWidget
@@ -158,7 +171,7 @@ export function OwnershipSection({ state }: IOwnershipSectionProps): ReactElemen
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">
-                        Contributor collaboration graph
+                        {t("code-city:ownership.contributorCollaborationGraph")}
                     </p>
                 </CardHeader>
                 <CardBody>
@@ -193,7 +206,7 @@ export function OwnershipSection({ state }: IOwnershipSectionProps): ReactElemen
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">
-                        Ownership transition widget
+                        {t("code-city:ownership.ownershipTransitionWidget")}
                     </p>
                 </CardHeader>
                 <CardBody>
