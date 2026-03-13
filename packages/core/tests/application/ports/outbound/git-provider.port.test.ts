@@ -247,8 +247,10 @@ describe("IGitProvider contract", () => {
     test("returns commit history", async () => {
         const provider = new InMemoryGitProvider()
         const commits = await provider.getCommitHistory("main", {
+            author: "alice",
             maxCount: 2,
             since: "2026-01-01T00:00:00.000Z",
+            path: "src",
         })
 
         expect(commits).toHaveLength(2)

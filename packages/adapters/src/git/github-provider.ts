@@ -99,6 +99,14 @@ interface IGitHubCheckRunPayload {
     readonly details_url?: string | null
 }
 
+interface INormalizedCommitHistoryOptions {
+    readonly author?: string
+    readonly since?: string
+    readonly until?: string
+    readonly maxCount?: number
+    readonly path?: string
+}
+
 /**
  * Minimal subset of Octokit methods used by GitHub provider.
  */
@@ -436,23 +444,14 @@ export class GitHubProvider implements IGitProvider {
         options?: ICommitHistoryOptions,
     ): Promise<readonly ICommitInfo[]> {
         const normalizedRef = normalizeRequiredText(ref, "ref")
-        const commits = await this.executeRequest(() => {
-            return this.client.repos.listCommits({
-                owner: this.owner,
-                repo: this.repo,
-                sha: normalizedRef,
-                since: options?.since,
-                until: options?.until,
-                path: options?.filePath,
-                per_page: resolveCommitHistoryPerPage(options?.maxCount),
-            })
-        })
-
-        const maxCount = options?.maxCount
-        const limitedCommits = commits.data.slice(0, maxCount)
+        const normalizedOptions = normalizeCommitHistoryOptions(options)
+        const commits = await this.listCommitHistory(
+            normalizedRef,
+            normalizedOptions,
+        )
 
         return Promise.all(
-            limitedCommits.map(async (commit): Promise<ICommitInfo> => {
+            commits.map(async (commit): Promise<ICommitInfo> => {
                 const details = await this.executeRequest(() => {
                     return this.client.repos.getCommit({
                         owner: this.owner,
@@ -778,6 +777,51 @@ export class GitHubProvider implements IGitProvider {
         })
 
         return response.data
+    }
+
+    /**
+     * Lists repository history pages until the requested max count is reached.
+     *
+     * @param ref Normalized branch or commit reference.
+     * @param options Normalized history filters.
+     * @returns Raw commit list from repository history.
+     */
+    private async listCommitHistory(
+        ref: string,
+        options: INormalizedCommitHistoryOptions,
+    ): Promise<readonly ReposListCommitsResponseItem[]> {
+        const pageSize = resolveCommitHistoryPerPage(options.maxCount)
+        const targetCount = options.maxCount ?? pageSize
+        const commits: ReposListCommitsResponseItem[] = []
+        let page = 1
+
+        while (commits.length < targetCount) {
+            const remaining = targetCount - commits.length
+            const perPage = Math.min(pageSize, remaining)
+            const response = await this.executeRequest(() => {
+                return this.client.repos.listCommits({
+                    owner: this.owner,
+                    repo: this.repo,
+                    sha: ref,
+                    author: options.author,
+                    since: options.since,
+                    until: options.until,
+                    path: options.path,
+                    per_page: perPage,
+                    page,
+                })
+            })
+
+            commits.push(...response.data.slice(0, remaining))
+
+            if (response.data.length < perPage) {
+                break
+            }
+
+            page += 1
+        }
+
+        return commits
     }
 
     /**
@@ -1144,6 +1188,45 @@ function normalizeRequiredText(value: string, fieldName: string): string {
     }
 
     return normalized
+}
+
+/**
+ * Normalizes optional text inputs.
+ *
+ * @param value Optional raw text.
+ * @param fieldName Field label.
+ * @returns Trimmed string or undefined.
+ */
+function normalizeOptionalText(
+    value: string | undefined,
+    fieldName: string,
+): string | undefined {
+    if (value === undefined) {
+        return undefined
+    }
+
+    return normalizeRequiredText(value, fieldName)
+}
+
+/**
+ * Normalizes commit history query options with backward-compatible path support.
+ *
+ * @param options Optional history query options.
+ * @returns Normalized history query options.
+ */
+function normalizeCommitHistoryOptions(
+    options?: ICommitHistoryOptions,
+): INormalizedCommitHistoryOptions {
+    const normalizedPath = normalizeOptionalText(options?.path, "path")
+    const normalizedFilePath = normalizeOptionalText(options?.filePath, "filePath")
+
+    return {
+        author: normalizeOptionalText(options?.author, "author"),
+        since: options?.since,
+        until: options?.until,
+        maxCount: options?.maxCount,
+        path: normalizedPath ?? normalizedFilePath,
+    }
 }
 
 /**

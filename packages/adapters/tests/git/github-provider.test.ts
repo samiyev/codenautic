@@ -845,7 +845,7 @@ describe("GitHubProvider", () => {
         ])
     })
 
-    test("lists commit history with file filters and files changed", async () => {
+    test("lists commit history with author and path filters and files changed", async () => {
         const listCommits = createQueuedAsyncMethod([
             createDataHandler([
                 {
@@ -885,8 +885,10 @@ describe("GitHubProvider", () => {
         })
 
         const history = await provider.getCommitHistory("main", {
+            author: "alice",
             since: "2026-03-01T00:00:00.000Z",
             until: "2026-03-09T00:00:00.000Z",
+            path: "src/features",
             filePath: "src/a.ts",
             maxCount: 1,
         })
@@ -902,9 +904,79 @@ describe("GitHubProvider", () => {
             },
         ])
         expect(listCommits.calls[0]?.[0]).toMatchObject({
+            author: "alice",
             sha: "main",
-            path: "src/a.ts",
+            path: "src/features",
             per_page: 1,
+            page: 1,
+        })
+    })
+
+    test("paginates commit history across multiple pages up to maxCount", async () => {
+        const firstPage = Array.from({length: 100}, (_value, index): {readonly sha: string} => {
+            return {sha: `c${index + 1}`}
+        })
+        const secondPage = [
+            {sha: "c101"},
+        ]
+        const listCommits = createQueuedAsyncMethod([
+            createDataHandler(firstPage),
+            createDataHandler(secondPage),
+        ])
+        const getCommit = createQueuedAsyncMethod(
+            Array.from({length: 101}, (_value, index) => {
+                const commitNumber = index + 1
+
+                return createDataHandler({
+                    commit: {
+                        message: `Commit ${commitNumber}`,
+                        author: {
+                            name: `Author ${commitNumber}`,
+                            email: `author${commitNumber}@example.com`,
+                            date: "2026-03-08T12:00:00.000Z",
+                        },
+                    },
+                    files: [
+                        {
+                            filename: `src/file-${commitNumber}.ts`,
+                        },
+                    ],
+                })
+            }),
+        )
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    listCommits,
+                    getCommit,
+                },
+            }),
+        })
+
+        const history = await provider.getCommitHistory("main", {
+            author: "team-bot",
+            filePath: "src",
+            maxCount: 101,
+        })
+
+        expect(history).toHaveLength(101)
+        expect(history[0]?.sha).toBe("c1")
+        expect(history[100]?.sha).toBe("c101")
+        expect(listCommits.calls[0]?.[0]).toMatchObject({
+            author: "team-bot",
+            path: "src",
+            per_page: 100,
+            page: 1,
+            sha: "main",
+        })
+        expect(listCommits.calls[1]?.[0]).toMatchObject({
+            author: "team-bot",
+            path: "src",
+            per_page: 1,
+            page: 2,
+            sha: "main",
         })
     })
 

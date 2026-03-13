@@ -3,6 +3,11 @@
  */
 export interface ICommitHistoryOptions {
     /**
+     * Filter commits by platform-native author identifier.
+     */
+    readonly author?: string
+
+    /**
      * Include commits after ISO-8601 timestamp.
      */
     readonly since?: string
@@ -18,7 +23,14 @@ export interface ICommitHistoryOptions {
     readonly maxCount?: number
 
     /**
-     * Filter commits that touch specific file path.
+     * Filter commits that touch specific repository path.
+     *
+     * Supports both file and directory paths.
+     */
+    readonly path?: string
+
+    /**
+     * Backward-compatible alias for `path`.
      */
     readonly filePath?: string
 }

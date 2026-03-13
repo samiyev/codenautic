@@ -21,13 +21,17 @@ describe("ICommitHistory DTO contracts", () => {
 
     test("поддерживает опции запроса истории", () => {
         const options: ICommitHistoryOptions = {
+            author: "alice",
             since: "2026-01-01T00:00:00.000Z",
             until: "2026-03-03T00:00:00.000Z",
             maxCount: 25,
+            path: "src/features",
             filePath: "src/index.ts",
         }
 
+        expect(options.author).toBe("alice")
         expect(options.maxCount).toBe(25)
+        expect(options.path).toBe("src/features")
         expect(options.filePath).toBe("src/index.ts")
     })
 })
