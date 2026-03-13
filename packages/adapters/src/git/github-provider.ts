@@ -411,25 +411,31 @@ export class GitHubProvider implements IGitProvider {
                     repo: this.repo,
                 })
             }),
-            this.executeRequest(() => {
-                return this.client.repos.listBranches({
-                    owner: this.owner,
-                    repo: this.repo,
-                    per_page: 100,
-                })
-            }),
+            this.listRepositoryBranches(),
         ])
 
         const defaultBranch = repository.data.default_branch ?? ""
 
-        return branches.data.map((branch): IBranchInfo => {
-            return {
-                name: branch.name,
-                sha: branch.commit.sha,
-                isDefault: branch.name === defaultBranch,
-                isProtected: branch.protected,
-            }
-        })
+        return Promise.all(
+            branches.map(async (branch): Promise<IBranchInfo> => {
+                const branchSha = normalizeRequiredText(branch.commit.sha, "branchSha")
+                const details = await this.executeRequest(() => {
+                    return this.client.repos.getCommit({
+                        owner: this.owner,
+                        repo: this.repo,
+                        ref: branchSha,
+                    })
+                })
+
+                return {
+                    name: branch.name,
+                    sha: branchSha,
+                    isDefault: branch.name === defaultBranch,
+                    isProtected: branch.protected,
+                    lastCommitDate: resolveBranchLastCommitDate(details.data),
+                }
+            }),
+        )
     }
 
     /**
@@ -780,6 +786,37 @@ export class GitHubProvider implements IGitProvider {
     }
 
     /**
+     * Lists all repository branches across paginated GitHub responses.
+     *
+     * @returns Raw repository branches.
+     */
+    private async listRepositoryBranches(): Promise<readonly ReposListBranchesResponseItem[]> {
+        const branches: ReposListBranchesResponseItem[] = []
+        let page = 1
+
+        while (true) {
+            const response = await this.executeRequest(() => {
+                return this.client.repos.listBranches({
+                    owner: this.owner,
+                    repo: this.repo,
+                    per_page: 100,
+                    page,
+                })
+            })
+
+            branches.push(...response.data)
+
+            if (response.data.length < 100) {
+                break
+            }
+
+            page += 1
+        }
+
+        return branches
+    }
+
+    /**
      * Lists repository history pages until the requested max count is reached.
      *
      * @param ref Normalized branch or commit reference.
@@ -1094,6 +1131,16 @@ function mapCheckRun(data: IGitHubCheckRunPayload): ICheckRunDTO {
         summary: data.output?.summary ?? undefined,
         detailsUrl: data.details_url ?? undefined,
     }
+}
+
+/**
+ * Resolves branch head commit date from detailed commit payload.
+ *
+ * @param payload Detailed commit payload.
+ * @returns Commit timestamp or empty string when upstream omits it.
+ */
+function resolveBranchLastCommitDate(payload: ReposGetCommitResponse): string {
+    return payload.commit.committer?.date ?? payload.commit.author?.date ?? ""
 }
 
 /**

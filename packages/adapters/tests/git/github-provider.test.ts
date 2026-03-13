@@ -794,7 +794,26 @@ describe("GitHubProvider", () => {
         expect(nonFileError.message).toContain("GitHub content response points to non-file node")
     })
 
-    test("lists branches and marks default branch", async () => {
+    test("lists branches with protection, default flag, and last commit date", async () => {
+        const getCommit = createQueuedAsyncMethod([
+            createDataHandler({
+                commit: {
+                    author: {
+                        date: "2026-03-10T08:00:00.000Z",
+                    },
+                    committer: {
+                        date: "2026-03-10T09:00:00.000Z",
+                    },
+                },
+            }),
+            createDataHandler({
+                commit: {
+                    author: {
+                        date: "2026-03-09T08:00:00.000Z",
+                    },
+                },
+            }),
+        ])
         const provider = new GitHubProvider({
             owner: "codenautic",
             repo: "platform",
@@ -823,6 +842,7 @@ describe("GitHubProvider", () => {
                             },
                         ]),
                     ]),
+                    getCommit,
                 },
             }),
         })
@@ -835,14 +855,108 @@ describe("GitHubProvider", () => {
                 sha: "main-sha",
                 isDefault: true,
                 isProtected: true,
+                lastCommitDate: "2026-03-10T09:00:00.000Z",
             },
             {
                 name: "feature/x",
                 sha: "feature-sha",
                 isDefault: false,
                 isProtected: false,
+                lastCommitDate: "2026-03-09T08:00:00.000Z",
             },
         ])
+        expect(getCommit.calls[0]?.[0]).toMatchObject({
+            owner: "codenautic",
+            repo: "platform",
+            ref: "main-sha",
+        })
+        expect(getCommit.calls[1]?.[0]).toMatchObject({
+            owner: "codenautic",
+            repo: "platform",
+            ref: "feature-sha",
+        })
+    })
+
+    test("paginates branches beyond the first page and enriches last commit date", async () => {
+        const firstPage = Array.from(
+            {length: 100},
+            (_value, index): {
+                readonly name: string
+                readonly protected: boolean
+                readonly commit: {readonly sha: string}
+            } => {
+                const branchNumber = index + 1
+
+                return {
+                    name: `branch-${branchNumber}`,
+                    protected: branchNumber === 1,
+                    commit: {
+                        sha: `sha-${branchNumber}`,
+                    },
+                }
+            },
+        )
+        const secondPage = [
+            {
+                name: "branch-101",
+                protected: false,
+                commit: {
+                    sha: "sha-101",
+                },
+            },
+        ]
+        const getCommit = createQueuedAsyncMethod(
+            Array.from({length: 101}, (_value, index) => {
+                const branchNumber = index + 1
+
+                return createDataHandler({
+                    commit: {
+                        author: {
+                            date: `2026-03-${String((branchNumber % 28) + 1).padStart(2, "0")}T10:00:00.000Z`,
+                        },
+                    },
+                })
+            }),
+        )
+        const listBranches = createQueuedAsyncMethod([
+            createDataHandler(firstPage),
+            createDataHandler(secondPage),
+        ])
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    get: createQueuedAsyncMethod([
+                        createDataHandler({
+                            default_branch: "branch-1",
+                        }),
+                    ]),
+                    listBranches,
+                    getCommit,
+                },
+            }),
+        })
+
+        const branches = await provider.getBranches()
+
+        expect(branches).toHaveLength(101)
+        expect(branches[0]?.name).toBe("branch-1")
+        expect(branches[0]?.isDefault).toBe(true)
+        expect(branches[100]?.name).toBe("branch-101")
+        expect(branches[100]?.lastCommitDate).toBe("2026-03-18T10:00:00.000Z")
+        expect(listBranches.calls[0]?.[0]).toMatchObject({
+            owner: "codenautic",
+            repo: "platform",
+            per_page: 100,
+            page: 1,
+        })
+        expect(listBranches.calls[1]?.[0]).toMatchObject({
+            owner: "codenautic",
+            repo: "platform",
+            per_page: 100,
+            page: 2,
+        })
     })
 
     test("lists commit history with author and path filters and files changed", async () => {

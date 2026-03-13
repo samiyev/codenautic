@@ -105,12 +105,14 @@ class InMemoryGitProvider implements IGitProvider {
                 sha: "abc123",
                 isDefault: true,
                 isProtected: true,
+                lastCommitDate: "2026-03-03T12:00:00.000Z",
             },
             {
                 name: "develop",
                 sha: "def456",
                 isDefault: false,
                 isProtected: false,
+                lastCommitDate: "2026-03-02T18:30:00.000Z",
             },
         ])
     }
@@ -268,6 +270,7 @@ describe("IGitProvider contract", () => {
         expect(branches[0]?.name).toBe("main")
         expect(branches[0]?.isDefault).toBe(true)
         expect(branches[1]?.isProtected).toBe(false)
+        expect(branches[0]?.lastCommitDate).toBe("2026-03-03T12:00:00.000Z")
     })
 
     test("returns blame data by file reference", async () => {

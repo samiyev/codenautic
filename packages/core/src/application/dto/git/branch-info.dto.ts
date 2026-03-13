@@ -21,4 +21,9 @@ export interface IBranchInfo {
      * Indicates protected branch policy.
      */
     readonly isProtected: boolean
+
+    /**
+     * Head commit timestamp in ISO 8601 format.
+     */
+    readonly lastCommitDate: string
 }
