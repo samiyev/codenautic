@@ -98,6 +98,58 @@ class InMemoryGitProvider implements IGitProvider {
         ])
     }
 
+    public getContributorStats(
+        _ref: string,
+        _options?: Parameters<IGitProvider["getContributorStats"]>[1],
+    ): ReturnType<IGitProvider["getContributorStats"]> {
+        return Promise.resolve([
+            {
+                name: "Alice",
+                email: "alice@example.com",
+                commitCount: 2,
+                additions: 12,
+                deletions: 3,
+                changes: 15,
+                activePeriod: {
+                    startedAt: "2026-03-01T08:00:00.000Z",
+                    endedAt: "2026-03-03T10:00:00.000Z",
+                },
+                files: [
+                    {
+                        filePath: "src/index.ts",
+                        commitCount: 2,
+                        additions: 12,
+                        deletions: 3,
+                        changes: 15,
+                        lastCommitDate: "2026-03-03T10:00:00.000Z",
+                    },
+                ],
+            },
+            {
+                name: "Bob",
+                email: "bob@example.com",
+                commitCount: 1,
+                additions: 4,
+                deletions: 1,
+                changes: 5,
+                activePeriod: {
+                    startedAt: "2026-03-04T09:00:00.000Z",
+                    endedAt: "2026-03-04T09:00:00.000Z",
+                },
+                files: [
+                    {
+                        filePath: "src/pipeline.ts",
+                        commitCount: 1,
+                        additions: 4,
+                        deletions: 1,
+                        changes: 5,
+                        lastCommitDate: "2026-03-04T09:00:00.000Z",
+                    },
+                ],
+            },
+        ])
+    }
+
     public getDiffBetweenRefs(
         baseRef: string,
         headRef: string,
@@ -316,6 +368,21 @@ describe("IGitProvider contract", () => {
         expect(branches[0]?.isDefault).toBe(true)
         expect(branches[1]?.isProtected).toBe(false)
         expect(branches[0]?.lastCommitDate).toBe("2026-03-03T12:00:00.000Z")
+    })
+
+    test("returns contributor statistics with per-file aggregation", async () => {
+        const provider = new InMemoryGitProvider()
+
+        const contributors = await provider.getContributorStats("main", {
+            path: "src",
+            maxCount: 50,
+        })
+
+        expect(contributors).toHaveLength(2)
+        expect(contributors[0]?.name).toBe("Alice")
+        expect(contributors[0]?.activePeriod.endedAt).toBe("2026-03-03T10:00:00.000Z")
+        expect(contributors[0]?.files[0]?.filePath).toBe("src/index.ts")
+        expect(contributors[1]?.commitCount).toBe(1)
     })
 
     test("returns diff between refs with summary and rename metadata", async () => {

@@ -38,6 +38,13 @@ class InMemoryGitProvider implements IGitProvider {
         return Promise.resolve([])
     }
 
+    public getContributorStats(
+        _ref: string,
+        _options?: Parameters<IGitProvider["getContributorStats"]>[1],
+    ): ReturnType<IGitProvider["getContributorStats"]> {
+        return Promise.resolve([])
+    }
+
     public getDiffBetweenRefs(
         baseRef: string,
         headRef: string,

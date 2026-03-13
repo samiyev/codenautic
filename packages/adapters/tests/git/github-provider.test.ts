@@ -1185,6 +1185,240 @@ describe("GitHubProvider", () => {
         expect(error.message).toContain("maxCount must be positive integer")
     })
 
+    test("aggregates contributor statistics with file breakdown and history filters", async () => {
+        const listCommits = createQueuedAsyncMethod([
+            createDataHandler([
+                {sha: "c1"},
+                {sha: "c2"},
+                {sha: "c3"},
+            ]),
+        ])
+        const getCommit = createQueuedAsyncMethod([
+            createDataHandler({
+                commit: {
+                    author: {
+                        name: "Alice",
+                        email: "alice@example.com",
+                        date: "2026-03-01T08:00:00.000Z",
+                    },
+                },
+                files: [
+                    {
+                        filename: "src/a.ts",
+                        additions: 3,
+                        deletions: 1,
+                        changes: 4,
+                    },
+                    {
+                        filename: "src/b.ts",
+                        additions: 2,
+                        deletions: 0,
+                        changes: 2,
+                    },
+                ],
+            }),
+            createDataHandler({
+                commit: {
+                    author: {
+                        name: "Bob",
+                        email: "bob@example.com",
+                        date: "2026-03-04T09:30:00.000Z",
+                    },
+                },
+                files: [
+                    {
+                        filename: "src/a.ts",
+                        additions: 1,
+                        deletions: 4,
+                        changes: 5,
+                    },
+                ],
+            }),
+            createDataHandler({
+                commit: {
+                    author: {
+                        name: "Alice",
+                        email: "alice@example.com",
+                        date: "2026-03-08T18:15:00.000Z",
+                    },
+                },
+                files: [
+                    {
+                        filename: "src/a.ts",
+                        additions: 5,
+                        deletions: 2,
+                        changes: 7,
+                    },
+                ],
+            }),
+        ])
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    listCommits,
+                    getCommit,
+                },
+            }),
+        })
+
+        const contributors = await provider.getContributorStats("main", {
+            since: "2026-03-01T00:00:00.000Z",
+            until: "2026-03-10T00:00:00.000Z",
+            filePath: "src",
+            maxCount: 3,
+        })
+
+        expect(contributors).toEqual([
+            {
+                name: "Alice",
+                email: "alice@example.com",
+                commitCount: 2,
+                additions: 10,
+                deletions: 3,
+                changes: 13,
+                activePeriod: {
+                    startedAt: "2026-03-01T08:00:00.000Z",
+                    endedAt: "2026-03-08T18:15:00.000Z",
+                },
+                files: [
+                    {
+                        filePath: "src/a.ts",
+                        commitCount: 2,
+                        additions: 8,
+                        deletions: 3,
+                        changes: 11,
+                        lastCommitDate: "2026-03-08T18:15:00.000Z",
+                    },
+                    {
+                        filePath: "src/b.ts",
+                        commitCount: 1,
+                        additions: 2,
+                        deletions: 0,
+                        changes: 2,
+                        lastCommitDate: "2026-03-01T08:00:00.000Z",
+                    },
+                ],
+            },
+            {
+                name: "Bob",
+                email: "bob@example.com",
+                commitCount: 1,
+                additions: 1,
+                deletions: 4,
+                changes: 5,
+                activePeriod: {
+                    startedAt: "2026-03-04T09:30:00.000Z",
+                    endedAt: "2026-03-04T09:30:00.000Z",
+                },
+                files: [
+                    {
+                        filePath: "src/a.ts",
+                        commitCount: 1,
+                        additions: 1,
+                        deletions: 4,
+                        changes: 5,
+                        lastCommitDate: "2026-03-04T09:30:00.000Z",
+                    },
+                ],
+            },
+        ])
+        expect(listCommits.calls[0]?.[0]).toMatchObject({
+            sha: "main",
+            since: "2026-03-01T00:00:00.000Z",
+            until: "2026-03-10T00:00:00.000Z",
+            path: "src",
+            per_page: 3,
+            page: 1,
+        })
+    })
+
+    test("loads contributor statistics across all pages when maxCount is omitted", async () => {
+        const firstPage = Array.from({length: 100}, (_value, index): {readonly sha: string} => {
+            return {sha: `c${index + 1}`}
+        })
+        const secondPage = [{sha: "c101"}]
+        const listCommits = createQueuedAsyncMethod([
+            createDataHandler(firstPage),
+            createDataHandler(secondPage),
+        ])
+        const getCommit = createQueuedAsyncMethod(
+            Array.from({length: 101}, (_value, index) => {
+                return createDataHandler({
+                    commit: {
+                        author: {
+                            name: "Alice",
+                            email: "alice@example.com",
+                            date: `2026-03-${String((index % 28) + 1).padStart(2, "0")}T12:00:00.000Z`,
+                        },
+                    },
+                    files: [],
+                })
+            }),
+        )
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    listCommits,
+                    getCommit,
+                },
+            }),
+        })
+
+        const contributors = await provider.getContributorStats("main")
+
+        expect(contributors).toHaveLength(1)
+        expect(contributors[0]?.commitCount).toBe(101)
+        expect(listCommits.calls[0]?.[0]).toMatchObject({
+            sha: "main",
+            per_page: 100,
+            page: 1,
+        })
+        expect(listCommits.calls[1]?.[0]).toMatchObject({
+            sha: "main",
+            per_page: 100,
+            page: 2,
+        })
+    })
+
+    test("retries contributor statistics requests on retryable github errors", async () => {
+        const sleepCalls: number[] = []
+        const listCommits = createQueuedAsyncMethod([
+            createErrorHandler(
+                createGitHubApiError("rate limited", {
+                    status: 429,
+                    headers: {
+                        "retry-after": "1",
+                    },
+                }),
+            ),
+            createDataHandler([]),
+        ])
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    listCommits,
+                    getCommit: createQueuedAsyncMethod([]),
+                },
+            }),
+            sleep(delayMs: number): Promise<void> {
+                sleepCalls.push(delayMs)
+                return Promise.resolve()
+            },
+        })
+
+        const contributors = await provider.getContributorStats("main")
+
+        expect(contributors).toEqual([])
+        expect(sleepCalls).toEqual([1000])
+        expect(listCommits.calls).toHaveLength(2)
+    })
+
     test("loads diff between refs with summary stats and rename metadata", async () => {
         const compareCommitsWithBasehead = createQueuedAsyncMethod([
             createDataHandler({

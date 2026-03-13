@@ -17,6 +17,9 @@ import {
     type ICommentDTO,
     type ICommitHistoryOptions,
     type ICommitInfo,
+    type IContributorFileStat,
+    type IContributorStat,
+    type IContributorStatsOptions,
     type IFileBlame,
     type IFileTreeNode,
     type IGitProvider,
@@ -115,6 +118,26 @@ interface INormalizedCommitHistoryOptions {
     readonly until?: string
     readonly maxCount?: number
     readonly path?: string
+}
+
+interface IContributorAggregation {
+    readonly name: string
+    readonly email: string
+    readonly files: Map<string, IContributorFileAggregation>
+    commitCount: number
+    additions: number
+    deletions: number
+    changes: number
+    startedAt: string
+    endedAt: string
+}
+
+interface IContributorFileAggregation {
+    commitCount: number
+    additions: number
+    deletions: number
+    changes: number
+    lastCommitDate: string
 }
 
 /**
@@ -249,6 +272,7 @@ export interface IGitHubProviderOptions {
 const DEFAULT_RETRY_MAX_ATTEMPTS = 3
 const DEFAULT_RETRY_BASE_DELAY_MS = 250
 const MAX_GITHUB_TEXT_FILE_BYTES = 1024 * 1024
+const COMMIT_DETAILS_BATCH_SIZE = 20
 
 /**
  * GraphQL query used for blame lookup.
@@ -492,6 +516,29 @@ export class GitHubProvider implements IGitProvider {
                 }
             }),
         )
+    }
+
+    /**
+     * Loads aggregated contributor statistics for a repository reference.
+     *
+     * @param ref Branch, tag, or commit reference.
+     * @param options Optional date/path/limit filters.
+     * @returns Contributor statistics with per-file breakdown.
+     */
+    public async getContributorStats(
+        ref: string,
+        options?: IContributorStatsOptions,
+    ): Promise<readonly IContributorStat[]> {
+        const normalizedRef = normalizeRequiredText(ref, "ref")
+        const normalizedOptions = normalizeCommitHistoryOptions(options)
+        const commits = await this.listCommitHistory(
+            normalizedRef,
+            normalizedOptions,
+            "all",
+        )
+        const details = await this.loadCommitDetails(commits)
+
+        return buildContributorStats(details)
     }
 
     /**
@@ -863,20 +910,26 @@ export class GitHubProvider implements IGitProvider {
      *
      * @param ref Normalized branch or commit reference.
      * @param options Normalized history filters.
+     * @param mode Pagination strategy when `maxCount` is omitted.
      * @returns Raw commit list from repository history.
      */
     private async listCommitHistory(
         ref: string,
         options: INormalizedCommitHistoryOptions,
+        mode: "page" | "all" = "page",
     ): Promise<readonly ReposListCommitsResponseItem[]> {
         const pageSize = resolveCommitHistoryPerPage(options.maxCount)
-        const targetCount = options.maxCount ?? pageSize
+        const targetCount = options.maxCount ?? (
+            mode === "all" ? Number.MAX_SAFE_INTEGER : pageSize
+        )
         const commits: ReposListCommitsResponseItem[] = []
         let page = 1
 
         while (commits.length < targetCount) {
             const remaining = targetCount - commits.length
-            const perPage = Math.min(pageSize, remaining)
+            const perPage = options.maxCount === undefined
+                ? pageSize
+                : Math.min(pageSize, remaining)
             const response = await this.executeRequest(() => {
                 return this.client.repos.listCommits({
                     owner: this.owner,
@@ -891,7 +944,12 @@ export class GitHubProvider implements IGitProvider {
                 })
             })
 
-            commits.push(...response.data.slice(0, remaining))
+            commits.push(
+                ...response.data.slice(
+                    0,
+                    options.maxCount === undefined ? response.data.length : remaining,
+                ),
+            )
 
             if (response.data.length < perPage) {
                 break
@@ -901,6 +959,45 @@ export class GitHubProvider implements IGitProvider {
         }
 
         return commits
+    }
+
+    /**
+     * Loads detailed commit payloads in bounded parallel batches.
+     *
+     * @param commits Raw commit list from GitHub history API.
+     * @returns Detailed commit payloads in source order.
+     */
+    private async loadCommitDetails(
+        commits: readonly ReposListCommitsResponseItem[],
+    ): Promise<readonly ReposGetCommitResponse[]> {
+        const detailedCommits: ReposGetCommitResponse[] = []
+
+        for (
+            let index = 0;
+            index < commits.length;
+            index += COMMIT_DETAILS_BATCH_SIZE
+        ) {
+            const batch = commits.slice(index, index + COMMIT_DETAILS_BATCH_SIZE)
+            const detailedBatch = await Promise.all(
+                batch.map(async (commit): Promise<ReposGetCommitResponse> => {
+                    const commitSha = normalizeRequiredText(commit.sha, "commitSha")
+
+                    return this.executeRequest(async () => {
+                        const response = await this.client.repos.getCommit({
+                            owner: this.owner,
+                            repo: this.repo,
+                            ref: commitSha,
+                        })
+
+                        return response.data
+                    })
+                }),
+            )
+
+            detailedCommits.push(...detailedBatch)
+        }
+
+        return detailedCommits
     }
 
     /**
@@ -1199,6 +1296,282 @@ function mapGitHubComparisonStatus(
     }
 
     return GIT_REF_COMPARISON_STATUS.DIVERGED
+}
+
+/**
+ * Aggregates detailed commit payloads into contributor statistics.
+ *
+ * @param commits Detailed commit payloads.
+ * @returns Stable contributor statistics ordered by impact.
+ */
+function buildContributorStats(
+    commits: readonly ReposGetCommitResponse[],
+): readonly IContributorStat[] {
+    const contributors = new Map<string, IContributorAggregation>()
+
+    for (const commit of commits) {
+        const author = resolveContributorIdentity(commit)
+        const key = createContributorAggregationKey(author)
+        const existing = contributors.get(key)
+        const contributor = existing ?? createContributorAggregation(author)
+
+        contributor.commitCount += 1
+        contributor.startedAt = pickEarlierIsoDate(
+            contributor.startedAt,
+            author.date,
+        )
+        contributor.endedAt = pickLaterIsoDate(
+            contributor.endedAt,
+            author.date,
+        )
+
+        for (const file of commit.files ?? []) {
+            const filePath = normalizeRequiredText(file.filename, "filePath")
+            const additions = normalizeNumericCount(file.additions)
+            const deletions = normalizeNumericCount(file.deletions)
+            const changes = normalizeNumericCount(file.changes)
+            const existingFile = contributor.files.get(filePath)
+            const fileStats = existingFile ?? createContributorFileAggregation()
+
+            contributor.additions += additions
+            contributor.deletions += deletions
+            contributor.changes += changes
+            fileStats.commitCount += 1
+            fileStats.additions += additions
+            fileStats.deletions += deletions
+            fileStats.changes += changes
+            fileStats.lastCommitDate = pickLaterIsoDate(
+                fileStats.lastCommitDate,
+                author.date,
+            )
+            contributor.files.set(filePath, fileStats)
+        }
+
+        contributors.set(key, contributor)
+    }
+
+    return Array.from(contributors.values())
+        .map(mapContributorAggregation)
+        .sort(compareContributorStats)
+}
+
+/**
+ * Resolves normalized contributor identity from detailed commit payload.
+ *
+ * @param commit Detailed commit payload.
+ * @returns Contributor identity fields used for aggregation.
+ */
+function resolveContributorIdentity(
+    commit: ReposGetCommitResponse,
+): Readonly<{name: string; email: string; date: string}> {
+    const author = commit.commit.author ?? commit.commit.committer
+    const email = normalizeOptionalContributorText(author?.email)
+    const resolvedName = normalizeOptionalContributorText(author?.name)
+
+    return {
+        name: resolvedName.length > 0 ? resolvedName : (
+            email.length > 0 ? email : "unknown"
+        ),
+        email,
+        date: normalizeOptionalContributorText(author?.date),
+    }
+}
+
+/**
+ * Creates stable aggregation key for contributor identity.
+ *
+ * @param author Contributor identity.
+ * @returns Aggregation key.
+ */
+function createContributorAggregationKey(
+    author: Readonly<{name: string; email: string}>,
+): string {
+    if (author.email.length > 0) {
+        return `email:${author.email.toLowerCase()}`
+    }
+
+    return `name:${author.name.toLowerCase()}`
+}
+
+/**
+ * Creates mutable contributor aggregation seed.
+ *
+ * @param author Contributor identity.
+ * @returns Empty aggregation object.
+ */
+function createContributorAggregation(
+    author: Readonly<{name: string; email: string; date: string}>,
+): IContributorAggregation {
+    return {
+        name: author.name,
+        email: author.email,
+        files: new Map<string, IContributorFileAggregation>(),
+        commitCount: 0,
+        additions: 0,
+        deletions: 0,
+        changes: 0,
+        startedAt: author.date,
+        endedAt: author.date,
+    }
+}
+
+/**
+ * Creates mutable per-file aggregation seed.
+ *
+ * @returns Empty file aggregation object.
+ */
+function createContributorFileAggregation(): IContributorFileAggregation {
+    return {
+        commitCount: 0,
+        additions: 0,
+        deletions: 0,
+        changes: 0,
+        lastCommitDate: "",
+    }
+}
+
+/**
+ * Maps mutable contributor aggregation to immutable DTO.
+ *
+ * @param contributor Mutable contributor aggregation.
+ * @returns Immutable contributor statistics DTO.
+ */
+function mapContributorAggregation(
+    contributor: IContributorAggregation,
+): IContributorStat {
+    return {
+        name: contributor.name,
+        email: contributor.email,
+        commitCount: contributor.commitCount,
+        additions: contributor.additions,
+        deletions: contributor.deletions,
+        changes: contributor.changes,
+        activePeriod: {
+            startedAt: contributor.startedAt,
+            endedAt: contributor.endedAt,
+        },
+        files: Array.from(contributor.files.entries())
+            .map(([filePath, file]): IContributorFileStat => {
+                return {
+                    filePath,
+                    commitCount: file.commitCount,
+                    additions: file.additions,
+                    deletions: file.deletions,
+                    changes: file.changes,
+                    lastCommitDate: file.lastCommitDate,
+                }
+            })
+            .sort(compareContributorFileStats),
+    }
+}
+
+/**
+ * Orders contributor statistics deterministically for stable consumers.
+ *
+ * @param left Left contributor stats.
+ * @param right Right contributor stats.
+ * @returns Sort comparison result.
+ */
+function compareContributorStats(
+    left: IContributorStat,
+    right: IContributorStat,
+): number {
+    if (left.commitCount !== right.commitCount) {
+        return right.commitCount - left.commitCount
+    }
+
+    if (left.changes !== right.changes) {
+        return right.changes - left.changes
+    }
+
+    const nameComparison = left.name.localeCompare(right.name)
+    if (nameComparison !== 0) {
+        return nameComparison
+    }
+
+    return left.email.localeCompare(right.email)
+}
+
+/**
+ * Orders per-file contributor breakdown deterministically.
+ *
+ * @param left Left file stats.
+ * @param right Right file stats.
+ * @returns Sort comparison result.
+ */
+function compareContributorFileStats(
+    left: IContributorFileStat,
+    right: IContributorFileStat,
+): number {
+    if (left.changes !== right.changes) {
+        return right.changes - left.changes
+    }
+
+    if (left.commitCount !== right.commitCount) {
+        return right.commitCount - left.commitCount
+    }
+
+    return left.filePath.localeCompare(right.filePath)
+}
+
+/**
+ * Picks earlier non-empty ISO timestamp.
+ *
+ * @param current Current timestamp.
+ * @param candidate Candidate timestamp.
+ * @returns Earlier non-empty timestamp.
+ */
+function pickEarlierIsoDate(current: string, candidate: string): string {
+    if (candidate.length === 0) {
+        return current
+    }
+
+    if (current.length === 0 || candidate < current) {
+        return candidate
+    }
+
+    return current
+}
+
+/**
+ * Picks later non-empty ISO timestamp.
+ *
+ * @param current Current timestamp.
+ * @param candidate Candidate timestamp.
+ * @returns Later non-empty timestamp.
+ */
+function pickLaterIsoDate(current: string, candidate: string): string {
+    if (candidate.length === 0) {
+        return current
+    }
+
+    if (current.length === 0 || candidate > current) {
+        return candidate
+    }
+
+    return current
+}
+
+/**
+ * Normalizes optional contributor text fields without throwing on blanks.
+ *
+ * @param value Raw optional field.
+ * @returns Trimmed string or empty string.
+ */
+function normalizeOptionalContributorText(
+    value: string | null | undefined,
+): string {
+    return typeof value === "string" ? value.trim() : ""
+}
+
+/**
+ * Normalizes GitHub numeric counters.
+ *
+ * @param value Raw counter value.
+ * @returns Safe numeric counter.
+ */
+function normalizeNumericCount(value: number | undefined): number {
+    return typeof value === "number" ? value : 0
 }
 
 /**

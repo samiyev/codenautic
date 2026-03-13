@@ -54,6 +54,12 @@ export function createGitProviderMock(): IGitProvider {
         getCommitHistory(_ref: string): Promise<readonly []> {
             return Promise.resolve([])
         },
+        getContributorStats(
+            _ref: string,
+            _options?: Parameters<IGitProvider["getContributorStats"]>[1],
+        ): ReturnType<IGitProvider["getContributorStats"]> {
+            return Promise.resolve([])
+        },
         getDiffBetweenRefs(
             baseRef: string,
             headRef: string,

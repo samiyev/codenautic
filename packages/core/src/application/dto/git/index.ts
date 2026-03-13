@@ -21,6 +21,12 @@ export {
 } from "./merge-request.dto"
 export {type IWebhookEventDTO} from "./webhook-event.dto"
 export {type ICommitHistoryOptions, type ICommitInfo} from "./commit-history.dto"
+export {
+    type IContributorActivePeriod,
+    type IContributorFileStat,
+    type IContributorStat,
+    type IContributorStatsOptions,
+} from "./contributor-stats.dto"
 export {type IBlameData} from "./blame-data.dto"
 export {type IFileBlame} from "./file-blame.dto"
 export {type IBranchInfo} from "./branch-info.dto"

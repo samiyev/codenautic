@@ -7,6 +7,8 @@ import type {
     IBranchInfo,
     ICommitHistoryOptions,
     ICommitInfo,
+    IContributorStat,
+    IContributorStatsOptions,
     IFileTreeNode,
     IRefDiffResult,
     IMergeRequestDTO,
@@ -69,6 +71,18 @@ export interface IGitProvider extends IGitBlame {
         ref: string,
         options?: ICommitHistoryOptions,
     ): Promise<readonly ICommitInfo[]>
+
+    /**
+     * Fetches aggregated contributor statistics for a branch, tag, or commit ref.
+     *
+     * @param ref Commit SHA, branch name, or tag.
+     * @param options Optional date/path/limit filters.
+     * @returns Contributor statistics with per-file breakdown.
+     */
+    getContributorStats(
+        ref: string,
+        options?: IContributorStatsOptions,
+    ): Promise<readonly IContributorStat[]>
 
     /**
      * Fetches diff between two commit, branch, or tag refs.
