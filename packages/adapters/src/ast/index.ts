@@ -1,4 +1,10 @@
 export {
+    AST_CODE_GRAPH_IMPACT_ANALYSIS_ERROR_CODE,
+    AstCodeGraphImpactAnalysisError,
+    type AstCodeGraphImpactAnalysisErrorCode,
+    type IAstCodeGraphImpactAnalysisErrorDetails,
+} from "./ast-code-graph-impact-analysis.error"
+export {
     AST_LANGUAGE_DETECTION_ERROR_CODE,
     AstLanguageDetectionError,
     type AstLanguageDetectionErrorCode,
@@ -44,6 +50,14 @@ export {
     AstCodeGraphPageRankService,
     type IAstCodeGraphPageRankServiceOptions,
 } from "./ast-code-graph-page-rank.service"
+export {
+    AST_CODE_GRAPH_IMPACT_ANALYSIS_DIRECTION,
+    AstCodeGraphImpactAnalysisService,
+    type AstCodeGraphImpactAnalysisDirection,
+    type IAstCodeGraphImpactAnalysisInput,
+    type IAstCodeGraphImpactAnalysisService,
+    type IAstCodeGraphImpactAnalysisServiceOptions,
+} from "./ast-code-graph-impact-analysis.service"
 export {
     assertJavaScriptParserLanguage,
     JavaScriptSourceCodeParser,
