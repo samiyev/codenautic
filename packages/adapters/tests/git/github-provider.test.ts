@@ -492,6 +492,228 @@ describe("GitHubProvider", () => {
         ])
     })
 
+    test("applies root and nested gitignore patterns when loading file tree", async () => {
+        const getContent = createQueuedAsyncMethod([
+            createDataHandler({
+                type: "file",
+                encoding: "base64",
+                content: Buffer.from(
+                    [
+                        "dist/",
+                        "node_modules/",
+                        "src/generated/*",
+                        "!src/generated/keep.ts",
+                    ].join("\n"),
+                ).toString("base64"),
+            }),
+            createDataHandler({
+                type: "file",
+                encoding: "base64",
+                content: Buffer.from("draft.md\n").toString("base64"),
+            }),
+        ])
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    getCommit: createQueuedAsyncMethod([
+                        createDataHandler({
+                            commit: {
+                                tree: {
+                                    sha: "tree-sha",
+                                },
+                            },
+                        }),
+                    ]),
+                    getContent,
+                },
+                git: {
+                    getTree: createQueuedAsyncMethod([
+                        createDataHandler({
+                            tree: [
+                                {
+                                    path: ".gitignore",
+                                    type: "blob",
+                                    size: 48,
+                                    sha: "blob-ignore-root",
+                                },
+                                {
+                                    path: "README.md",
+                                    type: "blob",
+                                    size: 12,
+                                    sha: "blob-readme",
+                                },
+                                {
+                                    path: "draft.md",
+                                    type: "blob",
+                                    size: 14,
+                                    sha: "blob-root-draft",
+                                },
+                                {
+                                    path: "src",
+                                    type: "tree",
+                                    sha: "tree-src",
+                                },
+                                {
+                                    path: "src/app.ts",
+                                    type: "blob",
+                                    size: 21,
+                                    sha: "blob-app",
+                                },
+                                {
+                                    path: "src/generated",
+                                    type: "tree",
+                                    sha: "tree-generated",
+                                },
+                                {
+                                    path: "src/generated/drop.ts",
+                                    type: "blob",
+                                    size: 10,
+                                    sha: "blob-drop",
+                                },
+                                {
+                                    path: "src/generated/keep.ts",
+                                    type: "blob",
+                                    size: 10,
+                                    sha: "blob-keep",
+                                },
+                                {
+                                    path: "docs",
+                                    type: "tree",
+                                    sha: "tree-docs",
+                                },
+                                {
+                                    path: "docs/.gitignore",
+                                    type: "blob",
+                                    size: 9,
+                                    sha: "blob-ignore-docs",
+                                },
+                                {
+                                    path: "docs/draft.md",
+                                    type: "blob",
+                                    size: 8,
+                                    sha: "blob-docs-draft",
+                                },
+                                {
+                                    path: "docs/publish.md",
+                                    type: "blob",
+                                    size: 8,
+                                    sha: "blob-docs-publish",
+                                },
+                                {
+                                    path: "dist",
+                                    type: "tree",
+                                    sha: "tree-dist",
+                                },
+                                {
+                                    path: "dist/app.js",
+                                    type: "blob",
+                                    size: 18,
+                                    sha: "blob-dist",
+                                },
+                                {
+                                    path: "node_modules",
+                                    type: "tree",
+                                    sha: "tree-node-modules",
+                                },
+                                {
+                                    path: "node_modules/pkg.js",
+                                    type: "blob",
+                                    size: 16,
+                                    sha: "blob-node-module",
+                                },
+                            ],
+                        }),
+                    ]),
+                },
+            }),
+        })
+
+        const tree = await provider.getFileTree("main")
+
+        expect(tree).toEqual([
+            {
+                path: ".gitignore",
+                type: "blob",
+                size: 48,
+                sha: "blob-ignore-root",
+            },
+            {
+                path: "README.md",
+                type: "blob",
+                size: 12,
+                sha: "blob-readme",
+            },
+            {
+                path: "draft.md",
+                type: "blob",
+                size: 14,
+                sha: "blob-root-draft",
+            },
+            {
+                path: "src",
+                type: "tree",
+                size: 0,
+                sha: "tree-src",
+            },
+            {
+                path: "src/app.ts",
+                type: "blob",
+                size: 21,
+                sha: "blob-app",
+            },
+            {
+                path: "src/generated",
+                type: "tree",
+                size: 0,
+                sha: "tree-generated",
+            },
+            {
+                path: "src/generated/keep.ts",
+                type: "blob",
+                size: 10,
+                sha: "blob-keep",
+            },
+            {
+                path: "docs",
+                type: "tree",
+                size: 0,
+                sha: "tree-docs",
+            },
+            {
+                path: "docs/.gitignore",
+                type: "blob",
+                size: 9,
+                sha: "blob-ignore-docs",
+            },
+            {
+                path: "docs/publish.md",
+                type: "blob",
+                size: 8,
+                sha: "blob-docs-publish",
+            },
+        ])
+        expect(getContent.calls).toEqual([
+            [
+                {
+                    owner: "codenautic",
+                    repo: "platform",
+                    path: ".gitignore",
+                    ref: "main",
+                },
+            ],
+            [
+                {
+                    owner: "codenautic",
+                    repo: "platform",
+                    path: "docs/.gitignore",
+                    ref: "main",
+                },
+            ],
+        ])
+    })
+
     test("loads file content from base64 response and handles empty content", async () => {
         const provider = new GitHubProvider({
             owner: "codenautic",

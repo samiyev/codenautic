@@ -30,6 +30,11 @@ import {
     type IExternalGitMergeRequest,
     type INormalizedGitAclError,
 } from "./acl"
+import {
+    filterFileTreeByGitIgnore,
+    isGitIgnoreFilePath,
+    type IGitIgnoreFile,
+} from "./gitignore-tree-filter"
 import {GitHubProviderError} from "./github-provider.error"
 
 type PullGetResponse =
@@ -353,18 +358,13 @@ export class GitHubProvider implements IGitProvider {
             })
         })
 
-        return tree.data.tree
-            .filter((item): boolean => {
-                return item.type === FILE_TREE_NODE_TYPE.BLOB || item.type === FILE_TREE_NODE_TYPE.TREE
-            })
-            .map((item): IFileTreeNode => {
-                return {
-                    path: item.path ?? "",
-                    type: item.type === "tree" ? FILE_TREE_NODE_TYPE.TREE : FILE_TREE_NODE_TYPE.BLOB,
-                    size: typeof item.size === "number" ? item.size : 0,
-                    sha: item.sha ?? "",
-                }
-            })
+        const treeNodes = mapGitTreeNodes(tree.data.tree)
+        const gitIgnoreFiles = await this.loadGitIgnoreFiles(
+            normalizedRef,
+            treeNodes,
+        )
+
+        return filterFileTreeByGitIgnore(treeNodes, gitIgnoreFiles)
     }
 
     /**
@@ -738,6 +738,65 @@ export class GitHubProvider implements IGitProvider {
 
         return response.data
     }
+
+    /**
+     * Loads all `.gitignore` files present in current tree snapshot.
+     *
+     * @param ref Branch or commit reference.
+     * @param treeNodes Repository tree nodes.
+     * @returns Loaded `.gitignore` files.
+     */
+    private async loadGitIgnoreFiles(
+        ref: string,
+        treeNodes: readonly IFileTreeNode[],
+    ): Promise<readonly IGitIgnoreFile[]> {
+        const gitIgnoreNodes = treeNodes.filter((node): boolean => {
+            return (
+                node.type === FILE_TREE_NODE_TYPE.BLOB &&
+                isGitIgnoreFilePath(node.path)
+            )
+        })
+
+        return Promise.all(
+            gitIgnoreNodes.map(async (node): Promise<IGitIgnoreFile> => {
+                return {
+                    path: node.path,
+                    content: await this.getFileContentByRef(node.path, ref),
+                }
+            }),
+        )
+    }
+}
+
+/**
+ * Maps GitHub tree payload into generic repository tree nodes.
+ *
+ * @param items Raw GitHub tree entries.
+ * @returns Normalized file tree nodes.
+ */
+function mapGitTreeNodes(
+    items: readonly GitGetTreeResponseItem[],
+): readonly IFileTreeNode[] {
+    return items
+        .filter((item): boolean => {
+            return (
+                (item.type === FILE_TREE_NODE_TYPE.BLOB ||
+                    item.type === FILE_TREE_NODE_TYPE.TREE) &&
+                typeof item.path === "string" &&
+                item.path.trim().length > 0
+            )
+        })
+        .map((item): IFileTreeNode => {
+            return {
+                path: item.path,
+                type:
+                    item.type === FILE_TREE_NODE_TYPE.TREE
+                        ? FILE_TREE_NODE_TYPE.TREE
+                        : FILE_TREE_NODE_TYPE.BLOB,
+                size: typeof item.size === "number" ? item.size : 0,
+                sha: item.sha ?? "",
+            }
+        })
 }
 
 /**
