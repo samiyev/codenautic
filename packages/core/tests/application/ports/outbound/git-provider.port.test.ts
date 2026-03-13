@@ -19,6 +19,7 @@ import {
     type IMergeRequestDTO,
     type IMergeRequestDiffFileDTO,
     type IBranchInfo,
+    type ITagInfo,
 } from "../../../../src"
 
 class InMemoryGitProvider implements IGitProvider {
@@ -146,6 +147,34 @@ class InMemoryGitProvider implements IGitProvider {
                         lastCommitDate: "2026-03-04T09:00:00.000Z",
                     },
                 ],
+            },
+        ])
+    }
+
+    public getTags(): Promise<readonly ITagInfo[]> {
+        return Promise.resolve([
+            {
+                name: "v1.0.1",
+                sha: "tag-object-1",
+                isAnnotated: true,
+                annotationMessage: "Stable release",
+                date: "2026-03-05T11:00:00.000Z",
+                commit: {
+                    sha: "commit-3",
+                    message: "Cut release",
+                    date: "2026-03-05T10:45:00.000Z",
+                },
+            },
+            {
+                name: "v1.0.0",
+                sha: "commit-1",
+                isAnnotated: false,
+                date: "2026-03-01T08:00:00.000Z",
+                commit: {
+                    sha: "commit-1",
+                    message: "Initial scaffold",
+                    date: "2026-03-01T08:00:00.000Z",
+                },
             },
         ])
     }
@@ -383,6 +412,19 @@ describe("IGitProvider contract", () => {
         expect(contributors[0]?.activePeriod.endedAt).toBe("2026-03-03T10:00:00.000Z")
         expect(contributors[0]?.files[0]?.filePath).toBe("src/index.ts")
         expect(contributors[1]?.commitCount).toBe(1)
+    })
+
+    test("returns sorted tag metadata with associated commit details", async () => {
+        const provider = new InMemoryGitProvider()
+
+        const tags = await provider.getTags()
+
+        expect(tags).toHaveLength(2)
+        expect(tags[0]?.name).toBe("v1.0.1")
+        expect(tags[0]?.isAnnotated).toBe(true)
+        expect(tags[0]?.annotationMessage).toBe("Stable release")
+        expect(tags[0]?.commit.sha).toBe("commit-3")
+        expect(tags[1]?.commit.message).toBe("Initial scaffold")
     })
 
     test("returns diff between refs with summary and rename metadata", async () => {

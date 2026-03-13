@@ -123,6 +123,10 @@ class InMemoryGitProvider implements IGitProvider {
         return Promise.resolve([])
     }
 
+    public getTags(): ReturnType<IGitProvider["getTags"]> {
+        return Promise.resolve([])
+    }
+
     public getDiffBetweenRefs(
         baseRef: string,
         headRef: string,

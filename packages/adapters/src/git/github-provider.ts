@@ -24,6 +24,7 @@ import {
     type IFileTreeNode,
     type IGitProvider,
     type IInlineCommentDTO,
+    type ITagInfo,
     type IRefDiffFile,
     type IRefDiffResult,
     type IRefDiffSummary,
@@ -65,6 +66,8 @@ type ReposGetResponse =
     RestEndpointMethodTypes["repos"]["get"]["response"]["data"]
 type ReposListBranchesResponseItem =
     RestEndpointMethodTypes["repos"]["listBranches"]["response"]["data"][number]
+type ReposListTagsResponseItem =
+    RestEndpointMethodTypes["repos"]["listTags"]["response"]["data"][number]
 type ReposGetContentResponse =
     RestEndpointMethodTypes["repos"]["getContent"]["response"]["data"]
 type ReposListCommitsResponseItem =
@@ -75,6 +78,10 @@ type ReposCompareCommitsWithBaseheadResponse =
     RestEndpointMethodTypes["repos"]["compareCommitsWithBasehead"]["response"]["data"]
 type ReposCompareCommitsWithBaseheadFile =
     NonNullable<ReposCompareCommitsWithBaseheadResponse["files"]>[number]
+type GitGetRefResponse =
+    RestEndpointMethodTypes["git"]["getRef"]["response"]["data"]
+type GitGetTagResponse =
+    RestEndpointMethodTypes["git"]["getTag"]["response"]["data"]
 type GitGetTreeResponseItem =
     RestEndpointMethodTypes["git"]["getTree"]["response"]["data"]["tree"][number]
 
@@ -193,6 +200,9 @@ export interface IGitHubOctokitClient {
         readonly listBranches: (
             params: RestEndpointMethodTypes["repos"]["listBranches"]["parameters"],
         ) => Promise<{readonly data: readonly ReposListBranchesResponseItem[]}>
+        readonly listTags: (
+            params: RestEndpointMethodTypes["repos"]["listTags"]["parameters"],
+        ) => Promise<{readonly data: readonly ReposListTagsResponseItem[]}>
         readonly getContent: (
             params: RestEndpointMethodTypes["repos"]["getContent"]["parameters"],
         ) => Promise<{readonly data: ReposGetContentResponse}>
@@ -211,6 +221,12 @@ export interface IGitHubOctokitClient {
      * Git data methods.
      */
     readonly git: {
+        readonly getRef: (
+            params: RestEndpointMethodTypes["git"]["getRef"]["parameters"],
+        ) => Promise<{readonly data: GitGetRefResponse}>
+        readonly getTag: (
+            params: RestEndpointMethodTypes["git"]["getTag"]["parameters"],
+        ) => Promise<{readonly data: GitGetTagResponse}>
         readonly getTree: (
             params: RestEndpointMethodTypes["git"]["getTree"]["parameters"],
         ) => Promise<{
@@ -272,7 +288,14 @@ export interface IGitHubProviderOptions {
 const DEFAULT_RETRY_MAX_ATTEMPTS = 3
 const DEFAULT_RETRY_BASE_DELAY_MS = 250
 const MAX_GITHUB_TEXT_FILE_BYTES = 1024 * 1024
-const COMMIT_DETAILS_BATCH_SIZE = 20
+const DETAILS_BATCH_SIZE = 20
+
+interface IResolvedGitHubTagTarget {
+    readonly commitSha: string
+    readonly date: string
+    readonly isAnnotated: boolean
+    readonly annotationMessage?: string
+}
 
 /**
  * GraphQL query used for blame lookup.
@@ -470,7 +493,7 @@ export class GitHubProvider implements IGitProvider {
                     sha: branchSha,
                     isDefault: branch.name === defaultBranch,
                     isProtected: branch.protected,
-                    lastCommitDate: resolveBranchLastCommitDate(details.data),
+                    lastCommitDate: resolveCommitDate(details.data),
                 }
             }),
         )
@@ -539,6 +562,18 @@ export class GitHubProvider implements IGitProvider {
         const details = await this.loadCommitDetails(commits)
 
         return buildContributorStats(details)
+    }
+
+    /**
+     * Loads repository tags with annotation and associated commit metadata.
+     *
+     * @returns Tags sorted by effective tag date descending.
+     */
+    public async getTags(): Promise<readonly ITagInfo[]> {
+        const tags = await this.listRepositoryTags()
+        const resolvedTags = await this.loadTagDetails(tags)
+
+        return [...resolvedTags].sort(compareTagInfo)
     }
 
     /**
@@ -906,6 +941,37 @@ export class GitHubProvider implements IGitProvider {
     }
 
     /**
+     * Lists all repository tags across paginated GitHub responses.
+     *
+     * @returns Raw repository tags.
+     */
+    private async listRepositoryTags(): Promise<readonly ReposListTagsResponseItem[]> {
+        const tags: ReposListTagsResponseItem[] = []
+        let page = 1
+
+        while (true) {
+            const response = await this.executeRequest(() => {
+                return this.client.repos.listTags({
+                    owner: this.owner,
+                    repo: this.repo,
+                    per_page: 100,
+                    page,
+                })
+            })
+
+            tags.push(...response.data)
+
+            if (response.data.length < 100) {
+                break
+            }
+
+            page += 1
+        }
+
+        return tags
+    }
+
+    /**
      * Lists repository history pages until the requested max count is reached.
      *
      * @param ref Normalized branch or commit reference.
@@ -972,12 +1038,8 @@ export class GitHubProvider implements IGitProvider {
     ): Promise<readonly ReposGetCommitResponse[]> {
         const detailedCommits: ReposGetCommitResponse[] = []
 
-        for (
-            let index = 0;
-            index < commits.length;
-            index += COMMIT_DETAILS_BATCH_SIZE
-        ) {
-            const batch = commits.slice(index, index + COMMIT_DETAILS_BATCH_SIZE)
+        for (let index = 0; index < commits.length; index += DETAILS_BATCH_SIZE) {
+            const batch = commits.slice(index, index + DETAILS_BATCH_SIZE)
             const detailedBatch = await Promise.all(
                 batch.map(async (commit): Promise<ReposGetCommitResponse> => {
                     const commitSha = normalizeRequiredText(commit.sha, "commitSha")
@@ -998,6 +1060,152 @@ export class GitHubProvider implements IGitProvider {
         }
 
         return detailedCommits
+    }
+
+    /**
+     * Loads tag metadata in bounded parallel batches.
+     *
+     * @param tags Raw repository tag list.
+     * @returns Normalized tag payloads in source order.
+     */
+    private async loadTagDetails(
+        tags: readonly ReposListTagsResponseItem[],
+    ): Promise<readonly ITagInfo[]> {
+        const resolvedTags: ITagInfo[] = []
+
+        for (let index = 0; index < tags.length; index += DETAILS_BATCH_SIZE) {
+            const batch = tags.slice(index, index + DETAILS_BATCH_SIZE)
+            const resolvedBatch = await Promise.all(
+                batch.map(async (tag): Promise<ITagInfo> => {
+                    return this.loadTagDetail(tag)
+                }),
+            )
+
+            resolvedTags.push(...resolvedBatch)
+        }
+
+        return resolvedTags
+    }
+
+    /**
+     * Loads one tag with annotation and associated commit metadata.
+     *
+     * @param tag Raw repository tag entry.
+     * @returns Normalized tag payload.
+     */
+    private async loadTagDetail(tag: ReposListTagsResponseItem): Promise<ITagInfo> {
+        const tagName = normalizeRequiredText(tag.name, "tagName")
+        const refResponse = await this.executeRequest(() => {
+            return this.client.git.getRef({
+                owner: this.owner,
+                repo: this.repo,
+                ref: `tags/${tagName}`,
+            })
+        })
+        const tagSha = normalizeRequiredText(refResponse.data.object.sha, "tagSha")
+        const target = await this.resolveTagTarget(
+            refResponse.data.object.type,
+            tagSha,
+        )
+        const commitResponse = await this.executeRequest(() => {
+            return this.client.repos.getCommit({
+                owner: this.owner,
+                repo: this.repo,
+                ref: target.commitSha,
+            })
+        })
+        const commitDate = resolveCommitDate(commitResponse.data)
+
+        return {
+            name: tagName,
+            sha: tagSha,
+            isAnnotated: target.isAnnotated,
+            annotationMessage: target.annotationMessage,
+            date: target.date.length > 0 ? target.date : commitDate,
+            commit: {
+                sha: target.commitSha,
+                message: commitResponse.data.commit.message,
+                date: commitDate,
+            },
+        }
+    }
+
+    /**
+     * Resolves tag target metadata from git ref object.
+     *
+     * @param type Raw git object type.
+     * @param sha Git object SHA.
+     * @returns Associated commit metadata seed.
+     */
+    private async resolveTagTarget(
+        type: string,
+        sha: string,
+    ): Promise<IResolvedGitHubTagTarget> {
+        const normalizedType = normalizeGitTagObjectType(type)
+
+        if (normalizedType === "commit") {
+            return {
+                commitSha: sha,
+                date: "",
+                isAnnotated: false,
+            }
+        }
+
+        return this.resolveAnnotatedTagTarget(sha, new Set<string>())
+    }
+
+    /**
+     * Resolves annotated tag chain until commit target is reached.
+     *
+     * @param tagSha Annotated tag object SHA.
+     * @param visitedTagShas Visited tag objects to guard against loops.
+     * @returns Resolved annotated tag metadata.
+     */
+    private async resolveAnnotatedTagTarget(
+        tagSha: string,
+        visitedTagShas: Set<string>,
+    ): Promise<IResolvedGitHubTagTarget> {
+        if (visitedTagShas.has(tagSha)) {
+            throw new Error(`GitHub tag object cycle detected for ${tagSha}`)
+        }
+
+        visitedTagShas.add(tagSha)
+
+        const response = await this.executeRequest(() => {
+            return this.client.git.getTag({
+                owner: this.owner,
+                repo: this.repo,
+                tag_sha: tagSha,
+            })
+        })
+        const nextObjectType = normalizeGitTagObjectType(response.data.object.type)
+        const nextObjectSha = normalizeRequiredText(
+            response.data.object.sha,
+            "tagTargetSha",
+        )
+        const annotationMessage = normalizeOptionalTagMessage(response.data.message)
+        const tagDate = normalizeOptionalContributorText(response.data.tagger?.date)
+
+        if (nextObjectType === "commit") {
+            return {
+                commitSha: nextObjectSha,
+                date: tagDate,
+                isAnnotated: true,
+                annotationMessage,
+            }
+        }
+
+        const nestedTarget = await this.resolveAnnotatedTagTarget(
+            nextObjectSha,
+            visitedTagShas,
+        )
+
+        return {
+            commitSha: nestedTarget.commitSha,
+            date: tagDate.length > 0 ? tagDate : nestedTarget.date,
+            isAnnotated: true,
+            annotationMessage: annotationMessage ?? nestedTarget.annotationMessage,
+        }
     }
 
     /**
@@ -1515,6 +1723,26 @@ function compareContributorFileStats(
 }
 
 /**
+ * Orders tags deterministically by effective date descending.
+ *
+ * @param left Left tag.
+ * @param right Right tag.
+ * @returns Sort comparison result.
+ */
+function compareTagInfo(left: ITagInfo, right: ITagInfo): number {
+    if (left.date !== right.date) {
+        return right.date.localeCompare(left.date)
+    }
+
+    const nameComparison = left.name.localeCompare(right.name)
+    if (nameComparison !== 0) {
+        return nameComparison
+    }
+
+    return left.sha.localeCompare(right.sha)
+}
+
+/**
  * Picks earlier non-empty ISO timestamp.
  *
  * @param current Current timestamp.
@@ -1572,6 +1800,20 @@ function normalizeOptionalContributorText(
  */
 function normalizeNumericCount(value: number | undefined): number {
     return typeof value === "number" ? value : 0
+}
+
+/**
+ * Normalizes optional annotated tag message.
+ *
+ * @param value Raw annotation message.
+ * @returns Trimmed annotation message or undefined.
+ */
+function normalizeOptionalTagMessage(
+    value: string | null | undefined,
+): string | undefined {
+    const normalized = normalizeOptionalContributorText(value)
+
+    return normalized.length > 0 ? normalized : undefined
 }
 
 /**
@@ -1793,13 +2035,27 @@ function mapCheckRun(data: IGitHubCheckRunPayload): ICheckRunDTO {
 }
 
 /**
- * Resolves branch head commit date from detailed commit payload.
+ * Resolves commit timestamp from detailed commit payload.
  *
  * @param payload Detailed commit payload.
  * @returns Commit timestamp or empty string when upstream omits it.
  */
-function resolveBranchLastCommitDate(payload: ReposGetCommitResponse): string {
+function resolveCommitDate(payload: ReposGetCommitResponse): string {
     return payload.commit.committer?.date ?? payload.commit.author?.date ?? ""
+}
+
+/**
+ * Normalizes supported git object types used by tag refs.
+ *
+ * @param value Raw git object type.
+ * @returns Supported git object type.
+ */
+function normalizeGitTagObjectType(value: string): "commit" | "tag" {
+    if (value === "commit" || value === "tag") {
+        return value
+    }
+
+    throw new Error(`GitHub tag ref points to unsupported object type: ${value}`)
 }
 
 /**

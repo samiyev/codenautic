@@ -4,6 +4,7 @@ import type {
     ICheckRunDTO,
     ICommentDTO,
     IInlineCommentDTO,
+    ITagInfo,
     IBranchInfo,
     ICommitHistoryOptions,
     ICommitInfo,
@@ -83,6 +84,13 @@ export interface IGitProvider extends IGitBlame {
         ref: string,
         options?: IContributorStatsOptions,
     ): Promise<readonly IContributorStat[]>
+
+    /**
+     * Fetches repository tags metadata sorted by provider-defined date semantics.
+     *
+     * @returns Tag list with annotation and associated commit metadata.
+     */
+    getTags(): Promise<readonly ITagInfo[]>
 
     /**
      * Fetches diff between two commit, branch, or tag refs.

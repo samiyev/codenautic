@@ -60,6 +60,9 @@ export function createGitProviderMock(): IGitProvider {
         ): ReturnType<IGitProvider["getContributorStats"]> {
             return Promise.resolve([])
         },
+        getTags(): ReturnType<IGitProvider["getTags"]> {
+            return Promise.resolve([])
+        },
         getDiffBetweenRefs(
             baseRef: string,
             headRef: string,

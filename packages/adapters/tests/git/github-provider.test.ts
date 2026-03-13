@@ -39,12 +39,15 @@ type IGitHubMockChecks = {
 type IGitHubMockRepos = {
     readonly get?: AsyncMethod<unknown>
     readonly listBranches?: AsyncMethod<unknown>
+    readonly listTags?: AsyncMethod<unknown>
     readonly getContent?: AsyncMethod<unknown>
     readonly listCommits?: AsyncMethod<unknown>
     readonly getCommit?: AsyncMethod<unknown>
     readonly compareCommitsWithBasehead?: AsyncMethod<unknown>
 }
 type IGitHubMockGit = {
+    readonly getRef?: AsyncMethod<unknown>
+    readonly getTag?: AsyncMethod<unknown>
     readonly getTree?: AsyncMethod<unknown>
 }
 type IGitHubClientMockOverrides = {
@@ -82,6 +85,30 @@ function createQueuedAsyncMethod<TResult>(
         if (handler === undefined) {
             return Promise.reject(new Error("Unexpected call"))
         }
+
+        return Promise.resolve(handler(...args))
+    }) as AsyncMethod<TResult> & {readonly calls: readonly (readonly unknown[])[]}
+
+    Object.defineProperty(method, "calls", {
+        value: calls,
+    })
+
+    return method
+}
+
+/**
+ * Creates async mock backed by one reusable handler.
+ *
+ * @param handler Call handler.
+ * @returns Async function with captured calls.
+ */
+function createAsyncMethod<TResult>(
+    handler: (...args: readonly unknown[]) => TResult | Promise<TResult>,
+): AsyncMethod<TResult> & {readonly calls: readonly (readonly unknown[])[]} {
+    const calls: (readonly unknown[])[] = []
+
+    const method = ((...args: readonly unknown[]): Promise<TResult> => {
+        calls.push(args)
 
         return Promise.resolve(handler(...args))
     }) as AsyncMethod<TResult> & {readonly calls: readonly (readonly unknown[])[]}
@@ -237,6 +264,8 @@ function createGitHubReposMock(
         get: resolveGitHubMethod(overrides?.get) as IGitHubOctokitClient["repos"]["get"],
         listBranches:
             resolveGitHubMethod(overrides?.listBranches) as IGitHubOctokitClient["repos"]["listBranches"],
+        listTags:
+            resolveGitHubMethod(overrides?.listTags) as IGitHubOctokitClient["repos"]["listTags"],
         getContent:
             resolveGitHubMethod(overrides?.getContent) as IGitHubOctokitClient["repos"]["getContent"],
         listCommits:
@@ -260,6 +289,8 @@ function createGitHubGitMock(
     overrides?: IGitHubMockGit,
 ): IGitHubOctokitClient["git"] {
     return {
+        getRef: resolveGitHubMethod(overrides?.getRef) as IGitHubOctokitClient["git"]["getRef"],
+        getTag: resolveGitHubMethod(overrides?.getTag) as IGitHubOctokitClient["git"]["getTag"],
         getTree: resolveGitHubMethod(overrides?.getTree) as IGitHubOctokitClient["git"]["getTree"],
     }
 }
@@ -1417,6 +1448,361 @@ describe("GitHubProvider", () => {
         expect(contributors).toEqual([])
         expect(sleepCalls).toEqual([1000])
         expect(listCommits.calls).toHaveLength(2)
+    })
+
+    test("lists tags with annotation metadata, associated commit, and effective-date sorting", async () => {
+        const listTags = createQueuedAsyncMethod([
+            createDataHandler([
+                {
+                    name: "v1.0.0",
+                },
+                {
+                    name: "v1.1.0",
+                },
+                {
+                    name: "v1.0.1",
+                },
+            ]),
+        ])
+        const getRef = createAsyncMethod((input: unknown): IDataResponse => {
+            const ref = typeof input === "object" && input !== null
+                ? (input as {readonly ref?: unknown}).ref
+                : undefined
+
+            if (ref === "tags/v1.0.0") {
+                return {
+                    data: {
+                        object: {
+                            type: "commit",
+                            sha: "commit-100",
+                        },
+                    },
+                }
+            }
+
+            if (ref === "tags/v1.1.0") {
+                return {
+                    data: {
+                        object: {
+                            type: "tag",
+                            sha: "tag-object-110",
+                        },
+                    },
+                }
+            }
+
+            if (ref === "tags/v1.0.1") {
+                return {
+                    data: {
+                        object: {
+                            type: "tag",
+                            sha: "tag-object-101",
+                        },
+                    },
+                }
+            }
+
+            throw new Error(`Unexpected tag ref request: ${String(ref)}`)
+        })
+        const getTag = createAsyncMethod((input: unknown): IDataResponse => {
+            const tagSha = typeof input === "object" && input !== null
+                ? (input as {readonly tag_sha?: unknown}).tag_sha
+                : undefined
+
+            if (tagSha === "tag-object-110") {
+                return {
+                    data: {
+                        message: "Release 1.1.0",
+                        tagger: {
+                            date: "2026-03-12T12:00:00.000Z",
+                        },
+                        object: {
+                            type: "commit",
+                            sha: "commit-110",
+                        },
+                    },
+                }
+            }
+
+            if (tagSha === "tag-object-101") {
+                return {
+                    data: {
+                        message: "Hotfix 1.0.1",
+                        tagger: {
+                            date: "2026-03-05T08:30:00.000Z",
+                        },
+                        object: {
+                            type: "commit",
+                            sha: "commit-101",
+                        },
+                    },
+                }
+            }
+
+            throw new Error(`Unexpected tag object request: ${String(tagSha)}`)
+        })
+        const getCommit = createAsyncMethod((input: unknown): IDataResponse => {
+            const ref = typeof input === "object" && input !== null
+                ? (input as {readonly ref?: unknown}).ref
+                : undefined
+
+            if (ref === "commit-100") {
+                return {
+                    data: {
+                        commit: {
+                            message: "Bootstrap release baseline",
+                            committer: {
+                                date: "2026-03-01T09:00:00.000Z",
+                            },
+                        },
+                    },
+                }
+            }
+
+            if (ref === "commit-110") {
+                return {
+                    data: {
+                        commit: {
+                            message: "Cut 1.1.0 release",
+                            author: {
+                                date: "2026-03-11T20:00:00.000Z",
+                            },
+                        },
+                    },
+                }
+            }
+
+            if (ref === "commit-101") {
+                return {
+                    data: {
+                        commit: {
+                            message: "Patch release",
+                            committer: {
+                                date: "2026-03-05T08:00:00.000Z",
+                            },
+                        },
+                    },
+                }
+            }
+
+            throw new Error(`Unexpected commit request: ${String(ref)}`)
+        })
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    listTags,
+                    getCommit,
+                },
+                git: {
+                    getRef,
+                    getTag,
+                },
+            }),
+        })
+
+        const tags = await provider.getTags()
+
+        expect(tags).toEqual([
+            {
+                name: "v1.1.0",
+                sha: "tag-object-110",
+                isAnnotated: true,
+                annotationMessage: "Release 1.1.0",
+                date: "2026-03-12T12:00:00.000Z",
+                commit: {
+                    sha: "commit-110",
+                    message: "Cut 1.1.0 release",
+                    date: "2026-03-11T20:00:00.000Z",
+                },
+            },
+            {
+                name: "v1.0.1",
+                sha: "tag-object-101",
+                isAnnotated: true,
+                annotationMessage: "Hotfix 1.0.1",
+                date: "2026-03-05T08:30:00.000Z",
+                commit: {
+                    sha: "commit-101",
+                    message: "Patch release",
+                    date: "2026-03-05T08:00:00.000Z",
+                },
+            },
+            {
+                name: "v1.0.0",
+                sha: "commit-100",
+                isAnnotated: false,
+                date: "2026-03-01T09:00:00.000Z",
+                commit: {
+                    sha: "commit-100",
+                    message: "Bootstrap release baseline",
+                    date: "2026-03-01T09:00:00.000Z",
+                },
+            },
+        ])
+        expect(listTags.calls[0]?.[0]).toMatchObject({
+            owner: "codenautic",
+            repo: "platform",
+            per_page: 100,
+            page: 1,
+        })
+    })
+
+    test("paginates repository tags beyond first page", async () => {
+        const firstPage = Array.from({length: 100}, (_value, index): {readonly name: string} => {
+            return {
+                name: `tag-${index + 1}`,
+            }
+        })
+        const secondPage = [
+            {
+                name: "tag-101",
+            },
+        ]
+        const listTags = createQueuedAsyncMethod([
+            createDataHandler(firstPage),
+            createDataHandler(secondPage),
+        ])
+        const getRef = createAsyncMethod((input: unknown): IDataResponse => {
+            const ref = typeof input === "object" && input !== null
+                ? (input as {readonly ref?: unknown}).ref
+                : undefined
+
+            if (typeof ref !== "string" || ref.startsWith("tags/tag-") === false) {
+                throw new Error(`Unexpected tag ref request: ${String(ref)}`)
+            }
+
+            return {
+                data: {
+                    object: {
+                        type: "commit",
+                        sha: ref.replace("tags/", "commit-"),
+                    },
+                },
+            }
+        })
+        const getCommit = createAsyncMethod((input: unknown): IDataResponse => {
+            const ref = typeof input === "object" && input !== null
+                ? (input as {readonly ref?: unknown}).ref
+                : undefined
+
+            if (typeof ref !== "string" || ref.startsWith("commit-tag-") === false) {
+                throw new Error(`Unexpected commit request: ${String(ref)}`)
+            }
+
+            const tagNumber = Number(ref.replace("commit-tag-", ""))
+            const month = String(Math.floor((tagNumber - 1) / 28) + 1).padStart(2, "0")
+            const day = String(((tagNumber - 1) % 28) + 1).padStart(2, "0")
+
+            return {
+                data: {
+                    commit: {
+                        message: `Release ${tagNumber}`,
+                        committer: {
+                            date: `2026-${month}-${day}T10:00:00.000Z`,
+                        },
+                    },
+                },
+            }
+        })
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    listTags,
+                    getCommit,
+                },
+                git: {
+                    getRef,
+                },
+            }),
+        })
+
+        const tags = await provider.getTags()
+
+        expect(tags).toHaveLength(101)
+        expect(tags[0]?.name).toBe("tag-101")
+        expect(tags[100]?.name).toBe("tag-1")
+        expect(listTags.calls[0]?.[0]).toMatchObject({
+            owner: "codenautic",
+            repo: "platform",
+            per_page: 100,
+            page: 1,
+        })
+        expect(listTags.calls[1]?.[0]).toMatchObject({
+            owner: "codenautic",
+            repo: "platform",
+            per_page: 100,
+            page: 2,
+        })
+    })
+
+    test("retries tag listing on retryable github errors", async () => {
+        const sleepCalls: number[] = []
+        const listTags = createQueuedAsyncMethod([
+            createErrorHandler(
+                createGitHubApiError("rate limited", {
+                    status: 429,
+                    headers: {
+                        "retry-after": "1",
+                    },
+                }),
+            ),
+            createDataHandler([]),
+        ])
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    listTags,
+                },
+            }),
+            sleep(delayMs: number): Promise<void> {
+                sleepCalls.push(delayMs)
+                return Promise.resolve()
+            },
+        })
+
+        const tags = await provider.getTags()
+
+        expect(tags).toEqual([])
+        expect(sleepCalls).toEqual([1000])
+        expect(listTags.calls).toHaveLength(2)
+    })
+
+    test("fails when tag ref points to unsupported git object type", async () => {
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    listTags: createQueuedAsyncMethod([
+                        createDataHandler([
+                            {
+                                name: "broken-tag",
+                            },
+                        ]),
+                    ]),
+                },
+                git: {
+                    getRef: createQueuedAsyncMethod([
+                        createDataHandler({
+                            object: {
+                                type: "blob",
+                                sha: "blob-sha",
+                            },
+                        }),
+                    ]),
+                },
+            }),
+        })
+
+        const error = await captureRejectedError(() => provider.getTags())
+
+        expect(error.message).toContain("unsupported object type")
     })
 
     test("loads diff between refs with summary stats and rename metadata", async () => {
