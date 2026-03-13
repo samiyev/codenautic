@@ -1,6 +1,8 @@
 /**
- * Конфигурация Recharts animation props для smooth data morph при range change.
- * Применяется к Line, Bar, Area, Pie компонентам Recharts.
+ * Конфигурация Recharts animation props.
+ * Анимации отключены глобально — графики рендерятся мгновенно.
+ * Это обеспечивает корректное поведение при prefers-reduced-motion
+ * и устраняет визуальные задержки при переключении данных.
  *
  * @example
  * ```tsx
@@ -8,15 +10,11 @@
  * ```
  */
 export const CHART_DATA_TRANSITION = {
-    animationDuration: 400,
-    animationEasing: "ease-in-out",
-    isAnimationActive: true,
-} as const
-
-/**
- * Конфигурация animation props с отключенной анимацией (для reduced motion).
- */
-export const CHART_DATA_TRANSITION_NONE = {
     animationDuration: 0,
     isAnimationActive: false,
 } as const
+
+/**
+ * Alias для обратной совместимости.
+ */
+export const CHART_DATA_TRANSITION_NONE = CHART_DATA_TRANSITION
