@@ -1,6 +1,7 @@
 import { type ReactElement, useCallback, useState } from "react"
 
 import { Button } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 import { resolveProviderLabel } from "./auth-labels"
 import { OAUTH_PROVIDERS, type TOAuthProvider } from "./types"
@@ -37,7 +38,7 @@ export function AuthLoginPanel(props: IAuthLoginPanelProps): ReactElement {
 
     return (
         <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
-            <h1 className="text-3xl font-semibold tracking-tight">{props.appTitle}</h1>
+            <h1 className={TYPOGRAPHY.splash}>{props.appTitle}</h1>
             <p className="mt-4 text-base text-muted-foreground">{props.description}</p>
             {props.statusMessage !== undefined ? (
                 <p aria-live="polite" className="mt-3 text-sm text-warning" role="status">
@@ -47,7 +48,7 @@ export function AuthLoginPanel(props: IAuthLoginPanelProps): ReactElement {
             <div className="mt-8 grid w-full max-w-sm gap-3">
                 {OAUTH_PROVIDERS.map((provider) => (
                     <Button
-                        className="rounded-xl border border-border bg-surface px-4 py-3 text-sm font-semibold text-foreground transition hover:border-border hover:bg-surface-muted"
+                        className={`rounded-xl border border-border bg-surface px-4 py-3 ${TYPOGRAPHY.cardTitle} transition hover:border-border hover:bg-surface-muted`}
                         isDisabled={pendingProvider !== null}
                         isLoading={pendingProvider === provider}
                         key={provider}
@@ -81,7 +82,7 @@ export function renderAuthLoadingState(appTitle: string, message: string): React
             aria-busy="true"
             className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8"
         >
-            <h1 className="text-3xl font-semibold tracking-tight">{appTitle}</h1>
+            <h1 className={TYPOGRAPHY.splash}>{appTitle}</h1>
             <p className="mt-4 text-base text-muted-foreground">{message}</p>
         </section>
     )

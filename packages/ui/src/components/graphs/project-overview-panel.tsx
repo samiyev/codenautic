@@ -1,6 +1,8 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
+import { TYPOGRAPHY } from "@/lib/constants/typography"
+
 /**
  * Минимальный file-дескриптор для проектного overview.
  */
@@ -163,10 +165,10 @@ export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactEl
     return (
         <article className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <header className="border-b border-border pb-2">
-                <p className="text-sm font-semibold text-foreground">
+                <p className={TYPOGRAPHY.cardTitle}>
                     {t("code-city:projectOverview.title")}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className={TYPOGRAPHY.captionMuted}>
                     {props.repositoryLabel} ({props.repositoryId})
                 </p>
             </header>
@@ -175,12 +177,12 @@ export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactEl
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     {t("code-city:projectOverview.architectureSummary")}
                 </p>
-                <ul className="space-y-1 text-sm text-foreground">
+                <ul className={`space-y-1 ${TYPOGRAPHY.body}`}>
                     {metrics.architectureSummary.map(
                         (item): ReactElement => (
                             <li className="flex items-center justify-between" key={item.label}>
                                 <span>{item.label}</span>
-                                <span className="text-xs text-muted-foreground">{item.value}</span>
+                                <span className={TYPOGRAPHY.captionMuted}>{item.value}</span>
                             </li>
                         ),
                     )}
@@ -191,12 +193,12 @@ export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactEl
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     {t("code-city:projectOverview.techStack")}
                 </p>
-                <ul className="space-y-1 text-sm text-foreground">
+                <ul className={`space-y-1 ${TYPOGRAPHY.body}`}>
                     {metrics.techStackSummary.map(
                         (item): ReactElement => (
                             <li className="flex items-center justify-between" key={item.label}>
                                 <span>{item.label}</span>
-                                <span className="text-xs text-muted-foreground">{item.value}</span>
+                                <span className={TYPOGRAPHY.captionMuted}>{item.value}</span>
                             </li>
                         ),
                     )}
@@ -218,7 +220,7 @@ export function ProjectOverviewPanel(props: IProjectOverviewPanelProps): ReactEl
                         )}
                     </ul>
                 ) : (
-                    <p className="text-xs text-muted-foreground">
+                    <p className={TYPOGRAPHY.captionMuted}>
                         {t("code-city:projectOverview.noEntryPoints")}
                     </p>
                 )}

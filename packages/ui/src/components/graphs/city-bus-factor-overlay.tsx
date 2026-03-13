@@ -70,8 +70,8 @@ export function CityBusFactorOverlay(props: ICityBusFactorOverlayProps): ReactEl
     const { t } = useTranslation(["code-city"])
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">{t("code-city:cityBusFactor.title")}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className={TYPOGRAPHY.cardTitle}>{t("code-city:cityBusFactor.title")}</p>
+            <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
                 {t("code-city:cityBusFactor.description")}
             </p>
 
@@ -92,10 +92,10 @@ export function CityBusFactorOverlay(props: ICityBusFactorOverlayProps): ReactEl
                             >
                                 <div className="flex items-start justify-between gap-2">
                                     <div className="min-w-0">
-                                        <p className="truncate text-sm font-semibold text-foreground">
+                                        <p className={`truncate ${TYPOGRAPHY.cardTitle}`}>
                                             {entry.districtLabel}
                                         </p>
-                                        <p className="mt-1 text-xs text-muted-foreground">
+                                        <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
                                             {t("code-city:cityBusFactor.filesAndBusFactor", { fileCount: String(entry.fileCount), busFactor: String(entry.busFactor) })}
                                         </p>
                                     </div>

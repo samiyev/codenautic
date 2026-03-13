@@ -1,5 +1,7 @@
 import type { ReactElement } from "react"
 
+import { TYPOGRAPHY } from "@/lib/constants/typography"
+
 /**
  * Параметры отдельного события timeline.
  */
@@ -26,11 +28,11 @@ export function ActivityTimelineItem(props: IActivityTimelineItemProps): ReactEl
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 {props.time}
             </p>
-            <p className="mt-1 text-sm font-semibold text-foreground">{props.title}</p>
+            <p className={`mt-1 ${TYPOGRAPHY.cardTitle}`}>{props.title}</p>
             <p className="mt-1 text-sm text-muted-foreground">{props.description}</p>
             {props.details === undefined ? null : (
                 <details className="mt-2">
-                    <summary className="cursor-pointer text-sm font-medium text-foreground">
+                    <summary className={`cursor-pointer ${TYPOGRAPHY.label}`}>
                         View details
                     </summary>
                     <p className="mt-2 text-sm text-muted-foreground">{props.details}</p>

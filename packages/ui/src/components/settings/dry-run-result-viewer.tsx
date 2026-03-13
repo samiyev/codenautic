@@ -2,6 +2,7 @@ import { type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import type { TRepoReviewMode } from "@/lib/api/endpoints/repo-config.endpoint"
 
 export interface IDryRunResultViewerIssue {
@@ -34,7 +35,7 @@ export function DryRunResultViewer(props: IDryRunResultViewerProps): ReactElemen
 
     return (
         <section className="space-y-3 rounded-xl border border-border bg-surface p-4">
-            <h2 className="text-base font-semibold text-foreground">
+            <h2 className={TYPOGRAPHY.sectionTitle}>
                 {t("settings:dryRunResultViewer.title")}
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -51,19 +52,19 @@ export function DryRunResultViewer(props: IDryRunResultViewerProps): ReactElemen
                     : t("settings:dryRunResultViewer.runDryRun")}
             </Button>
             {props.result === undefined ? (
-                <p className="text-xs text-muted-foreground" data-testid="dry-run-empty">
+                <p className={TYPOGRAPHY.captionMuted} data-testid="dry-run-empty">
                     {t("settings:dryRunResultViewer.emptyState")}
                 </p>
             ) : (
                 <div className="space-y-2">
-                    <p className="text-sm text-foreground" data-testid="dry-run-summary">
+                    <p className={TYPOGRAPHY.body} data-testid="dry-run-summary">
                         {t("settings:dryRunResultViewer.summaryLine", {
                             mode: props.result.mode,
                             files: props.result.reviewedFiles,
                             suggestions: props.result.suggestions,
                         })}
                     </p>
-                    <ul className="space-y-1 text-xs text-muted-foreground">
+                    <ul className={`space-y-1 ${TYPOGRAPHY.captionMuted}`}>
                         {props.result.issues.map(
                             (issue): ReactElement => (
                                 <li

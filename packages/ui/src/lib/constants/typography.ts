@@ -10,20 +10,24 @@
  * ```
  */
 export const TYPOGRAPHY = {
-    /** Заголовок страницы (Space Grotesk, 2xl, semibold). */
+    /** Заголовок страницы (DM Sans display, 2xl, semibold). */
     pageTitle: "font-display text-2xl font-semibold text-foreground",
     /** Подзаголовок страницы / контекст под pageTitle (sm, muted). */
     pageSubtitle: "text-sm text-text-secondary",
-    /** Заголовок секции/карточки (Space Grotesk, base, semibold). */
+    /** Заголовок секции (DM Sans display, base, semibold). */
     sectionTitle: "font-display text-base font-semibold text-foreground",
     /** Подзаголовок секции (sm, medium weight). */
     sectionSubtitle: "text-sm font-medium text-foreground",
+    /** Заголовок карточки / панели (sm, semibold). */
+    cardTitle: "text-sm font-semibold text-foreground",
     /** Основной текст (sm). */
     body: "text-sm text-foreground",
     /** Вторичный текст (sm, muted). */
     bodyMuted: "text-sm text-text-secondary",
     /** Подпись / caption (xs, subtle). */
     caption: "text-xs text-text-subtle",
+    /** Подпись / caption с muted цветом (xs, muted). */
+    captionMuted: "text-xs text-muted-foreground",
     /** Label для form-полей (sm, medium weight). */
     label: "text-sm font-medium text-foreground",
     /** Микро-текст для badges, status indicators (10px, semibold, uppercase, tracking). */

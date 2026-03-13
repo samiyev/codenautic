@@ -2,6 +2,7 @@ import { Outlet } from "@tanstack/react-router"
 import type { ReactElement, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { createSettingsNavItems } from "@/lib/navigation/settings-nav-items"
 
 import { SidebarNav } from "./sidebar-nav"
@@ -27,7 +28,7 @@ export function SettingsLayout(props: ISettingsLayoutProps): ReactElement {
     return (
         <div className="grid gap-4 md:grid-cols-[230px_1fr]">
             <aside className="rounded-lg bg-sidebar-bg p-2 shadow-sm">
-                <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-[0.2em] text-text-subtle">
+                <p className={`px-2 pb-2 ${TYPOGRAPHY.overline}`}>
                     {title}
                 </p>
                 <SidebarNav items={settingsItems} />

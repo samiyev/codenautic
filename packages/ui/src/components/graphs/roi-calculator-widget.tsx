@@ -2,6 +2,7 @@ import { useMemo, useState, type ChangeEvent, type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
 import type { IRefactoringTargetDescriptor } from "@/components/graphs/refactoring-dashboard"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
  * Пропсы ROI calculator widget.
@@ -80,8 +81,8 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">{t("code-city:roiCalculator.title")}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className={TYPOGRAPHY.cardTitle}>{t("code-city:roiCalculator.title")}</p>
+            <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
                 {t("code-city:roiCalculator.description")}
             </p>
 
@@ -102,10 +103,10 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
                                 type="checkbox"
                             />
                             <div className="min-w-0">
-                                <p className="text-sm font-semibold text-foreground">
+                                <p className={TYPOGRAPHY.cardTitle}>
                                     {target.title}
                                 </p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className={TYPOGRAPHY.captionMuted}>
                                     {t("code-city:roiCalculator.targetMeta", { roi: String(target.roiScore), risk: String(target.riskScore), effort: String(target.effortScore) })}
                                 </p>
                             </div>

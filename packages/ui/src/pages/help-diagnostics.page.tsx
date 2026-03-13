@@ -587,7 +587,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                                         className="rounded-lg border border-border bg-surface px-3 py-2"
                                         key={article.id}
                                     >
-                                        <p className="text-sm font-semibold text-foreground">
+                                        <p className={TYPOGRAPHY.cardTitle}>
                                             {tDynamic(article.titleKey)}
                                         </p>
                                         <p className="text-xs text-text-secondary">
@@ -675,7 +675,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                                     key={check.id}
                                 >
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <p className="text-sm font-semibold text-foreground">
+                                        <p className={TYPOGRAPHY.cardTitle}>
                                             {tDynamic(check.labelKey)}
                                         </p>
                                         <Chip
@@ -700,7 +700,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                         )}
                     </ul>
                     <div className="rounded-lg border border-border bg-surface px-3 py-2">
-                        <p className="text-sm font-semibold text-foreground">
+                        <p className={TYPOGRAPHY.cardTitle}>
                             {t("system:helpDiagnostics.suggestedActionsTitle")}
                         </p>
                         <ul
@@ -713,7 +713,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                                         className="rounded border border-border bg-surface px-2 py-2"
                                         key={action.id}
                                     >
-                                        <p className="text-sm font-semibold text-foreground">
+                                        <p className={TYPOGRAPHY.cardTitle}>
                                             {tDynamic(action.labelKey)}
                                         </p>
                                         <p className="text-xs text-text-secondary">

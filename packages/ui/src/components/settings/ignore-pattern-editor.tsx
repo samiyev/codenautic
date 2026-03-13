@@ -2,6 +2,7 @@ import { type FormEvent, type ReactElement, useEffect, useMemo, useState } from 
 import { useTranslation } from "react-i18next"
 
 import { Button, Textarea } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { sanitizeTextInput } from "@/lib/validation/schema-validation"
 
 /** Параметры file pattern editor для ignore-правил. */
@@ -57,7 +58,7 @@ export function IgnorePatternEditor(props: IIgnorePatternEditorProps): ReactElem
 
     return (
         <form className="space-y-3" onSubmit={applyChanges}>
-            <label className="text-sm font-medium text-foreground" htmlFor={textareaId}>
+            <label className={TYPOGRAPHY.label} htmlFor={textareaId}>
                 {t("settings:ignorePatternEditor.label")}
             </label>
             <Textarea
@@ -70,10 +71,10 @@ export function IgnorePatternEditor(props: IIgnorePatternEditorProps): ReactElem
                 }}
             />
             <div className="flex items-center justify-between gap-3">
-                <p className="text-xs text-muted-foreground">
+                <p className={TYPOGRAPHY.captionMuted}>
                     {props.helperText ?? t("settings:ignorePatternEditor.defaultHelper")}
                 </p>
-                <p className="text-xs text-muted-foreground" data-testid="ignore-pattern-count">
+                <p className={TYPOGRAPHY.captionMuted} data-testid="ignore-pattern-count">
                     {t("settings:ignorePatternEditor.patternCount", {
                         count: normalizedPatterns.length,
                     })}

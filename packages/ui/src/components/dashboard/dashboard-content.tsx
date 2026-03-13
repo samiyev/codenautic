@@ -11,6 +11,7 @@ import {
 } from "@/components/ui"
 import { StaggerContainer, STAGGER_ITEM_VARIANTS } from "@/lib/motion"
 import { EmptyState } from "@/components/states/empty-state"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { ActivityTimeline, type IActivityTimelineEntry } from "./activity-timeline"
 import { StatusDistributionChart, type IStatusDistributionPoint } from "./status-distribution-chart"
 
@@ -59,7 +60,7 @@ export function DashboardContent(props: IDashboardContentProps): ReactElement {
             <div className="space-y-4">
                 <Card className="border-l-2 border-l-danger">
                     <CardHeader>
-                        <h3 className="text-base font-semibold text-foreground">
+                        <h3 className={TYPOGRAPHY.sectionTitle}>
                             Signals & Work Queue
                         </h3>
                     </CardHeader>
@@ -88,14 +89,14 @@ export function DashboardContent(props: IDashboardContentProps): ReactElement {
                                             className="rounded-lg border border-border bg-surface p-3 transition-colors duration-150 hover:bg-surface-muted"
                                             variants={STAGGER_ITEM_VARIANTS}
                                         >
-                                            <p className="text-sm font-semibold text-foreground">
+                                            <p className={TYPOGRAPHY.cardTitle}>
                                                 {item.title}
                                             </p>
                                             <p className="text-sm text-muted-foreground">
                                                 {item.description}
                                             </p>
                                             <StyledLink
-                                                className="mt-2 inline-block text-sm text-foreground"
+                                                className={`mt-2 inline-block ${TYPOGRAPHY.body}`}
                                                 to={item.route}
                                             >
                                                 Open {item.id}

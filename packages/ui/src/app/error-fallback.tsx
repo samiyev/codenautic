@@ -1,6 +1,7 @@
 import { useEffect, type ReactElement } from "react"
 import type { ErrorComponentProps } from "@tanstack/react-router"
 import { Button } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 interface IErrorWithStatusCode {
     readonly statusCode: number
@@ -46,7 +47,7 @@ export function RouteErrorFallback(props: ErrorComponentProps): ReactElement {
 export function NotFoundFallback(): ReactElement {
     return (
         <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
-            <h1 className="text-3xl font-semibold tracking-tight">Страница не найдена</h1>
+            <h1 className={TYPOGRAPHY.splash}>Страница не найдена</h1>
             <p className="mt-4 text-base text-muted-foreground">
                 Запрошенный маршрут отсутствует или был перемещён.
             </p>
@@ -67,7 +68,7 @@ function ErrorFallback(props: IErrorFallbackProps): ReactElement {
     if (statusCode === 401) {
         return (
             <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
-                <h1 className="text-3xl font-semibold tracking-tight">{props.scopeLabel}</h1>
+                <h1 className={TYPOGRAPHY.splash}>{props.scopeLabel}</h1>
                 <p className="mt-4 text-base text-muted-foreground">
                     Сессия истекла, перенаправляем на страницу входа...
                 </p>
@@ -78,7 +79,7 @@ function ErrorFallback(props: IErrorFallbackProps): ReactElement {
     if (statusCode === 403) {
         return (
             <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
-                <h1 className="text-3xl font-semibold tracking-tight">{props.scopeLabel}</h1>
+                <h1 className={TYPOGRAPHY.splash}>{props.scopeLabel}</h1>
                 <p className="mt-4 text-base text-warning">
                     Доступ запрещён для текущего пользователя.
                 </p>
@@ -110,7 +111,7 @@ function ErrorFallback(props: IErrorFallbackProps): ReactElement {
     if (isServerError || isUnknownStatus) {
         return (
             <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
-                <h1 className="text-3xl font-semibold tracking-tight">{props.scopeLabel}</h1>
+                <h1 className={TYPOGRAPHY.splash}>{props.scopeLabel}</h1>
                 <p className="mt-4 text-base text-danger">{resolvedError.message}</p>
                 <div className="mt-6 flex flex-wrap items-center gap-2">
                     <Button
@@ -134,7 +135,7 @@ function ErrorFallback(props: IErrorFallbackProps): ReactElement {
 
     return (
         <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
-            <h1 className="text-3xl font-semibold tracking-tight">{props.scopeLabel}</h1>
+            <h1 className={TYPOGRAPHY.splash}>{props.scopeLabel}</h1>
             <p className="mt-4 text-base text-foreground">{resolvedError.message}</p>
         </section>
     )

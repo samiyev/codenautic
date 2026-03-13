@@ -2,6 +2,7 @@ import { type ReactElement, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { REPO_REVIEW_MODE, type TRepoReviewMode } from "@/lib/api/endpoints/repo-config.endpoint"
 
 interface IReviewCadenceOption {
@@ -59,7 +60,7 @@ export function ReviewCadenceSelector(props: IReviewCadenceSelectorProps): React
 
     return (
         <section className="space-y-3 rounded-xl border border-border bg-surface p-4">
-            <h2 className="text-base font-semibold text-foreground">
+            <h2 className={TYPOGRAPHY.sectionTitle}>
                 {t("settings:reviewCadenceSelector.title")}
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -73,7 +74,7 @@ export function ReviewCadenceSelector(props: IReviewCadenceSelectorProps): React
                     (option): ReactElement => (
                         <label
                             key={option.key}
-                            className="flex cursor-pointer items-start gap-2 rounded-md border border-border p-3 text-sm text-foreground"
+                            className={`flex cursor-pointer items-start gap-2 rounded-md border border-border p-3 ${TYPOGRAPHY.body}`}
                         >
                             <input
                                 checked={props.mode === option.key}
@@ -89,7 +90,7 @@ export function ReviewCadenceSelector(props: IReviewCadenceSelectorProps): React
                                 <span className="block font-medium text-foreground">
                                     {option.label}
                                 </span>
-                                <span className="block text-xs text-muted-foreground">
+                                <span className={`block ${TYPOGRAPHY.captionMuted}`}>
                                     {option.description}
                                 </span>
                             </span>
@@ -97,7 +98,7 @@ export function ReviewCadenceSelector(props: IReviewCadenceSelectorProps): React
                     ),
                 )}
             </fieldset>
-            <p className="text-xs text-muted-foreground" data-testid="review-cadence-current">
+            <p className={TYPOGRAPHY.captionMuted} data-testid="review-cadence-current">
                 {t("settings:reviewCadenceSelector.currentMode", {
                     label: mapReviewModeToLabel(props.mode),
                     mode: props.mode,

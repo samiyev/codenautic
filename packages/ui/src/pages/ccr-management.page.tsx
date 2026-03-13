@@ -351,7 +351,7 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
             />
             <select
                 aria-label={t("reviews:management.savedPresetsAriaLabel")}
-                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground md:col-span-2"
+                className={`w-full rounded-lg border border-border bg-surface px-3 py-2 ${TYPOGRAPHY.body} md:col-span-2`}
                 value={props.selectedPresetId}
                 onChange={(event): void => {
                     props.onFieldChange("selected", event.currentTarget.value)
@@ -367,7 +367,7 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
                 )}
             </select>
             <button
-                className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground"
+                className={`rounded-lg border border-border px-3 py-2 ${TYPOGRAPHY.label}`}
                 type="button"
                 onClick={props.onSavePreset}
             >
@@ -375,7 +375,7 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
             </button>
             <div className="grid grid-cols-3 gap-2 md:col-span-6">
                 <button
-                    className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                    className={`rounded-lg border border-border px-3 py-2 ${TYPOGRAPHY.label} disabled:cursor-not-allowed disabled:opacity-60`}
                     disabled={hasSelectedPreset === false}
                     type="button"
                     onClick={props.onApplyPreset}
@@ -383,7 +383,7 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
                     {t("reviews:management.applyPreset")}
                 </button>
                 <button
-                    className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                    className={`rounded-lg border border-border px-3 py-2 ${TYPOGRAPHY.label} disabled:cursor-not-allowed disabled:opacity-60`}
                     disabled={hasSelectedPreset === false}
                     type="button"
                     onClick={props.onUpdatePreset}

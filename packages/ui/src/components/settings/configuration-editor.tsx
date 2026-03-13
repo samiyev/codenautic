@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui"
 import { REPO_REVIEW_MODE, type TRepoReviewMode } from "@/lib/api/endpoints/repo-config.endpoint"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /** Параметры визуального редактора `codenautic-config.yml`. */
 export interface IConfigurationEditorProps {
@@ -62,7 +63,7 @@ export function ConfigurationEditor(props: IConfigurationEditorProps): ReactElem
             className="space-y-3 rounded-xl border border-border bg-surface p-4"
             onSubmit={props.onSave}
         >
-            <h2 className="text-base font-semibold text-foreground">
+            <h2 className={TYPOGRAPHY.sectionTitle}>
                 {t("settings:configurationEditor.repositoryConfig")}
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -70,7 +71,7 @@ export function ConfigurationEditor(props: IConfigurationEditorProps): ReactElem
             </p>
             <div className="grid gap-3 md:grid-cols-2">
                 <label
-                    className="space-y-1 text-sm text-foreground"
+                    className={`space-y-1 ${TYPOGRAPHY.body}`}
                     htmlFor="repo-config-repository-id"
                 >
                     <span className="font-medium text-foreground">
@@ -87,7 +88,7 @@ export function ConfigurationEditor(props: IConfigurationEditorProps): ReactElem
                         }}
                     />
                 </label>
-                <label className="space-y-1 text-sm text-foreground" htmlFor="repo-review-mode">
+                <label className={`space-y-1 ${TYPOGRAPHY.body}`} htmlFor="repo-review-mode">
                     <span className="font-medium text-foreground">
                         {t("settings:configurationEditor.reviewMode")}
                     </span>
@@ -120,7 +121,7 @@ export function ConfigurationEditor(props: IConfigurationEditorProps): ReactElem
                     </select>
                 </label>
             </div>
-            <label className="space-y-1 text-sm text-foreground" htmlFor="repo-config-yaml">
+            <label className={`space-y-1 ${TYPOGRAPHY.body}`} htmlFor="repo-config-yaml">
                 <span className="font-medium text-foreground">
                     {t("settings:configurationEditor.configYaml")}
                 </span>
@@ -144,7 +145,7 @@ export function ConfigurationEditor(props: IConfigurationEditorProps): ReactElem
                 >
                     {t("settings:configurationEditor.saveRepositoryConfig")}
                 </Button>
-                <p className="text-xs text-muted-foreground" data-testid="repo-config-state">
+                <p className={TYPOGRAPHY.captionMuted} data-testid="repo-config-state">
                     {stateMessage}
                 </p>
             </div>

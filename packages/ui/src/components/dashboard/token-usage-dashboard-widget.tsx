@@ -15,6 +15,7 @@ import {
 import { Card, CardBody, CardHeader } from "@/components/ui"
 import { EmptyState } from "@/components/states/empty-state"
 import { ChartContainer } from "@/components/charts/chart-container"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import {
     CHART_FALLBACK_COLOR,
     CHART_GRID_DASH,
@@ -61,10 +62,10 @@ export function TokenUsageDashboardWidget(props: ITokenUsageDashboardWidgetProps
     return (
         <Card className="border-l-2 border-l-secondary">
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">Token usage dashboard</p>
+                <p className={TYPOGRAPHY.sectionTitle}>Token usage dashboard</p>
             </CardHeader>
             <CardBody className="space-y-3">
-                <p className="text-sm text-text-secondary">
+                <p className={TYPOGRAPHY.bodyMuted}>
                     Usage by model, cost breakdown and trend chart for selected range.
                 </p>
                 {props.byModel.length === 0 && props.costTrend.length === 0 ? (

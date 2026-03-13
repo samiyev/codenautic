@@ -1,6 +1,8 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
+import { TYPOGRAPHY } from "@/lib/constants/typography"
+
 /**
  * Метрика before/after для sprint comparison.
  */
@@ -54,8 +56,8 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">{t("code-city:sprintComparison.title")}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className={TYPOGRAPHY.cardTitle}>{t("code-city:sprintComparison.title")}</p>
+            <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
                 {t("code-city:sprintComparison.description")}
             </p>
 
@@ -112,7 +114,7 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
                                         {String(delta)}
                                     </p>
                                 </div>
-                                <p className="mt-1 text-xs text-muted-foreground">
+                                <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
                                     {t("code-city:sprintComparison.beforeToAfter", { before: String(metric.beforeValue), after: String(metric.afterValue) })}
                                 </p>
                                 <div className="mt-1 h-1.5 overflow-hidden rounded bg-surface-muted">

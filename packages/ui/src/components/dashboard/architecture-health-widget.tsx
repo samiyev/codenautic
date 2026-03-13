@@ -5,6 +5,7 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "r
 import { Card, CardBody, CardHeader, Chip } from "@/components/ui"
 import { EmptyState } from "@/components/states/empty-state"
 import { ChartContainer } from "@/components/charts/chart-container"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { CHART_FILL_OPACITY, VIOLATION_SCORE_MULTIPLIER } from "@/lib/constants/chart-constants"
 import { CHART_DATA_TRANSITION } from "@/lib/motion"
 
@@ -36,7 +37,7 @@ export function ArchitectureHealthWidget(props: IArchitectureHealthWidgetProps):
     return (
         <Card className="border-l-2 border-l-secondary">
             <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-base font-semibold text-foreground">Architecture health</p>
+                <p className={TYPOGRAPHY.sectionTitle}>Architecture health</p>
                 <div className="flex flex-wrap items-center gap-2">
                     <Chip color="primary" size="sm" variant="flat">
                         {`Health ${String(props.healthScore)}`}
@@ -55,7 +56,7 @@ export function ArchitectureHealthWidget(props: IArchitectureHealthWidgetProps):
                 </div>
             </CardHeader>
             <CardBody className="space-y-2">
-                <p className="text-sm text-text-secondary">
+                <p className={TYPOGRAPHY.bodyMuted}>
                     Health score, layer violations and DDD compliance in one architecture widget.
                 </p>
                 {radarData.length === 0 ? (

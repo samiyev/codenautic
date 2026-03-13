@@ -438,12 +438,12 @@ export function DashboardMissionControlPage(): ReactElement {
                 <AnimatedAlert isVisible={isPersonalizationOpen}>
                     <Card className="mt-3">
                         <CardHeader>
-                            <p className="text-sm font-semibold text-foreground">
+                            <p className={TYPOGRAPHY.cardTitle}>
                                 {t("dashboard:missionControl.workspacePersonalization")}
                             </p>
                         </CardHeader>
                         <CardBody className="space-y-3">
-                            <label className="flex flex-col gap-1 text-sm text-foreground">
+                            <label className={`flex flex-col gap-1 ${TYPOGRAPHY.body}`}>
                                 {t("dashboard:missionControl.layoutPreset")}
                                 <select
                                     aria-label={t("dashboard:missionControl.layoutPresetAriaLabel")}
@@ -467,7 +467,7 @@ export function DashboardMissionControlPage(): ReactElement {
                             </label>
 
                             <div className="space-y-1">
-                                <p className="text-sm text-foreground">{t("dashboard:missionControl.pinnedShortcuts")}</p>
+                                <p className={TYPOGRAPHY.body}>{t("dashboard:missionControl.pinnedShortcuts")}</p>
                                 <div className="grid gap-2 sm:grid-cols-2">
                                     {WORKSPACE_SHORTCUT_OPTIONS.map(
                                         (shortcut): ReactElement => (
@@ -555,7 +555,7 @@ function renderExploreLinks(t: (key: string) => string): ReadonlyArray<ReactElem
         (link): ReactElement => (
             <li key={link.labelKey}>
                 <StyledLink
-                    className="text-sm text-foreground transition-colors duration-150 hover:text-primary"
+                    className={`${TYPOGRAPHY.body} transition-colors duration-150 hover:text-primary`}
                     to={link.to}
                 >
                     {t(link.labelKey)}

@@ -9,6 +9,8 @@ import {
     type FieldValues,
 } from "react-hook-form"
 
+import { TYPOGRAPHY } from "@/lib/constants/typography"
+
 import { pickFieldMessage } from "./form-field-utils"
 
 /**
@@ -106,7 +108,7 @@ export function FormField<TFormValues extends FieldValues, TName extends FieldPa
                     <div className={`flex flex-col ${gapClass}`}>
                         {props.label === undefined || props.hideLabel === true ? null : (
                             <LabelElement
-                                className="text-sm font-medium text-foreground"
+                                className={TYPOGRAPHY.label}
                                 htmlFor={LabelElement === "label" ? fieldId : undefined}
                             >
                                 {props.label}

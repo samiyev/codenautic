@@ -1,6 +1,8 @@
 import { type ReactElement, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { TYPOGRAPHY } from "@/lib/constants/typography"
+
 export type TCCRSummaryDetailLevel = "CONCISE" | "STANDARD" | "DEEP"
 
 export interface ICCRSummaryPreviewSettings {
@@ -39,10 +41,10 @@ export function CCRSummaryPreview(props: ICCRSummaryPreviewProps): ReactElement 
                 className="space-y-2 rounded-md border border-dashed border-border bg-surface p-3"
                 data-testid="ccr-summary-preview"
             >
-                <h3 className="text-sm font-semibold text-foreground">
+                <h3 className={TYPOGRAPHY.cardTitle}>
                     {t("settings:ccrSummaryPreview.title")}
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className={TYPOGRAPHY.captionMuted}>
                     {t("settings:ccrSummaryPreview.generationDisabled")}
                 </p>
             </article>
@@ -64,11 +66,11 @@ export function CCRSummaryPreview(props: ICCRSummaryPreviewProps): ReactElement 
             className="space-y-2 rounded-md border border-border bg-surface p-3"
             data-testid="ccr-summary-preview"
         >
-            <h3 className="text-sm font-semibold text-foreground">
+            <h3 className={TYPOGRAPHY.cardTitle}>
                 {t("settings:ccrSummaryPreview.title")}
             </h3>
             <p
-                className="text-xs text-muted-foreground"
+                className={TYPOGRAPHY.captionMuted}
                 data-testid="ccr-summary-preview-detail-level"
             >
                 {t("settings:ccrSummaryPreview.detailLevel", {
@@ -76,7 +78,7 @@ export function CCRSummaryPreview(props: ICCRSummaryPreviewProps): ReactElement 
                 })}
             </p>
             <p
-                className="text-xs text-muted-foreground"
+                className={TYPOGRAPHY.captionMuted}
                 data-testid="ccr-summary-preview-max-suggestions"
             >
                 {t("settings:ccrSummaryPreview.maxSuggestions", {

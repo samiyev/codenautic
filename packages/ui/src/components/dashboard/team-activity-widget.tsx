@@ -5,6 +5,7 @@ import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts"
 import { Card, CardBody, CardHeader } from "@/components/ui"
 import { EmptyState } from "@/components/states/empty-state"
 import { ChartContainer } from "@/components/charts/chart-container"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { CHART_GRID_DASH } from "@/lib/constants/chart-constants"
 import { CHART_DATA_TRANSITION } from "@/lib/motion"
 
@@ -30,10 +31,10 @@ export function TeamActivityWidget(props: ITeamActivityWidgetProps): ReactElemen
     return (
         <Card className="border-l-2 border-l-secondary">
             <CardHeader>
-                <p className="text-base font-semibold text-foreground">Team activity</p>
+                <p className={TYPOGRAPHY.sectionTitle}>Team activity</p>
             </CardHeader>
             <CardBody className="space-y-2">
-                <p className="text-sm text-text-secondary">
+                <p className={TYPOGRAPHY.bodyMuted}>
                     CCRs merged by developer in selected date range.
                 </p>
                 {props.points.length === 0 ? (

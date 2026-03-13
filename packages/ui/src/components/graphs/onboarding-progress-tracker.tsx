@@ -66,10 +66,10 @@ export function OnboardingProgressTracker(props: IOnboardingProgressTrackerProps
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">
+            <p className={TYPOGRAPHY.cardTitle}>
                 {t("code-city:onboardingTracker.title")}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
                 {t("code-city:onboardingTracker.description")}
             </p>
             <p className="mt-3 text-xs font-semibold text-foreground">
@@ -95,10 +95,10 @@ export function OnboardingProgressTracker(props: IOnboardingProgressTrackerProps
                         <li className="rounded border border-border bg-surface p-2" key={module.id}>
                             <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0">
-                                    <p className="text-sm font-semibold text-foreground">
+                                    <p className={TYPOGRAPHY.cardTitle}>
                                         {module.title}
                                     </p>
-                                    <p className="mt-1 text-xs text-muted-foreground">
+                                    <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
                                         {module.description}
                                     </p>
                                 </div>

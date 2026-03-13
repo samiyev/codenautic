@@ -1,6 +1,8 @@
 import { useMemo, useState, type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
+import { TYPOGRAPHY } from "@/lib/constants/typography"
+
 /**
  * Опция файла для what-if сценария.
  */
@@ -85,8 +87,8 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">{t("code-city:whatIf.title")}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className={TYPOGRAPHY.cardTitle}>{t("code-city:whatIf.title")}</p>
+            <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
                 {t("code-city:whatIf.description")}
             </p>
 
@@ -107,10 +109,10 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
                                 type="checkbox"
                             />
                             <div className="min-w-0">
-                                <p className="text-sm font-semibold text-foreground">
+                                <p className={TYPOGRAPHY.cardTitle}>
                                     {option.label}
                                 </p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className={TYPOGRAPHY.captionMuted}>
                                     {t("code-city:whatIf.optionMeta", { impact: String(option.impactScore), affected: String(option.affectedCount) })}
                                 </p>
                             </div>

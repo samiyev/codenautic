@@ -375,7 +375,7 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
             <h1 className={TYPOGRAPHY.pageTitle}>{t("dashboard:issuesTracking.pageTitle")}</h1>
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">{t("dashboard:issuesTracking.cardTitle")}</p>
+                    <p className={TYPOGRAPHY.cardTitle}>{t("dashboard:issuesTracking.cardTitle")}</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-4">
@@ -416,7 +416,7 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
                                 ),
                             )}
                         </select>
-                        <p className="rounded-lg border border-border px-3 py-2 text-sm text-foreground">
+                        <p className={`rounded-lg border border-border px-3 py-2 ${TYPOGRAPHY.body}`}>
                             {(t as unknown as (key: string, options: Record<string, string>) => string)("dashboard:issuesTracking.issueCount", { filtered: String(filteredIssues.length), total: String(sourceIssues.length) })}
                         </p>
                     </div>
@@ -425,7 +425,7 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
 
             <Card>
                 <CardBody className="space-y-2">
-                    <h2 className="text-sm font-semibold text-foreground">{t("dashboard:issuesTracking.issueListTitle")}</h2>
+                    <h2 className={TYPOGRAPHY.cardTitle}>{t("dashboard:issuesTracking.issueListTitle")}</h2>
                     <InfiniteScrollContainer
                         hasMore={hasMoreIssues}
                         isLoading={false}

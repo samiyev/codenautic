@@ -2,6 +2,7 @@ import { lazy, Suspense, type ReactElement, useEffect, useId, useState } from "r
 import { useTranslation } from "react-i18next"
 
 import { Button, Card, CardBody, CardHeader, Textarea } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import type { IRuleEditorMarkdownPreviewProps } from "./rule-editor-markdown-preview"
 
 const LazyRuleEditorPreview = lazy(
@@ -175,7 +176,7 @@ export function RuleEditor(props: IRuleEditorProps): ReactElement {
     return (
         <Card>
             <CardHeader>
-                <h2 className="text-sm font-semibold text-foreground">{label}</h2>
+                <h2 className={TYPOGRAPHY.cardTitle}>{label}</h2>
             </CardHeader>
             <CardBody className="space-y-3">
                 <div className="flex flex-wrap gap-2">
@@ -203,7 +204,7 @@ export function RuleEditor(props: IRuleEditorProps): ReactElement {
                             : t("settings:ruleEditor.showPreview")}
                     </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className={TYPOGRAPHY.captionMuted}>
                     {t("settings:ruleEditor.tipTapModeLabel")}
                     {tipTapLoadState === "loading"
                         ? t("settings:ruleEditor.tipTapLoading")
@@ -225,7 +226,7 @@ export function RuleEditor(props: IRuleEditorProps): ReactElement {
                     value={value}
                     placeholder={placeholder}
                 />
-                <p id={characterCountId} className="text-xs text-muted-foreground">
+                <p id={characterCountId} className={TYPOGRAPHY.captionMuted}>
                     {t("settings:ruleEditor.symbolCount", { count: value.length })}
                 </p>
                 {maxLength === undefined ? null : (

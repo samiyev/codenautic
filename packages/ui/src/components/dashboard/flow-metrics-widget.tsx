@@ -5,6 +5,7 @@ import { Legend, Line, LineChart, CartesianGrid, Tooltip, XAxis, YAxis } from "r
 import { Card, CardBody, CardHeader, Chip } from "@/components/ui"
 import { EmptyState } from "@/components/states/empty-state"
 import { ChartContainer } from "@/components/charts/chart-container"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { CHART_GRID_DASH, CHART_STROKE_WIDTH } from "@/lib/constants/chart-constants"
 import { CHART_DATA_TRANSITION } from "@/lib/motion"
 
@@ -36,7 +37,7 @@ export function FlowMetricsWidget(props: IFlowMetricsWidgetProps): ReactElement 
     return (
         <Card className="border-l-2 border-l-secondary">
             <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-base font-semibold text-foreground">Flow metrics</p>
+                <p className={TYPOGRAPHY.sectionTitle}>Flow metrics</p>
                 <div className="flex flex-wrap items-center gap-2">
                     <Chip color="primary" size="sm" variant="flat">
                         {`Flow efficiency ${props.flowTrendLabel}`}
@@ -47,7 +48,7 @@ export function FlowMetricsWidget(props: IFlowMetricsWidgetProps): ReactElement 
                 </div>
             </CardHeader>
             <CardBody className="space-y-2">
-                <p className="text-sm text-text-secondary">
+                <p className={TYPOGRAPHY.bodyMuted}>
                     Track flow efficiency and delivery capacity dynamics across recent windows.
                 </p>
                 {props.points.length === 0 ? (

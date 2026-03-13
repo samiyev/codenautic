@@ -2,6 +2,7 @@ import { type ReactElement } from "react"
 
 import { Card, CardBody, CardHeader, Chip } from "@/components/ui"
 import { useCountUp } from "@/lib/motion"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
  * Направление динамики метрики.
@@ -47,7 +48,7 @@ export function MetricCard(props: IMetricCardProps): ReactElement {
                 <p className="text-sm text-muted-foreground">{props.label}</p>
             </CardHeader>
             <CardBody className="pt-2">
-                <p className="text-3xl font-bold text-foreground">{displayValue}</p>
+                <p className={`${TYPOGRAPHY.display} text-foreground`}>{displayValue}</p>
                 {props.caption === undefined ? null : (
                     <p className="mt-1 text-sm text-muted-foreground">{props.caption}</p>
                 )}

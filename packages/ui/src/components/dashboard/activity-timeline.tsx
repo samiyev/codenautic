@@ -2,6 +2,7 @@ import type { ReactElement } from "react"
 
 import { Card, CardBody, CardHeader } from "@/components/ui"
 import { EmptyState } from "@/components/states/empty-state"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { ActivityTimelineItem } from "./activity-timeline-item"
 
 /**
@@ -58,7 +59,7 @@ export function ActivityTimeline(props: IActivityTimelineProps): ReactElement {
     return (
         <Card className="border-l-2 border-l-danger">
             <CardHeader>
-                <h2 className="text-base font-semibold text-foreground">Recent activity</h2>
+                <h2 className={TYPOGRAPHY.sectionTitle}>Recent activity</h2>
             </CardHeader>
             <CardBody>
                 {props.items.length === 0 ? (
@@ -70,7 +71,7 @@ export function ActivityTimeline(props: IActivityTimelineProps): ReactElement {
                     Object.entries(groupedEntries).map(
                         ([group, items]): ReactElement => (
                             <section key={group} className="space-y-2">
-                                <h3 className="mt-2 text-sm font-semibold text-foreground">
+                                <h3 className={`mt-2 ${TYPOGRAPHY.cardTitle}`}>
                                     {group}
                                 </h3>
                                 <ul className="space-y-2" aria-label={`Timeline ${group}`}>

@@ -2,6 +2,7 @@ import { lazy, Suspense, type ReactElement, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Button, Textarea } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import type { IRuleEditorMarkdownPreviewProps } from "./rule-editor-markdown-preview"
 
 const LazyPromptOverridePreview = lazy(
@@ -28,10 +29,10 @@ export function PromptOverrideEditor(props: IPromptOverrideEditorProps): ReactEl
 
     return (
         <section className="space-y-3 rounded-md border border-border bg-surface p-3">
-            <h3 className="text-sm font-semibold text-foreground">
+            <h3 className={TYPOGRAPHY.cardTitle}>
                 {t("settings:promptOverrideEditor.title")}
             </h3>
-            <p className="text-xs text-muted-foreground">
+            <p className={TYPOGRAPHY.captionMuted}>
                 {t("settings:promptOverrideEditor.description")}
             </p>
             <Textarea
@@ -64,7 +65,7 @@ export function PromptOverrideEditor(props: IPromptOverrideEditorProps): ReactEl
                 >
                     <Suspense
                         fallback={
-                            <p className="text-xs text-muted-foreground">
+                            <p className={TYPOGRAPHY.captionMuted}>
                                 {t("settings:promptOverrideEditor.loadingPreview")}
                             </p>
                         }

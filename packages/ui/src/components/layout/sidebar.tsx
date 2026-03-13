@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react"
 
 import { ChevronLeft, ChevronRight } from "@/components/icons/app-icons"
 import { Button } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { DURATION, EASING, useReducedMotion } from "@/lib/motion"
 
 import { BrandMark } from "./brand-mark"
@@ -49,7 +50,7 @@ export function Sidebar(props: ISidebarProps): ReactElement {
                 {isCollapsed ? (
                     <span className="w-0 overflow-hidden" />
                 ) : (
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-text-subtle">
+                    <p className={TYPOGRAPHY.overline}>
                         {props.title ?? t("navigation:sidebarNav.title")}
                     </p>
                 )}
