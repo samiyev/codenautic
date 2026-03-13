@@ -399,7 +399,7 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
                     <div className="grid gap-3 md:grid-cols-4">
                         <input
                             aria-label={t("dashboard:repositoriesList.searchAriaLabel")}
-                            className="rounded-lg border border-border px-3 py-2 text-sm outline-none"
+                            className={`${NATIVE_FORM.input} outline-none`}
                             name="repository-search"
                             onChange={handleSearch}
                             placeholder={t("dashboard:repositoriesList.searchPlaceholder")}

@@ -1,5 +1,7 @@
 import { type ReactElement, type ReactNode, type HTMLAttributes } from "react"
 
+import { TYPOGRAPHY } from "@/lib/constants/typography"
+
 /**
  * Свойства таблицы.
  */
@@ -109,7 +111,7 @@ export function TableBody({ children, emptyContent, ...props }: ITableBodyProps)
  */
 export function TableColumn({ children, ...props }: TableColumnProps): ReactElement {
     return (
-        <th className="px-3 py-2 text-left text-sm font-semibold text-foreground" {...props}>
+        <th className={`px-3 py-2 text-left ${TYPOGRAPHY.cardTitle}`} {...props}>
             {children}
         </th>
     )

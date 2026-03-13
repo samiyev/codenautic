@@ -19,7 +19,7 @@ import { ReviewCadenceSelector } from "@/components/settings/review-cadence-sele
 import { RuleEditor } from "@/components/settings/rule-editor"
 import { SuggestionLimitConfig } from "@/components/settings/suggestion-limit-config"
 import type { ICodeReviewFormValues } from "@/components/settings/settings-form-schemas"
-import { NATIVE_FORM } from "@/lib/constants/spacing"
+import { GAP, NATIVE_FORM, PADDING } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { REPO_REVIEW_MODE, type TRepoReviewMode } from "@/lib/api/endpoints/repo-config.endpoint"
 import { useCCRSummary, useDryRun, useRepoConfig, useReviewCadence } from "@/lib/hooks/queries"
@@ -482,7 +482,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                         const generatedSummary = ccrSummary.summaryQuery.data
                         return (
                             <article
-                                className="space-y-2 rounded-md border border-border bg-surface p-3"
+                                className={`space-y-2 rounded-md border border-border bg-surface ${PADDING.card}`}
                                 data-testid="ccr-summary-output"
                             >
                                 <p className={TYPOGRAPHY.captionMuted}>
@@ -589,35 +589,35 @@ export function SettingsCodeReviewPage(): ReactElement {
                 description={t("settings:codeReview.mcpDescription")}
                 heading={t("settings:codeReview.mcpHeading")}
             >
-                <div className="grid gap-3 sm:grid-cols-3">
-                    <article className="rounded-md border border-border bg-surface p-3">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <div className={`grid ${GAP.card} sm:grid-cols-3`}>
+                    <article className={`rounded-md border border-border bg-surface ${PADDING.card}`}>
+                        <p className={TYPOGRAPHY.overline}>
                             {t("settings:codeReview.totalToolCalls")}
                         </p>
                         <p
-                            className="text-xl font-semibold text-foreground"
+                            className={TYPOGRAPHY.metricValue}
                             data-testid="mcp-total-calls"
                         >
                             {mcpTotalCalls}
                         </p>
                     </article>
-                    <article className="rounded-md border border-border bg-surface p-3">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <article className={`rounded-md border border-border bg-surface ${PADDING.card}`}>
+                        <p className={TYPOGRAPHY.overline}>
                             {t("settings:codeReview.successRate")}
                         </p>
                         <p
-                            className="text-xl font-semibold text-foreground"
+                            className={TYPOGRAPHY.metricValue}
                             data-testid="mcp-success-rate"
                         >
                             {mcpSuccessRate}%
                         </p>
                     </article>
-                    <article className="rounded-md border border-border bg-surface p-3">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <article className={`rounded-md border border-border bg-surface ${PADDING.card}`}>
+                        <p className={TYPOGRAPHY.overline}>
                             {t("settings:codeReview.avgLatency")}
                         </p>
                         <p
-                            className="text-xl font-semibold text-foreground"
+                            className={TYPOGRAPHY.metricValue}
                             data-testid="mcp-avg-latency"
                         >
                             {mcpAverageLatencyMs} ms

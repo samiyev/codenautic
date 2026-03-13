@@ -24,6 +24,7 @@ import {
 import { useVirtualizer } from "@tanstack/react-virtual"
 
 import { Button, Chip } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { ColumnCard } from "./enterprise-data-table-column-card"
 
 type TDensity = "comfortable" | "compact"
@@ -651,7 +652,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                     style={isStickyHeaderEnabled ? { minWidth: `${String(totalTableWidth)}px`, top: stickyHeaderTopOffset } : { minWidth: `${String(totalTableWidth)}px` }}
                 >
                     <div
-                        className="grid items-center gap-2 px-2 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-text-secondary"
+                        className={`grid items-center gap-2 px-2 py-2 ${TYPOGRAPHY.overline} text-text-secondary`}
                         role="row"
                         style={{ gridTemplateColumns }}
                     >

@@ -4,6 +4,8 @@ import {
     type TextAreaProps as HeroUITextareaProps,
 } from "@heroui/react"
 
+import { TYPOGRAPHY } from "@/lib/constants/typography"
+
 /**
  * Свойства `Textarea` с поддержкой legacy callback `onValueChange`.
  */
@@ -84,6 +86,7 @@ export function Textarea(props: TextareaProps): ReactElement {
             {...textareaProps}
             id={textareaId}
             className={textareaClassName}
+            aria-invalid={isInvalid === true ? "true" : undefined}
             data-invalid={isInvalid === true ? "true" : undefined}
             disabled={mappedDisabled}
             onBlur={onBlur}
@@ -100,7 +103,7 @@ export function Textarea(props: TextareaProps): ReactElement {
     return (
         <div className="flex flex-col gap-1">
             {label === undefined ? null : (
-                <label className="text-sm font-medium" htmlFor={textareaId}>
+                <label className={TYPOGRAPHY.label} htmlFor={textareaId}>
                     {label}
                 </label>
             )}

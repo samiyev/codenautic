@@ -1,6 +1,8 @@
 /**
  * Duration tokens for motion animations.
  * Values follow a progressive scale from instant to slow.
+ *
+ * @remarks Unit: seconds (for motion/react API). Do not confuse with ms-based browser APIs.
  */
 export const DURATION = {
     /** Instant feedback: tooltips, micro-states. */

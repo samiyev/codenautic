@@ -1,6 +1,7 @@
 import { type ReactElement, useMemo } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { type ISSEStreamEvent, type TSSEEventType, useSSEStream } from "@/lib/hooks/use-sse"
 
 /** Пропсы для SSE viewer-а. */
@@ -204,7 +205,7 @@ export function SseStreamViewer(props: ISSEStreamViewerProps): ReactElement {
                                     className="rounded-md border border-border bg-surface p-2 text-sm text-foreground"
                                     key={createEventItemKey(event)}
                                 >
-                                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                                    <p className={TYPOGRAPHY.overline}>
                                         {getStatusLabel(event.type)}
                                     </p>
                                     <p>{buildEventLabel(event)}</p>

@@ -1,6 +1,7 @@
 import { type ReactElement, type ReactNode } from "react"
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
+import { SPACING, GAP } from "@/lib/constants/spacing"
 
 /**
  * Свойства полноразмерного layout формы.
@@ -24,16 +25,16 @@ export interface IFormLayoutProps {
  */
 export function FormLayout(props: IFormLayoutProps): ReactElement {
     return (
-        <div className="space-y-6">
-            <div className="space-y-1">
+        <div className={SPACING.section}>
+            <div className={SPACING.tight}>
                 <h1 className={TYPOGRAPHY.pageTitle}>{props.title}</h1>
                 {props.description !== undefined ? (
                     <p className={TYPOGRAPHY.bodyMuted}>{props.description}</p>
                 ) : null}
             </div>
-            <div className="space-y-6">{props.children}</div>
+            <div className={SPACING.section}>{props.children}</div>
             {props.actions !== undefined ? (
-                <div className="flex items-center gap-3 border-t border-border pt-4">
+                <div className={`flex items-center ${GAP.card} border-t border-border pt-4`}>
                     {props.actions}
                 </div>
             ) : null}

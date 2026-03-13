@@ -1,6 +1,7 @@
 /**
  * Конфигурация Recharts animation props.
- * Анимации отключены глобально — графики рендерятся мгновенно.
+ * Recharts animation is disabled globally for performance — large datasets
+ * cause janky transitions. This is a deliberate choice, not a workaround.
  * Это обеспечивает корректное поведение при prefers-reduced-motion
  * и устраняет визуальные задержки при переключении данных.
  *

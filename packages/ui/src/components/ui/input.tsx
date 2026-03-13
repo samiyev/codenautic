@@ -1,6 +1,8 @@
 import { useId, type ChangeEvent, type ReactElement, type ReactNode } from "react"
 import { Input as HeroUIInput, type InputProps as HeroUIInputProps } from "@heroui/react"
 
+import { TYPOGRAPHY } from "@/lib/constants/typography"
+
 /**
  * Свойства `Input` с поддержкой legacy-свойств.
  */
@@ -73,6 +75,7 @@ export function Input(props: InputProps): ReactElement {
             id={inputId}
             disabled={mappedDisabled}
             className={inputClassName}
+            aria-invalid={isInvalid === true ? "true" : undefined}
             data-invalid={isInvalid === true ? "true" : undefined}
             onBlur={onBlur}
             onChange={handleChange}
@@ -86,7 +89,7 @@ export function Input(props: InputProps): ReactElement {
     return (
         <div className="flex flex-col gap-1">
             {label === undefined ? null : (
-                <label className="text-sm font-medium" htmlFor={inputId}>
+                <label className={TYPOGRAPHY.label} htmlFor={inputId}>
                     {label}
                 </label>
             )}
@@ -133,10 +136,10 @@ function buildInputClassName(
 function buildSpacingClassName(hasStartContent: boolean, hasEndContent: boolean): string {
     const entries: string[] = []
     if (hasStartContent === true) {
-        entries.push("pl-9")
+        entries.push("ps-9")
     }
     if (hasEndContent === true) {
-        entries.push("pr-9")
+        entries.push("pe-9")
     }
 
     return entries.filter((entry): boolean => entry.length > 0).join(" ")

@@ -65,5 +65,5 @@ export {
     BUS_FACTOR_SERIES_COLORS,
     REPORT_DEFAULT_ACCENT_COLOR,
 } from "./graph-colors"
-export { NATIVE_FORM, PAGE_LAYOUT, SPACING } from "./spacing"
+export { GAP, NATIVE_FORM, PADDING, PAGE_LAYOUT, SPACING } from "./spacing"
 export { TYPOGRAPHY } from "./typography"

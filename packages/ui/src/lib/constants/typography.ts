@@ -38,6 +38,8 @@ export const TYPOGRAPHY = {
     microMuted: "text-[11px] text-muted-foreground",
     /** Крупный числовой дисплей (4xl, bold). */
     display: "text-4xl font-bold",
+    /** Числовое значение метрики / KPI (xl, semibold). */
+    metricValue: "text-xl font-semibold text-foreground",
     /** Uppercase section label / overline (xs, semibold, uppercase, tracking). */
     overline: "text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground",
     /** Крупный заголовок для центрированных splash-экранов (3xl, semibold, tight). */
