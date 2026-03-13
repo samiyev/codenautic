@@ -259,7 +259,7 @@ export function CodeDiffViewer(props: ICodeDiffViewerProps): ReactElement {
 
     return (
         <section className="space-y-4" aria-label={t("reviews:codeDiff.viewerAriaLabel")}>
-            <h2 className="text-xl font-semibold text-foreground">{t("reviews:codeDiff.sectionTitle")}</h2>
+            <h2 className={TYPOGRAPHY.sectionTitle}>{t("reviews:codeDiff.sectionTitle")}</h2>
             {props.files.map(
                 (file): ReactElement => (
                     <CodeDiffFilePanel {...file} key={file.filePath} />

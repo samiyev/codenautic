@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import { Button, Card, CardBody, CardHeader, Input } from "@/components/ui"
 import { XyFlowGraph } from "@/components/graphs/xyflow-graph"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import {
     calculateGraphLayout,
     type IGraphEdge,
@@ -317,7 +318,7 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
         <Card aria-label={title}>
             <CardHeader className="flex items-start justify-between gap-3">
                 <div>
-                    <h3 className="text-lg font-semibold">{title}</h3>
+                    <h3 className={TYPOGRAPHY.subsectionTitle}>{title}</h3>
                     <p className="text-sm text-foreground-500">{summaryText}</p>
                 </div>
                 <div className="flex min-w-0 gap-2">
@@ -400,7 +401,7 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
                     aria-live="polite"
                     className="rounded-xl border border-default-200 bg-content2 p-4"
                 >
-                    <h4 className="text-sm font-semibold text-foreground">{t("code-city:fileDependency.nodeDetails")}</h4>
+                    <h4 className={TYPOGRAPHY.cardTitle}>{t("code-city:fileDependency.nodeDetails")}</h4>
                     {selectedFile === undefined || selectedDependencyStats === undefined ? (
                         <p className="mt-2 text-sm text-foreground-500">
                             {t("code-city:fileDependency.selectNodePrompt")}

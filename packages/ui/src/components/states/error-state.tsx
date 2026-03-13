@@ -1,6 +1,7 @@
 import { type ReactElement } from "react"
 
 import { Button } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
  * Props for the ErrorState component.
@@ -45,7 +46,7 @@ export function ErrorState(props: IErrorStateProps): ReactElement {
                     />
                 </svg>
             </div>
-            <h3 className="text-base font-semibold text-foreground">
+            <h3 className={TYPOGRAPHY.subsectionTitle}>
                 {props.title ?? "Something went wrong"}
             </h3>
             <p className="max-w-sm text-sm text-text-secondary">{props.description}</p>

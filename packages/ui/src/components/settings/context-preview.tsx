@@ -37,7 +37,7 @@ export function ContextPreview(props: IContextPreviewProps): ReactElement {
     return (
         <Card>
             <CardHeader>
-                <h3 className={TYPOGRAPHY.sectionTitle}>{title}</h3>
+                <h3 className={TYPOGRAPHY.subsectionTitle}>{title}</h3>
             </CardHeader>
             <CardBody className="space-y-3">
                 {props.isLoading === true ? (

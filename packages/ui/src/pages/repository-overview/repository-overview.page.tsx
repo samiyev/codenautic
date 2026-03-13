@@ -203,7 +203,7 @@ function RescanScheduleDialog(props: {
                 role="dialog"
             >
                 <div className="mb-3 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold" id="rescan-schedule-title">
+                    <h2 className={TYPOGRAPHY.sectionTitle} id="rescan-schedule-title">
                         Настройка периодического рескана
                     </h2>
                     <button

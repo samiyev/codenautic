@@ -60,7 +60,7 @@ export function DashboardContent(props: IDashboardContentProps): ReactElement {
             <div className="space-y-4">
                 <Card className="border-l-2 border-l-danger">
                     <CardHeader>
-                        <h3 className={TYPOGRAPHY.sectionTitle}>
+                        <h3 className={TYPOGRAPHY.subsectionTitle}>
                             Signals & Work Queue
                         </h3>
                     </CardHeader>

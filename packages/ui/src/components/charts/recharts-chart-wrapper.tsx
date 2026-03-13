@@ -1,6 +1,7 @@
 import { type ReactElement, type ReactNode, useMemo } from "react"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 type TChartPoint = object
 type TChartKey<TPoint extends TChartPoint> = Extract<keyof TPoint, string>
@@ -272,7 +273,7 @@ export function RechartsChartWrapper<TPoint extends TChartPoint>(
     return (
         <Card>
             <CardHeader>
-                <h3 className="text-base font-semibold text-foreground">{props.title}</h3>
+                <h3 className={TYPOGRAPHY.subsectionTitle}>{props.title}</h3>
             </CardHeader>
             <CardBody>
                 {props.isLoading === true ? (

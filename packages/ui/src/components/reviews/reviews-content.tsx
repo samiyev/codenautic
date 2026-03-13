@@ -86,7 +86,7 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">{t("reviews:content.sectionTitle")}</h2>
+            <h2 className={TYPOGRAPHY.sectionTitle}>{t("reviews:content.sectionTitle")}</h2>
             {showInlineFilters === true ? (
                 <ReviewsFilters
                     assignee={assigneeFilter}

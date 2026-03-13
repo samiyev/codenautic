@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import { Button, Card, CardBody, CardHeader, Input } from "@/components/ui"
 import { XyFlowGraph } from "@/components/graphs/xyflow-graph"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { exportGraphAsJson } from "@/components/graphs/graph-export"
 import {
     calculateGraphLayout,
@@ -772,7 +773,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
         <Card aria-label={title}>
             <CardHeader className="flex items-start justify-between gap-3">
                 <div>
-                    <h3 className="text-lg font-semibold">{title}</h3>
+                    <h3 className={TYPOGRAPHY.subsectionTitle}>{title}</h3>
                     <p className="text-sm text-foreground-500">{summaryText}</p>
                 </div>
                 <div className="flex min-w-0 gap-2">
@@ -1034,7 +1035,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         </div>
                         <div className="grid gap-3 md:grid-cols-2">
                             <section className="rounded-lg border border-default-200 bg-content1 p-3">
-                                <h5 className="text-sm font-semibold text-foreground">{t("code-city:packageDependency.topHubs")}</h5>
+                                <h5 className={TYPOGRAPHY.cardTitle}>{t("code-city:packageDependency.topHubs")}</h5>
                                 <ul className="mt-2 space-y-1 text-xs text-foreground-700">
                                     {hugeGraphFallbackData.topHubs.map(
                                         (hub): ReactElement => (
@@ -1046,7 +1047,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                 </ul>
                             </section>
                             <section className="rounded-lg border border-default-200 bg-content1 p-3">
-                                <h5 className="text-sm font-semibold text-foreground">
+                                <h5 className={TYPOGRAPHY.cardTitle}>
                                     {t("code-city:packageDependency.sampledPaths")}
                                 </h5>
                                 <ul className="mt-2 space-y-1 text-xs text-foreground-700">
@@ -1098,7 +1099,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                     aria-live="polite"
                     className="rounded-xl border border-default-200 bg-content2 p-4"
                 >
-                    <h4 className="text-sm font-semibold text-foreground">{t("code-city:packageDependency.nodeDetails")}</h4>
+                    <h4 className={TYPOGRAPHY.cardTitle}>{t("code-city:packageDependency.nodeDetails")}</h4>
                     {selectedNode !== undefined && selectedRelationStats !== undefined ? (
                         <div className="mt-2 space-y-1 text-sm text-foreground-700">
                             <p>{t("code-city:packageDependency.name", { value: selectedNode.name })}</p>

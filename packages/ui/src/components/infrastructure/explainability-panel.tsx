@@ -2,6 +2,7 @@ import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, Textarea } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 type TFactorImpact = "high" | "low" | "medium"
 
@@ -92,7 +93,7 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
             <Drawer isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                 <DrawerContent className="!m-0 !ml-auto !h-full !w-[min(92vw,460px)] !rounded-none bg-surface text-foreground">
                     <DrawerHeader className="border-b border-border px-4 py-3">
-                        <h2 className="text-base font-semibold text-foreground">{t("common:explainabilityPanel.explainability")}</h2>
+                        <h2 className={TYPOGRAPHY.sectionTitle}>{t("common:explainabilityPanel.explainability")}</h2>
                     </DrawerHeader>
                     <DrawerBody className="space-y-3 px-4 py-3">
                         <dl className="grid grid-cols-[130px_1fr] gap-x-2 gap-y-2 text-sm">

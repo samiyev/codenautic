@@ -1,6 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 
 import { Button, Chip, Drawer, DrawerBody, DrawerContent, DrawerHeader } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 type TFreshnessState = "fresh" | "refreshing" | "stale"
 
@@ -189,7 +190,7 @@ export function DataFreshnessPanel(props: IDataFreshnessPanelProps): ReactElemen
             <Drawer isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                 <DrawerContent className="!m-0 !ml-auto !h-full !w-[min(92vw,420px)] !rounded-none bg-surface text-foreground">
                     <DrawerHeader className="border-b border-border px-4 py-3">
-                        <h2 className="text-base font-semibold text-foreground">
+                        <h2 className={TYPOGRAPHY.sectionTitle}>
                             Source data provenance
                         </h2>
                     </DrawerHeader>

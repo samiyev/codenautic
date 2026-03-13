@@ -1,5 +1,6 @@
 import { type ReactElement, type ReactNode } from "react"
 
+import { CARD_SURFACE } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
@@ -23,9 +24,9 @@ export interface IFormSectionProps {
  */
 export function FormSection(props: IFormSectionProps): ReactElement {
     return (
-        <section className="space-y-4">
+        <section className={`space-y-4 ${CARD_SURFACE.section}`}>
             <div className="space-y-1">
-                <h3 className={TYPOGRAPHY.sectionTitle}>{props.heading}</h3>
+                <h3 className={TYPOGRAPHY.subsectionTitle}>{props.heading}</h3>
                 {props.description !== undefined ? (
                     <p className={TYPOGRAPHY.bodyMuted}>{props.description}</p>
                 ) : null}

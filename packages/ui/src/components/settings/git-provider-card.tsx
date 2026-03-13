@@ -34,7 +34,7 @@ export function GitProviderCard(props: IGitProviderCardProps): ReactElement {
     return (
         <Card>
             <CardHeader>
-                <h3 className={TYPOGRAPHY.sectionTitle}>{props.provider}</h3>
+                <h3 className={TYPOGRAPHY.subsectionTitle}>{props.provider}</h3>
             </CardHeader>
             <CardBody>
                 <div className="flex flex-col gap-2">

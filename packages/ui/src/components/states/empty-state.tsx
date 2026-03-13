@@ -1,6 +1,7 @@
 import { type ReactElement, type ReactNode } from "react"
 
 import { Button } from "@/components/ui"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
  * Props for the EmptyState component.
@@ -32,7 +33,7 @@ export function EmptyState(props: IEmptyStateProps): ReactElement {
             className={`flex flex-col items-center justify-center gap-3 py-12 text-center ${props.className ?? ""}`}
         >
             {props.icon !== undefined ? <div className="text-text-subtle">{props.icon}</div> : null}
-            <h3 className="text-base font-semibold text-foreground">{props.title}</h3>
+            <h3 className={TYPOGRAPHY.subsectionTitle}>{props.title}</h3>
             {props.description !== undefined ? (
                 <p className="max-w-sm text-sm text-text-secondary">{props.description}</p>
             ) : null}

@@ -291,7 +291,7 @@ exports[`visual regression contract > фиксирует визуальный sh
       data-slot="card-header"
     >
       <p
-        class="font-display text-base font-semibold text-foreground"
+        class="font-display text-lg font-medium text-foreground"
       >
         Knowledge base search
       </p>
@@ -471,7 +471,7 @@ exports[`visual regression contract > фиксирует визуальный sh
       data-slot="card-header"
     >
       <p
-        class="font-display text-base font-semibold text-foreground"
+        class="font-display text-lg font-medium text-foreground"
       >
         Diagnostics checks
       </p>
@@ -862,7 +862,7 @@ exports[`visual regression contract > фиксирует визуальный sh
       data-slot="card-header"
     >
       <p
-        class="font-display text-base font-semibold text-foreground"
+        class="font-display text-lg font-medium text-foreground"
       >
         Support bundle
       </p>

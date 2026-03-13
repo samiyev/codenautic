@@ -260,7 +260,7 @@ export function ReviewCommentThread(props: IReviewCommentThreadProps): ReactElem
 
     return (
         <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">{t("reviews:commentThread.sectionTitle")}</h2>
+            <h2 className={TYPOGRAPHY.sectionTitle}>{t("reviews:commentThread.sectionTitle")}</h2>
             <ul className="space-y-3">
                 {threads.map(
                     (thread): ReactElement => (

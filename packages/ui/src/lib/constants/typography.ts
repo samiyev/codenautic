@@ -14,8 +14,10 @@ export const TYPOGRAPHY = {
     pageTitle: "font-display text-2xl font-semibold text-foreground",
     /** Подзаголовок страницы / контекст под pageTitle (sm, muted). */
     pageSubtitle: "text-sm text-text-secondary",
-    /** Заголовок секции (DM Sans display, base, semibold). */
-    sectionTitle: "font-display text-base font-semibold text-foreground",
+    /** Заголовок секции (DM Sans display, lg, medium weight). */
+    sectionTitle: "font-display text-lg font-medium text-foreground",
+    /** Подзаголовок вложенной секции (DM Sans display, base, semibold). */
+    subsectionTitle: "font-display text-base font-semibold text-foreground",
     /** Подзаголовок секции (sm, medium weight). */
     sectionSubtitle: "text-sm font-medium text-foreground",
     /** Заголовок карточки / панели (sm, semibold). */

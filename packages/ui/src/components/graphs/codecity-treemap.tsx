@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { ResponsiveContainer, Treemap } from "recharts"
 
 const DEFAULT_HEIGHT = "420px"
@@ -1350,7 +1351,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         return (
             <Card aria-label={title}>
                 <CardHeader>
-                    <h3 className="text-lg font-semibold">{title}</h3>
+                    <h3 className={TYPOGRAPHY.subsectionTitle}>{title}</h3>
                 </CardHeader>
                 <CardBody>
                     <p>{emptyStateLabel}</p>
@@ -1363,7 +1364,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         return (
             <Card aria-label={title}>
                 <CardHeader>
-                    <h3 className="text-lg font-semibold">{title}</h3>
+                    <h3 className={TYPOGRAPHY.subsectionTitle}>{title}</h3>
                     <p className="text-sm text-foreground-500">{t("code-city:treemap.noFilesForPackage")}</p>
                     <Button onPress={handleResetSelection}>Back</Button>
                 </CardHeader>
@@ -1389,7 +1390,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         <Card aria-label={title}>
             <CardHeader>
                 <div className="flex flex-col gap-2">
-                    <h3 className="text-lg font-semibold">{title}</h3>
+                    <h3 className={TYPOGRAPHY.subsectionTitle}>{title}</h3>
                     <p className="text-sm text-foreground-500">{summaryText}</p>
                     <p aria-label={t("code-city:treemap.ariaBreadcrumb")} className="text-xs text-foreground-500">
                         {breadcrumbText}
