@@ -397,13 +397,13 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className="text-sm font-semibold text-foreground">
+                    <p className={TYPOGRAPHY.cardTitle}>
                         {t("system:scanProgress.currentStatus")}
                     </p>
                 </CardHeader>
                 <CardBody className="space-y-4">
                     <div className="rounded-lg border border-border bg-surface p-3">
-                        <p className="mb-2 text-sm font-semibold text-foreground">
+                        <p className={`mb-2 ${TYPOGRAPHY.cardTitle}`}>
                             {progressState.currentMessage.length > 0
                                 ? progressState.currentMessage
                                 : t("system:scanProgress.waitingForScanStart")}
