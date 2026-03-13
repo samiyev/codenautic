@@ -27,6 +27,10 @@ export {
     type IContributorStat,
     type IContributorStatsOptions,
 } from "./contributor-stats.dto"
+export {
+    type ITemporalCouplingEdge,
+    type ITemporalCouplingOptions,
+} from "./temporal-coupling.dto"
 export {type ITagCommitInfo, type ITagInfo} from "./tag-info.dto"
 export {type IBlameData} from "./blame-data.dto"
 export {type IFileBlame} from "./file-blame.dto"

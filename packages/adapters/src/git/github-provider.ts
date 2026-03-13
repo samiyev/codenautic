@@ -24,6 +24,8 @@ import {
     type IFileTreeNode,
     type IGitProvider,
     type IInlineCommentDTO,
+    type ITemporalCouplingEdge,
+    type ITemporalCouplingOptions,
     type ITagInfo,
     type IRefDiffFile,
     type IRefDiffResult,
@@ -127,6 +129,10 @@ interface INormalizedCommitHistoryOptions {
     readonly path?: string
 }
 
+interface INormalizedTemporalCouplingOptions extends INormalizedCommitHistoryOptions {
+    readonly filePaths?: readonly string[]
+}
+
 interface IContributorAggregation {
     readonly name: string
     readonly email: string
@@ -145,6 +151,13 @@ interface IContributorFileAggregation {
     deletions: number
     changes: number
     lastCommitDate: string
+}
+
+interface ITemporalCouplingAggregation {
+    readonly sourcePath: string
+    readonly targetPath: string
+    sharedCommitCount: number
+    lastSeenAt: string
 }
 
 /**
@@ -562,6 +575,29 @@ export class GitHubProvider implements IGitProvider {
         const details = await this.loadCommitDetails(commits)
 
         return buildContributorStats(details)
+    }
+
+    /**
+     * Loads temporal coupling edges from co-changed commit files.
+     *
+     * @param ref Branch, tag, or commit reference.
+     * @param options Optional commit-window and batch file filters.
+     * @returns Stable temporal coupling edge list.
+     */
+    public async getTemporalCoupling(
+        ref: string,
+        options?: ITemporalCouplingOptions,
+    ): Promise<readonly ITemporalCouplingEdge[]> {
+        const normalizedRef = normalizeRequiredText(ref, "ref")
+        const normalizedOptions = normalizeTemporalCouplingOptions(options)
+        const commits = await this.listCommitHistory(
+            normalizedRef,
+            normalizedOptions,
+            "all",
+        )
+        const details = await this.loadCommitDetails(commits)
+
+        return buildTemporalCouplingEdges(details, normalizedOptions.filePaths)
     }
 
     /**
@@ -1564,6 +1600,216 @@ function buildContributorStats(
 }
 
 /**
+ * Aggregates detailed commit payloads into temporal coupling edge list.
+ *
+ * @param commits Detailed commit payloads.
+ * @param filePaths Optional batch file filter.
+ * @returns Stable temporal coupling edges ordered by strength and recency.
+ */
+function buildTemporalCouplingEdges(
+    commits: readonly ReposGetCommitResponse[],
+    filePaths?: readonly string[],
+): readonly ITemporalCouplingEdge[] {
+    const fileCommitCounts = new Map<string, number>()
+    const couplings = new Map<string, ITemporalCouplingAggregation>()
+    const filterSet = filePaths === undefined ? undefined : new Set(filePaths)
+
+    for (const commit of commits) {
+        const touchedFiles = extractTemporalCouplingFilePaths(commit)
+        incrementTemporalCouplingFileCounts(touchedFiles, fileCommitCounts)
+
+        if (touchedFiles.length < 2) {
+            continue
+        }
+
+        addTemporalCouplingCommit(
+            touchedFiles,
+            resolveCommitDate(commit),
+            couplings,
+        )
+    }
+
+    return Array.from(couplings.values())
+        .filter((coupling): boolean => {
+            return shouldIncludeTemporalCoupling(coupling, filterSet)
+        })
+        .map((coupling): ITemporalCouplingEdge => {
+            return mapTemporalCouplingAggregation(coupling, fileCommitCounts)
+        })
+        .sort(compareTemporalCouplingEdge)
+}
+
+/**
+ * Increments per-file commit counters used for coupling normalization.
+ *
+ * @param touchedFiles Sorted unique file paths from one commit.
+ * @param fileCommitCounts Mutable per-file commit counters.
+ * @returns Nothing.
+ */
+function incrementTemporalCouplingFileCounts(
+    touchedFiles: readonly string[],
+    fileCommitCounts: Map<string, number>,
+): void {
+    for (const filePath of touchedFiles) {
+        const currentCount = fileCommitCounts.get(filePath) ?? 0
+        fileCommitCounts.set(filePath, currentCount + 1)
+    }
+}
+
+/**
+ * Aggregates one commit into pairwise temporal coupling counters.
+ *
+ * @param touchedFiles Sorted unique file paths from one commit.
+ * @param commitDate Commit timestamp used for `lastSeenAt`.
+ * @param couplings Mutable pairwise coupling aggregations.
+ * @returns Nothing.
+ */
+function addTemporalCouplingCommit(
+    touchedFiles: readonly string[],
+    commitDate: string,
+    couplings: Map<string, ITemporalCouplingAggregation>,
+): void {
+    for (let leftIndex = 0; leftIndex < touchedFiles.length - 1; leftIndex += 1) {
+        const leftPath = touchedFiles[leftIndex]
+        if (leftPath === undefined) {
+            continue
+        }
+
+        for (
+            let rightIndex = leftIndex + 1;
+            rightIndex < touchedFiles.length;
+            rightIndex += 1
+        ) {
+            const rightPath = touchedFiles[rightIndex]
+            if (rightPath === undefined) {
+                continue
+            }
+
+            const key = createTemporalCouplingKey(leftPath, rightPath)
+            const coupling = couplings.get(key) ?? {
+                sourcePath: leftPath,
+                targetPath: rightPath,
+                sharedCommitCount: 0,
+                lastSeenAt: "",
+            }
+
+            coupling.sharedCommitCount += 1
+            coupling.lastSeenAt = pickLaterIsoDate(
+                coupling.lastSeenAt,
+                commitDate,
+            )
+            couplings.set(key, coupling)
+        }
+    }
+}
+
+/**
+ * Extracts sorted unique file paths from one detailed commit payload.
+ *
+ * @param commit Detailed commit payload.
+ * @returns Sorted unique repository-relative file paths.
+ */
+function extractTemporalCouplingFilePaths(
+    commit: ReposGetCommitResponse,
+): readonly string[] {
+    const touchedFiles = new Set<string>()
+
+    for (const file of commit.files ?? []) {
+        const filePath = normalizeRequiredText(file.filename, "filePath")
+        touchedFiles.add(filePath)
+    }
+
+    return Array.from(touchedFiles.values()).sort((left, right): number => {
+        return left.localeCompare(right)
+    })
+}
+
+/**
+ * Creates deterministic map key for one temporal coupling pair.
+ *
+ * @param sourcePath Canonical source path.
+ * @param targetPath Canonical target path.
+ * @returns Stable map key.
+ */
+function createTemporalCouplingKey(sourcePath: string, targetPath: string): string {
+    return `${sourcePath}\n${targetPath}`
+}
+
+/**
+ * Checks whether coupling edge should remain in the batch-filtered result.
+ *
+ * @param coupling Mutable temporal coupling aggregation.
+ * @param filePaths Optional batch filter set.
+ * @returns True when coupling should be kept.
+ */
+function shouldIncludeTemporalCoupling(
+    coupling: ITemporalCouplingAggregation,
+    filePaths: ReadonlySet<string> | undefined,
+): boolean {
+    if (filePaths === undefined || filePaths.size === 0) {
+        return true
+    }
+
+    return (
+        filePaths.has(coupling.sourcePath) ||
+        filePaths.has(coupling.targetPath)
+    )
+}
+
+/**
+ * Maps mutable temporal coupling aggregation to immutable DTO.
+ *
+ * @param coupling Mutable coupling aggregation.
+ * @param fileCommitCounts Per-file commit occurrence counters.
+ * @returns Immutable temporal coupling edge.
+ */
+function mapTemporalCouplingAggregation(
+    coupling: ITemporalCouplingAggregation,
+    fileCommitCounts: ReadonlyMap<string, number>,
+): ITemporalCouplingEdge {
+    const sourceCommitCount = fileCommitCounts.get(coupling.sourcePath) ?? 0
+    const targetCommitCount = fileCommitCounts.get(coupling.targetPath) ?? 0
+
+    return {
+        sourcePath: coupling.sourcePath,
+        targetPath: coupling.targetPath,
+        sharedCommitCount: coupling.sharedCommitCount,
+        strength: calculateTemporalCouplingStrength(
+            coupling.sharedCommitCount,
+            sourceCommitCount,
+            targetCommitCount,
+        ),
+        lastSeenAt: coupling.lastSeenAt,
+    }
+}
+
+/**
+ * Calculates normalized temporal coupling strength from pair and file counts.
+ *
+ * Uses Jaccard similarity so the metric stays within `[0, 1]` and naturally
+ * rewards files that change together consistently across the selected window.
+ *
+ * @param sharedCommitCount Number of commits where both files co-changed.
+ * @param sourceCommitCount Number of commits touching the source file.
+ * @param targetCommitCount Number of commits touching the target file.
+ * @returns Rounded coupling strength.
+ */
+function calculateTemporalCouplingStrength(
+    sharedCommitCount: number,
+    sourceCommitCount: number,
+    targetCommitCount: number,
+): number {
+    const unionCommitCount =
+        sourceCommitCount + targetCommitCount - sharedCommitCount
+
+    if (unionCommitCount <= 0) {
+        return 0
+    }
+
+    return roundToPrecision(sharedCommitCount / unionCommitCount, 4)
+}
+
+/**
  * Resolves normalized contributor identity from detailed commit payload.
  *
  * @param commit Detailed commit payload.
@@ -1720,6 +1966,37 @@ function compareContributorFileStats(
     }
 
     return left.filePath.localeCompare(right.filePath)
+}
+
+/**
+ * Orders temporal coupling edges deterministically for stable consumers.
+ *
+ * @param left Left temporal coupling edge.
+ * @param right Right temporal coupling edge.
+ * @returns Sort comparison result.
+ */
+function compareTemporalCouplingEdge(
+    left: ITemporalCouplingEdge,
+    right: ITemporalCouplingEdge,
+): number {
+    if (left.sharedCommitCount !== right.sharedCommitCount) {
+        return right.sharedCommitCount - left.sharedCommitCount
+    }
+
+    if (left.strength !== right.strength) {
+        return right.strength - left.strength
+    }
+
+    if (left.lastSeenAt !== right.lastSeenAt) {
+        return right.lastSeenAt.localeCompare(left.lastSeenAt)
+    }
+
+    const sourceComparison = left.sourcePath.localeCompare(right.sourcePath)
+    if (sourceComparison !== 0) {
+        return sourceComparison
+    }
+
+    return left.targetPath.localeCompare(right.targetPath)
 }
 
 /**
@@ -2192,6 +2469,53 @@ function normalizeCommitHistoryOptions(
 }
 
 /**
+ * Normalizes temporal coupling query options with commit window and batch paths.
+ *
+ * @param options Optional temporal coupling filters.
+ * @returns Normalized temporal coupling options.
+ */
+function normalizeTemporalCouplingOptions(
+    options?: ITemporalCouplingOptions,
+): INormalizedTemporalCouplingOptions {
+    return {
+        ...normalizeCommitHistoryOptions(options),
+        filePaths: normalizeOptionalTextList(options?.filePaths, "filePaths"),
+    }
+}
+
+/**
+ * Normalizes optional string list while preserving input order and uniqueness.
+ *
+ * @param values Optional raw string list.
+ * @param fieldName Field label used in validation errors.
+ * @returns Deduplicated normalized list or undefined.
+ */
+function normalizeOptionalTextList(
+    values: readonly string[] | undefined,
+    fieldName: string,
+): readonly string[] | undefined {
+    if (values === undefined) {
+        return undefined
+    }
+
+    const normalizedValues: string[] = []
+    const seenValues = new Set<string>()
+
+    for (const value of values) {
+        const normalizedValue = normalizeRequiredText(value, fieldName)
+
+        if (seenValues.has(normalizedValue)) {
+            continue
+        }
+
+        seenValues.add(normalizedValue)
+        normalizedValues.push(normalizedValue)
+    }
+
+    return normalizedValues.length > 0 ? normalizedValues : undefined
+}
+
+/**
  * Normalizes retry attempt cap.
  *
  * @param value Optional retry cap.
@@ -2274,6 +2598,19 @@ function resolveCommitHistoryPerPage(maxCount: number | undefined): number {
     }
 
     return Math.min(maxCount, 100)
+}
+
+/**
+ * Rounds floating-point values to a stable decimal precision.
+ *
+ * @param value Raw numeric value.
+ * @param digits Decimal digits to keep.
+ * @returns Rounded value.
+ */
+function roundToPrecision(value: number, digits: number): number {
+    const multiplier = 10 ** digits
+
+    return Math.round(value * multiplier) / multiplier
 }
 
 /**

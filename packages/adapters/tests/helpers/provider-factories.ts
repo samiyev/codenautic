@@ -60,6 +60,12 @@ export function createGitProviderMock(): IGitProvider {
         ): ReturnType<IGitProvider["getContributorStats"]> {
             return Promise.resolve([])
         },
+        getTemporalCoupling(
+            _ref: string,
+            _options?: Parameters<IGitProvider["getTemporalCoupling"]>[1],
+        ): ReturnType<IGitProvider["getTemporalCoupling"]> {
+            return Promise.resolve([])
+        },
         getTags(): ReturnType<IGitProvider["getTags"]> {
             return Promise.resolve([])
         },

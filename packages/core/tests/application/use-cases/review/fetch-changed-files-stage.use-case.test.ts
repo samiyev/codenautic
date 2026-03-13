@@ -49,6 +49,13 @@ class InMemoryGitProvider implements IGitProvider {
         return Promise.resolve([])
     }
 
+    public getTemporalCoupling(
+        _ref: string,
+        _options?: Parameters<IGitProvider["getTemporalCoupling"]>[1],
+    ): ReturnType<IGitProvider["getTemporalCoupling"]> {
+        return Promise.resolve([])
+    }
+
     public getTags(): ReturnType<IGitProvider["getTags"]> {
         return Promise.resolve([])
     }

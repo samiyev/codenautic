@@ -1450,6 +1450,222 @@ describe("GitHubProvider", () => {
         expect(listCommits.calls).toHaveLength(2)
     })
 
+    test("builds temporal coupling edges with batch filtering and stable strength metadata", async () => {
+        const listCommits = createQueuedAsyncMethod([
+            createDataHandler([
+                {sha: "c1"},
+                {sha: "c2"},
+                {sha: "c3"},
+                {sha: "c4"},
+            ]),
+        ])
+        const getCommit = createQueuedAsyncMethod([
+            createDataHandler({
+                commit: {
+                    committer: {
+                        date: "2026-03-01T08:00:00.000Z",
+                    },
+                },
+                files: [
+                    {filename: "src/a.ts"},
+                    {filename: "src/b.ts"},
+                    {filename: "src/c.ts"},
+                ],
+            }),
+            createDataHandler({
+                commit: {
+                    committer: {
+                        date: "2026-03-05T10:30:00.000Z",
+                    },
+                },
+                files: [
+                    {filename: "src/a.ts"},
+                    {filename: "src/b.ts"},
+                ],
+            }),
+            createDataHandler({
+                commit: {
+                    committer: {
+                        date: "2026-03-07T16:45:00.000Z",
+                    },
+                },
+                files: [
+                    {filename: "src/a.ts"},
+                    {filename: "src/d.ts"},
+                ],
+            }),
+            createDataHandler({
+                commit: {
+                    committer: {
+                        date: "2026-03-08T09:00:00.000Z",
+                    },
+                },
+                files: [
+                    {filename: "src/z.ts"},
+                ],
+            }),
+        ])
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    listCommits,
+                    getCommit,
+                },
+            }),
+        })
+
+        const couplings = await provider.getTemporalCoupling("main", {
+            since: "2026-03-01T00:00:00.000Z",
+            until: "2026-03-10T00:00:00.000Z",
+            path: "src",
+            maxCount: 4,
+            filePaths: ["src/b.ts", "src/d.ts"],
+        })
+
+        expect(couplings).toEqual([
+            {
+                sourcePath: "src/a.ts",
+                targetPath: "src/b.ts",
+                sharedCommitCount: 2,
+                strength: 0.6667,
+                lastSeenAt: "2026-03-05T10:30:00.000Z",
+            },
+            {
+                sourcePath: "src/b.ts",
+                targetPath: "src/c.ts",
+                sharedCommitCount: 1,
+                strength: 0.5,
+                lastSeenAt: "2026-03-01T08:00:00.000Z",
+            },
+            {
+                sourcePath: "src/a.ts",
+                targetPath: "src/d.ts",
+                sharedCommitCount: 1,
+                strength: 0.3333,
+                lastSeenAt: "2026-03-07T16:45:00.000Z",
+            },
+        ])
+        expect(listCommits.calls[0]?.[0]).toMatchObject({
+            sha: "main",
+            since: "2026-03-01T00:00:00.000Z",
+            until: "2026-03-10T00:00:00.000Z",
+            path: "src",
+            per_page: 4,
+            page: 1,
+        })
+    })
+
+    test("loads temporal coupling across all pages when maxCount is omitted", async () => {
+        const firstPage = Array.from({length: 100}, (_value, index): {readonly sha: string} => {
+            return {sha: `c${index + 1}`}
+        })
+        const secondPage = [{sha: "c101"}]
+        const listCommits = createQueuedAsyncMethod([
+            createDataHandler(firstPage),
+            createDataHandler(secondPage),
+        ])
+        const getCommit = createQueuedAsyncMethod(
+            Array.from({length: 101}, (_value, index) => {
+                return createDataHandler({
+                    commit: {
+                        committer: {
+                            date: `2026-03-${String((index % 28) + 1).padStart(2, "0")}T12:00:00.000Z`,
+                        },
+                    },
+                    files: [
+                        {filename: "src/a.ts"},
+                        {filename: "src/b.ts"},
+                    ],
+                })
+            }),
+        )
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    listCommits,
+                    getCommit,
+                },
+            }),
+        })
+
+        const couplings = await provider.getTemporalCoupling("main")
+
+        expect(couplings).toEqual([
+            {
+                sourcePath: "src/a.ts",
+                targetPath: "src/b.ts",
+                sharedCommitCount: 101,
+                strength: 1,
+                lastSeenAt: "2026-03-28T12:00:00.000Z",
+            },
+        ])
+        expect(listCommits.calls[0]?.[0]).toMatchObject({
+            sha: "main",
+            per_page: 100,
+            page: 1,
+        })
+        expect(listCommits.calls[1]?.[0]).toMatchObject({
+            sha: "main",
+            per_page: 100,
+            page: 2,
+        })
+    })
+
+    test("retries temporal coupling requests on retryable github errors", async () => {
+        const sleepCalls: number[] = []
+        const listCommits = createQueuedAsyncMethod([
+            createErrorHandler(
+                createGitHubApiError("rate limited", {
+                    status: 429,
+                    headers: {
+                        "retry-after": "1",
+                    },
+                }),
+            ),
+            createDataHandler([]),
+        ])
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                repos: {
+                    listCommits,
+                    getCommit: createQueuedAsyncMethod([]),
+                },
+            }),
+            sleep(delayMs: number): Promise<void> {
+                sleepCalls.push(delayMs)
+                return Promise.resolve()
+            },
+        })
+
+        const couplings = await provider.getTemporalCoupling("main")
+
+        expect(couplings).toEqual([])
+        expect(sleepCalls).toEqual([1000])
+        expect(listCommits.calls).toHaveLength(2)
+    })
+
+    test("validates temporal coupling batch file filters before request", async () => {
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({}),
+        })
+
+        const error = await captureRejectedError(() =>
+            provider.getTemporalCoupling("main", {
+                filePaths: ["   "],
+            }),
+        )
+
+        expect(error.message).toContain("filePaths cannot be empty")
+    })
+
     test("lists tags with annotation metadata, associated commit, and effective-date sorting", async () => {
         const listTags = createQueuedAsyncMethod([
             createDataHandler([

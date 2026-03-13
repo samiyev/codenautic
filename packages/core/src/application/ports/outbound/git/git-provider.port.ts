@@ -12,6 +12,8 @@ import type {
     IContributorStatsOptions,
     IFileTreeNode,
     IRefDiffResult,
+    ITemporalCouplingEdge,
+    ITemporalCouplingOptions,
     IMergeRequestDTO,
     IMergeRequestDiffFileDTO,
 } from "../../../dto/git"
@@ -84,6 +86,18 @@ export interface IGitProvider extends IGitBlame {
         ref: string,
         options?: IContributorStatsOptions,
     ): Promise<readonly IContributorStat[]>
+
+    /**
+     * Fetches temporal coupling edges derived from co-changed commits.
+     *
+     * @param ref Commit SHA, branch name, or tag.
+     * @param options Optional commit-window and batch file filters.
+     * @returns Temporal coupling edges in stable provider order.
+     */
+    getTemporalCoupling(
+        ref: string,
+        options?: ITemporalCouplingOptions,
+    ): Promise<readonly ITemporalCouplingEdge[]>
 
     /**
      * Fetches repository tags metadata sorted by provider-defined date semantics.

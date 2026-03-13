@@ -20,6 +20,7 @@ import {
     type IMergeRequestDiffFileDTO,
     type IBranchInfo,
     type ITagInfo,
+    type ITemporalCouplingEdge,
 } from "../../../../src"
 
 class InMemoryGitProvider implements IGitProvider {
@@ -147,6 +148,28 @@ class InMemoryGitProvider implements IGitProvider {
                         lastCommitDate: "2026-03-04T09:00:00.000Z",
                     },
                 ],
+            },
+        ])
+    }
+
+    public getTemporalCoupling(
+        _ref: string,
+        _options?: Parameters<IGitProvider["getTemporalCoupling"]>[1],
+    ): Promise<readonly ITemporalCouplingEdge[]> {
+        return Promise.resolve([
+            {
+                sourcePath: "src/index.ts",
+                targetPath: "src/pipeline.ts",
+                strength: 0.75,
+                sharedCommitCount: 3,
+                lastSeenAt: "2026-03-04T09:00:00.000Z",
+            },
+            {
+                sourcePath: "src/index.ts",
+                targetPath: "src/review.ts",
+                strength: 0.5,
+                sharedCommitCount: 1,
+                lastSeenAt: "2026-03-02T11:30:00.000Z",
             },
         ])
     }
@@ -412,6 +435,22 @@ describe("IGitProvider contract", () => {
         expect(contributors[0]?.activePeriod.endedAt).toBe("2026-03-03T10:00:00.000Z")
         expect(contributors[0]?.files[0]?.filePath).toBe("src/index.ts")
         expect(contributors[1]?.commitCount).toBe(1)
+    })
+
+    test("returns temporal coupling edges with stable strength metadata", async () => {
+        const provider = new InMemoryGitProvider()
+
+        const couplings = await provider.getTemporalCoupling("main", {
+            path: "src",
+            maxCount: 25,
+            filePaths: ["src/index.ts"],
+        })
+
+        expect(couplings).toHaveLength(2)
+        expect(couplings[0]?.sourcePath).toBe("src/index.ts")
+        expect(couplings[0]?.targetPath).toBe("src/pipeline.ts")
+        expect(couplings[0]?.sharedCommitCount).toBe(3)
+        expect(couplings[0]?.strength).toBe(0.75)
     })
 
     test("returns sorted tag metadata with associated commit details", async () => {

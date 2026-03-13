@@ -335,6 +335,8 @@ export {
     type IContributorFileStat,
     type IContributorStat,
     type IContributorStatsOptions,
+    type ITemporalCouplingEdge,
+    type ITemporalCouplingOptions,
     type ITagCommitInfo,
     type ITagInfo,
     GIT_REF_COMPARISON_STATUS,
