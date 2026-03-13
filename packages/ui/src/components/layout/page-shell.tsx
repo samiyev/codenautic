@@ -47,7 +47,7 @@ export function PageShell(props: IPageShellProps): ReactElement {
         <div
             className={
                 hasHeaderActions
-                    ? "flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+                    ? "flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-start sm:justify-between"
                     : undefined
             }
         >

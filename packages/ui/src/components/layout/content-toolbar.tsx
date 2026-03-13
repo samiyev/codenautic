@@ -60,7 +60,7 @@ export function ContentToolbar(props: IContentToolbarProps): ReactElement {
             : undefined
 
     return (
-        <div className="flex h-12 items-center gap-3 rounded-lg bg-sidebar-bg px-4 shadow-sm backdrop-blur">
+        <div className="flex h-12 items-center gap-2 rounded-lg bg-sidebar-bg px-4 shadow-sm backdrop-blur sm:gap-3">
             {/* Mobile menu button */}
             <div className="flex shrink-0 items-center md:hidden">
                 <Button

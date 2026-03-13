@@ -32,7 +32,7 @@ export function MetricsGrid(props: IMetricsGridProps): ReactElement {
         <StaggerContainer
             ariaLabel="KPI metrics"
             as="section"
-            className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+            className="grid gap-3 md:gap-4 md:grid-cols-2 xl:grid-cols-4"
         >
             {props.metrics.map((metric): ReactElement => {
                 const { id, ...cardProps } = metric
