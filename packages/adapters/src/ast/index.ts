@@ -59,6 +59,18 @@ export {
     type IAstCodeGraphImpactAnalysisServiceOptions,
 } from "./ast-code-graph-impact-analysis.service"
 export {
+    AST_CODE_GRAPH_REPOSITORY_ERROR_CODE,
+    AstCodeGraphRepositoryError,
+    type AstCodeGraphRepositoryErrorCode,
+    type IAstCodeGraphRepositoryErrorDetails,
+} from "./mongo-code-graph-repository.error"
+export {
+    MongoCodeGraphRepository,
+    type IMongoCodeGraphCollection,
+    type IMongoCodeGraphDocument,
+    type IMongoCodeGraphRepositoryOptions,
+} from "./mongo-code-graph.repository"
+export {
     assertJavaScriptParserLanguage,
     JavaScriptSourceCodeParser,
     type IJavaScriptSourceCodeParserOptions,
