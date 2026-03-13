@@ -14,6 +14,7 @@ export { Dropdown, DropdownTrigger, DropdownMenu, DropdownSection, DropdownItem 
 export { Input, type InputProps } from "./input"
 export { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "./modal"
 export { Select, SelectItem, SelectSection } from "./select"
+export { Slider, type ISliderProps } from "./slider"
 export { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "./table"
 export { type TextareaProps } from "./textarea"
 export { Tab, Tabs } from "./tabs"

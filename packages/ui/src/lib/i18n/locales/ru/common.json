@@ -133,7 +133,18 @@
         "pinLeft": "закрепить слева",
         "pinRight": "закрепить справа",
         "selected": "{{count}} выбрано",
-        "clearSelection": "Снять выделение"
+        "clearSelection": "Снять выделение",
+        "moveLeft": "Переместить влево",
+        "moveRight": "Переместить вправо",
+        "columnWidth": "Ширина колонки",
+        "columnWidthValue": "{{value}}px",
+        "pinColumnAriaLabel": "Закрепить {{column}}",
+        "hideColumnAriaLabel": "Скрыть колонку {{column}}",
+        "showColumnAriaLabel": "Показать колонку {{column}}",
+        "columnHidden": "Скрыта",
+        "columnPinnedLeft": "Слева",
+        "columnPinnedRight": "Справа",
+        "columnSettings": "Настройка колонок"
     },
     "explainabilityPanel": {
         "whyThisScore": "Почему такая оценка?",

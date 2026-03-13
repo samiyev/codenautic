@@ -291,7 +291,8 @@ describe("EnterpriseDataTable", (): void => {
             />,
         )
 
-        const hideButtons = screen.getAllByRole("button", { name: "Hide" })
+        await user.click(screen.getByRole("button", { name: "Column settings" }))
+        const hideButtons = screen.getAllByRole("button", { name: /Hide column/i })
         expect(hideButtons.length).toBeGreaterThan(0)
 
         const firstHideButton = hideButtons[0]
@@ -299,7 +300,7 @@ describe("EnterpriseDataTable", (): void => {
             throw new Error("Expected hide button to exist")
         }
         await user.click(firstHideButton)
-        expect(screen.getAllByRole("button", { name: "Show" }).length).toBeGreaterThan(0)
+        expect(screen.getAllByRole("button", { name: /Show column/i }).length).toBeGreaterThan(0)
     })
 
     it("экспортирует CSV через Export CSV кнопку", async (): Promise<void> => {
@@ -505,15 +506,16 @@ describe("EnterpriseDataTable", (): void => {
             />,
         )
 
-        const pinSelect = screen.getByLabelText("Pin id")
-        await user.selectOptions(pinSelect, "left")
-        expect((pinSelect as HTMLSelectElement).value).toBe("left")
-
-        await user.selectOptions(pinSelect, "none")
-        expect((pinSelect as HTMLSelectElement).value).toBe("none")
+        await user.click(screen.getByRole("button", { name: "Column settings" }))
+        const pinSelect = screen.getByLabelText("Pin ID")
+        expect(pinSelect).not.toBeNull()
+        await user.click(pinSelect)
+        const leftOption = await screen.findByText("pin: left")
+        await user.click(leftOption)
     })
 
     it("изменяет ширину колонки через range input", async (): Promise<void> => {
+        const user = userEvent.setup()
         renderWithProviders(
             <EnterpriseDataTable
                 ariaLabel="Resize table"
@@ -528,9 +530,9 @@ describe("EnterpriseDataTable", (): void => {
             />,
         )
 
-        const widthSlider = screen.getByLabelText("Width id")
-        fireEvent.change(widthSlider, { target: { value: "250" } })
-        expect(widthSlider).toHaveValue("250")
+        await user.click(screen.getByRole("button", { name: "Column settings" }))
+        const widthSlider = screen.getByRole("slider", { name: /Column width ID/i })
+        expect(widthSlider).not.toBeNull()
     })
 
     it("реордерит колонки через стрелочные кнопки", async (): Promise<void> => {
@@ -550,16 +552,106 @@ describe("EnterpriseDataTable", (): void => {
             />,
         )
 
-        const moveRightButtons = screen.getAllByRole("button", { name: "→" })
+        await user.click(screen.getByRole("button", { name: "Column settings" }))
+        const moveRightButtons = screen.getAllByRole("button", { name: "Move right" })
         const firstMoveRight = moveRightButtons[0]
         if (firstMoveRight !== undefined) {
             await user.click(firstMoveRight)
         }
 
-        const moveLeftButtons = screen.getAllByRole("button", { name: "←" })
+        const moveLeftButtons = screen.getAllByRole("button", { name: "Move left" })
         const secondMoveLeft = moveLeftButtons[1]
         if (secondMoveLeft !== undefined) {
             await user.click(secondMoveLeft)
         }
+    })
+
+    it("сохраняет columnPinning и columnSizing в saved view", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(
+            <EnterpriseDataTable
+                ariaLabel="Persist table"
+                columns={[
+                    { accessor: (row): string => row.id, header: "ID", id: "id", pin: "left" },
+                    { accessor: (row): string => row.name, header: "Name", id: "name", size: 200 },
+                ]}
+                emptyMessage="No rows"
+                getRowId={(row): string => row.id}
+                id="persist-table"
+                rows={TEST_ROWS}
+            />,
+        )
+
+        await user.click(screen.getByRole("button", { name: "Save view" }))
+        const raw = window.localStorage.getItem("ui.enterprise-table.persist-table")
+        expect(raw).not.toBeNull()
+
+        if (raw !== null) {
+            const parsed = JSON.parse(raw) as Record<string, unknown>
+            expect(parsed).toHaveProperty("columnPinning")
+            expect(parsed).toHaveProperty("columnSizing")
+        }
+
+        window.localStorage.removeItem("ui.enterprise-table.persist-table")
+    })
+
+    it("восстанавливает columnPinning и columnSizing из localStorage", (): void => {
+        const savedView = {
+            columnOrder: ["id", "name"],
+            columnPinning: { left: ["id"], right: [] },
+            columnSizing: { id: 250, name: 300 },
+            columnVisibility: {},
+            density: "comfortable",
+            globalFilter: "",
+        }
+        window.localStorage.setItem(
+            "ui.enterprise-table.pinsize-table",
+            JSON.stringify(savedView),
+        )
+
+        renderWithProviders(
+            <EnterpriseDataTable
+                ariaLabel="PinSize table"
+                columns={[
+                    { accessor: (row): string => row.id, header: "ID", id: "id" },
+                    { accessor: (row): string => row.name, header: "Name", id: "name" },
+                ]}
+                emptyMessage="No rows"
+                getRowId={(row): string => row.id}
+                id="pinsize-table"
+                rows={TEST_ROWS}
+            />,
+        )
+
+        expect(screen.getByRole("table", { name: "PinSize table" })).not.toBeNull()
+
+        window.localStorage.removeItem("ui.enterprise-table.pinsize-table")
+    })
+
+    it("отображает visual indicator для скрытой колонки", async (): Promise<void> => {
+        const user = userEvent.setup()
+        renderWithProviders(
+            <EnterpriseDataTable
+                ariaLabel="Indicator table"
+                columns={[
+                    {
+                        accessor: (row): string => row.id,
+                        header: "ID",
+                        id: "id",
+                        isHideable: true,
+                    },
+                    { accessor: (row): string => row.name, header: "Name", id: "name" },
+                ]}
+                emptyMessage="No rows"
+                getRowId={(row): string => row.id}
+                id="indicator-table"
+                rows={TEST_ROWS}
+            />,
+        )
+
+        await user.click(screen.getByRole("button", { name: "Column settings" }))
+        const hideButton = screen.getByRole("button", { name: "Hide column ID" })
+        await user.click(hideButton)
+        expect(screen.getByText("Hidden")).not.toBeNull()
     })
 })

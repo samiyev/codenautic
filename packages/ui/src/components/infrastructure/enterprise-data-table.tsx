@@ -1,5 +1,4 @@
 import {
-    type ChangeEvent,
     type KeyboardEvent,
     type ReactElement,
     type UIEvent,
@@ -25,7 +24,7 @@ import {
 import { useVirtualizer } from "@tanstack/react-virtual"
 
 import { Button, Chip } from "@/components/ui"
-import { NATIVE_FORM } from "@/lib/constants/spacing"
+import { ColumnCard } from "./enterprise-data-table-column-card"
 
 type TDensity = "comfortable" | "compact"
 
@@ -99,6 +98,10 @@ interface IEnterpriseTableSavedView {
     readonly density: TDensity
     /** Значение global filter. */
     readonly globalFilter: string
+    /** Закрепление колонок. */
+    readonly columnPinning: ColumnPinningState
+    /** Ширины колонок. */
+    readonly columnSizing: ColumnSizingState
 }
 
 interface IRenderedRowOffset {
@@ -111,24 +114,59 @@ function getStorageKey(tableId: string): string {
     return `ui.enterprise-table.${tableId}`
 }
 
+/**
+ * Парсит ColumnPinningState из сохранённых данных.
+ *
+ * @param value Сырые данные из localStorage.
+ * @returns Валидный ColumnPinningState или пустой default.
+ */
+function parseSavedColumnPinning(value: unknown): ColumnPinningState {
+    if (typeof value !== "object" || value === null) {
+        return { left: [], right: [] }
+    }
+    const record = value as Record<string, unknown>
+    return {
+        left: Array.isArray(record["left"]) ? (record["left"] as string[]) : [],
+        right: Array.isArray(record["right"]) ? (record["right"] as string[]) : [],
+    }
+}
+
+/**
+ * Парсит ColumnSizingState из сохранённых данных.
+ *
+ * @param value Сырые данные из localStorage.
+ * @returns Валидный ColumnSizingState или пустой default.
+ */
+function parseSavedColumnSizing(value: unknown): ColumnSizingState {
+    if (typeof value !== "object" || value === null) {
+        return {}
+    }
+    return value as ColumnSizingState
+}
+
+/**
+ * Читает сохранённое состояние таблицы из localStorage.
+ *
+ * @param tableId Идентификатор таблицы.
+ * @returns Восстановленный view state.
+ */
 function readSavedView(tableId: string): IEnterpriseTableSavedView {
+    const emptyView: IEnterpriseTableSavedView = {
+        columnOrder: [],
+        columnPinning: { left: [], right: [] },
+        columnSizing: {},
+        columnVisibility: {},
+        density: "comfortable",
+        globalFilter: "",
+    }
+
     if (typeof window === "undefined") {
-        return {
-            columnOrder: [],
-            columnVisibility: {},
-            density: "comfortable",
-            globalFilter: "",
-        }
+        return emptyView
     }
 
     const raw = window.localStorage.getItem(getStorageKey(tableId))
     if (raw === null) {
-        return {
-            columnOrder: [],
-            columnVisibility: {},
-            density: "comfortable",
-            globalFilter: "",
-        }
+        return emptyView
     }
 
     try {
@@ -137,6 +175,8 @@ function readSavedView(tableId: string): IEnterpriseTableSavedView {
 
         return {
             columnOrder: Array.isArray(parsed.columnOrder) ? parsed.columnOrder : [],
+            columnPinning: parseSavedColumnPinning(parsed.columnPinning),
+            columnSizing: parseSavedColumnSizing(parsed.columnSizing),
             columnVisibility:
                 typeof parsed.columnVisibility === "object" && parsed.columnVisibility !== null
                     ? parsed.columnVisibility
@@ -145,12 +185,7 @@ function readSavedView(tableId: string): IEnterpriseTableSavedView {
             globalFilter: typeof parsed.globalFilter === "string" ? parsed.globalFilter : "",
         }
     } catch {
-        return {
-            columnOrder: [],
-            columnVisibility: {},
-            density: "comfortable",
-            globalFilter: "",
-        }
+        return emptyView
     }
 }
 
@@ -192,6 +227,28 @@ function buildCsvPayload<TRow>(
     })
 
     return `${header}\n${records.join("\n")}`
+}
+
+/**
+ * Проверяет, содержит ли saved pinning реальные данные.
+ *
+ * @param pinning Сохранённый ColumnPinningState.
+ * @returns true если есть хотя бы одна закреплённая колонка.
+ */
+function hasSavedPinning(pinning: ColumnPinningState): boolean {
+    const leftCount = Array.isArray(pinning.left) ? pinning.left.length : 0
+    const rightCount = Array.isArray(pinning.right) ? pinning.right.length : 0
+    return leftCount > 0 || rightCount > 0
+}
+
+/**
+ * Проверяет, содержит ли saved sizing реальные данные.
+ *
+ * @param sizing Сохранённый ColumnSizingState.
+ * @returns true если есть хотя бы одна ширина.
+ */
+function hasSavedSizing(sizing: ColumnSizingState): boolean {
+    return Object.keys(sizing).length > 0
 }
 
 function createColumnDefs<TRow>(
@@ -259,10 +316,15 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
     const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
         initialView.columnOrder.length > 0 ? initialView.columnOrder : initialColumnOrder,
     )
-    const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(initialColumnPinning)
-    const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(initialColumnSizing)
+    const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(
+        hasSavedPinning(initialView.columnPinning) ? initialView.columnPinning : initialColumnPinning,
+    )
+    const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
+        hasSavedSizing(initialView.columnSizing) ? initialView.columnSizing : initialColumnSizing,
+    )
     const [focusedRowIndex, setFocusedRowIndex] = useState<number>(0)
     const [isBodyScrolled, setIsBodyScrolled] = useState<boolean>(false)
+    const [isColumnControlsOpen, setIsColumnControlsOpen] = useState<boolean>(false)
 
     const data = useMemo((): Array<TRow> => [...props.rows], [props.rows])
     const columnDefs = useMemo((): ReadonlyArray<ColumnDef<TRow>> => {
@@ -375,6 +437,8 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
     const handleSaveView = (): void => {
         writeSavedView(props.id, {
             columnOrder,
+            columnPinning,
+            columnSizing,
             columnVisibility,
             density,
             globalFilter,
@@ -418,22 +482,11 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
         }
     }
 
-    const handleColumnWidthChange = (
-        event: ChangeEvent<HTMLInputElement>,
-        columnId: string,
-    ): void => {
-        const next = Number.parseInt(event.currentTarget.value, 10)
-        if (Number.isNaN(next)) {
-            return
-        }
-        const column = table.getColumn(columnId)
-        if (column === undefined) {
-            return
-        }
+    const handleColumnWidthCommit = (columnId: string, width: number): void => {
         table.setColumnSizing(
             (previous): ColumnSizingState => ({
                 ...previous,
-                [columnId]: next,
+                [columnId]: width,
             }),
         )
     }
@@ -488,113 +541,81 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                 <Button size="sm" variant="flat" onPress={handleResetView}>
                     {t("common:dataTable.resetView")}
                 </Button>
+                <Button
+                    aria-label={t("common:dataTable.columnSettings")}
+                    size="sm"
+                    variant={isColumnControlsOpen ? "solid" : "flat"}
+                    onPress={(): void => {
+                        setIsColumnControlsOpen((previous): boolean => !previous)
+                    }}
+                >
+                    {t("common:dataTable.columnSettings")}
+                </Button>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            {isColumnControlsOpen ? <div className="flex flex-wrap gap-2">
                 {columnOrder.map((columnId, index): ReactElement | null => {
                     const column = table.getColumn(columnId)
                     if (column === undefined) {
                         return null
                     }
+                    const pinnedRaw = column.getIsPinned()
+                    const pinnedSide: "left" | "right" | false =
+                        pinnedRaw === "left" || pinnedRaw === "right" ? pinnedRaw : false
 
                     return (
-                        <div
-                            className="rounded-lg border border-border bg-surface px-3 py-2"
+                        <ColumnCard
+                            canHide={column.getCanHide()}
+                            columnId={columnId}
+                            currentWidth={Math.round(column.getSize())}
+                            header={String(column.columnDef.header)}
+                            index={index}
+                            isVisible={column.getIsVisible()}
                             key={columnId}
-                        >
-                            <p className="text-xs font-semibold uppercase tracking-[0.08em]">
-                                {String(column.columnDef.header)}
-                            </p>
-                            <div className="mt-1 flex flex-wrap items-center gap-1">
-                                {column.getCanHide() ? (
-                                    <Button
-                                        size="sm"
-                                        variant="flat"
-                                        onPress={(): void => {
-                                            column.toggleVisibility()
-                                        }}
-                                    >
-                                        {column.getIsVisible() ? t("common:dataTable.hide") : t("common:dataTable.show")}
-                                    </Button>
-                                ) : null}
-                                <Button
-                                    isDisabled={index === 0}
-                                    size="sm"
-                                    variant="flat"
-                                    onPress={(): void => {
-                                        if (index === 0) {
-                                            return
-                                        }
-                                        const next = [...columnOrder]
-                                        const target = next[index - 1]
-                                        if (target === undefined) {
-                                            return
-                                        }
-                                        next[index - 1] = columnId
-                                        next[index] = target
-                                        setColumnOrder(next)
-                                    }}
-                                >
-                                    ←
-                                </Button>
-                                <Button
-                                    isDisabled={index === columnOrder.length - 1}
-                                    size="sm"
-                                    variant="flat"
-                                    onPress={(): void => {
-                                        if (index >= columnOrder.length - 1) {
-                                            return
-                                        }
-                                        const next = [...columnOrder]
-                                        const target = next[index + 1]
-                                        if (target === undefined) {
-                                            return
-                                        }
-                                        next[index + 1] = columnId
-                                        next[index] = target
-                                        setColumnOrder(next)
-                                    }}
-                                >
-                                    →
-                                </Button>
-                                <select
-                                    aria-label={`Pin ${columnId}`}
-                                    className={`w-28 ${NATIVE_FORM.select}`}
-                                    value={
-                                        column.getIsPinned() === false
-                                            ? "none"
-                                            : String(column.getIsPinned())
-                                    }
-                                    onChange={(event): void => {
-                                        const value = event.currentTarget.value
-                                        if (value === "left" || value === "right") {
-                                            column.pin(value)
-                                            return
-                                        }
-                                        column.pin(false)
-                                    }}
-                                >
-                                    <option value="none">{t("common:dataTable.pinNone")}</option>
-                                    <option value="left">{t("common:dataTable.pinLeft")}</option>
-                                    <option value="right">{t("common:dataTable.pinRight")}</option>
-                                </select>
-                            </div>
-                            <input
-                                aria-label={`Width ${columnId}`}
-                                className="mt-2 w-full"
-                                max="420"
-                                min="120"
-                                step="10"
-                                type="range"
-                                value={Math.round(column.getSize())}
-                                onChange={(event): void => {
-                                    handleColumnWidthChange(event, columnId)
-                                }}
-                            />
-                        </div>
+                            onMoveLeft={(): void => {
+                                if (index === 0) {
+                                    return
+                                }
+                                const next = [...columnOrder]
+                                const target = next[index - 1]
+                                if (target === undefined) {
+                                    return
+                                }
+                                next[index - 1] = columnId
+                                next[index] = target
+                                setColumnOrder(next)
+                            }}
+                            onMoveRight={(): void => {
+                                if (index >= columnOrder.length - 1) {
+                                    return
+                                }
+                                const next = [...columnOrder]
+                                const target = next[index + 1]
+                                if (target === undefined) {
+                                    return
+                                }
+                                next[index + 1] = columnId
+                                next[index] = target
+                                setColumnOrder(next)
+                            }}
+                            onPinChange={(pin): void => {
+                                column.pin(pin)
+                            }}
+                            onToggleVisibility={(): void => {
+                                column.toggleVisibility()
+                            }}
+                            onWidthChange={(width): void => {
+                                handleColumnWidthCommit(columnId, width)
+                            }}
+                            onWidthChangeEnd={(width): void => {
+                                handleColumnWidthCommit(columnId, width)
+                            }}
+                            pinnedSide={pinnedSide}
+                            totalColumns={columnOrder.length}
+                        />
                     )
                 })}
-            </div>
+            </div> : null}
 
             {selectedRows.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2">
@@ -620,14 +641,14 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                 data-virtualized="true"
                 role="table"
                 aria-rowcount={rowModel.length}
-                style={{ minWidth: `${String(totalTableWidth)}px` }}
+                style={{ maxWidth: "100%" }}
             >
                 <div
                     className={`${isStickyHeaderEnabled ? "sticky" : ""} top-0 z-10 border-b border-border bg-surface ${isStickyShadowEnabled && isBodyScrolled ? "shadow-sm" : ""}`}
                     data-sticky-header={isStickyHeaderEnabled ? "true" : "false"}
                     data-sticky-shadow={isBodyScrolled ? "true" : "false"}
                     role="rowgroup"
-                    style={isStickyHeaderEnabled ? { top: stickyHeaderTopOffset } : undefined}
+                    style={isStickyHeaderEnabled ? { minWidth: `${String(totalTableWidth)}px`, top: stickyHeaderTopOffset } : { minWidth: `${String(totalTableWidth)}px` }}
                 >
                     <div
                         className="grid items-center gap-2 px-2 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-text-secondary"
@@ -668,7 +689,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                         className="overflow-auto"
                         data-rendered-row-count={renderedRowOffsets.length}
                         role="rowgroup"
-                        style={{ maxHeight: `${String(maxBodyHeight)}px` }}
+                        style={{ maxHeight: `${String(maxBodyHeight)}px`, minWidth: `${String(totalTableWidth)}px` }}
                         onScroll={handleBodyScroll}
                     >
                         <div
@@ -692,8 +713,8 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                                         role="row"
                                         style={{
                                             gridTemplateColumns,
-                                            minWidth: `${String(totalTableWidth)}px`,
                                             transform: `translateY(${String(rowOffset.start)}px)`,
+                                            width: `${String(totalTableWidth)}px`,
                                         }}
                                         tabIndex={isFocused ? 0 : -1}
                                         onFocus={(): void => {

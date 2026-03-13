@@ -133,7 +133,18 @@
         "pinLeft": "pin: left",
         "pinRight": "pin: right",
         "selected": "{{count}} selected",
-        "clearSelection": "Clear selection"
+        "clearSelection": "Clear selection",
+        "moveLeft": "Move left",
+        "moveRight": "Move right",
+        "columnWidth": "Column width",
+        "columnWidthValue": "{{value}}px",
+        "pinColumnAriaLabel": "Pin {{column}}",
+        "hideColumnAriaLabel": "Hide column {{column}}",
+        "showColumnAriaLabel": "Show column {{column}}",
+        "columnHidden": "Hidden",
+        "columnPinnedLeft": "Pinned left",
+        "columnPinnedRight": "Pinned right",
+        "columnSettings": "Column settings"
     },
     "explainabilityPanel": {
         "whyThisScore": "Why this score?",
