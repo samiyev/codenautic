@@ -708,7 +708,8 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
 
                                 return (
                                     <div
-                                        className={`absolute left-0 top-0 grid items-center gap-2 border-b border-border bg-surface px-2 ${rowPadding}`}
+                                        aria-selected={row.getIsSelected()}
+                                        className={`absolute left-0 top-0 grid items-center gap-2 border-b border-border bg-surface px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40 ${rowPadding}`}
                                         key={rowOffset.key}
                                         role="row"
                                         style={{

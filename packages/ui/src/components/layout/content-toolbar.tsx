@@ -103,7 +103,7 @@ export function ContentToolbar(props: IContentToolbarProps): ReactElement {
                                         {segment.path !== undefined &&
                                         !isLast ? (
                                             <button
-                                                className="text-text-secondary transition-colors duration-150 hover:text-foreground"
+                                                className="rounded-sm text-text-secondary transition-colors duration-150 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                                                 type="button"
                                                 onClick={(): void => {
                                                     props.onBreadcrumbNavigate?.(

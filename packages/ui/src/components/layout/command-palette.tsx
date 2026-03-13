@@ -1,4 +1,4 @@
-import { type ReactElement, type RefObject, useEffect, useMemo, useRef, useState } from "react"
+import { type KeyboardEvent as ReactKeyboardEvent, type ReactElement, type RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { AnimatePresence, motion } from "motion/react"
 
@@ -268,6 +268,7 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
         return readStringArrayFromStorage(COMMAND_PALETTE_PINNED_STORAGE_KEY)
     })
     const inputRef = useRef<HTMLInputElement | null>(null)
+    const dialogRef = useRef<HTMLDivElement | null>(null)
     const prefersReducedMotion = useReducedMotion()
 
     const tDynamic = useMemo(
@@ -427,12 +428,45 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
         handleSelection(target)
     }
 
+    const handleDialogKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>): void => {
+        if (event.key !== "Tab" || dialogRef.current === null) {
+            return
+        }
+
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+            'input, button, [tabindex]:not([tabindex="-1"])',
+        )
+        if (focusable.length === 0) {
+            return
+        }
+
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+
+        if (first === undefined || last === undefined) {
+            return
+        }
+
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault()
+            last.focus()
+            return
+        }
+
+        if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault()
+            first.focus()
+        }
+    }, [])
+
     const paletteContent = (
         <div
             aria-label="Global command palette"
             aria-modal="true"
             className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16"
+            ref={dialogRef}
             role="dialog"
+            onKeyDown={handleDialogKeyDown}
         >
             <button
                 aria-label="Close command palette"
