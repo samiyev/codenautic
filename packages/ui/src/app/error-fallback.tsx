@@ -1,6 +1,6 @@
 import { useEffect, type ReactElement } from "react"
 import type { ErrorComponentProps } from "@tanstack/react-router"
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 interface IErrorWithStatusCode {
@@ -112,7 +112,7 @@ function ErrorFallbackContent(props: {
                         Вернуться на главную
                     </Button>
                     <Button
-                        variant="flat"
+                        variant="secondary"
                         onPress={(): void => {
                             window.location.assign("/help-diagnostics?from=error-fallback")
                         }}
@@ -139,7 +139,7 @@ function ErrorFallbackContent(props: {
                         Повторить
                     </Button>
                     <Button
-                        variant="flat"
+                        variant="secondary"
                         onPress={(): void => {
                             window.location.assign("/help-diagnostics?from=error-fallback")
                         }}
