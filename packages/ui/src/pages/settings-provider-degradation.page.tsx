@@ -58,7 +58,9 @@ export function SettingsProviderDegradationPage(): ReactElement {
             return t("settings:providerDegradation.allProvidersOperational")
         }
 
-        return t("settings:providerDegradation.providerDegraded", { provider: providerState.provider })
+        return t("settings:providerDegradation.providerDegraded", {
+            provider: providerState.provider,
+        })
     }, [providerState.level, providerState.provider, t])
 
     const dispatchDegradationEvent = (detail: IProviderDegradationEventDetail): void => {
@@ -128,11 +130,12 @@ export function SettingsProviderDegradationPage(): ReactElement {
             title={t("settings:providerDegradation.pageTitle")}
             description={t("settings:providerDegradation.pageSubtitle")}
         >
-
             <Alert
                 color={providerState.level === "degraded" ? "danger" : "success"}
                 title={
-                    providerState.level === "degraded" ? t("settings:providerDegradation.degradedModeActive") : t("settings:providerDegradation.operationalMode")
+                    providerState.level === "degraded"
+                        ? t("settings:providerDegradation.degradedModeActive")
+                        : t("settings:providerDegradation.operationalMode")
                 }
                 variant="flat"
             >
@@ -141,7 +144,9 @@ export function SettingsProviderDegradationPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className={TYPOGRAPHY.sectionTitle}>{t("settings:providerDegradation.incidentControls")}</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>
+                        {t("settings:providerDegradation.incidentControls")}
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -157,7 +162,9 @@ export function SettingsProviderDegradationPage(): ReactElement {
                         </Chip>
                     </div>
                     {providerState.affectedFeatures.length === 0 ? (
-                        <p className="text-sm text-text-secondary">{t("settings:providerDegradation.noAffectedFeatures")}</p>
+                        <p className="text-sm text-text-secondary">
+                            {t("settings:providerDegradation.noAffectedFeatures")}
+                        </p>
                     ) : (
                         <ul aria-label="Affected features list" className="space-y-1">
                             {providerState.affectedFeatures.map(
@@ -170,7 +177,9 @@ export function SettingsProviderDegradationPage(): ReactElement {
                         </ul>
                     )}
                     <div className="flex flex-wrap gap-2">
-                        <Button color="primary" onPress={handleSimulateOutage}>{t("settings:providerDegradation.simulateOutage")}</Button>
+                        <Button color="primary" onPress={handleSimulateOutage}>
+                            {t("settings:providerDegradation.simulateOutage")}
+                        </Button>
                         <Button variant="flat" onPress={handleMarkOperational}>
                             {t("settings:providerDegradation.markOperational")}
                         </Button>
@@ -188,7 +197,9 @@ export function SettingsProviderDegradationPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className={TYPOGRAPHY.sectionTitle}>{t("settings:providerDegradation.queueRetry")}</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>
+                        {t("settings:providerDegradation.queueRetry")}
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="flex gap-2">
@@ -219,7 +230,9 @@ export function SettingsProviderDegradationPage(): ReactElement {
                         )}
                     </ul>
                     {queuedActions.length === 0 ? (
-                        <p className="text-sm text-text-secondary">{t("settings:providerDegradation.noCriticalActionsInQueue")}</p>
+                        <p className="text-sm text-text-secondary">
+                            {t("settings:providerDegradation.noCriticalActionsInQueue")}
+                        </p>
                     ) : null}
                 </CardBody>
             </Card>

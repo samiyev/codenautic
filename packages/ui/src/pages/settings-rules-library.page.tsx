@@ -193,7 +193,9 @@ export function SettingsRulesLibraryPage(): ReactElement {
         setCustomName("")
         setCustomDescription("")
         setCustomExpression("")
-        showToastSuccess(t("settings:rulesLibrary.toast.customRuleCreated", { name: nextRule.name }))
+        showToastSuccess(
+            t("settings:rulesLibrary.toast.customRuleCreated", { name: nextRule.name }),
+        )
     }
 
     const handleTestRule = (): void => {
@@ -213,7 +215,9 @@ export function SettingsRulesLibraryPage(): ReactElement {
         setTestResult({
             message: isMatched
                 ? t("settings:rulesLibrary.patternDetected", { pattern: selectedRule.testPattern })
-                : t("settings:rulesLibrary.patternNotDetected", { pattern: selectedRule.testPattern }),
+                : t("settings:rulesLibrary.patternNotDetected", {
+                      pattern: selectedRule.testPattern,
+                  }),
             status: isMatched ? "passed" : "failed",
         })
         showToastInfo(t("settings:rulesLibrary.toast.ruleTestFinished"))
@@ -224,42 +228,55 @@ export function SettingsRulesLibraryPage(): ReactElement {
             title={t("settings:rulesLibrary.pageTitle")}
             description={t("settings:rulesLibrary.pageSubtitle")}
         >
-
             <div className="grid gap-4 md:grid-cols-3">
                 <Card>
                     <CardHeader>
-                        <p className="text-sm font-semibold text-foreground">{t("settings:rulesLibrary.catalog")}</p>
+                        <p className="text-sm font-semibold text-foreground">
+                            {t("settings:rulesLibrary.catalog")}
+                        </p>
                     </CardHeader>
                     <CardBody>
                         <p className="text-2xl font-semibold text-foreground">{rules.length}</p>
-                        <p className="text-xs text-text-secondary">{t("settings:rulesLibrary.totalRules")}</p>
+                        <p className="text-xs text-text-secondary">
+                            {t("settings:rulesLibrary.totalRules")}
+                        </p>
                     </CardBody>
                 </Card>
                 <Card>
                     <CardHeader>
-                        <p className="text-sm font-semibold text-foreground">{t("settings:rulesLibrary.imported")}</p>
+                        <p className="text-sm font-semibold text-foreground">
+                            {t("settings:rulesLibrary.imported")}
+                        </p>
                     </CardHeader>
                     <CardBody>
                         <p className="text-2xl font-semibold text-foreground">{importedCount}</p>
-                        <p className="text-xs text-text-secondary">{t("settings:rulesLibrary.rulesInActiveProfile")}</p>
+                        <p className="text-xs text-text-secondary">
+                            {t("settings:rulesLibrary.rulesInActiveProfile")}
+                        </p>
                     </CardBody>
                 </Card>
                 <Card>
                     <CardHeader>
-                        <p className="text-sm font-semibold text-foreground">{t("settings:rulesLibrary.custom")}</p>
+                        <p className="text-sm font-semibold text-foreground">
+                            {t("settings:rulesLibrary.custom")}
+                        </p>
                     </CardHeader>
                     <CardBody>
                         <p className="text-2xl font-semibold text-foreground">
                             {rules.filter((rule): boolean => rule.source === "custom").length}
                         </p>
-                        <p className="text-xs text-text-secondary">{t("settings:rulesLibrary.teamDefinedPolicyRules")}</p>
+                        <p className="text-xs text-text-secondary">
+                            {t("settings:rulesLibrary.teamDefinedPolicyRules")}
+                        </p>
                     </CardBody>
                 </Card>
             </div>
 
             <Card>
                 <CardHeader>
-                    <p className={TYPOGRAPHY.sectionTitle}>{t("settings:rulesLibrary.browsePrebuiltRules")}</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>
+                        {t("settings:rulesLibrary.browsePrebuiltRules")}
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[1fr_220px]">
@@ -340,7 +357,9 @@ export function SettingsRulesLibraryPage(): ReactElement {
                                                 handleImportRule(rule.id)
                                             }}
                                         >
-                                            {isImported ? t("settings:rulesLibrary.importedButton") : t("settings:rulesLibrary.importButton")}
+                                            {isImported
+                                                ? t("settings:rulesLibrary.importedButton")
+                                                : t("settings:rulesLibrary.importButton")}
                                         </Button>
                                     </div>
                                 </li>
@@ -353,7 +372,9 @@ export function SettingsRulesLibraryPage(): ReactElement {
             <div className="grid gap-4 xl:grid-cols-2">
                 <Card>
                     <CardHeader>
-                        <p className={TYPOGRAPHY.sectionTitle}>{t("settings:rulesLibrary.createCustomRule")}</p>
+                        <p className={TYPOGRAPHY.sectionTitle}>
+                            {t("settings:rulesLibrary.createCustomRule")}
+                        </p>
                     </CardHeader>
                     <CardBody className="space-y-3">
                         <Input
@@ -385,10 +406,18 @@ export function SettingsRulesLibraryPage(): ReactElement {
                                 }
                             }}
                         >
-                            <option value="security">{t("settings:rulesLibrary.categorySecurity")}</option>
-                            <option value="architecture">{t("settings:rulesLibrary.categoryArchitecture")}</option>
-                            <option value="performance">{t("settings:rulesLibrary.categoryPerformance")}</option>
-                            <option value="style">{t("settings:rulesLibrary.categoryStyle")}</option>
+                            <option value="security">
+                                {t("settings:rulesLibrary.categorySecurity")}
+                            </option>
+                            <option value="architecture">
+                                {t("settings:rulesLibrary.categoryArchitecture")}
+                            </option>
+                            <option value="performance">
+                                {t("settings:rulesLibrary.categoryPerformance")}
+                            </option>
+                            <option value="style">
+                                {t("settings:rulesLibrary.categoryStyle")}
+                            </option>
                         </select>
                         <Input
                             label={t("settings:rulesLibrary.ruleExpression")}
@@ -397,14 +426,18 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             onValueChange={setCustomExpression}
                         />
                         <div className="flex justify-end">
-                            <Button color="primary" onPress={handleCreateCustomRule}>{t("settings:rulesLibrary.createCustomRule")}</Button>
+                            <Button color="primary" onPress={handleCreateCustomRule}>
+                                {t("settings:rulesLibrary.createCustomRule")}
+                            </Button>
                         </div>
                     </CardBody>
                 </Card>
 
                 <Card>
                     <CardHeader>
-                        <p className={TYPOGRAPHY.sectionTitle}>{t("settings:rulesLibrary.testRules")}</p>
+                        <p className={TYPOGRAPHY.sectionTitle}>
+                            {t("settings:rulesLibrary.testRules")}
+                        </p>
                     </CardHeader>
                     <CardBody className="space-y-3">
                         <select
