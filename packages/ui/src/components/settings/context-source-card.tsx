@@ -86,9 +86,7 @@ export function ContextSourceCard(props: IContextSourceCardProps): ReactElement 
         >
             <CardHeader className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                    <h3 className={`truncate ${TYPOGRAPHY.cardTitle}`}>
-                        {source.name}
-                    </h3>
+                    <h3 className={`truncate ${TYPOGRAPHY.cardTitle}`}>{source.name}</h3>
                     <p className="text-xs text-foreground-500">{source.type}</p>
                 </div>
                 <Chip color={resolveStatusColor(source.status)} size="sm" variant="flat">
@@ -99,7 +97,8 @@ export function ContextSourceCard(props: IContextSourceCardProps): ReactElement 
                 <p className="text-xs text-foreground-600">
                     {t("settings:contextSourceCard.itemsAndSync", {
                         items: source.itemCount,
-                        sync: source.lastSyncedAt ?? t("settings:contextSourceCard.syncNotAvailable"),
+                        sync:
+                            source.lastSyncedAt ?? t("settings:contextSourceCard.syncNotAvailable"),
                     })}
                 </p>
                 <div className="flex flex-wrap gap-2">

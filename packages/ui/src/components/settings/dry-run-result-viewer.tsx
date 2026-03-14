@@ -35,9 +35,7 @@ export function DryRunResultViewer(props: IDryRunResultViewerProps): ReactElemen
 
     return (
         <section className="space-y-3 rounded-xl border border-border bg-surface p-4">
-            <h2 className={TYPOGRAPHY.sectionTitle}>
-                {t("settings:dryRunResultViewer.title")}
-            </h2>
+            <h2 className={TYPOGRAPHY.sectionTitle}>{t("settings:dryRunResultViewer.title")}</h2>
             <p className="text-sm text-muted-foreground">
                 {t("settings:dryRunResultViewer.description")}
             </p>

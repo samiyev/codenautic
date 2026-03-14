@@ -29,9 +29,7 @@ export function PromptOverrideEditor(props: IPromptOverrideEditorProps): ReactEl
 
     return (
         <section className="space-y-3 rounded-md border border-border bg-surface p-3">
-            <h3 className={TYPOGRAPHY.cardTitle}>
-                {t("settings:promptOverrideEditor.title")}
-            </h3>
+            <h3 className={TYPOGRAPHY.cardTitle}>{t("settings:promptOverrideEditor.title")}</h3>
             <p className={TYPOGRAPHY.captionMuted}>
                 {t("settings:promptOverrideEditor.description")}
             </p>

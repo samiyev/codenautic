@@ -248,9 +248,7 @@ export function RuleEditor(props: IRuleEditorProps): ReactElement {
                         aria-label={t("settings:ruleEditor.previewAriaLabel")}
                         id={previewId}
                     >
-                        <Suspense
-                            fallback={<p>{t("settings:ruleEditor.loadingPreview")}</p>}
-                        >
+                        <Suspense fallback={<p>{t("settings:ruleEditor.loadingPreview")}</p>}>
                             <LazyRuleEditorPreview content={value} />
                         </Suspense>
                     </section>

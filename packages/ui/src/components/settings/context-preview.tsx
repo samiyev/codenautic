@@ -58,9 +58,7 @@ export function ContextPreview(props: IContextPreviewProps): ReactElement {
                                     key={item.id}
                                     className="rounded-lg border border-default-200 bg-content1 p-3"
                                 >
-                                    <p className={TYPOGRAPHY.cardTitle}>
-                                        {item.title}
-                                    </p>
+                                    <p className={TYPOGRAPHY.cardTitle}>{item.title}</p>
                                     <p className="mt-1 text-xs text-foreground-600">
                                         {item.excerpt}
                                     </p>

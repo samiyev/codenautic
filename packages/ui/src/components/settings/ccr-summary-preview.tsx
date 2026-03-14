@@ -41,9 +41,7 @@ export function CCRSummaryPreview(props: ICCRSummaryPreviewProps): ReactElement 
                 className="space-y-2 rounded-md border border-dashed border-border bg-surface p-3"
                 data-testid="ccr-summary-preview"
             >
-                <h3 className={TYPOGRAPHY.cardTitle}>
-                    {t("settings:ccrSummaryPreview.title")}
-                </h3>
+                <h3 className={TYPOGRAPHY.cardTitle}>{t("settings:ccrSummaryPreview.title")}</h3>
                 <p className={TYPOGRAPHY.captionMuted}>
                     {t("settings:ccrSummaryPreview.generationDisabled")}
                 </p>
@@ -66,13 +64,8 @@ export function CCRSummaryPreview(props: ICCRSummaryPreviewProps): ReactElement 
             className="space-y-2 rounded-md border border-border bg-surface p-3"
             data-testid="ccr-summary-preview"
         >
-            <h3 className={TYPOGRAPHY.cardTitle}>
-                {t("settings:ccrSummaryPreview.title")}
-            </h3>
-            <p
-                className={TYPOGRAPHY.captionMuted}
-                data-testid="ccr-summary-preview-detail-level"
-            >
+            <h3 className={TYPOGRAPHY.cardTitle}>{t("settings:ccrSummaryPreview.title")}</h3>
+            <p className={TYPOGRAPHY.captionMuted} data-testid="ccr-summary-preview-detail-level">
                 {t("settings:ccrSummaryPreview.detailLevel", {
                     level: detailLabels[props.settings.detailLevel],
                 })}

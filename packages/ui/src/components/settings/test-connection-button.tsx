@@ -26,8 +26,12 @@ export function TestConnectionButton(props: ITestConnectionButtonProps): ReactEl
     const handlePress = async (): Promise<void> => {
         setStatus("checking")
 
-        const result = await props.onTest()
-        setStatus(result ? "ok" : "failed")
+        try {
+            const result = await props.onTest()
+            setStatus(result ? "ok" : "failed")
+        } catch {
+            setStatus("failed")
+        }
     }
 
     return (
