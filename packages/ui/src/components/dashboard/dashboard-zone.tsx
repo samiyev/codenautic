@@ -56,13 +56,16 @@ export function DashboardZone(props: IDashboardZoneProps): ReactElement | null {
         <section className={`space-y-3 ${priorityClass}`}>
             <button
                 aria-expanded={isExpanded}
-                className="flex w-full items-center gap-2 text-left"
+                className="group flex w-full items-center gap-2 rounded-md py-1 text-left transition-colors duration-150 hover:bg-surface-muted/50"
                 type="button"
                 onClick={(): void => {
                     setIsExpanded((prev): boolean => !prev)
                 }}
             >
-                <span aria-hidden="true" className="flex h-6 w-6 items-center justify-center">
+                <span
+                    aria-hidden="true"
+                    className="flex h-6 w-6 items-center justify-center rounded-md bg-surface-muted/60 text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary"
+                >
                     {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                 </span>
                 <span className={TYPOGRAPHY.sectionTitle}>{props.title}</span>
