@@ -7,6 +7,7 @@ import {
 } from "@/lib/access/access-types"
 import { searchAccessibleRoutes } from "@/lib/navigation/route-guard-map"
 import { TENANT_STORAGE_KEY } from "@/lib/sync/multi-tab-consistency"
+import { getWindowLocalStorage, safeStorageGet } from "@/lib/utils/safe-storage"
 
 import type { IAuthSession } from "./types"
 
@@ -82,17 +83,9 @@ export function resolveAuthTenantId(session: IAuthSession): TTenantId {
  * @returns Tenant id из storage или undefined.
  */
 export function readStoredTenantId(): TTenantId | undefined {
-    if (typeof window === "undefined") {
-        return undefined
-    }
-
-    try {
-        const tenantId = window.localStorage.getItem(TENANT_STORAGE_KEY)
-        if (isTenantId(tenantId)) {
-            return tenantId
-        }
-    } catch {
-        return undefined
+    const tenantId = safeStorageGet(getWindowLocalStorage(), TENANT_STORAGE_KEY)
+    if (tenantId !== undefined && isTenantId(tenantId)) {
+        return tenantId
     }
 
     return undefined
