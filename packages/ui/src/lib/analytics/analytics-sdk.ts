@@ -6,6 +6,7 @@ import type {
     TAnalyticsConsent,
     TAnalyticsEventName,
 } from "./analytics-types"
+import { safeParseJsonUnknown } from "@/lib/utils/safe-json"
 
 export interface IAnalyticsSdkOptions {
     /** Базовый endpoint для отправки батчей. */
@@ -58,6 +59,14 @@ const DEFAULT_SAMPLING_RATE = 1
 const DEFAULT_SESSION_ID_LENGTH = 20
 const MAX_QUEUE_SIZE = 250
 const SAMPLE_MULTIPLIER = 10_000
+/**
+ * Длина correlation ID в base-36 представлении.
+ */
+const CORRELATION_ID_LENGTH = 12
+/**
+ * Длина event ID в base-36 представлении.
+ */
+const EVENT_ID_LENGTH = 24
 
 /**
  * OSS-ориентированный SDK для batch/queue analytics в UI.
@@ -269,7 +278,7 @@ export class AnalyticsSdk {
 
     private createCorrelationId(payload: Readonly<Record<string, unknown>>): string {
         const seed = `${this.sessionId}-${stableSerialize(payload)}`
-        return createDeterministicHash(seed).toString(36).slice(0, 12)
+        return createDeterministicHash(seed).toString(36).slice(0, CORRELATION_ID_LENGTH)
     }
 
     private shouldSample<TName extends TAnalyticsEventName>(
@@ -364,7 +373,7 @@ export class AnalyticsSdk {
                 return []
             }
 
-            serializedQueue = parseJsonSafe(rawPayload)
+            serializedQueue = safeParseJsonUnknown(rawPayload)
         } catch {
             return []
         }
@@ -457,7 +466,7 @@ function createEventId(args: {
         stableSerialize(args.payload),
     )}`
 
-    return `evt_${createDeterministicHash(seed).toString(36).slice(0, 24)}`
+    return `evt_${createDeterministicHash(seed).toString(36).slice(0, EVENT_ID_LENGTH)}`
 }
 
 function createSessionId(): string {
@@ -478,14 +487,6 @@ function createDeterministicHash(input: string): number {
     }
 
     return hash >>> 0
-}
-
-function parseJsonSafe(value: string): unknown {
-    try {
-        return JSON.parse(value)
-    } catch {
-        return undefined
-    }
 }
 
 function stableSerialize(value: unknown): string {
