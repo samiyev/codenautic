@@ -4,6 +4,7 @@ import {
     Container,
     TOKENS,
     type IInboxRepository,
+    type IMergeRequestDTO,
     type ILogger,
     type IOutboxRelayService,
     type IOutboxRepository,
@@ -19,7 +20,12 @@ import {
     type IDatabaseConnectionManager,
     registerDatabaseModule,
 } from "../../src/database"
-import {GIT_TOKENS, GitProviderFactory, registerGitModule} from "../../src/git"
+import {
+    GIT_RATE_LIMIT_TIER,
+    GIT_TOKENS,
+    GitProviderFactory,
+    registerGitModule,
+} from "../../src/git"
 import {LLM_TOKENS, LlmProviderFactory, registerLlmModule} from "../../src/llm"
 import {
     InboxDeduplicationImpl,
@@ -74,6 +80,45 @@ describe("Provider modules registration", () => {
         expect(resolvedBlame).toBe(provider)
         expect(resolvedPipelineStatus).toBe(provider)
         expect(resolved).toBe(provider)
+    })
+
+    test("registerGitModule applies optional git rate limiter wrapper", async () => {
+        const container = new Container()
+        const calls: string[] = []
+        let currentTimeMs = 0
+        const sleepCalls: number[] = []
+        const provider = createGitProviderMock()
+        provider.getMergeRequest = (id: string): Promise<IMergeRequestDTO> => {
+            calls.push(id)
+            return Promise.resolve({id} as IMergeRequestDTO)
+        }
+
+        registerGitModule(container, {
+            provider,
+            rateLimit: {
+                organizationId: "org-module-rate-limit",
+                tier: GIT_RATE_LIMIT_TIER.FREE,
+                freeTierLimit: 1,
+                windowMs: 1_000,
+                now: (): number => currentTimeMs,
+                sleep: (delayMs: number): Promise<void> => {
+                    sleepCalls.push(delayMs)
+                    currentTimeMs += delayMs
+                    return Promise.resolve()
+                },
+            },
+        })
+
+        const resolvedProvider = container.resolve(GIT_TOKENS.Provider)
+
+        await resolvedProvider.getMergeRequest("mr-1")
+        await resolvedProvider.getMergeRequest("mr-2")
+
+        expect(calls).toEqual([
+            "mr-1",
+            "mr-2",
+        ])
+        expect(sleepCalls).toEqual([1_000])
     })
 
     test("registerLlmModule binds provider to adapters token", () => {

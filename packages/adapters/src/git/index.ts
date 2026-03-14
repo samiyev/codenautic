@@ -1,6 +1,15 @@
 export {type IRegisterGitModuleOptions, registerGitModule} from "./git.module"
 export {GIT_TOKENS} from "./git.tokens"
 export {
+    GIT_RATE_LIMIT_REASON,
+    GIT_RATE_LIMIT_TIER,
+    withGitRateLimit,
+    type GitRateLimitReason,
+    type GitRateLimitTier,
+    type IGitRateLimitEvent,
+    type IGitRateLimitOptions,
+} from "./git-rate-limiter"
+export {
     GIT_REPOSITORY_WORKSPACE_PROVIDER_ERROR_CODE,
     GitRepositoryWorkspaceProviderError,
     type GitRepositoryWorkspaceProviderErrorCode,

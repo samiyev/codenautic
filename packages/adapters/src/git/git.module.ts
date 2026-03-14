@@ -7,6 +7,7 @@ import {
 
 import {bindConstantSingleton} from "../shared/bind-constant-singleton"
 import type {IGitProviderFactory} from "./git-provider.factory"
+import {withGitRateLimit, type IGitRateLimitOptions} from "./git-rate-limiter"
 import {GIT_TOKENS} from "./git.tokens"
 
 /**
@@ -17,6 +18,11 @@ export interface IRegisterGitModuleOptions {
      * Git provider implementation.
      */
     readonly provider: IGitProvider
+
+    /**
+     * Optional rate limiter configuration for provider calls.
+     */
+    readonly rateLimit?: IGitRateLimitOptions
 
     /**
      * Optional external pipeline status provider.
@@ -41,9 +47,14 @@ export interface IRegisterGitModuleOptions {
  * @param options Module options.
  */
 export function registerGitModule(container: Container, options: IRegisterGitModuleOptions): void {
-    bindConstantSingleton(container, GIT_TOKENS.Blame, options.provider)
-    bindConstantSingleton(container, GIT_TOKENS.Provider, options.provider)
-    const pipelineStatusProvider = resolvePipelineStatusProvider(options)
+    const provider = resolveGitProvider(options)
+
+    bindConstantSingleton(container, GIT_TOKENS.Blame, provider)
+    bindConstantSingleton(container, GIT_TOKENS.Provider, provider)
+    const pipelineStatusProvider = resolvePipelineStatusProvider({
+        ...options,
+        provider,
+    })
 
     if (pipelineStatusProvider !== undefined) {
         bindConstantSingleton(
@@ -68,6 +79,20 @@ export function registerGitModule(container: Container, options: IRegisterGitMod
             options.repositoryWorkspaceProvider,
         )
     }
+}
+
+/**
+ * Resolves provider instance with optional rate-limiting decorator.
+ *
+ * @param options Git module registration options.
+ * @returns Provider instance used for DI registration.
+ */
+function resolveGitProvider(options: IRegisterGitModuleOptions): IGitProvider {
+    if (options.rateLimit === undefined) {
+        return options.provider
+    }
+
+    return withGitRateLimit(options.provider, options.rateLimit)
 }
 
 /**
