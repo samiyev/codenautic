@@ -1,6 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 
 import { Button, Chip, Drawer, DrawerBody, DrawerContent, DrawerHeader } from "@/components/ui"
+import { useDynamicTranslation } from "@/lib/i18n"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 type TFreshnessState = "fresh" | "refreshing" | "stale"
@@ -58,29 +59,32 @@ function formatAbsoluteTimestamp(rawValue: string): string {
     })
 }
 
-function formatRelativeTimestamp(rawValue: string): string {
+function formatRelativeTimestamp(
+    rawValue: string,
+    t: (key: string, options?: Record<string, string | number>) => string,
+): string {
     const parsed = new Date(rawValue)
     const updatedAt = parsed.getTime()
     if (Number.isNaN(updatedAt)) {
-        return "unknown"
+        return t("common:freshness.unknown")
     }
 
     const deltaMinutes = Math.floor((Date.now() - updatedAt) / 60_000)
     if (deltaMinutes <= 0) {
-        return "just now"
+        return t("common:freshness.justNow")
     }
 
     if (deltaMinutes < 60) {
-        return `${String(deltaMinutes)}m ago`
+        return t("common:freshness.minutesAgo", { count: deltaMinutes })
     }
 
     const deltaHours = Math.floor(deltaMinutes / 60)
     if (deltaHours < 24) {
-        return `${String(deltaHours)}h ago`
+        return t("common:freshness.hoursAgo", { count: deltaHours })
     }
 
     const deltaDays = Math.floor(deltaHours / 24)
-    return `${String(deltaDays)}d ago`
+    return t("common:freshness.daysAgo", { count: deltaDays })
 }
 
 function resolveFreshnessState(props: IDataFreshnessPanelProps): TFreshnessState {
@@ -112,14 +116,8 @@ function getFreshnessChipColor(state: TFreshnessState): "danger" | "success" | "
     return "success"
 }
 
-function getFreshnessChipLabel(state: TFreshnessState): string {
-    if (state === "stale") {
-        return "stale"
-    }
-    if (state === "refreshing") {
-        return "refreshing"
-    }
-    return "fresh"
+function getFreshnessChipLabel(state: TFreshnessState, t: (key: string) => string): string {
+    return t(`common:freshness.${state}`)
 }
 
 /**
@@ -129,8 +127,12 @@ function getFreshnessChipLabel(state: TFreshnessState): string {
  * @returns Панель с индикатором свежести, refresh CTA и provenance drawer.
  */
 export function DataFreshnessPanel(props: IDataFreshnessPanelProps): ReactElement {
+    const { td } = useDynamicTranslation(["common"])
     const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-    const freshnessState = useMemo((): TFreshnessState => resolveFreshnessState(props), [props])
+    const freshnessState = useMemo(
+        (): TFreshnessState => resolveFreshnessState(props),
+        [props.isRefreshing, props.lastUpdatedAt, props.staleThresholdMinutes],
+    )
 
     return (
         <>
@@ -144,10 +146,13 @@ export function DataFreshnessPanel(props: IDataFreshnessPanelProps): ReactElemen
                                 size="sm"
                                 variant="flat"
                             >
-                                {getFreshnessChipLabel(freshnessState)}
+                                {getFreshnessChipLabel(freshnessState, td)}
                             </Chip>
                             <p className="text-xs text-text-secondary">
-                                {`Last updated ${formatRelativeTimestamp(props.lastUpdatedAt)} (${formatAbsoluteTimestamp(props.lastUpdatedAt)})`}
+                                {td("common:freshness.lastUpdated", {
+                                    time: formatRelativeTimestamp(props.lastUpdatedAt, td),
+                                    absolute: formatAbsoluteTimestamp(props.lastUpdatedAt),
+                                })}
                             </p>
                         </div>
                     </div>
@@ -161,7 +166,7 @@ export function DataFreshnessPanel(props: IDataFreshnessPanelProps): ReactElemen
                                 }
                             }}
                         >
-                            Refresh
+                            {td("common:freshness.refresh")}
                         </Button>
                         <Button
                             size="sm"
@@ -172,7 +177,7 @@ export function DataFreshnessPanel(props: IDataFreshnessPanelProps): ReactElemen
                                 }
                             }}
                         >
-                            Rescan
+                            {td("common:freshness.rescan")}
                         </Button>
                         <Button
                             size="sm"
@@ -181,7 +186,7 @@ export function DataFreshnessPanel(props: IDataFreshnessPanelProps): ReactElemen
                                 setIsDrawerOpen(true)
                             }}
                         >
-                            Open provenance
+                            {td("common:freshness.openProvenance")}
                         </Button>
                     </div>
                 </div>
@@ -191,34 +196,58 @@ export function DataFreshnessPanel(props: IDataFreshnessPanelProps): ReactElemen
                 <DrawerContent className="!m-0 !ml-auto !h-full !w-[min(92vw,420px)] !rounded-none bg-surface text-foreground">
                     <DrawerHeader className="border-b border-border px-4 py-3">
                         <h2 className={TYPOGRAPHY.sectionTitle}>
-                            Source data provenance
+                            {td("common:freshness.provenanceTitle")}
                         </h2>
                     </DrawerHeader>
                     <DrawerBody className="space-y-3 px-4 py-3">
                         <dl className="grid grid-cols-[130px_1fr] gap-x-2 gap-y-2 text-sm">
-                            <dt className="text-text-subtle">Source</dt>
+                            <dt className="text-text-subtle">
+                                {td("common:freshness.provenanceSource")}
+                            </dt>
                             <dd>{props.provenance.source}</dd>
-                            <dt className="text-text-subtle">Job ID</dt>
+                            <dt className="text-text-subtle">
+                                {td("common:freshness.provenanceJobId")}
+                            </dt>
                             <dd>{props.provenance.jobId}</dd>
-                            <dt className="text-text-subtle">Repository</dt>
+                            <dt className="text-text-subtle">
+                                {td("common:freshness.provenanceRepository")}
+                            </dt>
                             <dd>{props.provenance.repository}</dd>
-                            <dt className="text-text-subtle">Branch</dt>
+                            <dt className="text-text-subtle">
+                                {td("common:freshness.provenanceBranch")}
+                            </dt>
                             <dd>{props.provenance.branch}</dd>
-                            <dt className="text-text-subtle">Commit</dt>
+                            <dt className="text-text-subtle">
+                                {td("common:freshness.provenanceCommit")}
+                            </dt>
                             <dd>{props.provenance.commit}</dd>
-                            <dt className="text-text-subtle">Data window</dt>
+                            <dt className="text-text-subtle">
+                                {td("common:freshness.provenanceDataWindow")}
+                            </dt>
                             <dd>{props.provenance.dataWindow}</dd>
-                            <dt className="text-text-subtle">Partial data</dt>
-                            <dd>{props.provenance.isPartial ? "yes" : "no"}</dd>
-                            <dt className="text-text-subtle">Failure flags</dt>
-                            <dd>{props.provenance.hasFailures ? "present" : "none"}</dd>
+                            <dt className="text-text-subtle">
+                                {td("common:freshness.provenancePartialData")}
+                            </dt>
+                            <dd>
+                                {props.provenance.isPartial
+                                    ? td("common:freshness.yes")
+                                    : td("common:freshness.no")}
+                            </dd>
+                            <dt className="text-text-subtle">
+                                {td("common:freshness.provenanceFailureFlags")}
+                            </dt>
+                            <dd>
+                                {props.provenance.hasFailures
+                                    ? td("common:freshness.present")
+                                    : td("common:freshness.none")}
+                            </dd>
                         </dl>
                         <div className="flex flex-wrap gap-2">
                             <a
                                 className="inline-flex items-center rounded-lg border border-border px-3 py-1 text-sm"
                                 href={props.provenance.diagnosticsHref}
                             >
-                                Open job / scan logs
+                                {td("common:freshness.openJobLogs")}
                             </a>
                             <Button
                                 size="sm"
@@ -229,7 +258,7 @@ export function DataFreshnessPanel(props: IDataFreshnessPanelProps): ReactElemen
                                     }
                                 }}
                             >
-                                Refresh / Rescan
+                                {td("common:freshness.refreshRescan")}
                             </Button>
                         </div>
                     </DrawerBody>

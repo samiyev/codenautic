@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
-import { useTranslation } from "react-i18next"
 
 import { Button, Card, CardBody } from "@/components/ui"
+import { useDynamicTranslation } from "@/lib/i18n"
 
 type TSystemStateVariant = "empty" | "error" | "loading" | "partial"
 
@@ -51,12 +51,12 @@ function mapStateLabelKey(variant: TSystemStateVariant): string {
  * @returns Системный state card.
  */
 export function SystemStateCard(props: ISystemStateCardProps): ReactElement {
-    const { t } = useTranslation(["common"])
+    const { td } = useDynamicTranslation(["common"])
     return (
         <Card className={mapStateTone(props.variant)}>
             <CardBody className="space-y-2 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em]">
-                    {(t as unknown as (key: string) => string)(mapStateLabelKey(props.variant))}
+                    {td(mapStateLabelKey(props.variant))}
                 </p>
                 <p className="text-base font-semibold">{props.title}</p>
                 <p className="text-sm opacity-90">{props.description}</p>
