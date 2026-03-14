@@ -8,6 +8,7 @@ import {
 
 import {bindConstantSingleton} from "../shared/bind-constant-singleton"
 import type {InboxDeduplicator} from "./inbox-deduplicator.adapter"
+import type {InboxDeduplicationImpl} from "./inbox-deduplication.impl"
 import {MESSAGING_TOKENS} from "./messaging.tokens"
 import type {OutboxWriter} from "./outbox-writer.adapter"
 
@@ -39,6 +40,11 @@ export interface IRegisterMessagingModuleOptions {
      * Optional outbox relay service implementation.
      */
     readonly outboxRelayService?: IOutboxRelayService
+
+    /**
+     * Optional inbox deduplication implementation.
+     */
+    readonly inboxDeduplication?: InboxDeduplicationImpl
 }
 
 /**
@@ -89,6 +95,14 @@ export function registerMessagingModule(
             container,
             MESSAGING_TOKENS.OutboxRelayService,
             options.outboxRelayService,
+        )
+    }
+
+    if (options.inboxDeduplication !== undefined) {
+        bindConstantSingleton(
+            container,
+            MESSAGING_TOKENS.InboxDeduplication,
+            options.inboxDeduplication,
         )
     }
 }

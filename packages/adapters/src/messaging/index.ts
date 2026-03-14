@@ -4,6 +4,13 @@ export {
 } from "./messaging.module"
 export {MESSAGING_TOKENS} from "./messaging.tokens"
 export {
+    type IInboxDeduplicationImplOptions,
+    type IInboxDeduplicationInput,
+    type IInboxDeduplicationRecord,
+    type IInboxDeduplicationResult,
+    InboxDeduplicationImpl,
+} from "./inbox-deduplication.impl"
+export {
     type IInboxDeduplicatorInput,
     type IInboxDeduplicatorRecord,
     type IInboxDeduplicatorResult,

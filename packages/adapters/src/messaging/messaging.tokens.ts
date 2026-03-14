@@ -6,12 +6,16 @@ import {
 } from "@codenautic/core"
 
 import type {InboxDeduplicator} from "./inbox-deduplicator.adapter"
+import type {InboxDeduplicationImpl} from "./inbox-deduplication.impl"
 import type {OutboxWriter} from "./outbox-writer.adapter"
 
 /**
  * DI tokens for messaging adapter domain.
  */
 export const MESSAGING_TOKENS = {
+    InboxDeduplication: createToken<InboxDeduplicationImpl>(
+        "adapters.messaging.inbox-deduplication",
+    ),
     InboxDeduplicator: createToken<InboxDeduplicator>("adapters.messaging.inbox-deduplicator"),
     InboxRepository: createToken<IInboxRepository>("adapters.messaging.inbox-repository"),
     OutboxRelayService: createToken<IOutboxRelayService>(

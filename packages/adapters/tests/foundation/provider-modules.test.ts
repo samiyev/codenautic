@@ -21,6 +21,7 @@ import {
 import {GIT_TOKENS, GitProviderFactory, registerGitModule} from "../../src/git"
 import {LLM_TOKENS, LlmProviderFactory, registerLlmModule} from "../../src/llm"
 import {
+    InboxDeduplicationImpl,
     InboxDeduplicator,
     MESSAGING_TOKENS,
     OutboxWriter,
@@ -314,6 +315,10 @@ describe("Provider modules registration", () => {
                 })
             },
         }
+        const inboxDeduplication = new InboxDeduplicationImpl({
+            inboxRepository,
+            now: () => new Date("2026-03-14T19:00:00.000Z"),
+        })
 
         registerMessagingModule(container, {
             outboxWriter,
@@ -321,6 +326,7 @@ describe("Provider modules registration", () => {
             outboxRepository,
             inboxRepository,
             outboxRelayService,
+            inboxDeduplication,
         })
 
         const resolvedOutboxWriter = container.resolve(MESSAGING_TOKENS.OutboxWriter)
@@ -330,6 +336,9 @@ describe("Provider modules registration", () => {
         const resolvedOutboxRelayService = container.resolve(
             MESSAGING_TOKENS.OutboxRelayService,
         )
+        const resolvedInboxDeduplication = container.resolve(
+            MESSAGING_TOKENS.InboxDeduplication,
+        )
         const resolvedCoreOutboxRepository = container.resolve(TOKENS.Messaging.OutboxRepository)
         const resolvedCoreInboxRepository = container.resolve(TOKENS.Messaging.InboxRepository)
 
@@ -338,6 +347,7 @@ describe("Provider modules registration", () => {
         expect(resolvedOutboxRepository).toBe(outboxRepository)
         expect(resolvedInboxRepository).toBe(inboxRepository)
         expect(resolvedOutboxRelayService).toBe(outboxRelayService)
+        expect(resolvedInboxDeduplication).toBe(inboxDeduplication)
         expect(resolvedCoreOutboxRepository).toBe(outboxRepository)
         expect(resolvedCoreInboxRepository).toBe(inboxRepository)
     })
