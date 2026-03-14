@@ -166,6 +166,28 @@
         "partialDataState": "Partial data state",
         "emptyState": "Empty state"
     },
+    "ariaLabel": {
+        "chatPanel": {
+            "close": "Close chat panel"
+        },
+        "chatThreadList": {
+            "threads": "Chat threads",
+            "filterByRepo": "Filter by repo",
+            "filterByCcr": "Filter by CCR",
+            "conversationThreads": "Conversation threads"
+        },
+        "activationChecklist": {
+            "steps": "Activation checklist steps"
+        },
+        "explainabilityPanel": {
+            "factors": "Explainability factors",
+            "limitations": "Explainability limitations",
+            "exportSnippet": "Explainability export snippet"
+        },
+        "sseStreamViewer": {
+            "streamProgress": "Stream progress"
+        }
+    },
     "freshness": {
         "stale": "stale",
         "refreshing": "refreshing",

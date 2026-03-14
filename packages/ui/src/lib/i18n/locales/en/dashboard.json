@@ -163,5 +163,18 @@
         "partialFilesSummaryWithTotal": "Files analyzed before error: {{scanned}} of {{total}}",
         "errorDetails": "Error details",
         "retryScan": "Retry scan"
+    },
+    "ariaLabel": {
+        "scopeFilters": {
+            "organizationScope": "Organization scope",
+            "repositoryScope": "Repository scope",
+            "teamScope": "Team scope"
+        },
+        "statusDistribution": {
+            "statusLegend": "Status legend"
+        },
+        "dateRangeFilter": {
+            "dateRange": "Dashboard date range"
+        }
     }
 }
