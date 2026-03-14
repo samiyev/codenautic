@@ -6,14 +6,12 @@ import { describe, expect, it, vi } from "vitest"
 import { RuleEditor } from "@/components/settings/rule-editor"
 import { renderWithProviders } from "../../utils/render"
 
-function ControlledRuleEditor(
-    props: {
-        readonly initialValue: string
-        readonly maxLength?: number
-        readonly showPreview?: boolean
-        readonly placeholder?: string
-    },
-): ReactElement {
+function ControlledRuleEditor(props: {
+    readonly initialValue: string
+    readonly maxLength?: number
+    readonly showPreview?: boolean
+    readonly placeholder?: string
+}): ReactElement {
     const [value, setValue] = useState<string>(props.initialValue)
 
     return (
@@ -98,9 +96,7 @@ describe("RuleEditor", (): void => {
         const headingButton = screen.getByRole("button", { name: "Heading" })
         await user.click(headingButton)
 
-        expect(screen.getByRole("textbox", { name: "Rule editor" })).toHaveValue(
-            "## Section title",
-        )
+        expect(screen.getByRole("textbox", { name: "Rule editor" })).toHaveValue("## Section title")
     })
 
     it("when Heading button is clicked on text already prefixed with ##, then removes ## prefix", async (): Promise<void> => {
@@ -210,9 +206,7 @@ describe("RuleEditor", (): void => {
 
     it("when no id is provided, then generates a fallback id", (): void => {
         const onChange = vi.fn()
-        renderWithProviders(
-            <RuleEditor label="Unnamed editor" onChange={onChange} value="" />,
-        )
+        renderWithProviders(<RuleEditor label="Unnamed editor" onChange={onChange} value="" />)
 
         const textarea = screen.getByRole("textbox", { name: "Unnamed editor" })
         expect(textarea.id).toContain("rule-editor-")

@@ -123,9 +123,7 @@ describe("redirectToAuthorizationUrl", (): void => {
     })
 
     it("when called, then assigns the authorization URL to window.location", (): void => {
-        const assignSpy = vi
-            .spyOn(window.location, "assign")
-            .mockImplementation((): void => {})
+        const assignSpy = vi.spyOn(window.location, "assign").mockImplementation((): void => {})
 
         redirectToAuthorizationUrl("https://oauth.example.com/authorize")
 
@@ -140,9 +138,7 @@ describe("navigateToPath", (): void => {
     })
 
     it("when called, then assigns the path to window.location", (): void => {
-        const assignSpy = vi
-            .spyOn(window.location, "assign")
-            .mockImplementation((): void => {})
+        const assignSpy = vi.spyOn(window.location, "assign").mockImplementation((): void => {})
 
         navigateToPath("/dashboard")
 

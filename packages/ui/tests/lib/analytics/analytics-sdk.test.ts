@@ -1013,12 +1013,10 @@ describe("AnalyticsSdk", (): void => {
             vi.useFakeTimers()
 
             let flushCount = 0
-            const sendRequest = vi.fn(
-                async (): Promise<Response> => {
-                    flushCount += 1
-                    return new Response(null, { status: 200, statusText: "ok" })
-                },
-            )
+            const sendRequest = vi.fn(async (): Promise<Response> => {
+                flushCount += 1
+                return new Response(null, { status: 200, statusText: "ok" })
+            })
 
             const sdk = new AnalyticsSdk(
                 createDefaultTestOptions({
@@ -1091,12 +1089,10 @@ describe("AnalyticsSdk", (): void => {
                 resolveFirst = resolve
             })
 
-            const sendRequest = vi.fn(
-                async (): Promise<Response> => {
-                    await firstCallPromise
-                    return new Response(null, { status: 200, statusText: "ok" })
-                },
-            )
+            const sendRequest = vi.fn(async (): Promise<Response> => {
+                await firstCallPromise
+                return new Response(null, { status: 200, statusText: "ok" })
+            })
 
             const sdk = new AnalyticsSdk(
                 createDefaultTestOptions({
