@@ -97,6 +97,7 @@ export default tseslint.config(
             "**/.next/",
             "**/generated/",
             "**/routeTree.gen.ts",
+            "**/public/mockServiceWorker.js",
         ],
     },
 )
