@@ -69,8 +69,8 @@ export const server = setupServer(
                 expiresAt: "2030-01-01T00:00:00.000Z",
                 user: {
                     id: "u-default",
-                    email: "default@example.com",
-                    displayName: "Default User",
+                    email: "neo@metacortex.com",
+                    displayName: "Neo",
                     role: "admin",
                     tenantId: "platform-team",
                 },
@@ -84,8 +84,8 @@ export const server = setupServer(
                 expiresAt: "2030-01-01T00:00:00.000Z",
                 user: {
                     id: "u-default",
-                    email: "default@example.com",
-                    displayName: "Default User",
+                    email: "neo@metacortex.com",
+                    displayName: "Neo",
                     role: "admin",
                     tenantId: "platform-team",
                 },
