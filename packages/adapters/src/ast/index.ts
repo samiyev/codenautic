@@ -4,6 +4,12 @@ export {
 } from "./ast.module"
 export {AST_TOKENS} from "./ast.tokens"
 export {
+    AST_ADVANCED_CODE_ANALYSIS_ERROR_CODE,
+    AstAdvancedCodeAnalysisError,
+    type AstAdvancedCodeAnalysisErrorCode,
+    type IAstAdvancedCodeAnalysisErrorDetails,
+} from "./ast-advanced-code-analysis.error"
+export {
     AST_CODE_CHUNK_EMBEDDING_GENERATOR_ERROR_CODE,
     AstCodeChunkEmbeddingGeneratorError,
     type AstCodeChunkEmbeddingGeneratorErrorCode,
@@ -83,6 +89,19 @@ export {
     AstCodeGraphPageRankService,
     type IAstCodeGraphPageRankServiceOptions,
 } from "./ast-code-graph-page-rank.service"
+export {
+    AST_ADVANCED_CODE_PATTERN_SEVERITY,
+    AST_ADVANCED_CODE_PATTERN_TYPE,
+    AstAdvancedCodeAnalysisService,
+    type AstAdvancedCodePatternSeverity,
+    type AstAdvancedCodePatternType,
+    type IAstAdvancedCodeAnalysisInput,
+    type IAstAdvancedCodeAnalysisResult,
+    type IAstAdvancedCodeAnalysisService,
+    type IAstAdvancedCodeAnalysisServiceOptions,
+    type IAstAdvancedCodeAnalysisSummary,
+    type IAstAdvancedCodePattern,
+} from "./ast-advanced-code-analysis.service"
 export {
     AST_CODE_GRAPH_IMPACT_ANALYSIS_DIRECTION,
     AstCodeGraphImpactAnalysisService,
