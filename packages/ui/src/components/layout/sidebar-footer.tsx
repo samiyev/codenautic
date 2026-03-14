@@ -3,7 +3,16 @@ import { useTranslation } from "react-i18next"
 
 import { ChevronDown } from "@/components/icons/app-icons"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
-import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@/components/ui"
+import {
+    Avatar as HeroUIAvatar,
+    AvatarFallback,
+
+    Dropdown,
+    DropdownItem,
+    DropdownMenu,
+    DropdownPopover,
+    DropdownTrigger,
+} from "@heroui/react"
 
 /**
  * Organization option for workspace switcher.
@@ -65,14 +74,12 @@ export function SidebarFooter(props: ISidebarFooterProps): ReactElement {
             <Dropdown>
                 <DropdownTrigger
                     className={`w-full gap-2 rounded-lg px-2 py-1.5 ${isCollapsed ? "justify-center min-w-0" : "justify-start"}`}
-                    size="sm"
-                    variant="light"
                 >
                     {isCollapsed ? (
-                        <Avatar className="shrink-0" label={displayName} size="sm" />
+                        <HeroUIAvatar className="shrink-0"><AvatarFallback>{displayName.slice(0, 2).toUpperCase()}</AvatarFallback></HeroUIAvatar>
                     ) : (
                         <span className="flex w-full items-center gap-2.5">
-                            <Avatar className="shrink-0" label={displayName} size="sm" />
+                            <HeroUIAvatar className="shrink-0"><AvatarFallback>{displayName.slice(0, 2).toUpperCase()}</AvatarFallback></HeroUIAvatar>
                             <span className="flex min-w-0 flex-1 flex-col">
                                 <span className={`truncate ${TYPOGRAPHY.cardTitle}`}>
                                     {displayName}
@@ -89,7 +96,8 @@ export function SidebarFooter(props: ISidebarFooterProps): ReactElement {
                         </span>
                     )}
                 </DropdownTrigger>
-                <DropdownMenu aria-label={displayName}>
+                <DropdownPopover>
+            <DropdownMenu aria-label={displayName}>
                     <DropdownItem key="identity" className="pointer-events-none opacity-100">
                         <p className={TYPOGRAPHY.cardTitle}>{displayName}</p>
                         <p className="text-xs text-text-subtle">{displayEmail}</p>
@@ -150,7 +158,7 @@ export function SidebarFooter(props: ISidebarFooterProps): ReactElement {
                     {props.onSignOut === undefined ? null : (
                         <DropdownItem
                             key="logout"
-                            color="danger"
+                            className="text-danger hover:text-danger"
                             onPress={(): void => {
                                 const signOut = props.onSignOut
                                 if (signOut === undefined) {
@@ -164,6 +172,7 @@ export function SidebarFooter(props: ISidebarFooterProps): ReactElement {
                         </DropdownItem>
                     )}
                 </DropdownMenu>
+                </DropdownPopover>
             </Dropdown>
         </div>
     )

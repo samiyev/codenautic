@@ -2,7 +2,7 @@ import { type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Bell, Search } from "@/components/icons/app-icons"
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 
 import { ThemeModeToggle } from "./theme-mode-toggle"
 
@@ -31,14 +31,12 @@ export function SidebarActions(props: ISidebarActionsProps): ReactElement {
 
     const bellButton = (
         <Button
-            isIconOnly
             aria-label={t("navigation:toolbar.notifications", {
                 count: props.notificationCount ?? 0,
             })}
-            className="h-7 min-h-7 w-7"
-            radius="full"
+            className="h-7 min-h-7 w-7 rounded-full p-0"
             size="sm"
-            variant="light"
+            variant="ghost"
         >
             <span className="relative inline-flex">
                 <Bell size={14} />
@@ -58,12 +56,10 @@ export function SidebarActions(props: ISidebarActionsProps): ReactElement {
         return (
             <div className="flex flex-col items-center gap-1">
                 <Button
-                    isIconOnly
                     aria-label={t("navigation:toolbar.openCommandPalette")}
-                    className="h-7 min-h-7 w-7"
-                    radius="full"
+                    className="h-7 min-h-7 w-7 rounded-full p-0"
                     size="sm"
-                    variant="light"
+                    variant="ghost"
                     onPress={props.onOpenCommandPalette}
                 >
                     <Search size={14} />
