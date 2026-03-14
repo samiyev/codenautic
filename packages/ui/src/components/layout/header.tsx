@@ -10,7 +10,14 @@ import {
     Search,
 } from "@/components/icons/app-icons"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@/components/ui"
+import {
+    Button,
+    Dropdown,
+    DropdownItem,
+    DropdownMenu,
+    DropdownPopover,
+    DropdownTrigger,
+} from "@heroui/react"
 import { OPEN_COMMAND_PALETTE_EVENT } from "@/lib/keyboard/shortcut-registry"
 import type { IBreadcrumbSegment } from "@/lib/navigation/route-guard-map"
 
@@ -150,9 +157,8 @@ export function Header(props: IHeaderProps): ReactElement {
                 {/* Zone 1: Brand */}
                 <div className="flex shrink-0 items-center gap-2 md:hidden">
                     <Button
-                        isIconOnly
-                        radius="full"
-                        variant="light"
+                        className="rounded-full p-2"
+                        variant="ghost"
                         aria-label={t("navigation:header.openNavigationMenu")}
                         onPress={props.onMobileMenuOpen}
                     >
@@ -213,10 +219,9 @@ export function Header(props: IHeaderProps): ReactElement {
                     {/* Search trigger → opens Command Palette */}
                     <Button
                         aria-label={t("navigation:header.openCommandPalette")}
-                        className="hidden gap-1.5 px-2.5 sm:inline-flex"
-                        radius="md"
+                        className="hidden gap-1.5 rounded-md px-2.5 sm:inline-flex"
                         size="sm"
-                        variant="flat"
+                        variant="secondary"
                         onPress={openCommandPalette}
                     >
                         <Search size={15} />
@@ -232,8 +237,6 @@ export function Header(props: IHeaderProps): ReactElement {
                         <Dropdown>
                             <DropdownTrigger
                                 className="hidden sm:inline-flex"
-                                size="sm"
-                                variant="light"
                             >
                                 <span className="inline-flex items-center gap-1.5">
                                     <Building2
@@ -252,6 +255,7 @@ export function Header(props: IHeaderProps): ReactElement {
                                     />
                                 </span>
                             </DropdownTrigger>
+                            <DropdownPopover>
                             <DropdownMenu
                                 aria-label={t("navigation:header.workspaceSwitcher")}
                                 selectionMode="single"
@@ -275,6 +279,7 @@ export function Header(props: IHeaderProps): ReactElement {
                                     ),
                                 )}
                             </DropdownMenu>
+                            </DropdownPopover>
                         </Dropdown>
                     ) : null}
 
@@ -283,13 +288,12 @@ export function Header(props: IHeaderProps): ReactElement {
 
                     {/* Notification bell */}
                     <Button
-                        isIconOnly
                         aria-label={t("navigation:header.notifications", {
                             count: props.notificationCount ?? 0,
                         })}
-                        radius="full"
+                        className="rounded-full p-2"
                         size="sm"
-                        variant="light"
+                        variant="ghost"
                     >
                         <span className="relative inline-flex">
                             <Bell size={16} />

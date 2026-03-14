@@ -1,7 +1,6 @@
 export { ContentToolbar, type IContentToolbarProps } from "./content-toolbar"
 export { DashboardLayout } from "./dashboard-layout"
 export { PageShell, type IPageShellProps } from "./page-shell"
-export { Header } from "./header"
 export { MobileSidebar } from "./mobile-sidebar"
 export { Sidebar } from "./sidebar"
 export {
