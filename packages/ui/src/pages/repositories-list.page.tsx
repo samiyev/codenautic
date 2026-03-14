@@ -2,6 +2,7 @@ import { type ChangeEvent, type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "@tanstack/react-router"
 
+import { useDynamicTranslation } from "@/lib/i18n"
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 import { PageShell } from "@/components/layout/page-shell"
@@ -106,7 +107,9 @@ interface IRepositoryListSearchValues {
 }
 
 const STATUS_ORDER: ReadonlyArray<TRepositoryStatus> = ["scanning", "ready", "error"]
-function createSortOptions(t: (key: string) => string): ReadonlyArray<{ label: string; value: TRepositorySortKey }> {
+function createSortOptions(
+    t: (key: string) => string,
+): ReadonlyArray<{ label: string; value: TRepositorySortKey }> {
     return [
         {
             label: t("dashboard:repositoriesList.sortByName"),
@@ -233,12 +236,12 @@ function useFilteredRepositories(
 }
 
 function RepositoryStatusBadge(props: { status: TRepositoryStatus }): ReactElement {
-    const { t } = useTranslation(["dashboard"])
+    const { td } = useDynamicTranslation(["dashboard"])
     return (
         <span
             className={`rounded-full border px-2 py-1 text-xs font-medium ${mapStatusClasses(props.status)}`}
         >
-            {mapStatusToLabel(props.status, t as unknown as (key: string) => string)}
+            {mapStatusToLabel(props.status, td)}
         </span>
     )
 }
@@ -251,8 +254,7 @@ function RepositoryCountSummary(props: {
     const valueColor = props.colorClass ?? ""
     return (
         <p className={`rounded-lg border border-border px-3 py-2 ${TYPOGRAPHY.body}`}>
-            {props.label}:{" "}
-            <span className={`font-semibold ${valueColor}`}>{props.value}</span>
+            {props.label}: <span className={`font-semibold ${valueColor}`}>{props.value}</span>
         </p>
     )
 }
@@ -263,15 +265,20 @@ function RepositoryScanErrorRecovery(props: {
     onRetryScan?: (repositoryId: string) => void
 }): ReactElement | null {
     const { t } = useTranslation(["dashboard"])
+    const { td } = useDynamicTranslation(["dashboard"])
     if (props.scanError === undefined) {
         return <></>
     }
 
-    const tInterpolate = t as unknown as (key: string, options: Record<string, string>) => string
     const partialSummary =
         props.scanError.totalFiles === undefined
-            ? tInterpolate("dashboard:repositoriesList.partialFilesSummary", { scanned: String(props.scanError.partialFilesScanned) })
-            : tInterpolate("dashboard:repositoriesList.partialFilesSummaryWithTotal", { scanned: String(props.scanError.partialFilesScanned), total: String(props.scanError.totalFiles) })
+            ? td("dashboard:repositoriesList.partialFilesSummary", {
+                  scanned: String(props.scanError.partialFilesScanned),
+              })
+            : td("dashboard:repositoriesList.partialFilesSummaryWithTotal", {
+                  scanned: String(props.scanError.partialFilesScanned),
+                  total: String(props.scanError.totalFiles),
+              })
 
     return (
         <section className="mt-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-on-danger">
@@ -341,9 +348,8 @@ function RepositoriesEmptyState(): ReactElement {
  */
 export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElement {
     const { t } = useTranslation(["dashboard"])
-    const tDynamic = t as unknown as (key: string) => string
-    const tInterpolate = t as unknown as (key: string, options: Record<string, string>) => string
-    const sortOptions = useMemo(() => createSortOptions(tDynamic), [tDynamic])
+    const { td } = useDynamicTranslation(["dashboard"])
+    const sortOptions = useMemo(() => createSortOptions(td), [td])
     const repositories = props.repositories ?? DEFAULT_REPOSITORIES
     const [search, setSearch] = useState("")
     const [status, setStatus] = useState<"all" | TRepositoryStatus>("all")
@@ -395,60 +401,41 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
                     <CardHeader>
                         <div className="grid gap-3 md:grid-cols-4">
                             <input
-                                aria-label={t(
-                                    "dashboard:repositoriesList.searchAriaLabel",
-                                )}
+                                aria-label={t("dashboard:repositoriesList.searchAriaLabel")}
                                 className={`${NATIVE_FORM.input} outline-none`}
                                 name="repository-search"
                                 onChange={handleSearch}
-                                placeholder={t(
-                                    "dashboard:repositoriesList.searchPlaceholder",
-                                )}
+                                placeholder={t("dashboard:repositoriesList.searchPlaceholder")}
                                 value={search}
                             />
                             <select
-                                aria-label={t(
-                                    "dashboard:repositoriesList.filterByStatus",
-                                )}
+                                aria-label={t("dashboard:repositoriesList.filterByStatus")}
                                 className={NATIVE_FORM.select}
                                 value={status}
                                 onChange={handleStatusFilter}
                             >
                                 <option value="all">
-                                    {t(
-                                        "dashboard:repositoriesList.allStatuses",
-                                    )}
+                                    {t("dashboard:repositoriesList.allStatuses")}
                                 </option>
                                 <option value="ready">
-                                    {t(
-                                        "dashboard:repositoriesList.statusReady",
-                                    )}
+                                    {t("dashboard:repositoriesList.statusReady")}
                                 </option>
                                 <option value="scanning">
-                                    {t(
-                                        "dashboard:repositoriesList.statusScanning",
-                                    )}
+                                    {t("dashboard:repositoriesList.statusScanning")}
                                 </option>
                                 <option value="error">
-                                    {t(
-                                        "dashboard:repositoriesList.statusError",
-                                    )}
+                                    {t("dashboard:repositoriesList.statusError")}
                                 </option>
                             </select>
                             <select
-                                aria-label={t(
-                                    "dashboard:repositoriesList.sortAriaLabel",
-                                )}
+                                aria-label={t("dashboard:repositoriesList.sortAriaLabel")}
                                 className={NATIVE_FORM.select}
                                 value={sortBy}
                                 onChange={handleSortChange}
                             >
                                 {sortOptions.map(
                                     (option): ReactElement => (
-                                        <option
-                                            key={option.value}
-                                            value={option.value}
-                                        >
+                                        <option key={option.value} value={option.value}>
                                             {option.label}
                                         </option>
                                     ),
@@ -460,39 +447,30 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
                         <div className="mb-3 grid gap-2 md:grid-cols-3">
                             <RepositoryCountSummary
                                 colorClass="text-success"
-                                label={t(
-                                    "dashboard:repositoriesList.summaryReady",
-                                )}
+                                label={t("dashboard:repositoriesList.summaryReady")}
                                 value={repoReadyCount}
                             />
                             <RepositoryCountSummary
                                 colorClass="text-warning"
-                                label={t(
-                                    "dashboard:repositoriesList.summaryScanning",
-                                )}
+                                label={t("dashboard:repositoriesList.summaryScanning")}
                                 value={repoScanningCount}
                             />
                             <RepositoryCountSummary
                                 colorClass="text-danger"
-                                label={t(
-                                    "dashboard:repositoriesList.summaryError",
-                                )}
+                                label={t("dashboard:repositoriesList.summaryError")}
                                 value={repoErrorCount}
                             />
                         </div>
                         <EnterpriseDataTable
-                            ariaLabel={t(
-                                "dashboard:repositoriesList.tableAriaLabel",
-                            )}
+                            ariaLabel={t("dashboard:repositoriesList.tableAriaLabel")}
                             columns={[
                                 {
                                     accessor: (item): string => item.name,
                                     cell: (item): ReactElement => {
-                                        const repositoryId =
-                                            getRepositoryId(item)
+                                        const repositoryId = getRepositoryId(item)
                                         return (
                                             <Link
-                                                aria-label={tInterpolate(
+                                                aria-label={td(
                                                     "dashboard:repositoriesList.openOverviewAriaLabel",
                                                     {
                                                         owner: item.owner,
@@ -507,61 +485,41 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
                                             </Link>
                                         )
                                     },
-                                    header: t(
-                                        "dashboard:repositoriesList.columnRepository",
-                                    ),
+                                    header: t("dashboard:repositoriesList.columnRepository"),
                                     id: "repository",
                                     pin: "left",
                                     size: 220,
                                 },
                                 {
                                     accessor: (item): string => item.owner,
-                                    header: t(
-                                        "dashboard:repositoriesList.columnOwner",
-                                    ),
+                                    header: t("dashboard:repositoriesList.columnOwner"),
                                     id: "owner",
                                     size: 170,
                                 },
                                 {
                                     accessor: (item): string => item.branch,
-                                    header: t(
-                                        "dashboard:repositoriesList.columnBranch",
-                                    ),
+                                    header: t("dashboard:repositoriesList.columnBranch"),
                                     id: "branch",
                                     size: 150,
                                 },
                                 {
-                                    accessor: (item): string =>
-                                        formatScanDate(item.lastScanAt),
-                                    header: t(
-                                        "dashboard:repositoriesList.columnLastScan",
-                                    ),
+                                    accessor: (item): string => formatScanDate(item.lastScanAt),
+                                    header: t("dashboard:repositoriesList.columnLastScan"),
                                     id: "lastScan",
                                     size: 190,
                                 },
                                 {
-                                    accessor: (item): string =>
-                                        mapStatusToLabel(
-                                            item.status,
-                                            tDynamic,
-                                        ),
+                                    accessor: (item): string => mapStatusToLabel(item.status, td),
                                     cell: (item): ReactElement => (
-                                        <RepositoryStatusBadge
-                                            status={item.status}
-                                        />
+                                        <RepositoryStatusBadge status={item.status} />
                                     ),
-                                    header: t(
-                                        "dashboard:repositoriesList.columnStatus",
-                                    ),
+                                    header: t("dashboard:repositoriesList.columnStatus"),
                                     id: "status",
                                     size: 150,
                                 },
                                 {
-                                    accessor: (item): number =>
-                                        item.issueCount,
-                                    header: t(
-                                        "dashboard:repositoriesList.columnIssues",
-                                    ),
+                                    accessor: (item): number => item.issueCount,
+                                    header: t("dashboard:repositoriesList.columnIssues"),
                                     id: "issueCount",
                                     size: 120,
                                 },
@@ -576,39 +534,25 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
                                             item.status !== "error"
                                         ) {
                                             return (
-                                                <span
-                                                    className={
-                                                        TYPOGRAPHY.captionMuted
-                                                    }
-                                                >
-                                                    —
-                                                </span>
+                                                <span className={TYPOGRAPHY.captionMuted}>—</span>
                                             )
                                         }
 
                                         return (
                                             <RepositoryScanErrorRecovery
-                                                onRetryScan={
-                                                    props.onRetryScan
-                                                }
-                                                repositoryId={getRepositoryId(
-                                                    item,
-                                                )}
+                                                onRetryScan={props.onRetryScan}
+                                                repositoryId={getRepositoryId(item)}
                                                 scanError={item.scanError}
                                             />
                                         )
                                     },
                                     enableGlobalFilter: false,
-                                    header: t(
-                                        "dashboard:repositoriesList.columnRecovery",
-                                    ),
+                                    header: t("dashboard:repositoriesList.columnRecovery"),
                                     id: "recovery",
                                     size: 360,
                                 },
                             ]}
-                            emptyMessage={t(
-                                "dashboard:repositoriesList.emptyMessage",
-                            )}
+                            emptyMessage={t("dashboard:repositoriesList.emptyMessage")}
                             getRowId={(item): string => getRepositoryId(item)}
                             id="repositories-list-table"
                             rows={visible}

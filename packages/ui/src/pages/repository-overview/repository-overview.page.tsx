@@ -486,7 +486,6 @@ export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactEl
             subtitle="Отображение health score, архитектуры и ключевых метрик после последнего сканирования."
             title={`${repository.owner}/${repository.name}`}
         >
-
             <Card>
                 <CardHeader>
                     <p className="text-sm font-semibold text-foreground">Scan snapshot</p>
