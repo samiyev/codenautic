@@ -59,10 +59,7 @@ export function useDynamicTranslation(
     const { t } = useTranslation(namespaces as TI18nNamespace[])
 
     const td: TDynamicTranslator = useCallback(
-        (
-            key: string,
-            options?: Readonly<Record<string, string | number>>,
-        ): string =>
+        (key: string, options?: Readonly<Record<string, string | number>>): string =>
             (t as unknown as TDynamicTranslator)(key, options),
         [t],
     )

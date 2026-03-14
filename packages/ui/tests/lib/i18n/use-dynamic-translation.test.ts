@@ -26,9 +26,7 @@ describe("useDynamicTranslation", (): void => {
     })
 
     it("when namespaces are provided, then passes them to useTranslation", (): void => {
-        const { result } = renderHook(() =>
-            useDynamicTranslation(["dashboard", "common"]),
-        )
+        const { result } = renderHook(() => useDynamicTranslation(["dashboard", "common"]))
 
         const translated = result.current.td("metric.label")
 
