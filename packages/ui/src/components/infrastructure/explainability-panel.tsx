@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button, Drawer, DrawerBody, DrawerContent, DrawerHeader, Textarea } from "@/components/ui"
+import { Button, Modal, TextArea } from "@heroui/react"
 import { useDynamicTranslation } from "@/lib/i18n"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -82,7 +82,7 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                     </div>
                     <Button
                         size="sm"
-                        variant="flat"
+                        variant="secondary"
                         onPress={(): void => {
                             setIsDrawerOpen(true)
                         }}
@@ -92,14 +92,16 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                 </div>
             </section>
 
-            <Drawer isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-                <DrawerContent className="!m-0 !ml-auto !h-full !w-[min(92vw,460px)] !rounded-none bg-surface text-foreground">
-                    <DrawerHeader className="border-b border-border px-4 py-3">
+            <Modal isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+                <Modal.Backdrop>
+                <Modal.Container className="!items-stretch !justify-end !p-0">
+                <Modal.Dialog className="!m-0 !h-full !w-[min(92vw,460px)] !rounded-none bg-surface text-foreground">
+                    <div className="border-b border-border px-4 py-3">
                         <h2 className={TYPOGRAPHY.sectionTitle}>
                             {t("common:explainabilityPanel.explainability")}
                         </h2>
-                    </DrawerHeader>
-                    <DrawerBody className="space-y-3 px-4 py-3">
+                    </div>
+                    <div className="flex-1 overflow-y-auto space-y-3 px-4 py-3">
                         <dl className="grid grid-cols-[130px_1fr] gap-x-2 gap-y-2 text-sm">
                             <dt className="text-text-subtle">
                                 {t("common:explainabilityPanel.signal")}
@@ -167,7 +169,7 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                         <section className="space-y-2">
                             <Button
                                 size="sm"
-                                variant="flat"
+                                variant="secondary"
                                 onPress={(): void => {
                                     setSnippet(exportSnippet)
                                 }}
@@ -175,8 +177,8 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                                 {t("common:explainabilityPanel.exportSnippet")}
                             </Button>
                             {snippet.length > 0 ? (
-                                <Textarea
-                                    isReadOnly
+                                <TextArea
+                                    readOnly
                                     aria-label={t(
                                         "common:ariaLabel.explainabilityPanel.exportSnippet",
                                     )}
@@ -184,9 +186,11 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                                 />
                             ) : null}
                         </section>
-                    </DrawerBody>
-                </DrawerContent>
-            </Drawer>
+                    </div>
+                </Modal.Dialog>
+                </Modal.Container>
+                </Modal.Backdrop>
+            </Modal>
         </>
     )
 }

@@ -23,7 +23,7 @@ import {
 } from "@tanstack/react-table"
 import { useVirtualizer } from "@tanstack/react-virtual"
 
-import { Button, Chip } from "@/components/ui"
+import { Button, Chip } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 import {
@@ -344,9 +344,8 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                     }}
                 />
                 <Button
-                    color="primary"
                     size="sm"
-                    variant={density === "compact" ? "solid" : "flat"}
+                    variant={density === "compact" ? "primary" : "secondary"}
                     onPress={(): void => {
                         setDensity("compact")
                     }}
@@ -354,32 +353,30 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                     {t("common:dataTable.compact")}
                 </Button>
                 <Button
-                    color="primary"
                     size="sm"
-                    variant={density === "comfortable" ? "solid" : "flat"}
+                    variant={density === "comfortable" ? "primary" : "secondary"}
                     onPress={(): void => {
                         setDensity("comfortable")
                     }}
                 >
                     {t("common:dataTable.comfortable")}
                 </Button>
-                <Button size="sm" variant="flat" onPress={handleExportCsv}>
+                <Button size="sm" variant="secondary" onPress={handleExportCsv}>
                     {t("common:dataTable.exportCsv")}
                 </Button>
-                <Button size="sm" variant="flat" onPress={handleExportJson}>
+                <Button size="sm" variant="secondary" onPress={handleExportJson}>
                     {t("common:dataTable.exportJson")}
                 </Button>
-                <Button size="sm" variant="flat" onPress={handleSaveView}>
+                <Button size="sm" variant="secondary" onPress={handleSaveView}>
                     {t("common:dataTable.saveView")}
                 </Button>
-                <Button size="sm" variant="flat" onPress={handleResetView}>
+                <Button size="sm" variant="secondary" onPress={handleResetView}>
                     {t("common:dataTable.resetView")}
                 </Button>
                 <Button
                     aria-label={t("common:dataTable.columnSettings")}
                     size="sm"
-                    color="primary"
-                    variant={isColumnControlsOpen ? "solid" : "flat"}
+                    variant={isColumnControlsOpen ? "primary" : "secondary"}
                     onPress={(): void => {
                         setIsColumnControlsOpen((previous): boolean => !previous)
                     }}
@@ -456,12 +453,12 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
 
             {selectedRows.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
-                    <Chip color="primary" size="sm" variant="flat">
+                    <Chip color="accent" size="sm" variant="soft">
                         {t("common:dataTable.selected", { count: selectedRows.length })}
                     </Chip>
                     <Button
                         size="sm"
-                        variant="flat"
+                        variant="secondary"
                         onPress={(): void => {
                             setRowSelection({})
                         }}
