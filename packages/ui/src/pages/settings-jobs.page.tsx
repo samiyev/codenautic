@@ -418,7 +418,12 @@ export function SettingsJobsPage(): ReactElement {
     }
 
     const handleSaveSchedule = (): void => {
-        setScheduleSaveMessage(t("settings:jobs.scheduleSavedMessage", { description: scheduleDescription, timezone: effectiveTimezone }))
+        setScheduleSaveMessage(
+            t("settings:jobs.scheduleSavedMessage", {
+                description: scheduleDescription,
+                timezone: effectiveTimezone,
+            }),
+        )
         showToastSuccess(t("settings:jobs.toast.scheduleSaved"))
     }
 
@@ -501,7 +506,6 @@ export function SettingsJobsPage(): ReactElement {
             title={t("settings:jobs.pageTitle")}
             description={t("settings:jobs.pageSubtitle")}
         >
-
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>{t("settings:jobs.liveSummary")}</p>
@@ -521,7 +525,9 @@ export function SettingsJobsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className={TYPOGRAPHY.sectionTitle}>{t("settings:jobs.timezoneSchedulePreview")}</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>
+                        {t("settings:jobs.timezoneSchedulePreview")}
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -583,7 +589,9 @@ export function SettingsJobsPage(): ReactElement {
                                 }
                             }}
                         >
-                            <option value="inherit-user">{t("settings:jobs.inheritUserTimezone")}</option>
+                            <option value="inherit-user">
+                                {t("settings:jobs.inheritUserTimezone")}
+                            </option>
                             {TIMEZONE_OPTIONS.map(
                                 (timezone): ReactElement => (
                                     <option key={`org-${timezone}`} value={timezone}>
@@ -695,8 +703,14 @@ export function SettingsJobsPage(): ReactElement {
                         </select>
                     </div>
 
-                    <Alert color="warning" title={t("settings:jobs.timezoneApplicationBoundaryTitle")} variant="flat">
-                        {t("settings:jobs.timezoneApplicationBoundaryDescription", { timezone: effectiveTimezone })}
+                    <Alert
+                        color="warning"
+                        title={t("settings:jobs.timezoneApplicationBoundaryTitle")}
+                        variant="flat"
+                    >
+                        {t("settings:jobs.timezoneApplicationBoundaryDescription", {
+                            timezone: effectiveTimezone,
+                        })}
                     </Alert>
 
                     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -707,7 +721,11 @@ export function SettingsJobsPage(): ReactElement {
                     </div>
 
                     {scheduleSaveMessage.length > 0 ? (
-                        <Alert color="primary" title={t("settings:jobs.scheduleSavedTitle")} variant="flat">
+                        <Alert
+                            color="primary"
+                            title={t("settings:jobs.scheduleSavedTitle")}
+                            variant="flat"
+                        >
                             {scheduleSaveMessage}
                         </Alert>
                     ) : null}
@@ -770,7 +788,11 @@ export function SettingsJobsPage(): ReactElement {
                                             </Chip>
                                         </div>
                                         <p className="mt-1 text-xs text-text-secondary">
-                                            {t("settings:jobs.eta", { eta: job.etaLabel, count: job.retryCount, limit: job.retryLimit })}
+                                            {t("settings:jobs.eta", {
+                                                eta: job.etaLabel,
+                                                count: job.retryCount,
+                                                limit: job.retryLimit,
+                                            })}
                                         </p>
                                         <div className="mt-2 flex flex-wrap gap-2">
                                             <Button
@@ -814,7 +836,9 @@ export function SettingsJobsPage(): ReactElement {
                 <div className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <p className={TYPOGRAPHY.sectionTitle}>{t("settings:jobs.errorDrillDown")}</p>
+                            <p className={TYPOGRAPHY.sectionTitle}>
+                                {t("settings:jobs.errorDrillDown")}
+                            </p>
                         </CardHeader>
                         <CardBody className="space-y-2">
                             {activeJob === undefined ? (
@@ -826,7 +850,8 @@ export function SettingsJobsPage(): ReactElement {
                             ) : (
                                 <>
                                     <p className="text-sm text-foreground">
-                                        {t("settings:jobs.activeJob")}<strong>{activeJob.id}</strong> ({activeJob.kind})
+                                        {t("settings:jobs.activeJob")}
+                                        <strong>{activeJob.id}</strong> ({activeJob.kind})
                                     </p>
                                     <p className="text-xs text-text-secondary">
                                         {t("settings:jobs.scope", { scope: activeJob.scope })}
@@ -855,7 +880,9 @@ export function SettingsJobsPage(): ReactElement {
 
                     <Card>
                         <CardHeader>
-                            <p className={TYPOGRAPHY.sectionTitle}>{t("settings:jobs.recoveryAuditTrail")}</p>
+                            <p className={TYPOGRAPHY.sectionTitle}>
+                                {t("settings:jobs.recoveryAuditTrail")}
+                            </p>
                         </CardHeader>
                         <CardBody className="space-y-2">
                             <ul aria-label="Jobs audit trail list" className="space-y-2">

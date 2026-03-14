@@ -1,6 +1,7 @@
 import { type ReactElement, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useDynamicTranslation } from "@/lib/i18n"
 import { ContextPreview } from "@/components/settings/context-preview"
 import { ContextSourceCard } from "@/components/settings/context-source-card"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
@@ -167,6 +168,7 @@ function updateIntegrationByProvider(
  */
 export function SettingsIntegrationsPage(): ReactElement {
     const { t } = useTranslation(["settings"])
+    const { td } = useDynamicTranslation(["settings"])
     const [integrations, setIntegrations] =
         useState<ReadonlyArray<IIntegrationState>>(INITIAL_INTEGRATIONS)
     const [selectedContextSourceId, setSelectedContextSourceId] = useState<string | undefined>(
@@ -410,7 +412,6 @@ export function SettingsIntegrationsPage(): ReactElement {
             title={t("settings:integrations.pageTitle")}
             description={t("settings:integrations.pageSubtitle")}
         >
-
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>
@@ -451,7 +452,9 @@ export function SettingsIntegrationsPage(): ReactElement {
                                     size="sm"
                                     variant="flat"
                                 >
-                                    {(t as unknown as (key: string) => string)(`settings:integrations.${mapStatusLabelKey(integration.status)}`)}
+                                    {td(
+                                        `settings:integrations.${mapStatusLabelKey(integration.status)}`,
+                                    )}
                                 </Chip>
                             </CardHeader>
                             <CardBody className="space-y-3">
@@ -510,9 +513,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                                         }}
                                         size="sm"
                                         color="primary"
-                                        variant={
-                                            integration.connected === true ? "flat" : "solid"
-                                        }
+                                        variant={integration.connected === true ? "flat" : "solid"}
                                     >
                                         {integration.connected === true
                                             ? t("settings:integrations.disconnect")
@@ -535,7 +536,8 @@ export function SettingsIntegrationsPage(): ReactElement {
                                         ? t("settings:integrations.configured")
                                         : t("settings:integrations.notConfigured")}{" "}
                                     · {t("settings:integrations.lastSync")}{" "}
-                                    {integration.lastSyncAt ?? t("settings:integrations.notSyncedYet")}
+                                    {integration.lastSyncAt ??
+                                        t("settings:integrations.notSyncedYet")}
                                 </p>
                             </CardBody>
                         </Card>
