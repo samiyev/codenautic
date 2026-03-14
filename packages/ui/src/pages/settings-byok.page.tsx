@@ -2,6 +2,7 @@ import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input, Switch } from "@/components/ui"
+import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -260,11 +261,10 @@ export function SettingsByokPage(): ReactElement {
     }
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:byok.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("settings:byok.pageSubtitle")}
-            </p>
+        <FormLayout
+            title={t("settings:byok.pageTitle")}
+            description={t("settings:byok.pageSubtitle")}
+        >
 
             <Card>
                 <CardHeader>
@@ -327,7 +327,7 @@ export function SettingsByokPage(): ReactElement {
                             }}
                         />
                         <div className="flex items-end">
-                            <Button className="w-full md:w-auto" onPress={handleCreateKey}>
+                            <Button className="w-full md:w-auto" color="primary" onPress={handleCreateKey}>
                                 {t("settings:byok.addKey")}
                             </Button>
                         </div>
@@ -484,6 +484,6 @@ export function SettingsByokPage(): ReactElement {
                     )}
                 </CardBody>
             </Card>
-        </section>
+        </FormLayout>
     )
 }

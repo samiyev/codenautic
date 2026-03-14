@@ -448,7 +448,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                 <p className={TYPOGRAPHY.captionMuted} data-testid="ccr-summary-state">
                     {ccrSummaryState}
                 </p>
-                <Button type="button" variant="solid" onPress={handleSummarySettingsSave}>
+                <Button color="primary" type="button" variant="solid" onPress={handleSummarySettingsSave}>
                     {t("settings:codeReview.saveCcrSummarySettings")}
                 </Button>
                 <Button
@@ -581,7 +581,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                 <p className={TYPOGRAPHY.captionMuted} data-testid="ide-sync-state">
                     {ideSyncState}
                 </p>
-                <Button type="button" variant="solid" onPress={handleIdeSyncSave}>
+                <Button color="primary" type="button" variant="solid" onPress={handleIdeSyncSave}>
                     {t("settings:codeReview.saveIdeSyncSettings")}
                 </Button>
             </FormSection>
