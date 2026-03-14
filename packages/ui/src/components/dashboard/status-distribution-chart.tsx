@@ -2,7 +2,7 @@ import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 import { Cell, Pie, PieChart, Tooltip } from "recharts"
 
-import { Chip } from "@/components/ui"
+import { Chip } from "@heroui/react"
 import { RechartsChartWrapper } from "@/components/charts/recharts-chart-wrapper"
 import { ChartContainer } from "@/components/charts/chart-container"
 

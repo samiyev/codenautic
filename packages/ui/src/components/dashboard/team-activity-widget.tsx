@@ -10,11 +10,11 @@ import {
     YAxis,
 } from "recharts"
 
-import { Card, CardBody, CardHeader } from "@/components/ui"
+import { Card, CardContent, CardHeader } from "@heroui/react"
 import { EmptyState } from "@/components/states/empty-state"
 import { ChartContainer } from "@/components/charts/chart-container"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
-import { CHART_GRID_DASH } from "@/lib/constants/chart-constants"
+import { CHART_GRID_DASH } from "@/lib/constants/chart-recharts-defaults"
 import { CHART_DATA_TRANSITION } from "@/lib/motion"
 
 interface ITeamActivityPoint {
@@ -65,7 +65,7 @@ export function TeamActivityWidget(props: ITeamActivityWidgetProps): ReactElemen
             <CardHeader className="border-b border-border/30 pb-3">
                 <p className={TYPOGRAPHY.sectionTitle}>Team activity</p>
             </CardHeader>
-            <CardBody className="space-y-2 pt-4">
+            <CardContent className="space-y-2 pt-4">
                 <p className={TYPOGRAPHY.bodyMuted}>
                     CCRs merged by developer in selected date range.
                 </p>
@@ -124,7 +124,7 @@ export function TeamActivityWidget(props: ITeamActivityWidgetProps): ReactElemen
                         </BarChart>
                     </ChartContainer>
                 )}
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
