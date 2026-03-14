@@ -313,7 +313,9 @@ export function SettingsNotificationsPage(): ReactElement {
         if (deepLinkResult.decision === "switch_org") {
             writeStoredActiveTenantId(deepLinkResult.switchTenantId ?? tenantId)
             setDeepLinkGuardNotice(
-                t("settings:notifications.deepLinkWorkspaceSwitch", { tenantId: deepLinkResult.switchTenantId }),
+                t("settings:notifications.deepLinkWorkspaceSwitch", {
+                    tenantId: deepLinkResult.switchTenantId,
+                }),
             )
             showToastInfo(t("settings:notifications.toast.workspaceSwitched"))
         } else {
@@ -473,20 +475,34 @@ export function SettingsNotificationsPage(): ReactElement {
                             {t("settings:notifications.unread", { count: unreadCount })}
                         </Chip>
                         <Chip size="sm" variant="flat">
-                            {t("settings:notifications.activeChannels", { count: activeChannelCount })}
+                            {t("settings:notifications.activeChannels", {
+                                count: activeChannelCount,
+                            })}
                         </Chip>
                         <Chip size="sm" variant="flat">
-                            {t("settings:notifications.selected", { count: selectedNotificationIds.length })}
+                            {t("settings:notifications.selected", {
+                                count: selectedNotificationIds.length,
+                            })}
                         </Chip>
                     </div>
                     {deepLinkGuardNotice === undefined ? null : (
-                        <Alert color="primary" title={t("settings:notifications.deepLinkGuardTitle")} variant="flat">
+                        <Alert
+                            color="primary"
+                            title={t("settings:notifications.deepLinkGuardTitle")}
+                            variant="flat"
+                        >
                             {deepLinkGuardNotice}
                         </Alert>
                     )}
                     {selectedNotificationIds.length === 0 ? null : (
-                        <Alert color="primary" title={t("settings:notifications.bulkActionsTitle")} variant="flat">
-                            {t("settings:notifications.notificationsSelected", { count: selectedNotificationIds.length })}
+                        <Alert
+                            color="primary"
+                            title={t("settings:notifications.bulkActionsTitle")}
+                            variant="flat"
+                        >
+                            {t("settings:notifications.notificationsSelected", {
+                                count: selectedNotificationIds.length,
+                            })}
                             <div className="mt-2 flex flex-wrap gap-2">
                                 <Button size="sm" variant="flat" onPress={handleBulkMarkRead}>
                                     {t("settings:notifications.markSelectedAsRead")}
@@ -504,7 +520,11 @@ export function SettingsNotificationsPage(): ReactElement {
                         </Alert>
                     )}
                     {bulkPendingState === undefined ? null : (
-                        <Alert color="warning" title={t("settings:notifications.bulkActionPendingSyncTitle")} variant="flat">
+                        <Alert
+                            color="warning"
+                            title={t("settings:notifications.bulkActionPendingSyncTitle")}
+                            variant="flat"
+                        >
                             {t("settings:notifications.bulkActionPendingSyncDescription")}
                             <div className="mt-2">
                                 <Button size="sm" variant="flat" onPress={handleUndoBulkAction}>
@@ -531,10 +551,18 @@ export function SettingsNotificationsPage(): ReactElement {
                                 }
                             }}
                         >
-                            <option value="all">{t("settings:notifications.filterAllEvents")}</option>
-                            <option value="review.completed">{t("settings:notifications.filterReviewCompleted")}</option>
-                            <option value="drift.alert">{t("settings:notifications.filterDriftAlert")}</option>
-                            <option value="prediction.alert">{t("settings:notifications.filterPredictionAlert")}</option>
+                            <option value="all">
+                                {t("settings:notifications.filterAllEvents")}
+                            </option>
+                            <option value="review.completed">
+                                {t("settings:notifications.filterReviewCompleted")}
+                            </option>
+                            <option value="drift.alert">
+                                {t("settings:notifications.filterDriftAlert")}
+                            </option>
+                            <option value="prediction.alert">
+                                {t("settings:notifications.filterPredictionAlert")}
+                            </option>
                         </select>
                     </div>
 
@@ -558,14 +586,18 @@ export function SettingsNotificationsPage(): ReactElement {
                                                 handleToggleNotificationSelection(notification.id)
                                             }}
                                         />
-                                        <p className={`text-sm text-foreground${notification.isRead !== true ? " font-semibold" : ""}`}>
+                                        <p
+                                            className={`text-sm text-foreground${notification.isRead !== true ? " font-semibold" : ""}`}
+                                        >
                                             {notification.title}
                                         </p>
                                         <Chip
                                             size="sm"
                                             variant={notification.isRead ? "flat" : "solid"}
                                         >
-                                            {notification.isRead ? t("settings:notifications.read") : t("settings:notifications.unreadLabel")}
+                                            {notification.isRead
+                                                ? t("settings:notifications.read")
+                                                : t("settings:notifications.unreadLabel")}
                                         </Chip>
                                         <Chip size="sm" variant="flat">
                                             {EVENT_TYPE_LABELS[notification.type]}
@@ -586,8 +618,12 @@ export function SettingsNotificationsPage(): ReactElement {
                                             }}
                                         >
                                             {notification.isRead
-                                                ? t("settings:notifications.markAsUnread", { id: notification.id })
-                                                : t("settings:notifications.markAsRead", { id: notification.id })}
+                                                ? t("settings:notifications.markAsUnread", {
+                                                      id: notification.id,
+                                                  })
+                                                : t("settings:notifications.markAsRead", {
+                                                      id: notification.id,
+                                                  })}
                                         </Button>
                                         <Button
                                             aria-label={`Open ${notification.id} context`}
@@ -605,7 +641,11 @@ export function SettingsNotificationsPage(): ReactElement {
                         )}
                     </ul>
                     {filteredNotifications.length === 0 ? (
-                        <Alert color="warning" title={t("settings:notifications.noNotificationsFoundTitle")} variant="flat">
+                        <Alert
+                            color="warning"
+                            title={t("settings:notifications.noNotificationsFoundTitle")}
+                            variant="flat"
+                        >
                             {t("settings:notifications.noNotificationsFoundDescription")}
                         </Alert>
                     ) : null}
@@ -614,7 +654,9 @@ export function SettingsNotificationsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className={TYPOGRAPHY.sectionTitle}>{t("settings:notifications.deliveryPreferences")}</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>
+                        {t("settings:notifications.deliveryPreferences")}
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     {(["slack", "discord", "teams", "inApp"] as const).map(
@@ -626,7 +668,10 @@ export function SettingsNotificationsPage(): ReactElement {
                                     className="grid gap-2 rounded-lg border border-border bg-surface p-3 md:grid-cols-[220px_1fr]"
                                 >
                                     <Switch
-                                        aria-label={t("settings:notifications.enableNotifications", { channel: CHANNEL_LABELS[channelId] })}
+                                        aria-label={t(
+                                            "settings:notifications.enableNotifications",
+                                            { channel: CHANNEL_LABELS[channelId] },
+                                        )}
                                         isSelected={channel.enabled}
                                         onValueChange={(isSelected): void => {
                                             setChannelPreferences((previous) => ({
@@ -638,11 +683,15 @@ export function SettingsNotificationsPage(): ReactElement {
                                             }))
                                         }}
                                     >
-                                        {t("settings:notifications.enableNotifications", { channel: CHANNEL_LABELS[channelId] })}
+                                        {t("settings:notifications.enableNotifications", {
+                                            channel: CHANNEL_LABELS[channelId],
+                                        })}
                                     </Switch>
                                     <Input
                                         isDisabled={channel.enabled !== true}
-                                        label={t("settings:notifications.channelTarget", { channel: CHANNEL_LABELS[channelId] })}
+                                        label={t("settings:notifications.channelTarget", {
+                                            channel: CHANNEL_LABELS[channelId],
+                                        })}
                                         placeholder={
                                             channelId === "slack"
                                                 ? "#code-review"
@@ -677,15 +726,22 @@ export function SettingsNotificationsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className={TYPOGRAPHY.sectionTitle}>{t("settings:notifications.inAppMuteRules")}</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>
+                        {t("settings:notifications.inAppMuteRules")}
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary">
                         <Chip size="sm" variant="flat">
-                            {t("settings:notifications.enabledRules", { count: enabledMuteRulesCount })}
+                            {t("settings:notifications.enabledRules", {
+                                count: enabledMuteRulesCount,
+                            })}
                         </Chip>
                         <Chip size="sm" variant="flat">
-                            {t("settings:notifications.quietHours", { start: muteRules.quietHoursStart, end: muteRules.quietHoursEnd })}
+                            {t("settings:notifications.quietHours", {
+                                start: muteRules.quietHoursStart,
+                                end: muteRules.quietHoursEnd,
+                            })}
                         </Chip>
                     </div>
                     <Switch
@@ -749,7 +805,9 @@ export function SettingsNotificationsPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className={TYPOGRAPHY.sectionTitle}>{t("settings:notifications.bulkActionAudit")}</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>
+                        {t("settings:notifications.bulkActionAudit")}
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-2">
                     {bulkAudit.length === 0 ? (
@@ -769,7 +827,9 @@ export function SettingsNotificationsPage(): ReactElement {
                                         </p>
                                         <p className="text-text-tertiary">{entry.summary}</p>
                                         <p className="text-text-secondary">
-                                            {t("settings:notifications.auditNotifications", { ids: entry.notificationIds.join(", ") })}
+                                            {t("settings:notifications.auditNotifications", {
+                                                ids: entry.notificationIds.join(", "),
+                                            })}
                                         </p>
                                     </li>
                                 ),

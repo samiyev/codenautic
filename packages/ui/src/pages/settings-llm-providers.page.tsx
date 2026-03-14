@@ -194,7 +194,9 @@ function renderProviderCard(
                     color="primary"
                     isDisabled={isActionDisabled}
                     onPress={(): void => {
-                        showToastInfo(t("settings:llmProviders.toast.manualTestTriggered", { provider }))
+                        showToastInfo(
+                            t("settings:llmProviders.toast.manualTestTriggered", { provider }),
+                        )
                     }}
                 >
                     {t("settings:llmProviders.validateViaPipeline")}
