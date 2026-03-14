@@ -5,6 +5,7 @@ import { useVirtualizer } from "@tanstack/react-virtual"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input, Switch } from "@/components/ui"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
+import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import {
@@ -382,11 +383,10 @@ export function SettingsWebhooksPage(): ReactElement {
     }
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:webhooks.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("settings:webhooks.pageSubtitle")}
-            </p>
+        <FormLayout
+            title={t("settings:webhooks.pageTitle")}
+            description={t("settings:webhooks.pageSubtitle")}
+        >
 
             <Card>
                 <CardHeader>
@@ -421,7 +421,7 @@ export function SettingsWebhooksPage(): ReactElement {
                             value={createForm.eventTypesCsv}
                         />
                         <div className="flex items-end">
-                            <Button onPress={handleCreateWebhook} type="button">
+                            <Button color="primary" onPress={handleCreateWebhook} type="button">
                                 {t("settings:webhooks.createEndpoint")}
                             </Button>
                         </div>
@@ -636,6 +636,6 @@ export function SettingsWebhooksPage(): ReactElement {
                     </CardBody>
                 </Card>
             </div>
-        </section>
+        </FormLayout>
     )
 }
