@@ -1,6 +1,8 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "@tanstack/react-router"
+
+import { useDynamicTranslation } from "@/lib/i18n"
 import {
     Bar,
     BarChart,
@@ -86,11 +88,10 @@ const SECTION_COLORS: ReadonlyArray<string> = ["#2563eb", "#16a34a", "#f59e0b", 
  */
 export function ReportViewerPage(): ReactElement {
     const { t } = useTranslation(["reports"])
+    const { td } = useDynamicTranslation(["reports"])
     const navigate = useNavigate()
     const [selectedMetric, setSelectedMetric] = useState<TViewerMetric>("riskScore")
-    const [downloadStatus, setDownloadStatus] = useState<string>(
-        t("reports:viewer.noDownloadYet"),
-    )
+    const [downloadStatus, setDownloadStatus] = useState<string>(t("reports:viewer.noDownloadYet"))
     const [shareLink, setShareLink] = useState<string>(t("reports:viewer.noShareLinkYet"))
 
     const metricLabel = useMemo((): string => {
@@ -104,28 +105,15 @@ export function ReportViewerPage(): ReactElement {
             return t("reports:viewer.noTrendData")
         }
 
-        return (t as unknown as (key: string, options: Record<string, string>) => string)(
-            "reports:viewer.latestMetrics",
-            {
-                risk: String(latestPoint.riskScore),
-                velocity: String(latestPoint.deliveryVelocity),
-            },
-        )
-    }, [t])
+        return td("reports:viewer.latestMetrics", {
+            risk: String(latestPoint.riskScore),
+            velocity: String(latestPoint.deliveryVelocity),
+        })
+    }, [td])
 
     const handleDownload = (format: "PDF" | "PNG"): void => {
-        setDownloadStatus(
-            (t as unknown as (key: string, options: Record<string, string>) => string)(
-                "reports:viewer.downloadPrepared",
-                { format },
-            ),
-        )
-        showToastSuccess(
-            (t as unknown as (key: string, options: Record<string, string>) => string)(
-                "reports:viewer.downloadPreparedToast",
-                { format },
-            ),
-        )
+        setDownloadStatus(td("reports:viewer.downloadPrepared", { format }))
+        showToastSuccess(td("reports:viewer.downloadPreparedToast", { format }))
     }
     const handleGenerateShareLink = (): void => {
         const generatedLink = `https://codenautic.app/reports/generated/2026-q1-weekly`
@@ -196,9 +184,7 @@ export function ReportViewerPage(): ReactElement {
                                     }
                                 }}
                             >
-                                <option value="riskScore">
-                                    {t("reports:viewer.riskScore")}
-                                </option>
+                                <option value="riskScore">{t("reports:viewer.riskScore")}</option>
                                 <option value="deliveryVelocity">
                                     {t("reports:viewer.deliveryVelocity")}
                                 </option>

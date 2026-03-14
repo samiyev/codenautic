@@ -2,6 +2,7 @@ import { type ChangeEvent, type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "@tanstack/react-router"
 
+import { useDynamicTranslation } from "@/lib/i18n"
 import { ReportScheduleDialog } from "@/components/reports/report-schedule-dialog"
 import { ReportTemplateEditor } from "@/components/reports/report-template-editor"
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
@@ -54,6 +55,7 @@ const REPORT_SECTION_OPTIONS: ReadonlyArray<IReportSectionOption> = [
  */
 export function ReportGeneratorPage(): ReactElement {
     const { t } = useTranslation(["reports"])
+    const { td } = useDynamicTranslation(["reports"])
     const navigate = useNavigate()
     const [reportType, setReportType] = useState<TReportType>("architecture")
     const [reportFormat, setReportFormat] = useState<TReportFormat>("pdf")
@@ -63,9 +65,7 @@ export function ReportGeneratorPage(): ReactElement {
         "executive-summary",
         "risk-hotspots",
     ])
-    const [previewStatus, setPreviewStatus] = useState<string>(
-        t("reports:generator.noPreviewYet"),
-    )
+    const [previewStatus, setPreviewStatus] = useState<string>(t("reports:generator.noPreviewYet"))
     const [generationStatus, setGenerationStatus] = useState<string>(
         t("reports:generator.noReportYet"),
     )
@@ -73,11 +73,8 @@ export function ReportGeneratorPage(): ReactElement {
     const selectedSectionLabels = useMemo((): ReadonlyArray<string> => {
         return REPORT_SECTION_OPTIONS.filter((option): boolean => {
             return selectedSections.includes(option.id)
-        }).map(
-            (option): string =>
-                (t as unknown as (key: string) => string)(option.labelKey),
-        )
-    }, [selectedSections, t])
+        }).map((option): string => td(option.labelKey))
+    }, [selectedSections, td])
     const previewPayload = useMemo((): IReportPreviewPayload => {
         return {
             dateRange: {
@@ -122,12 +119,7 @@ export function ReportGeneratorPage(): ReactElement {
     const handlePreviewReport = (): void => {
         const dateRangeError = validateDateRange(startDate, endDate)
         if (dateRangeError !== undefined) {
-            setPreviewStatus(
-                (t as unknown as (key: string, options: Record<string, string>) => string)(
-                    "reports:generator.previewBlocked",
-                    { error: dateRangeError },
-                ),
-            )
+            setPreviewStatus(td("reports:generator.previewBlocked", { error: dateRangeError }))
             showToastError(t("reports:generator.previewBlockedToast"))
             return
         }
@@ -138,15 +130,12 @@ export function ReportGeneratorPage(): ReactElement {
         }
 
         setPreviewStatus(
-            (t as unknown as (key: string, options: Record<string, string>) => string)(
-                "reports:generator.previewReady",
-                {
-                    end: endDate,
-                    format: reportFormat.toUpperCase(),
-                    start: startDate,
-                    type: reportType,
-                },
-            ),
+            td("reports:generator.previewReady", {
+                end: endDate,
+                format: reportFormat.toUpperCase(),
+                start: startDate,
+                type: reportType,
+            }),
         )
         showToastInfo(t("reports:generator.previewGeneratedToast"))
     }
@@ -154,10 +143,7 @@ export function ReportGeneratorPage(): ReactElement {
         const dateRangeError = validateDateRange(startDate, endDate)
         if (dateRangeError !== undefined) {
             setGenerationStatus(
-                (t as unknown as (key: string, options: Record<string, string>) => string)(
-                    "reports:generator.generationBlocked",
-                    { error: dateRangeError },
-                ),
+                td("reports:generator.generationBlocked", { error: dateRangeError }),
             )
             showToastError(t("reports:generator.generationBlockedToast"))
             return
@@ -169,14 +155,11 @@ export function ReportGeneratorPage(): ReactElement {
         }
 
         setGenerationStatus(
-            (t as unknown as (key: string, options: Record<string, string>) => string)(
-                "reports:generator.generationQueued",
-                {
-                    count: String(selectedSections.length),
-                    format: reportFormat.toUpperCase(),
-                    type: reportType,
-                },
-            ),
+            td("reports:generator.generationQueued", {
+                count: String(selectedSections.length),
+                format: reportFormat.toUpperCase(),
+                type: reportType,
+            }),
         )
         showToastSuccess(t("reports:generator.generationStartedToast"))
     }
@@ -317,11 +300,7 @@ export function ReportGeneratorPage(): ReactElement {
                                                 handleSectionToggle(section.id)
                                             }}
                                         />
-                                        <span>
-                                            {(t as unknown as (key: string) => string)(
-                                                section.labelKey,
-                                            )}
-                                        </span>
+                                        <span>{td(section.labelKey)}</span>
                                     </label>
                                 ),
                             )}
@@ -343,9 +322,7 @@ export function ReportGeneratorPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className={TYPOGRAPHY.sectionTitle}>
-                        {t("reports:generator.previewTitle")}
-                    </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>{t("reports:generator.previewTitle")}</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <Alert

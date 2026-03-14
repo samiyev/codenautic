@@ -2,6 +2,7 @@ import { type ChangeEvent, type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "@tanstack/react-router"
 
+import { useDynamicTranslation } from "@/lib/i18n"
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { PageShell } from "@/components/layout/page-shell"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -77,6 +78,7 @@ function resolveReportStatusBorderClass(status: TReportStatus): string {
  */
 export function ReportListPage(): ReactElement {
     const { t } = useTranslation(["reports"])
+    const { td } = useDynamicTranslation(["reports"])
     const navigate = useNavigate()
     const [reportTypeFilter, setReportTypeFilter] = useState<TReportType | "all">("all")
     const [dateFrom, setDateFrom] = useState<string>("")
@@ -111,12 +113,7 @@ export function ReportListPage(): ReactElement {
         setReports((currentReports): ReadonlyArray<IGeneratedReport> => {
             return currentReports.filter((report): boolean => report.id !== reportId)
         })
-        setActionStatus(
-            (t as unknown as (key: string, options: Record<string, string>) => string)(
-                "reports:list.deletedReport",
-                { id: reportId },
-            ),
-        )
+        setActionStatus(td("reports:list.deletedReport", { id: reportId }))
         showToastSuccess(t("reports:list.deletedToast"))
     }
     const handleRegenerateReport = (reportId: string): void => {
@@ -133,12 +130,7 @@ export function ReportListPage(): ReactElement {
                 }
             })
         })
-        setActionStatus(
-            (t as unknown as (key: string, options: Record<string, string>) => string)(
-                "reports:list.regenerationQueued",
-                { id: reportId },
-            ),
-        )
+        setActionStatus(td("reports:list.regenerationQueued", { id: reportId }))
         showToastInfo(t("reports:list.regenerationQueuedToast"))
     }
     const handleOpenGenerator = (): void => {
@@ -153,10 +145,7 @@ export function ReportListPage(): ReactElement {
     }
 
     return (
-        <PageShell
-            subtitle={t("reports:list.pageSubtitle")}
-            title={t("reports:list.pageTitle")}
-        >
+        <PageShell subtitle={t("reports:list.pageSubtitle")} title={t("reports:list.pageTitle")}>
             <div className="flex flex-wrap gap-2">
                 <Button size="sm" variant="flat" onPress={handleOpenGenerator}>
                     {t("reports:list.openGenerator")}
@@ -168,9 +157,7 @@ export function ReportListPage(): ReactElement {
 
             <Card>
                 <CardHeader>
-                    <p className={TYPOGRAPHY.sectionTitle}>
-                        {t("reports:list.filtersTitle")}
-                    </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>{t("reports:list.filtersTitle")}</p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-3">
@@ -230,10 +217,9 @@ export function ReportListPage(): ReactElement {
                         title={t("reports:list.filterSummaryTitle")}
                         variant="flat"
                     >
-                        {(t as unknown as (key: string, options: Record<string, string>) => string)(
-                            "reports:list.filteredReports",
-                            { count: String(filteredReports.length) },
-                        )}
+                        {td("reports:list.filteredReports", {
+                            count: String(filteredReports.length),
+                        })}
                     </Alert>
                 </CardBody>
             </Card>
@@ -275,13 +261,10 @@ export function ReportListPage(): ReactElement {
                                             </span>
                                         </div>
                                         <p className={TYPOGRAPHY.body}>
-                                            {(t as unknown as (key: string, options: Record<string, string>) => string)(
-                                                "reports:list.typeAndDate",
-                                                {
-                                                    date: report.generatedAt,
-                                                    type: report.type,
-                                                },
-                                            )}
+                                            {td("reports:list.typeAndDate", {
+                                                date: report.generatedAt,
+                                                type: report.type,
+                                            })}
                                         </p>
                                         <div className="mt-2 flex gap-2">
                                             <Button
@@ -298,10 +281,9 @@ export function ReportListPage(): ReactElement {
                                                     handleRegenerateReport(report.id)
                                                 }}
                                             >
-                                                {(t as unknown as (key: string, options: Record<string, string>) => string)(
-                                                    "reports:list.regenerate",
-                                                    { id: report.id },
-                                                )}
+                                                {td("reports:list.regenerate", {
+                                                    id: report.id,
+                                                })}
                                             </Button>
                                             <Button
                                                 color="danger"
@@ -311,10 +293,9 @@ export function ReportListPage(): ReactElement {
                                                     handleDeleteReport(report.id)
                                                 }}
                                             >
-                                                {(t as unknown as (key: string, options: Record<string, string>) => string)(
-                                                    "reports:list.delete",
-                                                    { id: report.id },
-                                                )}
+                                                {td("reports:list.delete", {
+                                                    id: report.id,
+                                                })}
                                             </Button>
                                         </div>
                                     </li>
