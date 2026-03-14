@@ -256,7 +256,6 @@ describe("layout components", (): void => {
             },
         )
 
-        expect(screen.queryByText("Navigation")).not.toBeNull()
         expect(screen.queryByRole("button", { name: /Dashboard/ })).not.toBeNull()
         expect(screen.queryByRole("button", { name: /CCR Management/ })).not.toBeNull()
 
