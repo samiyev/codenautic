@@ -481,12 +481,29 @@
         "activeLabel": "Active",
         "rotateKey": "Rotate key {{label}}",
         "removeKey": "Remove key {{label}}",
+        "providerOpenai": "OpenAI",
+        "providerAnthropic": "Anthropic",
+        "providerGithub": "GitHub",
+        "providerGitlab": "GitLab",
         "toast": {
             "keyLabelTooShort": "Key label should be at least 3 characters.",
             "apiKeyTooShort": "API key must be at least 12 characters.",
             "keyAdded": "BYOK key \"{{label}}\" added.",
             "keyRotated": "Key rotated successfully.",
             "keyRemoved": "BYOK key removed."
+        }
+    },
+    "contractValidation": {
+        "drift": {
+            "allSeverities": "All severities",
+            "critical": "Critical",
+            "high": "High",
+            "medium": "Medium",
+            "low": "Low",
+            "severityDesc": "Severity: high to low",
+            "severityAsc": "Severity: low to high",
+            "filesDesc": "Affected files: many to few",
+            "filesAsc": "Affected files: few to many"
         }
     },
     "tokenUsage": {

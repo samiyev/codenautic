@@ -17,6 +17,11 @@
         "impactGraphView": "Impact graph view",
         "whatIfPanel": "What-if panel"
     },
+    "riskGauge": {
+        "green": "Green",
+        "yellow": "Yellow",
+        "red": "Red"
+    },
     "comparison": {
         "predictionComparisonView": "Prediction comparison view",
         "sprintComparisonView": "Sprint comparison view",

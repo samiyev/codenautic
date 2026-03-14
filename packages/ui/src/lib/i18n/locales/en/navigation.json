@@ -175,6 +175,9 @@
         "workspaceSwitcher": "Workspace switcher",
         "notifications": "Notifications ({{count}})"
     },
+    "sessionRecovery": {
+        "title": "Session expired"
+    },
     "notifications": {
         "shortcutConflictsTitle": "Keyboard shortcut conflicts detected",
         "multiTabSyncTitle": "Multi-tab sync applied",
