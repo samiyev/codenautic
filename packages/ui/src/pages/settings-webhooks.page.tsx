@@ -387,10 +387,11 @@ export function SettingsWebhooksPage(): ReactElement {
             title={t("settings:webhooks.pageTitle")}
             description={t("settings:webhooks.pageSubtitle")}
         >
-
             <Card>
                 <CardHeader>
-                    <p className={TYPOGRAPHY.sectionTitle}>{t("settings:webhooks.createWebhookEndpoint")}</p>
+                    <p className={TYPOGRAPHY.sectionTitle}>
+                        {t("settings:webhooks.createWebhookEndpoint")}
+                    </p>
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[1.2fr_1fr_auto]">
@@ -426,16 +427,16 @@ export function SettingsWebhooksPage(): ReactElement {
                             </Button>
                         </div>
                     </div>
-                    <Alert color="primary">
-                        {t("settings:webhooks.secretsMaskedNotice")}
-                    </Alert>
+                    <Alert color="primary">{t("settings:webhooks.secretsMaskedNotice")}</Alert>
                 </CardBody>
             </Card>
 
             <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
                 <Card>
                     <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                        <p className={TYPOGRAPHY.sectionTitle}>{t("settings:webhooks.webhookEndpoints")}</p>
+                        <p className={TYPOGRAPHY.sectionTitle}>
+                            {t("settings:webhooks.webhookEndpoints")}
+                        </p>
                         <div className="flex flex-wrap gap-2">
                             <Input
                                 className="min-w-[200px]"
@@ -461,9 +462,15 @@ export function SettingsWebhooksPage(): ReactElement {
                                 }}
                             >
                                 <option value="all">{t("settings:webhooks.allStatuses")}</option>
-                                <option value="success">{t("settings:webhooks.statusSuccess")}</option>
-                                <option value="retrying">{t("settings:webhooks.statusRetrying")}</option>
-                                <option value="failed">{t("settings:webhooks.statusFailed")}</option>
+                                <option value="success">
+                                    {t("settings:webhooks.statusSuccess")}
+                                </option>
+                                <option value="retrying">
+                                    {t("settings:webhooks.statusRetrying")}
+                                </option>
+                                <option value="failed">
+                                    {t("settings:webhooks.statusFailed")}
+                                </option>
                             </select>
                         </div>
                     </CardHeader>
@@ -509,10 +516,16 @@ export function SettingsWebhooksPage(): ReactElement {
                                                             {webhook.url}
                                                         </p>
                                                         <p className="mt-1 text-xs text-muted-foreground">
-                                                            {t("settings:webhooks.events", { events: webhook.eventTypes.join(", ") })}
+                                                            {t("settings:webhooks.events", {
+                                                                events: webhook.eventTypes.join(
+                                                                    ", ",
+                                                                ),
+                                                            })}
                                                         </p>
                                                         <p className="text-xs text-muted-foreground">
-                                                            {t("settings:webhooks.secret", { preview: webhook.secretPreview })}
+                                                            {t("settings:webhooks.secret", {
+                                                                preview: webhook.secretPreview,
+                                                            })}
                                                         </p>
                                                     </button>
                                                     <Chip
@@ -564,7 +577,8 @@ export function SettingsWebhooksPage(): ReactElement {
                                                 </div>
                                                 <p className="mt-1 text-xs text-muted-foreground">
                                                     {t("settings:webhooks.lastDelivery")}
-                                                    {webhook.lastDeliveryAt ?? t("settings:webhooks.notDelivered")}
+                                                    {webhook.lastDeliveryAt ??
+                                                        t("settings:webhooks.notDelivered")}
                                                 </p>
                                             </article>
                                         )
@@ -583,7 +597,9 @@ export function SettingsWebhooksPage(): ReactElement {
                     </CardHeader>
                     <CardBody className="space-y-3">
                         {activeEndpoint === undefined ? (
-                            <Alert color="warning">{t("settings:webhooks.selectEndpointToInspect")}</Alert>
+                            <Alert color="warning">
+                                {t("settings:webhooks.selectEndpointToInspect")}
+                            </Alert>
                         ) : null}
                         <div
                             ref={logsListRef}
@@ -626,7 +642,9 @@ export function SettingsWebhooksPage(): ReactElement {
                                                     {log.message}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
-                                                    {t("settings:webhooks.httpStatus", { status: log.httpStatus })}
+                                                    {t("settings:webhooks.httpStatus", {
+                                                        status: log.httpStatus,
+                                                    })}
                                                 </p>
                                             </article>
                                         )

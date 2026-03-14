@@ -29,7 +29,10 @@ export function SettingsPage(): ReactElement {
             title={t("navigation:sidebar.settings")}
         >
             <ActivationChecklist role={checklistRole} />
-            <StaggerContainer as="div" className={`grid ${GAP.section} sm:grid-cols-2 lg:grid-cols-3`}>
+            <StaggerContainer
+                as="div"
+                className={`grid ${GAP.section} sm:grid-cols-2 lg:grid-cols-3`}
+            >
                 {settingsGroups.map((group) => (
                     <motion.div key={group.key} variants={STAGGER_ITEM_VARIANTS}>
                         <Card className="h-full">
