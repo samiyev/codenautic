@@ -174,7 +174,9 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
                             key={target.id}
                         >
                             <input
-                                aria-label={t("code-city:simulationPanel.ariaLabelSelectTarget", { title: target.title })}
+                                aria-label={t("code-city:simulationPanel.ariaLabelSelectTarget", {
+                                    title: target.title,
+                                })}
                                 checked={selectedTargetIds.includes(target.id)}
                                 className="mt-0.5 h-4 w-4 rounded border-border"
                                 onChange={(): void => {
@@ -183,11 +185,13 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
                                 type="checkbox"
                             />
                             <div className="min-w-0">
-                                <p className={TYPOGRAPHY.cardTitle}>
-                                    {target.title}
-                                </p>
+                                <p className={TYPOGRAPHY.cardTitle}>{target.title}</p>
                                 <p className={TYPOGRAPHY.captionMuted}>
-                                    {t("code-city:simulationPanel.targetMeta", { roi: String(target.roiScore), risk: String(target.riskScore), effort: String(target.effortScore) })}
+                                    {t("code-city:simulationPanel.targetMeta", {
+                                        roi: String(target.roiScore),
+                                        risk: String(target.riskScore),
+                                        effort: String(target.effortScore),
+                                    })}
                                 </p>
                             </div>
                         </li>
@@ -197,30 +201,40 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
 
             <div className="mt-3 grid gap-2 md:grid-cols-3">
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>{t("code-city:simulationPanel.complexity")}</p>
-                    <p className={TYPOGRAPHY.sectionTitle}>
-                        {String(activeMetrics.complexity)}
+                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
+                        {t("code-city:simulationPanel.complexity")}
                     </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>{String(activeMetrics.complexity)}</p>
                     <p className={TYPOGRAPHY.microMuted}>
-                        {t("code-city:simulationPanel.delta", { value: formatDelta(afterMetrics.complexity - beforeMetrics.complexity) })}
+                        {t("code-city:simulationPanel.delta", {
+                            value: formatDelta(afterMetrics.complexity - beforeMetrics.complexity),
+                        })}
                     </p>
                 </div>
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>{t("code-city:simulationPanel.risk")}</p>
-                    <p className={TYPOGRAPHY.sectionTitle}>
-                        {String(activeMetrics.risk)}
+                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
+                        {t("code-city:simulationPanel.risk")}
                     </p>
+                    <p className={TYPOGRAPHY.sectionTitle}>{String(activeMetrics.risk)}</p>
                     <p className={TYPOGRAPHY.microMuted}>
-                        {t("code-city:simulationPanel.delta", { value: formatDelta(afterMetrics.risk - beforeMetrics.risk) })}
+                        {t("code-city:simulationPanel.delta", {
+                            value: formatDelta(afterMetrics.risk - beforeMetrics.risk),
+                        })}
                     </p>
                 </div>
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>{t("code-city:simulationPanel.maintainability")}</p>
+                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
+                        {t("code-city:simulationPanel.maintainability")}
+                    </p>
                     <p className={TYPOGRAPHY.sectionTitle}>
                         {String(activeMetrics.maintainability)}
                     </p>
                     <p className={TYPOGRAPHY.microMuted}>
-                        {t("code-city:simulationPanel.delta", { value: formatDelta(afterMetrics.maintainability - beforeMetrics.maintainability) })}
+                        {t("code-city:simulationPanel.delta", {
+                            value: formatDelta(
+                                afterMetrics.maintainability - beforeMetrics.maintainability,
+                            ),
+                        })}
                     </p>
                 </div>
             </div>
