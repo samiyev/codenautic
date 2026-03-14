@@ -2,11 +2,12 @@ import type { ReactElement } from "react"
 
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts"
 
-import { Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { Card, CardContent, CardHeader, Chip } from "@heroui/react"
 import { EmptyState } from "@/components/states/empty-state"
 import { ChartContainer } from "@/components/charts/chart-container"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
-import { CHART_FILL_OPACITY, VIOLATION_SCORE_MULTIPLIER } from "@/lib/constants/chart-constants"
+import { CHART_FILL_OPACITY } from "@/lib/constants/chart-recharts-defaults"
+import { VIOLATION_SCORE_MULTIPLIER } from "@/lib/constants/chart-constants"
 import { CHART_DATA_TRANSITION } from "@/lib/motion"
 
 interface IArchitectureHealthWidgetProps {
@@ -39,23 +40,23 @@ export function ArchitectureHealthWidget(props: IArchitectureHealthWidgetProps):
             <CardHeader className="flex flex-wrap items-center justify-between gap-2 border-b border-border/30 pb-3">
                 <p className={TYPOGRAPHY.sectionTitle}>Architecture health</p>
                 <div className="flex flex-wrap items-center gap-2">
-                    <Chip color="primary" size="sm" variant="flat">
+                    <Chip color="accent" size="sm" variant="soft">
                         {`Health ${String(props.healthScore)}`}
                     </Chip>
                     <Chip
                         className={props.layerViolations > 5 ? "badge-pulse" : ""}
-                        color="warning"
+                        color="accent"
                         size="sm"
-                        variant="flat"
+                        variant="soft"
                     >
                         {`Violations ${String(props.layerViolations)}`}
                     </Chip>
-                    <Chip color="success" size="sm" variant="flat">
+                    <Chip color="accent" size="sm" variant="soft">
                         {`DDD ${String(props.dddCompliance)}%`}
                     </Chip>
                 </div>
             </CardHeader>
-            <CardBody className="space-y-2 pt-4">
+            <CardContent className="space-y-2 pt-4">
                 <p className={TYPOGRAPHY.bodyMuted}>
                     Health score, layer violations and DDD compliance in one architecture widget.
                 </p>
@@ -89,7 +90,7 @@ export function ArchitectureHealthWidget(props: IArchitectureHealthWidgetProps):
                         </RadarChart>
                     </ChartContainer>
                 )}
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }

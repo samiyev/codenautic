@@ -1,6 +1,6 @@
 import type { ReactElement } from "react"
 
-import { Card, CardBody, CardHeader } from "@/components/ui"
+import { Card, CardContent, CardHeader } from "@heroui/react"
 import { EmptyState } from "@/components/states/empty-state"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { ActivityTimelineItem } from "./activity-timeline-item"
@@ -66,7 +66,7 @@ export function ActivityTimeline(props: IActivityTimelineProps): ReactElement {
             <CardHeader className="border-b border-border/40 pb-3">
                 <h2 className={TYPOGRAPHY.sectionTitle}>Recent activity</h2>
             </CardHeader>
-            <CardBody className="pt-4">
+            <CardContent className="pt-4">
                 {props.items.length === 0 ? (
                     <EmptyState
                         description="No recent activity to display."
@@ -97,7 +97,7 @@ export function ActivityTimeline(props: IActivityTimelineProps): ReactElement {
                         )}
                     </div>
                 )}
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
