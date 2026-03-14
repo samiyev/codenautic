@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, Chip } from "@heroui/react"
 import { SystemStateCard } from "@/components/infrastructure/system-state-card"
 import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -165,9 +165,9 @@ function formatTimestamp(rawValue: string): string {
 
 function mapStatusColor(
     status: TJobStatus,
-): "danger" | "default" | "primary" | "success" | "warning" {
+): "danger" | "default" | "accent" | "success" | "warning" {
     if (status === "running") {
-        return "primary"
+        return "accent"
     }
 
     if (status === "completed") {
@@ -510,17 +510,17 @@ export function SettingsJobsPage(): ReactElement {
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>{t("settings:jobs.liveSummary")}</p>
                 </CardHeader>
-                <CardBody className="flex flex-wrap gap-2">
-                    <Chip size="sm" variant="flat">
+                <CardContent className="flex flex-wrap gap-2">
+                    <Chip size="sm" variant="soft">
                         {t("settings:jobs.total", { count: statusSummary.total })}
                     </Chip>
-                    <Chip size="sm" variant="flat">
+                    <Chip size="sm" variant="soft">
                         {t("settings:jobs.activeQueue", { count: statusSummary.queuedOrRunning })}
                     </Chip>
-                    <Chip color="danger" size="sm" variant="flat">
+                    <Chip color="danger" size="sm" variant="soft">
                         {t("settings:jobs.failedStuck", { count: statusSummary.failedOrStuck })}
                     </Chip>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
@@ -529,7 +529,7 @@ export function SettingsJobsPage(): ReactElement {
                         {t("settings:jobs.timezoneSchedulePreview")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                         <select
                             aria-label={t("settings:ariaLabel.jobs.scheduleTarget")}
@@ -703,30 +703,26 @@ export function SettingsJobsPage(): ReactElement {
                         </select>
                     </div>
 
-                    <Alert
-                        color="warning"
-                        title={t("settings:jobs.timezoneApplicationBoundaryTitle")}
-                        variant="flat"
-                    >
-                        {t("settings:jobs.timezoneApplicationBoundaryDescription", {
-                            timezone: effectiveTimezone,
-                        })}
+                    <Alert status="warning">
+                        <Alert.Title>{t("settings:jobs.timezoneApplicationBoundaryTitle")}</Alert.Title>
+                        <Alert.Description>
+                            {t("settings:jobs.timezoneApplicationBoundaryDescription", {
+                                timezone: effectiveTimezone,
+                            })}
+                        </Alert.Description>
                     </Alert>
 
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="text-sm text-text-tertiary">{scheduleDescription}</p>
-                        <Button size="sm" variant="flat" onPress={handleSaveSchedule}>
+                        <Button size="sm" variant="secondary" onPress={handleSaveSchedule}>
                             {t("settings:jobs.saveSchedule")}
                         </Button>
                     </div>
 
                     {scheduleSaveMessage.length > 0 ? (
-                        <Alert
-                            color="primary"
-                            title={t("settings:jobs.scheduleSavedTitle")}
-                            variant="flat"
-                        >
-                            {scheduleSaveMessage}
+                        <Alert status="accent">
+                            <Alert.Title>{t("settings:jobs.scheduleSavedTitle")}</Alert.Title>
+                            <Alert.Description>{scheduleSaveMessage}</Alert.Description>
                         </Alert>
                     ) : null}
 
@@ -750,7 +746,7 @@ export function SettingsJobsPage(): ReactElement {
                             ),
                         )}
                     </ul>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
@@ -758,7 +754,7 @@ export function SettingsJobsPage(): ReactElement {
                     <CardHeader>
                         <p className={TYPOGRAPHY.sectionTitle}>{t("settings:jobs.jobs")}</p>
                     </CardHeader>
-                    <CardBody className="space-y-2">
+                    <CardContent className="space-y-2">
                         <ul
                             aria-label={t("settings:ariaLabel.jobs.operationsJobsList")}
                             className="space-y-2"
@@ -788,7 +784,7 @@ export function SettingsJobsPage(): ReactElement {
                                             <Chip
                                                 color={mapStatusColor(job.status)}
                                                 size="sm"
-                                                variant="flat"
+                                                variant="soft"
                                             >
                                                 {job.status}
                                             </Chip>
@@ -804,7 +800,7 @@ export function SettingsJobsPage(): ReactElement {
                                             <Button
                                                 isDisabled={canRetryJob(job) !== true}
                                                 size="sm"
-                                                variant="flat"
+                                                variant="secondary"
                                                 onPress={(): void => {
                                                     handleRetryJob(job.id)
                                                 }}
@@ -814,7 +810,7 @@ export function SettingsJobsPage(): ReactElement {
                                             <Button
                                                 isDisabled={canCancelJob(job) !== true}
                                                 size="sm"
-                                                variant="flat"
+                                                variant="secondary"
                                                 onPress={(): void => {
                                                     handleCancelJob(job.id)
                                                 }}
@@ -824,7 +820,7 @@ export function SettingsJobsPage(): ReactElement {
                                             <Button
                                                 isDisabled={canRequeueJob(job) !== true}
                                                 size="sm"
-                                                variant="flat"
+                                                variant="secondary"
                                                 onPress={(): void => {
                                                     handleRequeueJob(job.id)
                                                 }}
@@ -836,7 +832,7 @@ export function SettingsJobsPage(): ReactElement {
                                 ),
                             )}
                         </ul>
-                    </CardBody>
+                    </CardContent>
                 </Card>
 
                 <div className="space-y-4">
@@ -846,7 +842,7 @@ export function SettingsJobsPage(): ReactElement {
                                 {t("settings:jobs.errorDrillDown")}
                             </p>
                         </CardHeader>
-                        <CardBody className="space-y-2">
+                        <CardContent className="space-y-2">
                             {activeJob === undefined ? (
                                 <SystemStateCard
                                     description={t("settings:jobs.noJobSelectedDescription")}
@@ -863,25 +859,19 @@ export function SettingsJobsPage(): ReactElement {
                                         {t("settings:jobs.scope", { scope: activeJob.scope })}
                                     </p>
                                     {activeJob.errorDetails === undefined ? (
-                                        <Alert
-                                            color="success"
-                                            title={t("settings:jobs.noBlockingErrorTitle")}
-                                            variant="flat"
-                                        >
-                                            {t("settings:jobs.noBlockingErrorDescription")}
+                                        <Alert status="success">
+                                            <Alert.Title>{t("settings:jobs.noBlockingErrorTitle")}</Alert.Title>
+                                            <Alert.Description>{t("settings:jobs.noBlockingErrorDescription")}</Alert.Description>
                                         </Alert>
                                     ) : (
-                                        <Alert
-                                            color="danger"
-                                            title={t("settings:jobs.latestErrorTraceTitle")}
-                                            variant="flat"
-                                        >
-                                            {activeJob.errorDetails}
+                                        <Alert status="danger">
+                                            <Alert.Title>{t("settings:jobs.latestErrorTraceTitle")}</Alert.Title>
+                                            <Alert.Description>{activeJob.errorDetails}</Alert.Description>
                                         </Alert>
                                     )}
                                 </>
                             )}
-                        </CardBody>
+                        </CardContent>
                     </Card>
 
                     <Card>
@@ -890,7 +880,7 @@ export function SettingsJobsPage(): ReactElement {
                                 {t("settings:jobs.recoveryAuditTrail")}
                             </p>
                         </CardHeader>
-                        <CardBody className="space-y-2">
+                        <CardContent className="space-y-2">
                             <ul
                                 aria-label={t("settings:ariaLabel.jobs.jobsAuditTrailList")}
                                 className="space-y-2"
@@ -912,7 +902,7 @@ export function SettingsJobsPage(): ReactElement {
                                     ),
                                 )}
                             </ul>
-                        </CardBody>
+                        </CardContent>
                     </Card>
                 </div>
             </div>

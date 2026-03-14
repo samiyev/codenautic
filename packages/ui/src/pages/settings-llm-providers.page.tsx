@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 import {
     LLM_MODEL_OPTIONS,
@@ -191,7 +191,7 @@ function renderProviderCard(
             <div className="flex items-center gap-3">
                 <TestConnectionButton providerLabel={provider} onTest={onTest} />
                 <Button
-                    color="primary"
+                    variant="primary"
                     isDisabled={isActionDisabled}
                     onPress={(): void => {
                         showToastInfo(
