@@ -105,6 +105,7 @@ export function ContextSourceCard(props: IContextSourceCardProps): ReactElement 
                 <div className="flex flex-wrap gap-2">
                     <Button
                         isDisabled={props.onToggleEnabled === undefined || props.isLoading === true}
+                        color="primary"
                         size="sm"
                         variant={source.enabled ? "bordered" : "solid"}
                         onPress={(): void => {
