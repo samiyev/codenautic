@@ -1,6 +1,6 @@
 import type { ReactElement } from "react"
 import { motion } from "motion/react"
-import { AlertTriangle, ChevronRight } from "lucide-react"
+import { AlertTriangle, ChevronRight } from "@/components/icons/app-icons"
 
 import {
     Card,

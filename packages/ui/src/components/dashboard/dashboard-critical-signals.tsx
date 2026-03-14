@@ -1,5 +1,5 @@
 import type { ReactElement } from "react"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle } from "@/components/icons/app-icons"
 
 import { Alert } from "@/components/ui"
 import {
