@@ -12,26 +12,26 @@ const TEST_EVENTS: ReadonlyArray<IOwnershipTransitionEvent> = [
     {
         changedAt: "2026-01-08T00:00:00.000Z",
         fileId: "src/api/auth.ts",
-        fromOwnerName: "Alice Rivera",
+        fromOwnerName: "Neo",
         handoffSeverity: "critical",
         id: "handoff-1",
         reason: "Primary owner moved to platform migration stream.",
         scopeLabel: "src/api/auth.ts",
         scopeType: "file",
-        toOwnerId: "max-h",
-        toOwnerName: "Max H.",
+        toOwnerId: "trinity",
+        toOwnerName: "Trinity",
     },
     {
         changedAt: "2026-02-02T00:00:00.000Z",
         fileId: "src/api/repository.ts",
-        fromOwnerName: "Max H.",
+        fromOwnerName: "Trinity",
         handoffSeverity: "smooth",
         id: "handoff-2",
         reason: "Planned rotation after pair-review onboarding.",
         scopeLabel: "src/api",
         scopeType: "module",
-        toOwnerId: "luna-kim",
-        toOwnerName: "Luna Kim",
+        toOwnerId: "morpheus",
+        toOwnerName: "Morpheus",
     },
 ]
 
@@ -42,7 +42,7 @@ describe("OwnershipTransitionWidget", (): void => {
         expect(screen.getByText("Ownership transition widget")).not.toBeNull()
         expect(screen.getByLabelText("Ownership transitions")).not.toBeNull()
         expect(screen.getByText("src/api/auth.ts")).not.toBeNull()
-        expect(screen.getByText("Alice Rivera → Max H.")).not.toBeNull()
+        expect(screen.getByText("Neo → Trinity")).not.toBeNull()
         expect(screen.getByText("Critical handoff")).not.toBeNull()
         expect(screen.getByText("Smooth handoff")).not.toBeNull()
     })
@@ -63,7 +63,7 @@ describe("OwnershipTransitionWidget", (): void => {
             expect.objectContaining({
                 fileId: "src/api/auth.ts",
                 handoffSeverity: "critical",
-                toOwnerId: "max-h",
+                toOwnerId: "trinity",
             }),
         )
     })
