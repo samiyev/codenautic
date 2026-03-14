@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
+import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastSuccess } from "@/lib/notifications/toast"
@@ -48,7 +49,7 @@ interface ISettingsAuditLogsPageProps {
 const INITIAL_AUDIT_LOGS: ReadonlyArray<IAuditLogEntry> = [
     {
         action: "member.invited",
-        actor: "Ari Karimov",
+        actor: "Neo Anderson",
         details: "Invited anya@acme.dev to Platform Enablement team.",
         id: "audit-1",
         occurredAt: "2026-03-04T09:13:00Z",
@@ -56,7 +57,7 @@ const INITIAL_AUDIT_LOGS: ReadonlyArray<IAuditLogEntry> = [
     },
     {
         action: "role.changed",
-        actor: "Mila Davletova",
+        actor: "Trinity",
         details: "Changed role for oliver@acme.dev from viewer to developer.",
         id: "audit-2",
         occurredAt: "2026-03-04T10:02:00Z",
@@ -64,7 +65,7 @@ const INITIAL_AUDIT_LOGS: ReadonlyArray<IAuditLogEntry> = [
     },
     {
         action: "integration.connected",
-        actor: "Nika Saryeva",
+        actor: "Morpheus",
         details: "Connected Jira integration and enabled issue sync.",
         id: "audit-3",
         occurredAt: "2026-03-03T16:22:00Z",
@@ -72,7 +73,7 @@ const INITIAL_AUDIT_LOGS: ReadonlyArray<IAuditLogEntry> = [
     },
     {
         action: "policy.updated",
-        actor: "Ari Karimov",
+        actor: "Neo Anderson",
         details: "Updated review policy for critical repositories.",
         id: "audit-4",
         occurredAt: "2026-03-03T13:54:00Z",
@@ -91,9 +92,9 @@ const INITIAL_AUDIT_LOGS: ReadonlyArray<IAuditLogEntry> = [
 const EXTRA_AUDIT_LOGS: ReadonlyArray<IAuditLogEntry> = Array.from({ length: 120 }).map(
     (_entry, index): IAuditLogEntry => {
         const actors: ReadonlyArray<string> = [
-            "Ari Karimov",
-            "Mila Davletova",
-            "Nika Saryeva",
+            "Neo Anderson",
+            "Trinity",
+            "Morpheus",
             "System",
         ]
         const actions: ReadonlyArray<TAuditAction> = [
@@ -282,11 +283,10 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
     }
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:auditLogs.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("settings:auditLogs.pageSubtitle")}
-            </p>
+        <FormLayout
+            title={t("settings:auditLogs.pageTitle")}
+            description={t("settings:auditLogs.pageSubtitle")}
+        >
 
             <Card>
                 <CardHeader>
@@ -486,6 +486,6 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                     />
                 </CardBody>
             </Card>
-        </section>
+        </FormLayout>
     )
 }
