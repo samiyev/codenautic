@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Textarea } from "@/components/ui"
+import { Alert, Button, TextArea } from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { FormSection } from "@/components/forms/form-section"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -123,35 +123,29 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
             description={t("settings:privacyRedaction.pageSubtitle")}
         >
             {hasSensitiveData ? (
-                <Alert
-                    color="danger"
-                    title={t("settings:privacyRedaction.sensitiveFragmentsDetectedTitle")}
-                    variant="flat"
-                >
-                    {t("settings:privacyRedaction.sensitiveFragmentsDetectedDescription")}
+                <Alert status="danger">
+                    <Alert.Title>{t("settings:privacyRedaction.sensitiveFragmentsDetectedTitle")}</Alert.Title>
+                    <Alert.Description>{t("settings:privacyRedaction.sensitiveFragmentsDetectedDescription")}</Alert.Description>
                 </Alert>
             ) : (
-                <Alert
-                    color="success"
-                    title={t("settings:privacyRedaction.noSensitiveFragmentsTitle")}
-                    variant="flat"
-                >
-                    {t("settings:privacyRedaction.noSensitiveFragmentsDescription")}
+                <Alert status="success">
+                    <Alert.Title>{t("settings:privacyRedaction.noSensitiveFragmentsTitle")}</Alert.Title>
+                    <Alert.Description>{t("settings:privacyRedaction.noSensitiveFragmentsDescription")}</Alert.Description>
                 </Alert>
             )}
 
             <FormSection heading={t("settings:privacyRedaction.sourceContent")}>
-                <Textarea
+                <TextArea
                     aria-label={t("settings:ariaLabel.privacyRedaction.sourceText")}
-                    minRows={6}
+                    className="min-h-[150px]"
                     value={sourceText}
-                    onValueChange={setSourceText}
+                    onChange={(e): void => { setSourceText(e.target.value) }}
                 />
                 <div className="flex flex-wrap gap-2">
-                    <Button color="primary" onPress={handleApplyRedaction}>
+                    <Button variant="primary" onPress={handleApplyRedaction}>
                         {t("settings:privacyRedaction.applyRedactionSuggestions")}
                     </Button>
-                    <Button variant="flat" onPress={handleExport}>
+                    <Button variant="secondary" onPress={handleExport}>
                         {t("settings:privacyRedaction.confirmSafeExport")}
                     </Button>
                 </div>
@@ -183,18 +177,15 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
             </FormSection>
 
             <FormSection heading={t("settings:privacyRedaction.redactedPreview")}>
-                <Textarea
+                <TextArea
                     aria-label={t("settings:ariaLabel.privacyRedaction.redactedPreview")}
-                    isReadOnly
-                    minRows={6}
+                    readOnly
+                    className="min-h-[150px]"
                     value={redactedText}
                 />
-                <Alert
-                    color="primary"
-                    title={t("settings:privacyRedaction.exportState")}
-                    variant="flat"
-                >
-                    {lastExportState}
+                <Alert status="accent">
+                    <Alert.Title>{t("settings:privacyRedaction.exportState")}</Alert.Title>
+                    <Alert.Description>{lastExportState}</Alert.Description>
                 </Alert>
             </FormSection>
         </FormLayout>

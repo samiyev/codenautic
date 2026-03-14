@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, Chip } from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -130,16 +130,13 @@ export function SettingsProviderDegradationPage(): ReactElement {
             title={t("settings:providerDegradation.pageTitle")}
             description={t("settings:providerDegradation.pageSubtitle")}
         >
-            <Alert
-                color={providerState.level === "degraded" ? "danger" : "success"}
-                title={
-                    providerState.level === "degraded"
+            <Alert status={providerState.level === "degraded" ? "danger" : "success"}>
+                <Alert.Title>
+                    {providerState.level === "degraded"
                         ? t("settings:providerDegradation.degradedModeActive")
-                        : t("settings:providerDegradation.operationalMode")
-                }
-                variant="flat"
-            >
-                {incidentMessage}
+                        : t("settings:providerDegradation.operationalMode")}
+                </Alert.Title>
+                <Alert.Description>{incidentMessage}</Alert.Description>
             </Alert>
 
             <Card>
@@ -148,16 +145,16 @@ export function SettingsProviderDegradationPage(): ReactElement {
                         {t("settings:providerDegradation.incidentControls")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                         <Chip
                             color={providerState.level === "degraded" ? "danger" : "success"}
                             size="sm"
-                            variant="flat"
+                            variant="soft"
                         >
                             {providerState.provider} · {providerState.level}
                         </Chip>
-                        <Chip size="sm" variant="flat">
+                        <Chip size="sm" variant="soft">
                             ETA: {providerState.eta}
                         </Chip>
                     </div>
@@ -182,10 +179,10 @@ export function SettingsProviderDegradationPage(): ReactElement {
                         </ul>
                     )}
                     <div className="flex flex-wrap gap-2">
-                        <Button color="primary" onPress={handleSimulateOutage}>
+                        <Button variant="primary" onPress={handleSimulateOutage}>
                             {t("settings:providerDegradation.simulateOutage")}
                         </Button>
-                        <Button variant="flat" onPress={handleMarkOperational}>
+                        <Button variant="secondary" onPress={handleMarkOperational}>
                             {t("settings:providerDegradation.markOperational")}
                         </Button>
                         <a
@@ -197,7 +194,7 @@ export function SettingsProviderDegradationPage(): ReactElement {
                             {t("settings:providerDegradation.openRunbook")}
                         </a>
                     </div>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
@@ -206,7 +203,7 @@ export function SettingsProviderDegradationPage(): ReactElement {
                         {t("settings:providerDegradation.queueRetry")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <div className="flex gap-2">
                         <Button
                             isDisabled={canQueueCriticalAction !== true}
@@ -215,7 +212,7 @@ export function SettingsProviderDegradationPage(): ReactElement {
                         >
                             {t("settings:providerDegradation.queueCriticalAction")}
                         </Button>
-                        <Button size="sm" variant="flat" onPress={handleRetryQueuedActions}>
+                        <Button size="sm" variant="secondary" onPress={handleRetryQueuedActions}>
                             {t("settings:providerDegradation.retryQueuedActions")}
                         </Button>
                     </div>
@@ -244,7 +241,7 @@ export function SettingsProviderDegradationPage(): ReactElement {
                             {t("settings:providerDegradation.noCriticalActionsInQueue")}
                         </p>
                     ) : null}
-                </CardBody>
+                </CardContent>
             </Card>
         </FormLayout>
     )
