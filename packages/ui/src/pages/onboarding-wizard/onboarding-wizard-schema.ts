@@ -11,6 +11,11 @@ import {
 } from "./onboarding-wizard-types"
 
 /**
+ * Максимум некорректных строк, отображаемых в сообщении валидации.
+ */
+const MAX_INVALID_LINES_PREVIEW = 3
+
+/**
  * Zod-схема для необязательного email-поля.
  */
 const EMAIL_OPTIONAL_SCHEMA = z
@@ -83,7 +88,7 @@ export const ONBOARDING_FORM_SCHEMA = z
 
         const preview = parsed.invalidLines
             .map((item): string => `${String(item.line)}: ${item.value}`)
-            .slice(0, 3)
+            .slice(0, MAX_INVALID_LINES_PREVIEW)
             .join("; ")
         context.addIssue({
             code: z.ZodIssueCode.custom,

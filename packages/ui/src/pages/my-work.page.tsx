@@ -1,6 +1,7 @@
 import { type ReactElement, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useDynamicTranslation } from "@/lib/i18n"
 import {
     Alert,
     Button,
@@ -160,6 +161,11 @@ const TRIAGE_ITEMS_DEFAULT: ReadonlyArray<ITriageItem> = [
 const ASSIGNABLE_ROLES: ReadonlyArray<TReviewerRole> = ["developer", "lead", "admin"]
 const ESCALATION_ROLES: ReadonlyArray<TReviewerRole> = ["lead", "admin"]
 
+/**
+ * Максимум записей в audit trail истории действий.
+ */
+const MAX_AUDIT_TRAIL_ENTRIES = 12
+
 function formatTimestamp(rawValue: string): string {
     const date = new Date(rawValue)
     if (Number.isNaN(date.getTime())) {
@@ -253,6 +259,7 @@ function getEscalationColor(
  */
 export function MyWorkPage(): ReactElement {
     const { t } = useTranslation(["dashboard"])
+    const { td } = useDynamicTranslation(["dashboard"])
     const [scope, setScope] = useState<TTriageScope>("mine")
     const [reviewerRole, setReviewerRole] = useState<TReviewerRole>("lead")
     const [items, setItems] = useState<ReadonlyArray<ITriageItem>>(TRIAGE_ITEMS_DEFAULT)
@@ -363,7 +370,7 @@ export function MyWorkPage(): ReactElement {
                 timestamp: new Date().toISOString(),
             }
 
-            return [nextEntry, ...previous].slice(0, 12)
+            return [nextEntry, ...previous].slice(0, MAX_AUDIT_TRAIL_ENTRIES)
         })
     }
 
@@ -586,12 +593,7 @@ export function MyWorkPage(): ReactElement {
                             title={t("dashboard:myWork.escalationWatchlist")}
                             variant="flat"
                         >
-                            {(
-                                t as unknown as (
-                                    key: string,
-                                    options: Record<string, string | number>,
-                                ) => string
-                            )("dashboard:myWork.slaBreachAlert", { count: String(breachCount) })}
+                            {td("dashboard:myWork.slaBreachAlert", { count: String(breachCount) })}
                         </Alert>
                     ) : null}
                 </CardBody>
