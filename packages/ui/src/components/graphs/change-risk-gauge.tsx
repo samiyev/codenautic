@@ -71,9 +71,7 @@ export function ChangeRiskGauge(props: IChangeRiskGaugeProps): ReactElement {
                     <span>Red</span>
                 </div>
                 <div className="rounded border border-primary/30 bg-primary/10 p-2">
-                    <p className={`${TYPOGRAPHY.overline} text-on-primary`}>
-                        Current risk score
-                    </p>
+                    <p className={`${TYPOGRAPHY.overline} text-on-primary`}>Current risk score</p>
                     <p className="text-lg font-semibold text-on-primary">{String(clampedScore)}</p>
                     <p className="text-xs text-on-primary">Zone: {riskZone}</p>
                 </div>
@@ -88,9 +86,7 @@ export function ChangeRiskGauge(props: IChangeRiskGaugeProps): ReactElement {
                             key={point.label}
                         >
                             <div>
-                                <p className={TYPOGRAPHY.cardTitle}>
-                                    {point.label}
-                                </p>
+                                <p className={TYPOGRAPHY.cardTitle}>{point.label}</p>
                                 <p className={TYPOGRAPHY.captionMuted}>
                                     Historical {String(point.score)} · Delta{" "}
                                     {delta > 0 ? `+${String(delta)}` : String(delta)}

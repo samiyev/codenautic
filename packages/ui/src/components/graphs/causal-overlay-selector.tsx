@@ -148,9 +148,8 @@ export function CausalOverlaySelector(props: ICausalOverlaySelectorProps): React
             </p>
             <p className={TYPOGRAPHY.captionMuted}>
                 {
-                    causalOverlayOptions.find(
-                        (option): boolean => option.value === props.value,
-                    )?.description
+                    causalOverlayOptions.find((option): boolean => option.value === props.value)
+                        ?.description
                 }
             </p>
         </div>

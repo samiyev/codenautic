@@ -210,7 +210,9 @@ export function ChurnComplexityScatter(props: IChurnComplexityScatterProps): Rea
 
                     return (
                         <g
-                            aria-label={t("code-city:churnComplexity.ariaLabelPoint", { fileName: point.fileName })}
+                            aria-label={t("code-city:churnComplexity.ariaLabelPoint", {
+                                fileName: point.fileName,
+                            })}
                             className="cursor-pointer"
                             data-selected={isSelected ? "true" : "false"}
                             key={point.fileId}
@@ -238,14 +240,23 @@ export function ChurnComplexityScatter(props: IChurnComplexityScatterProps): Rea
                     )
                 })}
             </svg>
-            <p aria-label={t("code-city:churnComplexity.ariaLabelQuadrants")} className="text-xs text-foreground-500">
+            <p
+                aria-label={t("code-city:churnComplexity.ariaLabelQuadrants")}
+                className="text-xs text-foreground-500"
+            >
                 {t("code-city:churnComplexity.quadrantsDescription")}
             </p>
             {selectedPoint === undefined ? (
-                <p className="text-xs text-foreground-500">{t("code-city:churnComplexity.noPointSelected")}</p>
+                <p className="text-xs text-foreground-500">
+                    {t("code-city:churnComplexity.noPointSelected")}
+                </p>
             ) : (
                 <p className="text-xs text-foreground-500">
-                    {t("code-city:churnComplexity.selectedPoint", { fileName: selectedPoint.fileName, churn: selectedPoint.churn, complexity: selectedPoint.complexity })}
+                    {t("code-city:churnComplexity.selectedPoint", {
+                        fileName: selectedPoint.fileName,
+                        churn: selectedPoint.churn,
+                        complexity: selectedPoint.complexity,
+                    })}
                 </p>
             )}
         </div>
