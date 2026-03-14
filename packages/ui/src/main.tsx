@@ -18,13 +18,22 @@ void initializeI18n().then((): void => {
     syncHtmlLangAttribute()
 })
 
-const rootElement = document.getElementById("root")
-if (rootElement === null) {
-    throw new Error("Root element #root не найден")
+async function bootstrapApp(): Promise<void> {
+    if (import.meta.env.DEV) {
+        const { worker } = await import("@/mocks/browser")
+        await worker.start({ onUnhandledRequest: "bypass" })
+    }
+
+    const rootElement = document.getElementById("root")
+    if (rootElement === null) {
+        throw new Error("Root element #root не найден")
+    }
+
+    createRoot(rootElement).render(
+        <StrictMode>
+            <App />
+        </StrictMode>,
+    )
 }
 
-createRoot(rootElement).render(
-    <StrictMode>
-        <App />
-    </StrictMode>,
-)
+void bootstrapApp()
