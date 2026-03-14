@@ -8,5 +8,6 @@ export {
     MongoConnectionManager,
     type IMongoConnectionManagerOptions,
 } from "./mongo-connection-manager"
+export * from "./adapters"
 export * from "./repositories"
 export * from "./schemas"
