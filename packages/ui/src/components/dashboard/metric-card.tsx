@@ -1,5 +1,5 @@
 import { type ReactElement } from "react"
-import { ArrowUpRight, ArrowDownRight, Minus } from "lucide-react"
+import { ArrowDownRight, ArrowUpRight, Minus } from "@/components/icons/app-icons"
 
 import { Card, CardBody } from "@/components/ui"
 import { useCountUp } from "@/lib/motion"
