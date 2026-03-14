@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
 import { SystemStateCard } from "@/components/infrastructure/system-state-card"
+import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -106,7 +107,7 @@ const INITIAL_JOBS: ReadonlyArray<IOperationJob> = [
 const INITIAL_AUDIT: ReadonlyArray<IJobAuditEntry> = [
     {
         action: "retry",
-        actor: "Nika Saryeva",
+        actor: "Morpheus",
         id: "J-AUD-001",
         jobId: "JOB-4055",
         occurredAt: "2026-03-04T08:55:00Z",
@@ -496,11 +497,10 @@ export function SettingsJobsPage(): ReactElement {
     }
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:jobs.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("settings:jobs.pageSubtitle")}
-            </p>
+        <FormLayout
+            title={t("settings:jobs.pageTitle")}
+            description={t("settings:jobs.pageSubtitle")}
+        >
 
             <Card>
                 <CardHeader>
@@ -880,6 +880,6 @@ export function SettingsJobsPage(): ReactElement {
                     </Card>
                 </div>
             </div>
-        </section>
+        </FormLayout>
     )
 }
