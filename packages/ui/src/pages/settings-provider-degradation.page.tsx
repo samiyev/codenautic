@@ -2,6 +2,7 @@ import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { FormLayout } from "@/components/forms/form-layout"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 import {
@@ -123,11 +124,10 @@ export function SettingsProviderDegradationPage(): ReactElement {
     }
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:providerDegradation.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("settings:providerDegradation.pageSubtitle")}
-            </p>
+        <FormLayout
+            title={t("settings:providerDegradation.pageTitle")}
+            description={t("settings:providerDegradation.pageSubtitle")}
+        >
 
             <Alert
                 color={providerState.level === "degraded" ? "danger" : "success"}
@@ -170,7 +170,7 @@ export function SettingsProviderDegradationPage(): ReactElement {
                         </ul>
                     )}
                     <div className="flex flex-wrap gap-2">
-                        <Button onPress={handleSimulateOutage}>{t("settings:providerDegradation.simulateOutage")}</Button>
+                        <Button color="primary" onPress={handleSimulateOutage}>{t("settings:providerDegradation.simulateOutage")}</Button>
                         <Button variant="flat" onPress={handleMarkOperational}>
                             {t("settings:providerDegradation.markOperational")}
                         </Button>
@@ -223,6 +223,6 @@ export function SettingsProviderDegradationPage(): ReactElement {
                     ) : null}
                 </CardBody>
             </Card>
-        </section>
+        </FormLayout>
     )
 }
