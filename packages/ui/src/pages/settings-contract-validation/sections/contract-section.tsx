@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader, Textarea } from "@/components/ui"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -24,6 +25,7 @@ export interface IContractSectionProps {
  * @returns The contract section element.
  */
 export function ContractSection({ state }: IContractSectionProps): ReactElement {
+    const { t } = useTranslation(["settings"])
     return (
         <>
             <Card>
@@ -32,7 +34,7 @@ export function ContractSection({ state }: IContractSectionProps): ReactElement 
                 </CardHeader>
                 <CardBody className="space-y-3">
                     <Textarea
-                        aria-label="Contract json"
+                        aria-label={t("settings:ariaLabel.contractValidation.contractJson")}
                         minRows={10}
                         value={state.rawContract}
                         onValueChange={state.setRawContract}
@@ -59,7 +61,12 @@ export function ContractSection({ state }: IContractSectionProps): ReactElement 
                         </Alert>
                     ) : (
                         <Alert color="danger" title="Contract validation errors" variant="flat">
-                            <ul aria-label="Contract errors list" className="space-y-1">
+                            <ul
+                                aria-label={t(
+                                    "settings:ariaLabel.contractValidation.contractErrorsList",
+                                )}
+                                className="space-y-1"
+                            >
                                 {state.validationResult.errors.map(
                                     (error): ReactElement => (
                                         <li key={error}>{error}</li>
@@ -70,7 +77,12 @@ export function ContractSection({ state }: IContractSectionProps): ReactElement 
                     )}
                     {state.validationResult.migrationHints.length === 0 ? null : (
                         <Alert color="warning" title="Migration hints" variant="flat">
-                            <ul aria-label="Contract migration hints list" className="space-y-1">
+                            <ul
+                                aria-label={t(
+                                    "settings:ariaLabel.contractValidation.contractMigrationHintsList",
+                                )}
+                                className="space-y-1"
+                            >
                                 {state.validationResult.migrationHints.map(
                                     (hint): ReactElement => (
                                         <li key={hint}>{hint}</li>

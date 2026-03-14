@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -25,6 +26,7 @@ export interface IDriftAlertsSectionProps {
  * @returns The drift alerts section element.
  */
 export function DriftAlertsSection({ state }: IDriftAlertsSectionProps): ReactElement {
+    const { t } = useTranslation(["settings"])
     return (
         <Card>
             <CardHeader>
@@ -39,7 +41,9 @@ export function DriftAlertsSection({ state }: IDriftAlertsSectionProps): ReactEl
                     <label className="space-y-1 text-sm">
                         <span className="font-semibold text-foreground">Severity threshold</span>
                         <select
-                            aria-label="Drift alert severity threshold"
+                            aria-label={t(
+                                "settings:ariaLabel.contractValidation.driftAlertSeverityThreshold",
+                            )}
                             className={NATIVE_FORM.select}
                             value={state.driftAlertSeverityThreshold}
                             onChange={(event): void => {
@@ -65,7 +69,9 @@ export function DriftAlertsSection({ state }: IDriftAlertsSectionProps): ReactEl
                             Violation count threshold
                         </span>
                         <input
-                            aria-label="Drift alert violation threshold"
+                            aria-label={t(
+                                "settings:ariaLabel.contractValidation.driftAlertViolationThreshold",
+                            )}
                             className="w-full rounded border border-border bg-surface px-2 py-1 text-sm text-foreground"
                             min={0}
                             type="number"

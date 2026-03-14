@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader, Textarea } from "@/components/ui"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -23,6 +24,7 @@ export interface IBlueprintSectionProps {
  * @returns The blueprint section element.
  */
 export function BlueprintSection({ state }: IBlueprintSectionProps): ReactElement {
+    const { t } = useTranslation(["settings"])
     return (
         <>
             <Card>
@@ -35,7 +37,7 @@ export function BlueprintSection({ state }: IBlueprintSectionProps): ReactElemen
                         highlight and visual preview.
                     </p>
                     <Textarea
-                        aria-label="Architecture blueprint yaml"
+                        aria-label={t("settings:ariaLabel.contractValidation.blueprintYaml")}
                         minRows={12}
                         value={state.blueprintYaml}
                         onValueChange={state.setBlueprintYaml}
@@ -44,7 +46,9 @@ export function BlueprintSection({ state }: IBlueprintSectionProps): ReactElemen
                         <label className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground">
                             Upload blueprint YAML
                             <input
-                                aria-label="Upload blueprint yaml"
+                                aria-label={t(
+                                    "settings:ariaLabel.contractValidation.uploadBlueprintYaml",
+                                )}
                                 className="sr-only"
                                 accept=".yml,.yaml,text/yaml"
                                 onChange={state.handleUploadBlueprint}
@@ -64,7 +68,12 @@ export function BlueprintSection({ state }: IBlueprintSectionProps): ReactElemen
                         </Alert>
                     ) : (
                         <Alert color="danger" title="Blueprint validation errors" variant="flat">
-                            <ul aria-label="Blueprint errors list" className="space-y-1">
+                            <ul
+                                aria-label={t(
+                                    "settings:ariaLabel.contractValidation.blueprintErrorsList",
+                                )}
+                                className="space-y-1"
+                            >
                                 {state.blueprintValidationResult.errors.map(
                                     (error): ReactElement => (
                                         <li key={error}>{error}</li>
@@ -85,7 +94,9 @@ export function BlueprintSection({ state }: IBlueprintSectionProps): ReactElemen
                 </CardHeader>
                 <CardBody>
                     <pre
-                        aria-label="Blueprint syntax highlight preview"
+                        aria-label={t(
+                            "settings:ariaLabel.contractValidation.blueprintSyntaxHighlightPreview",
+                        )}
                         className="overflow-x-auto rounded-md border border-border bg-code-surface p-3 text-xs leading-6"
                     >
                         {state.blueprintHighlightLines.map(
@@ -122,7 +133,12 @@ export function BlueprintSection({ state }: IBlueprintSectionProps): ReactElemen
                     <p className={TYPOGRAPHY.sectionTitle}>Blueprint visual preview</p>
                 </CardHeader>
                 <CardBody>
-                    <ul aria-label="Blueprint visual nodes list" className="space-y-1">
+                    <ul
+                        aria-label={t(
+                            "settings:ariaLabel.contractValidation.blueprintVisualNodesList",
+                        )}
+                        className="space-y-1"
+                    >
                         {state.blueprintValidationResult.nodes.map(
                             (node): ReactElement => (
                                 <li

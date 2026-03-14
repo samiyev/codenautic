@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input, Switch } from "@/components/ui"
+import { getWindowLocalStorage, safeStorageGet, safeStorageSet } from "@/lib/utils/safe-storage"
 import { useAuthAccess } from "@/lib/auth/auth-access"
 import { resolveDeepLinkGuard } from "@/lib/navigation/deep-link-guard"
 import { FormLayout } from "@/components/forms/form-layout"
@@ -129,28 +130,12 @@ function isTenantId(value: string | undefined): value is TTenantId {
 }
 
 function readStoredActiveTenantId(): TTenantId | undefined {
-    if (typeof window === "undefined") {
-        return undefined
-    }
-
-    try {
-        const storedValue = window.localStorage.getItem("codenautic:tenant:active") ?? undefined
-        return isTenantId(storedValue) ? storedValue : undefined
-    } catch {
-        return undefined
-    }
+    const storedValue = safeStorageGet(getWindowLocalStorage(), "codenautic:tenant:active")
+    return isTenantId(storedValue) ? storedValue : undefined
 }
 
 function writeStoredActiveTenantId(tenantId: TTenantId): void {
-    if (typeof window === "undefined") {
-        return
-    }
-
-    try {
-        window.localStorage.setItem("codenautic:tenant:active", tenantId)
-    } catch {
-        return
-    }
+    safeStorageSet(getWindowLocalStorage(), "codenautic:tenant:active", tenantId)
 }
 
 function dedupeNotificationsById(
@@ -535,7 +520,7 @@ export function SettingsNotificationsPage(): ReactElement {
                     )}
                     <div className="md:max-w-[260px]">
                         <select
-                            aria-label="Filter event type"
+                            aria-label={t("settings:ariaLabel.notifications.filterEventType")}
                             className={NATIVE_FORM.select}
                             id="notifications-event-type-filter"
                             value={eventTypeFilter}
@@ -566,7 +551,11 @@ export function SettingsNotificationsPage(): ReactElement {
                         </select>
                     </div>
 
-                    <ul aria-label="Notification inbox list" className="space-y-2" role="list">
+                    <ul
+                        aria-label={t("settings:ariaLabel.notifications.inboxList")}
+                        className="space-y-2"
+                        role="list"
+                    >
                         {filteredNotifications.map(
                             (notification): ReactElement => (
                                 <li
@@ -815,7 +804,10 @@ export function SettingsNotificationsPage(): ReactElement {
                             {t("settings:notifications.noBulkOperations")}
                         </p>
                     ) : (
-                        <ul aria-label="Bulk action audit list" className="space-y-2">
+                        <ul
+                            aria-label={t("settings:ariaLabel.notifications.bulkActionAuditList")}
+                            className="space-y-2"
+                        >
                             {bulkAudit.map(
                                 (entry): ReactElement => (
                                     <li

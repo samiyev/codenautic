@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { CodeCityTreemap } from "@/components/graphs/codecity-treemap"
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
@@ -27,6 +28,7 @@ export interface IDriftViolationsSectionProps {
  * @returns The drift violations section element.
  */
 export function DriftViolationsSection({ state }: IDriftViolationsSectionProps): ReactElement {
+    const { t } = useTranslation(["settings"])
     return (
         <>
             <Card>
@@ -42,7 +44,9 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                         <label className="space-y-1 text-sm text-text-tertiary">
                             Search
                             <input
-                                aria-label="Drift report search query"
+                                aria-label={t(
+                                    "settings:ariaLabel.contractValidation.driftReportSearchQuery",
+                                )}
                                 className="w-full rounded-md border border-border px-3 py-2 text-sm text-foreground"
                                 placeholder="Rule, rationale or file"
                                 type="text"
@@ -55,7 +59,9 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                         <label className="space-y-1 text-sm text-text-tertiary">
                             Severity filter
                             <select
-                                aria-label="Drift severity filter"
+                                aria-label={t(
+                                    "settings:ariaLabel.contractValidation.driftSeverityFilter",
+                                )}
                                 className={NATIVE_FORM.select}
                                 value={state.driftSeverityFilter}
                                 onChange={(event): void => {
@@ -81,7 +87,9 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                         <label className="space-y-1 text-sm text-text-tertiary">
                             Sort
                             <select
-                                aria-label="Drift report sort mode"
+                                aria-label={t(
+                                    "settings:ariaLabel.contractValidation.driftReportSortMode",
+                                )}
                                 className={NATIVE_FORM.select}
                                 value={state.driftSortMode}
                                 onChange={(event): void => {
@@ -117,7 +125,12 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                             Change filters or search query to see drift analysis data.
                         </Alert>
                     ) : (
-                        <ul aria-label="Drift violations list" className="space-y-2">
+                        <ul
+                            aria-label={t(
+                                "settings:ariaLabel.contractValidation.driftViolationsList",
+                            )}
+                            className="space-y-2"
+                        >
                             {state.filteredSortedDriftViolations.map(
                                 (violation): ReactElement => (
                                     <li
@@ -145,7 +158,9 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                         {state.driftExportStatus}
                     </Alert>
                     <pre
-                        aria-label="Drift report export payload"
+                        aria-label={t(
+                            "settings:ariaLabel.contractValidation.driftReportExportPayload",
+                        )}
                         className="overflow-x-auto rounded-md border border-border bg-code-surface p-3 text-xs leading-6 text-emerald-200"
                     >
                         {state.driftExportPayload}
@@ -170,7 +185,12 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                         onFileSelect={state.setSelectedDriftOverlayFileId}
                         title="Architecture drift overlay treemap"
                     />
-                    <div aria-label="Drift overlay file shortcuts" className="flex flex-wrap gap-2">
+                    <div
+                        aria-label={t(
+                            "settings:ariaLabel.contractValidation.driftOverlayFileShortcuts",
+                        )}
+                        className="flex flex-wrap gap-2"
+                    >
                         {DRIFT_CODE_CITY_FILES.map(
                             (file): ReactElement => (
                                 <Button
@@ -209,7 +229,9 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                                 </p>
                             ) : (
                                 <ul
-                                    aria-label="Selected drift file violations"
+                                    aria-label={t(
+                                        "settings:ariaLabel.contractValidation.selectedDriftFileViolations",
+                                    )}
                                     className="space-y-1"
                                 >
                                     {state.selectedDriftOverlayViolations.map(

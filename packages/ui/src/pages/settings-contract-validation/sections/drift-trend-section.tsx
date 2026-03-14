@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 import { CartesianGrid, Line, LineChart, ReferenceDot, Tooltip, XAxis, YAxis } from "recharts"
 
 import { Alert, Card, CardBody, CardHeader } from "@/components/ui"
@@ -32,6 +33,7 @@ export interface IDriftTrendSectionProps {
  * @returns The drift trend section element.
  */
 export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElement {
+    const { t } = useTranslation(["settings"])
     return (
         <>
             <Card>
@@ -49,7 +51,9 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                                 Intended architecture
                             </p>
                             <ul
-                                aria-label="Blueprint intended architecture list"
+                                aria-label={t(
+                                    "settings:ariaLabel.contractValidation.blueprintIntendedArchitectureList",
+                                )}
                                 className="space-y-2"
                             >
                                 {BLUEPRINT_STRUCTURE_NODES.map(
@@ -76,7 +80,12 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                             <p className="mb-2 text-sm font-semibold text-foreground">
                                 Runtime structure
                             </p>
-                            <ul aria-label="Reality architecture list" className="space-y-2">
+                            <ul
+                                aria-label={t(
+                                    "settings:ariaLabel.contractValidation.realityArchitectureList",
+                                )}
+                                className="space-y-2"
+                            >
                                 {REALITY_STRUCTURE_NODES.map(
                                     (node): ReactElement => (
                                         <li
@@ -101,7 +110,12 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                     <Alert color="primary" title="Difference summary" variant="flat">
                         {state.architectureDifferenceSummary}
                     </Alert>
-                    <ul aria-label="Architecture differences list" className="space-y-2">
+                    <ul
+                        aria-label={t(
+                            "settings:ariaLabel.contractValidation.architectureDifferencesList",
+                        )}
+                        className="space-y-2"
+                    >
                         {state.architectureDifferences.map(
                             (difference): ReactElement => (
                                 <li
@@ -136,7 +150,10 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                     <p className="text-sm text-text-secondary">
                         Drift score trend over time with architecture change annotations.
                     </p>
-                    <ChartContainer aria-label="Drift score trend chart" height="xl">
+                    <ChartContainer
+                        aria-label={t("settings:ariaLabel.contractValidation.driftScoreTrendChart")}
+                        height="xl"
+                    >
                         <LineChart
                             data={DRIFT_TREND_POINTS}
                             margin={{
@@ -182,7 +199,9 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                         {state.driftTrendSummary}
                     </Alert>
                     <ul
-                        aria-label="Architecture change annotations list"
+                        aria-label={t(
+                            "settings:ariaLabel.contractValidation.architectureChangeAnnotationsList",
+                        )}
                         className="space-y-1 text-sm"
                     >
                         {state.driftTrendAnnotations.map(

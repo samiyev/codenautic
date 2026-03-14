@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader, Textarea } from "@/components/ui"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -23,6 +24,7 @@ export interface IGuardrailsSectionProps {
  * @returns The guardrails section element.
  */
 export function GuardrailsSection({ state }: IGuardrailsSectionProps): ReactElement {
+    const { t } = useTranslation(["settings"])
     return (
         <Card>
             <CardHeader>
@@ -33,7 +35,7 @@ export function GuardrailsSection({ state }: IGuardrailsSectionProps): ReactElem
                     Configure allowed and forbidden import rules with YAML and visual rule preview.
                 </p>
                 <Textarea
-                    aria-label="Architecture guardrails yaml"
+                    aria-label={t("settings:ariaLabel.contractValidation.guardrailsYaml")}
                     minRows={10}
                     value={state.guardrailsYaml}
                     onValueChange={state.setGuardrailsYaml}
@@ -52,7 +54,12 @@ export function GuardrailsSection({ state }: IGuardrailsSectionProps): ReactElem
                     </Alert>
                 ) : (
                     <Alert color="danger" title="Guardrails validation errors" variant="flat">
-                        <ul aria-label="Guardrails errors list" className="space-y-1">
+                        <ul
+                            aria-label={t(
+                                "settings:ariaLabel.contractValidation.guardrailsErrorsList",
+                            )}
+                            className="space-y-1"
+                        >
                             {state.guardrailsValidationResult.errors.map(
                                 (error): ReactElement => (
                                     <li key={error}>{error}</li>
@@ -61,7 +68,10 @@ export function GuardrailsSection({ state }: IGuardrailsSectionProps): ReactElem
                         </ul>
                     </Alert>
                 )}
-                <ul aria-label="Guardrail visual rules list" className="space-y-2">
+                <ul
+                    aria-label={t("settings:ariaLabel.contractValidation.guardrailVisualRulesList")}
+                    className="space-y-2"
+                >
                     {state.guardrailsValidationResult.rules.map(
                         (rule): ReactElement => (
                             <li

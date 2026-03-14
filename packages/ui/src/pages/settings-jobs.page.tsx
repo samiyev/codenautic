@@ -532,7 +532,7 @@ export function SettingsJobsPage(): ReactElement {
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                         <select
-                            aria-label="Schedule target"
+                            aria-label={t("settings:ariaLabel.jobs.scheduleTarget")}
                             className={NATIVE_FORM.select}
                             value={scheduleTarget}
                             onChange={(event): void => {
@@ -546,7 +546,7 @@ export function SettingsJobsPage(): ReactElement {
                             <option value="report">{t("settings:jobs.reportSchedule")}</option>
                         </select>
                         <select
-                            aria-label="User timezone"
+                            aria-label={t("settings:ariaLabel.jobs.userTimezone")}
                             className={NATIVE_FORM.select}
                             value={userTimezone}
                             onChange={(event): void => {
@@ -570,7 +570,7 @@ export function SettingsJobsPage(): ReactElement {
                             )}
                         </select>
                         <select
-                            aria-label="Organization timezone override"
+                            aria-label={t("settings:ariaLabel.jobs.organizationTimezoneOverride")}
                             className={NATIVE_FORM.select}
                             value={orgTimezoneOverride}
                             onChange={(event): void => {
@@ -601,7 +601,7 @@ export function SettingsJobsPage(): ReactElement {
                             )}
                         </select>
                         <select
-                            aria-label="Schedule frequency"
+                            aria-label={t("settings:ariaLabel.jobs.scheduleFrequency")}
                             className={NATIVE_FORM.select}
                             value={activeSchedule.mode}
                             onChange={(event): void => {
@@ -619,7 +619,7 @@ export function SettingsJobsPage(): ReactElement {
                     <div className="grid gap-3 md:grid-cols-3">
                         {activeSchedule.mode === "hourly" ? (
                             <select
-                                aria-label="Interval hours"
+                                aria-label={t("settings:ariaLabel.jobs.intervalHours")}
                                 className={NATIVE_FORM.select}
                                 value={String(activeSchedule.intervalHours)}
                                 onChange={(event): void => {
@@ -638,7 +638,7 @@ export function SettingsJobsPage(): ReactElement {
                             </select>
                         ) : (
                             <select
-                                aria-label="Schedule weekday"
+                                aria-label={t("settings:ariaLabel.jobs.scheduleWeekday")}
                                 className={NATIVE_FORM.select}
                                 value={String(activeSchedule.weekday)}
                                 onChange={(event): void => {
@@ -662,7 +662,7 @@ export function SettingsJobsPage(): ReactElement {
                             </select>
                         )}
                         <select
-                            aria-label="Schedule hour"
+                            aria-label={t("settings:ariaLabel.jobs.scheduleHour")}
                             className={NATIVE_FORM.select}
                             value={String(activeSchedule.hour)}
                             onChange={(event): void => {
@@ -682,7 +682,7 @@ export function SettingsJobsPage(): ReactElement {
                             )}
                         </select>
                         <select
-                            aria-label="Schedule minute"
+                            aria-label={t("settings:ariaLabel.jobs.scheduleMinute")}
                             className={NATIVE_FORM.select}
                             value={String(activeSchedule.minute)}
                             onChange={(event): void => {
@@ -730,7 +730,10 @@ export function SettingsJobsPage(): ReactElement {
                         </Alert>
                     ) : null}
 
-                    <ul aria-label="Schedule preview list" className="space-y-2">
+                    <ul
+                        aria-label={t("settings:ariaLabel.jobs.schedulePreviewList")}
+                        className="space-y-2"
+                    >
                         {schedulePreview.map(
                             (nextRun, index): ReactElement => (
                                 <li
@@ -756,7 +759,10 @@ export function SettingsJobsPage(): ReactElement {
                         <p className={TYPOGRAPHY.sectionTitle}>{t("settings:jobs.jobs")}</p>
                     </CardHeader>
                     <CardBody className="space-y-2">
-                        <ul aria-label="Operations jobs list" className="space-y-2">
+                        <ul
+                            aria-label={t("settings:ariaLabel.jobs.operationsJobsList")}
+                            className="space-y-2"
+                        >
                             {jobs.map(
                                 (job): ReactElement => (
                                     <li
@@ -885,7 +891,10 @@ export function SettingsJobsPage(): ReactElement {
                             </p>
                         </CardHeader>
                         <CardBody className="space-y-2">
-                            <ul aria-label="Jobs audit trail list" className="space-y-2">
+                            <ul
+                                aria-label={t("settings:ariaLabel.jobs.jobsAuditTrailList")}
+                                className="space-y-2"
+                            >
                                 {audit.map(
                                     (entry): ReactElement => (
                                         <li
