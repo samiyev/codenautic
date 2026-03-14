@@ -1,6 +1,6 @@
 import { type ReactElement, useState } from "react"
 
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 
 /**
  * Параметры кнопки тестирования провайдера.
@@ -36,9 +36,9 @@ export function TestConnectionButton(props: ITestConnectionButtonProps): ReactEl
 
     return (
         <Button
-            color="primary"
-            isLoading={isChecking}
+            variant="primary"
             isDisabled={isChecking}
+            aria-busy={isChecking}
             onPress={(): void => {
                 void handlePress()
             }}

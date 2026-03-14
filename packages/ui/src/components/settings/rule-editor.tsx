@@ -1,7 +1,7 @@
-import { lazy, Suspense, type ReactElement, useEffect, useId, useState } from "react"
+import { type ChangeEvent, lazy, Suspense, type ReactElement, useEffect, useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button, Card, CardBody, CardHeader, Textarea } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, TextArea } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import type { IRuleEditorMarkdownPreviewProps } from "./rule-editor-markdown-preview"
 
@@ -178,27 +178,26 @@ export function RuleEditor(props: IRuleEditorProps): ReactElement {
             <CardHeader>
                 <h2 className={TYPOGRAPHY.cardTitle}>{label}</h2>
             </CardHeader>
-            <CardBody className="space-y-3">
+            <CardContent className="space-y-3">
                 <div className="flex flex-wrap gap-2">
-                    <Button color="primary" onPress={formatBold} size="sm" variant="solid">
+                    <Button onPress={formatBold} size="sm" variant="primary">
                         {t("settings:ruleEditor.bold")}
                     </Button>
-                    <Button color="primary" onPress={formatItalic} size="sm" variant="solid">
+                    <Button onPress={formatItalic} size="sm" variant="primary">
                         {t("settings:ruleEditor.italic")}
                     </Button>
-                    <Button color="primary" onPress={formatHeading} size="sm" variant="solid">
+                    <Button onPress={formatHeading} size="sm" variant="primary">
                         {t("settings:ruleEditor.heading")}
                     </Button>
-                    <Button color="primary" onPress={formatCodeBlock} size="sm" variant="solid">
+                    <Button onPress={formatCodeBlock} size="sm" variant="primary">
                         {t("settings:ruleEditor.codeBlock")}
                     </Button>
                     <Button
-                        color="primary"
                         onPress={(): void => {
                             setIsPreviewVisible((previousValue): boolean => !previousValue)
                         }}
                         size="sm"
-                        variant="solid"
+                        variant="primary"
                     >
                         {isPreviewVisible === true
                             ? t("settings:ruleEditor.hidePreview")
@@ -213,7 +212,7 @@ export function RuleEditor(props: IRuleEditorProps): ReactElement {
                           ? t("settings:ruleEditor.tipTapReady")
                           : t("settings:ruleEditor.tipTapFallback")}
                 </p>
-                <Textarea
+                <TextArea
                     aria-label={label}
                     aria-describedby={
                         maxLength === undefined
@@ -222,7 +221,7 @@ export function RuleEditor(props: IRuleEditorProps): ReactElement {
                     }
                     id={textareaId}
                     maxLength={maxLength}
-                    onValueChange={onChange}
+                    onChange={(event: ChangeEvent<HTMLTextAreaElement>): void => { onChange(event.target.value) }}
                     rows={10}
                     value={value}
                     placeholder={placeholder}
@@ -253,7 +252,7 @@ export function RuleEditor(props: IRuleEditorProps): ReactElement {
                         </Suspense>
                     </section>
                 )}
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
