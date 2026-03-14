@@ -44,6 +44,7 @@ export function PromptOverrideEditor(props: IPromptOverrideEditorProps): ReactEl
             />
             <div className="flex flex-wrap gap-2">
                 <Button
+                    color="primary"
                     size="sm"
                     variant="solid"
                     onPress={(): void => {
