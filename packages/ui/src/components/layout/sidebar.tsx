@@ -1,10 +1,9 @@
 import type { ReactElement, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { motion, AnimatePresence } from "motion/react"
+import { motion } from "motion/react"
 
 import { ChevronLeft, ChevronRight } from "@/components/icons/app-icons"
 import { Button } from "@/components/ui"
-import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { DURATION, EASING, useReducedMotion } from "@/lib/motion"
 
 import { BrandMark } from "./brand-mark"
@@ -45,18 +44,11 @@ export function Sidebar(props: ISidebarProps): ReactElement {
 
     const sidebarContent = (
         <>
-            <BrandMark isCompact={isCollapsed} />
-            <div className="mb-2 flex items-center justify-between px-2">
-                {isCollapsed ? (
-                    <span className="w-0 overflow-hidden" />
-                ) : (
-                    <p className={TYPOGRAPHY.overline}>
-                        {props.title ?? t("navigation:sidebarNav.title")}
-                    </p>
-                )}
+            <div className="mb-1 flex items-center justify-between">
+                <BrandMark isCompact={isCollapsed} />
                 <Button
                     aria-label={isCollapsed ? t("navigation:sidebarNav.expandAriaLabel") : t("navigation:sidebarNav.collapseAriaLabel")}
-                    className="h-7 min-h-7 w-7 rounded-full px-0"
+                    className={`${isCollapsed ? "h-8 min-h-8 w-8" : "h-6 min-h-6 w-6"} rounded-full px-0 hover:bg-surface-hover`}
                     isIconOnly
                     radius="full"
                     size="sm"
@@ -64,23 +56,23 @@ export function Sidebar(props: ISidebarProps): ReactElement {
                     onPress={props.onSidebarToggle}
                 >
                     {isCollapsed ? (
-                        <ChevronRight aria-hidden className="size-4" />
+                        <ChevronRight aria-hidden className="size-3.5" />
                     ) : (
-                        <ChevronLeft aria-hidden className="size-4" />
+                        <ChevronLeft aria-hidden className="size-3.5" />
                     )}
                 </Button>
             </div>
             {props.headerSlot !== undefined ? (
-                <div className="mb-3 px-2">{props.headerSlot}</div>
+                <div className="mb-1.5 px-1">{props.headerSlot}</div>
             ) : null}
-            <div className="flex-1 overflow-y-auto">
+            <div className="min-h-0 flex-1">
                 <SidebarNav isCollapsed={isCollapsed} onNavigate={props.onNavigate} />
             </div>
             {props.footerSlot !== undefined ? props.footerSlot : null}
         </>
     )
 
-    const baseClassName = `flex h-full flex-col overflow-hidden rounded-xl bg-sidebar-bg p-2 shadow-md ring-1 ring-border/50 ${props.className ?? ""}`
+    const baseClassName = `flex h-full flex-col overflow-hidden border-r border-border/50 bg-sidebar-bg px-2 py-2 ${props.className ?? ""}`
 
     if (prefersReducedMotion) {
         return (
@@ -98,22 +90,11 @@ export function Sidebar(props: ISidebarProps): ReactElement {
             animate={{ width: targetWidth }}
             className={baseClassName}
             transition={{
-                duration: DURATION.slow,
-                ease: EASING.spring,
+                duration: DURATION.normal,
+                ease: EASING.move,
             }}
         >
-            <AnimatePresence mode="wait">
-                <motion.div
-                    animate={{ opacity: 1 }}
-                    className="flex h-full flex-col"
-                    exit={{ opacity: 0 }}
-                    initial={{ opacity: 0 }}
-                    key={isCollapsed ? "collapsed" : "expanded"}
-                    transition={{ duration: DURATION.fast }}
-                >
-                    {sidebarContent}
-                </motion.div>
-            </AnimatePresence>
+            {sidebarContent}
         </motion.aside>
     )
 }
