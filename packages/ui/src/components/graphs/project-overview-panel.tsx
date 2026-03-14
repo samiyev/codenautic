@@ -4,6 +4,16 @@ import { useTranslation } from "react-i18next"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
+ * Максимум модулей в architecture summary.
+ */
+const MAX_ARCHITECTURE_MODULES = 4
+
+/**
+ * Максимум записей в tech stack summary и entry points.
+ */
+const MAX_TECH_STACK_ENTRIES = 5
+
+/**
  * Минимальный file-дескриптор для проектного overview.
  */
 export interface IProjectOverviewFileDescriptor {
@@ -121,7 +131,7 @@ function buildProjectOverviewMetrics(
 
     const architectureSummary = [...moduleCounter.entries()]
         .sort((left, right): number => right[1] - left[1])
-        .slice(0, 4)
+        .slice(0, MAX_ARCHITECTURE_MODULES)
         .map(([label, count]): IOverviewMetricItem => {
             return {
                 label,
@@ -131,7 +141,7 @@ function buildProjectOverviewMetrics(
 
     const techStackSummary = [...techCounter.entries()]
         .sort((left, right): number => right[1] - left[1])
-        .slice(0, 5)
+        .slice(0, MAX_TECH_STACK_ENTRIES)
         .map(([label, count]): IOverviewMetricItem => {
             return {
                 label,
@@ -139,7 +149,7 @@ function buildProjectOverviewMetrics(
             }
         })
 
-    const entryPoints = [...entryPointCandidates].sort().slice(0, 5)
+    const entryPoints = [...entryPointCandidates].sort().slice(0, MAX_TECH_STACK_ENTRIES)
 
     return {
         architectureSummary,

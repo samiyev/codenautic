@@ -6,6 +6,11 @@ import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
+ * Максимум отображаемых refactoring-таргетов в диалоге экспорта.
+ */
+const MAX_VISIBLE_EXPORT_TARGETS = 6
+
+/**
  * Канал экспорта refactoring плана.
  */
 export type TRefactoringExportDestination = "github" | "jira"
@@ -145,7 +150,7 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
                     </label>
 
                     <ul className="mt-3 space-y-2">
-                        {props.targets.slice(0, 6).map(
+                        {props.targets.slice(0, MAX_VISIBLE_EXPORT_TARGETS).map(
                             (target): ReactElement => (
                                 <li
                                     className="flex items-start gap-2 rounded border border-border bg-surface p-2"
