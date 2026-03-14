@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import { Laptop, Moon, Sun } from "@/components/icons/app-icons"
 import { Button } from "@/components/ui"
+import { useDynamicTranslation } from "@/lib/i18n"
 import { type ThemeMode, useThemeMode } from "@/lib/theme/theme-provider"
 
 const MODE_ICONS: Record<ThemeMode, typeof Moon> = {
@@ -36,16 +37,17 @@ export interface IThemeModeToggleProps {
  */
 export function ThemeModeToggle(props: IThemeModeToggleProps): ReactElement {
     const { t } = useTranslation(["navigation"])
+    const { td } = useDynamicTranslation(["navigation"])
     const { mode, resolvedMode, setMode } = useThemeMode()
 
     const modeOptions = useMemo(
         () =>
             MODE_VALUES.map((value) => ({
                 Icon: MODE_ICONS[value],
-                ariaLabel: (t as unknown as (key: string) => string)(MODE_ARIA_KEYS[value]),
+                ariaLabel: td(MODE_ARIA_KEYS[value]),
                 value,
             })),
-        [t],
+        [td],
     )
 
     return (

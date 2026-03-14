@@ -51,7 +51,9 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
             </DropdownTrigger>
             <DropdownMenu aria-label={t("navigation:userMenuAriaLabel")}>
                 <DropdownItem key="name">{props.userName ?? defaultName}</DropdownItem>
-                <DropdownItem key="email">{props.userEmail ?? t("navigation:userMenu.defaultEmail")}</DropdownItem>
+                <DropdownItem key="email">
+                    {props.userEmail ?? t("navigation:userMenu.defaultEmail")}
+                </DropdownItem>
                 <DropdownItem
                     key="settings"
                     onPress={(): void => {
