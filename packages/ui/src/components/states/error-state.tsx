@@ -46,9 +46,7 @@ export function ErrorState(props: IErrorStateProps): ReactElement {
                     />
                 </svg>
             </div>
-            <h3 className={TYPOGRAPHY.subsectionTitle}>
-                {props.title ?? "Something went wrong"}
-            </h3>
+            <h3 className={TYPOGRAPHY.subsectionTitle}>{props.title ?? "Something went wrong"}</h3>
             <p className="max-w-sm text-sm text-text-secondary">{props.description}</p>
             {props.onRetry !== undefined ? (
                 <Button

@@ -114,9 +114,7 @@ function ErrorFallbackContent(props: {
                     <Button
                         variant="flat"
                         onPress={(): void => {
-                            window.location.assign(
-                                "/help-diagnostics?from=error-fallback",
-                            )
+                            window.location.assign("/help-diagnostics?from=error-fallback")
                         }}
                     >
                         Открыть диагностику
@@ -126,8 +124,7 @@ function ErrorFallbackContent(props: {
         )
     }
 
-    const isServerError =
-        props.statusCode !== null && props.statusCode >= 500
+    const isServerError = props.statusCode !== null && props.statusCode >= 500
     const isUnknownStatus = props.statusCode === null
 
     if (isServerError || isUnknownStatus) {
@@ -144,9 +141,7 @@ function ErrorFallbackContent(props: {
                     <Button
                         variant="flat"
                         onPress={(): void => {
-                            window.location.assign(
-                                "/help-diagnostics?from=error-fallback",
-                            )
+                            window.location.assign("/help-diagnostics?from=error-fallback")
                         }}
                     >
                         Открыть диагностику
