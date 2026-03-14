@@ -1,6 +1,6 @@
 import type { ReactElement } from "react"
 
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**

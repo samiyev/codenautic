@@ -1,6 +1,6 @@
 import { type ReactElement, useCallback, useState } from "react"
 
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 import { resolveProviderLabel } from "./auth-labels"
@@ -50,7 +50,7 @@ export function AuthLoginPanel(props: IAuthLoginPanelProps): ReactElement {
                     <Button
                         className={`rounded-xl border border-border bg-surface px-4 py-3 ${TYPOGRAPHY.cardTitle} transition hover:border-border hover:bg-surface-muted`}
                         isDisabled={pendingProvider !== null}
-                        isLoading={pendingProvider === provider}
+                        aria-busy={pendingProvider === provider}
                         key={provider}
                         onPress={(): void => {
                             handleSignIn(provider)
