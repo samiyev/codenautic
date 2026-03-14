@@ -88,9 +88,7 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
             <p className={TYPOGRAPHY.cardTitle}>{t("code-city:whatIf.title")}</p>
-            <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
-                {t("code-city:whatIf.description")}
-            </p>
+            <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>{t("code-city:whatIf.description")}</p>
 
             <ul className="mt-3 space-y-2">
                 {props.options.slice(0, 6).map(
@@ -100,7 +98,9 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
                             key={option.id}
                         >
                             <input
-                                aria-label={t("code-city:whatIf.ariaLabelSelectOption", { label: option.label })}
+                                aria-label={t("code-city:whatIf.ariaLabelSelectOption", {
+                                    label: option.label,
+                                })}
                                 checked={selectedOptionIds.includes(option.id)}
                                 className="mt-0.5 h-4 w-4 rounded border-border"
                                 onChange={(): void => {
@@ -109,11 +109,12 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
                                 type="checkbox"
                             />
                             <div className="min-w-0">
-                                <p className={TYPOGRAPHY.cardTitle}>
-                                    {option.label}
-                                </p>
+                                <p className={TYPOGRAPHY.cardTitle}>{option.label}</p>
                                 <p className={TYPOGRAPHY.captionMuted}>
-                                    {t("code-city:whatIf.optionMeta", { impact: String(option.impactScore), affected: String(option.affectedCount) })}
+                                    {t("code-city:whatIf.optionMeta", {
+                                        impact: String(option.impactScore),
+                                        affected: String(option.affectedCount),
+                                    })}
                                 </p>
                             </div>
                         </li>
@@ -126,7 +127,11 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
                     {t("code-city:whatIf.aggregatedScenario")}
                 </p>
                 <p className="text-xs text-on-primary">
-                    {t("code-city:whatIf.aggregatedMeta", { files: String(aggregatedScenario.fileIds.length), score: String(aggregatedScenario.aggregatedScore), affected: String(aggregatedScenario.totalAffectedCount) })}
+                    {t("code-city:whatIf.aggregatedMeta", {
+                        files: String(aggregatedScenario.fileIds.length),
+                        score: String(aggregatedScenario.aggregatedScore),
+                        affected: String(aggregatedScenario.totalAffectedCount),
+                    })}
                 </p>
             </div>
 
