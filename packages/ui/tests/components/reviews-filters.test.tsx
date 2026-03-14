@@ -13,7 +13,7 @@ import type { IReviewsFiltersProps } from "@/components/reviews/reviews-filters"
 function createDefaultProps(): IReviewsFiltersProps {
     return {
         assignee: "all",
-        assigneeOptions: ["Alice", "Bob", "Charlie"],
+        assigneeOptions: ["Neo", "Trinity", "Morpheus"],
         onAssigneeChange: vi.fn<(assignee: string) => void>(),
         onReset: vi.fn<() => void>(),
         onSearchChange: vi.fn<(search: string) => void>(),
