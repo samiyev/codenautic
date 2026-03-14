@@ -146,6 +146,14 @@ function createDefaultHeaders(rawToken: string | undefined): Readonly<Record<str
         throw new Error("VITE_API_BEARER_TOKEN не должен быть пустым")
     }
 
+    if (typeof window !== "undefined" && window.location.protocol === "https:") {
+        // eslint-disable-next-line no-console -- security warning for production misconfiguration
+        console.warn(
+            "[codenautic] VITE_API_BEARER_TOKEN detected in HTTPS context. " +
+                "Use httpOnly cookies for production auth.",
+        )
+    }
+
     headers.Authorization = `Bearer ${normalizedToken}`
     return headers
 }
