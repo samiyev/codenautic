@@ -9,6 +9,16 @@ import {
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
+ * Максимум видимых owner-записей в легенде виджета.
+ */
+const MAX_VISIBLE_LEGEND_OWNERS = 3
+
+/**
+ * Максимум видимых district-записей в легенде виджета.
+ */
+const MAX_VISIBLE_LEGEND_DISTRICTS = 2
+
+/**
  * Формат экспорта knowledge map.
  */
 export type TKnowledgeMapExportFormat = "svg" | "png"
@@ -95,35 +105,39 @@ export function KnowledgeMapExportWidget(props: IKnowledgeMapExportWidgetProps):
                     {t("code-city:knowledgeMapExportComp.legend")}
                 </p>
                 <ul className="mt-1 space-y-1">
-                    {props.model.owners.slice(0, 3).map((entry): ReactElement => {
-                        return (
-                            <li
-                                className="flex items-center gap-2 text-xs text-foreground"
-                                key={entry.ownerName}
-                            >
-                                <span
-                                    aria-hidden={true}
-                                    className="inline-flex h-3 w-3 rounded-full border border-border"
-                                    style={{ backgroundColor: entry.color }}
-                                />
-                                {t("code-city:knowledgeMapExportComp.ownerFiles", {
-                                    owner: entry.ownerName,
-                                    count: entry.fileCount,
-                                })}
-                            </li>
-                        )
-                    })}
-                    {props.model.districts.slice(0, 2).map((entry): ReactElement => {
-                        return (
-                            <li className="text-xs text-foreground" key={entry.districtLabel}>
-                                {t("code-city:knowledgeMapExportComp.districtInfo", {
-                                    district: entry.districtLabel,
-                                    busFactor: entry.busFactor,
-                                    riskLabel: entry.riskLabel,
-                                })}
-                            </li>
-                        )
-                    })}
+                    {props.model.owners
+                        .slice(0, MAX_VISIBLE_LEGEND_OWNERS)
+                        .map((entry): ReactElement => {
+                            return (
+                                <li
+                                    className="flex items-center gap-2 text-xs text-foreground"
+                                    key={entry.ownerName}
+                                >
+                                    <span
+                                        aria-hidden={true}
+                                        className="inline-flex h-3 w-3 rounded-full border border-border"
+                                        style={{ backgroundColor: entry.color }}
+                                    />
+                                    {t("code-city:knowledgeMapExportComp.ownerFiles", {
+                                        owner: entry.ownerName,
+                                        count: entry.fileCount,
+                                    })}
+                                </li>
+                            )
+                        })}
+                    {props.model.districts
+                        .slice(0, MAX_VISIBLE_LEGEND_DISTRICTS)
+                        .map((entry): ReactElement => {
+                            return (
+                                <li className="text-xs text-foreground" key={entry.districtLabel}>
+                                    {t("code-city:knowledgeMapExportComp.districtInfo", {
+                                        district: entry.districtLabel,
+                                        busFactor: entry.busFactor,
+                                        riskLabel: entry.riskLabel,
+                                    })}
+                                </li>
+                            )
+                        })}
                 </ul>
             </div>
 

@@ -11,6 +11,11 @@ import {
 } from "@/lib/constants/graph-colors"
 
 /**
+ * Максимум строк легенды для каждой секции в SVG-экспорте knowledge map.
+ */
+const MAX_EXPORT_LEGEND_ROWS = 8
+
+/**
  * Метаданные knowledge map snapshot.
  */
 export interface IKnowledgeMapExportMetadata {
@@ -153,9 +158,9 @@ export function buildKnowledgeMapExportSvg(model: IKnowledgeMapExportModel): str
         `Contributors: ${String(model.metadata.totalContributors)}`,
     ]
 
-    const ownerRows = model.owners.slice(0, 8)
-    const districtRows = model.districts.slice(0, 8)
-    const siloRows = model.silos.slice(0, 8)
+    const ownerRows = model.owners.slice(0, MAX_EXPORT_LEGEND_ROWS)
+    const districtRows = model.districts.slice(0, MAX_EXPORT_LEGEND_ROWS)
+    const siloRows = model.silos.slice(0, MAX_EXPORT_LEGEND_ROWS)
 
     const metadataTextSvg = metadataRows
         .map((row, index): string => {
