@@ -1,6 +1,7 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useDynamicTranslation } from "@/lib/i18n"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { PAGE_LAYOUT } from "@/lib/constants/spacing"
 import type { SupportedLocale } from "@/lib/i18n/i18n"
@@ -16,6 +17,7 @@ import { Button } from "@/components/ui"
  */
 export function SystemHealthPage(): ReactElement {
     const { t, i18n } = useTranslation(["common", "system"])
+    const { td } = useDynamicTranslation(["common", "system"])
     const locale = getCurrentLocale(i18n)
     const { healthQuery } = useHealthQuery()
     const { featureFlagsQuery } = useFeatureFlagsQuery()
@@ -39,7 +41,7 @@ export function SystemHealthPage(): ReactElement {
                 isPending={isPending}
                 isPremiumDashboardEnabled={isPremiumDashboardEnabled}
                 locale={locale}
-                t={t as unknown as (key: string) => string}
+                t={td}
             />
         </section>
     )
@@ -60,21 +62,13 @@ function SystemHealthContent(props: {
     readonly t: (key: string) => string
 }): ReactElement {
     if (props.isPending === true) {
-        return (
-            <p className="mt-4 text-base text-muted-foreground">
-                {props.t("common:loading")}
-            </p>
-        )
+        return <p className="mt-4 text-base text-muted-foreground">{props.t("common:loading")}</p>
     }
 
     if (props.hasError === true) {
         return (
             <>
-                <p
-                    aria-live="assertive"
-                    className="mt-4 text-base text-danger"
-                    role="alert"
-                >
+                <p aria-live="assertive" className="mt-4 text-base text-danger" role="alert">
                     {props.t("system:unavailable")}
                 </p>
                 <Button
@@ -94,43 +88,28 @@ function SystemHealthContent(props: {
         return <p className="mt-4 text-base text-muted-foreground">—</p>
     }
 
-    const localizedTimestamp = formatLocalizedDateTime(
-        healthData.timestamp,
-        props.locale,
-    )
+    const localizedTimestamp = formatLocalizedDateTime(healthData.timestamp, props.locale)
 
     return (
         <>
-            <p className={`mt-3 ${TYPOGRAPHY.overline}`}>
-                {props.t("system:healthStatus")}
-            </p>
-            <p className="mt-2 text-4xl font-bold text-success">
-                {healthData.status}
-            </p>
+            <p className={`mt-3 ${TYPOGRAPHY.overline}`}>{props.t("system:healthStatus")}</p>
+            <p className="mt-2 text-4xl font-bold text-success">{healthData.status}</p>
             <p className="mt-4 text-sm text-muted-foreground">
                 {props.t("system:service")}:{" "}
-                <span className="font-medium text-foreground">
-                    {healthData.service}
-                </span>
+                <span className="font-medium text-foreground">{healthData.service}</span>
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
                 {props.t("system:timestamp")}:{" "}
-                <span className="font-medium text-foreground">
-                    {localizedTimestamp}
-                </span>
+                <span className="font-medium text-foreground">{localizedTimestamp}</span>
             </p>
             <section
                 aria-label={props.t("system:premiumSectionTitle")}
                 className="mt-8 w-full rounded-2xl border border-border bg-surface/80 p-5 text-left shadow-sm backdrop-blur"
             >
-                <p className={TYPOGRAPHY.overline}>
-                    {props.t("system:premiumSectionTitle")}
-                </p>
+                <p className={TYPOGRAPHY.overline}>{props.t("system:premiumSectionTitle")}</p>
                 <p
                     className={`mt-2 text-base font-semibold ${
-                        props.isPremiumDashboardEnabled === true
-                            ? "text-success"
-                            : "text-warning"
+                        props.isPremiumDashboardEnabled === true ? "text-success" : "text-warning"
                     }`}
                 >
                     {props.isPremiumDashboardEnabled === true
