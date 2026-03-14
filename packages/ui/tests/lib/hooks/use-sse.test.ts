@@ -584,19 +584,20 @@ describe("useSSEStream", (): void => {
             })
 
             expect(result.current.state).toBe("error")
-            expect(result.current.error).toBe(
-                "EventSource is not available in this environment.",
-            )
+            expect(result.current.error).toBe("EventSource is not available in this environment.")
         })
     })
 
     describe("EventSource constructor throws", (): void => {
         it("when EventSource constructor throws, then sets error with message", (): void => {
-            vi.stubGlobal("EventSource", class {
-                public constructor() {
-                    throw new Error("Blocked by CSP")
-                }
-            })
+            vi.stubGlobal(
+                "EventSource",
+                class {
+                    public constructor() {
+                        throw new Error("Blocked by CSP")
+                    }
+                },
+            )
 
             const { result } = renderHook((): IUseSSEStreamResult => {
                 return useSSEStream({
@@ -610,12 +611,15 @@ describe("useSSEStream", (): void => {
         })
 
         it("when EventSource constructor throws non-Error, then uses fallback message", (): void => {
-            vi.stubGlobal("EventSource", class {
-                public constructor() {
-                    // eslint-disable-next-line @typescript-eslint/only-throw-error
-                    throw "string error"
-                }
-            })
+            vi.stubGlobal(
+                "EventSource",
+                class {
+                    public constructor() {
+                        // eslint-disable-next-line @typescript-eslint/only-throw-error
+                        throw "string error"
+                    }
+                },
+            )
 
             const { result } = renderHook((): IUseSSEStreamResult => {
                 return useSSEStream({
@@ -673,9 +677,7 @@ describe("useSSEStream", (): void => {
 
             act((): void => {
                 for (let index = 0; index < 105; index += 1) {
-                    controller.sendMessage(
-                        JSON.stringify({ message: `msg-${String(index)}` }),
-                    )
+                    controller.sendMessage(JSON.stringify({ message: `msg-${String(index)}` }))
                 }
             })
 
@@ -698,9 +700,7 @@ describe("useSSEStream", (): void => {
             })
 
             act((): void => {
-                controller.sendProgress(
-                    JSON.stringify({ current: 999999999999999, total: 10 }),
-                )
+                controller.sendProgress(JSON.stringify({ current: 999999999999999, total: 10 }))
             })
 
             expect(result.current.progressCurrent).toBe(999999999999999)

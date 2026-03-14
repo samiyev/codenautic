@@ -26,19 +26,16 @@ describe("useCountUp", (): void => {
         rafIdCounter = 0
         cancelledRafs = new Set()
 
-        vi.stubGlobal(
-            "requestAnimationFrame",
-            (callback: (time: number) => void): number => {
-                rafIdCounter += 1
-                const id = rafIdCounter
-                rafCallbacks.push((time: number): void => {
-                    if (cancelledRafs.has(id) !== true) {
-                        callback(time)
-                    }
-                })
-                return id
-            },
-        )
+        vi.stubGlobal("requestAnimationFrame", (callback: (time: number) => void): number => {
+            rafIdCounter += 1
+            const id = rafIdCounter
+            rafCallbacks.push((time: number): void => {
+                if (cancelledRafs.has(id) !== true) {
+                    callback(time)
+                }
+            })
+            return id
+        })
 
         vi.stubGlobal("cancelAnimationFrame", (id: number): void => {
             cancelledRafs.add(id)
@@ -56,12 +53,9 @@ describe("useCountUp", (): void => {
         const motion = await importMockedMotion()
         motion.useReducedMotion.mockReturnValue(true)
 
-        const { result } = renderHook(
-            (props: IUseCountUpOptions): number => useCountUp(props),
-            {
-                initialProps: { target: 100 },
-            },
-        )
+        const { result } = renderHook((props: IUseCountUpOptions): number => useCountUp(props), {
+            initialProps: { target: 100 },
+        })
 
         expect(result.current).toBe(100)
     })
@@ -70,12 +64,9 @@ describe("useCountUp", (): void => {
         const motion = await importMockedMotion()
         motion.useReducedMotion.mockReturnValue(false)
 
-        const { result } = renderHook(
-            (props: IUseCountUpOptions): number => useCountUp(props),
-            {
-                initialProps: { target: 50 },
-            },
-        )
+        const { result } = renderHook((props: IUseCountUpOptions): number => useCountUp(props), {
+            initialProps: { target: 50 },
+        })
 
         expect(result.current).toBe(50)
     })
