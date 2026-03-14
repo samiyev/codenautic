@@ -239,7 +239,8 @@ export function Header(props: IHeaderProps): ReactElement {
                                         size={15}
                                     />
                                     <span className="text-sm text-foreground">
-                                        {activeOrganization?.label ?? t("navigation:header.workspace")}
+                                        {activeOrganization?.label ??
+                                            t("navigation:header.workspace")}
                                     </span>
                                     <ChevronDown
                                         aria-hidden="true"
@@ -280,7 +281,9 @@ export function Header(props: IHeaderProps): ReactElement {
                     {/* Notification bell */}
                     <Button
                         isIconOnly
-                        aria-label={t("navigation:header.notifications", { count: props.notificationCount ?? 0 })}
+                        aria-label={t("navigation:header.notifications", {
+                            count: props.notificationCount ?? 0,
+                        })}
                         radius="full"
                         size="sm"
                         variant="light"

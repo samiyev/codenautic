@@ -4,7 +4,11 @@ export { PageShell, type IPageShellProps } from "./page-shell"
 export { Header } from "./header"
 export { MobileSidebar } from "./mobile-sidebar"
 export { Sidebar } from "./sidebar"
-export { SidebarFooter, type ISidebarFooterProps, type ISidebarOrganizationOption } from "./sidebar-footer"
+export {
+    SidebarFooter,
+    type ISidebarFooterProps,
+    type ISidebarOrganizationOption,
+} from "./sidebar-footer"
 export { SidebarNav } from "./sidebar-nav"
 export { SettingsLayout } from "./settings-layout"
 export { ThemeToggle } from "./theme-toggle"
