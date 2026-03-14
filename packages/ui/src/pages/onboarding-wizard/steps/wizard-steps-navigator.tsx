@@ -1,6 +1,7 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useDynamicTranslation } from "@/lib/i18n"
 import { Button } from "@/components/ui"
 import { FormSubmitButton } from "@/components/forms"
 
@@ -75,6 +76,7 @@ export interface IWizardStepIndicatorProps {
  */
 export function WizardStepIndicator({ state }: IWizardStepIndicatorProps): ReactElement {
     const { t } = useTranslation(["onboarding"])
+    const { td } = useDynamicTranslation(["onboarding"])
 
     return (
         <div className="flex items-center justify-between gap-2">
@@ -101,12 +103,7 @@ export function WizardStepIndicator({ state }: IWizardStepIndicatorProps): React
                             className={`rounded-md px-2 py-2 ${isActive ? "bg-foreground text-background" : isCompleted ? "bg-surface-muted text-foreground" : "bg-surface text-muted-foreground"}`}
                         >
                             <p className="text-xs font-semibold uppercase tracking-wider">
-                                {(
-                                    t as unknown as (
-                                        key: string,
-                                        options: Record<string, string>,
-                                    ) => string
-                                )("onboarding:steps.stepLabel", { number: String(index + 1) })}
+                                {td("onboarding:steps.stepLabel", { number: String(index + 1) })}
                             </p>
                             <p className="text-sm font-semibold">
                                 {t(`onboarding:steps.${stepId}.label`)}

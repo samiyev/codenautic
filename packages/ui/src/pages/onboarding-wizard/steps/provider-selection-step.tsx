@@ -1,6 +1,7 @@
 import { useMemo, type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useDynamicTranslation } from "@/lib/i18n"
 import { Alert, Button, Chip } from "@/components/ui"
 import { FormSelectField } from "@/components/forms"
 import type { IFormSelectOption } from "@/components/forms"
@@ -25,6 +26,7 @@ export interface IProviderSelectionStepProps {
  */
 export function ProviderSelectionStep({ state }: IProviderSelectionStepProps): ReactElement | null {
     const { t } = useTranslation(["onboarding"])
+    const { td } = useDynamicTranslation(["onboarding"])
 
     const gitProviderSelectOptions: ReadonlyArray<IFormSelectOption> = useMemo(
         () => [
@@ -76,12 +78,7 @@ export function ProviderSelectionStep({ state }: IProviderSelectionStepProps): R
                     variant="flat"
                 >
                     {state.isProviderConnected
-                        ? (
-                              t as unknown as (
-                                  key: string,
-                                  options: Record<string, string>,
-                              ) => string
-                          )("onboarding:provider.connected", {
+                        ? td("onboarding:provider.connected", {
                               provider: mapProviderLabel(state.values.provider),
                           })
                         : t("onboarding:provider.notConnected")}

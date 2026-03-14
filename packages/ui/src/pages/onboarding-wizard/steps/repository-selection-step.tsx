@@ -1,6 +1,7 @@
 import { useMemo, type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useDynamicTranslation } from "@/lib/i18n"
 import { Alert, Button, Checkbox } from "@/components/ui"
 import { FormRadioGroupField, FormTextField, FormTextareaField } from "@/components/forms"
 import type { IFormSelectOption } from "@/components/forms"
@@ -27,6 +28,7 @@ export function RepositorySelectionStep({
     state,
 }: IRepositorySelectionStepProps): ReactElement | null {
     const { t } = useTranslation(["onboarding"])
+    const { td } = useDynamicTranslation(["onboarding"])
 
     const onboardingModeOptions: ReadonlyArray<IFormSelectOption> = useMemo(
         () => [
@@ -84,12 +86,7 @@ https://github.com/owner/repo-b`,
 
                     <div className="flex items-center justify-between">
                         <p className="text-sm text-foreground">
-                            {(
-                                t as unknown as (
-                                    key: string,
-                                    options: Record<string, string>,
-                                ) => string
-                            )("onboarding:repository.selectedCount", {
+                            {td("onboarding:repository.selectedCount", {
                                 selected: String(state.selectedRepositoryUrls.length),
                                 total: String(state.parsedBulkList.repositories.length),
                             })}

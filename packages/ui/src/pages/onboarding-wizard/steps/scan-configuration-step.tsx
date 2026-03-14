@@ -1,6 +1,7 @@
 import { useMemo, type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useDynamicTranslation } from "@/lib/i18n"
 import { Alert, Button, Chip } from "@/components/ui"
 import {
     FormNumberField,
@@ -37,6 +38,7 @@ export interface IScanConfigurationStepProps {
  */
 export function ScanConfigurationStep({ state }: IScanConfigurationStepProps): ReactElement | null {
     const { t } = useTranslation(["onboarding"])
+    const { td } = useDynamicTranslation(["onboarding"])
 
     const templateOptions: ReadonlyArray<{
         readonly label: string
@@ -212,12 +214,7 @@ export function ScanConfigurationStep({ state }: IScanConfigurationStepProps): R
                                                     {entry.appliedAt}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
-                                                    {(
-                                                        t as unknown as (
-                                                            key: string,
-                                                            options: Record<string, string>,
-                                                        ) => string
-                                                    )("onboarding:scan.auditLogFrom", {
+                                                    {td("onboarding:scan.auditLogFrom", {
                                                         before: formatTemplateTags(
                                                             entry.before.tags,
                                                         ),
@@ -346,12 +343,7 @@ export function ScanConfigurationStep({ state }: IScanConfigurationStepProps): R
                                 {t("onboarding:summary.appliedProfile")}
                             </summary>
                             <p className="mt-1 text-sm text-foreground">
-                                {(
-                                    t as unknown as (
-                                        key: string,
-                                        options: Record<string, string>,
-                                    ) => string
-                                )("onboarding:summary.profileDescription", {
+                                {td("onboarding:summary.profileDescription", {
                                     count: String(state.selectedRepositoryUrls.length),
                                     mode: state.values.scanMode,
                                     schedule: state.values.scanSchedule,
@@ -371,12 +363,7 @@ export function ScanConfigurationStep({ state }: IScanConfigurationStepProps): R
                                     {state.selectedRepositoryUrls.length >
                                     PREVIEW_REPOSITORY_LIMIT ? (
                                         <li>
-                                            {(
-                                                t as unknown as (
-                                                    key: string,
-                                                    options: Record<string, string>,
-                                                ) => string
-                                            )("onboarding:summary.moreRepositories", {
+                                            {td("onboarding:summary.moreRepositories", {
                                                 count: String(
                                                     state.selectedRepositoryUrls.length -
                                                         PREVIEW_REPOSITORY_LIMIT,
