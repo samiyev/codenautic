@@ -3,7 +3,9 @@ import {
     CHECK_RUN_STATUS,
     type CheckRunConclusion,
 } from "../../dto/git/check-run.dto"
-import type {IGitProvider} from "../../ports/outbound/git/git-provider.port"
+import type {IPipelineStatusDTO} from "../../dto/git/pipeline-status.dto"
+import type {IReviewCheckRunDefaults} from "../../dto/config/system-defaults.dto"
+import type {IGitPipelineStatusProvider} from "../../ports/outbound/git/git-pipeline-status.port"
 import type {
     IPipelineStageUseCase,
     IStageCommand,
@@ -12,7 +14,12 @@ import type {
 import {NotFoundError} from "../../../domain/errors/not-found.error"
 import {StageError} from "../../../domain/errors/stage.error"
 import {Result} from "../../../shared/result"
-import {INITIAL_STAGE_ATTEMPT, mergeExternalContext} from "./pipeline-stage-state.utils"
+import {
+    INITIAL_STAGE_ATTEMPT,
+    mergeExternalContext,
+    resolveCurrentHeadCommitId,
+    readStringField,
+} from "./pipeline-stage-state.utils"
 
 const MAX_CHECK_UPDATE_ATTEMPTS = 3
 
@@ -20,17 +27,19 @@ const MAX_CHECK_UPDATE_ATTEMPTS = 3
  * Constructor dependencies for finalize-check stage.
  */
 export interface IFinalizeCheckStageDependencies {
-    gitProvider: IGitProvider
+    pipelineStatusProvider: IGitPipelineStatusProvider
+    defaults: IReviewCheckRunDefaults
 }
 
 /**
- * Stage 18 use case. Finalizes external check run with retry strategy.
+ * Stage 18 use case. Finalizes external review status with retry strategy.
  */
 export class FinalizeCheckStageUseCase implements IPipelineStageUseCase {
     public readonly stageId: string
     public readonly stageName: string
 
-    private readonly gitProvider: IGitProvider
+    private readonly pipelineStatusProvider: IGitPipelineStatusProvider
+    private readonly checkRunName: string
 
     /**
      * Creates finalize-check stage use case.
@@ -40,11 +49,12 @@ export class FinalizeCheckStageUseCase implements IPipelineStageUseCase {
     public constructor(dependencies: IFinalizeCheckStageDependencies) {
         this.stageId = "finalize-check"
         this.stageName = "Finalize Check"
-        this.gitProvider = dependencies.gitProvider
+        this.pipelineStatusProvider = dependencies.pipelineStatusProvider
+        this.checkRunName = dependencies.defaults.checkRunName
     }
 
     /**
-     * Finalizes check run with success/failure conclusion from review decision.
+     * Finalizes review status with success/failure conclusion from review decision.
      *
      * @param input Stage command payload.
      * @returns Updated stage transition or stage error.
@@ -63,20 +73,39 @@ export class FinalizeCheckStageUseCase implements IPipelineStageUseCase {
             )
         }
 
+        const mergeRequestId = readStringField(input.state.mergeRequest, "id")
+        if (mergeRequestId === undefined) {
+            return Result.fail<IStageTransition, StageError>(
+                this.createStageError(
+                    input.state.runId,
+                    input.state.definitionVersion,
+                    "Missing merge request id for check finalization stage",
+                    false,
+                    new NotFoundError("MergeRequest", "id"),
+                ),
+            )
+        }
+
         const conclusion = this.resolveConclusion(input.state.externalContext)
         const summary = this.resolveSummary(input.state.externalContext)
 
         try {
-            const attempts = await this.updateCheckRunWithRetry(checkId, conclusion)
+            const updateResult = await this.updateCheckRunWithRetry({
+                checkId,
+                mergeRequestId,
+                conclusion,
+                summary,
+                headCommitId: resolveCurrentHeadCommitId(input.state.mergeRequest),
+            })
 
             return Result.ok<IStageTransition, StageError>({
                 state: input.state.with({
                     externalContext: mergeExternalContext(input.state.externalContext, {
                         finalizeCheck: {
                             checkId,
-                            status: CHECK_RUN_STATUS.COMPLETED,
-                            conclusion,
-                            attempts,
+                            status: updateResult.pipelineStatus.status,
+                            conclusion: updateResult.pipelineStatus.conclusion,
+                            attempts: updateResult.attempts,
                             summary,
                         },
                     }),
@@ -154,28 +183,38 @@ export class FinalizeCheckStageUseCase implements IPipelineStageUseCase {
     }
 
     /**
-     * Updates check run with bounded retry policy.
+     * Updates external review status with bounded retry policy.
      *
-     * @param checkId Check run identifier.
-     * @param conclusion Target check conclusion.
-     * @returns Number of attempts used.
+     * @param input Update payload.
+     * @returns Attempts used together with final pipeline status payload.
      * @throws Error When all attempts fail.
      */
-    private async updateCheckRunWithRetry(
-        checkId: string,
-        conclusion: CheckRunConclusion,
-    ): Promise<number> {
+    private async updateCheckRunWithRetry(input: {
+        readonly checkId: string
+        readonly mergeRequestId: string
+        readonly conclusion: CheckRunConclusion
+        readonly summary: string | null
+        readonly headCommitId?: string
+    }): Promise<{readonly attempts: number; readonly pipelineStatus: IPipelineStatusDTO}> {
         let lastError: Error | undefined = undefined
 
         for (let attempt = 1; attempt <= MAX_CHECK_UPDATE_ATTEMPTS; attempt += 1) {
             try {
-                await this.gitProvider.updateCheckRun(
-                    checkId,
-                    CHECK_RUN_STATUS.COMPLETED,
-                    conclusion,
-                )
+                const pipelineStatus =
+                    await this.pipelineStatusProvider.updatePipelineStatus({
+                        pipelineId: input.checkId,
+                        mergeRequestId: input.mergeRequestId,
+                        name: this.checkRunName,
+                        status: CHECK_RUN_STATUS.COMPLETED,
+                        conclusion: input.conclusion,
+                        summary: input.summary ?? undefined,
+                        headCommitId: input.headCommitId,
+                    })
 
-                return attempt
+                return {
+                    attempts: attempt,
+                    pipelineStatus,
+                }
             } catch (error: unknown) {
                 if (error instanceof Error) {
                     lastError = error

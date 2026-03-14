@@ -30,6 +30,12 @@ export {
 } from "./github-provider"
 export {GitHubProviderError} from "./github-provider.error"
 export {
+    GitLabProvider,
+    type IGitLabClient,
+    type IGitLabProviderOptions,
+} from "./gitlab-provider"
+export {GitLabProviderError} from "./gitlab-provider.error"
+export {
     GIT_ACL_ERROR_KIND,
     GitDiffFilesAcl,
     GitErrorAcl,

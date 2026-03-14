@@ -1,4 +1,4 @@
-import type {IGitProvider} from "../../ports/outbound/git/git-provider.port"
+import type {IGitPipelineStatusProvider} from "../../ports/outbound/git/git-pipeline-status.port"
 import type {
     IPipelineStageUseCase,
     IStageCommand,
@@ -10,6 +10,7 @@ import {Result} from "../../../shared/result"
 import {
     INITIAL_STAGE_ATTEMPT,
     mergeExternalContext,
+    resolveCurrentHeadCommitId,
     readStringField,
 } from "./pipeline-stage-state.utils"
 import type {IReviewCheckRunDefaults} from "../../dto/config/system-defaults.dto"
@@ -18,18 +19,18 @@ import type {IReviewCheckRunDefaults} from "../../dto/config/system-defaults.dto
  * Dependencies for create-check stage use case.
  */
 export interface ICreateCheckStageDependencies {
-    gitProvider: IGitProvider
+    pipelineStatusProvider: IGitPipelineStatusProvider
     defaults: IReviewCheckRunDefaults
 }
 
 /**
- * Stage 5 use case. Creates pending check run in Git provider and stores checkId in state.
+ * Stage 5 use case. Creates pending external review status and stores checkId in state.
  */
 export class CreateCheckStageUseCase implements IPipelineStageUseCase {
     public readonly stageId: string
     public readonly stageName: string
 
-    private readonly gitProvider: IGitProvider
+    private readonly pipelineStatusProvider: IGitPipelineStatusProvider
     private readonly checkRunName: string
 
     /**
@@ -40,12 +41,12 @@ export class CreateCheckStageUseCase implements IPipelineStageUseCase {
     public constructor(dependencies: ICreateCheckStageDependencies) {
         this.stageId = "create-check"
         this.stageName = "Create Check"
-        this.gitProvider = dependencies.gitProvider
+        this.pipelineStatusProvider = dependencies.pipelineStatusProvider
         this.checkRunName = dependencies.defaults.checkRunName
     }
 
     /**
-     * Creates pending check run and updates pipeline state with check metadata.
+     * Creates pending external review status and updates pipeline state with check metadata.
      *
      * @param input Stage command payload.
      * @returns Updated stage transition or stage error.
@@ -65,10 +66,11 @@ export class CreateCheckStageUseCase implements IPipelineStageUseCase {
         }
 
         try {
-            const checkRun = await this.gitProvider.createCheckRun(
+            const checkRun = await this.pipelineStatusProvider.createPipelineStatus({
                 mergeRequestId,
-                this.checkRunName,
-            )
+                name: this.checkRunName,
+                headCommitId: resolveCurrentHeadCommitId(input.state.mergeRequest),
+            })
 
             return Result.ok<IStageTransition, StageError>({
                 state: input.state.with({

@@ -14,7 +14,7 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| GIT-003 | Реализовать gitLabProvider | TODO | Не начато | Реализация: Интеграция через Gitbeaker SDK. Pipeline API. Discussion threads. Token verify. Готово, если: GitLab provider корректно маппит MR/discussions/pipeline состояния в доменные DTO, обрабатывает 401/403/404/429/5xx и соблюдает retry policy; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| GIT-003 | Реализовать gitLabProvider | DONE | Реализовано | Реализация: Интеграция через Gitbeaker SDK. Pipeline API. Discussion threads. Token verify. Готово, если: GitLab provider корректно маппит MR/discussions/pipeline состояния в доменные DTO, обрабатывает 401/403/404/429/5xx и соблюдает retry policy; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 
 ---
 

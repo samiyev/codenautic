@@ -22,14 +22,17 @@ import {
     type IContributorStatsOptions,
     type IFileBlame,
     type IFileTreeNode,
+    type IGitPipelineStatusProvider,
     type IGitProvider,
     type IInlineCommentDTO,
+    type ICreatePipelineStatusInput,
     type ITemporalCouplingEdge,
     type ITemporalCouplingOptions,
     type ITagInfo,
     type IRefDiffFile,
     type IRefDiffResult,
     type IRefDiffSummary,
+    type IUpdatePipelineStatusInput,
     type IMergeRequestDTO,
     type IMergeRequestDiffFileDTO,
     type IWebhookEventDTO,
@@ -341,7 +344,7 @@ query GitHubProviderBlame($owner: String!, $repo: String!, $expression: String!)
 /**
  * GitHub implementation of the generic git provider contract.
  */
-export class GitHubProvider implements IGitProvider {
+export class GitHubProvider implements IGitProvider, IGitPipelineStatusProvider {
     private readonly client: IGitHubOctokitClient
     private readonly owner: string
     private readonly repo: string
@@ -814,6 +817,18 @@ export class GitHubProvider implements IGitProvider {
     }
 
     /**
+     * Creates generic pipeline status by delegating to GitHub checks API.
+     *
+     * @param input Pipeline status creation payload.
+     * @returns Created pipeline status DTO.
+     */
+    public createPipelineStatus(
+        input: ICreatePipelineStatusInput,
+    ): Promise<ICheckRunDTO> {
+        return this.createCheckRun(input.mergeRequestId, input.name)
+    }
+
+    /**
      * Updates existing GitHub check run.
      *
      * @param checkId Check-run identifier.
@@ -843,6 +858,27 @@ export class GitHubProvider implements IGitProvider {
         })
 
         return mapCheckRun(response.data)
+    }
+
+    /**
+     * Updates generic pipeline status by delegating to GitHub checks API.
+     *
+     * @param input Pipeline status update payload.
+     * @returns Updated pipeline status DTO.
+     */
+    public updatePipelineStatus(
+        input: IUpdatePipelineStatusInput,
+    ): Promise<ICheckRunDTO> {
+        const pipelineId = normalizeRequiredText(
+            input.pipelineId ?? "",
+            "pipelineId",
+        )
+
+        return this.updateCheckRun(
+            pipelineId,
+            input.status,
+            input.conclusion,
+        )
     }
 
     /**

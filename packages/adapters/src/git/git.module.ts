@@ -1,5 +1,6 @@
 import {
     Container,
+    type IGitPipelineStatusProvider,
     type IGitProvider,
     type IRepositoryWorkspaceProvider,
 } from "@codenautic/core"
@@ -16,6 +17,11 @@ export interface IRegisterGitModuleOptions {
      * Git provider implementation.
      */
     readonly provider: IGitProvider
+
+    /**
+     * Optional external pipeline status provider.
+     */
+    readonly pipelineStatusProvider?: IGitPipelineStatusProvider
 
     /**
      * Optional git provider factory.
@@ -37,6 +43,15 @@ export interface IRegisterGitModuleOptions {
 export function registerGitModule(container: Container, options: IRegisterGitModuleOptions): void {
     bindConstantSingleton(container, GIT_TOKENS.Blame, options.provider)
     bindConstantSingleton(container, GIT_TOKENS.Provider, options.provider)
+    const pipelineStatusProvider = resolvePipelineStatusProvider(options)
+
+    if (pipelineStatusProvider !== undefined) {
+        bindConstantSingleton(
+            container,
+            GIT_TOKENS.PipelineStatus,
+            pipelineStatusProvider,
+        )
+    }
 
     if (options.providerFactory !== undefined) {
         bindConstantSingleton(
@@ -53,4 +68,41 @@ export function registerGitModule(container: Container, options: IRegisterGitMod
             options.repositoryWorkspaceProvider,
         )
     }
+}
+
+/**
+ * Resolves pipeline-status provider from explicit options or multi-capability provider.
+ *
+ * @param options Git module registration options.
+ * @returns Pipeline status provider when available.
+ */
+function resolvePipelineStatusProvider(
+    options: IRegisterGitModuleOptions,
+): IGitPipelineStatusProvider | undefined {
+    if (options.pipelineStatusProvider !== undefined) {
+        return options.pipelineStatusProvider
+    }
+
+    if (isGitPipelineStatusProvider(options.provider)) {
+        return options.provider
+    }
+
+    return undefined
+}
+
+/**
+ * Type guard for providers implementing the pipeline-status contract.
+ *
+ * @param value Candidate provider.
+ * @returns True when provider exposes pipeline-status methods.
+ */
+function isGitPipelineStatusProvider(
+    value: IGitProvider,
+): value is IGitProvider & IGitPipelineStatusProvider {
+    const candidate = value as unknown as Readonly<Record<string, unknown>>
+
+    return (
+        typeof candidate["createPipelineStatus"] === "function" &&
+        typeof candidate["updatePipelineStatus"] === "function"
+    )
 }

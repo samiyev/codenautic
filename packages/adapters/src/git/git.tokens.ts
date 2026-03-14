@@ -1,6 +1,7 @@
 import {
     createToken,
     type IGitBlame,
+    type IGitPipelineStatusProvider,
     type IGitProvider,
     type IRepositoryWorkspaceProvider,
 } from "@codenautic/core"
@@ -12,6 +13,7 @@ import type {IGitProviderFactory} from "./git-provider.factory"
  */
 export const GIT_TOKENS = {
     Blame: createToken<IGitBlame>("adapters.git.blame"),
+    PipelineStatus: createToken<IGitPipelineStatusProvider>("adapters.git.pipeline-status"),
     Provider: createToken<IGitProvider>("adapters.git.provider"),
     ProviderFactory: createToken<IGitProviderFactory>("adapters.git.provider-factory"),
     RepositoryWorkspaceProvider: createToken<IRepositoryWorkspaceProvider>(

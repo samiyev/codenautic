@@ -1,16 +1,10 @@
 import {describe, expect, test} from "bun:test"
 
 import type {
-    CheckRunConclusion,
-    CheckRunStatus,
-    ICheckRunDTO,
-    ICommentDTO,
-    IGitProvider,
-    IFileTreeNode,
-    IInlineCommentDTO,
-    IMergeRequestDTO,
-    IMergeRequestDiffFileDTO,
+    IGitPipelineStatusProvider,
+    IPipelineStatusDTO,
 } from "../../../../src"
+import {PIPELINE_CONCLUSION, PIPELINE_STATUS} from "../../../../src"
 import {CreateCheckStageUseCase} from "../../../../src/application/use-cases/review/create-check-stage.use-case"
 import {ReviewPipelineState} from "../../../../src/application/types/review/review-pipeline-state"
 
@@ -18,120 +12,41 @@ const checkRunDefaults = {
     checkRunName: "CodeNautic Review",
 }
 
-class InMemoryGitProvider implements IGitProvider {
+class InMemoryGitPipelineStatusProvider implements IGitPipelineStatusProvider {
     public lastMergeRequestId: string | null = null
     public lastCheckName: string | null = null
+    public lastHeadCommitId: string | null = null
     public shouldThrowOnCreateCheck = false
 
-    public getMergeRequest(_id: string): Promise<IMergeRequestDTO> {
-        return Promise.reject(new Error("not implemented in test"))
-    }
-
-    public getChangedFiles(_mergeRequestId: string): Promise<readonly IMergeRequestDiffFileDTO[]> {
-        return Promise.resolve([])
-    }
-
-    public getFileTree(_ref: string): Promise<readonly IFileTreeNode[]> {
-        return Promise.resolve([])
-    }
-
-    public getFileContentByRef(_filePath: string, _ref: string): Promise<string> {
-        return Promise.resolve("")
-    }
-
-    public getCommitHistory(_ref: string): Promise<readonly never[]> {
-        return Promise.resolve([])
-    }
-
-    public getContributorStats(
-        _ref: string,
-        _options?: Parameters<IGitProvider["getContributorStats"]>[1],
-    ): ReturnType<IGitProvider["getContributorStats"]> {
-        return Promise.resolve([])
-    }
-
-    public getTemporalCoupling(
-        _ref: string,
-        _options?: Parameters<IGitProvider["getTemporalCoupling"]>[1],
-    ): ReturnType<IGitProvider["getTemporalCoupling"]> {
-        return Promise.resolve([])
-    }
-
-    public getTags(): ReturnType<IGitProvider["getTags"]> {
-        return Promise.resolve([])
-    }
-
-    public getDiffBetweenRefs(
-        baseRef: string,
-        headRef: string,
-    ): ReturnType<IGitProvider["getDiffBetweenRefs"]> {
-        return Promise.resolve({
-            baseRef,
-            headRef,
-            comparisonStatus: "identical",
-            aheadBy: 0,
-            behindBy: 0,
-            totalCommits: 0,
-            summary: {
-                changedFiles: 0,
-                addedFiles: 0,
-                modifiedFiles: 0,
-                deletedFiles: 0,
-                renamedFiles: 0,
-                additions: 0,
-                deletions: 0,
-                changes: 0,
-            },
-            files: [],
-        })
-    }
-
-    public getBranches(): Promise<readonly never[]> {
-        return Promise.resolve([])
-    }
-
-    public getBlameData(_filePath: string, _ref: string): Promise<readonly never[]> {
-        return Promise.resolve([])
-    }
-
-    public getBlameDataBatch(
-        _filePaths: readonly string[],
-        _ref: string,
-    ): Promise<readonly never[]> {
-        return Promise.resolve([])
-    }
-
-    public postComment(_mergeRequestId: string, _body: string): Promise<ICommentDTO> {
-        return Promise.reject(new Error("not implemented in test"))
-    }
-
-    public postInlineComment(
-        _mergeRequestId: string,
-        _comment: IInlineCommentDTO,
-    ): Promise<IInlineCommentDTO> {
-        return Promise.reject(new Error("not implemented in test"))
-    }
-
-    public createCheckRun(mergeRequestId: string, name: string): Promise<ICheckRunDTO> {
+    public createPipelineStatus(input: {
+        readonly mergeRequestId: string
+        readonly name: string
+        readonly headCommitId?: string
+    }): Promise<IPipelineStatusDTO> {
         if (this.shouldThrowOnCreateCheck) {
             return Promise.reject(new Error("provider unavailable"))
         }
 
-        this.lastMergeRequestId = mergeRequestId
-        this.lastCheckName = name
+        this.lastMergeRequestId = input.mergeRequestId
+        this.lastCheckName = input.name
+        this.lastHeadCommitId = input.headCommitId ?? null
         return Promise.resolve({
             id: "check-1",
-            name,
-            status: "queued" as CheckRunStatus,
-            conclusion: "neutral" as CheckRunConclusion,
+            name: input.name,
+            status: PIPELINE_STATUS.QUEUED,
+            conclusion: PIPELINE_CONCLUSION.NEUTRAL,
         })
     }
 
-    public updateCheckRun(
-        _checkId: string,
-        _status: CheckRunStatus,
-        _conclusion: CheckRunConclusion,
-    ): Promise<ICheckRunDTO> {
+    public updatePipelineStatus(_input: {
+        readonly pipelineId?: string
+        readonly mergeRequestId: string
+        readonly name: string
+        readonly status: typeof PIPELINE_STATUS[keyof typeof PIPELINE_STATUS]
+        readonly conclusion: typeof PIPELINE_CONCLUSION[keyof typeof PIPELINE_CONCLUSION]
+        readonly summary?: string
+        readonly headCommitId?: string
+    }): Promise<IPipelineStatusDTO> {
         return Promise.reject(new Error("not implemented in test"))
     }
 }
@@ -153,13 +68,18 @@ function createState(mergeRequest: Readonly<Record<string, unknown>>): ReviewPip
 
 describe("CreateCheckStageUseCase", () => {
     test("creates pending check and stores check id in state", async () => {
-        const gitProvider = new InMemoryGitProvider()
+        const pipelineStatusProvider = new InMemoryGitPipelineStatusProvider()
         const useCase = new CreateCheckStageUseCase({
-            gitProvider,
+            pipelineStatusProvider,
             defaults: checkRunDefaults,
         })
         const state = createState({
             id: "mr-10",
+            commits: [
+                {
+                    id: "head-commit-1",
+                },
+            ],
         })
 
         const result = await useCase.execute({
@@ -169,13 +89,14 @@ describe("CreateCheckStageUseCase", () => {
         expect(result.isOk).toBe(true)
         expect(result.value.state.checkId).toBe("check-1")
         expect(result.value.metadata?.checkpointHint).toBe("check:created")
-        expect(gitProvider.lastMergeRequestId).toBe("mr-10")
-        expect(gitProvider.lastCheckName).toBe("CodeNautic Review")
+        expect(pipelineStatusProvider.lastMergeRequestId).toBe("mr-10")
+        expect(pipelineStatusProvider.lastCheckName).toBe("CodeNautic Review")
+        expect(pipelineStatusProvider.lastHeadCommitId).toBe("head-commit-1")
     })
 
     test("returns fail result when merge request id is missing", async () => {
         const useCase = new CreateCheckStageUseCase({
-            gitProvider: new InMemoryGitProvider(),
+            pipelineStatusProvider: new InMemoryGitPipelineStatusProvider(),
             defaults: checkRunDefaults,
         })
         const state = createState({})
@@ -190,11 +111,11 @@ describe("CreateCheckStageUseCase", () => {
     })
 
     test("returns recoverable stage error when provider throws", async () => {
-        const gitProvider = new InMemoryGitProvider()
-        gitProvider.shouldThrowOnCreateCheck = true
+        const pipelineStatusProvider = new InMemoryGitPipelineStatusProvider()
+        pipelineStatusProvider.shouldThrowOnCreateCheck = true
 
         const useCase = new CreateCheckStageUseCase({
-            gitProvider,
+            pipelineStatusProvider,
             defaults: {
                 checkRunName: "Custom Check Name",
             },

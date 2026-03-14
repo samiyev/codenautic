@@ -7,11 +7,15 @@ import type {
     IChatRequestDTO,
     IChatResponseDTO,
     ICheckRunDTO,
+    ICreatePipelineStatusInput,
     ICommentDTO,
+    IGitPipelineStatusProvider,
     IGitProvider,
     INotificationPayload,
     INotificationProvider,
     IInlineCommentDTO,
+    IPipelineStatusDTO,
+    IUpdatePipelineStatusInput,
     ILLMProvider,
     IMergeRequestDTO,
     IMergeRequestDiffFileDTO,
@@ -34,7 +38,7 @@ import type {
  *
  * @returns Provider instance.
  */
-export function createGitProviderMock(): IGitProvider {
+export function createGitProviderMock(): IGitProvider & IGitPipelineStatusProvider {
     return {
         getMergeRequest(_id: string): Promise<IMergeRequestDTO> {
             return Promise.resolve({} as IMergeRequestDTO)
@@ -114,12 +118,22 @@ export function createGitProviderMock(): IGitProvider {
         createCheckRun(_mergeRequestId: string, _name: string): Promise<ICheckRunDTO> {
             return Promise.resolve({} as ICheckRunDTO)
         },
+        createPipelineStatus(
+            _input: ICreatePipelineStatusInput,
+        ): Promise<IPipelineStatusDTO> {
+            return Promise.resolve({} as IPipelineStatusDTO)
+        },
         updateCheckRun(
             _checkId: string,
             _status: CheckRunStatus,
             _conclusion: CheckRunConclusion,
         ): Promise<ICheckRunDTO> {
             return Promise.resolve({} as ICheckRunDTO)
+        },
+        updatePipelineStatus(
+            _input: IUpdatePipelineStatusInput,
+        ): Promise<IPipelineStatusDTO> {
+            return Promise.resolve({} as IPipelineStatusDTO)
         },
     }
 }

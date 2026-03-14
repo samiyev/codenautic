@@ -9,6 +9,7 @@ import type {ILogger} from "../../src/application/ports/outbound/common/logger.p
 import type {ICustomRuleRepository} from "../../src/application/ports/outbound/custom-rule-repository.port"
 import type {IFeedbackRepository} from "../../src/application/ports/outbound/feedback-repository.port"
 import type {IGitBlame} from "../../src/application/ports/outbound/git/git-blame.port"
+import type {IGitPipelineStatusProvider} from "../../src/application/ports/outbound/git/git-pipeline-status.port"
 import type {IGitProvider} from "../../src/application/ports/outbound/git/git-provider.port"
 import type {ICodeGraphPageRankService} from "../../src/application/ports/outbound/graph/code-graph-page-rank-service.port"
 import type {IGraphRepository} from "../../src/application/ports/outbound/graph/code-graph-repository.port"
@@ -118,6 +119,8 @@ describe("TOKENS", () => {
         const feedbackRepositoryToken: InjectionToken<IFeedbackRepository> =
             TOKENS.Feedback.Repository
         const gitBlameToken: InjectionToken<IGitBlame> = TOKENS.Git.Blame
+        const gitPipelineStatusToken: InjectionToken<IGitPipelineStatusProvider> =
+            TOKENS.Git.PipelineStatus
         const gitProviderToken: InjectionToken<IGitProvider> = TOKENS.Git.Provider
         const llmProviderToken: InjectionToken<ILLMProvider> = TOKENS.LLM.Provider
         const messageBrokerToken: InjectionToken<IMessageBroker> = TOKENS.Messaging.MessageBroker
@@ -191,6 +194,7 @@ describe("TOKENS", () => {
             loggerToken,
             feedbackRepositoryToken,
             gitBlameToken,
+            gitPipelineStatusToken,
             gitProviderToken,
             llmProviderToken,
             messageBrokerToken,

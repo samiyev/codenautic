@@ -13,6 +13,7 @@ export {type IOrganizationRepository} from "./application/ports/outbound/organiz
 export {type IExpertPanelRepository} from "./application/ports/outbound/expert-panel-repository.port"
 export {type ICache} from "./application/ports/outbound/cache/cache.port"
 export {type IGitBlame} from "./application/ports/outbound/git/git-blame.port"
+export {type IGitPipelineStatusProvider} from "./application/ports/outbound/git/git-pipeline-status.port"
 export {type IGitProvider} from "./application/ports/outbound/git/git-provider.port"
 export {type IFileMetricsProvider} from "./application/ports/outbound/analysis/file-metrics-provider"
 export {type IIssueAggregationProvider} from "./application/ports/outbound/review/issue-aggregation-provider"
@@ -329,11 +330,15 @@ export {
     CHECK_RUN_STATUS,
     INLINE_COMMENT_SIDE,
     MERGE_REQUEST_DIFF_FILE_STATUS,
+    PIPELINE_CONCLUSION,
+    PIPELINE_STATUS,
     type CheckRunConclusion,
     type CheckRunStatus,
+    type ICreatePipelineStatusInput,
     type ICheckRunDTO,
     type ICommentDTO,
     type IInlineCommentDTO,
+    type IPipelineStatusDTO,
     FILE_TREE_NODE_TYPE,
     type FileTreeNodeType,
     type IBlameData,
@@ -356,12 +361,15 @@ export {
     type IMergeRequestDiffFileDTO,
     type ICommitHistoryOptions,
     type ICommitInfo,
+    type IUpdatePipelineStatusInput,
     type IRefDiffFile,
     type IRefDiffResult,
     type IRefDiffSummary,
     type IWebhookEventDTO,
     type InlineCommentSide,
     type MergeRequestDiffFileStatus,
+    type PipelineConclusion,
+    type PipelineStatus,
 } from "./application/dto/git"
 export {
     CHAT_FINISH_REASON,

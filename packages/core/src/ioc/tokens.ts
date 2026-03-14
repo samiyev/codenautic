@@ -10,6 +10,7 @@ import type {ISystemSettingsWriter} from "../application/ports/outbound/common/s
 import type {ICustomRuleRepository} from "../application/ports/outbound/custom-rule-repository.port"
 import type {IFeedbackRepository} from "../application/ports/outbound/feedback-repository.port"
 import type {IGitBlame} from "../application/ports/outbound/git/git-blame.port"
+import type {IGitPipelineStatusProvider} from "../application/ports/outbound/git/git-pipeline-status.port"
 import type {IGitProvider} from "../application/ports/outbound/git/git-provider.port"
 import type {ICodeGraphPageRankService} from "../application/ports/outbound/graph/code-graph-page-rank-service.port"
 import type {IGraphRepository} from "../application/ports/outbound/graph/code-graph-repository.port"
@@ -87,6 +88,9 @@ export const TOKENS = {
     },
     Git: {
         Blame: createToken<IGitBlame>("core.git.blame"),
+        PipelineStatus: createToken<IGitPipelineStatusProvider>(
+            "core.git.pipeline-status",
+        ),
         Provider: createToken<IGitProvider>("core.git.provider"),
     },
     LLM: {
