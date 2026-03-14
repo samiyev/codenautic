@@ -28,12 +28,12 @@ describe("chat message bubble", (): void => {
                     ...messageWithMarkdown,
                     id: "user-msg",
                     role: "user",
-                    sender: "Alice",
+                    sender: "Neo",
                 }}
             />,
         )
 
-        expect(screen.queryByText("Alice")).not.toBeNull()
+        expect(screen.queryByText("Neo")).not.toBeNull()
         expect(screen.queryByText("—")).not.toBeNull()
     })
 
