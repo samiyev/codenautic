@@ -162,6 +162,14 @@ export function useSSEStream(props: IUseSSEStreamProps): IUseSSEStreamResult {
     const reconnectCountRef = useRef(0)
     const reconnectDelayRef = useRef(initialReconnectDelayMs)
     const eventSequenceRef = useRef(0)
+    const listenersRef = useRef<{
+        onOpen: (event: Event) => void
+        onConnectionError: (event: Event) => void
+        onMessage: (event: Event) => void
+        onProgress: (event: Event) => void
+        onDone: (event: Event) => void
+        onStreamError: (event: Event) => void
+    } | null>(null)
 
     const clearReconnectTimer = useCallback((): void => {
         if (reconnectTimerRef.current !== null) {
@@ -173,7 +181,18 @@ export function useSSEStream(props: IUseSSEStreamProps): IUseSSEStreamResult {
     const closeSource = useCallback((): void => {
         clearReconnectTimer()
         if (sourceRef.current !== null) {
-            sourceRef.current.close()
+            const source = sourceRef.current
+            const handlers = listenersRef.current
+            if (handlers !== null && typeof source.removeEventListener === "function") {
+                source.removeEventListener("open", handlers.onOpen)
+                source.removeEventListener("error", handlers.onConnectionError)
+                source.removeEventListener("message", handlers.onMessage)
+                source.removeEventListener("progress", handlers.onProgress)
+                source.removeEventListener("done", handlers.onDone)
+                source.removeEventListener("stream-error", handlers.onStreamError)
+            }
+            listenersRef.current = null
+            source.close()
             sourceRef.current = null
         }
     }, [clearReconnectTimer])
@@ -279,36 +298,39 @@ export function useSSEStream(props: IUseSSEStreamProps): IUseSSEStreamResult {
             }, nextDelay)
         }
 
+        const onMessage = (event: Event): void => {
+            if (event instanceof MessageEvent === false || typeof event.data !== "string") {
+                return
+            }
+            appendEvent(parseSSEEvent("message", event.data, createSSEEventId(eventSequenceRef)))
+        }
+        const onProgress = (event: Event): void => {
+            if (event instanceof MessageEvent === false || typeof event.data !== "string") {
+                return
+            }
+            appendEvent(parseSSEEvent("progress", event.data, createSSEEventId(eventSequenceRef)))
+        }
+        const onDone = (event: Event): void => {
+            if (event instanceof MessageEvent === false || typeof event.data !== "string") {
+                return
+            }
+            appendEvent(parseSSEEvent("done", event.data, createSSEEventId(eventSequenceRef)))
+        }
+        const onStreamError = (event: Event): void => {
+            if (event instanceof MessageEvent === false || typeof event.data !== "string") {
+                return
+            }
+            appendEvent(parseSSEEvent("error", event.data, createSSEEventId(eventSequenceRef)))
+        }
+
         source.addEventListener("open", onOpen)
         source.addEventListener("error", onConnectionError)
-        source.addEventListener("message", (event: Event): void => {
-            if (event instanceof MessageEvent === false || typeof event.data !== "string") {
-                return
-            }
+        source.addEventListener("message", onMessage)
+        source.addEventListener("progress", onProgress)
+        source.addEventListener("done", onDone)
+        source.addEventListener("stream-error", onStreamError)
 
-            appendEvent(parseSSEEvent("message", event.data, createSSEEventId(eventSequenceRef)))
-        })
-        source.addEventListener("progress", (event: Event): void => {
-            if (event instanceof MessageEvent === false || typeof event.data !== "string") {
-                return
-            }
-
-            appendEvent(parseSSEEvent("progress", event.data, createSSEEventId(eventSequenceRef)))
-        })
-        source.addEventListener("done", (event: Event): void => {
-            if (event instanceof MessageEvent === false || typeof event.data !== "string") {
-                return
-            }
-
-            appendEvent(parseSSEEvent("done", event.data, createSSEEventId(eventSequenceRef)))
-        })
-        source.addEventListener("stream-error", (event: Event): void => {
-            if (event instanceof MessageEvent === false || typeof event.data !== "string") {
-                return
-            }
-
-            appendEvent(parseSSEEvent("error", event.data, createSSEEventId(eventSequenceRef)))
-        })
+        listenersRef.current = { onOpen, onConnectionError, onMessage, onProgress, onDone, onStreamError }
     }, [
         appendEvent,
         clearReconnectTimer,
