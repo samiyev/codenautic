@@ -136,5 +136,30 @@
         "summaryCopiedToast": "AI-сводка скопирована.",
         "copyFailed": "Не удалось скопировать сводку.",
         "copyFailedToast": "Не удалось скопировать AI-сводку."
+    },
+    "ariaLabel": {
+        "list": {
+            "generatedReportsList": "Список сгенерированных отчётов"
+        },
+        "generator": {
+            "selectedSectionsList": "Выбранные разделы отчёта",
+            "previewPayload": "Данные предпросмотра отчёта"
+        },
+        "viewer": {
+            "trendChart": "График тренда отчёта",
+            "sectionsDistributionChart": "Диаграмма распределения разделов отчёта",
+            "shareLink": "Ссылка для обмена отчётом"
+        },
+        "scheduleDialog": {
+            "dialog": "Диалог расписания отчётов",
+            "previewValue": "Значение предпросмотра расписания"
+        },
+        "templateEditor": {
+            "sectionsList": "Список разделов шаблона",
+            "previewSummary": "Сводка предпросмотра шаблона"
+        },
+        "aiSummary": {
+            "summaryText": "Текст AI-сводки"
+        }
     }
 }

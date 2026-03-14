@@ -205,5 +205,22 @@
         "stepApplied": "применено",
         "stepFilteredOut": "отфильтровано",
         "stepPassed": "пройдено"
+    },
+    "ariaLabel": {
+        "detail": {
+            "reviewContextMapStatus": "Статус карты контекста ревью",
+            "reviewHistoryHeatmapList": "Список тепловой карты истории ревью",
+            "activeFileNeighborhoodList": "Список соседних файлов",
+            "neighborhoodDependencyList": "Список зависимостей окружения",
+            "neighborhoodRecentChangesList": "Список последних изменений окружения",
+            "reviewRiskDriversList": "Список факторов риска ревью",
+            "safeGuardTraceList": "Список трассировки SafeGuard",
+            "safeGuardPipelineDetails": "Детали pipeline SafeGuard",
+            "feedbackHistoryList": "Список истории обратной связи"
+        },
+        "repositoryOverview": {
+            "healthScore": "Оценка здоровья репозитория",
+            "keyMetrics": "Ключевые метрики"
+        }
     }
 }

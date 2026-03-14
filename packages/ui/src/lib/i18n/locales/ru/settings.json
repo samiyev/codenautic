@@ -876,5 +876,116 @@
             "triggeredManualTest": "Запущен ручной тест для {{provider}}.",
             "providerConfigSaved": "Конфигурация провайдера {{provider}} сохранена."
         }
+    },
+    "ariaLabel": {
+        "jobs": {
+            "scheduleTarget": "Цель расписания",
+            "userTimezone": "Часовой пояс пользователя",
+            "organizationTimezoneOverride": "Переопределение часового пояса организации",
+            "scheduleFrequency": "Частота расписания",
+            "intervalHours": "Часы интервала",
+            "scheduleWeekday": "День недели расписания",
+            "scheduleHour": "Час расписания",
+            "scheduleMinute": "Минута расписания",
+            "schedulePreviewList": "Список предпросмотра расписания",
+            "operationsJobsList": "Список операционных задач",
+            "jobsAuditTrailList": "Список журнала аудита задач"
+        },
+        "tokenUsage": {
+            "groupSelector": "Выбор группы использования токенов"
+        },
+        "webhooks": {
+            "filterByStatus": "Фильтр webhooks по статусу"
+        },
+        "byok": {
+            "provider": "Провайдер"
+        },
+        "privacyRedaction": {
+            "sourceText": "Исходный текст приватности",
+            "sensitiveHitsList": "Список обнаруженных данных",
+            "redactedPreview": "Предпросмотр редактирования"
+        },
+        "concurrency": {
+            "severityThreshold": "Порог критичности конкурентности",
+            "requireReviewerApproval": "Требование одобрения рецензентом",
+            "auditList": "Список аудита конкурентности",
+            "conflictDiffList": "Список конфликтных различий"
+        },
+        "codeReview": {
+            "summaryDetailLevel": "Уровень детализации сводки",
+            "ideProviderScope": "Область IDE-провайдера"
+        },
+        "team": {
+            "inviteRole": "Роль приглашения"
+        },
+        "billing": {
+            "plan": "Тарифный план",
+            "status": "Статус биллинга",
+            "entitlementFeaturesList": "Список функций тарифа",
+            "historyList": "История биллинга"
+        },
+        "organization": {
+            "membersTable": "Участники организации",
+            "auditLogsTable": "Журнал аудита организации"
+        },
+        "notifications": {
+            "filterEventType": "Фильтр типа события",
+            "inboxList": "Список входящих уведомлений",
+            "bulkActionAuditList": "Список аудита массовых действий"
+        },
+        "auditLogs": {
+            "filterByActor": "Фильтр по автору",
+            "filterByAction": "Фильтр по действию",
+            "dateFrom": "Дата с",
+            "dateTo": "Дата по"
+        },
+        "appearance": {
+            "languageSelection": "Выбор языка",
+            "accentColorPicker": "Выбор акцентного цвета",
+            "accentIntensitySlider": "Ползунок интенсивности акцента",
+            "basePalettePicker": "Выбор базовой палитры",
+            "globalRadiusSlider": "Ползунок общего радиуса",
+            "formRadiusSlider": "Ползунок радиуса форм",
+            "themeLibrarySelection": "Выбор библиотеки тем",
+            "themeLibraryJson": "JSON библиотеки тем",
+            "previewInput": "Поле предпросмотра внешнего вида"
+        },
+        "rulesLibrary": {
+            "category": "Категория",
+            "rulesCatalog": "Каталог правил",
+            "ruleToTest": "Правило для тестирования",
+            "sampleInput": "Пример ввода"
+        },
+        "providerDegradation": {
+            "affectedFeaturesList": "Список затронутых функций",
+            "queuedCriticalActionsList": "Список критических действий в очереди"
+        },
+        "contractValidation": {
+            "driftAlertSeverityThreshold": "Порог критичности оповещения о дрейфе",
+            "driftAlertViolationThreshold": "Порог нарушений оповещения о дрейфе",
+            "driftReportSearchQuery": "Поиск по отчёту о дрейфе",
+            "driftSeverityFilter": "Фильтр критичности дрейфа",
+            "driftReportSortMode": "Режим сортировки отчёта о дрейфе",
+            "driftViolationsList": "Список нарушений дрейфа",
+            "driftReportExportPayload": "Данные экспорта отчёта о дрейфе",
+            "driftOverlayFileShortcuts": "Ярлыки файлов оверлея дрейфа",
+            "selectedDriftFileViolations": "Нарушения выбранного файла дрейфа",
+            "guardrailsYaml": "YAML ограничителей архитектуры",
+            "guardrailsErrorsList": "Список ошибок ограничителей",
+            "guardrailVisualRulesList": "Список визуальных правил ограничителей",
+            "blueprintYaml": "YAML архитектурного чертежа",
+            "uploadBlueprintYaml": "Загрузить YAML чертежа",
+            "blueprintErrorsList": "Список ошибок чертежа",
+            "blueprintSyntaxHighlightPreview": "Предпросмотр подсветки синтаксиса чертежа",
+            "blueprintVisualNodesList": "Список визуальных узлов чертежа",
+            "contractJson": "JSON контракта",
+            "contractErrorsList": "Список ошибок контракта",
+            "contractMigrationHintsList": "Список подсказок миграции контракта",
+            "blueprintIntendedArchitectureList": "Список запланированной архитектуры",
+            "realityArchitectureList": "Список реальной архитектуры",
+            "architectureDifferencesList": "Список архитектурных различий",
+            "driftScoreTrendChart": "График тренда оценки дрейфа",
+            "architectureChangeAnnotationsList": "Список аннотаций архитектурных изменений"
+        }
     }
 }

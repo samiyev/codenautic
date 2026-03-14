@@ -216,5 +216,25 @@
         "expandAriaLabel": "Развернуть навигацию",
         "collapseAriaLabel": "Свернуть навигацию"
     },
-    "userMenuAriaLabel": "Меню пользователя"
+    "userMenuAriaLabel": "Меню пользователя",
+    "ariaLabel": {
+        "sidebarNav": {
+            "mainNavigation": "Основная навигация"
+        },
+        "header": {
+            "breadcrumb": "Навигационная цепочка"
+        },
+        "contentToolbar": {
+            "breadcrumb": "Навигационная цепочка"
+        },
+        "commandPalette": {
+            "globalPalette": "Глобальная палитра команд",
+            "closePalette": "Закрыть палитру команд",
+            "searchInput": "Поиск палитры команд",
+            "results": "Результаты палитры команд"
+        },
+        "themeToggle": {
+            "themeMode": "Режим темы"
+        }
+    }
 }
