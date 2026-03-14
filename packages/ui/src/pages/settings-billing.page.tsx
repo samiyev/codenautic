@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Chip } from "@/components/ui"
+import { Alert, Button, Chip } from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { FormSection } from "@/components/forms/form-section"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -269,12 +269,14 @@ export function SettingsBillingPage(): ReactElement {
             description="Manage trial/active/past-due/canceled states, feature entitlements, and plan transitions with explicit outcomes."
         >
             {paywallBanner === null ? (
-                <Alert color="success" title="Billing status is healthy" variant="flat">
-                    Premium feature availability follows current plan entitlements.
+                <Alert status="success">
+                    <Alert.Title>Billing status is healthy</Alert.Title>
+                    <Alert.Description>Premium feature availability follows current plan entitlements.</Alert.Description>
                 </Alert>
             ) : (
-                <Alert color={paywallBanner.color} title={paywallBanner.title} variant="flat">
-                    {paywallBanner.description}
+                <Alert status={paywallBanner.color}>
+                    <Alert.Title>{paywallBanner.title}</Alert.Title>
+                    <Alert.Description>{paywallBanner.description}</Alert.Description>
                 </Alert>
             )}
 
@@ -283,7 +285,7 @@ export function SettingsBillingPage(): ReactElement {
                     <Chip
                         color={mapStatusChipColor(billingSnapshot.status)}
                         size="sm"
-                        variant="flat"
+                        variant="soft"
                     >
                         {billingSnapshot.status}
                     </Chip>
@@ -338,17 +340,18 @@ export function SettingsBillingPage(): ReactElement {
                     </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                    <Button color="primary" onPress={handleApplyBillingChange}>
+                    <Button variant="primary" onPress={handleApplyBillingChange}>
                         Apply billing change
                     </Button>
                     {billingSnapshot.status === "past_due" ? (
-                        <Button color="success" variant="flat" onPress={handleMarkInvoicePaid}>
+                        <Button variant="tertiary" onPress={handleMarkInvoicePaid}>
                             Mark invoice as paid
                         </Button>
                     ) : null}
                 </div>
-                <Alert color="primary" title="Last billing action" variant="flat">
-                    {lastOutcome}
+                <Alert status="accent">
+                    <Alert.Title>Last billing action</Alert.Title>
+                    <Alert.Description>{lastOutcome}</Alert.Description>
                 </Alert>
             </FormSection>
 
@@ -370,7 +373,7 @@ export function SettingsBillingPage(): ReactElement {
                                     <Chip
                                         color={feature.isLocked ? "danger" : "success"}
                                         size="sm"
-                                        variant="flat"
+                                        variant="soft"
                                     >
                                         {feature.isLocked ? "Locked" : "Unlocked"}
                                     </Chip>

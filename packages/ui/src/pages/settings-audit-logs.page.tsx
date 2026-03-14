@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, Chip } from "@heroui/react"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -123,12 +123,12 @@ const ALL_AUDIT_LOGS: ReadonlyArray<IAuditLogEntry> = [...INITIAL_AUDIT_LOGS, ..
  */
 const ISO_DATE_LENGTH = 10
 
-function mapActionChipColor(action: TAuditAction): "default" | "primary" | "success" | "warning" {
+function mapActionChipColor(action: TAuditAction): "default" | "accent" | "success" | "warning" {
     if (action === "integration.connected") {
         return "success"
     }
     if (action === "role.changed") {
-        return "primary"
+        return "accent"
     }
     if (action === "policy.updated") {
         return "warning"
@@ -291,7 +291,7 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>{t("settings:auditLogs.filters")}</p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[1fr_1fr_180px_180px_auto]">
                         <select
                             aria-label={t("settings:ariaLabel.auditLogs.filterByActor")}
@@ -412,7 +412,7 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                         <div className="flex items-end">
                             <Button
                                 className="w-full md:w-auto"
-                                variant="flat"
+                                variant="secondary"
                                 onPress={handleExport}
                             >
                                 {t("settings:auditLogs.exportCsv")}
@@ -426,25 +426,22 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                         })}
                     </p>
                     {exportMessage.length > 0 ? (
-                        <Alert
-                            color="success"
-                            title={t("settings:auditLogs.exportCompleted")}
-                            variant="flat"
-                        >
-                            {exportMessage}
+                        <Alert status="success">
+                            <Alert.Title>{t("settings:auditLogs.exportCompleted")}</Alert.Title>
+                            <Alert.Description>{exportMessage}</Alert.Description>
                         </Alert>
                     ) : null}
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
                 <CardHeader className="flex items-center justify-between">
                     <p className={TYPOGRAPHY.sectionTitle}>{t("settings:auditLogs.changesList")}</p>
-                    <Chip size="sm" variant="flat">
+                    <Chip size="sm" variant="soft">
                         {t("settings:auditLogs.entriesCount", { count: filteredLogs.length })}
                     </Chip>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <EnterpriseDataTable
                         ariaLabel="Audit log list"
                         columns={[
@@ -467,7 +464,7 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                                     <Chip
                                         color={mapActionChipColor(entry.action)}
                                         size="sm"
-                                        variant="flat"
+                                        variant="soft"
                                     >
                                         {formatActionLabel(entry.action)}
                                     </Chip>
@@ -500,7 +497,7 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                         id="settings-audit-logs-table"
                         rows={filteredLogs}
                     />
-                </CardBody>
+                </CardContent>
             </Card>
         </FormLayout>
     )
