@@ -41,6 +41,8 @@ export const PAGE_LAYOUT = {
     standard: "space-y-6",
     /** Полноширинная с увеличенными отступами (mission control). */
     spacious: "space-y-8",
+    /** Fluid — edge-to-edge для table/list страниц. Minimal vertical spacing. */
+    fluid: "space-y-4",
     /** Центрированная узкая (system-health, session-recovery). */
     centered: "mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8",
 } as const
