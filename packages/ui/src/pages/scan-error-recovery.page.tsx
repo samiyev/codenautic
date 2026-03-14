@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "@tanstack/react-router"
 
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { PageShell } from "@/components/layout/page-shell"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
@@ -15,14 +16,10 @@ export function ScanErrorRecoveryPage(): ReactElement {
     const navigate = useNavigate()
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>
-                {t("system:scanErrorRecovery.pageTitle")}
-            </h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("system:scanErrorRecovery.pageSubtitle")}
-            </p>
-
+        <PageShell
+            subtitle={t("system:scanErrorRecovery.pageSubtitle")}
+            title={t("system:scanErrorRecovery.pageTitle")}
+        >
             <Alert
                 color="warning"
                 title={t("system:scanErrorRecovery.recoveryFlowTitle")}
@@ -80,6 +77,6 @@ export function ScanErrorRecoveryPage(): ReactElement {
                     </div>
                 </CardBody>
             </Card>
-        </section>
+        </PageShell>
     )
 }
