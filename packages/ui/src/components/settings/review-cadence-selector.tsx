@@ -105,6 +105,7 @@ export function ReviewCadenceSelector(props: IReviewCadenceSelectorProps): React
                 })}
             </p>
             <Button
+                color="primary"
                 isDisabled={props.isApplyDisabled}
                 type="button"
                 variant="solid"
