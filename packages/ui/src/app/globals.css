@@ -144,8 +144,8 @@
 
     /* Layout surface tokens */
     --surface-subtle: oklch(0.97 0.005 74);
+    --sidebar-bg: oklch(0.96 0.008 68);
     --header-bg: color-mix(in oklch, var(--surface) 88%, transparent);
-    --sidebar-bg: color-mix(in oklch, var(--surface) 84%, transparent);
     --content-bg: color-mix(in oklch, var(--surface) 88%, transparent);
 
     /*
@@ -218,8 +218,8 @@
 
     /* Layout surface tokens */
     --surface-subtle: oklch(0.18 0.005 74);
+    --sidebar-bg: oklch(0.14 0.008 68);
     --header-bg: color-mix(in oklch, var(--surface) 88%, transparent);
-    --sidebar-bg: color-mix(in oklch, var(--surface) 84%, transparent);
     --content-bg: color-mix(in oklch, var(--surface) 88%, transparent);
 
     --success-foreground: oklch(0.15 0.03 149);
