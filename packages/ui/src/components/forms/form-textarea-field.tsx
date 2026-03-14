@@ -1,6 +1,6 @@
-import { type ReactElement } from "react"
+import { type ChangeEvent, type ReactElement } from "react"
 import { type FieldPath, type FieldValues } from "react-hook-form"
-import { Textarea, type TextareaProps } from "@/components/ui/textarea"
+import { TextArea as Textarea, type TextAreaProps as TextareaProps } from "@heroui/react"
 
 import { FormField, type IFormFieldProps } from "./form-field"
 
@@ -14,14 +14,7 @@ export interface IFormTextareaFieldProps<
     /** Пропсы HeroUI Textarea без значений/обработчиков. */
     readonly textareaProps?: Omit<
         TextareaProps,
-        | "name"
-        | "value"
-        | "defaultValue"
-        | "onChange"
-        | "onValueChange"
-        | "onBlur"
-        | "isInvalid"
-        | "isDisabled"
+        "name" | "value" | "defaultValue" | "onChange" | "onBlur"
     >
 }
 
@@ -55,12 +48,11 @@ export function FormTextareaField<
                         aria-label={accessibilityLabel}
                         aria-invalid={hasError}
                         id={fieldId}
-                        isInvalid={hasError}
                         name={field.name}
                         value={value}
                         onBlur={field.onBlur}
-                        onValueChange={(nextValue: string): void => {
-                            field.onChange(nextValue)
+                        onChange={(event: ChangeEvent<HTMLTextAreaElement>): void => {
+                            field.onChange(event.target.value)
                         }}
                         {...textareaProps}
                     />
