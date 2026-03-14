@@ -47,6 +47,18 @@ export {
     type IAzureDevOpsProviderOptions,
 } from "./azure-devops-provider"
 export {
+    BITBUCKET_PROVIDER_ERROR_CODE,
+    BitbucketProviderError,
+    type BitbucketProviderErrorCode,
+    type IBitbucketProviderErrorDetails,
+} from "./bitbucket-provider.error"
+export {
+    BitbucketProvider,
+    type IBitbucketApiResponse,
+    type IBitbucketClient,
+    type IBitbucketProviderOptions,
+} from "./bitbucket-provider"
+export {
     GIT_ACL_ERROR_KIND,
     GitDiffFilesAcl,
     GitErrorAcl,
