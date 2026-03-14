@@ -526,8 +526,8 @@ export function MyWorkPage(): ReactElement {
             subtitle={t("dashboard:myWork.pageSubtitle")}
             title={t("dashboard:myWork.pageTitle")}
         >
-            <Card>
-                <CardHeader className="flex flex-wrap items-center justify-between gap-2">
+            <Card className="border border-border/40 bg-surface/40 backdrop-blur-sm">
+                <CardHeader className="flex flex-wrap items-center justify-between gap-2 border-b border-border/30 pb-3">
                     <p className={TYPOGRAPHY.sectionTitle}>
                         {t("dashboard:myWork.scopeAndOwnership")}
                     </p>
@@ -599,8 +599,8 @@ export function MyWorkPage(): ReactElement {
                 </CardBody>
             </Card>
 
-            <Card>
-                <CardHeader>
+            <Card className="border border-border/40 bg-surface/40 backdrop-blur-sm">
+                <CardHeader className="border-b border-border/30 pb-3">
                     <p className={TYPOGRAPHY.sectionTitle}>
                         {t("dashboard:myWork.unifiedTriageList")}
                     </p>
@@ -625,7 +625,15 @@ export function MyWorkPage(): ReactElement {
                                 const slaState = getSlaState(item, nowTimestamp)
                                 return (
                                     <li
-                                        className="rounded-lg border border-border bg-surface p-3"
+                                        className={[
+                                            "rounded-lg border p-3",
+                                            "transition-colors duration-150 hover:bg-surface-muted/30",
+                                            slaState === "breach"
+                                                ? "border-danger/30 border-l-4 border-l-danger/60 bg-danger/3"
+                                                : slaState === "warning"
+                                                  ? "border-warning/30 border-l-4 border-l-warning/50 bg-warning/3"
+                                                  : "border-border/50 border-l-2 border-l-border bg-surface/60",
+                                        ].join(" ")}
                                         key={item.id}
                                     >
                                         <div className="flex flex-wrap items-center gap-2">
