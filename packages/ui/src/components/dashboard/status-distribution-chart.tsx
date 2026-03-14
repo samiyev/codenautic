@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 import { Cell, Pie, PieChart, Tooltip } from "recharts"
 
 import { Chip } from "@/components/ui"
@@ -38,6 +39,7 @@ export interface IStatusDistributionChartProps {
  * @returns Recharts pie диаграмма.
  */
 export function StatusDistributionChart(props: IStatusDistributionChartProps): ReactElement {
+    const { t } = useTranslation(["dashboard"])
     const title = props.title ?? "CCR status distribution"
 
     return (
@@ -73,7 +75,10 @@ export function StatusDistributionChart(props: IStatusDistributionChartProps): R
                             <Tooltip />
                         </PieChart>
                     </ChartContainer>
-                    <div className="mt-2 flex flex-wrap gap-2" aria-label="Status legend">
+                    <div
+                        className="mt-2 flex flex-wrap gap-2"
+                        aria-label={t("dashboard:ariaLabel.statusDistribution.statusLegend")}
+                    >
                         {displayData.map(
                             (point): ReactElement => (
                                 <Chip
