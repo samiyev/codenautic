@@ -12,15 +12,12 @@ import {
     Cell,
 } from "recharts"
 
-import { Card, CardBody, CardHeader } from "@/components/ui"
+import { Card, CardContent, CardHeader } from "@heroui/react"
 import { EmptyState } from "@/components/states/empty-state"
 import { ChartContainer } from "@/components/charts/chart-container"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
-import {
-    CHART_FALLBACK_COLOR,
-    CHART_GRID_DASH,
-    PIE_OUTER_RADIUS,
-} from "@/lib/constants/chart-constants"
+import { CHART_FALLBACK_COLOR } from "@/lib/constants/chart-constants"
+import { CHART_GRID_DASH, PIE_OUTER_RADIUS } from "@/lib/constants/chart-recharts-defaults"
 import { CHART_DATA_TRANSITION } from "@/lib/motion"
 
 interface ITokenUsageModelPoint {
@@ -67,7 +64,7 @@ export function TokenUsageDashboardWidget(props: ITokenUsageDashboardWidgetProps
             <CardHeader className="border-b border-border/30 pb-3">
                 <p className={TYPOGRAPHY.sectionTitle}>Token usage dashboard</p>
             </CardHeader>
-            <CardBody className="space-y-3 pt-4">
+            <CardContent className="space-y-3 pt-4">
                 <p className={TYPOGRAPHY.bodyMuted}>
                     Usage by model, cost breakdown and trend chart for selected range.
                 </p>
@@ -153,7 +150,7 @@ export function TokenUsageDashboardWidget(props: ITokenUsageDashboardWidgetProps
                         </ChartContainer>
                     </div>
                 )}
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
