@@ -2,8 +2,23 @@ import {describe, expect, test} from "bun:test"
 
 import {Container, TOKENS} from "@codenautic/core"
 
+import type {Connection} from "mongoose"
+
+import {AST_TOKENS, registerAstModule} from "../../src/ast"
+import {CONTEXT_TOKENS, registerContextModule} from "../../src/context"
+import {
+    DATABASE_TOKENS,
+    type IDatabaseConnectionManager,
+    registerDatabaseModule,
+} from "../../src/database"
 import {GIT_TOKENS, GitProviderFactory, registerGitModule} from "../../src/git"
 import {LLM_TOKENS, LlmProviderFactory, registerLlmModule} from "../../src/llm"
+import {
+    InboxDeduplicator,
+    MESSAGING_TOKENS,
+    OutboxWriter,
+    registerMessagingModule,
+} from "../../src/messaging"
 import {
     NOTIFICATION_TOKENS,
     NotificationProviderFactory,
@@ -12,12 +27,24 @@ import {
 import {registerReviewModule} from "../../src/review"
 import {registerRuleModule} from "../../src/rule"
 import {
+    WORKER_TOKENS,
+    type IWorkerProcessorRegistry,
+    type IWorkerQueueService,
+    type IWorkerRuntime,
+    registerWorkerModule,
+} from "../../src/worker"
+import {
+    createCodeChunkEmbeddingGeneratorMock,
+    createCodeGraphPageRankServiceMock,
+    createExternalContextProviderMock,
+    createGraphRepositoryMock,
     createGitProviderMock,
     createLlmProviderMock,
     createNotificationProviderMock,
     createPipelineCheckpointStoreMock,
     createRepositoryWorkspaceProviderMock,
     createReviewRepositoryMock,
+    createSourceCodeParserMock,
     createRuleRepositoryMock,
 } from "../helpers/provider-factories"
 
@@ -138,6 +165,179 @@ describe("Provider modules registration", () => {
         const resolvedFactory = container.resolve(NOTIFICATION_TOKENS.ProviderFactory)
 
         expect(resolvedFactory).toBe(providerFactory)
+    })
+
+    test("registerContextModule binds providers collection and default provider", () => {
+        const container = new Container()
+        const jiraProvider = createExternalContextProviderMock("JIRA")
+        const sentryProvider = createExternalContextProviderMock("SENTRY")
+
+        registerContextModule(container, {
+            providers: [
+                jiraProvider,
+                sentryProvider,
+            ],
+        })
+
+        const resolvedProviders = container.resolve(CONTEXT_TOKENS.Providers)
+        const resolvedDefaultProvider = container.resolve(CONTEXT_TOKENS.Provider)
+        const resolvedCoreProvider = container.resolve(TOKENS.Review.ExternalContextProvider)
+
+        expect(resolvedProviders).toEqual([
+            jiraProvider,
+            sentryProvider,
+        ])
+        expect(resolvedDefaultProvider).toBe(jiraProvider)
+        expect(resolvedCoreProvider).toBe(jiraProvider)
+    })
+
+    test("registerContextModule binds explicit default provider override", () => {
+        const container = new Container()
+        const jiraProvider = createExternalContextProviderMock("JIRA")
+        const linearProvider = createExternalContextProviderMock("LINEAR")
+
+        registerContextModule(container, {
+            providers: [
+                jiraProvider,
+                linearProvider,
+            ],
+            defaultProvider: linearProvider,
+        })
+
+        const resolvedDefaultProvider = container.resolve(CONTEXT_TOKENS.Provider)
+        const resolvedCoreProvider = container.resolve(TOKENS.Review.ExternalContextProvider)
+
+        expect(resolvedDefaultProvider).toBe(linearProvider)
+        expect(resolvedCoreProvider).toBe(linearProvider)
+    })
+
+    test("registerAstModule binds source-code parser to adapters and core tokens", () => {
+        const container = new Container()
+        const parser = createSourceCodeParserMock()
+
+        registerAstModule(container, {
+            sourceCodeParser: parser,
+        })
+
+        const resolvedAdaptersParser = container.resolve(AST_TOKENS.SourceCodeParser)
+        const resolvedCoreParser = container.resolve(TOKENS.Scanning.SourceCodeParser)
+
+        expect(resolvedAdaptersParser).toBe(parser)
+        expect(resolvedCoreParser).toBe(parser)
+    })
+
+    test("registerAstModule binds optional graph and vector services", () => {
+        const container = new Container()
+        const parser = createSourceCodeParserMock()
+        const graphRepository = createGraphRepositoryMock()
+        const embeddingGenerator = createCodeChunkEmbeddingGeneratorMock()
+        const pageRankService = createCodeGraphPageRankServiceMock()
+
+        registerAstModule(container, {
+            sourceCodeParser: parser,
+            graphRepository,
+            codeChunkEmbeddingGenerator: embeddingGenerator,
+            pageRankService,
+        })
+
+        const resolvedGraphRepository = container.resolve(AST_TOKENS.GraphRepository)
+        const resolvedCoreGraphRepository = container.resolve(TOKENS.Analysis.GraphRepository)
+        const resolvedEmbeddingGenerator = container.resolve(
+            AST_TOKENS.CodeChunkEmbeddingGenerator,
+        )
+        const resolvedCoreEmbeddingGenerator = container.resolve(
+            TOKENS.Vector.CodeChunkEmbeddingGenerator,
+        )
+        const resolvedPageRankService = container.resolve(AST_TOKENS.PageRankService)
+        const resolvedCorePageRankService = container.resolve(
+            TOKENS.Analysis.CodeGraphPageRankService,
+        )
+
+        expect(resolvedGraphRepository).toBe(graphRepository)
+        expect(resolvedCoreGraphRepository).toBe(graphRepository)
+        expect(resolvedEmbeddingGenerator).toBe(embeddingGenerator)
+        expect(resolvedCoreEmbeddingGenerator).toBe(embeddingGenerator)
+        expect(resolvedPageRankService).toBe(pageRankService)
+        expect(resolvedCorePageRankService).toBe(pageRankService)
+    })
+
+    test("registerMessagingModule binds outbox writer and inbox deduplicator", () => {
+        const container = new Container()
+        const outboxWriter = new OutboxWriter()
+        const inboxDeduplicator = new InboxDeduplicator()
+
+        registerMessagingModule(container, {
+            outboxWriter,
+            inboxDeduplicator,
+        })
+
+        const resolvedOutboxWriter = container.resolve(MESSAGING_TOKENS.OutboxWriter)
+        const resolvedInboxDeduplicator = container.resolve(MESSAGING_TOKENS.InboxDeduplicator)
+
+        expect(resolvedOutboxWriter).toBe(outboxWriter)
+        expect(resolvedInboxDeduplicator).toBe(inboxDeduplicator)
+    })
+
+    test("registerWorkerModule binds optional worker adapters", () => {
+        const container = new Container()
+        const queueService: IWorkerQueueService = {
+            enqueue(_payload): Promise<string> {
+                return Promise.resolve("job-1")
+            },
+        }
+        const processorRegistry: IWorkerProcessorRegistry = {
+            register(_jobType: string, _processor: (payload: unknown) => Promise<void>): void {
+                return
+            },
+        }
+        const runtime: IWorkerRuntime = {
+            start(): Promise<void> {
+                return Promise.resolve()
+            },
+            stop(): Promise<void> {
+                return Promise.resolve()
+            },
+        }
+
+        registerWorkerModule(container, {
+            queueService,
+            processorRegistry,
+            runtime,
+        })
+
+        const resolvedQueueService = container.resolve(WORKER_TOKENS.QueueService)
+        const resolvedProcessorRegistry = container.resolve(WORKER_TOKENS.ProcessorRegistry)
+        const resolvedRuntime = container.resolve(WORKER_TOKENS.Runtime)
+
+        expect(resolvedQueueService).toBe(queueService)
+        expect(resolvedProcessorRegistry).toBe(processorRegistry)
+        expect(resolvedRuntime).toBe(runtime)
+    })
+
+    test("registerDatabaseModule binds connection manager", () => {
+        const container = new Container()
+        const connectionManager: IDatabaseConnectionManager = {
+            connect(): Promise<void> {
+                return Promise.resolve()
+            },
+            disconnect(): Promise<void> {
+                return Promise.resolve()
+            },
+            getConnection(): Connection | null {
+                return null
+            },
+            isConnected(): boolean {
+                return false
+            },
+        }
+
+        registerDatabaseModule(container, {
+            connectionManager,
+        })
+
+        const resolvedConnectionManager = container.resolve(DATABASE_TOKENS.ConnectionManager)
+
+        expect(resolvedConnectionManager).toBe(connectionManager)
     })
 
     test("registerReviewModule binds review repository", () => {

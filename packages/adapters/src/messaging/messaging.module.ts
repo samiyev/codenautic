@@ -1,0 +1,40 @@
+import {Container} from "@codenautic/core"
+
+import {bindConstantSingleton} from "../shared/bind-constant-singleton"
+import type {InboxDeduplicator} from "./inbox-deduplicator.adapter"
+import {MESSAGING_TOKENS} from "./messaging.tokens"
+import type {OutboxWriter} from "./outbox-writer.adapter"
+
+/**
+ * Registration options for messaging adapter module.
+ */
+export interface IRegisterMessagingModuleOptions {
+    /**
+     * Outbox writer adapter instance.
+     */
+    readonly outboxWriter: OutboxWriter
+
+    /**
+     * Inbox deduplication adapter instance.
+     */
+    readonly inboxDeduplicator: InboxDeduplicator
+}
+
+/**
+ * Registers messaging adapters in DI container.
+ *
+ * @param container Target container.
+ * @param options Module options.
+ */
+export function registerMessagingModule(
+    container: Container,
+    options: IRegisterMessagingModuleOptions,
+): void {
+    bindConstantSingleton(container, MESSAGING_TOKENS.OutboxWriter, options.outboxWriter)
+    bindConstantSingleton(
+        container,
+        MESSAGING_TOKENS.InboxDeduplicator,
+        options.inboxDeduplicator,
+    )
+}
+

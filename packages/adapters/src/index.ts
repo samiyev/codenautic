@@ -1,4 +1,5 @@
 export {
+    AST_TOKENS,
     AST_CODE_CHUNK_EMBEDDING_GENERATOR_ERROR_CODE,
     AST_CODE_GRAPH_BUILDER_ERROR_CODE,
     AST_CODE_GRAPH_ENRICHER_ERROR_CODE,
@@ -58,6 +59,7 @@ export {
     type IAstCodeGraphRepositoryErrorDetails,
     type IAstCodeGraphPageRankErrorDetails,
     type IAstCodeGraphPageRankServiceOptions,
+    type IRegisterAstModuleOptions,
     type AstParserFactoryErrorCode,
     type AstParserErrorCode,
     type IAstParserFactory,
@@ -74,6 +76,7 @@ export {
     type JavaScriptParserLanguage,
     type TypeScriptParserLanguage,
     normalizeAstParserLanguage,
+    registerAstModule,
     assertTypeScriptParserLanguage,
     TypeScriptSourceCodeParser,
 } from "./ast"
@@ -177,6 +180,7 @@ export {
     registerLlmModule,
 } from "./llm"
 export {
+    CONTEXT_TOKENS,
     JiraContextAcl,
     JiraProvider,
     JiraProviderError,
@@ -194,6 +198,7 @@ export {
     type IJiraGetIssueRequest,
     type IJiraProviderErrorDetails,
     type IJiraProviderOptions,
+    type IRegisterContextModuleOptions,
     type IJiraResponseHeaders,
     type IJiraSearchIssuesPage,
     type IJiraSearchIssuesRequest,
@@ -221,6 +226,7 @@ export {
     mapJiraContext,
     mapLinearContext,
     mapSentryContext,
+    registerContextModule,
 } from "./context"
 export {
     NOTIFICATION_PROVIDER_FACTORY_ERROR_CODE,
@@ -256,9 +262,19 @@ export {
     type QdrantVectorRepositoryErrorCode,
 } from "./vector"
 export {
+    DATABASE_TOKENS,
+    type IDatabaseConnectionManager,
+    MongoConnectionManager,
+    type IMongoConnectionManagerOptions,
+    type IRegisterDatabaseModuleOptions,
+    registerDatabaseModule,
+} from "./database"
+export {
+    MESSAGING_TOKENS,
     type IInboxDeduplicatorInput,
     type IInboxDeduplicatorRecord,
     type IInboxDeduplicatorResult,
+    type IRegisterMessagingModuleOptions,
     type IOutboxWriteInput,
     type IOutboxWriteResult,
     type IOutboxWriterRecord,
@@ -266,6 +282,16 @@ export {
     OUTBOX_WRITER_STATUS,
     type OutboxWriterStatus,
     OutboxWriter,
+    registerMessagingModule,
 } from "./messaging"
 export {type IRegisterReviewModuleOptions, registerReviewModule} from "./review"
 export {type IRegisterRuleModuleOptions, registerRuleModule} from "./rule"
+export {
+    WORKER_TOKENS,
+    type IRegisterWorkerModuleOptions,
+    type IWorkerJobPayload,
+    type IWorkerProcessorRegistry,
+    type IWorkerQueueService,
+    type IWorkerRuntime,
+    registerWorkerModule,
+} from "./worker"

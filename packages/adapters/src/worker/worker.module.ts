@@ -1,0 +1,57 @@
+import {Container} from "@codenautic/core"
+
+import {bindConstantSingleton} from "../shared/bind-constant-singleton"
+import {WORKER_TOKENS} from "./worker.tokens"
+import type {
+    IWorkerProcessorRegistry,
+    IWorkerQueueService,
+    IWorkerRuntime,
+} from "./worker.types"
+
+/**
+ * Registration options for worker adapter module.
+ */
+export interface IRegisterWorkerModuleOptions {
+    /**
+     * Optional queue service adapter.
+     */
+    readonly queueService?: IWorkerQueueService
+
+    /**
+     * Optional processor registry adapter.
+     */
+    readonly processorRegistry?: IWorkerProcessorRegistry
+
+    /**
+     * Optional worker runtime adapter.
+     */
+    readonly runtime?: IWorkerRuntime
+}
+
+/**
+ * Registers worker adapters in DI container.
+ *
+ * @param container Target container.
+ * @param options Module options.
+ */
+export function registerWorkerModule(
+    container: Container,
+    options: IRegisterWorkerModuleOptions,
+): void {
+    if (options.queueService !== undefined) {
+        bindConstantSingleton(container, WORKER_TOKENS.QueueService, options.queueService)
+    }
+
+    if (options.processorRegistry !== undefined) {
+        bindConstantSingleton(
+            container,
+            WORKER_TOKENS.ProcessorRegistry,
+            options.processorRegistry,
+        )
+    }
+
+    if (options.runtime !== undefined) {
+        bindConstantSingleton(container, WORKER_TOKENS.Runtime, options.runtime)
+    }
+}
+

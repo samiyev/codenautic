@@ -22,6 +22,26 @@
       "import": "./dist/src/llm/index.js",
       "types": "./dist/src/llm/index.d.ts"
     },
+    "./context": {
+      "import": "./dist/src/context/index.js",
+      "types": "./dist/src/context/index.d.ts"
+    },
+    "./notifications": {
+      "import": "./dist/src/notifications/index.js",
+      "types": "./dist/src/notifications/index.d.ts"
+    },
+    "./messaging": {
+      "import": "./dist/src/messaging/index.js",
+      "types": "./dist/src/messaging/index.d.ts"
+    },
+    "./worker": {
+      "import": "./dist/src/worker/index.js",
+      "types": "./dist/src/worker/index.d.ts"
+    },
+    "./database": {
+      "import": "./dist/src/database/index.js",
+      "types": "./dist/src/database/index.d.ts"
+    },
     "./review": {
       "import": "./dist/src/review/index.js",
       "types": "./dist/src/review/index.d.ts"

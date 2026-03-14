@@ -1,6 +1,10 @@
-import {NOTIFICATION_CHANNEL} from "@codenautic/core"
+import {
+    AST_LANGUAGE,
+    NOTIFICATION_CHANNEL,
+} from "@codenautic/core"
 import type {
     NotificationChannel,
+    ExternalContextSource,
     CheckRunConclusion,
     CheckRunStatus,
     IChatChunkDTO,
@@ -8,13 +12,19 @@ import type {
     IChatResponseDTO,
     ICheckRunDTO,
     ICreatePipelineStatusInput,
+    ICodeChunkEmbeddingGenerator,
+    ICodeGraphPageRankService,
     ICommentDTO,
+    IExternalContextProvider,
+    IGraphRepository,
     IGitPipelineStatusProvider,
     IGitProvider,
     INotificationPayload,
     INotificationProvider,
     IInlineCommentDTO,
+    IParsedSourceFileDTO,
     IPipelineStatusDTO,
+    ISourceCodeParser,
     IUpdatePipelineStatusInput,
     ILLMProvider,
     IMergeRequestDTO,
@@ -196,6 +206,105 @@ export function createLlmProviderMock(): ILLMProvider {
         },
         embed(_texts: readonly string[]): Promise<readonly number[][]> {
             return Promise.resolve([])
+        },
+    }
+}
+
+/**
+ * Minimal source-code parser for DI tests.
+ *
+ * @returns Parser instance.
+ */
+export function createSourceCodeParserMock(): ISourceCodeParser {
+    return {
+        language: AST_LANGUAGE.TYPESCRIPT,
+        parse(_request: Parameters<ISourceCodeParser["parse"]>[0]): Promise<IParsedSourceFileDTO> {
+            return Promise.resolve({} as IParsedSourceFileDTO)
+        },
+    }
+}
+
+/**
+ * Minimal graph repository for DI tests.
+ *
+ * @returns Repository instance.
+ */
+export function createGraphRepositoryMock(): IGraphRepository {
+    return {
+        loadGraph(
+            _repositoryId: string,
+            _branch?: string,
+        ): ReturnType<IGraphRepository["loadGraph"]> {
+            return Promise.resolve(null)
+        },
+        saveGraph(
+            _repositoryId: string,
+            _graph: Parameters<IGraphRepository["saveGraph"]>[1],
+            _branch?: string,
+        ): ReturnType<IGraphRepository["saveGraph"]> {
+            return Promise.resolve()
+        },
+        queryNodes(_filter: Parameters<IGraphRepository["queryNodes"]>[0]): ReturnType<
+            IGraphRepository["queryNodes"]
+        > {
+            return Promise.resolve([])
+        },
+        queryEdges(_filter: Parameters<IGraphRepository["queryEdges"]>[0]): ReturnType<
+            IGraphRepository["queryEdges"]
+        > {
+            return Promise.resolve([])
+        },
+        queryPaths(_query: Parameters<IGraphRepository["queryPaths"]>[0]): ReturnType<
+            IGraphRepository["queryPaths"]
+        > {
+            return Promise.resolve([])
+        },
+    }
+}
+
+/**
+ * Minimal code-chunk embedding generator for DI tests.
+ *
+ * @returns Generator instance.
+ */
+export function createCodeChunkEmbeddingGeneratorMock(): ICodeChunkEmbeddingGenerator {
+    return {
+        generateEmbeddings(
+            _chunks: Parameters<ICodeChunkEmbeddingGenerator["generateEmbeddings"]>[0],
+        ): ReturnType<ICodeChunkEmbeddingGenerator["generateEmbeddings"]> {
+            return Promise.resolve([])
+        },
+    }
+}
+
+/**
+ * Minimal code-graph page-rank service for DI tests.
+ *
+ * @returns Service instance.
+ */
+export function createCodeGraphPageRankServiceMock(): ICodeGraphPageRankService {
+    return {
+        calculateHotspots(
+            _input: Parameters<ICodeGraphPageRankService["calculateHotspots"]>[0],
+        ): ReturnType<ICodeGraphPageRankService["calculateHotspots"]> {
+            return Promise.resolve([])
+        },
+    }
+}
+
+/**
+ * Minimal external-context provider for DI tests.
+ *
+ * @param source Supported external context source.
+ * @returns Provider instance.
+ */
+export function createExternalContextProviderMock(
+    source: ExternalContextSource = "JIRA",
+): IExternalContextProvider {
+    return {
+        source,
+        loadContext(_identifier: string): ReturnType<IExternalContextProvider["loadContext"]> {
+            return Promise.resolve(null)
         },
     }
 }

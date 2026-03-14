@@ -1,4 +1,9 @@
 export {
+    type IRegisterAstModuleOptions,
+    registerAstModule,
+} from "./ast.module"
+export {AST_TOKENS} from "./ast.tokens"
+export {
     AST_CODE_CHUNK_EMBEDDING_GENERATOR_ERROR_CODE,
     AstCodeChunkEmbeddingGeneratorError,
     type AstCodeChunkEmbeddingGeneratorErrorCode,

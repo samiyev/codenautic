@@ -1,4 +1,9 @@
 export {
+    type IRegisterMessagingModuleOptions,
+    registerMessagingModule,
+} from "./messaging.module"
+export {MESSAGING_TOKENS} from "./messaging.tokens"
+export {
     type IInboxDeduplicatorInput,
     type IInboxDeduplicatorRecord,
     type IInboxDeduplicatorResult,

@@ -1,4 +1,9 @@
 export {
+    type IRegisterContextModuleOptions,
+    registerContextModule,
+} from "./context.module"
+export {CONTEXT_TOKENS} from "./context.tokens"
+export {
     JiraContextAcl,
     JiraTicketAcl,
     LinearContextAcl,
