@@ -2,7 +2,8 @@ import { type ReactElement, Suspense, lazy, useCallback, useEffect, useMemo, use
 import { useTranslation } from "react-i18next"
 
 import { useDynamicTranslation } from "@/lib/i18n"
-import { Alert, Button, Card, CardBody, CardHeader, StyledLink } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader } from "@heroui/react"
+import { StyledLink } from "@/components/layout/styled-link"
 import { ActivationChecklist } from "@/components/onboarding/activation-checklist"
 import { type IProvenanceContext } from "@/components/infrastructure/data-freshness-panel"
 import { DashboardCriticalSignals } from "@/components/dashboard/dashboard-critical-signals"
@@ -456,7 +457,7 @@ export function DashboardMissionControlPage(): ReactElement {
             <div>
                 <Button
                     size="sm"
-                    variant="flat"
+                    variant="secondary"
                     onPress={(): void => {
                         setIsPersonalizationOpen((prev): boolean => !prev)
                     }}
@@ -472,7 +473,7 @@ export function DashboardMissionControlPage(): ReactElement {
                                 {t("dashboard:missionControl.workspacePersonalization")}
                             </p>
                         </CardHeader>
-                        <CardBody className="space-y-3">
+                        <CardContent className="space-y-3">
                             <label className={`flex flex-col gap-1 ${TYPOGRAPHY.body}`}>
                                 {t("dashboard:missionControl.layoutPreset")}
                                 <select
@@ -528,23 +529,20 @@ export function DashboardMissionControlPage(): ReactElement {
                             <div className="flex flex-wrap gap-2">
                                 <Button
                                     size="sm"
-                                    variant="flat"
+                                    variant="secondary"
                                     onPress={handleSavePersonalization}
                                 >
                                     {t("dashboard:missionControl.savePersonalization")}
                                 </Button>
-                                <Button size="sm" variant="flat" onPress={handleGenerateShareLink}>
+                                <Button size="sm" variant="secondary" onPress={handleGenerateShareLink}>
                                     {t("dashboard:missionControl.generateShareLink")}
                                 </Button>
                             </div>
 
                             <AnimatedAlert isVisible={personalizationMessage.length > 0}>
-                                <Alert
-                                    color="primary"
-                                    title={t("dashboard:missionControl.workspacePersonalization")}
-                                    variant="flat"
-                                >
-                                    {personalizationMessage}
+                                <Alert status="accent">
+                                    <Alert.Title>{t("dashboard:missionControl.workspacePersonalization")}</Alert.Title>
+                                    <Alert.Description>{personalizationMessage}</Alert.Description>
                                 </Alert>
                             </AnimatedAlert>
 
@@ -556,7 +554,7 @@ export function DashboardMissionControlPage(): ReactElement {
                                     value={shareLink}
                                 />
                             ) : null}
-                        </CardBody>
+                        </CardContent>
                     </Card>
                 </AnimatedAlert>
             </div>

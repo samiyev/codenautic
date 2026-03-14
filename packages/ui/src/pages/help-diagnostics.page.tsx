@@ -4,7 +4,7 @@ import { useNavigate } from "@tanstack/react-router"
 
 import { useDynamicTranslation } from "@/lib/i18n"
 import { getWindowSessionStorage, safeStorageGet } from "@/lib/utils/safe-storage"
-import { Alert, Button, Card, CardBody, CardHeader, Chip, Textarea } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, Chip, TextArea } from "@heroui/react"
 import { SystemStateCard } from "@/components/infrastructure/system-state-card"
 import { PageShell } from "@/components/layout/page-shell"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -496,12 +496,9 @@ export function HelpDiagnosticsPage(): ReactElement {
             title={t("system:helpDiagnostics.pageTitle")}
         >
             {sourceContext === "error-fallback" ? (
-                <Alert
-                    color="warning"
-                    title={t("system:helpDiagnostics.errorFallbackTitle")}
-                    variant="flat"
-                >
-                    {t("system:helpDiagnostics.errorFallbackMessage")}
+                <Alert status="warning">
+                    <Alert.Title>{t("system:helpDiagnostics.errorFallbackTitle")}</Alert.Title>
+                    <Alert.Description>{t("system:helpDiagnostics.errorFallbackMessage")}</Alert.Description>
                 </Alert>
             ) : null}
 
@@ -511,7 +508,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                         {t("system:helpDiagnostics.knowledgeBaseTitle")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[1fr_220px]">
                         <label className="flex flex-col gap-1 text-sm text-text-tertiary">
                             {t("system:helpDiagnostics.searchLabel")}
@@ -605,7 +602,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                             )}
                         </ul>
                     )}
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
@@ -614,18 +611,18 @@ export function HelpDiagnosticsPage(): ReactElement {
                         {t("system:helpDiagnostics.diagnosticsTitle")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="text-sm text-text-tertiary">
                             {t("system:helpDiagnostics.diagnosticsDescription")}
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
-                            <Button size="sm" variant="flat" onPress={handleRunDiagnostics}>
+                            <Button size="sm" variant="secondary" onPress={handleRunDiagnostics}>
                                 {t("system:helpDiagnostics.runDiagnostics")}
                             </Button>
                             <Button
                                 size="sm"
-                                variant="flat"
+                                variant="secondary"
                                 onPress={(): void => {
                                     void navigate({
                                         to: "/settings-provider-degradation",
@@ -636,7 +633,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                             </Button>
                             <Button
                                 size="sm"
-                                variant="flat"
+                                variant="secondary"
                                 onPress={(): void => {
                                     void navigate({
                                         to: "/scan-error-recovery",
@@ -647,7 +644,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                             </Button>
                             <Button
                                 size="sm"
-                                variant="flat"
+                                variant="secondary"
                                 onPress={(): void => {
                                     void navigate({
                                         to: "/session-recovery",
@@ -656,7 +653,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                             >
                                 {t("system:helpDiagnostics.openSessionRecovery")}
                             </Button>
-                            <Button size="sm" variant="flat" onPress={handleGenerateSupportBundle}>
+                            <Button size="sm" variant="secondary" onPress={handleGenerateSupportBundle}>
                                 {t("system:helpDiagnostics.generateSupportBundle")}
                             </Button>
                         </div>
@@ -676,7 +673,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                                         <Chip
                                             color={mapStatusColor(check.status)}
                                             size="sm"
-                                            variant="flat"
+                                            variant="soft"
                                         >
                                             {check.status}
                                         </Chip>
@@ -718,7 +715,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                                             <Button
                                                 className="mt-2"
                                                 size="sm"
-                                                variant="flat"
+                                                variant="secondary"
                                                 onPress={(): void => {
                                                     const actionPath = action.path
                                                     if (actionPath === undefined) {
@@ -737,7 +734,7 @@ export function HelpDiagnosticsPage(): ReactElement {
                             )}
                         </ul>
                     </div>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
@@ -746,27 +743,24 @@ export function HelpDiagnosticsPage(): ReactElement {
                         {t("system:helpDiagnostics.supportBundleTitle")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-3">
-                    <Button size="sm" variant="flat" onPress={handleGenerateSupportBundle}>
+                <CardContent className="space-y-3">
+                    <Button size="sm" variant="secondary" onPress={handleGenerateSupportBundle}>
                         {t("system:helpDiagnostics.generateRedactedBundle")}
                     </Button>
                     {bundleMessage.length > 0 ? (
-                        <Alert
-                            color="primary"
-                            title={t("system:helpDiagnostics.bundleReadyTitle")}
-                            variant="flat"
-                        >
-                            {bundleMessage}
+                        <Alert status="accent">
+                            <Alert.Title>{t("system:helpDiagnostics.bundleReadyTitle")}</Alert.Title>
+                            <Alert.Description>{bundleMessage}</Alert.Description>
                         </Alert>
                     ) : null}
                     {supportBundle.length > 0 ? (
-                        <Textarea
-                            isReadOnly
+                        <TextArea
+                            readOnly
                             aria-label={t("system:helpDiagnostics.supportBundlePayloadLabel")}
                             value={supportBundle}
                         />
                     ) : null}
-                </CardBody>
+                </CardContent>
             </Card>
         </PageShell>
     )
