@@ -13,11 +13,11 @@ export default meta
 type TStory = StoryObj<typeof TeamActivityWidget>
 
 const TEAM_POINTS: ReadonlyArray<ITeamActivityPoint> = [
-    { developer: "Alice", ccrMerged: 24 },
-    { developer: "Bob", ccrMerged: 18 },
-    { developer: "Charlie", ccrMerged: 31 },
-    { developer: "Dana", ccrMerged: 12 },
-    { developer: "Eve", ccrMerged: 27 },
+    { developer: "Neo", ccrMerged: 24 },
+    { developer: "Trinity", ccrMerged: 18 },
+    { developer: "Morpheus", ccrMerged: 31 },
+    { developer: "Niobe", ccrMerged: 12 },
+    { developer: "Tank", ccrMerged: 27 },
 ]
 
 export const Default: TStory = {
