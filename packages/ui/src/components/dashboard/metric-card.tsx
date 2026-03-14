@@ -1,9 +1,9 @@
 import { type ReactElement } from "react"
+import { ArrowUpRight, ArrowDownRight, Minus } from "lucide-react"
 
-import { Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { Card, CardBody } from "@/components/ui"
 import { useCountUp } from "@/lib/motion"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
-import { CARD_SURFACE } from "@/lib/constants/spacing"
 
 /**
  * Направление динамики метрики.
@@ -27,10 +27,43 @@ export interface IMetricCardProps {
 }
 
 /**
+ * Определяет конфигурацию отображения тренда по направлению.
+ *
+ * @param direction Направление тренда.
+ * @returns Объект с цветами, фоном и иконкой.
+ */
+function resolveTrendConfig(direction: TMetricTrendDirection): {
+    readonly textClass: string
+    readonly bgClass: string
+    readonly Icon: typeof ArrowUpRight
+} {
+    if (direction === "up") {
+        return {
+            Icon: ArrowUpRight,
+            bgClass: "bg-success/10",
+            textClass: "text-success",
+        }
+    }
+    if (direction === "down") {
+        return {
+            Icon: ArrowDownRight,
+            bgClass: "bg-danger/10",
+            textClass: "text-danger",
+        }
+    }
+    return {
+        Icon: Minus,
+        bgClass: "bg-muted-foreground/10",
+        textClass: "text-muted-foreground",
+    }
+}
+
+/**
  * Карточка с метрикой dashboard.
+ * Glass morphism эффект, trend arrows, hover glow.
  *
  * @param props Конфигурация карточки.
- * @returns HeroUI card со значением, подписью и трендом.
+ * @returns Premium KPI card.
  */
 export function MetricCard(props: IMetricCardProps): ReactElement {
     const hasTrend = props.trendDirection !== undefined && props.trendLabel !== undefined
@@ -40,30 +73,71 @@ export function MetricCard(props: IMetricCardProps): ReactElement {
     const animatedValue = useCountUp({ target: isNumeric ? parsed : 0 })
     const displayValue = isNumeric ? animatedValue.toLocaleString("en-US") : props.value
 
-    const trendColor = props.trendDirection === "up" ? "text-success" : "text-danger"
-    const trendLabel = props.trendDirection === "neutral" ? "text-muted-foreground" : trendColor
-
     return (
-        <Card className={`h-full ${CARD_SURFACE.elevated}`}>
-            <CardHeader className="pb-1">
-                <p className="text-sm text-muted-foreground">{props.label}</p>
-            </CardHeader>
-            <CardBody className="pt-0">
-                <p className={`${TYPOGRAPHY.display} text-foreground`}>{displayValue}</p>
-                {props.caption === undefined ? null : (
-                    <p className="mt-1 text-sm text-muted-foreground">{props.caption}</p>
-                )}
-                {hasTrend ? (
-                    <Chip
-                        className={`mt-3 ${trendLabel}${props.trendDirection === "down" ? " badge-pulse" : ""}`}
-                        color="accent"
-                        size="sm"
-                        variant="soft"
-                    >
-                        {props.trendLabel}
-                    </Chip>
+        <Card
+            className={[
+                "group h-full",
+                "border border-border/50",
+                "bg-surface/80 backdrop-blur-sm",
+                "shadow-sm transition-all duration-200",
+                "hover:border-primary/30 hover:shadow-md",
+            ].join(" ")}
+        >
+            <CardBody className="flex flex-col justify-between gap-3 p-4">
+                {/* Label */}
+                <p className={TYPOGRAPHY.bodyMuted}>{props.label}</p>
+
+                {/* Value + Trend */}
+                <div className="flex items-end justify-between gap-2">
+                    <p className="font-display text-3xl font-bold tracking-tight text-foreground">
+                        {displayValue}
+                    </p>
+
+                    {hasTrend ? (
+                        <TrendBadge direction={props.trendDirection} label={props.trendLabel} />
+                    ) : null}
+                </div>
+
+                {/* Caption */}
+                {props.caption !== undefined ? (
+                    <p className={TYPOGRAPHY.caption}>{props.caption}</p>
                 ) : null}
             </CardBody>
         </Card>
+    )
+}
+
+/**
+ * Параметры бейджа тренда.
+ */
+interface ITrendBadgeProps {
+    /** Направление тренда. */
+    readonly direction: TMetricTrendDirection
+    /** Текстовое значение тренда. */
+    readonly label: string
+}
+
+/**
+ * Компактный бейдж тренда с иконкой и цветовой индикацией.
+ *
+ * @param props Параметры бейджа.
+ * @returns Trend badge element.
+ */
+function TrendBadge(props: ITrendBadgeProps): ReactElement {
+    const config = resolveTrendConfig(props.direction)
+
+    return (
+        <span
+            className={[
+                "inline-flex items-center gap-0.5",
+                "rounded-md px-1.5 py-0.5",
+                "text-xs font-semibold",
+                config.bgClass,
+                config.textClass,
+            ].join(" ")}
+        >
+            <config.Icon aria-hidden="true" className="h-3.5 w-3.5" />
+            {props.label}
+        </span>
     )
 }
