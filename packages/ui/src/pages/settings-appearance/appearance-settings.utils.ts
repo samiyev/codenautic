@@ -8,6 +8,12 @@
 import type { IThemeLibraryProfileTheme } from "@/lib/theme/theme-library-profile-sync"
 import type { ThemeMode, ThemePresetId } from "@/lib/theme/theme-provider"
 import { isSurfaceToneId, type TSurfaceToneId } from "@/lib/theme/theme-surface-tones"
+import {
+    getWindowLocalStorage,
+    safeStorageGet,
+    safeStorageRemove,
+    safeStorageSet,
+} from "@/lib/utils/safe-storage"
 
 import {
     APPEARANCE_ACCENT_STORAGE_KEY,
@@ -35,6 +41,11 @@ import {
     SRGB_LINEAR_THRESHOLD,
     WCAG_LUMINANCE_OFFSET,
 } from "./appearance-settings.constants"
+
+/**
+ * Длина одного hex-канала в строковом представлении цвета (например "ff" = 2 символа).
+ */
+const HEX_CHANNEL_LENGTH = 2
 
 /**
  * @deprecated Алиас для TSurfaceToneId. Используй TSurfaceToneId напрямую.
@@ -102,39 +113,13 @@ export interface IThemeLibraryImportEnvelope {
 }
 
 /**
- * Безопасно получает Window.localStorage.
- *
- * @returns Storage или undefined если недоступен.
- */
-function getWindowLocalStorage(): Storage | undefined {
-    if (typeof window === "undefined") {
-        return undefined
-    }
-
-    try {
-        return window.localStorage
-    } catch {
-        return undefined
-    }
-}
-
-/**
  * Читает значение из localStorage по ключу.
  *
  * @param storageKey - Ключ в localStorage.
  * @returns Значение или undefined если ключ не найден или недоступен.
  */
 export function readLocalStorageItem(storageKey: string): string | undefined {
-    const storage = getWindowLocalStorage()
-    if (storage === undefined) {
-        return undefined
-    }
-
-    try {
-        return storage.getItem(storageKey) ?? undefined
-    } catch {
-        return undefined
-    }
+    return safeStorageGet(getWindowLocalStorage(), storageKey)
 }
 
 /**
@@ -144,16 +129,7 @@ export function readLocalStorageItem(storageKey: string): string | undefined {
  * @param value - Значение для записи.
  */
 export function writeLocalStorageItem(storageKey: string, value: string): void {
-    const storage = getWindowLocalStorage()
-    if (storage === undefined) {
-        return
-    }
-
-    try {
-        storage.setItem(storageKey, value)
-    } catch {
-        return
-    }
+    safeStorageSet(getWindowLocalStorage(), storageKey, value)
 }
 
 /**
@@ -162,16 +138,7 @@ export function writeLocalStorageItem(storageKey: string, value: string): void {
  * @param storageKey - Ключ в localStorage.
  */
 export function removeLocalStorageItem(storageKey: string): void {
-    const storage = getWindowLocalStorage()
-    if (storage === undefined) {
-        return
-    }
-
-    try {
-        storage.removeItem(storageKey)
-    } catch {
-        return
-    }
+    safeStorageRemove(getWindowLocalStorage(), storageKey)
 }
 
 /**
@@ -259,7 +226,7 @@ export function getRgbComponents(hex: string): {
     readonly r: number
 } {
     const normalized = hex.replace("#", "")
-    const r = Number.parseInt(normalized.slice(0, 2), 16)
+    const r = Number.parseInt(normalized.slice(0, HEX_CHANNEL_LENGTH), 16)
     const g = Number.parseInt(normalized.slice(2, 4), 16)
     const b = Number.parseInt(normalized.slice(4, 6), 16)
 

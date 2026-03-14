@@ -76,11 +76,17 @@ import {
 } from "./settings-appearance/appearance-settings.utils"
 
 /**
+ * Длина даты в ISO-строке (YYYY-MM-DD).
+ */
+const ISO_DATE_LENGTH = 10
+
+/**
  * Секция выбора языка интерфейса с preview форматирования.
  *
  * @returns Карточка выбора языка.
  */
 function LanguageSection(): ReactElement {
+    const { t } = useTranslation(["settings"])
     const { locale, setLocale } = useLocale()
 
     return (
@@ -89,7 +95,11 @@ function LanguageSection(): ReactElement {
                 <p className={TYPOGRAPHY.sectionTitle}>Language / Язык</p>
             </CardHeader>
             <CardBody className="space-y-3">
-                <div aria-label="Language selection" className="flex gap-2" role="radiogroup">
+                <div
+                    aria-label={t("settings:ariaLabel.appearance.languageSelection")}
+                    className="flex gap-2"
+                    role="radiogroup"
+                >
                     {SUPPORTED_LOCALES.map(
                         (localeOption): ReactElement => (
                             <Button
@@ -453,7 +463,7 @@ export function SettingsAppearancePage(): ReactElement {
         const jsonPayload = JSON.stringify(payload, null, 2)
         setThemeImportValue(jsonPayload)
         triggerJsonDownload(
-            `theme-library-${new Date().toISOString().slice(0, 10)}.json`,
+            `theme-library-${new Date().toISOString().slice(0, ISO_DATE_LENGTH)}.json`,
             jsonPayload,
         )
         showToastSuccess(t("settings:appearance.toast.themeLibraryExported"))
@@ -839,7 +849,9 @@ export function SettingsAppearancePage(): ReactElement {
                             </p>
                             <div className="flex items-center gap-3">
                                 <input
-                                    aria-label="Accent color picker"
+                                    aria-label={t(
+                                        "settings:ariaLabel.appearance.accentColorPicker",
+                                    )}
                                     className="h-10 w-14 cursor-pointer rounded-md border border-border bg-transparent p-1"
                                     type="color"
                                     value={accentColor}
@@ -860,7 +872,9 @@ export function SettingsAppearancePage(): ReactElement {
                                 })}
                             </label>
                             <input
-                                aria-label="Accent intensity slider"
+                                aria-label={t(
+                                    "settings:ariaLabel.appearance.accentIntensitySlider",
+                                )}
                                 className="w-full accent-primary"
                                 id="accent-intensity-slider"
                                 max={MAX_INTENSITY}
@@ -878,7 +892,7 @@ export function SettingsAppearancePage(): ReactElement {
                                 {t("settings:appearance.basePalette")}
                             </p>
                             <div
-                                aria-label="Base palette picker"
+                                aria-label={t("settings:ariaLabel.appearance.basePalettePicker")}
                                 className="flex flex-wrap gap-2"
                                 role="group"
                             >
@@ -915,7 +929,7 @@ export function SettingsAppearancePage(): ReactElement {
                                 {t("settings:appearance.globalRadius", { value: globalRadius })}
                             </label>
                             <input
-                                aria-label="Global radius slider"
+                                aria-label={t("settings:ariaLabel.appearance.globalRadiusSlider")}
                                 className="w-full accent-primary"
                                 id="global-radius-slider"
                                 max={MAX_RADIUS}
@@ -935,7 +949,7 @@ export function SettingsAppearancePage(): ReactElement {
                                 {t("settings:appearance.formRadius", { value: formRadius })}
                             </label>
                             <input
-                                aria-label="Form radius slider"
+                                aria-label={t("settings:ariaLabel.appearance.formRadiusSlider")}
                                 className="w-full accent-primary"
                                 id="form-radius-slider"
                                 max={MAX_FORM_RADIUS}
@@ -1030,7 +1044,9 @@ export function SettingsAppearancePage(): ReactElement {
                                 {t("settings:appearance.libraryThemes")}
                             </label>
                             <select
-                                aria-label="Theme library selection"
+                                aria-label={t(
+                                    "settings:ariaLabel.appearance.themeLibrarySelection",
+                                )}
                                 className={NATIVE_FORM.select}
                                 id="theme-library-selected"
                                 value={selectedThemeId}
@@ -1098,7 +1114,7 @@ export function SettingsAppearancePage(): ReactElement {
                             {t("settings:appearance.importExportJson")}
                         </p>
                         <textarea
-                            aria-label="Theme library json"
+                            aria-label={t("settings:ariaLabel.appearance.themeLibraryJson")}
                             className="min-h-28 w-full rounded-lg border border-border bg-surface-muted p-3 text-xs"
                             placeholder='{"version":1,"themes":[...]}'
                             value={themeImportValue}
@@ -1159,7 +1175,7 @@ export function SettingsAppearancePage(): ReactElement {
                                 {t("settings:appearance.formControls")}
                             </p>
                             <Input
-                                aria-label="Appearance preview input"
+                                aria-label={t("settings:ariaLabel.appearance.previewInput")}
                                 className="mt-2"
                                 placeholder="Preview input"
                                 style={{ borderRadius: `${formRadius}px` }}
