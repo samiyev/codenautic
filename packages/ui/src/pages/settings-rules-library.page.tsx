@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Card, CardBody, CardHeader, Chip, Input } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, Chip, Input } from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -83,9 +83,9 @@ const CATEGORY_OPTIONS: ReadonlyArray<"all" | TRuleCategory> = [
 
 function mapCategoryChipColor(
     category: TRuleCategory,
-): "default" | "primary" | "success" | "warning" {
+): "default" | "accent" | "success" | "warning" {
     if (category === "security") {
-        return "primary"
+        return "accent"
     }
     if (category === "architecture") {
         return "success"
@@ -235,12 +235,12 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             {t("settings:rulesLibrary.catalog")}
                         </p>
                     </CardHeader>
-                    <CardBody>
+                    <CardContent>
                         <p className="text-2xl font-semibold text-foreground">{rules.length}</p>
                         <p className="text-xs text-text-secondary">
                             {t("settings:rulesLibrary.totalRules")}
                         </p>
-                    </CardBody>
+                    </CardContent>
                 </Card>
                 <Card>
                     <CardHeader>
@@ -248,12 +248,12 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             {t("settings:rulesLibrary.imported")}
                         </p>
                     </CardHeader>
-                    <CardBody>
+                    <CardContent>
                         <p className="text-2xl font-semibold text-foreground">{importedCount}</p>
                         <p className="text-xs text-text-secondary">
                             {t("settings:rulesLibrary.rulesInActiveProfile")}
                         </p>
-                    </CardBody>
+                    </CardContent>
                 </Card>
                 <Card>
                     <CardHeader>
@@ -261,14 +261,14 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             {t("settings:rulesLibrary.custom")}
                         </p>
                     </CardHeader>
-                    <CardBody>
+                    <CardContent>
                         <p className="text-2xl font-semibold text-foreground">
                             {rules.filter((rule): boolean => rule.source === "custom").length}
                         </p>
                         <p className="text-xs text-text-secondary">
                             {t("settings:rulesLibrary.teamDefinedPolicyRules")}
                         </p>
-                    </CardBody>
+                    </CardContent>
                 </Card>
             </div>
 
@@ -278,13 +278,13 @@ export function SettingsRulesLibraryPage(): ReactElement {
                         {t("settings:rulesLibrary.browsePrebuiltRules")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[1fr_220px]">
                         <Input
-                            label={t("settings:rulesLibrary.searchRules")}
+                            aria-label={t("settings:rulesLibrary.searchRules")}
                             placeholder={t("settings:rulesLibrary.searchPlaceholder")}
                             value={searchQuery}
-                            onValueChange={setSearchQuery}
+                            onChange={(e): void => { setSearchQuery(e.target.value) }}
                         />
                         <select
                             aria-label={t("settings:ariaLabel.rulesLibrary.category")}
@@ -339,11 +339,11 @@ export function SettingsRulesLibraryPage(): ReactElement {
                                                 <Chip
                                                     color={mapCategoryChipColor(rule.category)}
                                                     size="sm"
-                                                    variant="flat"
+                                                    variant="soft"
                                                 >
                                                     {formatCategoryLabel(rule.category)}
                                                 </Chip>
-                                                <Chip size="sm" variant="bordered">
+                                                <Chip size="sm" variant="secondary">
                                                     {rule.source}
                                                 </Chip>
                                             </div>
@@ -352,10 +352,9 @@ export function SettingsRulesLibraryPage(): ReactElement {
                                             </p>
                                         </div>
                                         <Button
-                                            color="primary"
                                             isDisabled={isImported}
                                             size="sm"
-                                            variant={isImported ? "flat" : "solid"}
+                                            variant={isImported ? "secondary" : "primary"}
                                             onPress={(): void => {
                                                 handleImportRule(rule.id)
                                             }}
@@ -369,7 +368,7 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             )
                         })}
                     </ul>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <div className="grid gap-4 xl:grid-cols-2">
@@ -379,18 +378,18 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             {t("settings:rulesLibrary.createCustomRule")}
                         </p>
                     </CardHeader>
-                    <CardBody className="space-y-3">
+                    <CardContent className="space-y-3">
                         <Input
-                            label={t("settings:rulesLibrary.ruleName")}
+                            aria-label={t("settings:rulesLibrary.ruleName")}
                             placeholder={t("settings:rulesLibrary.ruleNamePlaceholder")}
                             value={customName}
-                            onValueChange={setCustomName}
+                            onChange={(e): void => { setCustomName(e.target.value) }}
                         />
                         <Input
-                            label={t("settings:rulesLibrary.description")}
+                            aria-label={t("settings:rulesLibrary.description")}
                             placeholder={t("settings:rulesLibrary.descriptionPlaceholder")}
                             value={customDescription}
-                            onValueChange={setCustomDescription}
+                            onChange={(e): void => { setCustomDescription(e.target.value) }}
                         />
                         <select
                             aria-label={t("settings:ariaLabel.rulesLibrary.category")}
@@ -423,17 +422,17 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             </option>
                         </select>
                         <Input
-                            label={t("settings:rulesLibrary.ruleExpression")}
+                            aria-label={t("settings:rulesLibrary.ruleExpression")}
                             placeholder={t("settings:rulesLibrary.ruleExpressionPlaceholder")}
                             value={customExpression}
-                            onValueChange={setCustomExpression}
+                            onChange={(e): void => { setCustomExpression(e.target.value) }}
                         />
                         <div className="flex justify-end">
-                            <Button color="primary" onPress={handleCreateCustomRule}>
+                            <Button variant="primary" onPress={handleCreateCustomRule}>
                                 {t("settings:rulesLibrary.createCustomRule")}
                             </Button>
                         </div>
-                    </CardBody>
+                    </CardContent>
                 </Card>
 
                 <Card>
@@ -442,7 +441,7 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             {t("settings:rulesLibrary.testRules")}
                         </p>
                     </CardHeader>
-                    <CardBody className="space-y-3">
+                    <CardContent className="space-y-3">
                         <select
                             aria-label={t("settings:ariaLabel.rulesLibrary.ruleToTest")}
                             className={NATIVE_FORM.select}
@@ -482,24 +481,21 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             />
                         </div>
                         <div className="flex justify-end">
-                            <Button variant="flat" onPress={handleTestRule}>
+                            <Button variant="secondary" onPress={handleTestRule}>
                                 {t("settings:rulesLibrary.testSelectedRule")}
                             </Button>
                         </div>
                         {testResult === undefined ? null : (
-                            <Alert
-                                color={testResult.status === "passed" ? "success" : "warning"}
-                                title={
-                                    testResult.status === "passed"
+                            <Alert status={testResult.status === "passed" ? "success" : "warning"}>
+                                <Alert.Title>
+                                    {testResult.status === "passed"
                                         ? t("settings:rulesLibrary.ruleMatched")
-                                        : t("settings:rulesLibrary.ruleNotMatched")
-                                }
-                                variant="flat"
-                            >
-                                {testResult.message}
+                                        : t("settings:rulesLibrary.ruleNotMatched")}
+                                </Alert.Title>
+                                <Alert.Description>{testResult.message}</Alert.Description>
                             </Alert>
                         )}
-                    </CardBody>
+                    </CardContent>
                 </Card>
             </div>
         </FormLayout>

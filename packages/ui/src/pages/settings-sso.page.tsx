@@ -1,7 +1,7 @@
 import { type ReactElement, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Card, CardBody, CardHeader, Input, Textarea } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, Input, TextArea } from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -140,53 +140,53 @@ export function SettingsSsoPage(): ReactElement {
                             {t("settings:sso.samlConfiguration")}
                         </p>
                     </CardHeader>
-                    <CardBody className="space-y-3">
+                    <CardContent className="space-y-3">
                         <Input
-                            label={t("settings:sso.samlEntityId")}
+                            aria-label={t("settings:sso.samlEntityId")}
                             placeholder="urn:codenautic:sp:acme"
                             value={samlConfig.entityId}
-                            onValueChange={(value): void => {
+                            onChange={(e): void => {
                                 setSamlConfig(
                                     (previous): ISamlConfigState => ({
                                         ...previous,
-                                        entityId: value,
+                                        entityId: e.target.value,
                                     }),
                                 )
                             }}
                         />
                         <Input
-                            label={t("settings:sso.samlSsoUrl")}
+                            aria-label={t("settings:sso.samlSsoUrl")}
                             placeholder="https://idp.acme.dev/sso/saml"
                             value={samlConfig.ssoUrl}
-                            onValueChange={(value): void => {
+                            onChange={(e): void => {
                                 setSamlConfig(
                                     (previous): ISamlConfigState => ({
                                         ...previous,
-                                        ssoUrl: value,
+                                        ssoUrl: e.target.value,
                                     }),
                                 )
                             }}
                         />
-                        <Textarea
-                            label={t("settings:sso.x509Certificate")}
-                            minRows={5}
+                        <TextArea
+                            aria-label={t("settings:sso.x509Certificate")}
+                            className="min-h-[120px]"
                             placeholder="-----BEGIN CERTIFICATE-----"
                             value={samlConfig.x509Certificate}
-                            onValueChange={(value): void => {
+                            onChange={(e): void => {
                                 setSamlConfig(
                                     (previous): ISamlConfigState => ({
                                         ...previous,
-                                        x509Certificate: value,
+                                        x509Certificate: e.target.value,
                                     }),
                                 )
                             }}
                         />
                         <div className="flex flex-wrap items-center gap-2">
-                            <Button color="primary" onPress={handleSaveSaml}>
+                            <Button variant="primary" onPress={handleSaveSaml}>
                                 {t("settings:sso.saveSamlConfig")}
                             </Button>
                             <Button
-                                variant="flat"
+                                variant="secondary"
                                 onPress={(): void => {
                                     handleTestSso("saml")
                                 }}
@@ -195,15 +195,12 @@ export function SettingsSsoPage(): ReactElement {
                             </Button>
                         </div>
                         {isSamlSaved ? (
-                            <Alert
-                                color="success"
-                                title={t("settings:sso.samlConfigSavedTitle")}
-                                variant="flat"
-                            >
-                                {t("settings:sso.samlConfigSavedDescription")}
+                            <Alert status="success">
+                                <Alert.Title>{t("settings:sso.samlConfigSavedTitle")}</Alert.Title>
+                                <Alert.Description>{t("settings:sso.samlConfigSavedDescription")}</Alert.Description>
                             </Alert>
                         ) : null}
-                    </CardBody>
+                    </CardContent>
                 </Card>
 
                 <Card>
@@ -212,43 +209,43 @@ export function SettingsSsoPage(): ReactElement {
                             {t("settings:sso.oidcConfiguration")}
                         </p>
                     </CardHeader>
-                    <CardBody className="space-y-3">
+                    <CardContent className="space-y-3">
                         <Input
-                            label={t("settings:sso.oidcIssuerUrl")}
+                            aria-label={t("settings:sso.oidcIssuerUrl")}
                             placeholder="https://auth.acme.dev/realms/platform"
                             value={oidcConfig.issuerUrl}
-                            onValueChange={(value): void => {
+                            onChange={(e): void => {
                                 setOidcConfig(
                                     (previous): IOidcConfigState => ({
                                         ...previous,
-                                        issuerUrl: value,
+                                        issuerUrl: e.target.value,
                                     }),
                                 )
                             }}
                         />
                         <Input
-                            label={t("settings:sso.oidcClientId")}
+                            aria-label={t("settings:sso.oidcClientId")}
                             placeholder="codenautic-web"
                             value={oidcConfig.clientId}
-                            onValueChange={(value): void => {
+                            onChange={(e): void => {
                                 setOidcConfig(
                                     (previous): IOidcConfigState => ({
                                         ...previous,
-                                        clientId: value,
+                                        clientId: e.target.value,
                                     }),
                                 )
                             }}
                         />
                         <Input
-                            label={t("settings:sso.oidcClientSecret")}
+                            aria-label={t("settings:sso.oidcClientSecret")}
                             placeholder="client secret"
                             type="password"
                             value={oidcConfig.clientSecret}
-                            onValueChange={(value): void => {
+                            onChange={(e): void => {
                                 setOidcConfig(
                                     (previous): IOidcConfigState => ({
                                         ...previous,
-                                        clientSecret: value,
+                                        clientSecret: e.target.value,
                                     }),
                                 )
                             }}
@@ -262,11 +259,11 @@ export function SettingsSsoPage(): ReactElement {
                             })}
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
-                            <Button color="primary" onPress={handleSaveOidc}>
+                            <Button variant="primary" onPress={handleSaveOidc}>
                                 {t("settings:sso.saveOidcConfig")}
                             </Button>
                             <Button
-                                variant="flat"
+                                variant="secondary"
                                 onPress={(): void => {
                                     handleTestSso("oidc")
                                 }}
@@ -275,29 +272,23 @@ export function SettingsSsoPage(): ReactElement {
                             </Button>
                         </div>
                         {isOidcSaved ? (
-                            <Alert
-                                color="success"
-                                title={t("settings:sso.oidcConfigSavedTitle")}
-                                variant="flat"
-                            >
-                                {t("settings:sso.oidcConfigSavedDescription")}
+                            <Alert status="success">
+                                <Alert.Title>{t("settings:sso.oidcConfigSavedTitle")}</Alert.Title>
+                                <Alert.Description>{t("settings:sso.oidcConfigSavedDescription")}</Alert.Description>
                             </Alert>
                         ) : null}
-                    </CardBody>
+                    </CardContent>
                 </Card>
             </div>
 
             {testState === undefined ? null : (
-                <Alert
-                    color={testState.status === "passed" ? "success" : "warning"}
-                    title={
-                        testState.status === "passed"
+                <Alert status={testState.status === "passed" ? "success" : "warning"}>
+                    <Alert.Title>
+                        {testState.status === "passed"
                             ? t("settings:sso.connectivityCheckPassed")
-                            : t("settings:sso.connectivityCheckFailed")
-                    }
-                    variant="flat"
-                >
-                    {testState.message}
+                            : t("settings:sso.connectivityCheckFailed")}
+                    </Alert.Title>
+                    <Alert.Description>{testState.message}</Alert.Description>
                 </Alert>
             )}
         </FormLayout>
