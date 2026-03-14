@@ -5,7 +5,7 @@ import { AchievementsPanel } from "@/components/graphs/achievements-panel"
 import { SprintSummaryCard } from "@/components/graphs/sprint-summary-card"
 import { TeamLeaderboard } from "@/components/graphs/team-leaderboard"
 import { TrendTimelineWidget } from "@/components/graphs/trend-timeline-widget"
-import { Card, CardBody, CardHeader } from "@/components/ui"
+import { Card, CardContent, CardHeader } from "@heroui/react"
 
 import type { ICodeCityDashboardState } from "../use-code-city-dashboard-state"
 
@@ -34,7 +34,7 @@ export function GamificationSection({ state }: IGamificationSectionProps): React
                         {t("code-city:gamification.achievementsPanel")}
                     </p>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <AchievementsPanel
                         achievements={state.sprintAchievements}
                         activeAchievementId={state.activeAchievementId}
@@ -52,7 +52,7 @@ export function GamificationSection({ state }: IGamificationSectionProps): React
                             state.markAreaExplored("city-3d")
                         }}
                     />
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
@@ -61,7 +61,7 @@ export function GamificationSection({ state }: IGamificationSectionProps): React
                         {t("code-city:gamification.teamLeaderboard")}
                     </p>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <TeamLeaderboard
                         activeOwnerId={state.activeTeamLeaderboardOwnerId}
                         entries={state.teamLeaderboardEntries}
@@ -79,7 +79,7 @@ export function GamificationSection({ state }: IGamificationSectionProps): React
                             state.markAreaExplored("city-3d")
                         }}
                     />
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
@@ -88,7 +88,7 @@ export function GamificationSection({ state }: IGamificationSectionProps): React
                         {t("code-city:gamification.sprintSummaryCard")}
                     </p>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <SprintSummaryCard
                         activeMetricId={state.activeSprintSummaryMetricId}
                         model={state.sprintSummaryModel}
@@ -108,7 +108,7 @@ export function GamificationSection({ state }: IGamificationSectionProps): React
                             state.markAreaExplored("city-3d")
                         }}
                     />
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
@@ -117,7 +117,7 @@ export function GamificationSection({ state }: IGamificationSectionProps): React
                         {t("code-city:gamification.trendTimelineWidget")}
                     </p>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <TrendTimelineWidget
                         activeEntryId={state.activeTrendTimelineEntryId}
                         entries={state.trendTimelineEntries}
@@ -137,7 +137,7 @@ export function GamificationSection({ state }: IGamificationSectionProps): React
                             state.markAreaExplored("city-3d")
                         }}
                     />
-                </CardBody>
+                </CardContent>
             </Card>
         </>
     )

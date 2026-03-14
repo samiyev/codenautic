@@ -2,7 +2,7 @@ import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
 import { CausalOverlaySelector } from "@/components/graphs/causal-overlay-selector"
-import { Card, CardBody, CardHeader } from "@/components/ui"
+import { Card, CardContent, CardHeader } from "@heroui/react"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 
 import { CODE_CITY_DASHBOARD_METRICS } from "../code-city-dashboard-mock-data"
@@ -32,7 +32,7 @@ export function ControlsSection({ state }: IControlsSectionProps): ReactElement 
                     {t("code-city:controls.dashboardTitle")}
                 </p>
             </CardHeader>
-            <CardBody className="space-y-3">
+            <CardContent className="space-y-3">
                 <p className="text-sm text-muted-foreground">{state.currentProfile.description}</p>
                 <div className="grid gap-3 md:grid-cols-2">
                     <label className="space-y-1" htmlFor="dashboard-repository">
@@ -80,7 +80,7 @@ export function ControlsSection({ state }: IControlsSectionProps): ReactElement 
                     value={state.overlayMode}
                     onChange={state.handleOverlayModeChange}
                 />
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
