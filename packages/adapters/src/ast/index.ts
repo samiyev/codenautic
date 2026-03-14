@@ -10,6 +10,12 @@ export {
     type IAstAdvancedCodeAnalysisErrorDetails,
 } from "./ast-advanced-code-analysis.error"
 export {
+    AST_CODE_DEDUPLICATION_ERROR_CODE,
+    AstCodeDeduplicationError,
+    type AstCodeDeduplicationErrorCode,
+    type IAstCodeDeduplicationErrorDetails,
+} from "./ast-code-deduplication.error"
+export {
     AST_CODE_CHUNK_EMBEDDING_GENERATOR_ERROR_CODE,
     AstCodeChunkEmbeddingGeneratorError,
     type AstCodeChunkEmbeddingGeneratorErrorCode,
@@ -102,6 +108,15 @@ export {
     type IAstAdvancedCodeAnalysisSummary,
     type IAstAdvancedCodePattern,
 } from "./ast-advanced-code-analysis.service"
+export {
+    AstCodeDeduplicationService,
+    type IAstCodeDeduplicationInput,
+    type IAstCodeDeduplicationResult,
+    type IAstCodeDeduplicationService,
+    type IAstCodeDeduplicationServiceOptions,
+    type IAstCodeDeduplicationSummary,
+    type IAstCodeDuplicatePair,
+} from "./ast-code-deduplication.service"
 export {
     AST_CODE_GRAPH_IMPACT_ANALYSIS_DIRECTION,
     AstCodeGraphImpactAnalysisService,
