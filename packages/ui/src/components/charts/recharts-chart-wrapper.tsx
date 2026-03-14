@@ -1,6 +1,6 @@
 import { type ReactElement, type ReactNode, useMemo } from "react"
 
-import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 type TChartPoint = object
@@ -275,7 +275,7 @@ export function RechartsChartWrapper<TPoint extends TChartPoint>(
             <CardHeader>
                 <h3 className={TYPOGRAPHY.subsectionTitle}>{props.title}</h3>
             </CardHeader>
-            <CardBody>
+            <CardContent>
                 {props.isLoading === true ? (
                     <p className="text-sm text-muted-foreground">
                         {props.loadingText ?? "Loading chart..."}
@@ -283,7 +283,7 @@ export function RechartsChartWrapper<TPoint extends TChartPoint>(
                 ) : (
                     <div className="space-y-2">
                         {scaleResult.isAggregated === true ? (
-                            <Alert color="warning">
+                            <Alert status="warning">
                                 <div className="space-y-2">
                                     <p className="text-sm">
                                         Data aggregated for interactive rendering. Showing{" "}
@@ -294,10 +294,9 @@ export function RechartsChartWrapper<TPoint extends TChartPoint>(
                                     <div className="flex flex-wrap items-center gap-2">
                                         {props.onRequestServerAggregation === undefined ? null : (
                                             <Button
-                                                color="warning"
                                                 onPress={props.onRequestServerAggregation}
                                                 size="sm"
-                                                variant="flat"
+                                                variant="secondary"
                                             >
                                                 Request server aggregation
                                             </Button>
@@ -305,7 +304,7 @@ export function RechartsChartWrapper<TPoint extends TChartPoint>(
                                         <Button
                                             onPress={handleExportRawData}
                                             size="sm"
-                                            variant="light"
+                                            variant="ghost"
                                         >
                                             {props.exportRawDataLabel ?? "Export raw CSV"}
                                         </Button>
@@ -316,7 +315,7 @@ export function RechartsChartWrapper<TPoint extends TChartPoint>(
                         {content}
                     </div>
                 )}
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
