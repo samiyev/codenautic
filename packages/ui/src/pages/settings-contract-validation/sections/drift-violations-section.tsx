@@ -2,7 +2,7 @@ import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
 import { CodeCityTreemap } from "@/components/graphs/codecity-treemap"
-import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader } from "@heroui/react"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -35,7 +35,7 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>Drift analysis report</p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <p className="text-sm text-text-secondary">
                         Review architecture drift violations with severity and affected files. Use
                         filters, sorting and export to share actionable reports.
@@ -130,7 +130,7 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                         </label>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                        <Button color="primary" onPress={state.handleExportDriftReport}>
+                        <Button variant="primary" onPress={state.handleExportDriftReport}>
                             Export drift report
                         </Button>
                         <span className="text-xs text-text-secondary">
@@ -139,8 +139,9 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                         </span>
                     </div>
                     {state.filteredSortedDriftViolations.length === 0 ? (
-                        <Alert color="warning" title="No drift violations found" variant="flat">
-                            Change filters or search query to see drift analysis data.
+                        <Alert status="warning">
+                            <Alert.Title>No drift violations found</Alert.Title>
+                            <Alert.Description>Change filters or search query to see drift analysis data.</Alert.Description>
                         </Alert>
                     ) : (
                         <ul
@@ -172,8 +173,9 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                             )}
                         </ul>
                     )}
-                    <Alert color="primary" title="Drift export status" variant="flat">
-                        {state.driftExportStatus}
+                    <Alert status="accent">
+                        <Alert.Title>Drift export status</Alert.Title>
+                        <Alert.Description>{state.driftExportStatus}</Alert.Description>
                     </Alert>
                     <pre
                         aria-label={t(
@@ -183,14 +185,14 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                     >
                         {state.driftExportPayload}
                     </pre>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>Drift overlay CodeCity</p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <p className="text-sm text-text-secondary">
                         Files violating architecture blueprint are highlighted in red. Click any
                         highlighted file to inspect related drift violations.
@@ -212,13 +214,12 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                         {DRIFT_CODE_CITY_FILES.map(
                             (file): ReactElement => (
                                 <Button
-                                    color="primary"
                                     key={file.id}
                                     size="sm"
                                     variant={
                                         state.selectedDriftOverlayFileId === file.id
-                                            ? "solid"
-                                            : "flat"
+                                            ? "primary"
+                                            : "secondary"
                                     }
                                     onPress={(): void => {
                                         state.setSelectedDriftOverlayFileId(file.id)
@@ -230,11 +231,14 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                         )}
                     </div>
                     {state.selectedDriftOverlayFile === undefined ? (
-                        <Alert color="primary" title="Drift violation details" variant="flat">
-                            Select a highlighted file in the treemap to view violation details.
+                        <Alert status="accent">
+                            <Alert.Title>Drift violation details</Alert.Title>
+                            <Alert.Description>Select a highlighted file in the treemap to view violation details.</Alert.Description>
                         </Alert>
                     ) : (
-                        <Alert color="danger" title="Drift violation details" variant="flat">
+                        <Alert status="danger">
+                            <Alert.Title>Drift violation details</Alert.Title>
+                            <Alert.Description>
                             <p className="mb-2 text-sm">
                                 File:{" "}
                                 <span className="font-semibold">
@@ -266,9 +270,10 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                                     )}
                                 </ul>
                             )}
+                            </Alert.Description>
                         </Alert>
                     )}
-                </CardBody>
+                </CardContent>
             </Card>
         </>
     )

@@ -2,9 +2,9 @@ import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 import { CartesianGrid, Line, LineChart, ReferenceDot, Tooltip, XAxis, YAxis } from "recharts"
 
-import { Alert, Card, CardBody, CardHeader } from "@/components/ui"
+import { Alert, Card, CardContent, CardHeader } from "@heroui/react"
 import { ChartContainer } from "@/components/charts/chart-container"
-import { CHART_GRID_DASH, CHART_STROKE_WIDTH } from "@/lib/constants/chart-constants"
+import { CHART_GRID_DASH, CHART_STROKE_WIDTH } from "@/lib/constants/chart-recharts-defaults"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 import {
@@ -40,7 +40,7 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>Blueprint vs reality view</p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <p className="text-sm text-text-secondary">
                         Compare intended architecture from blueprint with actual runtime structure.
                         Differences are color-coded to highlight missing and unexpected modules.
@@ -107,8 +107,9 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                             </ul>
                         </div>
                     </div>
-                    <Alert color="primary" title="Difference summary" variant="flat">
-                        {state.architectureDifferenceSummary}
+                    <Alert status="accent">
+                        <Alert.Title>Difference summary</Alert.Title>
+                        <Alert.Description>{state.architectureDifferenceSummary}</Alert.Description>
                     </Alert>
                     <ul
                         aria-label={t(
@@ -139,14 +140,14 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                             ),
                         )}
                     </ul>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>Drift trend chart</p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <p className="text-sm text-text-secondary">
                         Drift score trend over time with architecture change annotations.
                     </p>
@@ -195,8 +196,9 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                             )}
                         </LineChart>
                     </ChartContainer>
-                    <Alert color="primary" title="Trend summary" variant="flat">
-                        {state.driftTrendSummary}
+                    <Alert status="accent">
+                        <Alert.Title>Trend summary</Alert.Title>
+                        <Alert.Description>{state.driftTrendSummary}</Alert.Description>
                     </Alert>
                     <ul
                         aria-label={t(
@@ -213,7 +215,7 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                             ),
                         )}
                     </ul>
-                </CardBody>
+                </CardContent>
             </Card>
         </>
     )
