@@ -543,11 +543,7 @@ function resolveRoute(pathname: string): INavigationRouteEntry | undefined {
  * @param t Функция перевода.
  * @returns Переведённая строка.
  */
-function translateDynamicKey(
-    fullKey: string,
-    t: TFunction<ReadonlyArray<"navigation">>,
-): string {
-     
+function translateDynamicKey(fullKey: string, t: TFunction<ReadonlyArray<"navigation">>): string {
     return (t as unknown as (key: string) => string)(fullKey)
 }
 
@@ -558,10 +554,7 @@ function translateDynamicKey(
  * @param t Функция перевода.
  * @returns Переведённая метка.
  */
-function translateBreadcrumbKey(
-    key: string,
-    t: TFunction<ReadonlyArray<"navigation">>,
-): string {
+function translateBreadcrumbKey(key: string, t: TFunction<ReadonlyArray<"navigation">>): string {
     return translateDynamicKey(`navigation:breadcrumb.${key}`, t)
 }
 
@@ -600,10 +593,7 @@ export function getBreadcrumbs(
 ): ReadonlyArray<string> {
     const route = resolveRoute(pathname)
     if (route === undefined) {
-        return [
-            translateBreadcrumbKey("dashboard", t),
-            translateBreadcrumbKey("unknownRoute", t),
-        ]
+        return [translateBreadcrumbKey("dashboard", t), translateBreadcrumbKey("unknownRoute", t)]
     }
 
     return route.breadcrumbKeys.map((key): string => translateBreadcrumbKey(key, t))
