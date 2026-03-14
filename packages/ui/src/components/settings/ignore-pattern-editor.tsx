@@ -80,7 +80,7 @@ export function IgnorePatternEditor(props: IIgnorePatternEditorProps): ReactElem
                     })}
                 </p>
             </div>
-            <Button type="submit" variant="solid">
+            <Button color="primary" type="submit" variant="solid">
                 {t("settings:ignorePatternEditor.saveIgnorePatterns")}
             </Button>
         </form>
