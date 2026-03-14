@@ -31,12 +31,12 @@ const TEST_MODEL = {
         {
             color: "#0284c7",
             fileCount: 6,
-            ownerName: "Alice Rivera",
+            ownerName: "Neo",
         },
         {
             color: "#0ea5e9",
             fileCount: 4,
-            ownerName: "Max H.",
+            ownerName: "Trinity",
         },
     ],
     districts: [
@@ -64,7 +64,7 @@ describe("KnowledgeMapExportWidget", (): void => {
         expect(screen.getByLabelText("Knowledge map metadata")).not.toBeNull()
         expect(screen.getByText("Repository: platform-team/api-gateway")).not.toBeNull()
         expect(screen.getByLabelText("Knowledge map legend")).not.toBeNull()
-        expect(screen.getByText("Alice Rivera · files 6")).not.toBeNull()
+        expect(screen.getByText("Neo · files 6")).not.toBeNull()
         expect(screen.getByText("src/api · bus factor 1 · Critical")).not.toBeNull()
     })
 
