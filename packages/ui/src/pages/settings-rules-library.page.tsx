@@ -2,6 +2,7 @@ import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input } from "@/components/ui"
+import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -219,11 +220,10 @@ export function SettingsRulesLibraryPage(): ReactElement {
     }
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:rulesLibrary.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("settings:rulesLibrary.pageSubtitle")}
-            </p>
+        <FormLayout
+            title={t("settings:rulesLibrary.pageTitle")}
+            description={t("settings:rulesLibrary.pageSubtitle")}
+        >
 
             <div className="grid gap-4 md:grid-cols-3">
                 <Card>
@@ -332,6 +332,7 @@ export function SettingsRulesLibraryPage(): ReactElement {
                                             </p>
                                         </div>
                                         <Button
+                                            color="primary"
                                             isDisabled={isImported}
                                             size="sm"
                                             variant={isImported ? "flat" : "solid"}
@@ -396,7 +397,7 @@ export function SettingsRulesLibraryPage(): ReactElement {
                             onValueChange={setCustomExpression}
                         />
                         <div className="flex justify-end">
-                            <Button onPress={handleCreateCustomRule}>{t("settings:rulesLibrary.createCustomRule")}</Button>
+                            <Button color="primary" onPress={handleCreateCustomRule}>{t("settings:rulesLibrary.createCustomRule")}</Button>
                         </div>
                     </CardBody>
                 </Card>
@@ -465,6 +466,6 @@ export function SettingsRulesLibraryPage(): ReactElement {
                     </CardBody>
                 </Card>
             </div>
-        </section>
+        </FormLayout>
     )
 }
