@@ -101,18 +101,19 @@ export function ColumnCard(props: IColumnCardProps): ReactElement {
                             : t("common:dataTable.show")}
                     </Button>
                 ) : null}
-                <Tooltip content={t("common:dataTable.moveLeft")}>
+                <Tooltip>
                     <Button
                         aria-label={t("common:dataTable.moveLeft")}
                         isDisabled={props.index === 0}
                         size="sm"
+
                         variant="flat"
                         onPress={props.onMoveLeft}
                     >
                         ←
                     </Button>
                 </Tooltip>
-                <Tooltip content={t("common:dataTable.moveRight")}>
+                <Tooltip>
                     <Button
                         aria-label={t("common:dataTable.moveRight")}
                         isDisabled={props.index === props.totalColumns - 1}
