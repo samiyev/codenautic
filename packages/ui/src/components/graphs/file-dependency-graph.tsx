@@ -1,7 +1,7 @@
-import { type ReactElement, useMemo, useState } from "react"
+import { type ChangeEvent, type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button, Card, CardBody, CardHeader, Input } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, Input } from "@heroui/react"
 import { XyFlowGraph } from "@/components/graphs/xyflow-graph"
 import { useDynamicTranslation } from "@/lib/i18n"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -309,9 +309,9 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
         return (
             <Card aria-label={title}>
                 <CardHeader>{title}</CardHeader>
-                <CardBody>
+                <CardContent>
                     <p>{emptyStateLabel}</p>
-                </CardBody>
+                </CardContent>
             </Card>
         )
     }
@@ -328,18 +328,17 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
                         aria-label={t("code-city:fileDependency.ariaLabelFilterFiles")}
                         placeholder={t("code-city:fileDependency.placeholderFilter")}
                         value={state.query}
-                        onValueChange={(nextQuery): void => {
+                        onChange={(event: ChangeEvent<HTMLInputElement>): void => {
                             setState((previousState) => ({
                                 ...previousState,
-                                query: nextQuery,
+                                query: event.target.value,
                             }))
                         }}
                     />
                     {state.query.length > 0 ? (
                         <Button
-                            variant="flat"
-                            color="default"
-                            onPress={(): void => {
+                            variant="secondary"
+                                                        onPress={(): void => {
                                 setState((previousState) => ({
                                     ...previousState,
                                     query: "",
@@ -350,9 +349,8 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
                         </Button>
                     ) : null}
                     <Button
-                        color={state.showImpactPaths ? "success" : "default"}
                         isDisabled={state.selectedNodeId === undefined}
-                        variant={state.showImpactPaths ? "flat" : "bordered"}
+                        variant={state.showImpactPaths ? "secondary" : "outline"}
                         onPress={(): void => {
                             setState((previousState) => ({
                                 ...previousState,
@@ -364,7 +362,7 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
                     </Button>
                 </div>
             </CardHeader>
-            <CardBody className="gap-4">
+            <CardContent className="gap-4">
                 {isEmptyState ? (
                     <p>{emptyStateLabel}</p>
                 ) : (
@@ -451,7 +449,7 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
                         </div>
                     )}
                 </section>
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
