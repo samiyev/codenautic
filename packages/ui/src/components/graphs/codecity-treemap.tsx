@@ -1,7 +1,7 @@
 import { type KeyboardEvent, type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader } from "@heroui/react"
 import { useDynamicTranslation } from "@/lib/i18n"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -688,9 +688,9 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                 <CardHeader>
                     <h3 className={TYPOGRAPHY.subsectionTitle}>{title}</h3>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <p>{emptyStateLabel}</p>
-                </CardBody>
+                </CardContent>
             </Card>
         )
     }
@@ -703,13 +703,13 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                     <p className="text-sm text-foreground-500">
                         {t("code-city:treemap.noFilesForPackage")}
                     </p>
-                    <Button color="primary" onPress={handleResetSelection}>
+                    <Button variant="primary" onPress={handleResetSelection}>
                         Back
                     </Button>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <p>{emptyStateLabel}</p>
-                </CardBody>
+                </CardContent>
             </Card>
         )
     }
@@ -742,7 +742,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                     </p>
                     <div className="flex flex-wrap items-end gap-2">
                         {showBackButton ? (
-                            <Button color="primary" onPress={handleResetSelection} size="sm">
+                            <Button variant="primary" onPress={handleResetSelection} size="sm">
                                 Back
                             </Button>
                         ) : null}
@@ -885,7 +885,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                 aria-pressed={isTemporalCouplingOverlayEnabled}
                                 onPress={handleTemporalCouplingOverlayToggle}
                                 size="sm"
-                                variant="flat"
+                                variant="secondary"
                             >
                                 {temporalCouplingToggleLabel}
                             </Button>
@@ -894,7 +894,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                     ) : null}
                 </div>
             </CardHeader>
-            <CardBody>
+            <CardContent>
                 <div
                     aria-label={t("code-city:treemap.ariaTreemap")}
                     className="relative"
@@ -1027,7 +1027,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                         </div>
                     )}
                 </div>
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }

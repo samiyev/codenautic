@@ -1,17 +1,4 @@
-import {
-    BUILDING_COLOR_CRITICAL_COVERAGE,
-    BUILDING_COLOR_HIGH_COVERAGE,
-    BUILDING_COLOR_LOW_COVERAGE,
-    BUILDING_COLOR_MEDIUM_COVERAGE,
-    BUILDING_COLOR_UNDEFINED_COVERAGE,
-    BUG_EMISSION_COLOR_HIGH,
-    BUG_EMISSION_COLOR_LOW,
-    BUG_EMISSION_COLOR_MEDIUM,
-    IMPACT_EMISSIVE_CHANGED,
-    IMPACT_EMISSIVE_IMPACTED,
-    IMPACT_EMISSIVE_NEUTRAL,
-    IMPACT_EMISSIVE_RIPPLE,
-} from "@/lib/constants/codecity-colors"
+import { CODECITY_PALETTE } from "@/lib/constants/codecity-colors"
 
 import type {
     IBugEmissionSettings,
@@ -30,18 +17,18 @@ import type {
  */
 export function resolveCodeCityBuildingColor(coverage: number | undefined): string {
     if (coverage === undefined) {
-        return BUILDING_COLOR_UNDEFINED_COVERAGE
+        return CODECITY_PALETTE.coverage.undefined
     }
     if (coverage >= 85) {
-        return BUILDING_COLOR_HIGH_COVERAGE
+        return CODECITY_PALETTE.coverage.high
     }
     if (coverage >= 65) {
-        return BUILDING_COLOR_MEDIUM_COVERAGE
+        return CODECITY_PALETTE.coverage.medium
     }
     if (coverage >= 45) {
-        return BUILDING_COLOR_LOW_COVERAGE
+        return CODECITY_PALETTE.coverage.low
     }
-    return BUILDING_COLOR_CRITICAL_COVERAGE
+    return CODECITY_PALETTE.coverage.critical
 }
 
 /**
@@ -57,20 +44,20 @@ export function resolveCodeCityBugEmissionSettings(
 ): IBugEmissionSettings {
     if (totalBugCount >= 9) {
         return {
-            color: BUG_EMISSION_COLOR_HIGH,
+            color: CODECITY_PALETTE.bug.high,
             particleCount: 6,
             pulseStrength: recentBugCount > 0 ? 1 : 0.4,
         }
     }
     if (totalBugCount >= 5) {
         return {
-            color: BUG_EMISSION_COLOR_MEDIUM,
+            color: CODECITY_PALETTE.bug.medium,
             particleCount: 4,
             pulseStrength: recentBugCount > 0 ? 0.9 : 0.3,
         }
     }
     return {
-        color: BUG_EMISSION_COLOR_LOW,
+        color: CODECITY_PALETTE.bug.low,
         particleCount: 2,
         pulseStrength: recentBugCount > 0 ? 0.75 : 0.2,
     }
@@ -142,7 +129,7 @@ export function resolveCodeCityBuildingImpactProfile(
     if (impactState === "changed") {
         return {
             baseIntensity: 0.3,
-            emissive: IMPACT_EMISSIVE_CHANGED,
+            emissive: CODECITY_PALETTE.impact.changed,
             pulseAmplitude: 0.52,
             pulseSpeed: 3.8,
             rippleLift: 0,
@@ -152,7 +139,7 @@ export function resolveCodeCityBuildingImpactProfile(
     if (impactState === "impacted") {
         return {
             baseIntensity: 0.25,
-            emissive: IMPACT_EMISSIVE_IMPACTED,
+            emissive: CODECITY_PALETTE.impact.impacted,
             pulseAmplitude: 0.38,
             pulseSpeed: 3.1,
             rippleLift: 0,
@@ -162,7 +149,7 @@ export function resolveCodeCityBuildingImpactProfile(
     if (impactState === "ripple") {
         return {
             baseIntensity: 0.12,
-            emissive: IMPACT_EMISSIVE_RIPPLE,
+            emissive: CODECITY_PALETTE.impact.ripple,
             pulseAmplitude: 0.22,
             pulseSpeed: 2.4,
             rippleLift: 0.16,
@@ -171,7 +158,7 @@ export function resolveCodeCityBuildingImpactProfile(
 
     return {
         baseIntensity: 0,
-        emissive: IMPACT_EMISSIVE_NEUTRAL,
+        emissive: CODECITY_PALETTE.impact.neutral,
         pulseAmplitude: 0,
         pulseSpeed: 0,
         rippleLift: 0,
