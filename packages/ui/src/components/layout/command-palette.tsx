@@ -268,7 +268,7 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
 
     const paletteContent = (
         <div
-            aria-label="Global command palette"
+            aria-label={t("navigation:ariaLabel.commandPalette.globalPalette")}
             aria-modal="true"
             className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16"
             ref={dialogRef}
@@ -276,7 +276,7 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
             onKeyDown={handleDialogKeyDown}
         >
             <button
-                aria-label="Close command palette"
+                aria-label={t("navigation:ariaLabel.commandPalette.closePalette")}
                 className="absolute inset-0 h-full w-full cursor-default bg-foreground/50"
                 type="button"
                 onClick={handleClose}
@@ -294,7 +294,7 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
                     aria-autocomplete="list"
                     aria-controls="header-command-palette-results"
                     aria-expanded={filteredItems.length > 0}
-                    aria-label="Command palette search"
+                    aria-label={t("navigation:ariaLabel.commandPalette.searchInput")}
                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
                     placeholder={t("navigation:commandPalette.placeholder")}
                     ref={inputRef}
@@ -308,7 +308,7 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
                     onKeyDown={handleKeyDown}
                 />
                 <div
-                    aria-label="Command palette results"
+                    aria-label={t("navigation:ariaLabel.commandPalette.results")}
                     className="mt-3 max-h-[60vh] overflow-y-auto rounded-lg border border-border"
                     id="header-command-palette-results"
                     role="listbox"

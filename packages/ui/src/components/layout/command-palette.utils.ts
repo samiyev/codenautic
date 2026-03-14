@@ -1,3 +1,9 @@
+import {
+    getWindowLocalStorage,
+    safeStorageGetJson,
+    safeStorageSetJson,
+} from "@/lib/utils/safe-storage"
+
 import type {
     ICommandPaletteGroupSection,
     ICommandPaletteItem,
@@ -57,25 +63,12 @@ export function createCommandPaletteOptionId(itemId: string, itemIndex: number):
  * @returns The parsed string array, or an empty array on failure.
  */
 export function readStringArrayFromStorage(storageKey: string): ReadonlyArray<string> {
-    if (typeof window === "undefined") {
+    const parsed = safeStorageGetJson<unknown>(getWindowLocalStorage(), storageKey, null)
+    if (Array.isArray(parsed) === false) {
         return []
     }
 
-    try {
-        const raw = window.localStorage.getItem(storageKey)
-        if (raw === null) {
-            return []
-        }
-
-        const parsed = JSON.parse(raw) as unknown
-        if (Array.isArray(parsed) === false) {
-            return []
-        }
-
-        return parsed.filter((item): item is string => typeof item === "string")
-    } catch (_error: unknown) {
-        return []
-    }
+    return parsed.filter((item): item is string => typeof item === "string")
 }
 
 /**
@@ -86,15 +79,7 @@ export function readStringArrayFromStorage(storageKey: string): ReadonlyArray<st
  * @param value - The string array to persist.
  */
 export function writeStringArrayToStorage(storageKey: string, value: ReadonlyArray<string>): void {
-    if (typeof window === "undefined") {
-        return
-    }
-
-    try {
-        window.localStorage.setItem(storageKey, JSON.stringify(value))
-    } catch (_error: unknown) {
-        return
-    }
+    safeStorageSetJson(getWindowLocalStorage(), storageKey, value)
 }
 
 /**
