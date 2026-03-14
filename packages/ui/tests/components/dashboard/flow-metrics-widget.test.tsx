@@ -82,6 +82,6 @@ describe("FlowMetricsWidget", (): void => {
             />,
         )
 
-        expect(screen.getByTestId("recharts-line-chart")).not.toBeNull()
+        expect(screen.getByTestId("recharts-composed-chart")).not.toBeNull()
     })
 })
