@@ -265,11 +265,19 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
         }
     }
 
+    const selectClass = [
+        "rounded-lg border border-border/50 bg-surface/80",
+        "px-3 py-2 text-sm text-foreground",
+        "outline-none backdrop-blur-sm",
+        "transition-colors duration-150",
+        "focus:border-primary/50 focus:ring-1 focus:ring-primary/20",
+    ].join(" ")
+
     return (
-        <div className="grid gap-3 rounded-lg border border-border bg-surface p-3 md:grid-cols-4">
+        <div className="grid gap-3 rounded-xl border border-border/40 bg-surface/40 p-3 backdrop-blur-sm md:grid-cols-4">
             <input
                 aria-label={t("reviews:management.searchAriaLabel")}
-                className="rounded-lg border border-border px-3 py-2 text-sm outline-none"
+                className={`${selectClass} placeholder:text-muted-foreground`}
                 name="search"
                 placeholder={t("reviews:management.searchPlaceholder")}
                 value={props.filterState.search}
@@ -277,7 +285,7 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
             />
             <select
                 aria-label={t("reviews:management.filterByTeam")}
-                className={NATIVE_FORM.select}
+                className={selectClass}
                 value={props.filterState.team}
                 onChange={handleSelectChange("team")}
             >
@@ -292,7 +300,7 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
             </select>
             <select
                 aria-label={t("reviews:management.filterByRepository")}
-                className={NATIVE_FORM.select}
+                className={selectClass}
                 value={props.filterState.repository}
                 onChange={handleSelectChange("repository")}
             >
@@ -307,7 +315,7 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
             </select>
             <select
                 aria-label={t("reviews:management.filterByStatus")}
-                className={NATIVE_FORM.select}
+                className={selectClass}
                 value={props.filterState.status}
                 onChange={handleSelectChange("status")}
             >
@@ -328,11 +336,28 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
     const { t } = useTranslation(["reviews"])
     const hasSelectedPreset = props.selectedPresetId.length > 0
 
+    const inputClass = [
+        "rounded-lg border border-border/50 bg-surface/80",
+        "px-3 py-1.5 text-sm text-foreground",
+        "outline-none backdrop-blur-sm",
+        "transition-colors duration-150",
+        "focus:border-primary/50 focus:ring-1 focus:ring-primary/20",
+        "placeholder:text-muted-foreground",
+    ].join(" ")
+
+    const btnClass = [
+        "rounded-lg border border-border/50 bg-surface/60",
+        "px-3 py-1.5 text-xs font-medium text-foreground",
+        "transition-all duration-150",
+        "hover:border-primary/30 hover:bg-surface-muted",
+        "disabled:cursor-not-allowed disabled:opacity-40",
+    ].join(" ")
+
     return (
-        <div className="grid gap-3 rounded-lg border border-border bg-surface p-3 md:grid-cols-6">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/30 bg-surface/30 px-3 py-2 backdrop-blur-sm">
             <input
                 aria-label={t("reviews:management.presetNameAriaLabel")}
-                className="rounded-lg border border-border px-3 py-2 text-sm outline-none md:col-span-2"
+                className={`${inputClass} w-40`}
                 placeholder={t("reviews:management.presetNamePlaceholder")}
                 value={props.presetName}
                 onChange={(event): void => {
@@ -341,7 +366,7 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
             />
             <select
                 aria-label={t("reviews:management.savedPresetsAriaLabel")}
-                className={`w-full rounded-lg border border-border bg-surface px-3 py-2 ${TYPOGRAPHY.body} md:col-span-2`}
+                className={`${inputClass} w-48`}
                 value={props.selectedPresetId}
                 onChange={(event): void => {
                     props.onFieldChange("selected", event.currentTarget.value)
@@ -356,16 +381,13 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
                     ),
                 )}
             </select>
-            <button
-                className={`rounded-lg border border-border px-3 py-2 ${TYPOGRAPHY.label}`}
-                type="button"
-                onClick={props.onSavePreset}
-            >
-                {t("reviews:management.savePreset")}
-            </button>
-            <div className="grid grid-cols-3 gap-2 md:col-span-6">
+
+            <div className="flex items-center gap-1.5">
+                <button className={btnClass} type="button" onClick={props.onSavePreset}>
+                    {t("reviews:management.savePreset")}
+                </button>
                 <button
-                    className={`rounded-lg border border-border px-3 py-2 ${TYPOGRAPHY.label} disabled:cursor-not-allowed disabled:opacity-60`}
+                    className={btnClass}
                     disabled={hasSelectedPreset === false}
                     type="button"
                     onClick={props.onApplyPreset}
@@ -373,7 +395,7 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
                     {t("reviews:management.applyPreset")}
                 </button>
                 <button
-                    className={`rounded-lg border border-border px-3 py-2 ${TYPOGRAPHY.label} disabled:cursor-not-allowed disabled:opacity-60`}
+                    className={btnClass}
                     disabled={hasSelectedPreset === false}
                     type="button"
                     onClick={props.onUpdatePreset}
@@ -381,7 +403,13 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
                     {t("reviews:management.updatePreset")}
                 </button>
                 <button
-                    className="rounded-lg border border-danger/40 px-3 py-2 text-sm font-medium text-danger disabled:cursor-not-allowed disabled:opacity-60"
+                    className={[
+                        "rounded-lg border border-danger/30 bg-danger/5",
+                        "px-3 py-1.5 text-xs font-medium text-danger",
+                        "transition-all duration-150",
+                        "hover:bg-danger/10",
+                        "disabled:cursor-not-allowed disabled:opacity-40",
+                    ].join(" ")}
                     disabled={hasSelectedPreset === false}
                     type="button"
                     onClick={props.onDeletePreset}

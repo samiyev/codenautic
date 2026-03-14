@@ -5,8 +5,6 @@ import { useDynamicTranslation } from "@/lib/i18n"
 import { Button, Card, CardBody } from "@/components/ui"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 import { PageShell } from "@/components/layout/page-shell"
-import { NATIVE_FORM } from "@/lib/constants/spacing"
-import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { InfiniteScrollContainer } from "@/components/infrastructure/infinite-scroll-container"
 import { useFilterPersistence } from "@/lib/hooks/use-filter-persistence"
 
@@ -377,62 +375,58 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
 
     return (
         <PageShell layout="fluid" title={t("dashboard:issuesTracking.pageTitle")}>
-            <Card>
-                <CardBody className="space-y-3">
-                    <div className="grid gap-3 md:grid-cols-4">
-                        <input
-                            aria-label={t("dashboard:issuesTracking.searchAriaLabel")}
-                            className="rounded-lg border border-border px-3 py-2 text-sm"
-                            placeholder={t("dashboard:issuesTracking.searchPlaceholder")}
-                            value={filters.search}
-                            onChange={handleSearchChange}
-                        />
-                        <select
-                            aria-label={t("dashboard:issuesTracking.filterByStatus")}
-                            className={NATIVE_FORM.select}
-                            value={filters.status}
-                            onChange={handleSelectChange("status")}
-                        >
-                            <option value="all">{t("dashboard:issuesTracking.allStatuses")}</option>
-                            {ISSUE_STATUS_OPTIONS.map(
-                                (status): ReactElement => (
-                                    <option key={status} value={status}>
-                                        {ISSUE_STATUS_LABELS[status]}
-                                    </option>
-                                ),
-                            )}
-                        </select>
-                        <select
-                            aria-label={t("dashboard:issuesTracking.filterBySeverity")}
-                            className={NATIVE_FORM.select}
-                            value={filters.severity}
-                            onChange={handleSelectChange("severity")}
-                        >
-                            <option value="all">
-                                {t("dashboard:issuesTracking.allSeverities")}
+            <div className="grid gap-3 rounded-xl border border-border/40 bg-surface/40 p-3 backdrop-blur-sm md:grid-cols-4">
+                <input
+                    aria-label={t("dashboard:issuesTracking.searchAriaLabel")}
+                    className="rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 placeholder:text-muted-foreground focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                    placeholder={t("dashboard:issuesTracking.searchPlaceholder")}
+                    value={filters.search}
+                    onChange={handleSearchChange}
+                />
+                <select
+                    aria-label={t("dashboard:issuesTracking.filterByStatus")}
+                    className="rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                    value={filters.status}
+                    onChange={handleSelectChange("status")}
+                >
+                    <option value="all">{t("dashboard:issuesTracking.allStatuses")}</option>
+                    {ISSUE_STATUS_OPTIONS.map(
+                        (status): ReactElement => (
+                            <option key={status} value={status}>
+                                {ISSUE_STATUS_LABELS[status]}
                             </option>
-                            {ISSUE_SEVERITY_OPTIONS.map(
-                                (severity): ReactElement => (
-                                    <option key={severity} value={severity}>
-                                        {ISSUE_SEVERITY_LABELS[severity]}
-                                    </option>
-                                ),
-                            )}
-                        </select>
-                        <p
-                            className={`rounded-lg border border-border px-3 py-2 ${TYPOGRAPHY.body}`}
-                        >
-                            {td("dashboard:issuesTracking.issueCount", {
-                                filtered: String(filteredIssues.length),
-                                total: String(sourceIssues.length),
-                            })}
-                        </p>
-                    </div>
-                </CardBody>
-            </Card>
+                        ),
+                    )}
+                </select>
+                <select
+                    aria-label={t("dashboard:issuesTracking.filterBySeverity")}
+                    className="rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                    value={filters.severity}
+                    onChange={handleSelectChange("severity")}
+                >
+                    <option value="all">
+                        {t("dashboard:issuesTracking.allSeverities")}
+                    </option>
+                    {ISSUE_SEVERITY_OPTIONS.map(
+                        (severity): ReactElement => (
+                            <option key={severity} value={severity}>
+                                {ISSUE_SEVERITY_LABELS[severity]}
+                            </option>
+                        ),
+                    )}
+                </select>
+                <p
+                    className="flex items-center rounded-lg border border-border/30 bg-surface-muted/40 px-3 py-2 text-sm text-muted-foreground"
+                >
+                    {td("dashboard:issuesTracking.issueCount", {
+                        filtered: String(filteredIssues.length),
+                        total: String(sourceIssues.length),
+                    })}
+                </p>
+            </div>
 
-            <Card>
-                <CardBody className="space-y-2">
+            <Card className="border border-border/60 bg-surface/80 backdrop-blur-sm">
+                <CardBody className="space-y-2 pt-3">
                     <InfiniteScrollContainer
                         hasMore={hasMoreIssues}
                         isLoading={false}
