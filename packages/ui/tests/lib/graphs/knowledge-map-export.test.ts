@@ -21,12 +21,12 @@ const TEST_MODEL: IKnowledgeMapExportModel = {
         {
             color: "#0284c7",
             fileCount: 6,
-            ownerName: "Alice Rivera",
+            ownerName: "Neo",
         },
         {
             color: "#e879f9",
             fileCount: 4,
-            ownerName: "Max H.",
+            ownerName: "Trinity",
         },
     ],
     districts: [
@@ -107,7 +107,7 @@ describe("knowledge-map-export", (): void => {
             const svgPayload = buildKnowledgeMapExportSvg(model)
 
             expect(svgPayload).toContain("Legend — Ownership")
-            expect(svgPayload).not.toContain("Alice Rivera")
+            expect(svgPayload).not.toContain("Neo")
         })
 
         it("when model has no districts, then renders SVG without bus factor risk entries", (): void => {
