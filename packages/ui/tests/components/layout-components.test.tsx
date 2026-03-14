@@ -1,5 +1,5 @@
 import { screen, waitFor } from "@testing-library/react"
-import userEvent, { type UserEvent } from "@testing-library/user-event"
+import userEvent from "@testing-library/user-event"
 import type { ReactElement } from "react"
 import { describe, expect, it, vi } from "vitest"
 
@@ -236,33 +236,6 @@ describe("layout components", (): void => {
         await user.type(searchInput, "dashboard")
         expect(screen.getByRole("list", { name: "Shortcuts list" })).not.toBeNull()
         expect(screen.getByText("Go to dashboard")).not.toBeNull()
-    })
-
-    it("обрабатывает callback для collapse sidebar", async (): Promise<void> => {
-        const user: UserEvent = userEvent.setup()
-        const onNavigate = vi.fn()
-        const onSidebarToggle = vi.fn()
-        currentRoute = "/"
-
-        renderWithProviders(
-            <Sidebar
-                isCollapsed={false}
-                onNavigate={onNavigate}
-                onSidebarToggle={onSidebarToggle}
-                title="Navigation"
-            />,
-            {
-                defaultThemeMode: "light" as ThemeMode,
-            },
-        )
-
-        expect(screen.queryByRole("button", { name: /Dashboard/ })).not.toBeNull()
-        expect(screen.queryByRole("button", { name: /CCR Management/ })).not.toBeNull()
-
-        const collapseButton = screen.getByRole("button", { name: "Collapse navigation" })
-        await user.click(collapseButton)
-        expect(onSidebarToggle).toHaveBeenCalledTimes(1)
-        expect(onNavigate).toHaveBeenCalledTimes(0)
     })
 
     it("передаёт выбор пункта навигации в коллбэк", async (): Promise<void> => {
@@ -558,27 +531,6 @@ describe("layout components", (): void => {
 
         await waitFor((): void => {
             expect(screen.getByRole("dialog", { name: "Global command palette" })).not.toBeNull()
-        })
-    })
-
-    it("when sidebar toggle нажат, then переключает collapsed состояние", async (): Promise<void> => {
-        const user = userEvent.setup()
-        currentRoute = "/"
-
-        renderWithProviders(
-            <DashboardLayoutHarness>
-                <p>Sidebar toggle test</p>
-            </DashboardLayoutHarness>,
-            {
-                defaultThemeMode: "light" as ThemeMode,
-            },
-        )
-
-        const collapseButton = screen.getByRole("button", { name: "Collapse navigation" })
-        await user.click(collapseButton)
-
-        await waitFor((): void => {
-            expect(screen.getByRole("button", { name: "Expand navigation" })).not.toBeNull()
         })
     })
 

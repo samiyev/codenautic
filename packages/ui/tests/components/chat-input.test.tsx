@@ -342,11 +342,7 @@ describe("chat input", (): void => {
         const onDraftChange = vi.fn()
 
         renderWithProviders(
-            <ChatInput
-                draft="   "
-                onDraftChange={onDraftChange}
-                onSubmit={onSubmit}
-            />,
+            <ChatInput draft="   " onDraftChange={onDraftChange} onSubmit={onSubmit} />,
         )
 
         const submitButton = screen.getByRole("button", { name: "Отправить" })
@@ -358,11 +354,7 @@ describe("chat input", (): void => {
         const onDraftChange = vi.fn()
 
         renderWithProviders(
-            <ChatInput
-                draft="abc"
-                onDraftChange={onDraftChange}
-                onSubmit={onSubmit}
-            />,
+            <ChatInput draft="abc" onDraftChange={onDraftChange} onSubmit={onSubmit} />,
         )
 
         const counter = screen.getByLabelText("Message character count")

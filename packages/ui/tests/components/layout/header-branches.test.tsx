@@ -18,13 +18,7 @@ describe("Header — uncovered branches", (): void => {
     it("when keydown fires without Ctrl/Meta modifier, then command palette does not open", async (): Promise<void> => {
         const user = userEvent.setup()
 
-        renderWithProviders(
-            <Header
-                commandPaletteRoutes={[
-                    { label: "Dashboard", path: "/" },
-                ]}
-            />,
-        )
+        renderWithProviders(<Header commandPaletteRoutes={[{ label: "Dashboard", path: "/" }]} />)
 
         await user.keyboard("k")
 
@@ -34,13 +28,7 @@ describe("Header — uncovered branches", (): void => {
     it("when keydown fires with Ctrl but non-k key, then command palette does not open", async (): Promise<void> => {
         const user = userEvent.setup()
 
-        renderWithProviders(
-            <Header
-                commandPaletteRoutes={[
-                    { label: "Dashboard", path: "/" },
-                ]}
-            />,
-        )
+        renderWithProviders(<Header commandPaletteRoutes={[{ label: "Dashboard", path: "/" }]} />)
 
         await user.keyboard("{Control>}j{/Control}")
 
@@ -107,22 +95,12 @@ describe("Header — uncovered branches", (): void => {
     })
 
     it("when OPEN_COMMAND_PALETTE_EVENT dispatched on Header directly, then command palette opens", async (): Promise<void> => {
-        renderWithProviders(
-            <Header
-                commandPaletteRoutes={[
-                    { label: "Dashboard", path: "/" },
-                ]}
-            />,
-        )
+        renderWithProviders(<Header commandPaletteRoutes={[{ label: "Dashboard", path: "/" }]} />)
 
-        window.dispatchEvent(
-            new CustomEvent("codenautic:shortcut:open-command-palette"),
-        )
+        window.dispatchEvent(new CustomEvent("codenautic:shortcut:open-command-palette"))
 
         await waitFor((): void => {
-            expect(
-                screen.getByRole("dialog", { name: "Global command palette" }),
-            ).not.toBeNull()
+            expect(screen.getByRole("dialog", { name: "Global command palette" })).not.toBeNull()
         })
     })
 
@@ -144,18 +122,10 @@ describe("Header — uncovered branches", (): void => {
     it("when Meta+K pressed, then command palette opens", async (): Promise<void> => {
         const user = userEvent.setup()
 
-        renderWithProviders(
-            <Header
-                commandPaletteRoutes={[
-                    { label: "Dashboard", path: "/" },
-                ]}
-            />,
-        )
+        renderWithProviders(<Header commandPaletteRoutes={[{ label: "Dashboard", path: "/" }]} />)
 
         await user.keyboard("{Meta>}k{/Meta}")
 
-        expect(
-            screen.getByRole("dialog", { name: "Global command palette" }),
-        ).not.toBeNull()
+        expect(screen.getByRole("dialog", { name: "Global command palette" })).not.toBeNull()
     })
 })

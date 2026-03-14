@@ -604,10 +604,7 @@ describe("EnterpriseDataTable", (): void => {
             density: "comfortable",
             globalFilter: "",
         }
-        window.localStorage.setItem(
-            "ui.enterprise-table.pinsize-table",
-            JSON.stringify(savedView),
-        )
+        window.localStorage.setItem("ui.enterprise-table.pinsize-table", JSON.stringify(savedView))
 
         renderWithProviders(
             <EnterpriseDataTable
