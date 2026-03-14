@@ -20,6 +20,16 @@ import type { IPredictionComparisonSnapshot } from "@/components/graphs/predicti
 import type { IHealthTrendPoint } from "@/components/graphs/health-trend-chart"
 
 /**
+ * Максимум overlay entries для prediction-данных.
+ */
+const MAX_PREDICTION_OVERLAY_ENTRIES = 8
+
+/**
+ * Максимум hotspot / explain / accuracy / bug-prone записей для UI-виджетов.
+ */
+const MAX_PREDICTION_VISIBLE_ENTRIES = 6
+
+/**
  * Определяет уровень риска prediction для файла.
  *
  * @param file Дескриптор файла.
@@ -124,7 +134,7 @@ export function buildPredictionOverlayEntries(
             }
             return rightEntry.confidenceScore - leftEntry.confidenceScore
         })
-        .slice(0, 8)
+        .slice(0, MAX_PREDICTION_OVERLAY_ENTRIES)
 }
 
 /**
@@ -163,17 +173,19 @@ export function buildPredictionDashboardHotspots(
         files.map((file): readonly [string, ICodeCityTreemapFileDescriptor] => [file.id, file]),
     )
 
-    return overlayEntries.slice(0, 6).map((entry): IPredictionDashboardHotspotEntry => {
-        const file = fileById.get(entry.fileId)
-        return {
-            confidenceScore: entry.confidenceScore,
-            fileId: entry.fileId,
-            id: `prediction-hotspot-${entry.fileId}`,
-            label: entry.label,
-            predictedIssueIncrease: resolvePredictionIssueIncrease(file, entry.riskLevel),
-            riskLevel: entry.riskLevel,
-        }
-    })
+    return overlayEntries
+        .slice(0, MAX_PREDICTION_VISIBLE_ENTRIES)
+        .map((entry): IPredictionDashboardHotspotEntry => {
+            const file = fileById.get(entry.fileId)
+            return {
+                confidenceScore: entry.confidenceScore,
+                fileId: entry.fileId,
+                id: `prediction-hotspot-${entry.fileId}`,
+                label: entry.label,
+                predictedIssueIncrease: resolvePredictionIssueIncrease(file, entry.riskLevel),
+                riskLevel: entry.riskLevel,
+            }
+        })
 }
 
 /**
@@ -287,7 +299,7 @@ export function buildPredictionConfusionMatrix(
     let falsePositive = 0
     let falseNegative = 0
 
-    entries.slice(0, 8).forEach((entry, index): void => {
+    entries.slice(0, MAX_PREDICTION_OVERLAY_ENTRIES).forEach((entry, index): void => {
         const predictedIncident = entry.riskLevel === "high" || entry.riskLevel === "medium"
         const actualIncident = index % 3 !== 0
         if (predictedIncident && actualIncident) {
@@ -328,18 +340,20 @@ export function buildPredictionAccuracyCases(
         files.map((file): readonly [string, ICodeCityTreemapFileDescriptor] => [file.id, file]),
     )
 
-    return entries.slice(0, 6).map((entry, index): IPredictionAccuracyCase => {
-        const file = fileById.get(entry.fileId)
-        const bugIntroductions30d = file?.bugIntroductions?.["30d"] ?? 0
-        const actualOutcome = bugIntroductions30d > 1 || index % 2 === 0 ? "incident" : "stable"
-        return {
-            actualOutcome,
-            fileId: entry.fileId,
-            id: `prediction-accuracy-${entry.fileId}`,
-            label: entry.label,
-            predictedRiskLevel: entry.riskLevel,
-        }
-    })
+    return entries
+        .slice(0, MAX_PREDICTION_VISIBLE_ENTRIES)
+        .map((entry, index): IPredictionAccuracyCase => {
+            const file = fileById.get(entry.fileId)
+            const bugIntroductions30d = file?.bugIntroductions?.["30d"] ?? 0
+            const actualOutcome = bugIntroductions30d > 1 || index % 2 === 0 ? "incident" : "stable"
+            return {
+                actualOutcome,
+                fileId: entry.fileId,
+                id: `prediction-accuracy-${entry.fileId}`,
+                label: entry.label,
+                predictedRiskLevel: entry.riskLevel,
+            }
+        })
 }
 
 /**
@@ -377,7 +391,7 @@ export function buildPredictionAlertModules(
     })
 
     return Array.from(moduleIds)
-        .slice(0, 8)
+        .slice(0, MAX_PREDICTION_OVERLAY_ENTRIES)
         .map((moduleId, index): IAlertConfigDialogModule => {
             return {
                 enabledByDefault: index < 3,
@@ -489,7 +503,7 @@ export function buildPredictionBugProneFiles(
             }
             return rightFile.confidenceScore - leftFile.confidenceScore
         })
-        .slice(0, 6)
+        .slice(0, MAX_PREDICTION_VISIBLE_ENTRIES)
 }
 
 /**
@@ -507,23 +521,25 @@ export function buildPredictionExplainEntries(
         files.map((file): readonly [string, ICodeCityTreemapFileDescriptor] => [file.id, file]),
     )
 
-    return overlayEntries.slice(0, 6).map((entry): IPredictionExplainPanelEntry => {
-        const file = fileById.get(entry.fileId)
-        const complexity = Math.round(file?.complexity ?? 0)
-        const churn = file?.churn ?? 0
-        const bugIntroductions30d = file?.bugIntroductions?.["30d"] ?? 0
-        return {
-            confidenceScore: entry.confidenceScore,
-            explanation:
-                `LLM forecast: ${entry.label} has complexity ${String(complexity)}, ` +
-                `churn ${String(churn)}, and ${String(bugIntroductions30d)} ` +
-                "bug introductions in 30d, so this area is likely to evolve into a hotspot.",
-            fileId: entry.fileId,
-            label: entry.label,
-            reason: entry.reason,
-            riskLevel: entry.riskLevel,
-        }
-    })
+    return overlayEntries
+        .slice(0, MAX_PREDICTION_VISIBLE_ENTRIES)
+        .map((entry): IPredictionExplainPanelEntry => {
+            const file = fileById.get(entry.fileId)
+            const complexity = Math.round(file?.complexity ?? 0)
+            const churn = file?.churn ?? 0
+            const bugIntroductions30d = file?.bugIntroductions?.["30d"] ?? 0
+            return {
+                confidenceScore: entry.confidenceScore,
+                explanation:
+                    `LLM forecast: ${entry.label} has complexity ${String(complexity)}, ` +
+                    `churn ${String(churn)}, and ${String(bugIntroductions30d)} ` +
+                    "bug introductions in 30d, so this area is likely to evolve into a hotspot.",
+                fileId: entry.fileId,
+                label: entry.label,
+                reason: entry.reason,
+                riskLevel: entry.riskLevel,
+            }
+        })
 }
 
 /**

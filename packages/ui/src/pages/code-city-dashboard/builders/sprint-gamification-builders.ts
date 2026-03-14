@@ -13,6 +13,26 @@ import type {
 import type { ITrendTimelineEntry } from "@/components/graphs/trend-timeline-widget"
 import type { IHealthTrendPoint } from "@/components/graphs/health-trend-chart"
 
+/**
+ * Максимум файлов-кандидатов для sprint comparison snapshot.
+ */
+const MAX_SPRINT_CANDIDATE_FILES = 3
+
+/**
+ * Максимум достижений для sprint achievement panel.
+ */
+const MAX_SPRINT_ACHIEVEMENTS = 4
+
+/**
+ * Максимум связанных файлов в achievement/focus контексте.
+ */
+const MAX_RELATED_FILE_IDS = 3
+
+/**
+ * Длина даты в ISO-строке (YYYY-MM-DD).
+ */
+const ISO_DATE_LENGTH = 10
+
 import type {
     ICodeCityDashboardContributorDescriptor,
     ICodeCityDashboardOwnershipDescriptor,
@@ -47,7 +67,7 @@ export function calculateSprintImprovementScore(
 export function buildSprintComparisonSnapshots(
     files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
 ): ReadonlyArray<ISprintComparisonSnapshot> {
-    const candidateFiles = files.slice(0, 3)
+    const candidateFiles = files.slice(0, MAX_SPRINT_CANDIDATE_FILES)
     return candidateFiles.map((file, index): ISprintComparisonSnapshot => {
         const beforeComplexity = Math.max(1, Math.round((file.complexity ?? 0) + 4 + index))
         const afterComplexity = Math.max(1, beforeComplexity - 2 - index)
@@ -199,7 +219,7 @@ export function buildSprintAchievements(
     files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
 ): ReadonlyArray<IAchievementPanelEntry> {
     return files
-        .slice(0, 4)
+        .slice(0, MAX_SPRINT_ACHIEVEMENTS)
         .map((file, index): IAchievementPanelEntry => {
             const districtName = resolveDistrictName(file.path)
             const baseComplexity = Math.max(1, file.complexity ?? 1)
@@ -213,7 +233,7 @@ export function buildSprintAchievements(
                 .filter((candidateFile): boolean => {
                     return resolveDistrictName(candidateFile.path) === districtName
                 })
-                .slice(0, 3)
+                .slice(0, MAX_RELATED_FILE_IDS)
                 .map((candidateFile): string => candidateFile.id)
             const normalizedRelatedFileIds = relatedFileIds.length > 0 ? relatedFileIds : [file.id]
 
@@ -498,7 +518,7 @@ export function buildTrendTimelineEntries(
                       .filter((candidateFile): boolean => {
                           return resolveDistrictName(candidateFile.path) === focusDistrictName
                       })
-                      .slice(0, 3)
+                      .slice(0, MAX_RELATED_FILE_IDS)
                       .map((candidateFile): string => candidateFile.id)
         const normalizedFocusFileIds =
             focusFileIds.length > 0 ? focusFileIds : focusFileId === undefined ? [] : [focusFileId]
@@ -531,7 +551,7 @@ export function buildTrendTimelineEntries(
                 },
             ],
             sprintLabel: snapshot?.title ?? `Sprint ${String(12 - index)}`,
-            startedAt: (lastPoint?.timestamp ?? "").slice(0, 10),
+            startedAt: (lastPoint?.timestamp ?? "").slice(0, ISO_DATE_LENGTH),
             summary:
                 scoreDelta >= 0
                     ? `Quality improved by ${String(scoreDelta)} points since the start of this sprint window.`
