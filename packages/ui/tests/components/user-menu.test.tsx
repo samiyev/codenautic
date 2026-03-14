@@ -19,29 +19,29 @@ describe("UserMenu", (): void => {
                 onOpenHelp={onOpenHelp}
                 onOpenSettings={onOpenSettings}
                 onSignOut={onSignOut}
-                userEmail="default@example.com"
-                userName="Default User"
+                userEmail="neo@metacortex.com"
+                userName="Neo"
             />,
         )
 
-        expect(screen.getAllByRole("button", { name: /default user/i })).toHaveLength(1)
+        expect(screen.getAllByRole("button", { name: /neo/i })).toHaveLength(1)
 
-        await user.click(screen.getByRole("button", { name: /default user/i }))
+        await user.click(screen.getByRole("button", { name: /neo/i }))
 
         expect(screen.getByRole("menu")).not.toBeNull()
 
         await user.click(screen.getByRole("menuitem", { name: "Open settings" }))
         expect(onOpenSettings).toHaveBeenCalledTimes(1)
 
-        await user.click(screen.getByRole("button", { name: /default user/i }))
+        await user.click(screen.getByRole("button", { name: /neo/i }))
         await user.click(screen.getByRole("menuitem", { name: "Open billing" }))
         expect(onOpenBilling).toHaveBeenCalledTimes(1)
 
-        await user.click(screen.getByRole("button", { name: /default user/i }))
+        await user.click(screen.getByRole("button", { name: /neo/i }))
         await user.click(screen.getByRole("menuitem", { name: "Help & diagnostics" }))
         expect(onOpenHelp).toHaveBeenCalledTimes(1)
 
-        await user.click(screen.getByRole("button", { name: /default user/i }))
+        await user.click(screen.getByRole("button", { name: /neo/i }))
         await user.click(screen.getByRole("menuitem", { name: "Sign out" }))
         expect(onSignOut).toHaveBeenCalledTimes(1)
     })
