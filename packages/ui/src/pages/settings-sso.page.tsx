@@ -2,6 +2,7 @@ import { type ReactElement, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader, Input, Textarea } from "@/components/ui"
+import { FormLayout } from "@/components/forms/form-layout"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
@@ -128,10 +129,10 @@ export function SettingsSsoPage(): ReactElement {
     }
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:sso.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>{t("settings:sso.pageSubtitle")}</p>
-
+        <FormLayout
+            title={t("settings:sso.pageTitle")}
+            description={t("settings:sso.pageSubtitle")}
+        >
             <div className="grid gap-4 xl:grid-cols-2">
                 <Card>
                     <CardHeader>
@@ -181,7 +182,7 @@ export function SettingsSsoPage(): ReactElement {
                             }}
                         />
                         <div className="flex flex-wrap items-center gap-2">
-                            <Button onPress={handleSaveSaml}>
+                            <Button color="primary" onPress={handleSaveSaml}>
                                 {t("settings:sso.saveSamlConfig")}
                             </Button>
                             <Button
@@ -261,7 +262,7 @@ export function SettingsSsoPage(): ReactElement {
                             })}
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
-                            <Button onPress={handleSaveOidc}>
+                            <Button color="primary" onPress={handleSaveOidc}>
                                 {t("settings:sso.saveOidcConfig")}
                             </Button>
                             <Button
@@ -299,6 +300,6 @@ export function SettingsSsoPage(): ReactElement {
                     {testState.message}
                 </Alert>
             )}
-        </section>
+        </FormLayout>
     )
 }
