@@ -52,7 +52,7 @@ export function ThemeModeToggle(props: IThemeModeToggleProps): ReactElement {
         <div className={props.className}>
             <div
                 aria-label={t("navigation:themeModeToggle.ariaLabel")}
-                className="inline-flex items-center rounded-lg border border-border bg-header-bg p-0.5 backdrop-blur"
+                className="inline-flex items-center rounded-md border border-border/40 bg-surface/30 p-0.5"
                 role="radiogroup"
             >
                 {modeOptions.map((option): ReactElement => {
@@ -65,11 +65,11 @@ export function ThemeModeToggle(props: IThemeModeToggleProps): ReactElement {
                             aria-label={option.ariaLabel}
                             aria-pressed={isSelected}
                             aria-selected={isSelected}
-                            className="min-w-0 px-1.5"
+                            className={`min-w-0 px-1.5 ${isSelected ? "bg-surface shadow-sm" : ""}`}
                             isIconOnly
-                            radius="full"
+                            radius="sm"
                             size="sm"
-                            variant={isSelected ? "solid" : "light"}
+                            variant="light"
                             onPress={(): void => {
                                 setMode(option.value)
                             }}
