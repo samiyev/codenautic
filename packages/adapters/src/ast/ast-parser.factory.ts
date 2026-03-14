@@ -16,6 +16,10 @@ import {
     assertTypeScriptParserLanguage,
     TypeScriptSourceCodeParser,
 } from "./typescript-source-code-parser"
+import {
+    assertPythonParserLanguage,
+    PythonSourceCodeParser,
+} from "./python-source-code-parser"
 
 type IAstParserCreator = () => ISourceCodeParser
 
@@ -88,6 +92,11 @@ const DEFAULT_AST_PARSER_CREATORS: Readonly<
     [AST_LANGUAGE.JSX](): ISourceCodeParser {
         return new JavaScriptSourceCodeParser({
             language: assertJavaScriptParserLanguage(AST_LANGUAGE.JSX),
+        })
+    },
+    [AST_LANGUAGE.PYTHON](): ISourceCodeParser {
+        return new PythonSourceCodeParser({
+            language: assertPythonParserLanguage(AST_LANGUAGE.PYTHON),
         })
     },
 }

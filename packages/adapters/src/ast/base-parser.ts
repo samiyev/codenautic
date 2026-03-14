@@ -224,6 +224,17 @@ export abstract class BaseParser implements ISourceCodeParser {
      */
     private collectImport(node: ISyntaxNode): IAstImportDTO | null {
         if (node.type === "import_statement") {
+            const pythonImport = readPythonImportStatement(node)
+            if (pythonImport !== null) {
+                return {
+                    source: pythonImport.source,
+                    kind: AST_IMPORT_KIND.STATIC,
+                    specifiers: pythonImport.specifiers,
+                    typeOnly: false,
+                    location: createSourceLocation(node),
+                }
+            }
+
             const sourceNode = findFirstNamedChild(node, ["string"])
             const source = readStringNodeValue(sourceNode)
             if (source === undefined) {
@@ -251,6 +262,22 @@ export abstract class BaseParser implements ISourceCodeParser {
                 kind: AST_IMPORT_KIND.EXPORT_FROM,
                 specifiers: collectExportSpecifiers(node),
                 typeOnly: /^\s*export\s+type\b/.test(node.text),
+                location: createSourceLocation(node),
+            }
+        }
+
+        if (node.type === "import_from_statement") {
+            const sourceNode = findFirstNamedChild(node, ["dotted_name", "relative_import"])
+            const source = readNodeText(sourceNode)
+            if (source === undefined) {
+                return null
+            }
+
+            return {
+                source,
+                kind: AST_IMPORT_KIND.STATIC,
+                specifiers: collectImportSpecifiers(node),
+                typeOnly: false,
                 location: createSourceLocation(node),
             }
         }
@@ -356,6 +383,20 @@ export abstract class BaseParser implements ISourceCodeParser {
      * @returns Normalized class DTO or `null`.
      */
     private collectClass(node: ISyntaxNode): IAstClassDTO | null {
+        if (node.type === "class_definition") {
+            const nameNode = findFirstNamedChild(node, ["identifier"])
+            const argumentList = findFirstNamedChild(node, ["argument_list"])
+            const name = readNodeText(nameNode) ?? "(anonymous class)"
+
+            return {
+                name,
+                exported: false,
+                extendsTypes: collectPythonClassBaseTypes(argumentList),
+                implementsTypes: [],
+                location: createSourceLocation(node),
+            }
+        }
+
         if (node.type !== "class_declaration" && node.type !== "class") {
             return null
         }
@@ -398,7 +439,7 @@ export abstract class BaseParser implements ISourceCodeParser {
             return null
         }
 
-        const isMethod = node.type === "method_definition"
+        const isMethod = isMethodNode(node)
         return {
             name,
             kind: isMethod ? AST_FUNCTION_KIND.METHOD : AST_FUNCTION_KIND.FUNCTION,
@@ -419,11 +460,11 @@ export abstract class BaseParser implements ISourceCodeParser {
      * @returns Normalized call DTO or `null`.
      */
     private collectCall(node: ISyntaxNode, context: ITraversalContext): IAstCallDTO | null {
-        if (node.type !== "call_expression") {
+        if (node.type !== "call_expression" && node.type !== "call") {
             return null
         }
 
-        if (readImportLikeCallSource(node) !== null) {
+        if (node.type === "call_expression" && readImportLikeCallSource(node) !== null) {
             return null
         }
 
@@ -611,8 +652,32 @@ function isFunctionLikeNode(node: ISyntaxNode): boolean {
         node.type === "function_declaration" ||
         node.type === "function_expression" ||
         node.type === "arrow_function" ||
-        node.type === "method_definition"
+        node.type === "method_definition" ||
+        node.type === "function_definition"
     )
+}
+
+/**
+ * Resolves whether syntax node should be treated as class-bound method.
+ *
+ * @param node Function-like syntax node.
+ * @returns `true` when node represents a method declaration.
+ */
+function isMethodNode(node: ISyntaxNode): boolean {
+    if (node.type === "method_definition") {
+        return true
+    }
+
+    if (node.type !== "function_definition") {
+        return false
+    }
+
+    const parent = node.parent
+    if (parent === null || parent.type !== "block") {
+        return false
+    }
+
+    return parent.parent?.type === "class_definition"
 }
 
 /**
@@ -679,36 +744,40 @@ function findClosestAncestor(node: ISyntaxNode, nodeType: string): ISyntaxNode |
  * @returns Imported local specifiers.
  */
 function collectImportSpecifiers(node: ISyntaxNode): readonly string[] {
-    const importClause = findFirstNamedChild(node, ["import_clause"])
-    if (importClause === undefined) {
-        return []
+    if (node.type === "import_from_statement") {
+        return collectPythonFromImportSpecifiers(node)
     }
 
-    const specifiers: string[] = []
-    for (const child of importClause.namedChildren) {
-        if (child.type === "identifier") {
-            pushUnique(specifiers, child.text.trim())
-            continue
-        }
+    const importClause = findFirstNamedChild(node, ["import_clause"])
+    if (importClause !== undefined) {
+        const specifiers: string[] = []
+        for (const child of importClause.namedChildren) {
+            if (child.type === "identifier") {
+                pushUnique(specifiers, child.text.trim())
+                continue
+            }
 
-        if (child.type === "named_imports") {
-            for (const importSpecifier of child.namedChildren) {
-                const identifiers = importSpecifier.namedChildren.filter((namedChild): boolean => {
-                    return namedChild.type === "identifier"
-                })
-                const localIdentifier = identifiers.at(-1)
+            if (child.type === "named_imports") {
+                for (const importSpecifier of child.namedChildren) {
+                    const identifiers = importSpecifier.namedChildren.filter((namedChild): boolean => {
+                        return namedChild.type === "identifier"
+                    })
+                    const localIdentifier = identifiers.at(-1)
+                    pushUnique(specifiers, localIdentifier?.text.trim())
+                }
+                continue
+            }
+
+            if (child.type === "namespace_import") {
+                const localIdentifier = findFirstNamedChild(child, ["identifier"])
                 pushUnique(specifiers, localIdentifier?.text.trim())
             }
-            continue
         }
 
-        if (child.type === "namespace_import") {
-            const localIdentifier = findFirstNamedChild(child, ["identifier"])
-            pushUnique(specifiers, localIdentifier?.text.trim())
-        }
+        return specifiers
     }
 
-    return specifiers
+    return collectPythonImportSpecifiers(node)
 }
 
 /**
@@ -742,6 +811,159 @@ function collectExportSpecifiers(node: ISyntaxNode): readonly string[] {
     }
 
     return specifiers
+}
+
+/**
+ * Reads python import statement source and local specifiers.
+ *
+ * @param node Import statement node.
+ * @returns Python import payload or `null` for non-python forms.
+ */
+function readPythonImportStatement(
+    node: ISyntaxNode,
+): {readonly source: string; readonly specifiers: readonly string[]} | null {
+    if (node.type !== "import_statement") {
+        return null
+    }
+
+    const firstImportNode = node.namedChildren[0]
+    if (firstImportNode === undefined) {
+        return null
+    }
+
+    const source = readPythonImportSource(firstImportNode)
+    if (source === undefined) {
+        return null
+    }
+
+    return {
+        source,
+        specifiers: collectPythonImportSpecifiers(node),
+    }
+}
+
+/**
+ * Resolves source module for one python import statement entry.
+ *
+ * @param node Python import entry.
+ * @returns Source module name or `undefined`.
+ */
+function readPythonImportSource(node: ISyntaxNode): string | undefined {
+    if (node.type === "dotted_name" || node.type === "relative_import") {
+        return readNodeText(node)
+    }
+
+    if (node.type === "aliased_import") {
+        return readNodeText(findFirstNamedChild(node, ["dotted_name"]))
+    }
+
+    return undefined
+}
+
+/**
+ * Collects local specifiers from python import statement.
+ *
+ * @param node Import statement node.
+ * @returns Imported local names.
+ */
+function collectPythonImportSpecifiers(node: ISyntaxNode): readonly string[] {
+    if (node.type !== "import_statement") {
+        return []
+    }
+
+    const specifiers: string[] = []
+    for (const child of node.namedChildren) {
+        if (child.type === "dotted_name" || child.type === "relative_import") {
+            pushUnique(specifiers, readPythonLocalName(child))
+            continue
+        }
+
+        if (child.type === "aliased_import") {
+            const aliasNode = findFirstNamedChild(child, ["identifier"])
+            const alias = readNodeText(aliasNode)
+            if (alias !== undefined) {
+                pushUnique(specifiers, alias)
+                continue
+            }
+
+            const sourceNode = findFirstNamedChild(child, ["dotted_name"])
+            pushUnique(specifiers, readPythonLocalName(sourceNode))
+        }
+    }
+
+    return specifiers
+}
+
+/**
+ * Collects local specifiers from python import-from statement.
+ *
+ * @param node Import-from statement node.
+ * @returns Imported local names.
+ */
+function collectPythonFromImportSpecifiers(node: ISyntaxNode): readonly string[] {
+    if (node.type !== "import_from_statement") {
+        return []
+    }
+
+    const sourceNode = findFirstNamedChild(node, ["dotted_name", "relative_import"])
+    const specifiers: string[] = []
+    for (const child of node.namedChildren) {
+        if (child === sourceNode) {
+            continue
+        }
+
+        if (child.type === "wildcard_import") {
+            pushUnique(specifiers, "*")
+            continue
+        }
+
+        if (child.type === "dotted_name" || child.type === "relative_import") {
+            pushUnique(specifiers, readPythonLocalName(child))
+            continue
+        }
+
+        if (child.type === "aliased_import") {
+            const aliasNode = findFirstNamedChild(child, ["identifier"])
+            const alias = readNodeText(aliasNode)
+            if (alias !== undefined) {
+                pushUnique(specifiers, alias)
+                continue
+            }
+
+            const importedNode = findFirstNamedChild(child, ["dotted_name"])
+            pushUnique(specifiers, readPythonLocalName(importedNode))
+        }
+    }
+
+    return specifiers
+}
+
+/**
+ * Resolves python local symbol name from one import entry.
+ *
+ * @param node Python import node.
+ * @returns Local symbol name or `undefined`.
+ */
+function readPythonLocalName(node: ISyntaxNode | undefined): string | undefined {
+    if (node === undefined) {
+        return undefined
+    }
+
+    const identifierNodes = node.namedChildren.filter((child): boolean => {
+        return child.type === "identifier"
+    })
+    const localIdentifier = identifierNodes.at(-1)
+    const localName = readNodeText(localIdentifier)
+    if (localName !== undefined) {
+        return localName
+    }
+
+    const nestedDottedName = findFirstNamedChild(node, ["dotted_name"])
+    if (nestedDottedName !== undefined) {
+        return readPythonLocalName(nestedDottedName)
+    }
+
+    return readNodeText(node)
 }
 
 /**
@@ -788,6 +1010,29 @@ function readImportSourceFromArguments(
     }
 
     return {source, kind}
+}
+
+/**
+ * Collects python base classes from class argument list.
+ *
+ * @param argumentList Class argument list node.
+ * @returns Base class names.
+ */
+function collectPythonClassBaseTypes(argumentList: ISyntaxNode | undefined): readonly string[] {
+    if (argumentList === undefined) {
+        return []
+    }
+
+    const baseTypes: string[] = []
+    for (const child of argumentList.namedChildren) {
+        if (child.type === "keyword_argument") {
+            continue
+        }
+
+        pushUnique(baseTypes, readNodeText(child))
+    }
+
+    return baseTypes
 }
 
 /**

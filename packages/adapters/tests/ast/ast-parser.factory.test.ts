@@ -8,6 +8,7 @@ import {
     AstParserFactory,
     AstParserFactoryError,
     JavaScriptSourceCodeParser,
+    PythonSourceCodeParser,
     TypeScriptSourceCodeParser,
     normalizeAstParserLanguage,
 } from "../../src/ast"
@@ -78,15 +79,19 @@ describe("AstParserFactory", () => {
         const typescriptParser = factory.create("ts")
         const typescriptParserByCanonicalName = factory.create("typescript")
         const javascriptParser = factory.create("js")
+        const pythonParser = factory.create("py")
 
         expect(typescriptParser).toBe(typescriptParserByCanonicalName)
         expect(javascriptParser).toBe(factory.create("javascript"))
+        expect(pythonParser).toBe(factory.create("python"))
         expect(typescriptParser).not.toBe(javascriptParser)
+        expect(pythonParser).not.toBe(typescriptParser)
         expect(typescriptParser).toBeInstanceOf(TypeScriptSourceCodeParser)
         expect(javascriptParser).toBeInstanceOf(JavaScriptSourceCodeParser)
+        expect(pythonParser).toBeInstanceOf(PythonSourceCodeParser)
     })
 
-    test("creates typescript, tsx, javascript and jsx parsers", async () => {
+    test("creates typescript, tsx, javascript, jsx and python parsers", async () => {
         const factory = new AstParserFactory()
         const typescriptResult = await factory.create("typescript").parse({
             filePath: "src/parser.ts",
@@ -104,6 +109,10 @@ describe("AstParserFactory", () => {
             filePath: "src/view.jsx",
             content: "export const View = () => <main />",
         })
+        const pythonResult = await factory.create("python").parse({
+            filePath: "src/parser.py",
+            content: "import os\n\nclass Parser:\n    def parse(self):\n        return os.getcwd()\n",
+        })
 
         expect(typescriptResult.language).toBe(AST_LANGUAGE.TYPESCRIPT)
         expect(typescriptResult.hasSyntaxErrors).toBe(false)
@@ -113,6 +122,8 @@ describe("AstParserFactory", () => {
         expect(javascriptResult.hasSyntaxErrors).toBe(false)
         expect(jsxResult.language).toBe(AST_LANGUAGE.JSX)
         expect(jsxResult.hasSyntaxErrors).toBe(false)
+        expect(pythonResult.language).toBe(AST_LANGUAGE.PYTHON)
+        expect(pythonResult.hasSyntaxErrors).toBe(false)
     })
 
     test("throws typed error for unknown language", () => {
@@ -132,12 +143,12 @@ describe("AstParserFactory", () => {
         const factory = new AstParserFactory()
 
         expectAstParserFactoryError(
-            () => factory.create("python"),
+            () => factory.create("go"),
             AST_PARSER_FACTORY_ERROR_CODE.LANGUAGE_NOT_SUPPORTED,
-            "python",
+            "go",
         )
-        expect(() => factory.create("python")).toThrow(
-            "AST parser is not supported for language: python",
+        expect(() => factory.create("go")).toThrow(
+            "AST parser is not supported for language: go",
         )
     })
 

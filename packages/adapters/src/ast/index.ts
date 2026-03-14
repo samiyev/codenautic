@@ -129,6 +129,12 @@ export {
 } from "./ast-parser.factory"
 export {BaseParser, type IBaseParserOptions} from "./base-parser"
 export {
+    assertPythonParserLanguage,
+    PythonSourceCodeParser,
+    type IPythonSourceCodeParserOptions,
+    type PythonParserLanguage,
+} from "./python-source-code-parser"
+export {
     assertTypeScriptParserLanguage,
     TypeScriptSourceCodeParser,
     type ITypeScriptSourceCodeParserOptions,
