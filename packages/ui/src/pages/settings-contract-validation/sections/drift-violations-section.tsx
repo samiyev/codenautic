@@ -77,11 +77,21 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                                     }
                                 }}
                             >
-                                <option value="all">All severities</option>
-                                <option value="critical">Critical</option>
-                                <option value="high">High</option>
-                                <option value="medium">Medium</option>
-                                <option value="low">Low</option>
+                                <option value="all">
+                                    {t("settings:contractValidation.drift.allSeverities")}
+                                </option>
+                                <option value="critical">
+                                    {t("settings:contractValidation.drift.critical")}
+                                </option>
+                                <option value="high">
+                                    {t("settings:contractValidation.drift.high")}
+                                </option>
+                                <option value="medium">
+                                    {t("settings:contractValidation.drift.medium")}
+                                </option>
+                                <option value="low">
+                                    {t("settings:contractValidation.drift.low")}
+                                </option>
                             </select>
                         </label>
                         <label className="space-y-1 text-sm text-text-tertiary">
@@ -104,10 +114,18 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                                     }
                                 }}
                             >
-                                <option value="severity-desc">Severity: high to low</option>
-                                <option value="severity-asc">Severity: low to high</option>
-                                <option value="files-desc">Affected files: many to few</option>
-                                <option value="files-asc">Affected files: few to many</option>
+                                <option value="severity-desc">
+                                    {t("settings:contractValidation.drift.severityDesc")}
+                                </option>
+                                <option value="severity-asc">
+                                    {t("settings:contractValidation.drift.severityAsc")}
+                                </option>
+                                <option value="files-desc">
+                                    {t("settings:contractValidation.drift.filesDesc")}
+                                </option>
+                                <option value="files-asc">
+                                    {t("settings:contractValidation.drift.filesAsc")}
+                                </option>
                             </select>
                         </label>
                     </div>
