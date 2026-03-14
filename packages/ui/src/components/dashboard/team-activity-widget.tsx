@@ -45,7 +45,7 @@ function ActivityTooltip(props: TooltipContentProps<number, string>): ReactEleme
         <div className="rounded-lg border border-border/60 bg-surface/95 px-3 py-2 shadow-lg backdrop-blur-md">
             <p className="text-xs font-semibold text-foreground">{label}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-                {String(payload[0]?.value ?? 0)} CCRs merged
+                {String((payload[0] as { value?: number } | undefined)?.value ?? 0)} CCRs merged
             </p>
         </div>
     )
@@ -109,7 +109,7 @@ export function TeamActivityWidget(props: ITeamActivityWidgetProps): ReactElemen
                                 tick={{ fontSize: 11 }}
                                 tickLine={false}
                             />
-                            {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Recharts Tooltip content type mismatch */}
+                            { }
                             <Tooltip
                                 content={ActivityTooltip as never}
                                 cursor={{ fill: "var(--surface-muted)", opacity: 0.5 }}
