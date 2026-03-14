@@ -1,8 +1,16 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@/components/ui"
-import { Avatar } from "@/components/ui"
+import {
+    Avatar as HeroUIAvatar,
+    AvatarFallback,
+
+    Dropdown,
+    DropdownItem,
+    DropdownMenu,
+    DropdownPopover,
+    DropdownTrigger,
+} from "@heroui/react"
 
 /**
  * Количество символов для инициалов пользователя.
@@ -43,18 +51,18 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
         <Dropdown>
             <DropdownTrigger
                 className="h-8 min-h-8 rounded-full px-1"
-                radius="full"
-                size="sm"
-                variant="light"
             >
                 <span className="inline-flex items-center gap-2 rounded-full">
-                    <Avatar label={props.userName ?? defaultName} size="sm" />
+                    <HeroUIAvatar>
+                        <AvatarFallback>{initials}</AvatarFallback>
+                    </HeroUIAvatar>
                     <span className="hidden text-xs font-medium sm:inline">
                         {props.userName ?? defaultName}
                     </span>
                     <span className="sr-only">{initials}</span>
                 </span>
             </DropdownTrigger>
+            <DropdownPopover>
             <DropdownMenu aria-label={t("navigation:userMenuAriaLabel")}>
                 <DropdownItem key="name">{props.userName ?? defaultName}</DropdownItem>
                 <DropdownItem key="email">
@@ -87,7 +95,7 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
                 {props.onSignOut === undefined ? null : (
                     <DropdownItem
                         key="logout"
-                        color="danger"
+                        className="text-danger hover:text-danger"
                         onPress={(): void => {
                             const signOut = props.onSignOut
                             if (signOut === undefined) {
@@ -101,6 +109,7 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
                     </DropdownItem>
                 )}
             </DropdownMenu>
+            </DropdownPopover>
         </Dropdown>
     )
 }
