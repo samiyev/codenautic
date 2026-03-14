@@ -7,7 +7,7 @@ import { CodeCityTreemap } from "@/components/graphs/codecity-treemap"
 import { HealthTrendChart } from "@/components/graphs/health-trend-chart"
 import { PackageDependencyGraph } from "@/components/graphs/package-dependency-graph"
 import { RootCauseChainViewer } from "@/components/graphs/root-cause-chain-viewer"
-import { Card, CardBody, CardHeader } from "@/components/ui"
+import { Card, CardContent, CardHeader } from "@heroui/react"
 
 import {
     CODE_CITY_DASHBOARD_REPOSITORY_NODES,
@@ -40,7 +40,7 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
                         {t("code-city:visualization.crossRepositoryDependencies")}
                     </p>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <PackageDependencyGraph
                         height="360px"
                         nodes={CODE_CITY_DASHBOARD_REPOSITORY_NODES}
@@ -49,7 +49,7 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
                         showMiniMap={true}
                         title={t("code-city:visualization.crossRepositoryPackageDependencies")}
                     />
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card className={state.resolveTourCardClassName("city-3d")}>
@@ -58,7 +58,7 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
                         {t("code-city:visualization.codeCityPreview")}
                     </p>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <CodeCity3DScene
                         causalCouplings={state.overlayCausalCouplings}
                         files={state.currentProfile.files}
@@ -80,7 +80,7 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
                         impactedFiles={state.overlayImpactedFiles}
                         title={`${state.currentProfile.label} 3D scene`}
                     />
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
@@ -89,13 +89,13 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
                         {t("code-city:visualization.churnVsComplexitySidePanel")}
                     </p>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <ChurnComplexityScatter
                         files={state.currentProfile.files}
                         onFileSelect={state.setHighlightedFileId}
                         selectedFileId={state.highlightedFileId}
                     />
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
@@ -104,9 +104,9 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
                         {t("code-city:visualization.healthTrendTimeline")}
                     </p>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <HealthTrendChart points={state.currentProfile.healthTrend} />
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card className={state.resolveTourCardClassName("root-cause")}>
@@ -115,16 +115,16 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
                         {t("code-city:visualization.rootCauseChainViewer")}
                     </p>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <RootCauseChainViewer
                         issues={state.overlayRootCauseIssues}
                         onChainFocusChange={state.handleRootCauseChainFocusChange}
                     />
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
-                <CardBody>
+                <CardContent>
                     <CodeCityTreemap
                         key={`${state.currentProfile.id}-${state.metric}`}
                         comparisonLabel={`${state.currentProfile.id}-baseline`}
@@ -140,7 +140,7 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
                         temporalCouplings={state.overlayTemporalCouplings}
                         title={`${state.currentProfile.label} treemap`}
                     />
-                </CardBody>
+                </CardContent>
             </Card>
         </>
     )

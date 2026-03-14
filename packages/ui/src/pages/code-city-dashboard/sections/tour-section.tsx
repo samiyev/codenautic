@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import { GuidedTourOverlay } from "@/components/graphs/guided-tour-overlay"
 import { TourCustomizer } from "@/components/graphs/tour-customizer"
-import { Card, CardBody, CardHeader } from "@/components/ui"
+import { Card, CardContent, CardHeader } from "@heroui/react"
 
 import type { ICodeCityDashboardState } from "../use-code-city-dashboard-state"
 
@@ -40,13 +40,13 @@ export function TourSection({ state }: ITourSectionProps): ReactElement {
                         {t("code-city:tour.tourCustomizer")}
                     </p>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <TourCustomizer
                         isAdmin={true}
                         onStepsChange={state.handleTourStepsChange}
                         steps={state.guidedTourSteps}
                     />
-                </CardBody>
+                </CardContent>
             </Card>
         </>
     )
