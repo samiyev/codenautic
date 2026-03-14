@@ -61,12 +61,17 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
                 {t("code-city:sprintComparison.description")}
             </p>
 
-            <div aria-label={t("code-city:sprintComparison.ariaLabelSnapshots")} className="mt-3 space-y-2">
+            <div
+                aria-label={t("code-city:sprintComparison.ariaLabelSnapshots")}
+                className="mt-3 space-y-2"
+            >
                 {props.snapshots.map((snapshot): ReactElement => {
                     const isActive = snapshot.id === selectedSnapshot?.id
                     return (
                         <button
-                            aria-label={t("code-city:sprintComparison.ariaLabelInspect", { title: snapshot.title })}
+                            aria-label={t("code-city:sprintComparison.ariaLabelInspect", {
+                                title: snapshot.title,
+                            })}
                             className={`w-full rounded border p-2 text-left text-xs transition ${
                                 isActive
                                     ? "border-primary bg-primary/10 text-on-primary"
@@ -78,7 +83,10 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
                             }}
                             type="button"
                         >
-                            {t("code-city:sprintComparison.snapshotText", { title: snapshot.title, score: String(snapshot.improvementScore) })}
+                            {t("code-city:sprintComparison.snapshotText", {
+                                title: snapshot.title,
+                                score: String(snapshot.improvementScore),
+                            })}
                         </button>
                     )
                 })}
@@ -115,7 +123,10 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
                                     </p>
                                 </div>
                                 <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
-                                    {t("code-city:sprintComparison.beforeToAfter", { before: String(metric.beforeValue), after: String(metric.afterValue) })}
+                                    {t("code-city:sprintComparison.beforeToAfter", {
+                                        before: String(metric.beforeValue),
+                                        after: String(metric.afterValue),
+                                    })}
                                 </p>
                                 <div className="mt-1 h-1.5 overflow-hidden rounded bg-surface-muted">
                                     <div
