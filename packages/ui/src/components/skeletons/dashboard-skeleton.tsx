@@ -1,6 +1,6 @@
 import type { ReactElement } from "react"
 
-import { Card, CardBody, CardHeader, Skeleton } from "@/components/ui"
+import { Card, CardContent, CardHeader, Skeleton } from "@heroui/react"
 
 /**
  * Skeleton-скелетон для dashboard route.
@@ -21,11 +21,11 @@ export function DashboardSkeleton(): ReactElement {
                             <CardHeader>
                                 <Skeleton className="shimmer h-4 w-24" />
                             </CardHeader>
-                            <CardBody>
+                            <CardContent>
                                 <Skeleton className="mb-2 h-8 w-20" />
                                 <Skeleton className="shimmer h-4 w-32" />
                                 <Skeleton className="mt-4 h-4 w-16" />
-                            </CardBody>
+                            </CardContent>
                         </Card>
                     ),
                 )}
@@ -35,7 +35,7 @@ export function DashboardSkeleton(): ReactElement {
                     <CardHeader>
                         <Skeleton className="shimmer h-4 w-40" />
                     </CardHeader>
-                    <CardBody className="space-y-2">
+                    <CardContent className="space-y-2">
                         {Array.from({ length: 4 }).map(
                             (_, index): ReactElement => (
                                 <Skeleton
@@ -44,13 +44,13 @@ export function DashboardSkeleton(): ReactElement {
                                 />
                             ),
                         )}
-                    </CardBody>
+                    </CardContent>
                 </Card>
                 <Card>
                     <CardHeader>
                         <Skeleton className="shimmer h-4 w-32" />
                     </CardHeader>
-                    <CardBody className="space-y-2">
+                    <CardContent className="space-y-2">
                         {Array.from({ length: 3 }).map(
                             (_, index): ReactElement => (
                                 <Skeleton
@@ -59,7 +59,7 @@ export function DashboardSkeleton(): ReactElement {
                                 />
                             ),
                         )}
-                    </CardBody>
+                    </CardContent>
                 </Card>
             </div>
         </div>

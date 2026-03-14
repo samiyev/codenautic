@@ -1,6 +1,6 @@
 import type { ReactElement } from "react"
 
-import { Card, CardBody, CardHeader, Skeleton } from "@/components/ui"
+import { Card, CardContent, CardHeader, Skeleton } from "@heroui/react"
 
 /**
  * Skeleton-скелетон для CCR management routes.
@@ -15,7 +15,7 @@ export function ReviewsSkeleton(): ReactElement {
                 <CardHeader>
                     <Skeleton className="h-4 w-44" />
                 </CardHeader>
-                <CardBody className="space-y-2">
+                <CardContent className="space-y-2">
                     <div className="grid gap-2 md:grid-cols-4">
                         {Array.from({ length: 4 }).map(
                             (_, index): ReactElement => (
@@ -36,7 +36,7 @@ export function ReviewsSkeleton(): ReactElement {
                             ),
                         )}
                     </div>
-                </CardBody>
+                </CardContent>
             </Card>
         </section>
     )
