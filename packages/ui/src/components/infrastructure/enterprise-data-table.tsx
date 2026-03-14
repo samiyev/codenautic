@@ -25,28 +25,30 @@ import { useVirtualizer } from "@tanstack/react-virtual"
 
 import { Button, Chip } from "@/components/ui"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
+
+import {
+    CHECKBOX_COLUMN_WIDTH,
+    DEFAULT_COMFORTABLE_ROW_HEIGHT,
+    DEFAULT_COMPACT_ROW_HEIGHT,
+    DEFAULT_MAX_BODY_HEIGHT,
+    DEFAULT_OVERSCAN,
+    MIN_COLUMN_SIZE,
+    MIN_ROW_HEIGHT,
+} from "./enterprise-data-table.constants"
+import {
+    buildGridTemplate,
+    createColumnDefs,
+    buildCsvPayload,
+    downloadFile,
+    hasSavedPinning,
+    hasSavedSizing,
+    readSavedView,
+    writeSavedView,
+    type IEnterpriseDataTableColumn,
+    type IEnterpriseTableSavedView,
+    type TDensity,
+} from "./enterprise-data-table.utils"
 import { ColumnCard } from "./enterprise-data-table-column-card"
-
-type TDensity = "comfortable" | "compact"
-
-interface IEnterpriseDataTableColumn<TRow> {
-    /** Уникальный идентификатор колонки. */
-    readonly id: string
-    /** Заголовок колонки. */
-    readonly header: string
-    /** Доступ к ячейке как plain value для фильтрации/экспорта. */
-    readonly accessor: (row: TRow) => string | number
-    /** Кастомный рендер ячейки. */
-    readonly cell?: (row: TRow) => ReactElement | string | number
-    /** Ширина колонки. */
-    readonly size?: number
-    /** Можно ли скрыть колонку. */
-    readonly isHideable?: boolean
-    /** Участвует ли колонка в global search. */
-    readonly enableGlobalFilter?: boolean
-    /** Начальный pin колонки. */
-    readonly pin?: "left" | "right"
-}
 
 interface IEnterpriseDataTableProps<TRow> {
     /** Идентификатор таблицы для сохранения view state. */
@@ -90,187 +92,10 @@ interface IEnterpriseDataTableStickyHeaderOptions {
     readonly withShadow?: boolean
 }
 
-interface IEnterpriseTableSavedView {
-    /** Visibility колонок. */
-    readonly columnVisibility: VisibilityState
-    /** Порядок колонок. */
-    readonly columnOrder: ColumnOrderState
-    /** Density режима таблицы. */
-    readonly density: TDensity
-    /** Значение global filter. */
-    readonly globalFilter: string
-    /** Закрепление колонок. */
-    readonly columnPinning: ColumnPinningState
-    /** Ширины колонок. */
-    readonly columnSizing: ColumnSizingState
-}
-
 interface IRenderedRowOffset {
     readonly index: number
     readonly key: number | string
     readonly start: number
-}
-
-function getStorageKey(tableId: string): string {
-    return `ui.enterprise-table.${tableId}`
-}
-
-/**
- * Парсит ColumnPinningState из сохранённых данных.
- *
- * @param value Сырые данные из localStorage.
- * @returns Валидный ColumnPinningState или пустой default.
- */
-function parseSavedColumnPinning(value: unknown): ColumnPinningState {
-    if (typeof value !== "object" || value === null) {
-        return { left: [], right: [] }
-    }
-    const record = value as Record<string, unknown>
-    return {
-        left: Array.isArray(record["left"]) ? (record["left"] as string[]) : [],
-        right: Array.isArray(record["right"]) ? (record["right"] as string[]) : [],
-    }
-}
-
-/**
- * Парсит ColumnSizingState из сохранённых данных.
- *
- * @param value Сырые данные из localStorage.
- * @returns Валидный ColumnSizingState или пустой default.
- */
-function parseSavedColumnSizing(value: unknown): ColumnSizingState {
-    if (typeof value !== "object" || value === null) {
-        return {}
-    }
-    return value as ColumnSizingState
-}
-
-/**
- * Читает сохранённое состояние таблицы из localStorage.
- *
- * @param tableId Идентификатор таблицы.
- * @returns Восстановленный view state.
- */
-function readSavedView(tableId: string): IEnterpriseTableSavedView {
-    const emptyView: IEnterpriseTableSavedView = {
-        columnOrder: [],
-        columnPinning: { left: [], right: [] },
-        columnSizing: {},
-        columnVisibility: {},
-        density: "comfortable",
-        globalFilter: "",
-    }
-
-    if (typeof window === "undefined") {
-        return emptyView
-    }
-
-    const raw = window.localStorage.getItem(getStorageKey(tableId))
-    if (raw === null) {
-        return emptyView
-    }
-
-    try {
-        const parsed = JSON.parse(raw) as Partial<IEnterpriseTableSavedView>
-        const density = parsed.density === "compact" ? "compact" : "comfortable"
-
-        return {
-            columnOrder: Array.isArray(parsed.columnOrder) ? parsed.columnOrder : [],
-            columnPinning: parseSavedColumnPinning(parsed.columnPinning),
-            columnSizing: parseSavedColumnSizing(parsed.columnSizing),
-            columnVisibility:
-                typeof parsed.columnVisibility === "object" && parsed.columnVisibility !== null
-                    ? parsed.columnVisibility
-                    : {},
-            density,
-            globalFilter: typeof parsed.globalFilter === "string" ? parsed.globalFilter : "",
-        }
-    } catch {
-        return emptyView
-    }
-}
-
-function writeSavedView(tableId: string, view: IEnterpriseTableSavedView): void {
-    if (typeof window === "undefined") {
-        return
-    }
-    window.localStorage.setItem(getStorageKey(tableId), JSON.stringify(view))
-}
-
-function downloadFile(fileName: string, payload: string, contentType: string): void {
-    if (typeof window === "undefined" || typeof document === "undefined") {
-        return
-    }
-
-    const blob = new Blob([payload], { type: contentType })
-    const objectUrl = URL.createObjectURL(blob)
-    const anchor = document.createElement("a")
-    anchor.href = objectUrl
-    anchor.download = fileName
-    anchor.style.display = "none"
-    document.body.append(anchor)
-    anchor.click()
-    anchor.remove()
-    URL.revokeObjectURL(objectUrl)
-}
-
-function csvEscape(value: string): string {
-    return `"${value.replace(/"/g, '""')}"`
-}
-
-function buildCsvPayload<TRow>(
-    rows: ReadonlyArray<TRow>,
-    columns: ReadonlyArray<IEnterpriseDataTableColumn<TRow>>,
-): string {
-    const header = columns.map((column): string => csvEscape(column.header)).join(",")
-    const records = rows.map((row): string => {
-        return columns.map((column): string => csvEscape(String(column.accessor(row)))).join(",")
-    })
-
-    return `${header}\n${records.join("\n")}`
-}
-
-/**
- * Проверяет, содержит ли saved pinning реальные данные.
- *
- * @param pinning Сохранённый ColumnPinningState.
- * @returns true если есть хотя бы одна закреплённая колонка.
- */
-function hasSavedPinning(pinning: ColumnPinningState): boolean {
-    const leftCount = Array.isArray(pinning.left) ? pinning.left.length : 0
-    const rightCount = Array.isArray(pinning.right) ? pinning.right.length : 0
-    return leftCount > 0 || rightCount > 0
-}
-
-/**
- * Проверяет, содержит ли saved sizing реальные данные.
- *
- * @param sizing Сохранённый ColumnSizingState.
- * @returns true если есть хотя бы одна ширина.
- */
-function hasSavedSizing(sizing: ColumnSizingState): boolean {
-    return Object.keys(sizing).length > 0
-}
-
-function createColumnDefs<TRow>(
-    columns: ReadonlyArray<IEnterpriseDataTableColumn<TRow>>,
-): ReadonlyArray<ColumnDef<TRow>> {
-    return columns.map(
-        (column): ColumnDef<TRow> => ({
-            accessorFn: (row): string | number => column.accessor(row),
-            cell: (context): ReactElement | string | number => {
-                if (column.cell !== undefined) {
-                    return column.cell(context.row.original)
-                }
-                return column.accessor(context.row.original)
-            },
-            enableGlobalFilter: column.enableGlobalFilter !== false,
-            enableHiding: column.isHideable !== false,
-            header: column.header,
-            id: column.id,
-            size: column.size ?? 180,
-        }),
-    )
 }
 
 /**
@@ -315,10 +140,14 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
         initialView.columnVisibility,
     )
     const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
-        initialView.columnOrder.length > 0 ? initialView.columnOrder : initialColumnOrder,
+        initialView.columnOrder.length > 0
+            ? (initialView.columnOrder as ColumnOrderState)
+            : initialColumnOrder,
     )
     const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(
-        hasSavedPinning(initialView.columnPinning) ? initialView.columnPinning : initialColumnPinning,
+        hasSavedPinning(initialView.columnPinning)
+            ? initialView.columnPinning
+            : initialColumnPinning,
     )
     const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
         hasSavedSizing(initialView.columnSizing) ? initialView.columnSizing : initialColumnSizing,
@@ -327,7 +156,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
     const [isBodyScrolled, setIsBodyScrolled] = useState<boolean>(false)
     const [isColumnControlsOpen, setIsColumnControlsOpen] = useState<boolean>(false)
 
-    const data = useMemo((): Array<TRow> => [...props.rows], [props.rows])
+    const data = useMemo((): Array<TRow> => props.rows as Array<TRow>, [props.rows])
     const columnDefs = useMemo((): ReadonlyArray<ColumnDef<TRow>> => {
         return createColumnDefs(props.columns)
     }, [props.columns])
@@ -364,24 +193,22 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
 
     const rowModel = table.getRowModel().rows
     const visibleColumns = table.getVisibleLeafColumns()
-    const gridTemplateColumns = `48px ${visibleColumns
-        .map((column): string => `${String(Math.max(column.getSize(), 120))}px`)
-        .join(" ")}`
+    const columnSizes = visibleColumns.map((column): number =>
+        Math.max(column.getSize(), MIN_COLUMN_SIZE),
+    )
+    const gridTemplateColumns = buildGridTemplate(CHECKBOX_COLUMN_WIDTH, columnSizes)
     const totalTableWidth =
-        48 +
-        visibleColumns.reduce((accumulator, column): number => {
-            return accumulator + Math.max(column.getSize(), 120)
-        }, 0)
+        CHECKBOX_COLUMN_WIDTH +
+        columnSizes.reduce((accumulator, size): number => accumulator + size, 0)
 
     const parentRef = useRef<HTMLDivElement | null>(null)
-    const defaultComfortableRowHeight = 56
-    const defaultCompactRowHeight = 42
     const rowHeight =
         density === "compact"
-            ? (props.virtualization?.estimateRowHeight?.compact ?? defaultCompactRowHeight)
-            : (props.virtualization?.estimateRowHeight?.comfortable ?? defaultComfortableRowHeight)
-    const maxBodyHeight = props.virtualization?.maxBodyHeight ?? 520
-    const overscan = props.virtualization?.overscan ?? 8
+            ? (props.virtualization?.estimateRowHeight?.compact ?? DEFAULT_COMPACT_ROW_HEIGHT)
+            : (props.virtualization?.estimateRowHeight?.comfortable ??
+              DEFAULT_COMFORTABLE_ROW_HEIGHT)
+    const maxBodyHeight = props.virtualization?.maxBodyHeight ?? DEFAULT_MAX_BODY_HEIGHT
+    const overscan = props.virtualization?.overscan ?? DEFAULT_OVERSCAN
     const rowHeightEstimator = props.virtualization?.rowHeightEstimator
     const resolveEstimatedRowHeight = (index: number): number => {
         const row = rowModel[index]?.original
@@ -390,7 +217,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
         }
 
         const estimatedHeight = rowHeightEstimator(row, density)
-        if (Number.isFinite(estimatedHeight) === false || estimatedHeight < 28) {
+        if (Number.isFinite(estimatedHeight) === false || estimatedHeight < MIN_ROW_HEIGHT) {
             return rowHeight
         }
 
@@ -446,6 +273,10 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
         })
     }
 
+    /**
+     * React 18+ автоматически батчит все setState вызовы внутри event handlers
+     * в одно обновление, поэтому 7 вызовов ниже приводят к одному ре-рендеру.
+     */
     const handleResetView = (): void => {
         setGlobalFilter("")
         setDensity("comfortable")
@@ -557,69 +388,71 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                 </Button>
             </div>
 
-            {isColumnControlsOpen ? <div className="flex flex-wrap gap-2">
-                {columnOrder.map((columnId, index): ReactElement | null => {
-                    const column = table.getColumn(columnId)
-                    if (column === undefined) {
-                        return null
-                    }
-                    const pinnedRaw = column.getIsPinned()
-                    const pinnedSide: "left" | "right" | false =
-                        pinnedRaw === "left" || pinnedRaw === "right" ? pinnedRaw : false
+            {isColumnControlsOpen ? (
+                <div className="flex flex-wrap gap-2">
+                    {columnOrder.map((columnId, index): ReactElement | null => {
+                        const column = table.getColumn(columnId)
+                        if (column === undefined) {
+                            return null
+                        }
+                        const pinnedRaw = column.getIsPinned()
+                        const pinnedSide: "left" | "right" | false =
+                            pinnedRaw === "left" || pinnedRaw === "right" ? pinnedRaw : false
 
-                    return (
-                        <ColumnCard
-                            canHide={column.getCanHide()}
-                            columnId={columnId}
-                            currentWidth={Math.round(column.getSize())}
-                            header={String(column.columnDef.header)}
-                            index={index}
-                            isVisible={column.getIsVisible()}
-                            key={columnId}
-                            onMoveLeft={(): void => {
-                                if (index === 0) {
-                                    return
-                                }
-                                const next = [...columnOrder]
-                                const target = next[index - 1]
-                                if (target === undefined) {
-                                    return
-                                }
-                                next[index - 1] = columnId
-                                next[index] = target
-                                setColumnOrder(next)
-                            }}
-                            onMoveRight={(): void => {
-                                if (index >= columnOrder.length - 1) {
-                                    return
-                                }
-                                const next = [...columnOrder]
-                                const target = next[index + 1]
-                                if (target === undefined) {
-                                    return
-                                }
-                                next[index + 1] = columnId
-                                next[index] = target
-                                setColumnOrder(next)
-                            }}
-                            onPinChange={(pin): void => {
-                                column.pin(pin)
-                            }}
-                            onToggleVisibility={(): void => {
-                                column.toggleVisibility()
-                            }}
-                            onWidthChange={(width): void => {
-                                handleColumnWidthCommit(columnId, width)
-                            }}
-                            onWidthChangeEnd={(width): void => {
-                                handleColumnWidthCommit(columnId, width)
-                            }}
-                            pinnedSide={pinnedSide}
-                            totalColumns={columnOrder.length}
-                        />
-                    )
-                })}
-            </div> : null}
+                        return (
+                            <ColumnCard
+                                canHide={column.getCanHide()}
+                                columnId={columnId}
+                                currentWidth={Math.round(column.getSize())}
+                                header={String(column.columnDef.header)}
+                                index={index}
+                                isVisible={column.getIsVisible()}
+                                key={columnId}
+                                onMoveLeft={(): void => {
+                                    if (index === 0) {
+                                        return
+                                    }
+                                    const next = [...columnOrder]
+                                    const target = next[index - 1]
+                                    if (target === undefined) {
+                                        return
+                                    }
+                                    next[index - 1] = columnId
+                                    next[index] = target
+                                    setColumnOrder(next)
+                                }}
+                                onMoveRight={(): void => {
+                                    if (index >= columnOrder.length - 1) {
+                                        return
+                                    }
+                                    const next = [...columnOrder]
+                                    const target = next[index + 1]
+                                    if (target === undefined) {
+                                        return
+                                    }
+                                    next[index + 1] = columnId
+                                    next[index] = target
+                                    setColumnOrder(next)
+                                }}
+                                onPinChange={(pin): void => {
+                                    column.pin(pin)
+                                }}
+                                onToggleVisibility={(): void => {
+                                    column.toggleVisibility()
+                                }}
+                                onWidthChange={(width): void => {
+                                    handleColumnWidthCommit(columnId, width)
+                                }}
+                                onWidthChangeEnd={(width): void => {
+                                    handleColumnWidthCommit(columnId, width)
+                                }}
+                                pinnedSide={pinnedSide}
+                                totalColumns={columnOrder.length}
+                            />
+                        )
+                    })}
+                </div>
+            ) : null}
 
             {selectedRows.length > 0 ? (
                 <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2">
@@ -652,7 +485,14 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                     data-sticky-header={isStickyHeaderEnabled ? "true" : "false"}
                     data-sticky-shadow={isBodyScrolled ? "true" : "false"}
                     role="rowgroup"
-                    style={isStickyHeaderEnabled ? { minWidth: `${String(totalTableWidth)}px`, top: stickyHeaderTopOffset } : { minWidth: `${String(totalTableWidth)}px` }}
+                    style={
+                        isStickyHeaderEnabled
+                            ? {
+                                  minWidth: `${String(totalTableWidth)}px`,
+                                  top: stickyHeaderTopOffset,
+                              }
+                            : { minWidth: `${String(totalTableWidth)}px` }
+                    }
                 >
                     <div
                         className={`grid items-center gap-2 px-2 py-2 ${TYPOGRAPHY.overline} text-text-secondary`}
@@ -693,7 +533,10 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                         className="overflow-auto"
                         data-rendered-row-count={renderedRowOffsets.length}
                         role="rowgroup"
-                        style={{ maxHeight: `${String(maxBodyHeight)}px`, minWidth: `${String(totalTableWidth)}px` }}
+                        style={{
+                            maxHeight: `${String(maxBodyHeight)}px`,
+                            minWidth: `${String(totalTableWidth)}px`,
+                        }}
                         onScroll={handleBodyScroll}
                     >
                         <div

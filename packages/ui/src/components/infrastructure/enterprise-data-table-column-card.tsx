@@ -65,9 +65,7 @@ export function ColumnCard(props: IColumnCardProps): ReactElement {
     return (
         <div className={`w-56 rounded-lg border border-border bg-surface px-3 py-2 ${cardOpacity}`}>
             <div className="flex items-center gap-1.5">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em]">
-                    {props.header}
-                </p>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em]">{props.header}</p>
                 {props.isVisible === false ? (
                     <Chip color="default" size="sm" variant="flat">
                         {t("common:dataTable.columnHidden")}
@@ -89,16 +87,18 @@ export function ColumnCard(props: IColumnCardProps): ReactElement {
                     <Button
                         aria-label={
                             props.isVisible
-                                ? t("common:dataTable.hideColumnAriaLabel", { column: props.header })
-                                : t("common:dataTable.showColumnAriaLabel", { column: props.header })
+                                ? t("common:dataTable.hideColumnAriaLabel", {
+                                      column: props.header,
+                                  })
+                                : t("common:dataTable.showColumnAriaLabel", {
+                                      column: props.header,
+                                  })
                         }
                         size="sm"
                         variant="flat"
                         onPress={props.onToggleVisibility}
                     >
-                        {props.isVisible
-                            ? t("common:dataTable.hide")
-                            : t("common:dataTable.show")}
+                        {props.isVisible ? t("common:dataTable.hide") : t("common:dataTable.show")}
                     </Button>
                 ) : null}
                 <Tooltip>
@@ -106,7 +106,6 @@ export function ColumnCard(props: IColumnCardProps): ReactElement {
                         aria-label={t("common:dataTable.moveLeft")}
                         isDisabled={props.index === 0}
                         size="sm"
-
                         variant="flat"
                         onPress={props.onMoveLeft}
                     >
