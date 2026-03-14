@@ -15,6 +15,7 @@ import { useMultiTabSync } from "@/lib/hooks/use-multi-tab-sync"
 import { useDashboardShortcuts } from "@/lib/hooks/use-dashboard-shortcuts"
 import { OPEN_COMMAND_PALETTE_EVENT } from "@/lib/keyboard/shortcut-registry"
 
+import { AnimatedMount } from "@/lib/motion"
 import { Menu } from "@/components/icons/app-icons"
 import { Button } from "@/components/ui"
 
@@ -53,7 +54,7 @@ export interface IDashboardLayoutProps {
  */
 export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+    const isSidebarCollapsed = false
     const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false)
     const commandPaletteInvokerRef = useRef<HTMLElement | null>(null)
     const navigate = useNavigate()
@@ -198,9 +199,6 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
                     onNavigate={(): void => {
                         setIsMobileSidebarOpen(false)
                     }}
-                    onSidebarToggle={(): void => {
-                        setIsSidebarCollapsed((previousValue): boolean => !previousValue)
-                    }}
                     title="Menu"
                 />
             </div>
@@ -230,7 +228,9 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
                         restoredDraftMessage={sessionRecovery.restoredDraftMessage}
                         shortcutConflicts={shortcuts.conflicts}
                     />
-                    {props.children}
+                    <AnimatedMount motionKey={`page-${location.pathname}`}>
+                        {props.children}
+                    </AnimatedMount>
                 </div>
             </div>
 

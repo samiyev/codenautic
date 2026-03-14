@@ -1,10 +1,4 @@
 import type { ReactElement, ReactNode } from "react"
-import { useTranslation } from "react-i18next"
-import { motion } from "motion/react"
-
-import { ChevronLeft, ChevronRight } from "@/components/icons/app-icons"
-import { Button } from "@/components/ui"
-import { DURATION, EASING, useReducedMotion } from "@/lib/motion"
 
 import { BrandMark } from "./brand-mark"
 import { SidebarNav } from "./sidebar-nav"
@@ -25,8 +19,6 @@ export interface ISidebarProps {
     readonly footerSlot?: ReactNode
     /** Callback when a nav item is selected (close mobile sidebar). */
     readonly onNavigate?: (to?: string) => void
-    /** Callback to toggle collapse state. */
-    readonly onSidebarToggle?: () => void
 }
 
 /**
@@ -37,30 +29,14 @@ export interface ISidebarProps {
  * @returns Full-height sidebar navigation.
  */
 export function Sidebar(props: ISidebarProps): ReactElement {
-    const { t } = useTranslation(["navigation"])
     const isCollapsed = props.isCollapsed === true
-    const prefersReducedMotion = useReducedMotion()
-    const targetWidth = isCollapsed ? 48 : 240
 
-    const sidebarContent = (
-        <>
-            <div className="mb-1 flex items-center justify-between">
+    return (
+        <aside
+            className={`flex h-full w-60 flex-col overflow-hidden border-r border-border/50 bg-sidebar-bg px-2 py-2 ${props.className ?? ""}`}
+        >
+            <div className="mb-1 flex items-center">
                 <BrandMark isCompact={isCollapsed} />
-                <Button
-                    aria-label={isCollapsed ? t("navigation:sidebarNav.expandAriaLabel") : t("navigation:sidebarNav.collapseAriaLabel")}
-                    className={`${isCollapsed ? "h-8 min-h-8 w-8" : "h-6 min-h-6 w-6"} rounded-full px-0 hover:bg-surface-hover`}
-                    isIconOnly
-                    radius="full"
-                    size="sm"
-                    variant="light"
-                    onPress={props.onSidebarToggle}
-                >
-                    {isCollapsed ? (
-                        <ChevronRight aria-hidden className="size-3.5" />
-                    ) : (
-                        <ChevronLeft aria-hidden className="size-3.5" />
-                    )}
-                </Button>
             </div>
             {props.headerSlot !== undefined ? (
                 <div className="mb-1.5 px-1">{props.headerSlot}</div>
@@ -69,32 +45,6 @@ export function Sidebar(props: ISidebarProps): ReactElement {
                 <SidebarNav isCollapsed={isCollapsed} onNavigate={props.onNavigate} />
             </div>
             {props.footerSlot !== undefined ? props.footerSlot : null}
-        </>
-    )
-
-    const baseClassName = `flex h-full flex-col overflow-hidden border-r border-border/50 bg-sidebar-bg px-2 py-2 ${props.className ?? ""}`
-
-    if (prefersReducedMotion) {
-        return (
-            <aside
-                className={baseClassName}
-                style={{ width: targetWidth }}
-            >
-                {sidebarContent}
-            </aside>
-        )
-    }
-
-    return (
-        <motion.aside
-            animate={{ width: targetWidth }}
-            className={baseClassName}
-            transition={{
-                duration: DURATION.normal,
-                ease: EASING.move,
-            }}
-        >
-            {sidebarContent}
-        </motion.aside>
+        </aside>
     )
 }
