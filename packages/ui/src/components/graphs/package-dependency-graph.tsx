@@ -5,11 +5,33 @@ import { Button, Card, CardBody, CardHeader, Input } from "@/components/ui"
 import { XyFlowGraph } from "@/components/graphs/xyflow-graph"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { exportGraphAsJson } from "@/components/graphs/graph-export"
+import { calculateGraphLayout, type IGraphNode } from "@/components/graphs/xyflow-graph-layout"
+
+import { CLUSTER_DETAILS_DELAY_MS } from "./package-dependency-graph.constants"
 import {
-    calculateGraphLayout,
-    type IGraphEdge,
-    type IGraphNode,
-} from "@/components/graphs/xyflow-graph-layout"
+    type IHugeGraphFallbackData,
+    type IImpactPathHighlight,
+    type IPackageDependencyGraphData,
+    type IPackageRelationStats,
+    applyFocusPathFilter,
+    buildClusteredPackageGraphData,
+    buildHugeGraphFallbackData,
+    buildLayerClusterMap,
+    buildPackageDependencyGraphData,
+    calculateImpactPathHighlight,
+    calculatePackageRelationStats,
+    collectRelationTypes,
+    createSummaryText,
+    filterByPackageName,
+    filterRelationsByType,
+    isHugeGraph,
+    isPackageLayer,
+    parseClusterLayer,
+    readLayoutSnapshot,
+    toggleExpandedLayer,
+    toggleRelationFilter,
+    writeLayoutSnapshot,
+} from "./package-dependency-graph.utils"
 
 /** Описание пакета/модуля для package graph. */
 export interface IPackageDependencyNode {
@@ -33,13 +55,8 @@ export interface IPackageDependencyRelation {
     readonly relationType?: string
 }
 
-/** Нормализованные данные package graph. */
-export interface IPackageDependencyGraphData {
-    /** Узлы графа. */
-    readonly nodes: ReadonlyArray<IGraphNode>
-    /** Рёбра графа. */
-    readonly edges: ReadonlyArray<IGraphEdge>
-}
+export type { IPackageDependencyGraphData } from "./package-dependency-graph.utils"
+export { buildPackageDependencyGraphData } from "./package-dependency-graph.utils"
 
 /** Пропсы package graph-компонента. */
 export interface IPackageDependencyGraphProps {
@@ -60,545 +77,16 @@ export interface IPackageDependencyGraphProps {
 }
 
 interface IPackageDependencyGraphState {
-    /** Поисковый запрос по названию пакета. */
     readonly query: string
-    /** Фильтры по типам зависимостей. */
     readonly selectedRelationTypes: ReadonlyArray<string>
-    /** id выбранного узла. */
     readonly selectedNodeId?: string
-    /** Включён ли highlight impact paths. */
     readonly showImpactPaths: boolean
-    /** Флаг режима кластеризации. */
     readonly viewMode: "detailed" | "clustered"
-    /** Режим уровня детализации (LOD). */
     readonly lodMode: "overview" | "details"
-    /** Список раскрытых layer-кластеров. */
     readonly expandedLayerIds: ReadonlyArray<IPackageDependencyNode["layer"]>
-    /** Показывать только focus path для выбранного узла. */
     readonly focusPathOnly: boolean
-    /** Идёт ли отложенная подгрузка cluster-details. */
     readonly isClusterDetailLoading: boolean
-    /** Явно показать граф даже в huge-graph fallback режиме. */
     readonly forceGraphRenderInHugeMode: boolean
-}
-
-interface IPackageRelationStats {
-    readonly incoming: number
-    readonly outgoing: number
-}
-
-interface IImpactPathHighlight {
-    readonly edgeIds: ReadonlyArray<string>
-    readonly nodeIds: ReadonlyArray<string>
-}
-
-const MAX_LABEL_LENGTH = 40
-const LAYOUT_STATE_STORAGE_KEY = "ui.package-graph.layout.v1"
-const CLUSTER_NODE_PREFIX = "cluster:layer:"
-const CLUSTER_DETAILS_DELAY_MS = 160
-const HUGE_GRAPH_NODE_THRESHOLD = 260
-const HUGE_GRAPH_EDGE_THRESHOLD = 640
-const MAX_FALLBACK_PATH_ROWS = 24
-const MAX_FALLBACK_HUBS = 10
-
-interface IGraphFallbackPathRow {
-    readonly source: string
-    readonly target: string
-    readonly relationType: string
-}
-
-interface IGraphFallbackHubRow {
-    readonly nodeId: string
-    readonly label: string
-    readonly totalDegree: number
-    readonly incoming: number
-    readonly outgoing: number
-}
-
-interface IHugeGraphFallbackData {
-    readonly topHubs: ReadonlyArray<IGraphFallbackHubRow>
-    readonly pathRows: ReadonlyArray<IGraphFallbackPathRow>
-}
-
-interface ILayerLayoutSnapshot {
-    readonly viewMode: "detailed" | "clustered"
-    readonly lodMode: "overview" | "details"
-    readonly expandedLayerIds: ReadonlyArray<IPackageDependencyNode["layer"]>
-}
-
-function createClusterNodeId(layer: IPackageDependencyNode["layer"]): string {
-    return `${CLUSTER_NODE_PREFIX}${layer}`
-}
-
-function isPackageLayer(value: string): value is IPackageDependencyNode["layer"] {
-    return (
-        value === "core" ||
-        value === "api" ||
-        value === "ui" ||
-        value === "worker" ||
-        value === "db" ||
-        value === "infra"
-    )
-}
-
-function parseClusterLayer(nodeId: string): IPackageDependencyNode["layer"] | undefined {
-    if (nodeId.startsWith(CLUSTER_NODE_PREFIX) !== true) {
-        return undefined
-    }
-
-    const layerId = nodeId.slice(CLUSTER_NODE_PREFIX.length)
-    if (isPackageLayer(layerId)) {
-        return layerId
-    }
-
-    return undefined
-}
-
-function canUseStorage(): boolean {
-    return typeof globalThis.localStorage !== "undefined"
-}
-
-function readLayoutSnapshot(): ILayerLayoutSnapshot | undefined {
-    if (canUseStorage() !== true) {
-        return undefined
-    }
-
-    const rawSnapshot = globalThis.localStorage.getItem(LAYOUT_STATE_STORAGE_KEY)
-    if (rawSnapshot === null) {
-        return undefined
-    }
-
-    try {
-        const parsed = JSON.parse(rawSnapshot) as Partial<ILayerLayoutSnapshot>
-        if (
-            (parsed.viewMode === "detailed" || parsed.viewMode === "clustered") &&
-            (parsed.lodMode === "overview" || parsed.lodMode === "details") &&
-            Array.isArray(parsed.expandedLayerIds)
-        ) {
-            return {
-                viewMode: parsed.viewMode,
-                lodMode: parsed.lodMode,
-                expandedLayerIds: parsed.expandedLayerIds
-                    .filter((item): item is string => typeof item === "string")
-                    .map((item): string => item.trim())
-                    .filter(
-                        (item): item is IPackageDependencyNode["layer"] =>
-                            item.length > 0 && isPackageLayer(item),
-                    ),
-            }
-        }
-    } catch {
-        return undefined
-    }
-
-    return undefined
-}
-
-function writeLayoutSnapshot(snapshot: ILayerLayoutSnapshot): void {
-    if (canUseStorage() !== true) {
-        return
-    }
-
-    globalThis.localStorage.setItem(LAYOUT_STATE_STORAGE_KEY, JSON.stringify(snapshot))
-}
-
-function buildLayerClusterMap(
-    nodes: ReadonlyArray<IPackageDependencyNode>,
-): ReadonlyMap<IPackageDependencyNode["layer"], ReadonlyArray<IPackageDependencyNode>> {
-    const nextMap = new Map<IPackageDependencyNode["layer"], IPackageDependencyNode[]>()
-    for (const node of nodes) {
-        const currentNodes = nextMap.get(node.layer) ?? []
-        currentNodes.push(node)
-        nextMap.set(node.layer, currentNodes)
-    }
-
-    return nextMap
-}
-
-function filterRelationsByType(
-    relations: ReadonlyArray<IPackageDependencyRelation>,
-    selectedRelationTypes: ReadonlyArray<string>,
-): ReadonlyArray<IPackageDependencyRelation> {
-    const normalizedTypes = selectedRelationTypes
-        .map((item): string => item.trim())
-        .filter((item): boolean => item.length > 0)
-    if (normalizedTypes.length === 0) {
-        return relations
-    }
-
-    const selectedTypeSet = new Set<string>(normalizedTypes)
-    return relations.filter((relation): boolean => {
-        const relationType = relation.relationType
-        return relationType !== undefined && selectedTypeSet.has(relationType)
-    })
-}
-
-function createClusterLabel(layer: IPackageDependencyNode["layer"], membersCount: number): string {
-    return `${layer.toUpperCase()} cluster (${membersCount})`
-}
-
-function buildClusteredPackageGraphData(
-    nodes: ReadonlyArray<IPackageDependencyNode>,
-    relations: ReadonlyArray<IPackageDependencyRelation>,
-    expandedLayerIds: ReadonlyArray<IPackageDependencyNode["layer"]>,
-): IPackageDependencyGraphData {
-    const nodesById = new Map<string, IPackageDependencyNode>()
-    for (const node of nodes) {
-        nodesById.set(node.id, node)
-    }
-
-    const expandedLayerIdSet = new Set<IPackageDependencyNode["layer"]>(expandedLayerIds)
-    const layerClusterMap = buildLayerClusterMap(nodes)
-    const graphNodes: IGraphNode[] = []
-
-    const layerEntries = Array.from(layerClusterMap.entries()).sort((left, right): number =>
-        left[0].localeCompare(right[0]),
-    )
-    for (const [layer, members] of layerEntries) {
-        if (expandedLayerIdSet.has(layer) === true) {
-            for (const member of members) {
-                graphNodes.push({
-                    id: member.id,
-                    label: normalizeNodeLabel(member.name),
-                    width: 220 + (member.size ?? 1) * 1.7,
-                    height: 72,
-                })
-            }
-            continue
-        }
-
-        graphNodes.push({
-            id: createClusterNodeId(layer),
-            label: createClusterLabel(layer, members.length),
-            width: 280 + Math.min(members.length, 25) * 2,
-            height: 78,
-        })
-    }
-
-    const edgeCountByKey = new Map<string, number>()
-    for (const relation of relations) {
-        const sourceNode = nodesById.get(relation.source)
-        const targetNode = nodesById.get(relation.target)
-        if (sourceNode === undefined || targetNode === undefined) {
-            continue
-        }
-
-        const sourceId =
-            expandedLayerIdSet.has(sourceNode.layer) === true
-                ? sourceNode.id
-                : createClusterNodeId(sourceNode.layer)
-        const targetId =
-            expandedLayerIdSet.has(targetNode.layer) === true
-                ? targetNode.id
-                : createClusterNodeId(targetNode.layer)
-        if (sourceId === targetId) {
-            continue
-        }
-
-        const relationType = relation.relationType ?? "dependency"
-        const edgeKey = `${sourceId}->${targetId}:${relationType}`
-        edgeCountByKey.set(edgeKey, (edgeCountByKey.get(edgeKey) ?? 0) + 1)
-    }
-
-    const edges: IGraphEdge[] = []
-    for (const [key, count] of edgeCountByKey.entries()) {
-        const keySeparatorIndex = key.indexOf(":")
-        if (keySeparatorIndex <= 0) {
-            continue
-        }
-
-        const pair = key.slice(0, keySeparatorIndex)
-        const relationType = key.slice(keySeparatorIndex + 1)
-        const nodeSeparatorIndex = pair.indexOf("->")
-        if (nodeSeparatorIndex <= 0) {
-            continue
-        }
-
-        const source = pair.slice(0, nodeSeparatorIndex)
-        const target = pair.slice(nodeSeparatorIndex + 2)
-        if (source.length === 0 || target.length === 0) {
-            continue
-        }
-
-        edges.push({
-            id: key,
-            source,
-            target,
-            label: count > 1 ? `${relationType} x${count}` : relationType,
-        })
-    }
-
-    return { nodes: graphNodes, edges }
-}
-
-function applyFocusPathFilter(
-    graphData: IPackageDependencyGraphData,
-    selectedNodeId: string | undefined,
-    focusPathOnly: boolean,
-): IPackageDependencyGraphData {
-    if (focusPathOnly !== true || selectedNodeId === undefined) {
-        return graphData
-    }
-
-    const highlight = calculateImpactPathHighlight(graphData, selectedNodeId)
-    if (highlight.nodeIds.length === 0) {
-        return graphData
-    }
-
-    const visibleNodeIds = new Set<string>(highlight.nodeIds)
-    const visibleEdgeIds = new Set<string>(highlight.edgeIds)
-    return {
-        nodes: graphData.nodes.filter((node): boolean => visibleNodeIds.has(node.id)),
-        edges: graphData.edges.filter((edge): boolean => {
-            const edgeId = edge.id ?? `${edge.source}-${edge.target}`
-            return visibleEdgeIds.has(edgeId)
-        }),
-    }
-}
-
-function isHugeGraph(nodesCount: number, edgesCount: number): boolean {
-    return nodesCount > HUGE_GRAPH_NODE_THRESHOLD || edgesCount > HUGE_GRAPH_EDGE_THRESHOLD
-}
-
-function buildHugeGraphFallbackData(
-    nodes: ReadonlyArray<IPackageDependencyNode>,
-    relations: ReadonlyArray<IPackageDependencyRelation>,
-): IHugeGraphFallbackData {
-    const nodesById = new Map<string, IPackageDependencyNode>()
-    const statsByNodeId = new Map<string, { incoming: number; outgoing: number }>()
-
-    for (const node of nodes) {
-        nodesById.set(node.id, node)
-        statsByNodeId.set(node.id, {
-            incoming: 0,
-            outgoing: 0,
-        })
-    }
-
-    const pathRows: IGraphFallbackPathRow[] = []
-    for (const relation of relations) {
-        const sourceStats = statsByNodeId.get(relation.source)
-        const targetStats = statsByNodeId.get(relation.target)
-        if (sourceStats === undefined || targetStats === undefined) {
-            continue
-        }
-
-        sourceStats.outgoing += 1
-        targetStats.incoming += 1
-        if (pathRows.length < MAX_FALLBACK_PATH_ROWS) {
-            pathRows.push({
-                source: relation.source,
-                target: relation.target,
-                relationType: relation.relationType ?? "dependency",
-            })
-        }
-    }
-
-    const topHubs: IGraphFallbackHubRow[] = Array.from(statsByNodeId.entries())
-        .map(([nodeId, stats]): IGraphFallbackHubRow => {
-            const node = nodesById.get(nodeId)
-            return {
-                nodeId,
-                label: node?.name ?? nodeId,
-                totalDegree: stats.incoming + stats.outgoing,
-                incoming: stats.incoming,
-                outgoing: stats.outgoing,
-            }
-        })
-        .sort((left, right): number => right.totalDegree - left.totalDegree)
-        .slice(0, MAX_FALLBACK_HUBS)
-
-    return {
-        topHubs,
-        pathRows,
-    }
-}
-
-/** Подготавливает label для отображения. */
-function normalizeNodeLabel(label: string): string {
-    if (label.length <= MAX_LABEL_LENGTH) {
-        return label
-    }
-
-    return `…${label.slice(label.length - (MAX_LABEL_LENGTH - 1))}`
-}
-
-/** Формирует node/edge для рендеринга package dependency graph. */
-export function buildPackageDependencyGraphData(
-    nodes: ReadonlyArray<IPackageDependencyNode>,
-    relations: ReadonlyArray<IPackageDependencyRelation>,
-): IPackageDependencyGraphData {
-    const packageIds = new Set<string>(nodes.map((node): string => node.id))
-    const edgeKeys = new Set<string>()
-    const edges: IGraphEdge[] = []
-
-    for (const relation of relations) {
-        if (packageIds.has(relation.source) !== true || packageIds.has(relation.target) !== true) {
-            continue
-        }
-
-        const edgeKey = `${relation.source}->${relation.target}:${relation.relationType ?? ""}`
-        if (edgeKeys.has(edgeKey) === true) {
-            continue
-        }
-
-        edgeKeys.add(edgeKey)
-        edges.push({
-            id: edgeKey,
-            source: relation.source,
-            target: relation.target,
-            label: relation.relationType,
-        })
-    }
-
-    const graphNodes: IGraphNode[] = nodes.map((node): IGraphNode => {
-        const label = normalizeNodeLabel(node.name)
-        return {
-            id: node.id,
-            label: `${label} (${node.layer})`,
-            width: 230 + (node.size ?? 1) * 1.8,
-            height: 74,
-        }
-    })
-
-    return { nodes: graphNodes, edges }
-}
-
-/** Применяет фильтр по названию пакета. */
-function filterByPackageName(
-    data: IPackageDependencyGraphData,
-    nodes: ReadonlyArray<IPackageDependencyNode>,
-    query: string,
-): IPackageDependencyGraphData {
-    const trimQuery = query.trim().toLowerCase()
-    if (trimQuery.length === 0) {
-        return data
-    }
-
-    const selectedNodes = new Set<string>()
-    for (const node of nodes) {
-        if (node.name.toLowerCase().includes(trimQuery) === true) {
-            selectedNodes.add(node.id)
-        }
-    }
-
-    const filteredNodes = data.nodes.filter((node): boolean => selectedNodes.has(node.id))
-    const nodeIds = new Set<string>(filteredNodes.map((node): string => node.id))
-    const filteredEdges = data.edges.filter(
-        (edge): boolean => nodeIds.has(edge.source) && nodeIds.has(edge.target),
-    )
-
-    return {
-        nodes: filteredNodes,
-        edges: filteredEdges,
-    }
-}
-
-/** Возвращает список relationType для фильтрации в детерминированном порядке. */
-function collectRelationTypes(
-    relations: ReadonlyArray<IPackageDependencyRelation>,
-): ReadonlyArray<string> {
-    const relationTypes = new Set<string>()
-    for (const relation of relations) {
-        if (relation.relationType !== undefined && relation.relationType.length > 0) {
-            relationTypes.add(relation.relationType)
-        }
-    }
-
-    return Array.from(relationTypes).sort()
-}
-
-/** Рекомендует next состояния для фильтра relationType по клику на кнопке. */
-function toggleRelationFilter(
-    selected: ReadonlyArray<string>,
-    relationType: string,
-): ReadonlyArray<string> {
-    const current = selected.findIndex((entry): boolean => entry === relationType)
-    if (current >= 0) {
-        return selected.filter((entry): boolean => entry !== relationType)
-    }
-
-    return [...selected, relationType]
-}
-
-function toggleExpandedLayer(
-    selected: ReadonlyArray<IPackageDependencyNode["layer"]>,
-    layer: IPackageDependencyNode["layer"],
-): ReadonlyArray<IPackageDependencyNode["layer"]> {
-    if (selected.includes(layer) === true) {
-        return selected.filter((item): boolean => item !== layer)
-    }
-
-    return [...selected, layer]
-}
-
-/** Формирует summary строку. */
-function createSummaryText(nodesCount: number, edgesCount: number): string {
-    return `Nodes: ${nodesCount}, edges: ${edgesCount}`
-}
-
-/** Подсчитывает входящие/исходящие связи для выбранного пакета. */
-function calculatePackageRelationStats(
-    relations: ReadonlyArray<IPackageDependencyRelation>,
-    nodeId: string,
-): IPackageRelationStats {
-    let incoming = 0
-    let outgoing = 0
-
-    for (const relation of relations) {
-        if (relation.source === nodeId) {
-            outgoing += 1
-        }
-        if (relation.target === nodeId) {
-            incoming += 1
-        }
-    }
-
-    return { incoming, outgoing }
-}
-
-/** Формирует highlight-данные impact path для выбранного package node. */
-function calculateImpactPathHighlight(
-    graphData: IPackageDependencyGraphData,
-    nodeId: string,
-): IImpactPathHighlight {
-    const knownNodeIds = new Set<string>(graphData.nodes.map((node): string => node.id))
-    if (knownNodeIds.has(nodeId) !== true) {
-        return { edgeIds: [], nodeIds: [] }
-    }
-
-    const queue: string[] = [nodeId]
-    const visitedNodeIds = new Set<string>([nodeId])
-    const visitedEdgeIds = new Set<string>()
-
-    while (queue.length > 0) {
-        const currentNodeId = queue.shift()
-        if (currentNodeId === undefined) {
-            continue
-        }
-
-        for (const edge of graphData.edges) {
-            const edgeId = edge.id ?? `${edge.source}-${edge.target}`
-            if (edge.source !== currentNodeId && edge.target !== currentNodeId) {
-                continue
-            }
-
-            visitedEdgeIds.add(edgeId)
-            if (visitedNodeIds.has(edge.source) !== true) {
-                visitedNodeIds.add(edge.source)
-                queue.push(edge.source)
-            }
-            if (visitedNodeIds.has(edge.target) !== true) {
-                visitedNodeIds.add(edge.target)
-                queue.push(edge.target)
-            }
-        }
-    }
-
-    return {
-        edgeIds: Array.from(visitedEdgeIds),
-        nodeIds: Array.from(visitedNodeIds),
-    }
 }
 
 /**
@@ -627,7 +115,8 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
     )
     const { t } = useTranslation(["code-city"])
     const title = props.title ?? t("code-city:packageDependency.defaultTitle")
-    const emptyStateLabel = props.emptyStateLabel ?? t("code-city:packageDependency.defaultEmptyState")
+    const emptyStateLabel =
+        props.emptyStateLabel ?? t("code-city:packageDependency.defaultEmptyState")
     const packageNodesById = useMemo((): ReadonlyMap<string, IPackageDependencyNode> => {
         const nextMap = new Map<string, IPackageDependencyNode>()
         for (const node of props.nodes) {
@@ -924,7 +413,9 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         }}
                         variant="flat"
                     >
-                        {state.lodMode === "details" ? t("code-city:packageDependency.lodDetails") : t("code-city:packageDependency.lodOverview")}
+                        {state.lodMode === "details"
+                            ? t("code-city:packageDependency.lodDetails")
+                            : t("code-city:packageDependency.lodOverview")}
                     </Button>
                     {hugeGraphFallbackMode ? (
                         <Button
@@ -962,8 +453,12 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                             variant="light"
                         >
                             {state.expandedLayerIds.includes(selectedClusterLayer)
-                                ? t("code-city:packageDependency.collapse", { layer: selectedClusterLayer })
-                                : t("code-city:packageDependency.expand", { layer: selectedClusterLayer })}
+                                ? t("code-city:packageDependency.collapse", {
+                                      layer: selectedClusterLayer,
+                                  })
+                                : t("code-city:packageDependency.expand", {
+                                      layer: selectedClusterLayer,
+                                  })}
                         </Button>
                     ) : null}
                 </div>
@@ -1014,7 +509,10 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         className="space-y-3 rounded-xl border border-warning-300 bg-warning-50 p-4"
                     >
                         <p className="text-sm text-warning-800">
-                            {t("code-city:packageDependency.hugeGraphWarning", { nodes: String(props.nodes.length), relations: String(filteredRelations.length) })}
+                            {t("code-city:packageDependency.hugeGraphWarning", {
+                                nodes: String(props.nodes.length),
+                                relations: String(filteredRelations.length),
+                            })}
                         </p>
                         <div className="flex flex-wrap gap-2">
                             <Button
@@ -1035,7 +533,9 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         </div>
                         <div className="grid gap-3 md:grid-cols-2">
                             <section className="rounded-lg border border-default-200 bg-content1 p-3">
-                                <h5 className={TYPOGRAPHY.cardTitle}>{t("code-city:packageDependency.topHubs")}</h5>
+                                <h5 className={TYPOGRAPHY.cardTitle}>
+                                    {t("code-city:packageDependency.topHubs")}
+                                </h5>
                                 <ul className="mt-2 space-y-1 text-xs text-foreground-700">
                                     {hugeGraphFallbackData.topHubs.map(
                                         (hub): ReactElement => (
@@ -1099,25 +599,77 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                     aria-live="polite"
                     className="rounded-xl border border-default-200 bg-content2 p-4"
                 >
-                    <h4 className={TYPOGRAPHY.cardTitle}>{t("code-city:packageDependency.nodeDetails")}</h4>
+                    <h4 className={TYPOGRAPHY.cardTitle}>
+                        {t("code-city:packageDependency.nodeDetails")}
+                    </h4>
                     {selectedNode !== undefined && selectedRelationStats !== undefined ? (
                         <div className="mt-2 space-y-1 text-sm text-foreground-700">
-                            <p>{t("code-city:packageDependency.name", { value: selectedNode.name })}</p>
-                            <p>{t("code-city:packageDependency.layer", { value: selectedNode.layer })}</p>
-                            <p>{t("code-city:packageDependency.size", { value: selectedNode.size ?? "n/a" })}</p>
-                            <p>{t("code-city:packageDependency.incomingRelations", { value: selectedRelationStats.incoming })}</p>
-                            <p>{t("code-city:packageDependency.outgoingRelations", { value: selectedRelationStats.outgoing })}</p>
-                            <p>{t("code-city:packageDependency.impactPathNodes", { value: impactPathHighlight.nodeIds.length })}</p>
-                            <p>{t("code-city:packageDependency.impactPathEdges", { value: impactPathHighlight.edgeIds.length })}</p>
+                            <p>
+                                {t("code-city:packageDependency.name", {
+                                    value: selectedNode.name,
+                                })}
+                            </p>
+                            <p>
+                                {t("code-city:packageDependency.layer", {
+                                    value: selectedNode.layer,
+                                })}
+                            </p>
+                            <p>
+                                {t("code-city:packageDependency.size", {
+                                    value: selectedNode.size ?? "n/a",
+                                })}
+                            </p>
+                            <p>
+                                {t("code-city:packageDependency.incomingRelations", {
+                                    value: selectedRelationStats.incoming,
+                                })}
+                            </p>
+                            <p>
+                                {t("code-city:packageDependency.outgoingRelations", {
+                                    value: selectedRelationStats.outgoing,
+                                })}
+                            </p>
+                            <p>
+                                {t("code-city:packageDependency.impactPathNodes", {
+                                    value: impactPathHighlight.nodeIds.length,
+                                })}
+                            </p>
+                            <p>
+                                {t("code-city:packageDependency.impactPathEdges", {
+                                    value: impactPathHighlight.edgeIds.length,
+                                })}
+                            </p>
                         </div>
                     ) : selectedClusterLayer !== undefined &&
                       selectedClusterMembers !== undefined ? (
                         <div className="mt-2 space-y-1 text-sm text-foreground-700">
-                            <p>{t("code-city:packageDependency.clusterLayer", { value: selectedClusterLayer })}</p>
-                            <p>{t("code-city:packageDependency.packagesInCluster", { value: selectedClusterMembers.length })}</p>
-                            <p>{t("code-city:packageDependency.expanded", { value: state.expandedLayerIds.includes(selectedClusterLayer) ? t("code-city:packageDependency.yes") : t("code-city:packageDependency.no") })}</p>
-                            <p>{t("code-city:packageDependency.lodMode", { value: state.lodMode })}</p>
-                            <p>{t("code-city:packageDependency.focusPathOnly", { value: state.focusPathOnly ? t("code-city:packageDependency.yes") : t("code-city:packageDependency.no") })}</p>
+                            <p>
+                                {t("code-city:packageDependency.clusterLayer", {
+                                    value: selectedClusterLayer,
+                                })}
+                            </p>
+                            <p>
+                                {t("code-city:packageDependency.packagesInCluster", {
+                                    value: selectedClusterMembers.length,
+                                })}
+                            </p>
+                            <p>
+                                {t("code-city:packageDependency.expanded", {
+                                    value: state.expandedLayerIds.includes(selectedClusterLayer)
+                                        ? t("code-city:packageDependency.yes")
+                                        : t("code-city:packageDependency.no"),
+                                })}
+                            </p>
+                            <p>
+                                {t("code-city:packageDependency.lodMode", { value: state.lodMode })}
+                            </p>
+                            <p>
+                                {t("code-city:packageDependency.focusPathOnly", {
+                                    value: state.focusPathOnly
+                                        ? t("code-city:packageDependency.yes")
+                                        : t("code-city:packageDependency.no"),
+                                })}
+                            </p>
                         </div>
                     ) : (
                         <p className="mt-2 text-sm text-foreground-500">
