@@ -1,4 +1,5 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui"
 
@@ -35,9 +36,10 @@ const DATE_RANGES: ReadonlyArray<{ readonly value: TDashboardDateRange; readonly
  * @returns Группа кнопок с диапазоном.
  */
 export function DashboardDateRangeFilter(props: IDashboardDateRangeFilterProps): ReactElement {
+    const { t } = useTranslation(["dashboard"])
     return (
         <div
-            aria-label="Dashboard date range"
+            aria-label={t("dashboard:ariaLabel.dateRangeFilter.dateRange")}
             className="inline-flex rounded-lg border border-border bg-surface p-1"
             role="group"
         >

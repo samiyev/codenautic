@@ -1,4 +1,5 @@
 import { type ReactElement } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Select, SelectItem } from "@/components/ui"
 import {
@@ -74,10 +75,11 @@ const TEAM_OPTIONS: ReadonlyArray<{ readonly value: TTeamScope; readonly label: 
  * @returns Filter bar with four selects.
  */
 export function DashboardScopeFilters(props: IDashboardScopeFiltersProps): ReactElement {
+    const { t } = useTranslation(["dashboard"])
     return (
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <Select
-                aria-label="Organization scope"
+                aria-label={t("dashboard:ariaLabel.scopeFilters.organizationScope")}
                 selectedKeys={new Set([props.orgScope])}
                 size="sm"
                 onSelectionChange={createScopeChangeHandler<TOrgScope>(props.onOrgScopeChange)}
@@ -91,7 +93,7 @@ export function DashboardScopeFilters(props: IDashboardScopeFiltersProps): React
                 )}
             </Select>
             <Select
-                aria-label="Repository scope"
+                aria-label={t("dashboard:ariaLabel.scopeFilters.repositoryScope")}
                 selectedKeys={new Set([props.repositoryScope])}
                 size="sm"
                 onSelectionChange={createScopeChangeHandler<TRepositoryScope>(
@@ -107,7 +109,7 @@ export function DashboardScopeFilters(props: IDashboardScopeFiltersProps): React
                 )}
             </Select>
             <Select
-                aria-label="Team scope"
+                aria-label={t("dashboard:ariaLabel.scopeFilters.teamScope")}
                 selectedKeys={new Set([props.teamScope])}
                 size="sm"
                 onSelectionChange={createScopeChangeHandler<TTeamScope>(props.onTeamScopeChange)}
