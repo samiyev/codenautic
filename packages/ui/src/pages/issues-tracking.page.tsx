@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ChangeEvent, type ReactElement } fro
 import { useTranslation } from "react-i18next"
 
 import { useDynamicTranslation } from "@/lib/i18n"
-import { Button, Card, CardBody } from "@/components/ui"
+import { Button, Card, CardContent } from "@heroui/react"
 import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 import { PageShell } from "@/components/layout/page-shell"
 import { InfiniteScrollContainer } from "@/components/infrastructure/infinite-scroll-container"
@@ -426,7 +426,7 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
             </div>
 
             <Card className="border border-border/60 bg-surface/80 backdrop-blur-sm">
-                <CardBody className="space-y-2 pt-3">
+                <CardContent className="space-y-2 pt-3">
                     <InfiniteScrollContainer
                         hasMore={hasMoreIssues}
                         isLoading={false}
@@ -517,7 +517,7 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
                                                         aria-label={`${action} issue ${issue.id}`}
                                                         key={`${issue.id}-${action}`}
                                                         size="sm"
-                                                        variant="light"
+                                                        variant="ghost"
                                                         onPress={(): void => {
                                                             handleAction(issue, action)
                                                         }}
@@ -555,7 +555,7 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
                             }}
                         />
                     </InfiniteScrollContainer>
-                </CardBody>
+                </CardContent>
             </Card>
         </PageShell>
     )

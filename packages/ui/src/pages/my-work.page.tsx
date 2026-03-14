@@ -6,14 +6,14 @@ import {
     Alert,
     Button,
     Card,
-    CardBody,
+    CardContent,
     CardHeader,
     Chip,
     Dropdown,
     DropdownItem,
     DropdownMenu,
     DropdownTrigger,
-} from "@/components/ui"
+} from "@heroui/react"
 import { SystemStateCard } from "@/components/infrastructure/system-state-card"
 import { PageShell } from "@/components/layout/page-shell"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -224,12 +224,12 @@ function getSlaColor(state: TSlaState): "danger" | "success" | "warning" {
 
 function getStatusColor(
     status: TTriageStatus,
-): "danger" | "default" | "primary" | "success" | "warning" {
+): "accent" | "danger" | "default" | "success" | "warning" {
     if (status === "blocked") {
         return "danger"
     }
     if (status === "in_progress") {
-        return "primary"
+        return "accent"
     }
     if (status === "done") {
         return "success"
@@ -531,11 +531,11 @@ export function MyWorkPage(): ReactElement {
                     <p className={TYPOGRAPHY.sectionTitle}>
                         {t("dashboard:myWork.scopeAndOwnership")}
                     </p>
-                    <Chip size="sm" variant="flat">
+                    <Chip size="sm" variant="soft">
                         {t("dashboard:myWork.keyboardHint")}
                     </Chip>
                 </CardHeader>
-                <CardBody className="space-y-2">
+                <CardContent className="space-y-2">
                     <div className="flex flex-wrap gap-2">
                         <select
                             aria-label={t("dashboard:myWork.triageScopeAriaLabel")}
@@ -580,23 +580,17 @@ export function MyWorkPage(): ReactElement {
                         </select>
                     </div>
 
-                    <Alert
-                        color="primary"
-                        title={t("dashboard:myWork.lastTriageAction")}
-                        variant="flat"
-                    >
-                        {lastActionSummary}
+                    <Alert status="accent">
+                        <Alert.Title>{t("dashboard:myWork.lastTriageAction")}</Alert.Title>
+                        <Alert.Description>{lastActionSummary}</Alert.Description>
                     </Alert>
                     {breachCount > 0 ? (
-                        <Alert
-                            color="danger"
-                            title={t("dashboard:myWork.escalationWatchlist")}
-                            variant="flat"
-                        >
-                            {td("dashboard:myWork.slaBreachAlert", { count: String(breachCount) })}
+                        <Alert status="danger">
+                            <Alert.Title>{t("dashboard:myWork.escalationWatchlist")}</Alert.Title>
+                            <Alert.Description>{td("dashboard:myWork.slaBreachAlert", { count: String(breachCount) })}</Alert.Description>
                         </Alert>
                     ) : null}
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card className="border border-border/40 bg-surface/40 backdrop-blur-sm">
@@ -605,7 +599,7 @@ export function MyWorkPage(): ReactElement {
                         {t("dashboard:myWork.unifiedTriageList")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-2">
+                <CardContent className="space-y-2">
                     {filteredItems.length === 0 ? (
                         <SystemStateCard
                             ctaLabel={t("dashboard:myWork.switchScope")}
@@ -638,7 +632,7 @@ export function MyWorkPage(): ReactElement {
                                     >
                                         <div className="flex flex-wrap items-center gap-2">
                                             <p className={TYPOGRAPHY.cardTitle}>{item.title}</p>
-                                            <Chip size="sm" variant="flat">
+                                            <Chip size="sm" variant="soft">
                                                 {item.category}
                                             </Chip>
                                             <Chip
@@ -648,17 +642,17 @@ export function MyWorkPage(): ReactElement {
                                                         : "warning"
                                                 }
                                                 size="sm"
-                                                variant="flat"
+                                                variant="soft"
                                             >
                                                 {item.severity}
                                             </Chip>
-                                            <Chip size="sm" variant="flat">
+                                            <Chip size="sm" variant="soft">
                                                 {t("dashboard:myWork.ownerLabel")} {item.owner}
                                             </Chip>
                                             <Chip
                                                 color={getStatusColor(item.status)}
                                                 size="sm"
-                                                variant="flat"
+                                                variant="soft"
                                             >
                                                 {t("dashboard:myWork.statusLabel")} {item.status}
                                             </Chip>
@@ -666,7 +660,7 @@ export function MyWorkPage(): ReactElement {
                                                 color={getEscalationColor(item.escalationLevel)}
                                                 size="sm"
                                                 title={`${t("dashboard:myWork.escalationTitle")} ${item.escalationLevel}`}
-                                                variant="flat"
+                                                variant="soft"
                                             >
                                                 {t("dashboard:myWork.escalationLabel")}{" "}
                                                 {item.escalationLevel}
@@ -675,7 +669,7 @@ export function MyWorkPage(): ReactElement {
                                                 color={getSlaColor(slaState)}
                                                 size="sm"
                                                 title={`${t("dashboard:myWork.dueAtTitle")} ${formatTimestamp(item.dueAt)}`}
-                                                variant="flat"
+                                                variant="soft"
                                             >
                                                 {slaLabelMap[slaState]}
                                             </Chip>
@@ -697,7 +691,7 @@ export function MyWorkPage(): ReactElement {
                                                     ) !== true
                                                 }
                                                 size="sm"
-                                                variant="flat"
+                                                variant="secondary"
                                                 onPress={(): void => {
                                                     handleStartWork(item.id)
                                                 }}
@@ -712,7 +706,7 @@ export function MyWorkPage(): ReactElement {
                                                     ) !== true
                                                 }
                                                 size="sm"
-                                                variant="flat"
+                                                variant="secondary"
                                                 onPress={(): void => {
                                                     handleMarkDone(item.id)
                                                 }}
@@ -727,7 +721,7 @@ export function MyWorkPage(): ReactElement {
                                                     ) !== true
                                                 }
                                                 size="sm"
-                                                variant="flat"
+                                                variant="secondary"
                                                 onPress={(): void => {
                                                     handleEscalate(item.id)
                                                 }}
@@ -738,7 +732,7 @@ export function MyWorkPage(): ReactElement {
                                             {/* Secondary actions — overflow dropdown */}
                                             <Dropdown>
                                                 <DropdownTrigger>
-                                                    <Button size="sm" variant="flat">
+                                                    <Button size="sm" variant="secondary">
                                                         {t("dashboard:myWork.moreActions")}
                                                     </Button>
                                                 </DropdownTrigger>
@@ -805,7 +799,7 @@ export function MyWorkPage(): ReactElement {
                             })}
                         </ul>
                     )}
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
@@ -814,7 +808,7 @@ export function MyWorkPage(): ReactElement {
                         {t("dashboard:myWork.ownershipAuditTrail")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-2">
+                <CardContent className="space-y-2">
                     {auditTrail.length === 0 ? (
                         <p className={TYPOGRAPHY.bodyMuted}>
                             {t("dashboard:myWork.noOwnershipChanges")}
@@ -834,7 +828,7 @@ export function MyWorkPage(): ReactElement {
                             )}
                         </ul>
                     )}
-                </CardBody>
+                </CardContent>
             </Card>
         </PageShell>
     )
