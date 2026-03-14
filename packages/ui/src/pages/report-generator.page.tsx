@@ -5,6 +5,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { ReportScheduleDialog } from "@/components/reports/report-schedule-dialog"
 import { ReportTemplateEditor } from "@/components/reports/report-template-editor"
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { PageShell } from "@/components/layout/page-shell"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -187,11 +188,10 @@ export function ReportGeneratorPage(): ReactElement {
     }
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("reports:generator.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("reports:generator.pageSubtitle")}
-            </p>
+        <PageShell
+            subtitle={t("reports:generator.pageSubtitle")}
+            title={t("reports:generator.pageTitle")}
+        >
             <div className="flex flex-wrap gap-2">
                 <Button
                     size="sm"
@@ -328,7 +328,7 @@ export function ReportGeneratorPage(): ReactElement {
                         </div>
                     </fieldset>
                     <div className="flex gap-2">
-                        <Button onPress={handlePreviewReport}>
+                        <Button color="primary" onPress={handlePreviewReport}>
                             {t("reports:generator.previewReport")}
                         </Button>
                         <Button variant="flat" onPress={handleGenerateReport}>
@@ -387,6 +387,6 @@ export function ReportGeneratorPage(): ReactElement {
                     </Alert>
                 </CardBody>
             </Card>
-        </section>
+        </PageShell>
     )
 }
