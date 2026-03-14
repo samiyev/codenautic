@@ -1,0 +1,108 @@
+import { vi } from "vitest"
+
+import type { IOnboardingWizardState } from "@/pages/onboarding-wizard/use-onboarding-wizard-state"
+
+/**
+ * Создает мок-состояние onboarding wizard для тестирования шагов.
+ *
+ * @param overrides Частичные переопределения полей.
+ * @returns Мок-объект IOnboardingWizardState.
+ */
+export function createMockOnboardingState(
+    overrides: Partial<IOnboardingWizardState> = {},
+): IOnboardingWizardState {
+    return {
+        activeStep: 0,
+        activeTemplate: undefined,
+        activeTemplateId: "custom",
+        appliedTemplateMeta: {
+            name: "Custom",
+            version: "1.0.0",
+            rulesPreset: "default",
+            tags: "general",
+        },
+        bulkJobs: [],
+        bulkSummary: {
+            running: 0,
+            queued: 0,
+            paused: 0,
+            error: 0,
+            completed: 0,
+            cancelled: 0,
+        },
+        canApplyTemplate: false,
+        form: {
+            control: {} as never,
+            watch: vi.fn(() => ({
+                provider: "github",
+                repositoryUrl: "",
+                repositoryUrlList: "",
+                onboardingMode: "single",
+                onboardingTemplateId: "custom",
+                scanMode: "incremental",
+                scanSchedule: "manual",
+                scanThreads: 4,
+                includeSubmodules: false,
+                includeHistory: false,
+                notifyEmail: "",
+                tags: "",
+            })),
+            handleSubmit: vi.fn(),
+            formState: { errors: {} },
+            setValue: vi.fn(),
+            getValues: vi.fn(),
+            trigger: vi.fn(),
+            reset: vi.fn(),
+            register: vi.fn(),
+            unregister: vi.fn(),
+            setError: vi.fn(),
+            clearErrors: vi.fn(),
+            setFocus: vi.fn(),
+            getFieldState: vi.fn(),
+        } as never,
+        hasBulkSelection: false,
+        hasTemplateChanges: false,
+        isBulkPaused: false,
+        isFinalStep: false,
+        isProviderConnected: false,
+        isSingleMode: true,
+        isStarted: false,
+        lastTemplateAudit: undefined,
+        parsedBulkList: { repositories: [], invalidLines: [] },
+        providerConnectionError: undefined,
+        selectedRepositoryUrls: [],
+        selectedTemplate: undefined,
+        templateAuditLog: [],
+        templateDiff: [],
+        values: {
+            provider: "github",
+            repositoryUrl: "",
+            repositoryUrlList: "",
+            onboardingMode: "single",
+            onboardingTemplateId: "custom",
+            scanMode: "incremental",
+            scanSchedule: "manual",
+            scanThreads: 4,
+            includeSubmodules: false,
+            includeHistory: false,
+            notifyEmail: "",
+            tags: "",
+        },
+        applyTemplateToForm: vi.fn(),
+        clearAllRepositories: vi.fn(),
+        goNextStep: vi.fn(async (): Promise<void> => undefined),
+        goPrevStep: vi.fn(),
+        handleCancelAll: vi.fn(),
+        handleCancelJob: vi.fn(),
+        handleConnectProvider: vi.fn(),
+        handlePauseAll: vi.fn(),
+        handleResumeAll: vi.fn(),
+        handleRetryJob: vi.fn(),
+        handleRollbackTemplate: vi.fn(),
+        handleSubmit: vi.fn(),
+        selectAllRepositories: vi.fn(),
+        setActiveStep: vi.fn(),
+        toggleRepositorySelection: vi.fn(),
+        ...overrides,
+    } as unknown as IOnboardingWizardState
+}
