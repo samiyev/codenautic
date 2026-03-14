@@ -21,13 +21,13 @@ const testFiles: ICodeCityTreemapFileDescriptor[] = [
 ]
 
 const testContributors = [
-    { ownerId: "alice", ownerName: "Alice", commitCount: 50, color: "#ff0000" },
-    { ownerId: "bob", ownerName: "Bob", commitCount: 30, color: "#00ff00" },
+    { ownerId: "neo", ownerName: "Neo", commitCount: 50, color: "#ff0000" },
+    { ownerId: "trinity", ownerName: "Trinity", commitCount: 30, color: "#00ff00" },
 ]
 
 const testOwnership = [
-    { fileId: "f1", ownerId: "alice" },
-    { fileId: "f2", ownerId: "bob" },
+    { fileId: "f1", ownerId: "neo" },
+    { fileId: "f2", ownerId: "trinity" },
 ]
 
 describe("buildOwnershipOverlayEntries", (): void => {
@@ -39,7 +39,7 @@ describe("buildOwnershipOverlayEntries", (): void => {
 
     it("when ownership references missing files, then filters them out", (): void => {
         const entries = buildOwnershipOverlayEntries(testFiles, testContributors, [
-            { fileId: "nonexistent", ownerId: "alice" },
+            { fileId: "nonexistent", ownerId: "neo" },
         ])
 
         expect(entries).toHaveLength(0)
@@ -112,7 +112,7 @@ describe("buildContributorGraphNodes", (): void => {
         const nodes = buildContributorGraphNodes(testContributors)
 
         expect(nodes).toHaveLength(2)
-        expect(nodes[0]?.label).toBe("Alice")
+        expect(nodes[0]?.label).toBe("Neo")
         expect(nodes[0]?.commitCount).toBe(50)
     })
 
@@ -161,8 +161,8 @@ describe("buildKnowledgeSiloPanelEntries", (): void => {
 
     it("when single contributor owns all files, then ownership risk is high", (): void => {
         const singleOwnership = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f2", ownerId: "alice" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f2", ownerId: "neo" },
         ]
 
         const entries = buildKnowledgeSiloPanelEntries(testFiles, singleOwnership)
@@ -179,8 +179,8 @@ describe("buildKnowledgeSiloPanelEntries", (): void => {
             { id: "f2", path: "src/domain/b.ts", loc: 100, complexity: 5, churn: 1 },
         ]
         const sharedOwnership = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f2", ownerId: "bob" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f2", ownerId: "trinity" },
         ]
 
         const entries = buildKnowledgeSiloPanelEntries(sharedFiles, sharedOwnership)
@@ -195,8 +195,8 @@ describe("buildKnowledgeSiloPanelEntries", (): void => {
             { id: "f3", path: "src/shared/c.ts", loc: 100 },
         ]
         const manyOwnership = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f2", ownerId: "bob" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f2", ownerId: "trinity" },
             { fileId: "f3", ownerId: "charlie" },
         ]
 
@@ -209,7 +209,7 @@ describe("buildKnowledgeSiloPanelEntries", (): void => {
         const zeroMetricFiles: ICodeCityTreemapFileDescriptor[] = [
             { id: "f1", path: "src/clean/file.ts", loc: 10, complexity: 0, churn: 0 },
         ]
-        const singleOwn = [{ fileId: "f1", ownerId: "alice" }]
+        const singleOwn = [{ fileId: "f1", ownerId: "neo" }]
 
         const entries = buildKnowledgeSiloPanelEntries(zeroMetricFiles, singleOwn)
 
@@ -218,8 +218,8 @@ describe("buildKnowledgeSiloPanelEntries", (): void => {
 
     it("when duplicate file in same silo, then does not double count", (): void => {
         const sameOwnership = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f1", ownerId: "alice" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f1", ownerId: "neo" },
         ]
 
         const entries = buildKnowledgeSiloPanelEntries(testFiles, sameOwnership)
@@ -296,8 +296,8 @@ describe("buildBusFactorTrendSeries", (): void => {
             { id: "f2", path: "bbb/file.ts", loc: 100 },
         ]
         const own = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f2", ownerId: "bob" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f2", ownerId: "trinity" },
         ]
 
         const busFactorEntries = buildBusFactorOverlayEntries(files, own)
@@ -400,8 +400,8 @@ describe("buildKnowledgeMapExportModel", (): void => {
             { id: "f2", path: "src/shared/b.ts", loc: 100 },
         ]
         const twoOwnerOwnership = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f2", ownerId: "bob" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f2", ownerId: "trinity" },
         ]
         const profile: ICodeCityDashboardRepositoryProfile = {
             id: "repo-1",
@@ -431,13 +431,13 @@ describe("buildKnowledgeMapExportModel", (): void => {
             { id: "f3", path: "src/mod/c.ts", loc: 100 },
         ]
         const threeContributors = [
-            { ownerId: "alice", ownerName: "Alice", commitCount: 50, color: "#f00" },
-            { ownerId: "bob", ownerName: "Bob", commitCount: 30, color: "#0f0" },
-            { ownerId: "charlie", ownerName: "Charlie", commitCount: 20, color: "#00f" },
+            { ownerId: "neo", ownerName: "Neo", commitCount: 50, color: "#f00" },
+            { ownerId: "trinity", ownerName: "Trinity", commitCount: 30, color: "#0f0" },
+            { ownerId: "morpheus", ownerName: "Morpheus", commitCount: 20, color: "#00f" },
         ]
         const threeOwnership = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f2", ownerId: "bob" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f2", ownerId: "trinity" },
             { fileId: "f3", ownerId: "charlie" },
         ]
         const profile: ICodeCityDashboardRepositoryProfile = {
@@ -478,7 +478,7 @@ describe("buildOwnershipTransitionEvents", (): void => {
     })
 
     it("when ownership references missing file, then filters it out", (): void => {
-        const badOwnership = [{ fileId: "nonexistent", ownerId: "alice" }]
+        const badOwnership = [{ fileId: "nonexistent", ownerId: "neo" }]
 
         const events = buildOwnershipTransitionEvents(testFiles, testContributors, badOwnership)
 
@@ -495,7 +495,7 @@ describe("buildOwnershipTransitionEvents", (): void => {
                 complexity: 35,
             },
         ]
-        const own = [{ fileId: "f1", ownerId: "alice" }]
+        const own = [{ fileId: "f1", ownerId: "neo" }]
 
         const events = buildOwnershipTransitionEvents(highBugFiles, testContributors, own)
 
@@ -512,7 +512,7 @@ describe("buildOwnershipTransitionEvents", (): void => {
                 complexity: 10,
             },
         ]
-        const own = [{ fileId: "f1", ownerId: "alice" }]
+        const own = [{ fileId: "f1", ownerId: "neo" }]
 
         const events = buildOwnershipTransitionEvents(watchFiles, testContributors, own)
 
@@ -529,7 +529,7 @@ describe("buildOwnershipTransitionEvents", (): void => {
                 complexity: 5,
             },
         ]
-        const own = [{ fileId: "f1", ownerId: "alice" }]
+        const own = [{ fileId: "f1", ownerId: "neo" }]
 
         const events = buildOwnershipTransitionEvents(smoothFiles, testContributors, own)
 
@@ -557,14 +557,14 @@ describe("buildOwnershipTransitionEvents", (): void => {
 
     it("when single contributor, then from/to may be the same", (): void => {
         const singleContributor = [
-            { ownerId: "alice", ownerName: "Alice", commitCount: 50, color: "#ff0000" },
+            { ownerId: "neo", ownerName: "Neo", commitCount: 50, color: "#ff0000" },
         ]
-        const singleOwn = [{ fileId: "f1", ownerId: "alice" }]
+        const singleOwn = [{ fileId: "f1", ownerId: "neo" }]
 
         const events = buildOwnershipTransitionEvents(testFiles, singleContributor, singleOwn)
 
         if (events[0] !== undefined) {
-            expect(events[0].toOwnerName).toBe("Alice")
+            expect(events[0].toOwnerName).toBe("Neo")
         }
     })
 
@@ -585,7 +585,7 @@ describe("buildOwnershipTransitionEvents", (): void => {
         }))
         const manyOwnership = manyFiles.map((f) => ({
             fileId: f.id,
-            ownerId: "alice",
+            ownerId: "neo",
         }))
 
         const events = buildOwnershipTransitionEvents(manyFiles, testContributors, manyOwnership)
@@ -617,8 +617,8 @@ describe("buildOwnershipTransitionEvents", (): void => {
             },
         ]
         const own = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f2", ownerId: "bob" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f2", ownerId: "trinity" },
         ]
 
         const events = buildOwnershipTransitionEvents(criticalFiles, testContributors, own)
@@ -641,7 +641,7 @@ describe("buildOwnershipTransitionEvents", (): void => {
                 complexity: 40,
             },
         ]
-        const own = [{ fileId: "f1", ownerId: "alice" }]
+        const own = [{ fileId: "f1", ownerId: "neo" }]
 
         const events = buildOwnershipTransitionEvents(criticalFiles, testContributors, own)
 
@@ -657,7 +657,7 @@ describe("buildOwnershipTransitionEvents", (): void => {
         const watchFiles: ICodeCityTreemapFileDescriptor[] = [
             { id: "f1", path: "src/watch.ts", loc: 100, bugIntroductions: { "30d": 3 } },
         ]
-        const own = [{ fileId: "f1", ownerId: "alice" }]
+        const own = [{ fileId: "f1", ownerId: "neo" }]
 
         const events = buildOwnershipTransitionEvents(watchFiles, testContributors, own)
 
@@ -670,7 +670,7 @@ describe("buildOwnershipTransitionEvents", (): void => {
         const smoothFiles: ICodeCityTreemapFileDescriptor[] = [
             { id: "f1", path: "src/smooth.ts", loc: 50, complexity: 5 },
         ]
-        const own = [{ fileId: "f1", ownerId: "alice" }]
+        const own = [{ fileId: "f1", ownerId: "neo" }]
 
         const events = buildOwnershipTransitionEvents(smoothFiles, testContributors, own)
 
@@ -693,8 +693,8 @@ describe("buildOwnershipOverlayEntries — additional edge cases", (): void => {
 
     it("when multiple files owned by same person, then sorted by fileIds length", (): void => {
         const multiOwnership = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f2", ownerId: "alice" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f2", ownerId: "neo" },
         ]
 
         const entries = buildOwnershipOverlayEntries(testFiles, testContributors, multiOwnership)
@@ -707,7 +707,7 @@ describe("buildOwnershipOverlayEntries — additional edge cases", (): void => {
         const singleFile: ICodeCityTreemapFileDescriptor[] = [
             { id: "f1", path: "src/only.ts", loc: 50 },
         ]
-        const singleOwn = [{ fileId: "f1", ownerId: "alice" }]
+        const singleOwn = [{ fileId: "f1", ownerId: "neo" }]
 
         const entries = buildOwnershipOverlayEntries(singleFile, testContributors, singleOwn)
 
@@ -723,8 +723,8 @@ describe("buildBusFactorOverlayEntries — additional edge cases", (): void => {
             { id: "f2", path: "src/shared/b.ts", loc: 100 },
         ]
         const sharedOwnership = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f2", ownerId: "bob" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f2", ownerId: "trinity" },
         ]
 
         const entries = buildBusFactorOverlayEntries(sharedFiles, sharedOwnership)
@@ -737,8 +737,8 @@ describe("buildBusFactorOverlayEntries — additional edge cases", (): void => {
             { id: "f1", path: "src/mod/file.ts", loc: 100 },
         ]
         const dupOwnership = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f1", ownerId: "alice" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f1", ownerId: "neo" },
         ]
 
         const entries = buildBusFactorOverlayEntries(files, dupOwnership)
@@ -753,9 +753,9 @@ describe("buildBusFactorOverlayEntries — additional edge cases", (): void => {
             { id: "f3", path: "bbb/a.ts", loc: 100 },
         ]
         const own = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f2", ownerId: "alice" },
-            { fileId: "f3", ownerId: "bob" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f2", ownerId: "neo" },
+            { fileId: "f3", ownerId: "trinity" },
         ]
 
         const entries = buildBusFactorOverlayEntries(files, own)
@@ -769,7 +769,7 @@ describe("buildBusFactorPackageColorByName — color mapping", (): void => {
         const files: ICodeCityTreemapFileDescriptor[] = [
             { id: "f1", path: "src/solo/file.ts", loc: 100 },
         ]
-        const own = [{ fileId: "f1", ownerId: "alice" }]
+        const own = [{ fileId: "f1", ownerId: "neo" }]
 
         const entries = buildBusFactorOverlayEntries(files, own)
         const colorMap = buildBusFactorPackageColorByName(entries)
@@ -785,8 +785,8 @@ describe("buildBusFactorPackageColorByName — color mapping", (): void => {
             { id: "f2", path: "src/pair/b.ts", loc: 100 },
         ]
         const own = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f2", ownerId: "bob" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f2", ownerId: "trinity" },
         ]
 
         const entries = buildBusFactorOverlayEntries(files, own)
@@ -804,8 +804,8 @@ describe("buildBusFactorPackageColorByName — color mapping", (): void => {
             { id: "f3", path: "src/team/c.ts", loc: 100 },
         ]
         const own = [
-            { fileId: "f1", ownerId: "alice" },
-            { fileId: "f2", ownerId: "bob" },
+            { fileId: "f1", ownerId: "neo" },
+            { fileId: "f2", ownerId: "trinity" },
             { fileId: "f3", ownerId: "charlie" },
         ]
 
