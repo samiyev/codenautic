@@ -18,6 +18,8 @@ export interface IReviewsContentProps {
     readonly rows: ReadonlyArray<IReviewRow>
     /** Показывать ли встроенную панель фильтров списка. */
     readonly showInlineFilters?: boolean
+    /** Скрыть заголовок секции (когда страница уже рендерит свой h1). */
+    readonly hideTitle?: boolean
     /** Есть ли ещё страницы. */
     readonly hasMore: boolean
     /** Идёт ли фоновая подгрузка. */
@@ -86,7 +88,9 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
 
     return (
         <section className="space-y-4">
-            <h2 className={TYPOGRAPHY.sectionTitle}>{t("reviews:content.sectionTitle")}</h2>
+            {props.hideTitle === true ? null : (
+                <h2 className={TYPOGRAPHY.sectionTitle}>{t("reviews:content.sectionTitle")}</h2>
+            )}
             {showInlineFilters === true ? (
                 <ReviewsFilters
                     assignee={assigneeFilter}
