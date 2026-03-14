@@ -2,7 +2,7 @@ import { useMemo, type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useDynamicTranslation } from "@/lib/i18n"
-import { Alert, Button, Chip } from "@/components/ui"
+import { Alert, Button, Chip } from "@heroui/react"
 import { FormSelectField } from "@/components/forms"
 import type { IFormSelectOption } from "@/components/forms"
 
@@ -75,7 +75,7 @@ export function ProviderSelectionStep({ state }: IProviderSelectionStepProps): R
                 <Chip
                     color={state.isProviderConnected ? "success" : "warning"}
                     size="sm"
-                    variant="flat"
+                    variant="soft"
                 >
                     {state.isProviderConnected
                         ? td("onboarding:provider.connected", {
@@ -85,7 +85,7 @@ export function ProviderSelectionStep({ state }: IProviderSelectionStepProps): R
                 </Chip>
             </div>
             {state.providerConnectionError === undefined ? null : (
-                <Alert color="danger">{state.providerConnectionError}</Alert>
+                <Alert status="danger">{state.providerConnectionError}</Alert>
             )}
         </section>
     )

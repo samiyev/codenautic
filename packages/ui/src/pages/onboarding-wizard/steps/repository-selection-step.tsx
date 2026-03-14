@@ -2,7 +2,7 @@ import { useMemo, type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useDynamicTranslation } from "@/lib/i18n"
-import { Alert, Button, Checkbox } from "@/components/ui"
+import { Alert, Button, Checkbox } from "@heroui/react"
 import { FormRadioGroupField, FormTextField, FormTextareaField } from "@/components/forms"
 import type { IFormSelectOption } from "@/components/forms"
 
@@ -78,7 +78,7 @@ export function RepositorySelectionStep({
                         label={t("onboarding:repository.bulkListLabel")}
                         name="repositoryUrlList"
                         textareaProps={{
-                            minRows: 6,
+                            className: "min-h-[150px]",
                             placeholder: `https://github.com/owner/repo-a
 https://github.com/owner/repo-b`,
                         }}
@@ -98,7 +98,7 @@ https://github.com/owner/repo-b`,
                                 }}
                                 size="sm"
                                 type="button"
-                                variant="light"
+                                variant="ghost"
                             >
                                 {t("onboarding:repository.selectAll")}
                             </Button>
@@ -108,7 +108,7 @@ https://github.com/owner/repo-b`,
                                 }}
                                 size="sm"
                                 type="button"
-                                variant="light"
+                                variant="ghost"
                             >
                                 {t("onboarding:repository.deselectAll")}
                             </Button>
@@ -132,7 +132,7 @@ https://github.com/owner/repo-b`,
                                         isSelected={state.selectedRepositoryUrls.includes(
                                             repositoryUrl,
                                         )}
-                                        onValueChange={(): void => {
+                                        onChange={(): void => {
                                             state.toggleRepositorySelection(repositoryUrl)
                                         }}
                                     >
@@ -144,7 +144,7 @@ https://github.com/owner/repo-b`,
                     </div>
 
                     {state.parsedBulkList.invalidLines.length > 0 ? (
-                        <Alert color="danger">
+                        <Alert status="danger">
                             {t("onboarding:repository.invalidLines")}
                             <ul className="mt-1 list-disc space-y-1 pl-5">
                                 {state.parsedBulkList.invalidLines.map(
@@ -160,7 +160,7 @@ https://github.com/owner/repo-b`,
 
                     {state.parsedBulkList.repositories.length >
                     BULK_PROGRESS_PREVIEW_LABEL_LIMIT ? (
-                        <Alert color="primary">
+                        <Alert status="accent">
                             {t("onboarding:repository.bulkTemplateNotice")}
                         </Alert>
                     ) : null}
@@ -168,7 +168,7 @@ https://github.com/owner/repo-b`,
             )}
 
             {state.isSingleMode || state.isStarted ? null : (
-                <Alert color="primary">{t("onboarding:repository.bulkInfoNotice")}</Alert>
+                <Alert status="accent">{t("onboarding:repository.bulkInfoNotice")}</Alert>
             )}
         </section>
     )
