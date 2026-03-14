@@ -47,6 +47,7 @@ export function DashboardDateRangeFilter(props: IDashboardDateRangeFilterProps):
                 return (
                     <Button
                         key={range.value}
+                        color="primary"
                         size="sm"
                         variant={isSelected ? "solid" : "light"}
                         onPress={(): void => {
