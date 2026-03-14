@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 
 /**
  * Варианты диапазона дат.
@@ -49,9 +49,8 @@ export function DashboardDateRangeFilter(props: IDashboardDateRangeFilterProps):
                 return (
                     <Button
                         key={range.value}
-                        color="primary"
                         size="sm"
-                        variant={isSelected ? "solid" : "light"}
+                        variant={isSelected ? "primary" : "ghost"}
                         onPress={(): void => {
                             props.onChange(range.value)
                         }}

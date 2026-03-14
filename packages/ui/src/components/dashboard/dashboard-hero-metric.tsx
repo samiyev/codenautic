@@ -1,6 +1,6 @@
 import { type ReactElement, useId } from "react"
 
-import { Card, CardBody } from "@/components/ui"
+import { Card, CardContent } from "@heroui/react"
 import { useCountUp } from "@/lib/motion"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -96,7 +96,7 @@ export function DashboardHeroMetric(props: IDashboardHeroMetricProps): ReactElem
                 }}
             />
 
-            <CardBody className="relative flex flex-col items-center gap-3 py-8 px-6">
+            <CardContent className="relative flex flex-col items-center gap-3 py-8 px-6">
                 <svg
                     aria-label={`${props.label}: ${String(props.value)}`}
                     className="h-36 w-36"
@@ -174,7 +174,7 @@ export function DashboardHeroMetric(props: IDashboardHeroMetricProps): ReactElem
                         <p className={`mt-1 ${TYPOGRAPHY.bodyMuted}`}>{props.subtitle}</p>
                     ) : null}
                 </div>
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
