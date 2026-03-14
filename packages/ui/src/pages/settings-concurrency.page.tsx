@@ -8,11 +8,10 @@ import {
     Input,
     Modal,
     ModalBody,
-    ModalContent,
     ModalFooter,
     ModalHeader,
     Switch,
-} from "@/components/ui"
+} from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { FormSection } from "@/components/forms/form-section"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -256,23 +255,23 @@ export function SettingsConcurrencyPage(): ReactElement {
         >
             <FormSection heading={t("settings:concurrency.snapshotVersions")}>
                 <div className="flex flex-wrap gap-2">
-                    <Chip size="sm" variant="flat">
+                    <Chip size="sm" variant="soft">
                         {t("settings:concurrency.localEtag", { etag: localDraft.etag })}
                     </Chip>
-                    <Chip size="sm" variant="flat">
+                    <Chip size="sm" variant="soft">
                         {t("settings:concurrency.remoteEtag", { etag: remoteSnapshot.etag })}
                     </Chip>
                 </div>
                 <Input
-                    label={t("settings:concurrency.ignorePaths")}
+                    aria-label={t("settings:concurrency.ignorePaths")}
                     value={localDraft.values.ignorePaths}
-                    onValueChange={(value): void => {
+                    onChange={(e): void => {
                         setLocalDraft(
                             (previous): IAdminConfigSnapshot => ({
                                 ...previous,
                                 values: {
                                     ...previous.values,
-                                    ignorePaths: value,
+                                    ignorePaths: e.target.value,
                                 },
                             }),
                         )
@@ -305,13 +304,13 @@ export function SettingsConcurrencyPage(): ReactElement {
                 <Switch
                     aria-label={t("settings:ariaLabel.concurrency.requireReviewerApproval")}
                     isSelected={localDraft.values.requireReviewerApproval}
-                    onValueChange={(value): void => {
+                    onChange={(isSelected: boolean): void => {
                         setLocalDraft(
                             (previous): IAdminConfigSnapshot => ({
                                 ...previous,
                                 values: {
                                     ...previous.values,
-                                    requireReviewerApproval: value,
+                                    requireReviewerApproval: isSelected,
                                 },
                             }),
                         )
@@ -320,10 +319,10 @@ export function SettingsConcurrencyPage(): ReactElement {
                     {t("settings:concurrency.requireReviewerApproval")}
                 </Switch>
                 <div className="flex flex-wrap gap-2">
-                    <Button color="primary" onPress={handleSave}>
+                    <Button variant="primary" onPress={handleSave}>
                         {t("settings:concurrency.saveSettingsOptimistic")}
                     </Button>
-                    <Button variant="flat" onPress={handleSimulateRemoteChange}>
+                    <Button variant="secondary" onPress={handleSimulateRemoteChange}>
                         {t("settings:concurrency.simulateExternalUpdate")}
                     </Button>
                 </div>
@@ -331,12 +330,9 @@ export function SettingsConcurrencyPage(): ReactElement {
 
             <FormSection heading={t("settings:concurrency.conflictResolutionAudit")}>
                 {audit.length === 0 ? (
-                    <Alert
-                        color="warning"
-                        title={t("settings:concurrency.noConcurrencyDecisionsTitle")}
-                        variant="flat"
-                    >
-                        {t("settings:concurrency.noConcurrencyDecisionsDescription")}
+                    <Alert status="warning">
+                        <Alert.Title>{t("settings:concurrency.noConcurrencyDecisionsTitle")}</Alert.Title>
+                        <Alert.Description>{t("settings:concurrency.noConcurrencyDecisionsDescription")}</Alert.Description>
                     </Alert>
                 ) : (
                     <ul
@@ -371,7 +367,8 @@ export function SettingsConcurrencyPage(): ReactElement {
                     }
                 }}
             >
-                <ModalContent>
+                <Modal.Container>
+                    <Modal.Dialog>
                     <ModalHeader>{t("settings:concurrency.configConflictDetected")}</ModalHeader>
                     <ModalBody>
                         <p className="text-sm text-text-tertiary">
@@ -404,17 +401,18 @@ export function SettingsConcurrencyPage(): ReactElement {
                         </ul>
                     </ModalBody>
                     <ModalFooter>
-                        <Button variant="flat" onPress={handleConflictReload}>
+                        <Button variant="secondary" onPress={handleConflictReload}>
                             {t("settings:concurrency.reloadRemote")}
                         </Button>
-                        <Button variant="flat" onPress={handleConflictRetry}>
+                        <Button variant="secondary" onPress={handleConflictRetry}>
                             {t("settings:concurrency.retryWithLatestEtag")}
                         </Button>
-                        <Button color="primary" onPress={handleConflictMerge}>
+                        <Button variant="primary" onPress={handleConflictMerge}>
                             {t("settings:concurrency.mergeAndSave")}
                         </Button>
                     </ModalFooter>
-                </ModalContent>
+                    </Modal.Dialog>
+                </Modal.Container>
             </Modal>
         </FormLayout>
     )

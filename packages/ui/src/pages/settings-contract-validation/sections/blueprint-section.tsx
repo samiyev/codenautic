@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Card, CardBody, CardHeader, Textarea } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, TextArea } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 import type { IContractValidationState } from "../use-contract-validation-state"
@@ -31,16 +31,16 @@ export function BlueprintSection({ state }: IBlueprintSectionProps): ReactElemen
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>Architecture blueprint editor</p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <p className="text-sm text-text-secondary">
                         Upload and edit architecture blueprint in YAML format with inline syntax
                         highlight and visual preview.
                     </p>
-                    <Textarea
+                    <TextArea
                         aria-label={t("settings:ariaLabel.contractValidation.blueprintYaml")}
-                        minRows={12}
+                        className="min-h-[300px]"
                         value={state.blueprintYaml}
-                        onValueChange={state.setBlueprintYaml}
+                        onChange={(e): void => { state.setBlueprintYaml(e.target.value) }}
                     />
                     <div className="flex flex-wrap gap-2">
                         <label className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground">
@@ -55,44 +55,49 @@ export function BlueprintSection({ state }: IBlueprintSectionProps): ReactElemen
                                 type="file"
                             />
                         </label>
-                        <Button color="primary" onPress={state.handleValidateBlueprint}>
+                        <Button variant="primary" onPress={state.handleValidateBlueprint}>
                             Validate blueprint
                         </Button>
-                        <Button variant="flat" onPress={state.handleApplyBlueprint}>
+                        <Button variant="secondary" onPress={state.handleApplyBlueprint}>
                             Apply blueprint
                         </Button>
                     </div>
                     {state.blueprintValidationResult.errors.length === 0 ? (
-                        <Alert color="success" title="Blueprint is valid" variant="flat">
-                            Visual nodes: {String(state.blueprintValidationResult.nodes.length)}
+                        <Alert status="success">
+                            <Alert.Title>Blueprint is valid</Alert.Title>
+                            <Alert.Description>Visual nodes: {String(state.blueprintValidationResult.nodes.length)}</Alert.Description>
                         </Alert>
                     ) : (
-                        <Alert color="danger" title="Blueprint validation errors" variant="flat">
-                            <ul
-                                aria-label={t(
-                                    "settings:ariaLabel.contractValidation.blueprintErrorsList",
-                                )}
-                                className="space-y-1"
-                            >
-                                {state.blueprintValidationResult.errors.map(
-                                    (error): ReactElement => (
-                                        <li key={error}>{error}</li>
-                                    ),
-                                )}
-                            </ul>
+                        <Alert status="danger">
+                            <Alert.Title>Blueprint validation errors</Alert.Title>
+                            <Alert.Description>
+                                <ul
+                                    aria-label={t(
+                                        "settings:ariaLabel.contractValidation.blueprintErrorsList",
+                                    )}
+                                    className="space-y-1"
+                                >
+                                    {state.blueprintValidationResult.errors.map(
+                                        (error): ReactElement => (
+                                            <li key={error}>{error}</li>
+                                        ),
+                                    )}
+                                </ul>
+                            </Alert.Description>
                         </Alert>
                     )}
-                    <Alert color="primary" title="Blueprint apply status" variant="flat">
-                        {state.lastBlueprintApplyState}
+                    <Alert status="accent">
+                        <Alert.Title>Blueprint apply status</Alert.Title>
+                        <Alert.Description>{state.lastBlueprintApplyState}</Alert.Description>
                     </Alert>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>YAML syntax highlight preview</p>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <pre
                         aria-label={t(
                             "settings:ariaLabel.contractValidation.blueprintSyntaxHighlightPreview",
@@ -125,14 +130,14 @@ export function BlueprintSection({ state }: IBlueprintSectionProps): ReactElemen
                             ),
                         )}
                     </pre>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>Blueprint visual preview</p>
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <ul
                         aria-label={t(
                             "settings:ariaLabel.contractValidation.blueprintVisualNodesList",
@@ -161,7 +166,7 @@ export function BlueprintSection({ state }: IBlueprintSectionProps): ReactElemen
                             ),
                         )}
                     </ul>
-                </CardBody>
+                </CardContent>
             </Card>
         </>
     )
