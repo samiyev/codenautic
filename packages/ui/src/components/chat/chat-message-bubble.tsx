@@ -8,6 +8,11 @@ import { Avatar, Button } from "@/components/ui"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { sanitizeText } from "@/lib/validation/schema-validation"
 
+/**
+ * Количество символов для инициалов отправителя сообщения.
+ */
+const SENDER_INITIALS_LENGTH = 2
+
 import type { IChatPanelMessage } from "./chat-panel"
 
 /** Maximum width of a message bubble relative to container. */
@@ -312,7 +317,7 @@ export function ChatMessageBubble(props: IChatMessageBubbleProps): ReactElement 
     const isUser = props.message.role === "user"
     const formattedTime = formatMessageTime(props.message.createdAt)
     const compactClass = props.compact === true ? "max-w-full" : BUBBLE_MAX_WIDTH
-    const avatarLabel = sender.slice(0, 2).toUpperCase()
+    const avatarLabel = sender.slice(0, SENDER_INITIALS_LENGTH).toUpperCase()
     const messageContent = sanitizeText(props.message.content)
     let blockIndex = 0
 

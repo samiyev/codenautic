@@ -3,6 +3,11 @@ import { type ReactElement, type ReactNode, useState } from "react"
 import { Button, Chip } from "@/components/ui"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
+/**
+ * Максимум видимых прикреплённых файлов в индикаторе контекста.
+ */
+const MAX_VISIBLE_ATTACHED_FILES = 3
+
 /** Контекст, доступный для чата. */
 export interface IChatPanelContextInfo {
     /** Уникальный идентификатор контекста. */
@@ -42,12 +47,12 @@ function formatAttachedFiles(attachedFiles: ReadonlyArray<string>): string {
         return "No attached files"
     }
 
-    if (attachedFiles.length <= 3) {
+    if (attachedFiles.length <= MAX_VISIBLE_ATTACHED_FILES) {
         return attachedFiles.join(", ")
     }
 
-    const visible = attachedFiles.slice(0, 3).join(", ")
-    const more = attachedFiles.length - 3
+    const visible = attachedFiles.slice(0, MAX_VISIBLE_ATTACHED_FILES).join(", ")
+    const more = attachedFiles.length - MAX_VISIBLE_ATTACHED_FILES
     return `${visible} +${String(more)} more`
 }
 
