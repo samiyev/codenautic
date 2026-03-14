@@ -333,10 +333,10 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
 
     return (
         <section className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/30 bg-surface/30 px-3 py-2 backdrop-blur-sm">
                 <input
                     aria-label={`${props.ariaLabel} search`}
-                    className="rounded-lg border border-border bg-surface px-3 py-2 text-sm"
+                    className="rounded-lg border border-border/50 bg-surface/80 px-3 py-1.5 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 placeholder:text-muted-foreground focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
                     placeholder={t("common:dataTable.searchRows")}
                     value={globalFilter}
                     onChange={(event): void => {
@@ -455,7 +455,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
             ) : null}
 
             {selectedRows.length > 0 ? (
-                <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2">
+                <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
                     <Chip color="primary" size="sm" variant="flat">
                         {t("common:dataTable.selected", { count: selectedRows.length })}
                     </Chip>
@@ -473,7 +473,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
 
             <div
                 aria-label={props.ariaLabel}
-                className="overflow-auto rounded-lg border border-border"
+                className="overflow-auto rounded-xl border border-border/50 bg-surface/60 backdrop-blur-sm"
                 data-row-height-estimator={rowHeightEstimator === undefined ? "default" : "custom"}
                 data-virtualized="true"
                 role="table"
@@ -481,7 +481,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                 style={{ maxWidth: "100%" }}
             >
                 <div
-                    className={`${isStickyHeaderEnabled ? "sticky" : ""} top-0 z-10 border-b border-border bg-surface ${isStickyShadowEnabled && isBodyScrolled ? "shadow-sm" : ""}`}
+                    className={`${isStickyHeaderEnabled ? "sticky" : ""} top-0 z-10 border-b border-border/40 bg-surface-muted/80 backdrop-blur-md ${isStickyShadowEnabled && isBodyScrolled ? "shadow-md" : ""}`}
                     data-sticky-header={isStickyHeaderEnabled ? "true" : "false"}
                     data-sticky-shadow={isBodyScrolled ? "true" : "false"}
                     role="rowgroup"
@@ -556,7 +556,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                                 return (
                                     <div
                                         aria-selected={row.getIsSelected()}
-                                        className={`absolute left-0 top-0 grid items-center gap-2 border-b border-border bg-surface px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40 ${rowPadding}`}
+                                        className={`absolute left-0 top-0 grid items-center gap-2 border-b border-border/30 px-2 transition-colors duration-100 hover:bg-surface-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40 ${rowPadding} ${rowOffset.index % 2 === 0 ? "bg-transparent" : "bg-surface-muted/20"}`}
                                         key={rowOffset.key}
                                         role="row"
                                         style={{
