@@ -32,6 +32,7 @@ export function TestConnectionButton(props: ITestConnectionButtonProps): ReactEl
 
     return (
         <Button
+            color="primary"
             isLoading={isChecking}
             isDisabled={isChecking}
             onPress={(): void => {
