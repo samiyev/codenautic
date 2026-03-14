@@ -94,7 +94,9 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
                             key={target.id}
                         >
                             <input
-                                aria-label={t("code-city:roiCalculator.ariaLabelSelectTarget", { title: target.title })}
+                                aria-label={t("code-city:roiCalculator.ariaLabelSelectTarget", {
+                                    title: target.title,
+                                })}
                                 checked={selectedTargetIds.includes(target.id)}
                                 className="mt-0.5 h-4 w-4 rounded border-border"
                                 onChange={(): void => {
@@ -103,11 +105,13 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
                                 type="checkbox"
                             />
                             <div className="min-w-0">
-                                <p className={TYPOGRAPHY.cardTitle}>
-                                    {target.title}
-                                </p>
+                                <p className={TYPOGRAPHY.cardTitle}>{target.title}</p>
                                 <p className={TYPOGRAPHY.captionMuted}>
-                                    {t("code-city:roiCalculator.targetMeta", { roi: String(target.roiScore), risk: String(target.riskScore), effort: String(target.effortScore) })}
+                                    {t("code-city:roiCalculator.targetMeta", {
+                                        roi: String(target.roiScore),
+                                        risk: String(target.riskScore),
+                                        effort: String(target.effortScore),
+                                    })}
                                 </p>
                             </div>
                         </li>
