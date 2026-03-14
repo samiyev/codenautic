@@ -2,7 +2,7 @@ import { useMemo, type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useDynamicTranslation } from "@/lib/i18n"
-import { Alert, Button, Chip } from "@/components/ui"
+import { Alert, Button, Chip } from "@heroui/react"
 import {
     FormNumberField,
     FormRadioGroupField,
@@ -180,7 +180,7 @@ export function ScanConfigurationStep({ state }: IScanConfigurationStepProps): R
                                 }}
                                 size="sm"
                                 type="button"
-                                variant="light"
+                                variant="ghost"
                             >
                                 {t("onboarding:scan.applyTemplate")}
                             </Button>
@@ -225,14 +225,13 @@ export function ScanConfigurationStep({ state }: IScanConfigurationStepProps): R
                                         ),
                                     )}
                                 <Button
-                                    color="warning"
+                                    variant="tertiary"
                                     isDisabled={state.lastTemplateAudit === undefined}
                                     onPress={(): void => {
                                         state.handleRollbackTemplate()
                                     }}
                                     size="sm"
                                     type="button"
-                                    variant="ghost"
                                 >
                                     {t("onboarding:scan.rollbackLast")}
                                 </Button>
@@ -426,14 +425,14 @@ export function ScanConfigurationStep({ state }: IScanConfigurationStepProps): R
                 </div>
 
                 {state.isSingleMode ? (
-                    <Alert color="success">
+                    <Alert status="success">
                         {state.isStarted
                             ? t("onboarding:summary.singleStartedAlert")
                             : t("onboarding:summary.singleReadyAlert")}
                     </Alert>
                 ) : null}
                 {state.isSingleMode || state.isStarted ? null : (
-                    <Alert color="primary">{t("onboarding:summary.bulkReadyAlert")}</Alert>
+                    <Alert status="accent">{t("onboarding:summary.bulkReadyAlert")}</Alert>
                 )}
             </section>
         </>

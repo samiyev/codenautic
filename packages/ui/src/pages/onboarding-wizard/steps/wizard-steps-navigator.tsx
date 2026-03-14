@@ -2,7 +2,7 @@ import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useDynamicTranslation } from "@/lib/i18n"
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 import { FormSubmitButton } from "@/components/forms"
 
 import type { IOnboardingWizardState } from "../use-onboarding-wizard-state"
@@ -33,7 +33,7 @@ export function WizardStepsNavigator({ state }: IWizardStepsNavigatorProps): Rea
                     state.goPrevStep()
                 }}
                 type="button"
-                variant="light"
+                variant="ghost"
             >
                 {t("onboarding:navigator.backButton")}
             </Button>
