@@ -1,7 +1,7 @@
-import type { FormEvent, KeyboardEvent, ReactElement } from "react"
+import type { ChangeEvent, FormEvent, KeyboardEvent, ReactElement } from "react"
 import { useEffect, useState } from "react"
 
-import { Button, Select, SelectItem, Textarea } from "@/components/ui"
+import { type Key, Button, ListBox, ListBoxItem, Select, TextArea } from "@heroui/react"
 
 /** Опция выбора контекста для отправки сообщения. */
 export interface IChatFileContextOption {
@@ -53,18 +53,13 @@ export interface IChatInputProps {
     readonly onQuickAction?: (message: string) => void
 }
 
-function resolveSelection(keys: "all" | Set<string>): string | undefined {
-    if (keys === "all") {
+function resolveSelection(key: Key | null): string | undefined {
+    if (key === null) {
         return undefined
     }
 
-    const next = keys.values().next()
-    if (next.done === true) {
-        return undefined
-    }
-
-    const raw = next.value
-    if (typeof raw === "string" && raw.length > 0) {
+    const raw = String(key)
+    if (raw.length > 0) {
         return raw
     }
     return undefined
@@ -147,8 +142,8 @@ export function ChatInput(props: IChatInputProps): ReactElement {
         }
     }
 
-    const handleContextChange = (keys: "all" | Set<string>): void => {
-        const nextContext = resolveSelection(keys)
+    const handleContextChange = (key: Key | null): void => {
+        const nextContext = resolveSelection(key)
         if (nextContext === undefined) {
             return
         }
@@ -177,16 +172,22 @@ export function ChatInput(props: IChatInputProps): ReactElement {
                         className="w-full"
                         id="chat-context-select"
                         onSelectionChange={handleContextChange}
-                        selectedKeys={new Set(selectedContext === "" ? [] : [selectedContext])}
-                        size="sm"
+                        selectedKey={selectedContext === "" ? null : selectedContext}
                     >
-                        {contextOptions.map(
-                            (context): ReactElement => (
-                                <SelectItem key={context.id} value={context.id}>
-                                    {context.label}
-                                </SelectItem>
-                            ),
-                        )}
+                        <Select.Trigger>
+                            <Select.Value />
+                        </Select.Trigger>
+                        <Select.Popover>
+                            <ListBox>
+                                {contextOptions.map(
+                                    (context): ReactElement => (
+                                        <ListBoxItem key={context.id} id={context.id} textValue={context.label}>
+                                            {context.label}
+                                        </ListBoxItem>
+                                    ),
+                                )}
+                            </ListBox>
+                        </Select.Popover>
                     </Select>
                 </div>
             )}
@@ -199,7 +200,7 @@ export function ChatInput(props: IChatInputProps): ReactElement {
                                 isDisabled={props.isLoading}
                                 size="sm"
                                 type="button"
-                                variant="flat"
+                                variant="secondary"
                                 onPress={(): void => {
                                     handleQuickAction(action.message)
                                 }}
@@ -214,16 +215,15 @@ export function ChatInput(props: IChatInputProps): ReactElement {
                 <label className="sr-only" htmlFor="conversation-input">
                     {props.inputAriaLabel ?? "Message input"}
                 </label>
-                <Textarea
+                <TextArea
                     aria-label={props.inputAriaLabel ?? "Message input"}
                     autoComplete="off"
                     className="min-h-20 rounded-lg bg-surface"
                     id="conversation-input"
-                    isDisabled={props.isLoading}
+                    disabled={props.isLoading === true}
                     maxLength={maxLength}
-                    minRows={2}
                     onKeyDown={handleKeyDown}
-                    onValueChange={props.onDraftChange}
+                    onChange={(event: ChangeEvent<HTMLTextAreaElement>): void => { props.onDraftChange(event.target.value) }}
                     placeholder={props.placeholder ?? "Type a message and press Enter"}
                     value={props.draft}
                 />

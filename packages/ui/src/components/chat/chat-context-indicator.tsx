@@ -1,6 +1,6 @@
 import { type ReactElement, type ReactNode, useState } from "react"
 
-import { Button, Chip } from "@/components/ui"
+import { Button, Chip } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
@@ -117,7 +117,7 @@ export function ChatContextIndicator(props: IChatContextIndicatorProps): ReactEl
         >
             <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                    <Chip size="sm" variant="flat">
+                    <Chip size="sm" variant="secondary">
                         {contextTitle}
                     </Chip>
                     <p className="mt-1 text-xs font-semibold sm:text-sm">{contextSummary}</p>
@@ -128,7 +128,7 @@ export function ChatContextIndicator(props: IChatContextIndicatorProps): ReactEl
                     aria-expanded={isOpen}
                     isDisabled={props.contexts.length <= 1}
                     size="sm"
-                    variant="flat"
+                    variant="secondary"
                     onPress={(): void => {
                         setIsOpen((previous): boolean => previous === false)
                     }}
