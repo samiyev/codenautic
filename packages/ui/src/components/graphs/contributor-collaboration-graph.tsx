@@ -231,11 +231,16 @@ export function ContributorCollaborationGraph(
 
     return (
         <section className="rounded-lg border border-border bg-surface p-3 shadow-sm">
-            <p className="text-sm font-semibold text-foreground">{t("code-city:contributorCollaboration.title")}</p>
+            <p className="text-sm font-semibold text-foreground">
+                {t("code-city:contributorCollaboration.title")}
+            </p>
             <p className="mt-1 text-xs text-muted-foreground">
                 {t("code-city:contributorCollaboration.description")}
             </p>
-            <div aria-label={t("code-city:contributorCollaboration.ariaLabelViewport")} className="mt-3 overflow-x-auto">
+            <div
+                aria-label={t("code-city:contributorCollaboration.ariaLabelViewport")}
+                className="mt-3 overflow-x-auto"
+            >
                 <svg
                     aria-label={t("code-city:contributorCollaboration.ariaLabelGraph")}
                     className="h-auto w-full min-w-[680px]"
@@ -270,7 +275,9 @@ export function ContributorCollaborationGraph(
 
                         return (
                             <g
-                                aria-label={t("code-city:contributorCollaboration.ariaLabelFocus", { label: contributor.label })}
+                                aria-label={t("code-city:contributorCollaboration.ariaLabelFocus", {
+                                    label: contributor.label,
+                                })}
                                 className="cursor-pointer"
                                 key={contributor.contributorId}
                                 role="button"
