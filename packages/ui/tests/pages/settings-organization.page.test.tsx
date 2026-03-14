@@ -15,7 +15,7 @@ describe("SettingsOrganizationPage", (): void => {
 
         expect(screen.getByText("Organization profile")).not.toBeNull()
         expect(screen.getByText("Billing")).not.toBeNull()
-        expect(screen.getAllByText("Ari Karimov").length).toBeGreaterThan(0)
+        expect(screen.getAllByText("Neo Anderson").length).toBeGreaterThan(0)
         expect(screen.getByText("BYOK")).not.toBeNull()
         expect(screen.getByText("Audit logs (latest)")).not.toBeNull()
         expect(screen.getByText("Members")).not.toBeNull()
@@ -77,10 +77,10 @@ describe("SettingsOrganizationPage", (): void => {
     it("рендерит таблицу участников с ролями", (): void => {
         renderWithProviders(<SettingsOrganizationPage />)
 
-        expect(screen.getAllByText("Nika Saryeva").length).toBeGreaterThan(0)
-        expect(screen.getByText("nika@acme.dev")).not.toBeNull()
-        expect(screen.getByText("Mila Davletova")).not.toBeNull()
-        expect(screen.getByText("mila@acme.dev")).not.toBeNull()
+        expect(screen.getAllByText("Trinity").length).toBeGreaterThan(0)
+        expect(screen.getByText("trinity@acme.dev")).not.toBeNull()
+        expect(screen.getByText("Morpheus")).not.toBeNull()
+        expect(screen.getByText("morpheus@acme.dev")).not.toBeNull()
 
         expect(screen.getAllByText("admin").length).toBeGreaterThan(0)
         expect(screen.getAllByText("lead").length).toBeGreaterThan(0)
@@ -142,7 +142,7 @@ describe("SettingsOrganizationPage", (): void => {
         renderWithProviders(<SettingsOrganizationPage />)
 
         const memberRoleSelect = screen.getByRole("combobox", {
-            name: "Role for ari@acme.dev",
+            name: "Role for neo@acme.dev",
         })
         await user.selectOptions(memberRoleSelect, "developer")
 
@@ -153,7 +153,7 @@ describe("SettingsOrganizationPage", (): void => {
         const user = userEvent.setup()
         renderWithProviders(<SettingsOrganizationPage />)
 
-        expect(screen.getByText("Mila Davletova")).not.toBeNull()
+        expect(screen.getByText("Morpheus")).not.toBeNull()
 
         const removeButtons = screen.getAllByRole("button", { name: "Remove" })
         const lastRemoveButton = removeButtons[removeButtons.length - 1]
@@ -161,7 +161,7 @@ describe("SettingsOrganizationPage", (): void => {
             await user.click(lastRemoveButton)
         }
 
-        expect(screen.queryByText("Mila Davletova")).toBeNull()
+        expect(screen.queryByText("Morpheus")).toBeNull()
     })
 
     it("когда выбирается другой план billing, тогда план обновляется", async (): Promise<void> => {
@@ -329,7 +329,7 @@ describe("SettingsOrganizationPage", (): void => {
         renderWithProviders(<SettingsOrganizationPage />)
 
         const memberRoleSelect = screen.getByRole("combobox", {
-            name: "Role for mila@acme.dev",
+            name: "Role for morpheus@acme.dev",
         })
         await user.selectOptions(memberRoleSelect, "lead")
 
