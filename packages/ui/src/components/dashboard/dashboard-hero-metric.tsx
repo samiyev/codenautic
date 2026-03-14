@@ -1,6 +1,7 @@
-import { type ReactElement } from "react"
+import { type ReactElement, useId } from "react"
 
 import { Card, CardBody } from "@/components/ui"
+import { useCountUp } from "@/lib/motion"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
@@ -17,6 +18,22 @@ export interface IDashboardHeroMetricProps {
     readonly color?: string
     /** Подпись снизу. */
     readonly subtitle?: string
+}
+
+/**
+ * Определяет severity-цвет по значению gauge.
+ *
+ * @param percentage Процент заполнения (0-1).
+ * @returns CSS цвет severity.
+ */
+function resolveSeverityColor(percentage: number): string {
+    if (percentage >= 0.8) {
+        return "var(--success)"
+    }
+    if (percentage >= 0.6) {
+        return "var(--warning)"
+    }
+    return "var(--danger)"
 }
 
 /**
@@ -43,57 +60,120 @@ function describeArc(percentage: number, radius: number, cx: number, cy: number)
 }
 
 /**
- * Large hero metric card с radial gauge визуализацией.
- * Используется как Zone A элемент dashboard с progressive disclosure.
+ * Large hero metric card с radial gauge визуализацией,
+ * glow-эффектом и severity-цветом.
  *
  * @param props Конфигурация метрики.
- * @returns Hero metric card с gauge.
+ * @returns Hero metric card с animated gauge.
  */
 export function DashboardHeroMetric(props: IDashboardHeroMetricProps): ReactElement {
     const max = props.max ?? 100
     const percentage = Math.min(1, Math.max(0, props.value / max))
-    const color = props.color ?? "var(--primary)"
-    const radius = 40
-    const cx = 50
-    const cy = 50
+    const severityColor = props.color ?? resolveSeverityColor(percentage)
+    const radius = 42
+    const cx = 55
+    const cy = 55
+    const filterId = useId()
+    const gradientId = useId()
+
+    const animatedValue = useCountUp({ target: props.value })
 
     return (
-        <Card className="overflow-hidden">
-            <CardBody className="flex flex-col items-center gap-2 py-6">
+        <Card
+            className={[
+                "relative overflow-hidden",
+                "bg-gradient-to-b from-surface to-surface-muted/50",
+                "border border-border/60",
+                "shadow-lg",
+            ].join(" ")}
+        >
+            {/* Ambient glow behind gauge */}
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-15 blur-3xl"
+                style={{
+                    background: `radial-gradient(circle at 50% 40%, ${severityColor}, transparent 70%)`,
+                }}
+            />
+
+            <CardBody className="relative flex flex-col items-center gap-3 py-8 px-6">
                 <svg
                     aria-label={`${props.label}: ${String(props.value)}`}
-                    className="h-28 w-28"
-                    viewBox="0 0 100 100"
+                    className="h-36 w-36"
+                    viewBox="0 0 110 110"
                 >
+                    <defs>
+                        <filter id={filterId}>
+                            <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+                        </filter>
+                        <linearGradient id={gradientId} x1="0%" x2="100%" y1="0%" y2="100%">
+                            <stop offset="0%" stopColor={severityColor} stopOpacity="1" />
+                            <stop offset="100%" stopColor={severityColor} stopOpacity="0.5" />
+                        </linearGradient>
+                    </defs>
+
+                    {/* Background track */}
                     <path
                         d={describeArc(1, radius, cx, cy)}
                         fill="none"
                         stroke="var(--border)"
                         strokeLinecap="round"
-                        strokeWidth="6"
+                        strokeOpacity="0.4"
+                        strokeWidth="8"
                     />
+
+                    {/* Glow layer */}
                     <path
                         d={describeArc(percentage, radius, cx, cy)}
                         fill="none"
-                        stroke={color}
+                        filter={`url(#${filterId})`}
+                        stroke={severityColor}
                         strokeLinecap="round"
-                        strokeWidth="6"
+                        strokeOpacity="0.6"
+                        strokeWidth="12"
                     />
+
+                    {/* Active arc with gradient */}
+                    <path
+                        className="transition-all duration-700 ease-out"
+                        d={describeArc(percentage, radius, cx, cy)}
+                        fill="none"
+                        stroke={`url(#${gradientId})`}
+                        strokeLinecap="round"
+                        strokeWidth="8"
+                    />
+
+                    {/* Center value */}
                     <text
-                        className="text-2xl font-bold"
-                        dominantBaseline="middle"
+                        className="font-display text-[28px] font-bold"
+                        dominantBaseline="central"
                         fill="currentColor"
                         textAnchor="middle"
                         x={cx}
-                        y={cy}
+                        y={cy - 2}
                     >
-                        {String(props.value)}
+                        {String(animatedValue)}
+                    </text>
+
+                    {/* Score label under value */}
+                    <text
+                        className="text-[9px] font-medium uppercase tracking-[0.15em]"
+                        dominantBaseline="hanging"
+                        fill="var(--muted-foreground)"
+                        textAnchor="middle"
+                        x={cx}
+                        y={cy + 16}
+                    >
+                        / {String(max)}
                     </text>
                 </svg>
-                <p className={TYPOGRAPHY.sectionTitle}>{props.label}</p>
-                {props.subtitle !== undefined ? (
-                    <p className={TYPOGRAPHY.caption}>{props.subtitle}</p>
-                ) : null}
+
+                <div className="text-center">
+                    <p className={`${TYPOGRAPHY.sectionTitle} tracking-tight`}>{props.label}</p>
+                    {props.subtitle !== undefined ? (
+                        <p className={`mt-1 ${TYPOGRAPHY.bodyMuted}`}>{props.subtitle}</p>
+                    ) : null}
+                </div>
             </CardBody>
         </Card>
     )
