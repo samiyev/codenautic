@@ -12,16 +12,7 @@ import {
     Vector3,
 } from "three"
 
-import {
-    SCENE_BACKGROUND,
-    SCENE_BREADCRUMB_EMISSIVE,
-    SCENE_BREADCRUMB_SPHERE,
-    SCENE_DISTRICT_FLOOR,
-    SCENE_DISTRICT_LABEL,
-    SCENE_GRID_DIVISION,
-    SCENE_GRID_LINE,
-    SCENE_NAVIGATION_TRAIL,
-} from "@/lib/constants/codecity-colors"
+import { CODECITY_PALETTE } from "@/lib/constants/codecity-colors"
 
 import type { TCodeCityImpactType } from "../codecity-3d-scene"
 
@@ -696,7 +687,7 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                     setSampledFps(Math.round(fps))
                 }}
             />
-            <color args={[SCENE_BACKGROUND]} attach="background" />
+            <color args={[CODECITY_PALETTE.scene.background]} attach="background" />
             <ambientLight intensity={AMBIENT_LIGHT_INTENSITY} />
             <directionalLight
                 intensity={DIRECTIONAL_LIGHT_INTENSITY}
@@ -706,8 +697,8 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                 args={[
                     GRID_HELPER_SIZE,
                     GRID_HELPER_DIVISIONS,
-                    SCENE_GRID_LINE,
-                    SCENE_GRID_DIVISION,
+                    CODECITY_PALETTE.scene.gridLine,
+                    CODECITY_PALETTE.scene.gridDivision,
                 ]}
                 visible={renderBudget.quality !== "low"}
             />
@@ -719,7 +710,7 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                                 args={[district.width, DISTRICT_FLOOR_HEIGHT, district.depth]}
                             />
                             <meshStandardMaterial
-                                color={SCENE_DISTRICT_FLOOR}
+                                color={CODECITY_PALETTE.scene.districtFloor}
                                 metalness={0.02}
                                 roughness={0.92}
                             />
@@ -727,7 +718,7 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                         <Text
                             anchorX="center"
                             anchorY="middle"
-                            color={SCENE_DISTRICT_LABEL}
+                            color={CODECITY_PALETTE.scene.districtLabel}
                             fontSize={Math.max(
                                 DISTRICT_LABEL_FONT_SIZE_MIN,
                                 Math.min(
@@ -754,7 +745,7 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
             )}
             {navigationTrailVectors.length >= 2 ? (
                 <Line
-                    color={SCENE_NAVIGATION_TRAIL}
+                    color={CODECITY_PALETTE.scene.navigationTrail}
                     dashScale={NAVIGATION_TRAIL_DASH_SCALE}
                     dashSize={NAVIGATION_TRAIL_DASH_SIZE}
                     dashed={true}
@@ -779,8 +770,8 @@ export function CodeCity3DSceneRenderer(props: ICodeCity3DSceneRendererProps): R
                             ]}
                         />
                         <meshStandardMaterial
-                            color={SCENE_BREADCRUMB_SPHERE}
-                            emissive={SCENE_BREADCRUMB_EMISSIVE}
+                            color={CODECITY_PALETTE.scene.breadcrumbSphere}
+                            emissive={CODECITY_PALETTE.scene.breadcrumbEmissive}
                             emissiveIntensity={BREADCRUMB_EMISSIVE_INTENSITY}
                             toneMapped={false}
                         />

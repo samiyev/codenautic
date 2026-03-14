@@ -3,11 +3,7 @@ import type {
     TCodeCityCausalCouplingType,
 } from "../codecity-3d-scene"
 
-import {
-    CAUSAL_ARC_COLOR_DEFAULT,
-    CAUSAL_ARC_COLOR_DEPENDENCY,
-    CAUSAL_ARC_COLOR_OWNERSHIP,
-} from "@/lib/constants/codecity-colors"
+import { CODECITY_PALETTE } from "@/lib/constants/codecity-colors"
 
 import { CAUSAL_ARC_BASE_LIFT, CAUSAL_ARC_SEGMENTS } from "./codecity-scene-constants"
 import type { ICodeCityCausalArc, ICodeCityBuildingMesh, TVec3 } from "./codecity-scene-types"
@@ -20,12 +16,12 @@ import type { ICodeCityCausalArc, ICodeCityBuildingMesh, TVec3 } from "./codecit
  */
 export function resolveCodeCityCausalArcColor(couplingType: TCodeCityCausalCouplingType): string {
     if (couplingType === "dependency") {
-        return CAUSAL_ARC_COLOR_DEPENDENCY
+        return CODECITY_PALETTE.causal.dependency
     }
     if (couplingType === "ownership") {
-        return CAUSAL_ARC_COLOR_OWNERSHIP
+        return CODECITY_PALETTE.causal.ownership
     }
-    return CAUSAL_ARC_COLOR_DEFAULT
+    return CODECITY_PALETTE.causal.default
 }
 
 /**
