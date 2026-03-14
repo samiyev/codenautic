@@ -1,6 +1,6 @@
 import { type ReactElement } from "react"
 import { type FieldPath, type FieldValues } from "react-hook-form"
-import { Radio, RadioGroup } from "@/components/ui"
+import { Radio, RadioGroup } from "@heroui/react"
 
 import { FormField, type IFormFieldProps } from "./form-field"
 
@@ -53,10 +53,9 @@ export function FormRadioGroupField<
                     aria-describedby={ariaDescribedBy}
                     aria-label={accessibilityLabel}
                     aria-invalid={hasError}
-                    isInvalid={hasError}
                     name={field.name}
                     value={field.value ?? ""}
-                    onValueChange={(value: string): void => {
+                    onChange={(value: string): void => {
                         field.onChange(value)
                     }}
                 >
