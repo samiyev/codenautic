@@ -326,7 +326,7 @@ function resolveReviewHistoryHeatColor(activityCount: number, maxActivityCount: 
  */
 function mapReviewRiskChipColor(
     level: TReviewRiskLevel,
-): "danger" | "primary" | "success" | "warning" {
+): "accent" | "danger" | "success" | "warning" {
     if (level === "critical") {
         return "danger"
     }
@@ -334,7 +334,7 @@ function mapReviewRiskChipColor(
         return "warning"
     }
     if (level === "medium") {
-        return "primary"
+        return "accent"
     }
     return "success"
 }

@@ -20,7 +20,8 @@ import {
 } from "@/components/graphs/impact-analysis-panel"
 import { ReviewCommentThread } from "@/components/reviews/review-comment-thread"
 import { CodeDiffViewer } from "@/components/reviews/code-diff-viewer"
-import { Alert, Button, Card, CardBody, CardHeader, Chip, StyledLink } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, Chip } from "@heroui/react"
+import { StyledLink } from "@/components/layout/styled-link"
 import { SseStreamViewer } from "@/components/streaming/sse-stream-viewer"
 import type {
     ICcrWorkspaceContextResponse,
@@ -575,38 +576,35 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             {reviewDecisionPolicy.visibility === "hidden" ? null : (
                                 <>
                                     <Button
-                                        color="success"
+                                        variant={reviewDecision === "approved" ? "tertiary" : "ghost"}
                                         isDisabled={reviewDecisionPolicy.visibility === "disabled"}
                                         onPress={(): void => {
                                             handleReviewDecisionChange("approved")
                                         }}
                                         size="sm"
                                         type="button"
-                                        variant={reviewDecision === "approved" ? "solid" : "light"}
                                     >
                                         {t("reviews:detail.approveReview")}
                                     </Button>
                                     <Button
-                                        color="danger"
+                                        variant={reviewDecision === "rejected" ? "danger" : "ghost"}
                                         isDisabled={reviewDecisionPolicy.visibility === "disabled"}
                                         onPress={(): void => {
                                             handleReviewDecisionChange("rejected")
                                         }}
                                         size="sm"
                                         type="button"
-                                        variant={reviewDecision === "rejected" ? "solid" : "light"}
                                     >
                                         {t("reviews:detail.requestChanges")}
                                     </Button>
                                     <Button
-                                        color="primary"
+                                        variant={reviewDecision === "pending" ? "primary" : "ghost"}
                                         isDisabled={reviewDecisionPolicy.visibility === "disabled"}
                                         onPress={(): void => {
                                             handleReviewDecisionChange("pending")
                                         }}
                                         size="sm"
                                         type="button"
-                                        variant={reviewDecision === "pending" ? "solid" : "light"}
                                     >
                                         {t("reviews:detail.saveAsInProgress")}
                                     </Button>
@@ -627,15 +625,12 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                         </div>
                     </div>
                 </CardHeader>
-                <CardBody className="space-y-2">
+                <CardContent className="space-y-2">
                     {reviewDecisionPolicy.reason === undefined ||
                     reviewDecisionPolicy.visibility === "enabled" ? null : (
-                        <Alert
-                            color="warning"
-                            title={t("reviews:detail.roleBasedRestriction")}
-                            variant="flat"
-                        >
-                            {reviewDecisionPolicy.reason}
+                        <Alert status="warning">
+                            <Alert.Title>{t("reviews:detail.roleBasedRestriction")}</Alert.Title>
+                            <Alert.Description>{reviewDecisionPolicy.reason}</Alert.Description>
                         </Alert>
                     )}
                     <p className={TYPOGRAPHY.body}>
@@ -653,7 +648,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             ? t("reviews:detail.noAttachedFiles")
                             : ccr.attachedFiles.join(", ")}
                     </p>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <div className="grid gap-4 xl:grid-cols-[240px_minmax(0,1fr)_420px]">
@@ -662,7 +657,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                         <CardHeader>
                             <p className={TYPOGRAPHY.cardTitle}>{t("reviews:detail.filesTree")}</p>
                         </CardHeader>
-                        <CardBody className="space-y-2">
+                        <CardContent className="space-y-2">
                             {ccrDiffFiles.length === 0 ? (
                                 <p className="text-sm text-muted-foreground">
                                     {t("reviews:detail.noDiffFiles")}
@@ -688,7 +683,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     )
                                 })
                             )}
-                        </CardBody>
+                        </CardContent>
                     </Card>
                     <Card>
                         <CardHeader>
@@ -705,7 +700,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     }
                                     size="sm"
                                     type="button"
-                                    variant="flat"
+                                    variant="secondary"
                                     onPress={(): void => {
                                         setReviewContextMiniMapExpanded(
                                             isReviewContextMiniMapExpanded === false,
@@ -718,7 +713,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 </Button>
                             </div>
                         </CardHeader>
-                        <CardBody className="space-y-3">
+                        <CardContent className="space-y-3">
                             <p className={TYPOGRAPHY.captionMuted}>
                                 {t("reviews:detail.codeCityMiniMapHint")}
                             </p>
@@ -742,7 +737,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     ? t("reviews:detail.expandedMapActive")
                                     : t("reviews:detail.miniMapActive")}
                             </p>
-                        </CardBody>
+                        </CardContent>
                     </Card>
                 </aside>
 
@@ -754,7 +749,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 {t("reviews:detail.ccrImpactCityView")}
                             </p>
                         </CardHeader>
-                        <CardBody className="space-y-3">
+                        <CardContent className="space-y-3">
                             <p className={TYPOGRAPHY.captionMuted}>
                                 {t("reviews:detail.ccrImpactCityViewHint")}
                             </p>
@@ -776,7 +771,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     }
                                     size="sm"
                                     type="button"
-                                    variant="flat"
+                                    variant="secondary"
                                     onPress={(): void => {
                                         setReviewHistoryHeatmapEnabled(
                                             isReviewHistoryHeatmapEnabled === false,
@@ -814,16 +809,15 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     <option value="90d">90d</option>
                                 </select>
                             </div>
-                            <Alert
-                                color={isReviewHistoryHeatmapEnabled ? "success" : "primary"}
-                                title={t("reviews:detail.reviewHistoryHeatmapTitle")}
-                                variant="flat"
-                            >
-                                {isReviewHistoryHeatmapEnabled
-                                    ? t("reviews:detail.heatmapEnabled", {
-                                          window: selectedReviewHistoryWindow,
-                                      })
-                                    : t("reviews:detail.heatmapDisabled")}
+                            <Alert status={isReviewHistoryHeatmapEnabled ? "success" : "accent"}>
+                                <Alert.Title>{t("reviews:detail.reviewHistoryHeatmapTitle")}</Alert.Title>
+                                <Alert.Description>
+                                    {isReviewHistoryHeatmapEnabled
+                                        ? t("reviews:detail.heatmapEnabled", {
+                                              window: selectedReviewHistoryWindow,
+                                          })
+                                        : t("reviews:detail.heatmapDisabled")}
+                                </Alert.Description>
                             </Alert>
                             <ul
                                 aria-label={t("reviews:ariaLabel.detail.reviewHistoryHeatmapList")}
@@ -851,14 +845,13 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 onApplyImpact={handleApplyImpactFocus}
                                 seeds={reviewImpactSeeds}
                             />
-                            <Alert
-                                color="primary"
-                                title={t("reviews:detail.blastRadiusStatus")}
-                                variant="flat"
-                            >
-                                {impactFocusStatus.length === 0
-                                    ? t("reviews:detail.noBlastRadiusFocus")
-                                    : impactFocusStatus}
+                            <Alert status="accent">
+                                <Alert.Title>{t("reviews:detail.blastRadiusStatus")}</Alert.Title>
+                                <Alert.Description>
+                                    {impactFocusStatus.length === 0
+                                        ? t("reviews:detail.noBlastRadiusFocus")
+                                        : impactFocusStatus}
+                                </Alert.Description>
                             </Alert>
                             <div className="rounded-lg border border-border bg-surface p-3">
                                 <p className={TYPOGRAPHY.cardTitle}>
@@ -948,7 +941,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     </div>
                                 </div>
                             </div>
-                        </CardBody>
+                        </CardContent>
                     </Card>
                     {props.streamSourceUrl === undefined ? null : (
                         <SseStreamViewer
@@ -968,13 +961,13 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 {t("reviews:detail.reviewRiskIndicator")}
                             </p>
                         </CardHeader>
-                        <CardBody className="space-y-2">
+                        <CardContent className="space-y-2">
                             <div className="flex items-center gap-2">
                                 <Chip
                                     aria-label={`Review risk level ${reviewRiskIndicator.level}`}
                                     color={mapReviewRiskChipColor(reviewRiskIndicator.level)}
                                     size="sm"
-                                    variant="flat"
+                                    variant="soft"
                                 >
                                     {reviewRiskIndicator.level.toUpperCase()}
                                 </Chip>
@@ -993,9 +986,9 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     ),
                                 )}
                             </ul>
-                        </CardBody>
+                        </CardContent>
                     </Card>
-                    <Alert color={decisionBadge.color}>
+                    <Alert status={decisionBadge.color === "primary" ? "accent" : decisionBadge.color}>
                         {t("reviews:detail.reviewStatusMessage")}{" "}
                         <strong>{translatedDecisionLabels[reviewDecision]}</strong>.{" "}
                         {t("reviews:detail.reviewStatusHint")}
@@ -1006,7 +999,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 {t("reviews:detail.safeGuardDecisionTrace")}
                             </p>
                         </CardHeader>
-                        <CardBody className="space-y-3">
+                        <CardContent className="space-y-3">
                             <p className={TYPOGRAPHY.body}>
                                 {t("reviews:detail.appliedFilters")}{" "}
                                 {SAFEGUARD_FILTER_SEQUENCE.map((filter): string => {
@@ -1014,10 +1007,10 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 }).join(", ")}
                             </p>
                             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                <Chip size="sm" variant="flat">
+                                <Chip size="sm" variant="soft">
                                     {t("reviews:detail.visible")} {visibleTraceCount}
                                 </Chip>
-                                <Chip size="sm" variant="flat">
+                                <Chip size="sm" variant="soft">
                                     {t("reviews:detail.filteredOut")} {filteredOutTraceCount}
                                 </Chip>
                             </div>
@@ -1092,7 +1085,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     </ul>
                                 </div>
                             )}
-                        </CardBody>
+                        </CardContent>
                     </Card>
                     <Card>
                         <CardHeader>
@@ -1100,7 +1093,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 {t("reviews:detail.reviewerFeedbackLearningLoop")}
                             </p>
                         </CardHeader>
-                        <CardBody className="space-y-3">
+                        <CardContent className="space-y-3">
                             <p className="text-sm text-foreground">
                                 {t("reviews:detail.feedbackHint")}
                             </p>
@@ -1121,8 +1114,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                                 )}
                                                 size="sm"
                                                 type="button"
-                                                color="primary"
-                                                variant={isSelected ? "solid" : "flat"}
+                                                variant={isSelected ? "primary" : "secondary"}
                                                 onPress={(): void => {
                                                     setSelectedFeedbackReason(reason)
                                                 }}
@@ -1136,7 +1128,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             <div className="flex flex-wrap gap-2">
                                 <Button
                                     aria-label={t("reviews:detail.acceptFeedback")}
-                                    color="success"
+                                    variant="tertiary"
                                     size="sm"
                                     type="button"
                                     onPress={(): void => {
@@ -1147,7 +1139,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 </Button>
                                 <Button
                                     aria-label={t("reviews:detail.rejectFeedback")}
-                                    color="danger"
+                                    variant="danger"
                                     size="sm"
                                     type="button"
                                     onPress={(): void => {
@@ -1158,12 +1150,9 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 </Button>
                             </div>
                             {latestActiveTraceFeedback === undefined ? (
-                                <Alert
-                                    color="warning"
-                                    title={t("reviews:detail.noFeedbackYetTitle")}
-                                    variant="flat"
-                                >
-                                    {t("reviews:detail.noFeedbackYetHint")}
+                                <Alert status="warning">
+                                    <Alert.Title>{t("reviews:detail.noFeedbackYetTitle")}</Alert.Title>
+                                    <Alert.Description>{t("reviews:detail.noFeedbackYetHint")}</Alert.Description>
                                 </Alert>
                             ) : (
                                 <div className="rounded-lg border border-border bg-surface p-3 text-xs text-foreground">
@@ -1232,7 +1221,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     ),
                                 )}
                             </ul>
-                        </CardBody>
+                        </CardContent>
                     </Card>
                     <Card>
                         <CardHeader>
@@ -1240,7 +1229,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 {t("reviews:detail.conversationThreads")}
                             </p>
                         </CardHeader>
-                        <CardBody className="p-0">
+                        <CardContent className="p-0">
                             <ChatThreadList
                                 activeThreadId={activeThreadId}
                                 onArchiveThread={handleArchiveThread}
@@ -1249,7 +1238,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 onSelectThread={setActiveThreadId}
                                 threads={threads}
                             />
-                        </CardBody>
+                        </CardContent>
                     </Card>
                     <ChatPanel
                         activeContextId={contextItem.id}
