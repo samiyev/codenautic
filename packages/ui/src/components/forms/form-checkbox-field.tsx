@@ -1,6 +1,6 @@
 import { type ReactElement } from "react"
 import { type FieldPath, type FieldValues } from "react-hook-form"
-import { Checkbox } from "@/components/ui"
+import { Checkbox } from "@heroui/react"
 
 import { FormField, type IFormFieldProps } from "./form-field"
 
@@ -43,8 +43,7 @@ export function FormCheckboxField<
                     aria-invalid={hasError}
                     isSelected={field.value === true}
                     name={field.name}
-                    isInvalid={hasError}
-                    onValueChange={field.onChange}
+                    onChange={field.onChange}
                 >
                     {props.label}
                 </Checkbox>

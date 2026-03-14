@@ -1,7 +1,6 @@
 import { type ChangeEvent, type ReactElement } from "react"
 import { type FieldPath, type FieldValues } from "react-hook-form"
-import { Input } from "@/components/ui"
-import { type InputProps } from "@/components/ui/input"
+import { Input, type InputProps } from "@heroui/react"
 
 import { FormField, type IFormFieldProps } from "./form-field"
 
@@ -15,7 +14,7 @@ export interface IFormNumberFieldProps<
     /** Пропсы HeroUI Input без value/onChange. */
     readonly inputProps?: Omit<
         InputProps,
-        "name" | "value" | "defaultValue" | "onChange" | "onBlur" | "isInvalid" | "isDisabled"
+        "name" | "value" | "defaultValue" | "onChange" | "onBlur"
     >
 }
 
@@ -49,7 +48,6 @@ export function FormNumberField<
                         aria-label={accessibilityLabel}
                         aria-invalid={hasError}
                         id={fieldId}
-                        isInvalid={hasError}
                         inputMode="decimal"
                         name={field.name}
                         placeholder="0"
