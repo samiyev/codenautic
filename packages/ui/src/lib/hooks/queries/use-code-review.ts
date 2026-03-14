@@ -80,6 +80,9 @@ export function useCodeReview(args: IUseCodeReviewQueryArgs = {}): IUseCodeRevie
                 queryKey: queryKeys.codeReview.byId(response.reviewId),
             })
         },
+        onError: (_error: Error): void => {
+            /* Propagated via triggerReview.error — consumers handle in UI */
+        },
     })
 
     const submitFeedback = useMutation({
@@ -92,6 +95,9 @@ export function useCodeReview(args: IUseCodeReviewQueryArgs = {}): IUseCodeRevie
             await queryClient.invalidateQueries({
                 queryKey: queryKeys.codeReview.byId(response.reviewId),
             })
+        },
+        onError: (_error: Error): void => {
+            /* Propagated via submitFeedback.error — consumers handle in UI */
         },
     })
 
