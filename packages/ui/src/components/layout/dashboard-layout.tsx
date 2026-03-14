@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "@tanstack/react-router"
 
 import {
-    getBreadcrumbsWithPaths,
     isRouteAccessible,
     searchAccessibleRoutes,
     translateRouteLabelKey,
@@ -15,11 +14,13 @@ import { useProviderDegradation } from "@/lib/hooks/use-provider-degradation"
 import { useMultiTabSync } from "@/lib/hooks/use-multi-tab-sync"
 import { useDashboardShortcuts } from "@/lib/hooks/use-dashboard-shortcuts"
 import { OPEN_COMMAND_PALETTE_EVENT } from "@/lib/keyboard/shortcut-registry"
-import { AnimatedMount } from "@/lib/motion"
+
+import { Menu } from "@/components/icons/app-icons"
+import { Button } from "@/components/ui"
 
 import { CommandPalette } from "./command-palette"
-import { ContentToolbar } from "./content-toolbar"
 import { Sidebar } from "./sidebar"
+import { SidebarActions } from "./sidebar-actions"
 import { SidebarFooter } from "./sidebar-footer"
 import { MobileSidebar } from "./mobile-sidebar"
 import { ShortcutsHelpModal } from "./shortcuts-help-modal"
@@ -76,11 +77,6 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
             tenantId: orgSwitcher.activeOrganizationId,
         }),
         [orgSwitcher.activeOrganizationId, policyDrift.activeRoleId],
-    )
-
-    const breadcrumbs = useMemo(
-        () => getBreadcrumbsWithPaths(location.pathname, t),
-        [location.pathname, t],
     )
 
     const commandPaletteRoutes = useMemo(
@@ -187,11 +183,17 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
     )
 
     return (
-        <div className="relative grid h-screen grid-cols-1 gap-2 overflow-hidden p-3 text-foreground sm:gap-3 sm:p-4 md:grid-cols-[auto_1fr]">
-            {/* Sidebar — full height, hidden on mobile */}
-            <div className="hidden md:block">
+        <div className="relative grid h-screen grid-cols-1 overflow-hidden text-foreground lg:grid-cols-[auto_1fr]">
+            {/* Sidebar — full height, hidden on mobile/tablet */}
+            <div className="hidden lg:block">
                 <Sidebar
                     footerSlot={sidebarFooter}
+                    headerSlot={
+                        <SidebarActions
+                            isCollapsed={isSidebarCollapsed}
+                            onOpenCommandPalette={openCommandPalette}
+                        />
+                    }
                     isCollapsed={isSidebarCollapsed}
                     onNavigate={(): void => {
                         setIsMobileSidebarOpen(false)
@@ -204,30 +206,23 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
             </div>
 
             {/* Content column — scrollable */}
-            <div className="flex min-h-0 flex-col gap-2">
-                <ContentToolbar
-                    breadcrumbs={breadcrumbs}
-                    onBreadcrumbNavigate={(to): void => {
-                        void navigate({ to })
-                    }}
-                    onMobileMenuOpen={(): void => {
-                        setIsMobileSidebarOpen(true)
-                    }}
-                    onOpenBilling={(): void => {
-                        void navigate({ to: "/settings-billing" })
-                    }}
-                    onOpenCommandPalette={openCommandPalette}
-                    onOpenHelp={(): void => {
-                        void navigate({ to: "/help-diagnostics" })
-                    }}
-                    onOpenSettings={(): void => {
-                        void navigate({ to: "/settings" })
-                    }}
-                    onSignOut={handleSignOut}
-                    userEmail={props.userEmail}
-                    userName={props.userName}
-                />
-                <div className="flex-1 overflow-y-auto rounded-lg border border-border bg-content-bg p-4 shadow-sm">
+            <div className="flex min-h-0 flex-col">
+                {/* Mobile menu button — visible only on small screens */}
+                <div className="flex items-center gap-2 p-3 lg:hidden">
+                    <Button
+                        isIconOnly
+                        aria-label={t("navigation:toolbar.openNavigationMenu")}
+                        radius="full"
+                        size="sm"
+                        variant="light"
+                        onPress={(): void => {
+                            setIsMobileSidebarOpen(true)
+                        }}
+                    >
+                        <Menu size={20} />
+                    </Button>
+                </div>
+                <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-8 sm:py-6 lg:px-12 xl:px-16">
                     <NotificationAlerts
                         multiTabNotice={multiTab.multiTabNotice}
                         policyDriftNotice={policyDrift.policyDriftNotice}
@@ -235,7 +230,7 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
                         restoredDraftMessage={sessionRecovery.restoredDraftMessage}
                         shortcutConflicts={shortcuts.conflicts}
                     />
-                    <AnimatedMount motionKey={location.pathname}>{props.children}</AnimatedMount>
+                    {props.children}
                 </div>
             </div>
 
