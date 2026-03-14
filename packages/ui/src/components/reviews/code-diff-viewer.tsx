@@ -177,11 +177,15 @@ function CodeDiffFilePanel(props: ICcrDiffFile): ReactElement {
                 <span className="rounded bg-surface-muted px-2 py-0.5 text-[11px] text-foreground">
                     +{String(lineCounts.added)} / -{String(lineCounts.removed)}
                 </span>
-                <span className={TYPOGRAPHY.captionMuted}>{t("reviews:codeDiff.language", { language: fileData.language })}</span>
+                <span className={TYPOGRAPHY.captionMuted}>
+                    {t("reviews:codeDiff.language", { language: fileData.language })}
+                </span>
             </header>
             <div className="overflow-x-auto">
                 <div
-                    aria-label={t("reviews:codeDiff.diffLinesAriaLabel", { filePath: fileData.filePath })}
+                    aria-label={t("reviews:codeDiff.diffLinesAriaLabel", {
+                        filePath: fileData.filePath,
+                    })}
                     className="relative max-h-96 overflow-auto border-b border-border"
                     ref={virtualizer.parentRef}
                 >

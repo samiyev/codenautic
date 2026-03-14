@@ -110,7 +110,15 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
             ) : null}
             {hasActiveFilter ? (
                 <p className="text-sm text-muted-foreground">
-                    {t("reviews:content.showingFiltered", { filtered: String(filteredRows.length), total: String(props.rows.length) })}
+                    {t("reviews:content.showingFiltered", {
+                        filtered: String(filteredRows.length),
+                        total: String(props.rows.length),
+                    })}
+                </p>
+            ) : null}
+            {filteredRows.length === 0 && props.rows.length > 0 && hasActiveFilter ? (
+                <p className="py-6 text-center text-sm text-text-secondary">
+                    {t("reviews:content.noMatchingFilters")}
                 </p>
             ) : null}
             <InfiniteScrollContainer

@@ -105,9 +105,7 @@ function ReviewCommentNode(props: IReviewCommentNodeProps): ReactElement {
             <article className="rounded-lg border border-border bg-surface p-3">
                 <div className="flex items-start justify-between gap-2">
                     <div>
-                        <p className={TYPOGRAPHY.cardTitle}>
-                            {props.comment.author}
-                        </p>
+                        <p className={TYPOGRAPHY.cardTitle}>{props.comment.author}</p>
                         <p className={TYPOGRAPHY.captionMuted}>{props.comment.createdAt}</p>
                     </div>
                     {props.comment.isResolved ? (
@@ -129,23 +127,33 @@ function ReviewCommentNode(props: IReviewCommentNodeProps): ReactElement {
                     <button
                         className="rounded border border-border px-2 py-1 text-xs"
                         type="button"
-                        aria-label={t("reviews:commentThread.likeAriaLabel", { author: props.comment.author })}
+                        aria-label={t("reviews:commentThread.likeAriaLabel", {
+                            author: props.comment.author,
+                        })}
                         onClick={toggleLike}
                     >
-                        {isLiked ? t("reviews:commentThread.liked") : t("reviews:commentThread.like")}
+                        {isLiked
+                            ? t("reviews:commentThread.liked")
+                            : t("reviews:commentThread.like")}
                     </button>
                     <button
                         className="rounded border border-border px-2 py-1 text-xs"
                         type="button"
-                        aria-label={t("reviews:commentThread.dislikeAriaLabel", { author: props.comment.author })}
+                        aria-label={t("reviews:commentThread.dislikeAriaLabel", {
+                            author: props.comment.author,
+                        })}
                         onClick={toggleDislike}
                     >
-                        {isDisliked ? t("reviews:commentThread.disliked") : t("reviews:commentThread.dislike")}
+                        {isDisliked
+                            ? t("reviews:commentThread.disliked")
+                            : t("reviews:commentThread.dislike")}
                     </button>
                     <button
                         className="rounded border border-border px-2 py-1 text-xs"
                         type="button"
-                        aria-label={t("reviews:commentThread.replyAriaLabel", { author: props.comment.author })}
+                        aria-label={t("reviews:commentThread.replyAriaLabel", {
+                            author: props.comment.author,
+                        })}
                         onClick={(): void => {
                             setIsReplyOpen((previousValue): boolean => !previousValue)
                         }}
@@ -156,7 +164,9 @@ function ReviewCommentNode(props: IReviewCommentNodeProps): ReactElement {
                 {isReplyOpen ? (
                     <div className="mt-3 space-y-2">
                         <textarea
-                            aria-label={t("reviews:commentThread.replyTextareaAriaLabel", { author: props.comment.author })}
+                            aria-label={t("reviews:commentThread.replyTextareaAriaLabel", {
+                                author: props.comment.author,
+                            })}
                             className="min-h-16 w-full rounded border border-border px-2 py-1 text-sm"
                             value={replyText}
                             onChange={(event): void => {
