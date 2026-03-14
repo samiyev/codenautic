@@ -70,13 +70,20 @@ export function KnowledgeMapExportWidget(props: IKnowledgeMapExportWidgetProps):
                     {t("code-city:knowledgeMapExportComp.metadata")}
                 </p>
                 <p className="mt-1 text-xs text-foreground">
-                    {t("code-city:knowledgeMapExportComp.repository", { name: props.model.metadata.repositoryLabel })}
+                    {t("code-city:knowledgeMapExportComp.repository", {
+                        name: props.model.metadata.repositoryLabel,
+                    })}
                 </p>
                 <p className="text-xs text-foreground">
-                    {t("code-city:knowledgeMapExportComp.metric", { name: props.model.metadata.metricLabel })}
+                    {t("code-city:knowledgeMapExportComp.metric", {
+                        name: props.model.metadata.metricLabel,
+                    })}
                 </p>
                 <p className="text-xs text-foreground">
-                    {t("code-city:knowledgeMapExportComp.filesContributors", { files: props.model.metadata.totalFiles, contributors: props.model.metadata.totalContributors })}
+                    {t("code-city:knowledgeMapExportComp.filesContributors", {
+                        files: props.model.metadata.totalFiles,
+                        contributors: props.model.metadata.totalContributors,
+                    })}
                 </p>
             </div>
 
@@ -99,14 +106,21 @@ export function KnowledgeMapExportWidget(props: IKnowledgeMapExportWidgetProps):
                                     className="inline-flex h-3 w-3 rounded-full border border-border"
                                     style={{ backgroundColor: entry.color }}
                                 />
-                                {t("code-city:knowledgeMapExportComp.ownerFiles", { owner: entry.ownerName, count: entry.fileCount })}
+                                {t("code-city:knowledgeMapExportComp.ownerFiles", {
+                                    owner: entry.ownerName,
+                                    count: entry.fileCount,
+                                })}
                             </li>
                         )
                     })}
                     {props.model.districts.slice(0, 2).map((entry): ReactElement => {
                         return (
                             <li className="text-xs text-foreground" key={entry.districtLabel}>
-                                {t("code-city:knowledgeMapExportComp.districtInfo", { district: entry.districtLabel, busFactor: entry.busFactor, riskLabel: entry.riskLabel })}
+                                {t("code-city:knowledgeMapExportComp.districtInfo", {
+                                    district: entry.districtLabel,
+                                    busFactor: entry.busFactor,
+                                    riskLabel: entry.riskLabel,
+                                })}
                             </li>
                         )
                     })}
@@ -131,7 +145,9 @@ export function KnowledgeMapExportWidget(props: IKnowledgeMapExportWidgetProps):
                     }}
                     type="button"
                 >
-                    {isPngExporting ? t("code-city:knowledgeMapExportComp.exportingPng") : t("code-city:knowledgeMapExportComp.exportPng")}
+                    {isPngExporting
+                        ? t("code-city:knowledgeMapExportComp.exportingPng")
+                        : t("code-city:knowledgeMapExportComp.exportPng")}
                 </button>
             </div>
 
