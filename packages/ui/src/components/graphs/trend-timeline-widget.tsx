@@ -85,13 +85,18 @@ export function TrendTimelineWidget(props: ITrendTimelineWidgetProps): ReactElem
                 {t("code-city:trendTimeline.description")}
             </p>
 
-            <ul aria-label={t("code-city:trendTimeline.ariaLabelEntries")} className="mt-3 space-y-2">
+            <ul
+                aria-label={t("code-city:trendTimeline.ariaLabelEntries")}
+                className="mt-3 space-y-2"
+            >
                 {props.entries.map((entry): ReactElement => {
                     const isActive = props.activeEntryId === entry.id
                     return (
                         <li key={entry.id}>
                             <button
-                                aria-label={t("code-city:trendTimeline.ariaLabelInspect", { sprintLabel: entry.sprintLabel })}
+                                aria-label={t("code-city:trendTimeline.ariaLabelInspect", {
+                                    sprintLabel: entry.sprintLabel,
+                                })}
                                 className={resolveEntryClassName(isActive)}
                                 onClick={(): void => {
                                     props.onSelectEntry?.(entry)

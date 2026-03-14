@@ -183,12 +183,17 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
                 {t("code-city:trendForecast.forecastZoneNote")}
             </p>
 
-            <div aria-label={t("code-city:trendForecast.ariaLabelPoints")} className="mt-3 space-y-1">
+            <div
+                aria-label={t("code-city:trendForecast.ariaLabelPoints")}
+                className="mt-3 space-y-1"
+            >
                 {props.points.map((point): ReactElement => {
                     const isActive = point.id === props.activePointId
                     return (
                         <button
-                            aria-label={t("code-city:trendForecast.ariaLabelInspect", { timestamp: point.timestamp })}
+                            aria-label={t("code-city:trendForecast.ariaLabelInspect", {
+                                timestamp: point.timestamp,
+                            })}
                             className={`w-full rounded border px-2 py-1 text-left text-xs transition ${
                                 isActive
                                     ? "border-primary bg-primary/10 text-on-primary"
@@ -200,7 +205,13 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
                             }}
                             type="button"
                         >
-                            {t("code-city:trendForecast.pointText", { timestamp: point.timestamp, historical: String(point.historicalScore), forecast: String(point.forecastScore), low: String(point.confidenceLow), high: String(point.confidenceHigh) })}
+                            {t("code-city:trendForecast.pointText", {
+                                timestamp: point.timestamp,
+                                historical: String(point.historicalScore),
+                                forecast: String(point.forecastScore),
+                                low: String(point.confidenceLow),
+                                high: String(point.confidenceHigh),
+                            })}
                         </button>
                     )
                 })}
