@@ -3,7 +3,6 @@ import { motion } from "motion/react"
 import { AlertTriangle, ChevronRight } from "lucide-react"
 
 import {
-    Alert,
     Card,
     CardBody,
     CardHeader,
