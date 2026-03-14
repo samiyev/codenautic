@@ -90,7 +90,7 @@ export function ChatThreadList(props: IChatThreadListProps): ReactElement {
         <aside aria-label="Chat threads" className="h-full min-w-0 bg-surface-muted p-3">
             <div className="mb-3 flex items-center justify-between gap-2">
                 <h3 className="text-sm font-semibold">Threads</h3>
-                <Button onPress={props.onNewThread} size="sm">
+                <Button color="primary" onPress={props.onNewThread} size="sm">
                     + New thread
                 </Button>
             </div>
