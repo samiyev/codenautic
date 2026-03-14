@@ -40,9 +40,7 @@ export function AuthenticatedShell(props: IAuthenticatedShellProps): ReactElemen
             <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 pt-6">
                 <div>
                     <p className="text-sm text-muted-foreground">{props.appTitle}</p>
-                    <h2 className={TYPOGRAPHY.sectionTitle}>
-                        {props.userDisplayName}
-                    </h2>
+                    <h2 className={TYPOGRAPHY.sectionTitle}>{props.userDisplayName}</h2>
                     <p className="text-sm text-muted-foreground">{props.userEmail}</p>
                 </div>
                 <Button
