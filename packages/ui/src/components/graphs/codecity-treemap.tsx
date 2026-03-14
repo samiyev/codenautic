@@ -2,64 +2,82 @@ import { type KeyboardEvent, type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { useDynamicTranslation } from "@/lib/i18n"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { ResponsiveContainer, Treemap } from "recharts"
 
-const DEFAULT_HEIGHT = "420px"
-const DEFAULT_METRIC: ICodeCityTreemapMetric = "complexity"
-const DEFAULT_METRIC_SELECTOR_ID = "codecity-metric-selector"
-const DEFAULT_BUG_HEAT_SELECTOR_ID = "codecity-bug-heat-selector"
-const DEFAULT_TEMPORAL_COUPLING_OVERLAY_ENABLED = true
-const DEFAULT_BUG_HEAT_RANGE: ICodeCityBugHeatRange = "30d"
-const CODE_CITY_COMPARISON_MARKER_HEIGHT = 4
-const MAX_KEYBOARD_FILE_TAB_STOPS = 40
+import type { ICodeCityTreemapMetric, ICodeCityBugHeatRange } from "./codecity-treemap.constants"
+import {
+    CODE_CITY_BUG_HEAT_RANGE_LABEL_KEYS,
+    CODE_CITY_BUG_HEAT_RANGES,
+    CODE_CITY_COMPARISON_MARKER_HEIGHT,
+    CODE_CITY_IMPACT_COLOR,
+    CODE_CITY_IMPACT_LABEL_KEYS,
+    CODE_CITY_IMPACT_LEVELS,
+    CODE_CITY_METRICS,
+    DEFAULT_BUG_HEAT_RANGE,
+    DEFAULT_BUG_HEAT_SELECTOR_ID,
+    DEFAULT_HEIGHT,
+    DEFAULT_METRIC,
+    DEFAULT_METRIC_SELECTOR_ID,
+    DEFAULT_TEMPORAL_COUPLING_OVERLAY_ENABLED,
+    MAX_KEYBOARD_FILE_TAB_STOPS,
+} from "./codecity-treemap.constants"
+import type {
+    ICodeCityTreemapBugHeatSummary,
+    ICodeCityTreemapComparisonSummary,
+    ICodeCityTreemapFileDescriptor,
+    ICodeCityTreemapFileNode,
+    ICodeCityTreemapFileTooltip,
+    ICodeCityTreemapImpactSummary,
+    ICodeCityTreemapIssueSummary,
+    ICodeCityTreemapMetricRange,
+    ICodeCityTreemapOverlayPoint,
+    ICodeCityTreemapPackageNode,
+    ICodeCityTreemapTemporalCouplingLine,
+    ICodeCityTreemapTreemapNodePayload,
+    ICodeCityTreemapViewSummary,
+    TCodeCityTreemapPredictionRiskLevel,
+} from "./codecity-treemap.utils"
+import {
+    buildComparisonFileIndex,
+    buildFileOverlayPoints,
+    buildImpactedFileIndex,
+    buildTemporalCouplingLines,
+    formatComparisonDeltaLabel,
+    normalizePath,
+    resolveBugHeatOverlayColor,
+    resolveBugHeatRange,
+    resolveBugIntroductions,
+    resolveComparisonDeltaColor,
+    resolveComparisonSummary,
+    resolveCoverageLabel,
+    resolveFileLoc,
+    resolveFileName,
+    resolveImpactSummary,
+    resolveIssueCount,
+    resolveIssueHeatmapColor,
+    resolveLastReviewLabel,
+    resolveMetricByValue,
+    resolveMetricColor,
+    resolveMetricLabelKey,
+    resolveMetricRange,
+    resolveNumberLabel,
+    resolveOutlineStyle,
+    resolvePackageName,
+    resolveTreemapFileMetricValue,
+    resolveViewSummary,
+} from "./codecity-treemap.utils"
 
-const CODE_CITY_METRICS = ["complexity", "coverage", "churn"] as const
-const CODE_CITY_BUG_HEAT_RANGES = ["7d", "30d", "90d"] as const
-const CODE_CITY_IMPACT_LEVELS = ["changed", "impacted", "ripple"] as const
-
-/** Метрика для цветовой индикации.
- * @see WEB-CITY-002
- */
-type ICodeCityTreemapMetric = (typeof CODE_CITY_METRICS)[number]
-type ICodeCityBugHeatRange = (typeof CODE_CITY_BUG_HEAT_RANGES)[number]
-type ICodeCityTreemapImpactLevel = (typeof CODE_CITY_IMPACT_LEVELS)[number]
-export type TCodeCityTreemapPredictionRiskLevel = "low" | "medium" | "high"
-
-const CODE_CITY_METRIC_LABEL_KEYS: Record<ICodeCityTreemapMetric, string> = {
-    complexity: "code-city:treemap.metrics.complexity",
-    coverage: "code-city:treemap.metrics.coverage",
-    churn: "code-city:treemap.metrics.churn",
-}
-const CODE_CITY_BUG_HEAT_RANGE_LABEL_KEYS: Record<ICodeCityBugHeatRange, string> = {
-    "7d": "code-city:treemap.bugHeatRanges.7d",
-    "30d": "code-city:treemap.bugHeatRanges.30d",
-    "90d": "code-city:treemap.bugHeatRanges.90d",
-}
-const CODE_CITY_IMPACT_LABEL_KEYS: Record<ICodeCityTreemapImpactLevel, string> = {
-    changed: "code-city:treemap.impactLabels.changed",
-    impacted: "code-city:treemap.impactLabels.impacted",
-    ripple: "code-city:treemap.impactLabels.ripple",
-}
-const CODE_CITY_IMPACT_PRIORITIES: Record<ICodeCityTreemapImpactLevel, number> = {
-    changed: 3,
-    impacted: 2,
-    ripple: 1,
-}
-const CODE_CITY_IMPACT_COLOR: Record<ICodeCityTreemapImpactLevel, string> = {
-    changed: "hsl(348, 83%, 58%)",
-    impacted: "hsl(35, 96%, 59%)",
-    ripple: "hsl(212, 86%, 57%)",
-}
-const CODE_CITY_COMPARISON_DELTA_COLOR_GROWTH = "hsl(4, 82%, 58%)"
-const CODE_CITY_COMPARISON_DELTA_COLOR_SHRINK = "hsl(142, 69%, 47%)"
+export type { ICodeCityTreemapFileDescriptor } from "./codecity-treemap.utils"
+export type { TCodeCityTreemapPredictionRiskLevel } from "./codecity-treemap.utils"
 
 export interface ICodeCityTreemapImpactedFileDescriptor {
     /** Идентификатор файла в выборке. */
     readonly fileId: string
     /** Степень влияния CCR на файл. */
-    readonly impactType: ICodeCityTreemapImpactLevel
+    readonly impactType: (typeof CODE_CITY_IMPACT_LEVELS)[number]
 }
 
 export interface ICodeCityTreemapTemporalCouplingDescriptor {
@@ -69,100 +87,6 @@ export interface ICodeCityTreemapTemporalCouplingDescriptor {
     readonly targetFileId: string
     /** Сила связи (чем выше, тем толще линия). */
     readonly strength: number
-}
-
-interface ICodeCityTreemapImpactSummary {
-    changed: number
-    impacted: number
-    ripple: number
-}
-
-interface ICodeCityTreemapIssueSummary {
-    readonly filesWithIssues: number
-    readonly maxIssuesPerFile: number
-    readonly totalIssues: number
-}
-
-interface ICodeCityTreemapBugHeatSummary {
-    readonly filesWithBugIntroductions: number
-    readonly maxBugIntroductions: number
-    readonly totalBugIntroductions: number
-}
-
-interface ICodeCityTreemapComparisonSummary {
-    readonly addedFiles: number
-    readonly changedFiles: number
-    readonly comparedFiles: number
-    readonly comparedLoc: number
-    readonly currentLoc: number
-    readonly hasComparisonData: boolean
-    readonly removedFiles: number
-    readonly removedLoc: number
-    readonly locDelta: number
-}
-
-interface ICodeCityTreemapFileTooltip {
-    /** Ссылка на файл в quick link (если определена). */
-    readonly fileLink?: string
-    readonly complexity?: number
-    readonly coverage?: number
-    /** Изменение LOC относительно baseline-снимка. */
-    readonly comparisonDelta?: number
-    readonly fileId: string
-    readonly fileName: string
-    readonly issueCount: number
-    readonly lastReviewAt?: string
-    readonly loc: number
-    readonly path: string
-}
-
-export interface ICodeCityTreemapFileLinkResolver {
-    /** Идентификатор файла. */
-    readonly fileId: string
-    /** Отображаемое имя файла. */
-    readonly fileName: string
-    /** Полный путь к файлу. */
-    readonly path: string
-}
-
-interface ICodeCityTreemapViewSummary {
-    readonly files: number
-    readonly impactSummary: ICodeCityTreemapImpactSummary
-    readonly issueSummary: ICodeCityTreemapIssueSummary
-    readonly loc: number
-    readonly packageCount: number
-}
-
-interface ICodeCityTreemapMetricRange {
-    readonly min: number
-    readonly max: number
-}
-
-interface ICodeCityTreemapOverlayPoint {
-    readonly x: number
-    readonly y: number
-}
-
-interface ICodeCityTreemapTreemapNodePayload {
-    readonly children?: ReadonlyArray<unknown>
-    readonly complexity?: number
-    readonly color?: string
-    readonly depth?: number
-    readonly height?: number
-    readonly id?: string
-    readonly coverage?: number
-    readonly impactType?: ICodeCityTreemapImpactLevel
-    readonly issueHeatmapColor?: string
-    readonly bugHeatColor?: string
-    readonly issueCount?: number
-    readonly comparisonDelta?: number
-    readonly lastReviewAt?: string
-    readonly name?: string
-    readonly path?: string
-    readonly value?: number
-    readonly width?: number
-    readonly x?: number
-    readonly y?: number
 }
 
 interface ICodeCityTreemapTreemapContentProps {
@@ -183,520 +107,69 @@ interface ICodeCityTreemapTreemapContentProps {
     readonly height?: number
 }
 
-interface ICodeCityTreemapTemporalCouplingLine {
-    readonly id: string
-    readonly sourceFileId: string
-    readonly targetFileId: string
-    readonly sourcePoint: ICodeCityTreemapOverlayPoint
-    readonly targetPoint: ICodeCityTreemapOverlayPoint
-    readonly strength: number
+export interface ICodeCityTreemapFileLinkResolver {
+    /** Идентификатор файла. */
+    readonly fileId: string
+    /** Отображаемое имя файла. */
+    readonly fileName: string
+    /** Полный путь к файлу. */
+    readonly path: string
 }
 
-function resolveIssueCount(value?: number): number {
-    if (typeof value !== "number" || Number.isFinite(value) === false || value <= 0) {
-        return 0
-    }
-
-    return Math.floor(value)
+/** Агрегированные данные для визуализации treemap. */
+export interface ICodeCityTreemapData {
+    /** Узлы верхнего уровня (пакеты). */
+    readonly packages: ReadonlyArray<ICodeCityTreemapPackageNode>
+    /** Сумма LOC в дереве. */
+    readonly totalLoc: number
+    /** Общее число файлов в виджете. */
+    readonly totalFiles: number
+    /** Агрегированная метрика heatmap по issues. */
+    readonly issueSummary: ICodeCityTreemapIssueSummary
+    /** Агрегированная метрика heatmap по bug introductions. */
+    readonly bugHeatSummary: ICodeCityTreemapBugHeatSummary
+    /** Метрики CCR-влияния. */
+    readonly impactSummary: ICodeCityTreemapImpactSummary
+    /** Выбранная метрика цвета. */
+    readonly metric: ICodeCityTreemapMetric
+    /** Метрики сравнения по двум snapshot'ам. */
+    readonly comparisonSummary: ICodeCityTreemapComparisonSummary
+    /** Диапазон значений выбранной метрики. */
+    readonly metricRange: ICodeCityTreemapMetricRange
 }
 
-function resolveBugIntroductions(value: number | undefined): number {
-    if (typeof value !== "number" || Number.isFinite(value) === false || value <= 0) {
-        return 0
-    }
-
-    return Math.floor(value)
-}
-
-function formatComparisonDeltaLabel(value: number | undefined): string {
-    if (typeof value !== "number" || Number.isFinite(value) === false) {
-        return "—"
-    }
-
-    if (value > 0) {
-        return `+${String(value)}`
-    }
-
-    if (value < 0) {
-        return String(value)
-    }
-
-    return "0"
-}
-
-function resolveComparisonDeltaColor(delta: number | undefined): string | undefined {
-    if (typeof delta !== "number" || Number.isNaN(delta) === true || delta === 0) {
-        return undefined
-    }
-
-    return delta > 0
-        ? CODE_CITY_COMPARISON_DELTA_COLOR_GROWTH
-        : CODE_CITY_COMPARISON_DELTA_COLOR_SHRINK
-}
-
-function resolveIssueHeatmapColor(issueCount: number, maxIssueCount: number): string | undefined {
-    if (issueCount <= 0 || maxIssueCount <= 0) {
-        return undefined
-    }
-
-    const ratio = Math.max(0, Math.min(1, issueCount / maxIssueCount))
-    const hue = Math.round(120 - ratio * 120)
-
-    return `hsla(${hue}, 86%, 52%, 0.45)`
-}
-
-function resolveBugHeatOverlayColor(
-    bugIntroductions: number,
-    maxBugIntroductions: number,
-): string | undefined {
-    if (bugIntroductions <= 0 || maxBugIntroductions <= 0) {
-        return undefined
-    }
-
-    const ratio = Math.max(0, Math.min(1, bugIntroductions / maxBugIntroductions))
-    const hue = Math.round(48 - ratio * 48)
-
-    return `hsla(${hue}, 94%, 56%, 0.48)`
-}
-
-function resolveLastReviewLabel(lastReviewAt: string | undefined): string {
-    if (typeof lastReviewAt !== "string") {
-        return "—"
-    }
-
-    const date = new Date(lastReviewAt)
-    if (Number.isNaN(date.getTime()) === true) {
-        return "—"
-    }
-
-    return date.toLocaleDateString([], {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    })
-}
-
-function resolveCoverageLabel(coverage: number | undefined): string {
-    if (typeof coverage !== "number" || Number.isNaN(coverage)) {
-        return "—"
-    }
-
-    const normalizedCoverage = Math.max(0, Math.min(100, coverage))
-
-    return `${Math.round(normalizedCoverage * 10) / 10}%`
-}
-
-function resolveNumberLabel(value: number | undefined): string {
-    if (typeof value !== "number" || Number.isNaN(value) || value < 0) {
-        return "—"
-    }
-
-    if (Number.isInteger(value) === true) {
-        return String(value)
-    }
-
-    return String(Math.round(value * 10) / 10)
-}
-
-function resolveTemporalCouplingStrength(value: number): number {
-    if (Number.isFinite(value) === false || value <= 0) {
-        return 0
-    }
-
-    return Math.max(0, value)
-}
-
-function buildFileOverlayPoints(
-    packages: ReadonlyArray<ICodeCityTreemapPackageNode>,
-): Map<string, ICodeCityTreemapOverlayPoint> {
-    const files = packages.flatMap(
-        (packageNode): ReadonlyArray<ICodeCityTreemapFileNode> => packageNode.children,
-    )
-    const pointByFileId = new Map<string, ICodeCityTreemapOverlayPoint>()
-    if (files.length === 0) {
-        return pointByFileId
-    }
-
-    const columns = Math.min(4, files.length)
-    const rows = Math.max(1, Math.ceil(files.length / columns))
-
-    for (const [index, file] of files.entries()) {
-        const column = index % columns
-        const row = Math.floor(index / columns)
-        const x = ((column + 0.5) / columns) * 100
-        const y = ((row + 0.5) / rows) * 100
-        pointByFileId.set(file.id, { x, y })
-    }
-
-    return pointByFileId
-}
-
-function buildTemporalCouplingLines(
-    couplings: ReadonlyArray<ICodeCityTreemapTemporalCouplingDescriptor>,
-    pointByFileId: Map<string, ICodeCityTreemapOverlayPoint>,
-): ReadonlyArray<ICodeCityTreemapTemporalCouplingLine> {
-    if (couplings.length === 0 || pointByFileId.size === 0) {
-        return []
-    }
-
-    const lines: ICodeCityTreemapTemporalCouplingLine[] = []
-    const processedEdges = new Set<string>()
-    let maxStrength = 0
-
-    for (const coupling of couplings) {
-        const sourceId = coupling.sourceFileId.trim()
-        const targetId = coupling.targetFileId.trim()
-        if (sourceId.length === 0 || targetId.length === 0 || sourceId === targetId) {
-            continue
-        }
-
-        const edgeKey = `${sourceId}::${targetId}`
-        if (processedEdges.has(edgeKey) === true) {
-            continue
-        }
-
-        const sourcePoint = pointByFileId.get(sourceId)
-        const targetPoint = pointByFileId.get(targetId)
-        if (sourcePoint === undefined || targetPoint === undefined) {
-            continue
-        }
-
-        const strength = resolveTemporalCouplingStrength(coupling.strength)
-        if (strength <= 0) {
-            continue
-        }
-
-        if (strength > maxStrength) {
-            maxStrength = strength
-        }
-
-        processedEdges.add(edgeKey)
-        lines.push({
-            id: edgeKey,
-            sourceFileId: sourceId,
-            targetFileId: targetId,
-            sourcePoint,
-            targetPoint,
-            strength,
-        })
-    }
-
-    if (maxStrength <= 0) {
-        return []
-    }
-
-    return lines.map(
-        (line): ICodeCityTreemapTemporalCouplingLine => ({
-            ...line,
-            strength: line.strength / maxStrength,
-        }),
-    )
-}
-
-function buildImpactedFileIndex(
-    impactedFiles: ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor>,
-): Map<string, ICodeCityTreemapImpactLevel> {
-    const impactByFileId = new Map<string, ICodeCityTreemapImpactLevel>()
-
-    for (const entry of impactedFiles) {
-        if (entry.fileId.trim().length === 0) {
-            continue
-        }
-
-        const currentImpact = impactByFileId.get(entry.fileId)
-        if (
-            currentImpact === undefined ||
-            CODE_CITY_IMPACT_PRIORITIES[entry.impactType] >
-                CODE_CITY_IMPACT_PRIORITIES[currentImpact]
-        ) {
-            impactByFileId.set(entry.fileId, entry.impactType)
-        }
-    }
-
-    return impactByFileId
-}
-
-function buildComparisonFileIndex(
-    files: ReadonlyArray<ICodeCityTreemapFileDescriptor>,
-): Map<string, ICodeCityTreemapFileDescriptor> {
-    const compareByFileId = new Map<string, ICodeCityTreemapFileDescriptor>()
-
-    for (const file of files) {
-        const fileId = file.id.trim()
-        if (fileId.length === 0) {
-            continue
-        }
-
-        const normalizedPath = normalizePath(file.path)
-        if (normalizedPath.length === 0) {
-            continue
-        }
-
-        if (compareByFileId.has(fileId) === true) {
-            continue
-        }
-
-        compareByFileId.set(fileId, {
-            ...file,
-            id: fileId,
-            path: normalizedPath,
-        })
-    }
-
-    return compareByFileId
-}
-
-function resolveComparisonSummary(
-    currentFiles: ReadonlyArray<ICodeCityTreemapFileNode>,
-    comparisonFilesById: Map<string, ICodeCityTreemapFileDescriptor>,
-): ICodeCityTreemapComparisonSummary {
-    const comparisonFileIds = new Set<string>(comparisonFilesById.keys())
-    const currentFileIds = new Set<string>(currentFiles.map((file): string => file.id))
-    let addedFiles = 0
-    let changedFiles = 0
-    let currentLoc = 0
-    let comparedLoc = 0
-    let removedFiles = 0
-    let removedLoc = 0
-
-    for (const file of currentFiles) {
-        currentLoc += file.value
-        if (
-            comparisonFileIds.has(file.id) &&
-            file.comparisonDelta !== undefined &&
-            file.comparisonDelta !== 0
-        ) {
-            changedFiles += 1
-        }
-        if (comparisonFileIds.has(file.id) === false) {
-            addedFiles += 1
-        }
-    }
-
-    for (const file of comparisonFilesById.values()) {
-        const fileId = file.id.trim()
-        if (fileId.length === 0) {
-            continue
-        }
-
-        const fileLoc = resolveFileLoc(file)
-        comparedLoc += fileLoc
-        if (currentFileIds.has(fileId) === false) {
-            removedFiles += 1
-            removedLoc += fileLoc
-        }
-    }
-
-    return {
-        addedFiles,
-        changedFiles,
-        comparedFiles: comparisonFileIds.size,
-        comparedLoc,
-        currentLoc,
-        hasComparisonData: comparisonFileIds.size > 0,
-        removedFiles: removedFiles,
-        removedLoc,
-        locDelta: currentLoc - comparedLoc,
-    }
-}
-
-function resolveImpactSummary(
-    packages: ReadonlyArray<ICodeCityTreemapPackageNode>,
-): ICodeCityTreemapImpactSummary {
-    const summary: ICodeCityTreemapImpactSummary = {
-        changed: 0,
-        impacted: 0,
-        ripple: 0,
-    }
-
-    for (const packageItem of packages) {
-        for (const file of packageItem.children) {
-            if (file.impactType === "changed") {
-                summary.changed += 1
-            } else if (file.impactType === "impacted") {
-                summary.impacted += 1
-            } else if (file.impactType === "ripple") {
-                summary.ripple += 1
-            }
-        }
-    }
-
-    return summary
-}
-
-function resolveImpactStyle(props: ICodeCityTreemapTreemapContentProps): {
-    readonly stroke: string
-    readonly strokeWidth: number
-    readonly strokeDasharray?: string
-} {
-    const node = props.payload
-    if (node?.impactType === "changed") {
-        return { stroke: CODE_CITY_IMPACT_COLOR.changed, strokeWidth: 2.5 }
-    }
-    if (node?.impactType === "impacted") {
-        return { stroke: CODE_CITY_IMPACT_COLOR.impacted, strokeWidth: 2.2 }
-    }
-    if (node?.impactType === "ripple") {
-        return {
-            stroke: CODE_CITY_IMPACT_COLOR.ripple,
-            strokeWidth: 2,
-            strokeDasharray: "5 3",
-        }
-    }
-
-    return {
-        stroke: "hsl(var(--nextui-colors-defaultBorder))",
-        strokeWidth: 1,
-    }
-}
-
-function resolvePredictionStyle(
-    riskLevel: TCodeCityTreemapPredictionRiskLevel | undefined,
-):
-    | { readonly stroke: string; readonly strokeWidth: number; readonly strokeDasharray?: string }
-    | undefined {
-    if (riskLevel === "high") {
-        return {
-            stroke: "hsl(348, 83%, 58%)",
-            strokeWidth: 2.8,
-            strokeDasharray: "6 3",
-        }
-    }
-    if (riskLevel === "medium") {
-        return {
-            stroke: "hsl(35, 96%, 59%)",
-            strokeWidth: 2.4,
-        }
-    }
-    if (riskLevel === "low") {
-        return {
-            stroke: "hsl(212, 86%, 57%)",
-            strokeWidth: 2,
-        }
-    }
-    return undefined
-}
-
-function resolveOutlineStyle(
-    props: ICodeCityTreemapTreemapContentProps,
-    predictionRiskLevel: TCodeCityTreemapPredictionRiskLevel | undefined,
-): { readonly stroke: string; readonly strokeWidth: number; readonly strokeDasharray?: string } {
-    const predictionStyle = resolvePredictionStyle(predictionRiskLevel)
-    if (predictionStyle !== undefined) {
-        return predictionStyle
-    }
-    return resolveImpactStyle(props)
-}
-
-function resolveMetricByValue(value: string): ICodeCityTreemapMetric {
-    if (value === "coverage" || value === "churn") {
-        return value
-    }
-
-    return "complexity"
-}
-
-function resolveBugHeatRange(value: string): ICodeCityBugHeatRange {
-    if (value === "7d" || value === "90d") {
-        return value
-    }
-
-    return "30d"
-}
-
-function resolveMetricRange(values: ReadonlyArray<number>): ICodeCityTreemapMetricRange {
-    if (values.length === 0) {
-        return { max: 0, min: 0 }
-    }
-
-    let min = values[0] ?? 0
-    let max = values[0] ?? 0
-
-    for (const current of values) {
-        if (current < min) {
-            min = current
-        }
-        if (current > max) {
-            max = current
-        }
-    }
-
-    return { max, min }
-}
-
-function resolveViewSummary(
-    packages: ReadonlyArray<ICodeCityTreemapPackageNode>,
-): ICodeCityTreemapViewSummary {
-    let files = 0
-    let loc = 0
-    let totalIssues = 0
-    let filesWithIssues = 0
-    let maxIssuesPerFile = 0
-    const impactSummary = resolveImpactSummary(packages)
-
-    for (const packageItem of packages) {
-        files += packageItem.children.length
-        loc += packageItem.value
-        for (const file of packageItem.children) {
-            if (file.issueCount > maxIssuesPerFile) {
-                maxIssuesPerFile = file.issueCount
-            }
-            if (file.issueCount > 0) {
-                filesWithIssues += 1
-                totalIssues += file.issueCount
-            }
-        }
-    }
-
-    return {
-        files,
-        impactSummary,
-        issueSummary: {
-            filesWithIssues,
-            maxIssuesPerFile,
-            totalIssues,
-        },
-        loc,
-        packageCount: packages.length,
-    }
-}
-
-function resolveMetricLabelKey(metric: ICodeCityTreemapMetric): string {
-    return CODE_CITY_METRIC_LABEL_KEYS[metric]
-}
-
-function resolveMetricColor(range: ICodeCityTreemapMetricRange, value: number): string {
-    if (range.max <= range.min) {
-        return "hsl(120, 80%, 44%)"
-    }
-
-    const ratio = Math.max(0, Math.min(1, (value - range.min) / (range.max - range.min)))
-    const hue = Math.round(120 - ratio * 120)
-
-    return `hsl(${hue}, 78%, 44%)`
-}
-
-function resolveTreemapFileMetricValue(
-    file: ICodeCityTreemapFileDescriptor,
-    metric: ICodeCityTreemapMetric,
-): number {
-    const value = (() => {
-        if (metric === "coverage") {
-            return file.coverage
-        }
-
-        if (metric === "churn") {
-            return file.churn
-        }
-
-        return file.complexity
-    })()
-
-    if (typeof value !== "number" || Number.isNaN(value) || value < 0) {
-        return 0
-    }
-
-    return value
+/** Пропсы компонента treemap. */
+export interface ICodeCityTreemapProps {
+    /** Файлы для постройки 2D treemap. */
+    readonly files: ReadonlyArray<ICodeCityTreemapFileDescriptor>
+    /** Выбранная метрика по умолчанию для цветовой кодировки. */
+    readonly defaultMetric?: ICodeCityTreemapMetric
+    /** Файлы, затронутые в рамках текущего CCR. */
+    readonly impactedFiles?: ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor>
+    /** Высота контейнера. */
+    readonly height?: string
+    /** Заголовок. */
+    readonly title?: string
+    /** Ярлык baseline-среза для сравнения. */
+    readonly comparisonLabel?: string
+    /** Текст пустого состояния. */
+    readonly emptyStateLabel?: string
+    /** Файлы baseline-среза для temporal comparison. */
+    readonly compareFiles?: ReadonlyArray<ICodeCityTreemapFileDescriptor>
+    /** Генератор quick link-URL к файлу по наведению. */
+    readonly fileLink?: (file: ICodeCityTreemapFileLinkResolver) => string
+    /** Temporal coupling связи для отрисовки overlay-линий. */
+    readonly temporalCouplings?: ReadonlyArray<ICodeCityTreemapTemporalCouplingDescriptor>
+    /** Идентификатор файла для визуальной подсветки в treemap. */
+    readonly highlightedFileId?: string
+    /** Обработчик выбора файла по клику в treemap. */
+    readonly onFileSelect?: (fileId: string) => void
+    /** Принудительная раскраска зданий по file id (например ownership overlay). */
+    readonly fileColorById?: Readonly<Record<string, string>>
+    /** Принудительная обводка зданий по file id для prediction overlays. */
+    readonly predictedRiskByFileId?: Readonly<Record<string, TCodeCityTreemapPredictionRiskLevel>>
+    /** Принудительная раскраска district/package по package name (например bus factor). */
+    readonly packageColorByName?: Readonly<Record<string, string>>
 }
 
 function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactElement {
@@ -719,7 +192,7 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
     const filePath = typeof node?.path === "string" && node.path.length > 0 ? node.path : nodeName
     const predictedRiskLevel =
         isLeaf === false ? undefined : props.predictedRiskByFileId?.get(fileId)
-    const strokeStyle = resolveOutlineStyle(props, predictedRiskLevel)
+    const strokeStyle = resolveOutlineStyle(node?.impactType, predictedRiskLevel)
     const isHighlightedFile = isLeaf && props.highlightedFileId === fileId
     const isKeyboardTabStop = isPackage || (isLeaf === true && props.enableLeafTabStops === true)
 
@@ -786,7 +259,11 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
 
     return (
         <g
-            aria-label={isPackage ? (props.ariaOpenPackageLabel?.(nodeName) ?? `Open package ${nodeName}`) : (props.ariaFileLabel?.(nodeName) ?? `File ${nodeName}`)}
+            aria-label={
+                isPackage
+                    ? (props.ariaOpenPackageLabel?.(nodeName) ?? `Open package ${nodeName}`)
+                    : (props.ariaFileLabel?.(nodeName) ?? `File ${nodeName}`)
+            }
             className={isPackage === true ? "cursor-pointer" : ""}
             onBlur={isPackage === false ? handleFileMouseLeave : undefined}
             onFocus={isPackage === false ? handleFileMouseEnter : undefined}
@@ -845,167 +322,6 @@ function renderTreemapCell(props: ICodeCityTreemapTreemapContentProps): ReactEle
             ) : null}
         </g>
     )
-}
-
-/** Файл для источника CodeCity 2D treemap. */
-export interface ICodeCityTreemapFileDescriptor {
-    /** Идентификатор файла. */
-    readonly id: string
-    /** Путь к файлу. */
-    readonly path: string
-    /** LOC/строки кода. */
-    readonly loc?: number
-    /** Комплексная метрика сложности (fallback при отсутствии LOC). */
-    readonly complexity?: number
-    /** Явный уровень CCR-влияния для файла. */
-    readonly impactType?: ICodeCityTreemapImpactLevel
-    /** Покрытие по файла в проценте (0..100). */
-    readonly coverage?: number
-    /** Дата последнего ревью для tooltip блока. */
-    readonly lastReviewAt?: string
-    /** Churn/изменчивость файла в окне анализа. */
-    readonly churn?: number
-    /** Количество найденных найденных проблем для heatmap. */
-    readonly issueCount?: number
-    /** Частота bug introductions по диапазонам времени. */
-    readonly bugIntroductions?: Partial<Record<ICodeCityBugHeatRange, number>>
-    /** Общее количество строк (fallback при отсутствии LOC/complexity). */
-    readonly size?: number
-}
-
-interface ICodeCityTreemapFileNode {
-    /** Идентификатор файла. */
-    readonly id: string
-    /** Отображаемое имя файла. */
-    readonly name: string
-    /** Полный путь к файлу. */
-    readonly path: string
-    /** Количество найденных проблем в файле. */
-    readonly issueCount: number
-    /** Количество bug introductions в выбранном временном окне. */
-    readonly bugIntroductions: number
-    /** Значение веса для treemap. */
-    readonly value: number
-    /** Значение выбранной метрики для цветовой шкалы. */
-    readonly metricValue: number
-    /** Уровень CCR-влияния для узла (если применимо). */
-    readonly impactType?: ICodeCityTreemapImpactLevel
-    /** Сложность файла для tooltip блока. */
-    readonly complexity?: number
-    /** Покрытие файла для tooltip блока. */
-    readonly coverage?: number
-    /** Дата последнего ревью для tooltip блока. */
-    readonly lastReviewAt?: string
-    /** Цвет heatmap-оверлея по issue density. */
-    readonly issueHeatmapColor?: string
-    /** Цвет heatmap-оверлея по bug introductions. */
-    readonly bugHeatColor?: string
-    /** Цвет по метрике для узла. */
-    readonly color: string
-    /** Разница LOC относительно базового снимка. */
-    readonly comparisonDelta?: number
-}
-
-interface ICodeCityTreemapPackageNode {
-    /** Название пакета (группы файлов). */
-    readonly name: string
-    /** Общий вес пакета. */
-    readonly value: number
-    /** Файлы в пакете. */
-    readonly children: ReadonlyArray<ICodeCityTreemapFileNode>
-    /** Значение выбранной метрики для пакета. */
-    readonly metricValue: number
-    /** Цвет пакета. */
-    readonly color: string
-}
-
-/** Агрегированные данные для визуализации treemap. */
-export interface ICodeCityTreemapData {
-    /** Узлы верхнего уровня (пакеты). */
-    readonly packages: ReadonlyArray<ICodeCityTreemapPackageNode>
-    /** Сумма LOC в дереве. */
-    readonly totalLoc: number
-    /** Общее число файлов в виджете. */
-    readonly totalFiles: number
-    /** Агрегированная метрика heatmap по issues. */
-    readonly issueSummary: ICodeCityTreemapIssueSummary
-    /** Агрегированная метрика heatmap по bug introductions. */
-    readonly bugHeatSummary: ICodeCityTreemapBugHeatSummary
-    /** Метрики CCR-влияния. */
-    readonly impactSummary: ICodeCityTreemapImpactSummary
-    /** Выбранная метрика цвета. */
-    readonly metric: ICodeCityTreemapMetric
-    /** Метрики сравнения по двум snapshot'ам. */
-    readonly comparisonSummary: ICodeCityTreemapComparisonSummary
-    /** Диапазон значений выбранной метрики. */
-    readonly metricRange: ICodeCityTreemapMetricRange
-}
-
-/** Пропсы компонента treemap. */
-export interface ICodeCityTreemapProps {
-    /** Файлы для постройки 2D treemap. */
-    readonly files: ReadonlyArray<ICodeCityTreemapFileDescriptor>
-    /** Выбранная метрика по умолчанию для цветовой кодировки. */
-    readonly defaultMetric?: ICodeCityTreemapMetric
-    /** Файлы, затронутые в рамках текущего CCR. */
-    readonly impactedFiles?: ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor>
-    /** Высота контейнера. */
-    readonly height?: string
-    /** Заголовок. */
-    readonly title?: string
-    /** Ярлык baseline-среза для сравнения. */
-    readonly comparisonLabel?: string
-    /** Текст пустого состояния. */
-    readonly emptyStateLabel?: string
-    /** Файлы baseline-среза для temporal comparison. */
-    readonly compareFiles?: ReadonlyArray<ICodeCityTreemapFileDescriptor>
-    /** Генератор quick link-URL к файлу по наведению. */
-    readonly fileLink?: (file: ICodeCityTreemapFileLinkResolver) => string
-    /** Temporal coupling связи для отрисовки overlay-линий. */
-    readonly temporalCouplings?: ReadonlyArray<ICodeCityTreemapTemporalCouplingDescriptor>
-    /** Идентификатор файла для визуальной подсветки в treemap. */
-    readonly highlightedFileId?: string
-    /** Обработчик выбора файла по клику в treemap. */
-    readonly onFileSelect?: (fileId: string) => void
-    /** Принудительная раскраска зданий по file id (например ownership overlay). */
-    readonly fileColorById?: Readonly<Record<string, string>>
-    /** Принудительная обводка зданий по file id для prediction overlays. */
-    readonly predictedRiskByFileId?: Readonly<Record<string, TCodeCityTreemapPredictionRiskLevel>>
-    /** Принудительная раскраска district/package по package name (например bus factor). */
-    readonly packageColorByName?: Readonly<Record<string, string>>
-}
-
-function normalizePath(rawPath: string): string {
-    return rawPath.trim().replaceAll("\\", "/")
-}
-
-function resolvePackageName(filePath: string): string {
-    const normalizedPath = normalizePath(filePath)
-    const separatorIndex = normalizedPath.lastIndexOf("/")
-    if (separatorIndex <= 0) {
-        return "root"
-    }
-
-    return normalizedPath.slice(0, separatorIndex)
-}
-
-function resolveFileName(filePath: string): string {
-    const normalizedPath = normalizePath(filePath)
-    const separatorIndex = normalizedPath.lastIndexOf("/")
-    if (separatorIndex === -1) {
-        return normalizedPath
-    }
-
-    return normalizedPath.slice(separatorIndex + 1)
-}
-
-function resolveFileLoc(file: ICodeCityTreemapFileDescriptor): number {
-    const candidate = file.loc ?? file.size ?? file.complexity
-    if (typeof candidate === "number" && Number.isFinite(candidate) && candidate >= 1) {
-        return Math.floor(candidate)
-    }
-
-    return 1
 }
 
 /**
@@ -1184,7 +500,7 @@ export function buildCodeCityTreemapData(
  */
 export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     const { t } = useTranslation(["code-city"])
-    const tDynamic = t as unknown as (key: string) => string
+    const { td } = useDynamicTranslation(["code-city"])
     const title = props.title ?? t("code-city:treemap.title")
     const emptyStateLabel = props.emptyStateLabel ?? t("code-city:treemap.emptyState")
     const comparisonLabel = props.comparisonLabel ?? t("code-city:treemap.comparisonLabel")
@@ -1265,7 +581,10 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
         [fileOverlayPoints, props.temporalCouplings],
     )
     const issueSummary = summary.issueSummary
-    const issueSummaryText = t("code-city:treemap.issueSummary", { total: issueSummary.totalIssues, files: issueSummary.filesWithIssues })
+    const issueSummaryText = t("code-city:treemap.issueSummary", {
+        total: issueSummary.totalIssues,
+        files: issueSummary.filesWithIssues,
+    })
     const bugHeatSummary = treemapData.bugHeatSummary
     const hasAnyBugHeatData = props.files.some((file): boolean => {
         if (file.bugIntroductions === undefined) {
@@ -1278,9 +597,12 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     })
     const bugHeatSummaryText =
         bugHeatSummary.maxBugIntroductions > 0
-            ? t("code-city:treemap.bugIntroductions", { total: bugHeatSummary.totalBugIntroductions, files: bugHeatSummary.filesWithBugIntroductions })
+            ? t("code-city:treemap.bugIntroductions", {
+                  total: bugHeatSummary.totalBugIntroductions,
+                  files: bugHeatSummary.filesWithBugIntroductions,
+              })
             : t("code-city:treemap.noBugIntroductions")
-    const metricLabel = tDynamic(resolveMetricLabelKey(metric))
+    const metricLabel = td(resolveMetricLabelKey(metric))
     const hasIssueHeatmap = issueSummary.maxIssuesPerFile > 0
     const comparisonSummary = treemapData.comparisonSummary
     const hasComparison = comparisonSummary.hasComparisonData
@@ -1298,11 +620,21 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     const selectorId = `${DEFAULT_METRIC_SELECTOR_ID}-${title.toLowerCase().replaceAll(" ", "-")}`
     const bugHeatSelectorId = `${DEFAULT_BUG_HEAT_SELECTOR_ID}-${title.toLowerCase().replaceAll(" ", "-")}`
     const impactSummary = summary.impactSummary
-    const impactSummaryText = t("code-city:treemap.impactSummary", { changed: impactSummary.changed, impacted: impactSummary.impacted, ripple: impactSummary.ripple })
+    const impactSummaryText = t("code-city:treemap.impactSummary", {
+        changed: impactSummary.changed,
+        impacted: impactSummary.impacted,
+        ripple: impactSummary.ripple,
+    })
     const showBackButton = selectedPackage !== undefined
-    const summaryText = t("code-city:treemap.summaryText", { packages: summary.packageCount, files: summary.files, loc: summary.loc })
+    const summaryText = t("code-city:treemap.summaryText", {
+        packages: summary.packageCount,
+        files: summary.files,
+        loc: summary.loc,
+    })
     const breadcrumbText =
-        selectedPackage === undefined ? t("code-city:treemap.breadcrumbAll") : t("code-city:treemap.breadcrumbPackage", { package: selectedPackage })
+        selectedPackage === undefined
+            ? t("code-city:treemap.breadcrumbAll")
+            : t("code-city:treemap.breadcrumbPackage", { package: selectedPackage })
     const hasTemporalCouplings = temporalCouplingLines.length > 0
     const temporalCouplingToggleLabel = isTemporalCouplingOverlayEnabled
         ? t("code-city:treemap.hideTemporalCoupling")
@@ -1345,7 +677,10 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
     const handleBugHeatRangeChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
         setBugHeatRange(resolveBugHeatRange(event.currentTarget.value))
     }
-    const metricRangeText = t("code-city:treemap.metricRange", { min: treemapData.metricRange.min, max: treemapData.metricRange.max })
+    const metricRangeText = t("code-city:treemap.metricRange", {
+        min: treemapData.metricRange.min,
+        max: treemapData.metricRange.max,
+    })
 
     if (treemapData.packages.length === 0) {
         return (
@@ -1365,8 +700,12 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
             <Card aria-label={title}>
                 <CardHeader>
                     <h3 className={TYPOGRAPHY.subsectionTitle}>{title}</h3>
-                    <p className="text-sm text-foreground-500">{t("code-city:treemap.noFilesForPackage")}</p>
-                    <Button color="primary" onPress={handleResetSelection}>Back</Button>
+                    <p className="text-sm text-foreground-500">
+                        {t("code-city:treemap.noFilesForPackage")}
+                    </p>
+                    <Button color="primary" onPress={handleResetSelection}>
+                        Back
+                    </Button>
                 </CardHeader>
                 <CardBody>
                     <p>{emptyStateLabel}</p>
@@ -1392,10 +731,15 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                 <div className="flex flex-col gap-2">
                     <h3 className={TYPOGRAPHY.subsectionTitle}>{title}</h3>
                     <p className="text-sm text-foreground-500">{summaryText}</p>
-                    <p aria-label={t("code-city:treemap.ariaBreadcrumb")} className="text-xs text-foreground-500">
+                    <p
+                        aria-label={t("code-city:treemap.ariaBreadcrumb")}
+                        className="text-xs text-foreground-500"
+                    >
                         {breadcrumbText}
                     </p>
-                    <p className="text-sm text-foreground-500">{t("code-city:treemap.colorMetric", { metric: metricLabel })}</p>
+                    <p className="text-sm text-foreground-500">
+                        {t("code-city:treemap.colorMetric", { metric: metricLabel })}
+                    </p>
                     <div className="flex flex-wrap items-end gap-2">
                         {showBackButton ? (
                             <Button color="primary" onPress={handleResetSelection} size="sm">
@@ -1415,7 +759,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                             {CODE_CITY_METRICS.map(
                                 (metricName): ReactElement => (
                                     <option key={metricName} value={metricName}>
-                                        {tDynamic(resolveMetricLabelKey(metricName))}
+                                        {td(resolveMetricLabelKey(metricName))}
                                     </option>
                                 ),
                             )}
@@ -1435,7 +779,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                     {CODE_CITY_BUG_HEAT_RANGES.map(
                                         (range): ReactElement => (
                                             <option key={range} value={range}>
-                                                {tDynamic(CODE_CITY_BUG_HEAT_RANGE_LABEL_KEYS[range])}
+                                                {td(CODE_CITY_BUG_HEAT_RANGE_LABEL_KEYS[range])}
                                             </option>
                                         ),
                                     )}
@@ -1471,7 +815,11 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                         "linear-gradient(90deg, hsl(120, 80%, 44%), hsl(0, 78%, 44%))",
                                 }}
                             />
-                            <span>{t("code-city:treemap.maxIssues", { count: issueSummary.maxIssuesPerFile })}</span>
+                            <span>
+                                {t("code-city:treemap.maxIssues", {
+                                    count: issueSummary.maxIssuesPerFile,
+                                })}
+                            </span>
                             <span>{issueSummaryText}</span>
                         </div>
                     ) : null}
@@ -1480,7 +828,9 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                             aria-label={t("code-city:treemap.ariaBugHeatLegend")}
                             className="flex items-center gap-2 text-xs text-foreground-500"
                         >
-                            <span>{t("code-city:treemap.bugHeatOverlay", { range: bugHeatRange })}</span>
+                            <span>
+                                {t("code-city:treemap.bugHeatOverlay", { range: bugHeatRange })}
+                            </span>
                             <div
                                 className="h-2 flex-1 rounded-full"
                                 style={{
@@ -1488,7 +838,11 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                         "linear-gradient(90deg, hsl(48, 94%, 56%), hsl(0, 94%, 56%))",
                                 }}
                             />
-                            <span>{t("code-city:treemap.maxBugs", { count: bugHeatSummary.maxBugIntroductions })}</span>
+                            <span>
+                                {t("code-city:treemap.maxBugs", {
+                                    count: bugHeatSummary.maxBugIntroductions,
+                                })}
+                            </span>
                             <span>{bugHeatSummaryText}</span>
                         </div>
                     ) : null}
@@ -1515,7 +869,7 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                                 backgroundColor: CODE_CITY_IMPACT_COLOR[impact],
                                             }}
                                         />
-                                        <span>{tDynamic(CODE_CITY_IMPACT_LABEL_KEYS[impact])}</span>
+                                        <span>{td(CODE_CITY_IMPACT_LABEL_KEYS[impact])}</span>
                                     </div>
                                 ),
                             )}
@@ -1565,8 +919,10 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                                     highlightedFileId: props.highlightedFileId,
                                     enableLeafTabStops,
                                     predictedRiskByFileId,
-                                    ariaOpenPackageLabel: (name: string): string => t("code-city:treemap.ariaOpenPackage", { name }),
-                                    ariaFileLabel: (name: string): string => t("code-city:treemap.ariaFile", { name }),
+                                    ariaOpenPackageLabel: (name: string): string =>
+                                        t("code-city:treemap.ariaOpenPackage", { name }),
+                                    ariaFileLabel: (name: string): string =>
+                                        t("code-city:treemap.ariaFile", { name }),
                                 })
                             }}
                             onClick={(node): void => {
@@ -1610,33 +966,52 @@ export function CodeCityTreemap(props: ICodeCityTreemapProps): ReactElement {
                     {hoveredFile === undefined ? null : (
                         <div className="space-y-1 text-sm text-foreground-500">
                             <p>
-                                <span className="font-semibold">{t("code-city:treemap.tooltipFile")}</span> {hoveredFile.fileName}
+                                <span className="font-semibold">
+                                    {t("code-city:treemap.tooltipFile")}
+                                </span>{" "}
+                                {hoveredFile.fileName}
                             </p>
                             <p>
-                                <span className="font-semibold">{t("code-city:treemap.tooltipPath")}</span> {hoveredFile.path}
+                                <span className="font-semibold">
+                                    {t("code-city:treemap.tooltipPath")}
+                                </span>{" "}
+                                {hoveredFile.path}
                             </p>
                             <p>
-                                <span className="font-semibold">{t("code-city:treemap.tooltipLoc")}</span> {hoveredFile.loc}
+                                <span className="font-semibold">
+                                    {t("code-city:treemap.tooltipLoc")}
+                                </span>{" "}
+                                {hoveredFile.loc}
                             </p>
                             <p>
-                                <span className="font-semibold">{t("code-city:treemap.tooltipComplexity")}</span>{" "}
+                                <span className="font-semibold">
+                                    {t("code-city:treemap.tooltipComplexity")}
+                                </span>{" "}
                                 {resolveNumberLabel(hoveredFile.complexity)}
                             </p>
                             <p>
-                                <span className="font-semibold">{t("code-city:treemap.tooltipCoverage")}</span>{" "}
+                                <span className="font-semibold">
+                                    {t("code-city:treemap.tooltipCoverage")}
+                                </span>{" "}
                                 {resolveCoverageLabel(hoveredFile.coverage)}
                             </p>
                             <p>
-                                <span className="font-semibold">{t("code-city:treemap.tooltipLastReview")}</span>{" "}
+                                <span className="font-semibold">
+                                    {t("code-city:treemap.tooltipLastReview")}
+                                </span>{" "}
                                 {resolveLastReviewLabel(hoveredFile.lastReviewAt)}
                             </p>
                             <p>
-                                <span className="font-semibold">{t("code-city:treemap.tooltipIssueCount")}</span>{" "}
+                                <span className="font-semibold">
+                                    {t("code-city:treemap.tooltipIssueCount")}
+                                </span>{" "}
                                 {hoveredFile.issueCount}
                             </p>
                             {hoveredFile.comparisonDelta === undefined ? null : (
                                 <p>
-                                    <span className="font-semibold">{t("code-city:treemap.tooltipLocDelta")}</span>{" "}
+                                    <span className="font-semibold">
+                                        {t("code-city:treemap.tooltipLocDelta")}
+                                    </span>{" "}
                                     {formatComparisonDeltaLabel(hoveredFile.comparisonDelta)}
                                 </p>
                             )}
