@@ -2,6 +2,7 @@ import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input } from "@/components/ui"
+import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -48,15 +49,15 @@ const INITIAL_TEAMS: ReadonlyArray<ITeamState> = [
         id: "team-1",
         members: [
             {
-                email: "mila@acme.dev",
+                email: "trinity@acme.dev",
                 id: "team-1-member-1",
-                name: "Mila Davletova",
+                name: "Trinity",
                 role: "lead",
             },
             {
                 email: "oliver@acme.dev",
                 id: "team-1-member-2",
-                name: "Oliver Stone",
+                name: "Tank",
                 role: "developer",
             },
         ],
@@ -68,9 +69,9 @@ const INITIAL_TEAMS: ReadonlyArray<ITeamState> = [
         id: "team-2",
         members: [
             {
-                email: "ari@acme.dev",
+                email: "neo@acme.dev",
                 id: "team-2-member-1",
-                name: "Ari Karimov",
+                name: "Neo Anderson",
                 role: "admin",
             },
         ],
@@ -540,11 +541,10 @@ export function SettingsTeamPage(): ReactElement {
     }
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:team.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("settings:team.pageSubtitle")}
-            </p>
+        <FormLayout
+            title={t("settings:team.pageTitle")}
+            description={t("settings:team.pageSubtitle")}
+        >
             <Alert color="primary" title={t("settings:team.rbacPreviewRole", { role: activeUiRole })} variant="flat">
                 {t("settings:team.rbacDescription")}
             </Alert>
@@ -624,6 +624,6 @@ export function SettingsTeamPage(): ReactElement {
                     </div>
                 )}
             </div>
-        </section>
+        </FormLayout>
     )
 }
