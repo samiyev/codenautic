@@ -11,11 +11,11 @@ import {
     YAxis,
 } from "recharts"
 
-import { Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { Card, CardContent, CardHeader, Chip } from "@heroui/react"
 import { EmptyState } from "@/components/states/empty-state"
 import { ChartContainer } from "@/components/charts/chart-container"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
-import { CHART_GRID_DASH, CHART_STROKE_WIDTH } from "@/lib/constants/chart-constants"
+import { CHART_GRID_DASH, CHART_STROKE_WIDTH } from "@/lib/constants/chart-recharts-defaults"
 import { CHART_DATA_TRANSITION } from "@/lib/motion"
 
 interface IFlowMetricsPoint {
@@ -90,15 +90,15 @@ export function FlowMetricsWidget(props: IFlowMetricsWidgetProps): ReactElement 
             <CardHeader className="flex flex-wrap items-center justify-between gap-2 border-b border-border/30 pb-3">
                 <p className={TYPOGRAPHY.sectionTitle}>Flow metrics</p>
                 <div className="flex flex-wrap items-center gap-2">
-                    <Chip color="primary" size="sm" variant="flat">
+                    <Chip color="accent" size="sm" variant="soft">
                         {`Flow efficiency ${props.flowTrendLabel}`}
                     </Chip>
-                    <Chip color="success" size="sm" variant="flat">
+                    <Chip color="accent" size="sm" variant="soft">
                         {`Delivery capacity ${props.capacityTrendLabel}`}
                     </Chip>
                 </div>
             </CardHeader>
-            <CardBody className="space-y-2 pt-4">
+            <CardContent className="space-y-2 pt-4">
                 <p className={TYPOGRAPHY.bodyMuted}>
                     Track flow efficiency and delivery capacity dynamics across recent windows.
                 </p>
@@ -192,7 +192,7 @@ export function FlowMetricsWidget(props: IFlowMetricsWidgetProps): ReactElement 
                         </ComposedChart>
                     </ChartContainer>
                 )}
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }

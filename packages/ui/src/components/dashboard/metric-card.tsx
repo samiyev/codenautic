@@ -1,7 +1,7 @@
 import { type ReactElement } from "react"
 import { ArrowDownRight, ArrowUpRight, Minus } from "@/components/icons/app-icons"
 
-import { Card, CardBody } from "@/components/ui"
+import { Card, CardContent } from "@heroui/react"
 import { useCountUp } from "@/lib/motion"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -83,7 +83,7 @@ export function MetricCard(props: IMetricCardProps): ReactElement {
                 "hover:border-primary/30 hover:shadow-md",
             ].join(" ")}
         >
-            <CardBody className="flex flex-col justify-between gap-3 p-4">
+            <CardContent className="flex flex-col justify-between gap-3 p-4">
                 {/* Label */}
                 <p className={TYPOGRAPHY.bodyMuted}>{props.label}</p>
 
@@ -102,7 +102,7 @@ export function MetricCard(props: IMetricCardProps): ReactElement {
                 {props.caption !== undefined ? (
                     <p className={TYPOGRAPHY.caption}>{props.caption}</p>
                 ) : null}
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
