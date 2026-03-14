@@ -2,7 +2,7 @@ import { type ReactElement, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Laptop, Moon, Sun } from "@/components/icons/app-icons"
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 import { useDynamicTranslation } from "@/lib/i18n"
 import { type ThemeMode, useThemeMode } from "@/lib/theme/theme-provider"
 
@@ -67,11 +67,9 @@ export function ThemeModeToggle(props: IThemeModeToggleProps): ReactElement {
                             aria-label={option.ariaLabel}
                             aria-pressed={isSelected}
                             aria-selected={isSelected}
-                            className={`min-w-0 px-1.5 ${isSelected ? "bg-surface shadow-sm" : ""}`}
-                            isIconOnly
-                            radius="sm"
+                            className={`min-w-0 rounded-sm px-1.5 ${isSelected ? "bg-surface shadow-sm" : ""}`}
                             size="sm"
-                            variant="light"
+                            variant="ghost"
                             onPress={(): void => {
                                 setMode(option.value)
                             }}

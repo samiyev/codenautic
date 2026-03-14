@@ -2,7 +2,7 @@ import { type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Laptop, Moon, Sun } from "@/components/icons/app-icons"
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 import {
     type ThemeMode,
     type ThemePresetId,
@@ -106,11 +106,9 @@ function ThemeModeButtons({
                         aria-label={option.ariaLabel}
                         aria-pressed={isSelected}
                         aria-selected={isSelected}
-                        className="min-w-0 px-2"
-                        color="primary"
-                        radius="full"
+                        className="min-w-0 rounded-full px-2"
                         size="sm"
-                        variant={isSelected ? "solid" : "light"}
+                        variant={isSelected ? "primary" : "ghost"}
                         onPress={(): void => {
                             onModeChange(option.value)
                         }}
@@ -148,12 +146,10 @@ function ThemePresetButtons({
                         key={themePreset.id}
                         aria-label={`Set ${themePreset.label} theme preset`}
                         aria-pressed={isActive}
-                        className="min-w-0"
-                        radius="full"
+                        className="min-w-0 rounded-full"
                         size="sm"
-                        color="primary"
                         style={style}
-                        variant={isActive ? "solid" : "light"}
+                        variant={isActive ? "primary" : "ghost"}
                         onPress={(): void => {
                             onPresetChange(themePreset.id)
                         }}
