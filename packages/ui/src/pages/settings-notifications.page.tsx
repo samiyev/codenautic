@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Input, Switch } from "@/components/ui"
 import { useAuthAccess } from "@/lib/auth/auth-access"
 import { resolveDeepLinkGuard } from "@/lib/navigation/deep-link-guard"
+import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -447,12 +448,10 @@ export function SettingsNotificationsPage(): ReactElement {
     }
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:notifications.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("settings:notifications.pageSubtitle")}
-            </p>
-
+        <FormLayout
+            title={t("settings:notifications.pageTitle")}
+            description={t("settings:notifications.pageSubtitle")}
+        >
             <Card>
                 <CardHeader className="flex flex-wrap items-center justify-between gap-2">
                     <p className={TYPOGRAPHY.sectionTitle}>{t("settings:notifications.inbox")}</p>
@@ -544,7 +543,7 @@ export function SettingsNotificationsPage(): ReactElement {
                             (notification): ReactElement => (
                                 <li
                                     key={notification.id}
-                                    className="rounded-lg border border-border bg-surface p-3"
+                                    className={`rounded-lg border border-border bg-surface p-3${notification.isRead !== true ? " border-l-2 border-l-primary" : ""}`}
                                     role="listitem"
                                 >
                                     <div className="flex flex-wrap items-center gap-2">
@@ -559,7 +558,7 @@ export function SettingsNotificationsPage(): ReactElement {
                                                 handleToggleNotificationSelection(notification.id)
                                             }}
                                         />
-                                        <p className="text-sm font-semibold text-foreground">
+                                        <p className={`text-sm text-foreground${notification.isRead !== true ? " font-semibold" : ""}`}>
                                             {notification.title}
                                         </p>
                                         <Chip
@@ -779,6 +778,6 @@ export function SettingsNotificationsPage(): ReactElement {
                     )}
                 </CardBody>
             </Card>
-        </section>
+        </FormLayout>
     )
 }
