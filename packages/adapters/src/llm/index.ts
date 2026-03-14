@@ -84,6 +84,15 @@ export {
     type IOpenAIProviderErrorDetails,
 } from "./openai-provider.error"
 export {
+    GroqProvider,
+    type IGroqClient,
+    type IGroqProviderOptions,
+} from "./groq-provider"
+export {
+    GroqProviderError,
+    type IGroqProviderErrorDetails,
+} from "./groq-provider.error"
+export {
     AnthropicRequestAcl,
     AnthropicResponseAcl,
     LLM_ACL_PROVIDER,
