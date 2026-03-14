@@ -25,16 +25,12 @@ export interface IActivityTimelineItemProps {
 export function ActivityTimelineItem(props: IActivityTimelineItemProps): ReactElement {
     return (
         <li className="rounded-lg border border-border bg-surface p-3">
-            <p className={TYPOGRAPHY.overline}>
-                {props.time}
-            </p>
+            <p className={TYPOGRAPHY.overline}>{props.time}</p>
             <p className={`mt-1 ${TYPOGRAPHY.cardTitle}`}>{props.title}</p>
             <p className="mt-1 text-sm text-muted-foreground">{props.description}</p>
             {props.details === undefined ? null : (
                 <details className="mt-2">
-                    <summary className={`cursor-pointer ${TYPOGRAPHY.label}`}>
-                        View details
-                    </summary>
+                    <summary className={`cursor-pointer ${TYPOGRAPHY.label}`}>View details</summary>
                     <p className="mt-2 text-sm text-muted-foreground">{props.details}</p>
                 </details>
             )}

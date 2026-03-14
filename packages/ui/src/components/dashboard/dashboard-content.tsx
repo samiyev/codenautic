@@ -60,9 +60,7 @@ export function DashboardContent(props: IDashboardContentProps): ReactElement {
             <div className="space-y-4">
                 <Card className="border-l-2 border-l-danger">
                     <CardHeader>
-                        <h3 className={TYPOGRAPHY.subsectionTitle}>
-                            Signals & Work Queue
-                        </h3>
+                        <h3 className={TYPOGRAPHY.subsectionTitle}>Signals & Work Queue</h3>
                     </CardHeader>
                     <CardBody>
                         {hasCriticalSignals ? (
@@ -89,9 +87,7 @@ export function DashboardContent(props: IDashboardContentProps): ReactElement {
                                             className="rounded-lg border border-border bg-surface p-3 transition-colors duration-150 hover:bg-surface-muted"
                                             variants={STAGGER_ITEM_VARIANTS}
                                         >
-                                            <p className={TYPOGRAPHY.cardTitle}>
-                                                {item.title}
-                                            </p>
+                                            <p className={TYPOGRAPHY.cardTitle}>{item.title}</p>
                                             <p className="text-sm text-muted-foreground">
                                                 {item.description}
                                             </p>

@@ -71,9 +71,7 @@ export function ActivityTimeline(props: IActivityTimelineProps): ReactElement {
                     Object.entries(groupedEntries).map(
                         ([group, items]): ReactElement => (
                             <section key={group} className="space-y-2">
-                                <h3 className={`mt-2 ${TYPOGRAPHY.cardTitle}`}>
-                                    {group}
-                                </h3>
+                                <h3 className={`mt-2 ${TYPOGRAPHY.cardTitle}`}>{group}</h3>
                                 <ul className="space-y-2" aria-label={`Timeline ${group}`}>
                                     {items.map(
                                         (item): ReactElement => (
