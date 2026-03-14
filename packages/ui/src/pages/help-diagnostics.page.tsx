@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router"
 
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Textarea } from "@/components/ui"
 import { SystemStateCard } from "@/components/infrastructure/system-state-card"
+import { PageShell } from "@/components/layout/page-shell"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { useExternalContext, useFeatureFlagsQuery } from "@/lib/hooks/queries"
@@ -488,12 +489,10 @@ export function HelpDiagnosticsPage(): ReactElement {
     }
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("system:helpDiagnostics.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("system:helpDiagnostics.pageSubtitle")}
-            </p>
-
+        <PageShell
+            subtitle={t("system:helpDiagnostics.pageSubtitle")}
+            title={t("system:helpDiagnostics.pageTitle")}
+        >
             {sourceContext === "error-fallback" ? (
                 <Alert
                     color="warning"
@@ -773,6 +772,6 @@ export function HelpDiagnosticsPage(): ReactElement {
                     ) : null}
                 </CardBody>
             </Card>
-        </section>
+        </PageShell>
     )
 }
