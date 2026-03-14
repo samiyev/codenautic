@@ -7,6 +7,11 @@ import {
 } from "@heroui/react"
 
 /**
+ * Количество символов для генерации fallback-инициалов.
+ */
+const INITIALS_LENGTH = 2
+
+/**
  * Свойства Avatar с мягкой поддержкой fallback-текста.
  */
 interface IAvatarProps extends HeroUIAvatarProps {
@@ -31,7 +36,9 @@ export function Avatar(props: IAvatarProps): ReactElement {
     const resolvedName = typeof name === "string" ? name : undefined
     const fallbackSeed = fallback ?? label ?? resolvedName
     const fallbackText =
-        fallbackSeed === undefined ? undefined : fallbackSeed.slice(0, 2).toUpperCase()
+        fallbackSeed === undefined
+            ? undefined
+            : fallbackSeed.slice(0, INITIALS_LENGTH).toUpperCase()
 
     return (
         <HeroUIAvatar {...avatarProps}>
