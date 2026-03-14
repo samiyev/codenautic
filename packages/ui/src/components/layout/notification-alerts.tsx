@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import type { IProviderDegradationEventDetail } from "@/lib/providers/degradation-mode"
 import type { IShortcutConflict } from "@/lib/keyboard/shortcut-registry"
-import { Alert } from "@/components/ui"
+import { Alert } from "@heroui/react"
 import { AnimatedAlert } from "@/lib/motion"
 
 /**
@@ -33,66 +33,55 @@ export function NotificationAlerts(props: INotificationAlertsProps): ReactElemen
     return (
         <>
             <AnimatedAlert isVisible={props.shortcutConflicts.length > 0}>
-                <Alert
-                    color="warning"
-                    title={t("navigation:notifications.shortcutConflictsTitle")}
-                    variant="flat"
-                >
-                    {props.shortcutConflicts
-                        .map((conflict): string => {
-                            return `${conflict.signature}: ${conflict.ids.join(", ")}`
-                        })
-                        .join(" | ")}
+                <Alert status="warning">
+                    <Alert.Title>{t("navigation:notifications.shortcutConflictsTitle")}</Alert.Title>
+                    <Alert.Description>
+                        {props.shortcutConflicts
+                            .map((conflict): string => {
+                                return `${conflict.signature}: ${conflict.ids.join(", ")}`
+                            })
+                            .join(" | ")}
+                    </Alert.Description>
                 </Alert>
             </AnimatedAlert>
             <AnimatedAlert isVisible={props.multiTabNotice !== undefined}>
-                <Alert
-                    color="primary"
-                    title={t("navigation:notifications.multiTabSyncTitle")}
-                    variant="flat"
-                >
-                    {props.multiTabNotice}
+                <Alert status="accent">
+                    <Alert.Title>{t("navigation:notifications.multiTabSyncTitle")}</Alert.Title>
+                    <Alert.Description>{props.multiTabNotice}</Alert.Description>
                 </Alert>
             </AnimatedAlert>
             <AnimatedAlert isVisible={props.providerDegradation !== undefined}>
                 {props.providerDegradation !== undefined ? (
-                    <Alert
-                        color="danger"
-                        title={t("navigation:notifications.providerDegradationTitle")}
-                        variant="flat"
-                    >
-                        {t("navigation:notifications.providerDegradationMessage", {
-                            provider: props.providerDegradation.provider,
-                            features: props.providerDegradation.affectedFeatures.join(", "),
-                            eta: props.providerDegradation.eta,
-                        })}{" "}
-                        <a
-                            className="underline underline-offset-4"
-                            href={props.providerDegradation.runbookUrl}
-                            rel="noreferrer"
-                            target="_blank"
-                        >
-                            {t("navigation:notifications.openRunbook")}
-                        </a>
+                    <Alert status="danger">
+                        <Alert.Title>{t("navigation:notifications.providerDegradationTitle")}</Alert.Title>
+                        <Alert.Description>
+                            {t("navigation:notifications.providerDegradationMessage", {
+                                provider: props.providerDegradation.provider,
+                                features: props.providerDegradation.affectedFeatures.join(", "),
+                                eta: props.providerDegradation.eta,
+                            })}{" "}
+                            <a
+                                className="underline underline-offset-4"
+                                href={props.providerDegradation.runbookUrl}
+                                rel="noreferrer"
+                                target="_blank"
+                            >
+                                {t("navigation:notifications.openRunbook")}
+                            </a>
+                        </Alert.Description>
                     </Alert>
                 ) : null}
             </AnimatedAlert>
             <AnimatedAlert isVisible={props.policyDriftNotice !== undefined}>
-                <Alert
-                    color="warning"
-                    title={t("navigation:notifications.policyDriftTitle")}
-                    variant="flat"
-                >
-                    {props.policyDriftNotice}
+                <Alert status="warning">
+                    <Alert.Title>{t("navigation:notifications.policyDriftTitle")}</Alert.Title>
+                    <Alert.Description>{props.policyDriftNotice}</Alert.Description>
                 </Alert>
             </AnimatedAlert>
             <AnimatedAlert isVisible={props.restoredDraftMessage !== undefined}>
-                <Alert
-                    color="success"
-                    title={t("navigation:notifications.sessionRecoveredTitle")}
-                    variant="flat"
-                >
-                    {props.restoredDraftMessage}
+                <Alert status="success">
+                    <Alert.Title>{t("navigation:notifications.sessionRecoveredTitle")}</Alert.Title>
+                    <Alert.Description>{props.restoredDraftMessage}</Alert.Description>
                 </Alert>
             </AnimatedAlert>
         </>
