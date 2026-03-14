@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, Chip } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
@@ -36,7 +36,7 @@ export function GitProviderCard(props: IGitProviderCardProps): ReactElement {
             <CardHeader>
                 <h3 className={TYPOGRAPHY.subsectionTitle}>{props.provider}</h3>
             </CardHeader>
-            <CardBody>
+            <CardContent>
                 <div className="flex flex-col gap-2">
                     <p className="text-sm text-muted-foreground">
                         {props.connected
@@ -50,18 +50,17 @@ export function GitProviderCard(props: IGitProviderCardProps): ReactElement {
                             {t("settings:gitProviderCard.lastSync", { date: props.lastSyncAt })}
                         </p>
                     )}
-                    <Chip color={props.connected ? "success" : "default"} size="sm">
+                    <Chip color={props.connected ? "accent" : undefined} size="sm">
                         {props.connected
                             ? t("settings:gitProviderCard.statusConnected")
                             : t("settings:gitProviderCard.statusDisconnected")}
                     </Chip>
                     <Button
                         className="w-full"
-                        color="primary"
-                        isLoading={props.isLoading === true}
+                        isDisabled={props.isLoading === true || props.onAction === undefined}
+                        aria-busy={props.isLoading === true}
                         size="sm"
-                        variant={props.connected ? "bordered" : "solid"}
-                        isDisabled={props.onAction === undefined}
+                        variant={props.connected ? "outline" : "primary"}
                         onPress={(): void => {
                             if (props.onAction === undefined) {
                                 return
@@ -75,7 +74,7 @@ export function GitProviderCard(props: IGitProviderCardProps): ReactElement {
                             : t("settings:gitProviderCard.connect")}
                     </Button>
                 </div>
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }

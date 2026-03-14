@@ -1,7 +1,7 @@
-import { type FormEvent, type ReactElement, useEffect, useMemo, useState } from "react"
+import { type ChangeEvent, type FormEvent, type ReactElement, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button, Textarea } from "@/components/ui"
+import { Button, TextArea } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { sanitizeTextInput } from "@/lib/validation/schema-validation"
 
@@ -61,13 +61,13 @@ export function IgnorePatternEditor(props: IIgnorePatternEditorProps): ReactElem
             <label className={TYPOGRAPHY.label} htmlFor={textareaId}>
                 {t("settings:ignorePatternEditor.label")}
             </label>
-            <Textarea
+            <TextArea
                 aria-label={t("settings:ignorePatternEditor.label")}
                 id={textareaId}
                 rows={6}
                 value={rawValue}
-                onValueChange={(value: string): void => {
-                    setRawValue(value)
+                onChange={(event: ChangeEvent<HTMLTextAreaElement>): void => {
+                    setRawValue(event.target.value)
                 }}
             />
             <div className="flex items-center justify-between gap-3">
@@ -80,7 +80,7 @@ export function IgnorePatternEditor(props: IIgnorePatternEditorProps): ReactElem
                     })}
                 </p>
             </div>
-            <Button color="primary" type="submit" variant="solid">
+            <Button variant="primary" type="submit">
                 {t("settings:ignorePatternEditor.saveIgnorePatterns")}
             </Button>
         </form>
