@@ -21,6 +21,10 @@ import {
     JavaSourceCodeParser,
 } from "./java-source-code-parser"
 import {
+    assertRustParserLanguage,
+    RustSourceCodeParser,
+} from "./rust-source-code-parser"
+import {
     assertTypeScriptParserLanguage,
     TypeScriptSourceCodeParser,
 } from "./typescript-source-code-parser"
@@ -115,6 +119,11 @@ const DEFAULT_AST_PARSER_CREATORS: Readonly<
     [AST_LANGUAGE.JAVA](): ISourceCodeParser {
         return new JavaSourceCodeParser({
             language: assertJavaParserLanguage(AST_LANGUAGE.JAVA),
+        })
+    },
+    [AST_LANGUAGE.RUST](): ISourceCodeParser {
+        return new RustSourceCodeParser({
+            language: assertRustParserLanguage(AST_LANGUAGE.RUST),
         })
     },
 }

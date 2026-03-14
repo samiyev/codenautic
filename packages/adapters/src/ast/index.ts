@@ -116,6 +116,12 @@ export {
     type JavaParserLanguage,
 } from "./java-source-code-parser"
 export {
+    assertRustParserLanguage,
+    RustSourceCodeParser,
+    type IRustSourceCodeParserOptions,
+    type RustParserLanguage,
+} from "./rust-source-code-parser"
+export {
     assertJavaScriptParserLanguage,
     JavaScriptSourceCodeParser,
     type IJavaScriptSourceCodeParserOptions,

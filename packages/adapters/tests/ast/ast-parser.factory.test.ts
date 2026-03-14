@@ -11,6 +11,7 @@ import {
     JavaSourceCodeParser,
     JavaScriptSourceCodeParser,
     PythonSourceCodeParser,
+    RustSourceCodeParser,
     TypeScriptSourceCodeParser,
     normalizeAstParserLanguage,
 } from "../../src/ast"
@@ -84,24 +85,28 @@ describe("AstParserFactory", () => {
         const pythonParser = factory.create("py")
         const goParser = factory.create("go")
         const javaParser = factory.create("java")
+        const rustParser = factory.create("rs")
 
         expect(typescriptParser).toBe(typescriptParserByCanonicalName)
         expect(javascriptParser).toBe(factory.create("javascript"))
         expect(pythonParser).toBe(factory.create("python"))
         expect(goParser).toBe(factory.create("golang"))
         expect(javaParser).toBe(factory.create("java"))
+        expect(rustParser).toBe(factory.create("rust"))
         expect(typescriptParser).not.toBe(javascriptParser)
         expect(pythonParser).not.toBe(typescriptParser)
         expect(goParser).not.toBe(pythonParser)
         expect(javaParser).not.toBe(goParser)
+        expect(rustParser).not.toBe(javaParser)
         expect(typescriptParser).toBeInstanceOf(TypeScriptSourceCodeParser)
         expect(javascriptParser).toBeInstanceOf(JavaScriptSourceCodeParser)
         expect(pythonParser).toBeInstanceOf(PythonSourceCodeParser)
         expect(goParser).toBeInstanceOf(GoSourceCodeParser)
         expect(javaParser).toBeInstanceOf(JavaSourceCodeParser)
+        expect(rustParser).toBeInstanceOf(RustSourceCodeParser)
     })
 
-    test("creates typescript, tsx, javascript, jsx, python, go and java parsers", async () => {
+    test("creates typescript, tsx, javascript, jsx, python, go, java and rust parsers", async () => {
         const factory = new AstParserFactory()
         const typescriptResult = await factory.create("typescript").parse({
             filePath: "src/parser.ts",
@@ -131,6 +136,10 @@ describe("AstParserFactory", () => {
             filePath: "src/Parser.java",
             content: "class Parser { void run() { System.out.println(\"ok\"); } }",
         })
+        const rustResult = await factory.create("rust").parse({
+            filePath: "src/parser.rs",
+            content: "struct Parser; fn run() { Parser::run(); }",
+        })
 
         expect(typescriptResult.language).toBe(AST_LANGUAGE.TYPESCRIPT)
         expect(typescriptResult.hasSyntaxErrors).toBe(false)
@@ -146,6 +155,8 @@ describe("AstParserFactory", () => {
         expect(goResult.hasSyntaxErrors).toBe(false)
         expect(javaResult.language).toBe(AST_LANGUAGE.JAVA)
         expect(javaResult.hasSyntaxErrors).toBe(false)
+        expect(rustResult.language).toBe(AST_LANGUAGE.RUST)
+        expect(rustResult.hasSyntaxErrors).toBe(false)
     })
 
     test("throws typed error for unknown language", () => {
@@ -165,12 +176,12 @@ describe("AstParserFactory", () => {
         const factory = new AstParserFactory()
 
         expectAstParserFactoryError(
-            () => factory.create("csharp"),
+            () => factory.create("php"),
             AST_PARSER_FACTORY_ERROR_CODE.LANGUAGE_NOT_SUPPORTED,
-            "csharp",
+            "php",
         )
-        expect(() => factory.create("csharp")).toThrow(
-            "AST parser is not supported for language: csharp",
+        expect(() => factory.create("php")).toThrow(
+            "AST parser is not supported for language: php",
         )
     })
 
