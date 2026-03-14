@@ -481,12 +481,29 @@
         "activeLabel": "Активен",
         "rotateKey": "Ротировать ключ {{label}}",
         "removeKey": "Удалить ключ {{label}}",
+        "providerOpenai": "OpenAI",
+        "providerAnthropic": "Anthropic",
+        "providerGithub": "GitHub",
+        "providerGitlab": "GitLab",
         "toast": {
             "keyLabelTooShort": "Метка ключа должна содержать минимум 3 символа.",
             "apiKeyTooShort": "API ключ должен содержать минимум 12 символов.",
             "keyAdded": "BYOK ключ \"{{label}}\" добавлен.",
             "keyRotated": "Ключ успешно ротирован.",
             "keyRemoved": "BYOK ключ удалён."
+        }
+    },
+    "contractValidation": {
+        "drift": {
+            "allSeverities": "Все уровни",
+            "critical": "Критический",
+            "high": "Высокий",
+            "medium": "Средний",
+            "low": "Низкий",
+            "severityDesc": "Серьёзность: от высокого к низкому",
+            "severityAsc": "Серьёзность: от низкого к высокому",
+            "filesDesc": "Затронутые файлы: от большего к меньшему",
+            "filesAsc": "Затронутые файлы: от меньшего к большему"
         }
     },
     "tokenUsage": {

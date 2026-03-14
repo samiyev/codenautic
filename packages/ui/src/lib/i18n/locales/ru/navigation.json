@@ -175,6 +175,9 @@
         "workspaceSwitcher": "Переключение рабочего пространства",
         "notifications": "Уведомления ({{count}})"
     },
+    "sessionRecovery": {
+        "title": "Сессия истекла"
+    },
     "notifications": {
         "shortcutConflictsTitle": "Обнаружены конфликты клавиатурных сочетаний",
         "multiTabSyncTitle": "Синхронизация вкладок применена",

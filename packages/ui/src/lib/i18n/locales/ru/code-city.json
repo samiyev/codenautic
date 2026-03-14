@@ -17,6 +17,11 @@
         "impactGraphView": "Граф воздействия",
         "whatIfPanel": "Панель «Что если»"
     },
+    "riskGauge": {
+        "green": "Зелёная",
+        "yellow": "Жёлтая",
+        "red": "Красная"
+    },
     "comparison": {
         "predictionComparisonView": "Сравнение предсказаний",
         "sprintComparisonView": "Сравнение спринтов",
