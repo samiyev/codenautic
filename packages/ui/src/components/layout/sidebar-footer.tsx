@@ -105,12 +105,12 @@ export function SidebarFooter(props: ISidebarFooterProps): ReactElement {
                     )}
                 </DropdownTrigger>
                 <DropdownMenu aria-label={displayName}>
-                    <DropdownItem key="identity" isReadOnly className="opacity-100">
+                    <DropdownItem key="identity" className="pointer-events-none opacity-100">
                         <p className={TYPOGRAPHY.cardTitle}>{displayName}</p>
                         <p className="text-xs text-text-subtle">{displayEmail}</p>
                     </DropdownItem>
                     {props.organizations !== undefined && props.organizations.length > 1 ? (
-                        <DropdownItem key="org-separator" isReadOnly className="opacity-60">
+                        <DropdownItem key="org-separator" className="pointer-events-none opacity-60">
                             <p className="text-[10px] font-semibold uppercase tracking-wider text-text-subtle">
                                 {t("navigation:userMenu.workspace")}
                             </p>
