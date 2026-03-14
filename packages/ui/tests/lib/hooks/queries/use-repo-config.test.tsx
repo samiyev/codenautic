@@ -65,6 +65,67 @@ async function saveConfig(
     setStatus(`saved:${response.config.reviewMode}`)
 }
 
+function DisabledRepoConfigProbe(): ReactElement {
+    const hook = useRepoConfig({
+        repositoryId: "repo-1",
+        enabled: false,
+    })
+
+    return (
+        <div>
+            <p data-testid="config-pending">{String(hook.repoConfigQuery.isPending)}</p>
+            <p data-testid="config-fetched">{String(hook.repoConfigQuery.isFetched)}</p>
+        </div>
+    )
+}
+
+function EmptyRepoConfigProbe(): ReactElement {
+    const hook = useRepoConfig({
+        repositoryId: "   ",
+    })
+
+    return (
+        <div>
+            <p data-testid="config-pending">{String(hook.repoConfigQuery.isPending)}</p>
+            <p data-testid="config-fetched">{String(hook.repoConfigQuery.isFetched)}</p>
+        </div>
+    )
+}
+
+function SaveErrorRepoConfigProbe(): ReactElement {
+    const hook = useRepoConfig({
+        repositoryId: "repo-1",
+    })
+    const [saveStatus, setSaveStatus] = useState<string>("idle")
+
+    return (
+        <div>
+            <RepoConfigState {...hook} />
+            <p data-testid="save-status">{saveStatus}</p>
+            <button
+                data-testid="save-config"
+                disabled={hook.saveRepoConfig.isPending}
+                onClick={(): void => {
+                    void hook.saveRepoConfig
+                        .mutateAsync({
+                            repositoryId: "repo-1",
+                            reviewMode: "AUTO",
+                        })
+                        .then((response): void => {
+                            setSaveStatus(`saved:${response.config.reviewMode}`)
+                        })
+                        .catch((): void => {
+                            setSaveStatus("save-error")
+                        })
+                }}
+                type="button"
+            >
+                Save config
+            </button>
+        </div>
+    )
+}
+
 describe("useRepoConfig", (): void => {
     it("загружает repo config по repositoryId", async (): Promise<void> => {
         server.use(
@@ -128,6 +189,50 @@ describe("useRepoConfig", (): void => {
         })
         await waitFor((): void => {
             expect(screen.getByTestId("repo-config-mode")).toHaveTextContent("AUTO")
+        })
+    })
+
+    it("не загружает данные когда enabled=false", async (): Promise<void> => {
+        renderWithProviders(<DisabledRepoConfigProbe />)
+
+        await new Promise((resolve): void => {
+            setTimeout(resolve, 50)
+        })
+        expect(screen.getByTestId("config-fetched")).toHaveTextContent("false")
+    })
+
+    it("не загружает данные для пустого repositoryId", async (): Promise<void> => {
+        renderWithProviders(<EmptyRepoConfigProbe />)
+
+        await new Promise((resolve): void => {
+            setTimeout(resolve, 50)
+        })
+        expect(screen.getByTestId("config-fetched")).toHaveTextContent("false")
+    })
+
+    it("откатывает оптимистичное обновление при ошибке сохранения", async (): Promise<void> => {
+        server.use(
+            http.get("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
+                return HttpResponse.json({
+                    config: {
+                        repositoryId: "repo-1",
+                        configYaml: "version: 1\nreview:\n  mode: MANUAL\n",
+                        ignorePatterns: ["**/node_modules/**"],
+                        reviewMode: "MANUAL",
+                    },
+                })
+            }),
+            http.put("http://localhost:7120/api/v1/repositories/repo-1/config", () => {
+                return HttpResponse.json({ error: "Permission denied" }, { status: 403 })
+            }),
+        )
+
+        renderWithProviders(<SaveErrorRepoConfigProbe />)
+        expect(await screen.findByTestId("repo-config-mode")).toHaveTextContent("MANUAL")
+        await userEvent.click(screen.getByTestId("save-config"))
+
+        await waitFor((): void => {
+            expect(screen.getByTestId("save-status")).toHaveTextContent("save-error")
         })
     })
 })
