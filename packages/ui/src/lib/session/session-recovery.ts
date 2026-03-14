@@ -1,3 +1,12 @@
+import {
+    getWindowSessionStorage,
+    safeStorageGet,
+    safeStorageRemove,
+    safeStorageSet,
+    safeStorageSetJson,
+} from "@/lib/utils/safe-storage"
+import { safeParseJsonUnknown } from "@/lib/utils/safe-json"
+
 /**
  * Детали custom event `codenautic:session-expired`.
  */
@@ -31,20 +40,6 @@ const SESSION_PENDING_INTENT_KEY = "codenautic:session:pending-intent"
 const SESSION_DRAFT_KEY = "codenautic:session:draft"
 
 /**
- * Безопасно парсит JSON строку.
- *
- * @param rawValue Сырая JSON строка.
- * @returns Распарсенное значение или undefined при ошибке.
- */
-function safeParseJson(rawValue: string): unknown {
-    try {
-        return JSON.parse(rawValue) as unknown
-    } catch {
-        return undefined
-    }
-}
-
-/**
  * Создаёт стабильный key для draft поля.
  *
  * @param field Редактируемое поле.
@@ -75,11 +70,7 @@ export function buildDraftFieldKey(field: HTMLInputElement | HTMLTextAreaElement
  * @param pendingIntent Маршрут восстановления.
  */
 export function writeSessionPendingIntent(pendingIntent: string): void {
-    if (typeof window === "undefined") {
-        return
-    }
-
-    window.sessionStorage.setItem(SESSION_PENDING_INTENT_KEY, pendingIntent)
+    safeStorageSet(getWindowSessionStorage(), SESSION_PENDING_INTENT_KEY, pendingIntent)
 }
 
 /**
@@ -88,12 +79,8 @@ export function writeSessionPendingIntent(pendingIntent: string): void {
  * @returns Маршрут восстановления или undefined.
  */
 export function readSessionPendingIntent(): string | undefined {
-    if (typeof window === "undefined") {
-        return undefined
-    }
-
-    const rawValue = window.sessionStorage.getItem(SESSION_PENDING_INTENT_KEY)
-    if (rawValue === null || rawValue.trim().length === 0) {
+    const rawValue = safeStorageGet(getWindowSessionStorage(), SESSION_PENDING_INTENT_KEY)
+    if (rawValue === undefined || rawValue.trim().length === 0) {
         return undefined
     }
 
@@ -104,11 +91,7 @@ export function readSessionPendingIntent(): string | undefined {
  * Очищает pending intent после re-auth.
  */
 export function clearSessionPendingIntent(): void {
-    if (typeof window === "undefined") {
-        return
-    }
-
-    window.sessionStorage.removeItem(SESSION_PENDING_INTENT_KEY)
+    safeStorageRemove(getWindowSessionStorage(), SESSION_PENDING_INTENT_KEY)
 }
 
 /**
@@ -117,11 +100,7 @@ export function clearSessionPendingIntent(): void {
  * @param draft Snapshot draft.
  */
 export function writeSessionDraftSnapshot(draft: ISessionDraftSnapshot): void {
-    if (typeof window === "undefined") {
-        return
-    }
-
-    window.sessionStorage.setItem(SESSION_DRAFT_KEY, JSON.stringify(draft))
+    safeStorageSetJson(getWindowSessionStorage(), SESSION_DRAFT_KEY, draft)
 }
 
 /**
@@ -130,16 +109,12 @@ export function writeSessionDraftSnapshot(draft: ISessionDraftSnapshot): void {
  * @returns Snapshot draft или undefined.
  */
 export function readSessionDraftSnapshot(): ISessionDraftSnapshot | undefined {
-    if (typeof window === "undefined") {
+    const rawValue = safeStorageGet(getWindowSessionStorage(), SESSION_DRAFT_KEY)
+    if (rawValue === undefined) {
         return undefined
     }
 
-    const rawValue = window.sessionStorage.getItem(SESSION_DRAFT_KEY)
-    if (rawValue === null) {
-        return undefined
-    }
-
-    const parsed = safeParseJson(rawValue)
+    const parsed = safeParseJsonUnknown(rawValue)
     if (typeof parsed !== "object" || parsed === null) {
         return undefined
     }

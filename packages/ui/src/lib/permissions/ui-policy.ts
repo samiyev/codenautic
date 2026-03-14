@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 
 import { isUiRole, type TUiRole } from "@/lib/access/access-types"
 import { useAuthAccess } from "@/lib/auth/auth-access"
+import { getWindowLocalStorage, safeStorageGet, safeStorageSet } from "@/lib/utils/safe-storage"
 
 export type TUiActionId =
     | "review.decision"
@@ -155,18 +156,12 @@ export function isRolePreviewEnabled(): boolean {
  */
 export function readUiRoleFromStorage(): TUiRole {
     const defaultRole = resolveDefaultUiRole()
-    if (typeof window === "undefined" || isRolePreviewEnabled() !== true) {
+    if (isRolePreviewEnabled() !== true) {
         return defaultRole
     }
 
-    let storedRole: string | null
-    try {
-        storedRole = window.localStorage.getItem(UI_ROLE_STORAGE_KEY)
-    } catch {
-        return defaultRole
-    }
-
-    if (isUiRole(storedRole)) {
+    const storedRole = safeStorageGet(getWindowLocalStorage(), UI_ROLE_STORAGE_KEY)
+    if (storedRole !== undefined && isUiRole(storedRole)) {
         return storedRole
     }
 
@@ -179,23 +174,24 @@ export function readUiRoleFromStorage(): TUiRole {
  * @param nextRole Следующая роль.
  */
 export function writeUiRoleToStorage(nextRole: TUiRole): void {
-    if (typeof window === "undefined" || isRolePreviewEnabled() !== true) {
+    if (isRolePreviewEnabled() !== true) {
         return
     }
 
-    try {
-        window.localStorage.setItem(UI_ROLE_STORAGE_KEY, nextRole)
-    } catch {
+    const didWrite = safeStorageSet(getWindowLocalStorage(), UI_ROLE_STORAGE_KEY, nextRole)
+    if (didWrite !== true) {
         return
     }
 
-    window.dispatchEvent(
-        new CustomEvent("codenautic:rbac-role-changed", {
-            detail: {
-                role: nextRole,
-            },
-        }),
-    )
+    if (typeof window !== "undefined") {
+        window.dispatchEvent(
+            new CustomEvent("codenautic:rbac-role-changed", {
+                detail: {
+                    role: nextRole,
+                },
+            }),
+        )
+    }
 }
 
 /**
