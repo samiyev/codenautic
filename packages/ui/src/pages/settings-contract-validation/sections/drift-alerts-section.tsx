@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader } from "@heroui/react"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -32,7 +32,7 @@ export function DriftAlertsSection({ state }: IDriftAlertsSectionProps): ReactEl
             <CardHeader>
                 <p className={TYPOGRAPHY.sectionTitle}>Drift alert configuration</p>
             </CardHeader>
-            <CardBody className="space-y-3">
+            <CardContent className="space-y-3">
                 <p className="text-sm text-text-secondary">
                     Configure drift alerts by severity threshold, violation count, and delivery
                     channels.
@@ -105,24 +105,24 @@ export function DriftAlertsSection({ state }: IDriftAlertsSectionProps): ReactEl
                         )}
                     </div>
                 </fieldset>
-                <Alert
-                    color={state.driftAlertWouldTrigger === true ? "danger" : "primary"}
-                    title="Alert trigger preview"
-                    variant="flat"
-                >
-                    Violations at or above threshold:{" "}
-                    {String(state.driftAlertRelevantViolationCount)}.
-                    {state.driftAlertWouldTrigger === true
-                        ? " Alert will trigger with current drift data."
-                        : " Alert will not trigger with current drift data."}
+                <Alert status={state.driftAlertWouldTrigger === true ? "danger" : "accent"}>
+                    <Alert.Title>Alert trigger preview</Alert.Title>
+                    <Alert.Description>
+                        Violations at or above threshold:{" "}
+                        {String(state.driftAlertRelevantViolationCount)}.
+                        {state.driftAlertWouldTrigger === true
+                            ? " Alert will trigger with current drift data."
+                            : " Alert will not trigger with current drift data."}
+                    </Alert.Description>
                 </Alert>
-                <Button color="primary" onPress={state.handleSaveDriftAlertConfig}>
+                <Button variant="primary" onPress={state.handleSaveDriftAlertConfig}>
                     Save drift alert config
                 </Button>
-                <Alert color="primary" title="Drift alert save status" variant="flat">
-                    {state.driftAlertSaveStatus}
+                <Alert status="accent">
+                    <Alert.Title>Drift alert save status</Alert.Title>
+                    <Alert.Description>{state.driftAlertSaveStatus}</Alert.Description>
                 </Alert>
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }

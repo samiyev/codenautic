@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Card, CardBody, CardHeader, Textarea } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, TextArea } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 import type { IContractValidationState } from "../use-contract-validation-state"
@@ -32,69 +32,77 @@ export function ContractSection({ state }: IContractSectionProps): ReactElement 
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>Contract payload</p>
                 </CardHeader>
-                <CardBody className="space-y-3">
-                    <Textarea
+                <CardContent className="space-y-3">
+                    <TextArea
                         aria-label={t("settings:ariaLabel.contractValidation.contractJson")}
-                        minRows={10}
+                        className="min-h-[250px]"
                         value={state.rawContract}
-                        onValueChange={state.setRawContract}
+                        onChange={(e): void => { state.setRawContract(e.target.value) }}
                     />
                     <div className="flex gap-2">
-                        <Button color="primary" onPress={state.handleValidateContract}>
+                        <Button variant="primary" onPress={state.handleValidateContract}>
                             Validate contract
                         </Button>
-                        <Button variant="flat" onPress={state.handleApplyContract}>
+                        <Button variant="secondary" onPress={state.handleApplyContract}>
                             Apply validated contract
                         </Button>
                     </div>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>Validation result</p>
                 </CardHeader>
-                <CardBody className="space-y-2">
+                <CardContent className="space-y-2">
                     {state.validationResult.errors.length === 0 ? (
-                        <Alert color="success" title="Contract is valid" variant="flat">
-                            {state.previewSummary}
+                        <Alert status="success">
+                            <Alert.Title>Contract is valid</Alert.Title>
+                            <Alert.Description>{state.previewSummary}</Alert.Description>
                         </Alert>
                     ) : (
-                        <Alert color="danger" title="Contract validation errors" variant="flat">
-                            <ul
-                                aria-label={t(
-                                    "settings:ariaLabel.contractValidation.contractErrorsList",
-                                )}
-                                className="space-y-1"
-                            >
-                                {state.validationResult.errors.map(
-                                    (error): ReactElement => (
-                                        <li key={error}>{error}</li>
-                                    ),
-                                )}
-                            </ul>
+                        <Alert status="danger">
+                            <Alert.Title>Contract validation errors</Alert.Title>
+                            <Alert.Description>
+                                <ul
+                                    aria-label={t(
+                                        "settings:ariaLabel.contractValidation.contractErrorsList",
+                                    )}
+                                    className="space-y-1"
+                                >
+                                    {state.validationResult.errors.map(
+                                        (error): ReactElement => (
+                                            <li key={error}>{error}</li>
+                                        ),
+                                    )}
+                                </ul>
+                            </Alert.Description>
                         </Alert>
                     )}
                     {state.validationResult.migrationHints.length === 0 ? null : (
-                        <Alert color="warning" title="Migration hints" variant="flat">
-                            <ul
-                                aria-label={t(
-                                    "settings:ariaLabel.contractValidation.contractMigrationHintsList",
-                                )}
-                                className="space-y-1"
-                            >
-                                {state.validationResult.migrationHints.map(
-                                    (hint): ReactElement => (
-                                        <li key={hint}>{hint}</li>
-                                    ),
-                                )}
-                            </ul>
+                        <Alert status="warning">
+                            <Alert.Title>Migration hints</Alert.Title>
+                            <Alert.Description>
+                                <ul
+                                    aria-label={t(
+                                        "settings:ariaLabel.contractValidation.contractMigrationHintsList",
+                                    )}
+                                    className="space-y-1"
+                                >
+                                    {state.validationResult.migrationHints.map(
+                                        (hint): ReactElement => (
+                                            <li key={hint}>{hint}</li>
+                                        ),
+                                    )}
+                                </ul>
+                            </Alert.Description>
                         </Alert>
                     )}
-                    <Alert color="primary" title="Apply status" variant="flat">
-                        {state.lastAppliedState}
+                    <Alert status="accent">
+                        <Alert.Title>Apply status</Alert.Title>
+                        <Alert.Description>{state.lastAppliedState}</Alert.Description>
                     </Alert>
-                </CardBody>
+                </CardContent>
             </Card>
         </>
     )
