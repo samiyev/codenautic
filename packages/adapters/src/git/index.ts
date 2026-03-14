@@ -36,6 +36,17 @@ export {
 } from "./gitlab-provider"
 export {GitLabProviderError} from "./gitlab-provider.error"
 export {
+    AZURE_DEVOPS_PROVIDER_ERROR_CODE,
+    AzureDevOpsProviderError,
+    type AzureDevOpsProviderErrorCode,
+    type IAzureDevOpsProviderErrorDetails,
+} from "./azure-devops-provider.error"
+export {
+    AzureDevOpsProvider,
+    type IAzureDevOpsGitClient,
+    type IAzureDevOpsProviderOptions,
+} from "./azure-devops-provider"
+export {
     GIT_ACL_ERROR_KIND,
     GitDiffFilesAcl,
     GitErrorAcl,

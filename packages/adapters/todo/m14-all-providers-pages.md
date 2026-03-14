@@ -26,7 +26,7 @@
 
 | ID | Задача | Статус | Результат | Acceptance Criteria |
 |----------|--------------------|--------|-----------|---------------------|
-| GIT-004 | Реализовать azureDevOpsProvider | TODO | Не начато | Реализация: Интеграция через azure-devops-node-api. Build status. Thread comments. Готово, если: Azure DevOps provider стабильно работает с thread/build API, корректно обрабатывает paging и throttling, и сохраняет консистентность комментариев; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
+| GIT-004 | Реализовать azureDevOpsProvider | DONE | Реализовано | Реализация: Интеграция через azure-devops-node-api. Pull request statuses. Thread comments. Typed unsupported blame path. Готово, если: Azure DevOps provider стабильно работает с thread/build API, корректно обрабатывает paging и throttling, и сохраняет консистентность комментариев; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 | GIT-005 | Реализовать bitbucketProvider | TODO | Не начато | Реализация: Интеграция через Bitbucket SDK. Pipeline status. Inline comments with tasks. Готово, если: Bitbucket provider корректно поддерживает inline comments/tasks и pipeline status mapping, включая failure-path при ограничениях прав; DoD: `cd packages/adapters && bun run lint && bun run typecheck && bun test`. |
 
 ---
