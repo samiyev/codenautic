@@ -4,8 +4,9 @@ import { motion } from "motion/react"
 
 import { Card, CardBody, CardHeader, StyledLink } from "@/components/ui"
 import { ActivationChecklist } from "@/components/onboarding/activation-checklist"
+import { PageShell } from "@/components/layout/page-shell"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
-import { SPACING, GAP } from "@/lib/constants/spacing"
+import { GAP } from "@/lib/constants/spacing"
 import { useUiRole } from "@/lib/permissions/ui-policy"
 import { StaggerContainer, STAGGER_ITEM_VARIANTS } from "@/lib/motion"
 import { createSettingsNavGroups } from "@/lib/navigation/settings-nav-items"
@@ -22,13 +23,11 @@ export function SettingsPage(): ReactElement {
     const settingsGroups = createSettingsNavGroups(t)
 
     return (
-        <section className={SPACING.card}>
-            <header className={SPACING.tight}>
-                <h1 className={TYPOGRAPHY.pageTitle}>{t("navigation:sidebar.settings")}</h1>
-                <p className={TYPOGRAPHY.pageSubtitle}>
-                    {t("navigation:settingsGroup.generalDescription")}
-                </p>
-            </header>
+        <PageShell
+            layout="standard"
+            subtitle={t("navigation:settingsGroup.generalDescription")}
+            title={t("navigation:sidebar.settings")}
+        >
             <ActivationChecklist role={checklistRole} />
             <StaggerContainer as="div" className={`grid ${GAP.section} sm:grid-cols-2 lg:grid-cols-3`}>
                 {settingsGroups.map((group) => (
@@ -59,6 +58,6 @@ export function SettingsPage(): ReactElement {
                     </motion.div>
                 ))}
             </StaggerContainer>
-        </section>
+        </PageShell>
     )
 }
