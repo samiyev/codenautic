@@ -71,7 +71,10 @@ export function ContentToolbar(props: IContentToolbarProps): ReactElement {
 
             {/* Desktop breadcrumbs */}
             {props.breadcrumbs !== undefined && props.breadcrumbs.length > 0 ? (
-                <nav aria-label="Breadcrumb" className="hidden min-w-0 flex-1 md:flex">
+                <nav
+                    aria-label={t("navigation:ariaLabel.contentToolbar.breadcrumb")}
+                    className="hidden min-w-0 flex-1 md:flex"
+                >
                     <ol className="flex items-center gap-1.5 text-sm">
                         {props.breadcrumbs.map((segment, index): ReactElement => {
                             const isLast = index === (props.breadcrumbs?.length ?? 0) - 1
