@@ -2,7 +2,8 @@ import { type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 import { motion } from "motion/react"
 
-import { Card, CardBody, CardHeader, StyledLink } from "@/components/ui"
+import { Card, CardContent, CardHeader } from "@heroui/react"
+import { StyledLink } from "@/components/layout/styled-link"
 import { ActivationChecklist } from "@/components/onboarding/activation-checklist"
 import { PageShell } from "@/components/layout/page-shell"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -40,7 +41,7 @@ export function SettingsPage(): ReactElement {
                                 <span className="text-text-secondary">{group.icon}</span>
                                 <p className={TYPOGRAPHY.sectionTitle}>{group.label}</p>
                             </CardHeader>
-                            <CardBody className="space-y-2 text-sm">
+                            <CardContent className="space-y-2 text-sm">
                                 <p className="text-text-tertiary">{group.description}</p>
                                 <ul className="space-y-1">
                                     {group.items
@@ -56,7 +57,7 @@ export function SettingsPage(): ReactElement {
                                             </li>
                                         ))}
                                 </ul>
-                            </CardBody>
+                            </CardContent>
                         </Card>
                     </motion.div>
                 ))}

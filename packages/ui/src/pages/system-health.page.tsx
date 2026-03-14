@@ -8,7 +8,7 @@ import type { SupportedLocale } from "@/lib/i18n/i18n"
 import { FEATURE_FLAG_KEYS } from "@/lib/feature-flags/feature-flags"
 import { isFeatureFlagEnabled, useFeatureFlagsQuery, useHealthQuery } from "@/lib/hooks/queries"
 import { formatLocalizedDateTime, getCurrentLocale } from "@/lib/i18n/i18n"
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 
 /**
  * Первый системный экран foundation-этапа: статус runtime/api.

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import { useVirtualizer } from "@tanstack/react-virtual"
 
-import { Alert, Button, Card, CardBody, CardHeader, Chip, Input, Switch } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, Chip, Input, Switch } from "@heroui/react"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
 import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -156,7 +156,7 @@ function createNextWebhookId(endpoints: ReadonlyArray<IWebhookEndpoint>): string
 
 function mapWebhookStatusColor(
     status: TWebhookDeliveryStatus,
-): "danger" | "primary" | "success" | "warning" | "default" {
+): "danger" | "accent" | "success" | "warning" | "default" {
     if (status === "disconnected") {
         return "default"
     }
@@ -393,15 +393,15 @@ export function SettingsWebhooksPage(): ReactElement {
                         {t("settings:webhooks.createWebhookEndpoint")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[1.2fr_1fr_auto]">
                         <Input
-                            label={t("settings:webhooks.endpointUrl")}
-                            onValueChange={(value): void => {
+                            aria-label={t("settings:webhooks.endpointUrl")}
+                            onChange={(e): void => {
                                 setCreateForm(
                                     (previous): ICreateWebhookFormState => ({
                                         ...previous,
-                                        url: value,
+                                        url: e.target.value,
                                     }),
                                 )
                             }}
@@ -409,12 +409,12 @@ export function SettingsWebhooksPage(): ReactElement {
                             value={createForm.url}
                         />
                         <Input
-                            label={t("settings:webhooks.eventTypes")}
-                            onValueChange={(value): void => {
+                            aria-label={t("settings:webhooks.eventTypes")}
+                            onChange={(e): void => {
                                 setCreateForm(
                                     (previous): ICreateWebhookFormState => ({
                                         ...previous,
-                                        eventTypesCsv: value,
+                                        eventTypesCsv: e.target.value,
                                     }),
                                 )
                             }}
@@ -422,13 +422,13 @@ export function SettingsWebhooksPage(): ReactElement {
                             value={createForm.eventTypesCsv}
                         />
                         <div className="flex items-end">
-                            <Button color="primary" onPress={handleCreateWebhook} type="button">
+                            <Button variant="primary" onPress={handleCreateWebhook} type="button">
                                 {t("settings:webhooks.createEndpoint")}
                             </Button>
                         </div>
                     </div>
                     <Alert color="primary">{t("settings:webhooks.secretsMaskedNotice")}</Alert>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
@@ -440,7 +440,7 @@ export function SettingsWebhooksPage(): ReactElement {
                         <div className="flex flex-wrap gap-2">
                             <Input
                                 className="min-w-[200px]"
-                                onValueChange={setSearch}
+                                onChange={(e): void => { setSearch(e.target.value) }}
                                 placeholder={t("settings:webhooks.searchPlaceholder")}
                                 value={search}
                             />
@@ -474,7 +474,7 @@ export function SettingsWebhooksPage(): ReactElement {
                             </select>
                         </div>
                     </CardHeader>
-                    <CardBody>
+                    <CardContent>
                         <div
                             ref={endpointsListRef}
                             className="max-h-[520px] overflow-auto rounded-lg border border-border"
@@ -533,7 +533,7 @@ export function SettingsWebhooksPage(): ReactElement {
                                                             webhook.status,
                                                         )}
                                                         size="sm"
-                                                        variant="flat"
+                                                        variant="soft"
                                                     >
                                                         {mapWebhookStatusText(webhook.status)}
                                                     </Chip>
@@ -541,8 +541,8 @@ export function SettingsWebhooksPage(): ReactElement {
                                                 <div className="mt-2 flex flex-wrap items-center gap-2">
                                                     <Switch
                                                         isSelected={webhook.isEnabled}
-                                                        onValueChange={(value): void => {
-                                                            handleToggleEndpoint(webhook.id, value)
+                                                        onChange={(isSelected: boolean): void => {
+                                                            handleToggleEndpoint(webhook.id, isSelected)
                                                         }}
                                                     >
                                                         {t("settings:webhooks.enabled")}
@@ -552,7 +552,7 @@ export function SettingsWebhooksPage(): ReactElement {
                                                             handleRotateSecret(webhook.id)
                                                         }}
                                                         size="sm"
-                                                        variant="light"
+                                                        variant="ghost"
                                                     >
                                                         {t("settings:webhooks.rotateSecret")}
                                                     </Button>
@@ -565,12 +565,11 @@ export function SettingsWebhooksPage(): ReactElement {
                                                         providerLabel="Webhook"
                                                     />
                                                     <Button
-                                                        color="danger"
                                                         onPress={(): void => {
                                                             handleDeleteWebhook(webhook.id)
                                                         }}
                                                         size="sm"
-                                                        variant="ghost"
+                                                        variant="danger"
                                                     >
                                                         {t("settings:webhooks.delete")}
                                                     </Button>
@@ -585,7 +584,7 @@ export function SettingsWebhooksPage(): ReactElement {
                                     })}
                             </div>
                         </div>
-                    </CardBody>
+                    </CardContent>
                 </Card>
 
                 <Card>
@@ -595,7 +594,7 @@ export function SettingsWebhooksPage(): ReactElement {
                             {activeEndpoint === undefined ? "" : `· ${activeEndpoint.id}`}
                         </p>
                     </CardHeader>
-                    <CardBody className="space-y-3">
+                    <CardContent className="space-y-3">
                         {activeEndpoint === undefined ? (
                             <Alert color="warning">
                                 {t("settings:webhooks.selectEndpointToInspect")}
@@ -633,7 +632,7 @@ export function SettingsWebhooksPage(): ReactElement {
                                                     <Chip
                                                         color={mapWebhookStatusColor(log.status)}
                                                         size="sm"
-                                                        variant="flat"
+                                                        variant="soft"
                                                     >
                                                         {mapWebhookStatusText(log.status)}
                                                     </Chip>
@@ -651,7 +650,7 @@ export function SettingsWebhooksPage(): ReactElement {
                                     })}
                             </div>
                         </div>
-                    </CardBody>
+                    </CardContent>
                 </Card>
             </div>
         </FormLayout>
