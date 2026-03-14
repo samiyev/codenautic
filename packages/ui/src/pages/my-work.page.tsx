@@ -1,8 +1,20 @@
 import { type ReactElement, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import {
+    Alert,
+    Button,
+    Card,
+    CardBody,
+    CardHeader,
+    Chip,
+    Dropdown,
+    DropdownItem,
+    DropdownMenu,
+    DropdownTrigger,
+} from "@/components/ui"
 import { SystemStateCard } from "@/components/infrastructure/system-state-card"
+import { PageShell } from "@/components/layout/page-shell"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
@@ -504,12 +516,10 @@ export function MyWorkPage(): ReactElement {
     }).length
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("dashboard:myWork.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("dashboard:myWork.pageSubtitle")}
-            </p>
-
+        <PageShell
+            subtitle={t("dashboard:myWork.pageSubtitle")}
+            title={t("dashboard:myWork.pageTitle")}
+        >
             <Card>
                 <CardHeader className="flex flex-wrap items-center justify-between gap-2">
                     <p className={TYPOGRAPHY.sectionTitle}>
@@ -667,30 +677,7 @@ export function MyWorkPage(): ReactElement {
                                             {t("dashboard:myWork.slaLabel")} {item.slaMinutes}m
                                         </p>
                                         <div className="mt-2 flex flex-wrap gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="flat"
-                                                onPress={(): void => {
-                                                    handleMarkRead(item.id)
-                                                }}
-                                            >
-                                                {t("dashboard:myWork.markRead")}
-                                            </Button>
-                                            <Button
-                                                isDisabled={
-                                                    isRoleAllowed(
-                                                        reviewerRole,
-                                                        ASSIGNABLE_ROLES,
-                                                    ) !== true
-                                                }
-                                                size="sm"
-                                                variant="flat"
-                                                onPress={(): void => {
-                                                    handleAssignToMe(item.id)
-                                                }}
-                                            >
-                                                {t("dashboard:myWork.assignToMe")}
-                                            </Button>
+                                            {/* Primary actions — always visible */}
                                             <Button
                                                 isDisabled={
                                                     isRoleAllowed(
@@ -736,30 +723,74 @@ export function MyWorkPage(): ReactElement {
                                             >
                                                 {t("dashboard:myWork.escalate")}
                                             </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="flat"
-                                                onPress={(): void => {
-                                                    handleSnooze(item.id)
-                                                }}
-                                            >
-                                                {t("dashboard:myWork.snooze")}
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="flat"
-                                                onPress={(): void => {
-                                                    handleOpenReview(item.id)
-                                                }}
-                                            >
-                                                {t("dashboard:myWork.openReview")}
-                                            </Button>
-                                            <a
-                                                className="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs text-text-tertiary"
-                                                href={item.deepLink}
-                                            >
-                                                {t("dashboard:myWork.deepLink")}
-                                            </a>
+
+                                            {/* Secondary actions — overflow dropdown */}
+                                            <Dropdown>
+                                                <DropdownTrigger>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="flat"
+                                                    >
+                                                        {t("dashboard:myWork.moreActions")}
+                                                    </Button>
+                                                </DropdownTrigger>
+                                                <DropdownMenu
+                                                    aria-label={t(
+                                                        "dashboard:myWork.secondaryActionsAriaLabel",
+                                                    )}
+                                                >
+                                                    <DropdownItem
+                                                        key="mark_read"
+                                                        onPress={(): void => {
+                                                            handleMarkRead(item.id)
+                                                        }}
+                                                    >
+                                                        {t("dashboard:myWork.markRead")}
+                                                    </DropdownItem>
+                                                    <DropdownItem
+                                                        key="assign_to_me"
+                                                        isDisabled={
+                                                            isRoleAllowed(
+                                                                reviewerRole,
+                                                                ASSIGNABLE_ROLES,
+                                                            ) !== true
+                                                        }
+                                                        onPress={(): void => {
+                                                            handleAssignToMe(item.id)
+                                                        }}
+                                                    >
+                                                        {t("dashboard:myWork.assignToMe")}
+                                                    </DropdownItem>
+                                                    <DropdownItem
+                                                        key="snooze"
+                                                        onPress={(): void => {
+                                                            handleSnooze(item.id)
+                                                        }}
+                                                    >
+                                                        {t("dashboard:myWork.snooze")}
+                                                    </DropdownItem>
+                                                    <DropdownItem
+                                                        key="open_review"
+                                                        onPress={(): void => {
+                                                            handleOpenReview(item.id)
+                                                        }}
+                                                    >
+                                                        {t("dashboard:myWork.openReview")}
+                                                    </DropdownItem>
+                                                    <DropdownItem
+                                                        key="deep_link"
+                                                        onPress={(): void => {
+                                                            if (typeof window !== "undefined") {
+                                                                window.location.assign(
+                                                                    item.deepLink,
+                                                                )
+                                                            }
+                                                        }}
+                                                    >
+                                                        {t("dashboard:myWork.deepLink")}
+                                                    </DropdownItem>
+                                                </DropdownMenu>
+                                            </Dropdown>
                                         </div>
                                     </li>
                                 )
@@ -797,6 +828,6 @@ export function MyWorkPage(): ReactElement {
                     )}
                 </CardBody>
             </Card>
-        </section>
+        </PageShell>
     )
 }
