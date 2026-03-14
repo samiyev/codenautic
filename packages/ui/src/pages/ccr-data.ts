@@ -24,7 +24,7 @@ const MOCK_CCR_REVIEW_THREADS: ReadonlyArray<{
         threads: [
             {
                 id: "t1",
-                author: "Ari",
+                author: "Neo",
                 createdAt: "2026-03-01 10:20",
                 feedback: "like",
                 isResolved: false,
@@ -32,14 +32,14 @@ const MOCK_CCR_REVIEW_THREADS: ReadonlyArray<{
                 replies: [
                     {
                         id: "t1-1",
-                        author: "Nika",
+                        author: "Morpheus",
                         createdAt: "2026-03-01 10:28",
                         isResolved: false,
                         message: "Good point, we can hook into existing audit logger.",
                         replies: [
                             {
                                 id: "t1-1-1",
-                                author: "Oleg",
+                                author: "Cypher",
                                 createdAt: "2026-03-01 10:33",
                                 isResolved: true,
                                 feedback: "dislike",
@@ -52,7 +52,7 @@ const MOCK_CCR_REVIEW_THREADS: ReadonlyArray<{
             },
             {
                 id: "t2",
-                author: "Sari",
+                author: "Niobe",
                 createdAt: "2026-03-01 10:42",
                 isResolved: false,
                 message: "Do we still need return next() here or can middleware be async-safe?",
@@ -65,7 +65,7 @@ const MOCK_CCR_REVIEW_THREADS: ReadonlyArray<{
         threads: [
             {
                 id: "u1",
-                author: "Lena",
+                author: "Trinity",
                 createdAt: "2026-03-01 09:15",
                 isResolved: true,
                 message: "Need to add exponential backoff to retry queue.",
@@ -164,7 +164,7 @@ const MOCK_CCR_DIFFS: ReadonlyArray<{ ccrId: string; files: ReadonlyArray<ICcrDi
                         type: "added",
                         comments: [
                             {
-                                author: "Ari",
+                                author: "Neo",
                                 line: 11,
                                 message: "Need consistent error message with existing auth errors.",
                                 side: "right",
@@ -200,7 +200,7 @@ const MOCK_CCR_DIFFS: ReadonlyArray<{ ccrId: string; files: ReadonlyArray<ICcrDi
                         type: "removed",
                         comments: [
                             {
-                                author: "Nika",
+                                author: "Morpheus",
                                 line: 13,
                                 message:
                                     "Should we keep explicit return for middleware consistency?",
@@ -285,7 +285,7 @@ const MOCK_CCR_DIFFS: ReadonlyArray<{ ccrId: string; files: ReadonlyArray<ICcrDi
  */
 export const MOCK_CCR_ROWS: ReadonlyArray<ICcrRowData> = [
     {
-        assignee: "Ari",
+        assignee: "Neo",
         comments: 12,
         id: "ccr-9001",
         repository: "repo-core",
@@ -297,7 +297,7 @@ export const MOCK_CCR_ROWS: ReadonlyArray<ICcrRowData> = [
         attachedFiles: ["src/auth/index.ts", "src/auth/middleware.ts"],
     },
     {
-        assignee: "Nika",
+        assignee: "Morpheus",
         comments: 3,
         id: "ccr-9002",
         repository: "repo-ui",
@@ -309,7 +309,7 @@ export const MOCK_CCR_ROWS: ReadonlyArray<ICcrRowData> = [
         attachedFiles: ["src/scanner/index.ts", "src/scanner/retry.ts"],
     },
     {
-        assignee: "Ari",
+        assignee: "Neo",
         comments: 9,
         id: "ccr-9003",
         repository: "repo-mobile",
@@ -321,7 +321,7 @@ export const MOCK_CCR_ROWS: ReadonlyArray<ICcrRowData> = [
         attachedFiles: ["src/stream/reader.ts", "src/stream/lexer.ts"],
     },
     {
-        assignee: "Sari",
+        assignee: "Niobe",
         comments: 4,
         id: "ccr-9004",
         repository: "repo-core",
@@ -333,7 +333,7 @@ export const MOCK_CCR_ROWS: ReadonlyArray<ICcrRowData> = [
         attachedFiles: ["src/telemetry/exporter.ts", "src/telemetry/runner.ts"],
     },
     {
-        assignee: "Nika",
+        assignee: "Morpheus",
         comments: 13,
         id: "ccr-9005",
         repository: "repo-ui",
@@ -345,7 +345,7 @@ export const MOCK_CCR_ROWS: ReadonlyArray<ICcrRowData> = [
         attachedFiles: ["packages/ui/bundle.config.ts", "packages/ui/webpack.config.ts"],
     },
     {
-        assignee: "Oleg",
+        assignee: "Cypher",
         comments: 2,
         id: "ccr-9006",
         repository: "repo-api",
@@ -357,7 +357,7 @@ export const MOCK_CCR_ROWS: ReadonlyArray<ICcrRowData> = [
         attachedFiles: ["src/api/contracts/user.ts", "src/api/contracts/review.ts"],
     },
     {
-        assignee: "Mila",
+        assignee: "Trinity",
         comments: 1,
         id: "ccr-9007",
         repository: "repo-api",
@@ -369,7 +369,7 @@ export const MOCK_CCR_ROWS: ReadonlyArray<ICcrRowData> = [
         attachedFiles: ["src/auth/token.ts", "src/auth/middleware.ts", "src/auth/refresh.ts"],
     },
     {
-        assignee: "Ari",
+        assignee: "Neo",
         comments: 5,
         id: "ccr-9008",
         repository: "repo-data",
@@ -381,7 +381,7 @@ export const MOCK_CCR_ROWS: ReadonlyArray<ICcrRowData> = [
         attachedFiles: ["src/data/graph.ts", "src/data/shortest-path.ts"],
     },
     {
-        assignee: "Nika",
+        assignee: "Morpheus",
         comments: 6,
         id: "ccr-9009",
         repository: "repo-core",
@@ -393,7 +393,7 @@ export const MOCK_CCR_ROWS: ReadonlyArray<ICcrRowData> = [
         attachedFiles: ["docs/api/legacy.md", "docs/api/overview.md"],
     },
     {
-        assignee: "Mila",
+        assignee: "Trinity",
         comments: 2,
         id: "ccr-9010",
         repository: "repo-data",
