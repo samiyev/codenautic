@@ -1,6 +1,6 @@
 import { type ReactElement } from "react"
 
-import { Skeleton } from "@/components/ui"
+import { Skeleton } from "@heroui/react"
 
 /**
  * Props for the LoadingState component.

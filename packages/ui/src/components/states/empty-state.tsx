@@ -1,6 +1,6 @@
 import { type ReactElement, type ReactNode } from "react"
 
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
@@ -38,7 +38,7 @@ export function EmptyState(props: IEmptyStateProps): ReactElement {
                 <p className="max-w-sm text-sm text-text-secondary">{props.description}</p>
             ) : null}
             {props.actionLabel !== undefined && props.onAction !== undefined ? (
-                <Button className="mt-2" size="sm" variant="flat" onPress={props.onAction}>
+                <Button className="mt-2" size="sm" variant="secondary" onPress={props.onAction}>
                     {props.actionLabel}
                 </Button>
             ) : null}

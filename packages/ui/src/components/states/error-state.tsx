@@ -1,6 +1,6 @@
 import { type ReactElement } from "react"
 
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
@@ -51,9 +51,8 @@ export function ErrorState(props: IErrorStateProps): ReactElement {
             {props.onRetry !== undefined ? (
                 <Button
                     className="mt-2"
-                    color="danger"
                     size="sm"
-                    variant="flat"
+                    variant="secondary"
                     onPress={props.onRetry}
                 >
                     {props.retryLabel ?? "Retry"}
