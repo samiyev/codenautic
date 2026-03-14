@@ -3,45 +3,33 @@ import { describe, expect, it, vi } from "vitest"
 import { createScopeChangeHandler } from "@/components/dashboard/scope-filter-utils"
 
 describe("createScopeChangeHandler", (): void => {
-    it("when selection contains a single key, then calls callback with that key", (): void => {
+    it("when selection contains a key, then calls callback with that key", (): void => {
         const callback = vi.fn()
         const handler = createScopeChangeHandler<string>(callback)
 
-        const keys = new Set(["repository"])
-        handler(keys)
+        handler("repository")
 
         expect(callback).toHaveBeenCalledTimes(1)
         expect(callback).toHaveBeenCalledWith("repository")
     })
 
-    it("when selection is 'all', then does not call callback", (): void => {
+    it("when selection is null, then does not call callback", (): void => {
         const callback = vi.fn()
         const handler = createScopeChangeHandler<string>(callback)
 
-        handler("all")
+        handler(null)
 
         expect(callback).not.toHaveBeenCalled()
     })
 
-    it("when selection is an empty set, then does not call callback", (): void => {
+    it("when selection is a numeric key, then calls callback with string value", (): void => {
         const callback = vi.fn()
         const handler = createScopeChangeHandler<string>(callback)
 
-        const keys = new Set<string>()
-        handler(keys)
-
-        expect(callback).not.toHaveBeenCalled()
-    })
-
-    it("when selection contains multiple keys, then calls callback with the first iterable key", (): void => {
-        const callback = vi.fn()
-        const handler = createScopeChangeHandler<string>(callback)
-
-        const keys = new Set(["alpha", "beta"])
-        handler(keys)
+        handler(42)
 
         expect(callback).toHaveBeenCalledTimes(1)
-        expect(callback).toHaveBeenCalledWith("alpha")
+        expect(callback).toHaveBeenCalledWith("42")
     })
 
     it("when used with typed scope values, then preserves type narrowing", (): void => {
@@ -49,8 +37,7 @@ describe("createScopeChangeHandler", (): void => {
         const callback = vi.fn()
         const handler = createScopeChangeHandler<TScopeFilter>(callback)
 
-        const keys = new Set(["team"])
-        handler(keys)
+        handler("team")
 
         expect(callback).toHaveBeenCalledWith("team")
     })
