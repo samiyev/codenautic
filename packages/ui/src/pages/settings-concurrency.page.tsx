@@ -4,9 +4,6 @@ import { useTranslation } from "react-i18next"
 import {
     Alert,
     Button,
-    Card,
-    CardBody,
-    CardHeader,
     Chip,
     Input,
     Modal,
@@ -16,8 +13,9 @@ import {
     ModalHeader,
     Switch,
 } from "@/components/ui"
+import { FormLayout } from "@/components/forms/form-layout"
+import { FormSection } from "@/components/forms/form-section"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
-import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
 type TSeverity = "high" | "low" | "medium"
@@ -252,125 +250,114 @@ export function SettingsConcurrencyPage(): ReactElement {
     }
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:concurrency.pageTitle")}</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                {t("settings:concurrency.pageSubtitle")}
-            </p>
+        <FormLayout
+            title={t("settings:concurrency.pageTitle")}
+            description={t("settings:concurrency.pageSubtitle")}
+        >
 
-            <Card>
-                <CardHeader className="flex flex-wrap items-center justify-between gap-2">
-                    <p className={TYPOGRAPHY.sectionTitle}>{t("settings:concurrency.snapshotVersions")}</p>
-                    <div className="flex gap-2">
-                        <Chip size="sm" variant="flat">
-                            {t("settings:concurrency.localEtag", { etag: localDraft.etag })}
-                        </Chip>
-                        <Chip size="sm" variant="flat">
-                            {t("settings:concurrency.remoteEtag", { etag: remoteSnapshot.etag })}
-                        </Chip>
-                    </div>
-                </CardHeader>
-                <CardBody className="space-y-3">
-                    <Input
-                        label={t("settings:concurrency.ignorePaths")}
-                        value={localDraft.values.ignorePaths}
-                        onValueChange={(value): void => {
+            <FormSection heading={t("settings:concurrency.snapshotVersions")}>
+                <div className="flex flex-wrap gap-2">
+                    <Chip size="sm" variant="flat">
+                        {t("settings:concurrency.localEtag", { etag: localDraft.etag })}
+                    </Chip>
+                    <Chip size="sm" variant="flat">
+                        {t("settings:concurrency.remoteEtag", { etag: remoteSnapshot.etag })}
+                    </Chip>
+                </div>
+                <Input
+                    label={t("settings:concurrency.ignorePaths")}
+                    value={localDraft.values.ignorePaths}
+                    onValueChange={(value): void => {
+                        setLocalDraft(
+                            (previous): IAdminConfigSnapshot => ({
+                                ...previous,
+                                values: {
+                                    ...previous.values,
+                                    ignorePaths: value,
+                                },
+                            }),
+                        )
+                    }}
+                />
+                <select
+                    aria-label="Concurrency severity threshold"
+                    className={NATIVE_FORM.select}
+                    id="concurrency-severity"
+                    value={localDraft.values.severityThreshold}
+                    onChange={(event): void => {
+                        const nextValue = event.currentTarget.value
+                        if (
+                            nextValue === "low" ||
+                            nextValue === "medium" ||
+                            nextValue === "high"
+                        ) {
                             setLocalDraft(
                                 (previous): IAdminConfigSnapshot => ({
                                     ...previous,
                                     values: {
                                         ...previous.values,
-                                        ignorePaths: value,
+                                        severityThreshold: nextValue,
                                     },
                                 }),
                             )
-                        }}
-                    />
-                    <select
-                        aria-label="Concurrency severity threshold"
-                        className={NATIVE_FORM.select}
-                        id="concurrency-severity"
-                        value={localDraft.values.severityThreshold}
-                        onChange={(event): void => {
-                            const nextValue = event.currentTarget.value
-                            if (
-                                nextValue === "low" ||
-                                nextValue === "medium" ||
-                                nextValue === "high"
-                            ) {
-                                setLocalDraft(
-                                    (previous): IAdminConfigSnapshot => ({
-                                        ...previous,
-                                        values: {
-                                            ...previous.values,
-                                            severityThreshold: nextValue,
-                                        },
-                                    }),
-                                )
-                            }
-                        }}
-                    >
-                        <option value="low">low</option>
-                        <option value="medium">medium</option>
-                        <option value="high">high</option>
-                    </select>
-                    <Switch
-                        aria-label="Require reviewer approval"
-                        isSelected={localDraft.values.requireReviewerApproval}
-                        onValueChange={(value): void => {
-                            setLocalDraft(
-                                (previous): IAdminConfigSnapshot => ({
-                                    ...previous,
-                                    values: {
-                                        ...previous.values,
-                                        requireReviewerApproval: value,
-                                    },
-                                }),
-                            )
-                        }}
-                    >
-                        {t("settings:concurrency.requireReviewerApproval")}
-                    </Switch>
-                    <div className="flex flex-wrap gap-2">
-                        <Button onPress={handleSave}>{t("settings:concurrency.saveSettingsOptimistic")}</Button>
-                        <Button variant="flat" onPress={handleSimulateRemoteChange}>
-                            {t("settings:concurrency.simulateExternalUpdate")}
-                        </Button>
-                    </div>
-                </CardBody>
-            </Card>
+                        }
+                    }}
+                >
+                    <option value="low">low</option>
+                    <option value="medium">medium</option>
+                    <option value="high">high</option>
+                </select>
+                <Switch
+                    aria-label="Require reviewer approval"
+                    isSelected={localDraft.values.requireReviewerApproval}
+                    onValueChange={(value): void => {
+                        setLocalDraft(
+                            (previous): IAdminConfigSnapshot => ({
+                                ...previous,
+                                values: {
+                                    ...previous.values,
+                                    requireReviewerApproval: value,
+                                },
+                            }),
+                        )
+                    }}
+                >
+                    {t("settings:concurrency.requireReviewerApproval")}
+                </Switch>
+                <div className="flex flex-wrap gap-2">
+                    <Button color="primary" onPress={handleSave}>{t("settings:concurrency.saveSettingsOptimistic")}</Button>
+                    <Button variant="flat" onPress={handleSimulateRemoteChange}>
+                        {t("settings:concurrency.simulateExternalUpdate")}
+                    </Button>
+                </div>
+            </FormSection>
 
-            <Card>
-                <CardHeader>
-                    <p className={TYPOGRAPHY.sectionTitle}>{t("settings:concurrency.conflictResolutionAudit")}</p>
-                </CardHeader>
-                <CardBody className="space-y-2">
-                    {audit.length === 0 ? (
-                        <Alert color="warning" title={t("settings:concurrency.noConcurrencyDecisionsTitle")} variant="flat">
-                            {t("settings:concurrency.noConcurrencyDecisionsDescription")}
-                        </Alert>
-                    ) : (
-                        <ul aria-label="Concurrency audit list" className="space-y-2">
-                            {audit.map(
-                                (entry): ReactElement => (
-                                    <li
-                                        className="rounded-lg border border-border bg-surface p-3 text-sm"
-                                        key={entry.id}
-                                    >
-                                        <p className="font-semibold text-foreground">
-                                            {entry.decision} · etag {entry.resultingEtag}
-                                        </p>
-                                        <p className="text-text-tertiary">{entry.summary}</p>
-                                        <p className="text-xs text-text-secondary">
-                                            {formatTimestamp(entry.occurredAt)}
-                                        </p>
-                                    </li>
-                                ),
-                            )}
-                        </ul>
-                    )}
-                </CardBody>
-            </Card>
+            <FormSection heading={t("settings:concurrency.conflictResolutionAudit")}>
+                {audit.length === 0 ? (
+                    <Alert color="warning" title={t("settings:concurrency.noConcurrencyDecisionsTitle")} variant="flat">
+                        {t("settings:concurrency.noConcurrencyDecisionsDescription")}
+                    </Alert>
+                ) : (
+                    <ul aria-label="Concurrency audit list" className="space-y-2">
+                        {audit.map(
+                            (entry): ReactElement => (
+                                <li
+                                    className="rounded-lg border border-border bg-surface p-3 text-sm"
+                                    key={entry.id}
+                                >
+                                    <p className="font-semibold text-foreground">
+                                        {entry.decision} · etag {entry.resultingEtag}
+                                    </p>
+                                    <p className="text-text-tertiary">{entry.summary}</p>
+                                    <p className="text-xs text-text-secondary">
+                                        {formatTimestamp(entry.occurredAt)}
+                                    </p>
+                                </li>
+                            ),
+                        )}
+                    </ul>
+                )}
+            </FormSection>
 
             <Modal
                 isOpen={conflictState !== undefined}
@@ -414,6 +401,6 @@ export function SettingsConcurrencyPage(): ReactElement {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-        </section>
+        </FormLayout>
     )
 }
