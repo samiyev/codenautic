@@ -341,7 +341,10 @@ export function ReportGeneratorPage(): ReactElement {
                             {t("reports:generator.selectAtLeastOneSection")}
                         </Alert>
                     ) : (
-                        <ul aria-label="Selected report sections" className="space-y-1 text-sm">
+                        <ul
+                            aria-label={t("reports:ariaLabel.generator.selectedSectionsList")}
+                            className="space-y-1 text-sm"
+                        >
                             {selectedSectionLabels.map(
                                 (label): ReactElement => (
                                     <li key={label}>{label}</li>
@@ -350,7 +353,7 @@ export function ReportGeneratorPage(): ReactElement {
                         </ul>
                     )}
                     <pre
-                        aria-label="Report preview payload"
+                        aria-label={t("reports:ariaLabel.generator.previewPayload")}
                         className="max-h-56 overflow-auto rounded border border-border bg-code-surface p-3 text-xs text-foreground"
                     >
                         {JSON.stringify(previewPayload, null, 2)}

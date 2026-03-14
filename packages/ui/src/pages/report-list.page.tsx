@@ -240,7 +240,10 @@ export function ReportListPage(): ReactElement {
                             {t("reports:list.noReportsHint")}
                         </Alert>
                     ) : (
-                        <ul aria-label="Generated reports list" className="space-y-2">
+                        <ul
+                            aria-label={t("reports:ariaLabel.list.generatedReportsList")}
+                            className="space-y-2"
+                        >
                             {filteredReports.map(
                                 (report): ReactElement => (
                                     <li
