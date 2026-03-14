@@ -13,10 +13,7 @@ describe("HelpDiagnosticsPage", (): void => {
         expect(screen.getByText("Help & diagnostics center")).not.toBeNull()
 
         await user.type(screen.getByRole("textbox", { name: "Search" }), "provider")
-        await user.selectOptions(
-            screen.getByRole("combobox", { name: "Category" }),
-            "providers",
-        )
+        await user.selectOptions(screen.getByRole("combobox", { name: "Category" }), "providers")
 
         expect(screen.getByText("Provider outage playbook")).not.toBeNull()
         expect(screen.getAllByRole("link", { name: "Open article / diagnostics" }).length).toBe(1)

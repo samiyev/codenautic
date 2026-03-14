@@ -37,7 +37,9 @@ describe("ccr review detail page", (): void => {
         renderWithProviders(<CcrReviewDetailPage ccr={ccr} />)
 
         expect(screen.getByText(ccr.title)).not.toBeNull()
-        expect(screen.getByRole("heading", { name: new RegExp(`Conversation.*${ccr.id}`) })).not.toBeNull()
+        expect(
+            screen.getByRole("heading", { name: new RegExp(`Conversation.*${ccr.id}`) }),
+        ).not.toBeNull()
     })
 
     it("добавляет сообщение в чат по quick action", async (): Promise<void> => {

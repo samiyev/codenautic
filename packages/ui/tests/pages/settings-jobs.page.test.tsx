@@ -255,10 +255,7 @@ describe("SettingsJobsPage", (): void => {
         expect(screen.getByRole("combobox", { name: "Interval hours" })).not.toBeNull()
         expect(screen.queryByRole("combobox", { name: "Schedule weekday" })).toBeNull()
 
-        await user.selectOptions(
-            screen.getByRole("combobox", { name: "Interval hours" }),
-            "12",
-        )
+        await user.selectOptions(screen.getByRole("combobox", { name: "Interval hours" }), "12")
 
         expect(screen.getByText(/rescan runs every 12h/)).not.toBeNull()
     })
@@ -284,14 +281,8 @@ describe("SettingsJobsPage", (): void => {
             screen.getByRole("combobox", { name: "Schedule frequency" }),
             "weekly",
         )
-        await user.selectOptions(
-            screen.getByRole("combobox", { name: "Schedule hour" }),
-            "14",
-        )
-        await user.selectOptions(
-            screen.getByRole("combobox", { name: "Schedule minute" }),
-            "30",
-        )
+        await user.selectOptions(screen.getByRole("combobox", { name: "Schedule hour" }), "14")
+        await user.selectOptions(screen.getByRole("combobox", { name: "Schedule minute" }), "30")
 
         expect(screen.getByText(/rescan runs weekly on Monday at 14:30/)).not.toBeNull()
     })
@@ -301,9 +292,7 @@ describe("SettingsJobsPage", (): void => {
 
         const auditList = screen.getByRole("list", { name: "Jobs audit trail list" })
         expect(within(auditList).getByText(/JOB-4055 · retry · Morpheus/)).not.toBeNull()
-        expect(
-            within(auditList).getByText("Retry accepted by queue worker."),
-        ).not.toBeNull()
+        expect(within(auditList).getByText("Retry accepted by queue worker.")).not.toBeNull()
     })
 
     it("schedule preview list рендерит 5 preview элементов", async (): Promise<void> => {
@@ -323,10 +312,7 @@ describe("SettingsJobsPage", (): void => {
             "weekly",
         )
 
-        await user.selectOptions(
-            screen.getByRole("combobox", { name: "Schedule weekday" }),
-            "5",
-        )
+        await user.selectOptions(screen.getByRole("combobox", { name: "Schedule weekday" }), "5")
 
         expect(screen.getByText(/rescan runs weekly on Friday/)).not.toBeNull()
     })

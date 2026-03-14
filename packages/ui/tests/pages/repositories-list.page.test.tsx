@@ -107,9 +107,7 @@ describe("repositories list page", (): void => {
         )
 
         expect(screen.queryAllByText("Scan error").length).toBeGreaterThan(0)
-        expect(
-            await screen.findByText("Files analyzed before error: 41 of 112"),
-        ).not.toBeNull()
+        expect(await screen.findByText("Files analyzed before error: 41 of 112")).not.toBeNull()
 
         const detailsTrigger = await screen.findByText("Error details")
         await user.click(detailsTrigger)

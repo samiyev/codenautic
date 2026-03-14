@@ -255,9 +255,7 @@ describe("SettingsOrganizationPage", (): void => {
 
         await user.click(gitSwitch)
 
-        expect(
-            screen.getByRole("switch", { name: "Git provider key configured" }),
-        ).not.toBeNull()
+        expect(screen.getByRole("switch", { name: "Git provider key configured" })).not.toBeNull()
     })
 
     it("когда переключается LLM key, тогда switch остаётся в DOM", async (): Promise<void> => {

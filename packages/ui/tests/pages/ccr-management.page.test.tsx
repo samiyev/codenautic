@@ -227,9 +227,7 @@ describe("ccr management page — фильтрация и UI", (): void => {
             />,
         )
 
-        const searchInput = screen.getByPlaceholderText(
-            "Search title / id / repo / assignee",
-        )
+        const searchInput = screen.getByPlaceholderText("Search title / id / repo / assignee")
         expect((searchInput as HTMLInputElement).value).toBe("auth")
 
         const statusSelect = screen.getByRole("combobox", {

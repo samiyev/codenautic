@@ -185,13 +185,19 @@ describe("settings integrations page", (): void => {
         renderWithProviders(<SettingsIntegrationsPage />)
 
         expect(screen.getByText("Jira")).not.toBeNull()
-        expect(screen.getByText("Issue sync and ticket linking for review findings.")).not.toBeNull()
+        expect(
+            screen.getByText("Issue sync and ticket linking for review findings."),
+        ).not.toBeNull()
 
         expect(screen.getByText("Linear")).not.toBeNull()
-        expect(screen.getByText("Lightweight issue routing for triage and ownership.")).not.toBeNull()
+        expect(
+            screen.getByText("Lightweight issue routing for triage and ownership."),
+        ).not.toBeNull()
 
         expect(screen.getByText("Sentry")).not.toBeNull()
-        expect(screen.getByText("Production incidents and error alerts correlation.")).not.toBeNull()
+        expect(
+            screen.getByText("Production incidents and error alerts correlation."),
+        ).not.toBeNull()
 
         expect(screen.getByText("Slack")).not.toBeNull()
         expect(
