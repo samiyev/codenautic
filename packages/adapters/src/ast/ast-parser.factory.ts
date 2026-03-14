@@ -21,6 +21,10 @@ import {
     JavaSourceCodeParser,
 } from "./java-source-code-parser"
 import {
+    assertPhpParserLanguage,
+    PhpSourceCodeParser,
+} from "./php-source-code-parser"
+import {
     assertRustParserLanguage,
     RustSourceCodeParser,
 } from "./rust-source-code-parser"
@@ -124,6 +128,11 @@ const DEFAULT_AST_PARSER_CREATORS: Readonly<
     [AST_LANGUAGE.RUST](): ISourceCodeParser {
         return new RustSourceCodeParser({
             language: assertRustParserLanguage(AST_LANGUAGE.RUST),
+        })
+    },
+    [AST_LANGUAGE.PHP](): ISourceCodeParser {
+        return new PhpSourceCodeParser({
+            language: assertPhpParserLanguage(AST_LANGUAGE.PHP),
         })
     },
 }

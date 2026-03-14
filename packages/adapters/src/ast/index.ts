@@ -116,6 +116,12 @@ export {
     type JavaParserLanguage,
 } from "./java-source-code-parser"
 export {
+    assertPhpParserLanguage,
+    PhpSourceCodeParser,
+    type IPhpSourceCodeParserOptions,
+    type PhpParserLanguage,
+} from "./php-source-code-parser"
+export {
     assertRustParserLanguage,
     RustSourceCodeParser,
     type IRustSourceCodeParserOptions,
