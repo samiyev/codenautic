@@ -32,7 +32,8 @@
         "columnComments": "Комментарии",
         "columnUpdatedAt": "Обновлено",
         "columnStatus": "Статус",
-        "emptyMessage": "Нет записей CCR для текущих фильтров."
+        "emptyMessage": "Нет записей CCR для текущих фильтров.",
+        "noMatchingFilters": "Нет совпадающих ревью для текущих фильтров. Попробуйте изменить параметры поиска или фильтрации."
     },
     "filters": {
         "searchAriaLabel": "Поиск CCR",

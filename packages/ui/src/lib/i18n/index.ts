@@ -15,3 +15,4 @@ export {
 } from "./i18n"
 export { I18N_RESOURCES, I18N_NAMESPACES } from "./i18n-resources"
 export { type IUseLocaleReturn, useLocale, syncHtmlLangAttribute } from "./use-locale"
+export { useDynamicTranslation } from "./use-dynamic-translation"

@@ -32,7 +32,8 @@
         "columnComments": "Comments",
         "columnUpdatedAt": "Updated at",
         "columnStatus": "Status",
-        "emptyMessage": "No CCR entries for current filters."
+        "emptyMessage": "No CCR entries for current filters.",
+        "noMatchingFilters": "No matching reviews for current filters. Try adjusting search or filter criteria."
     },
     "filters": {
         "searchAriaLabel": "Search CCR",
