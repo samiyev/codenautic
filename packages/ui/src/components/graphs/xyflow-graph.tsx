@@ -294,7 +294,14 @@ export function XyFlowGraph(props: IXYFlowGraphProps): ReactElement {
                     aria-live="polite"
                     className="rounded-lg border border-border bg-surface px-3 py-2 text-xs text-foreground"
                 >
-                    {t("code-city:xyflowGraph.overBudgetMessage", { shownNodes: budgetedGraphSlice.nodes.length, totalNodes: props.nodes.length, shownEdges: budgetedGraphSlice.edges.length, totalEdges: props.edges.length, droppedNodes: budgetedGraphSlice.droppedNodes, droppedEdges: budgetedGraphSlice.droppedEdges })}
+                    {t("code-city:xyflowGraph.overBudgetMessage", {
+                        shownNodes: budgetedGraphSlice.nodes.length,
+                        totalNodes: props.nodes.length,
+                        shownEdges: budgetedGraphSlice.edges.length,
+                        totalEdges: props.edges.length,
+                        droppedNodes: budgetedGraphSlice.droppedNodes,
+                        droppedEdges: budgetedGraphSlice.droppedEdges,
+                    })}
                 </div>
             ) : null}
             {progressiveRenderEnabled === true && isProgressiveRenderReady !== true ? (

@@ -207,7 +207,9 @@ function XYFlowExportControls(props: {
                 }}
                 type="button"
             >
-                {isExportingPng === true ? t("code-city:xyflowRenderer.exportingPng") : t("code-city:xyflowRenderer.exportPng")}
+                {isExportingPng === true
+                    ? t("code-city:xyflowRenderer.exportingPng")
+                    : t("code-city:xyflowRenderer.exportPng")}
             </button>
         </Panel>
     )
