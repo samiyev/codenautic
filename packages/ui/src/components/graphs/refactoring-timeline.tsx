@@ -69,9 +69,7 @@ export function RefactoringTimeline(props: IRefactoringTimelineProps): ReactElem
                         <li className="rounded border border-border bg-surface p-2" key={task.id}>
                             <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0">
-                                    <p className={TYPOGRAPHY.cardTitle}>
-                                        {task.title}
-                                    </p>
+                                    <p className={TYPOGRAPHY.cardTitle}>{task.title}</p>
                                     <p className={TYPOGRAPHY.captionMuted}>
                                         Weeks {String(task.startWeek)}–
                                         {String(task.startWeek + task.durationWeeks - 1)}

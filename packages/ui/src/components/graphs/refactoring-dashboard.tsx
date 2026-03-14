@@ -148,9 +148,15 @@ export function RefactoringDashboard(props: IRefactoringDashboardProps): ReactEl
                             }
                         }}
                     >
-                        <option value="roi">{t("code-city:refactoringComp.sortOptions.roi")}</option>
-                        <option value="risk">{t("code-city:refactoringComp.sortOptions.risk")}</option>
-                        <option value="effort">{t("code-city:refactoringComp.sortOptions.effort")}</option>
+                        <option value="roi">
+                            {t("code-city:refactoringComp.sortOptions.roi")}
+                        </option>
+                        <option value="risk">
+                            {t("code-city:refactoringComp.sortOptions.risk")}
+                        </option>
+                        <option value="effort">
+                            {t("code-city:refactoringComp.sortOptions.effort")}
+                        </option>
                     </select>
                 </label>
 
@@ -184,32 +190,40 @@ export function RefactoringDashboard(props: IRefactoringDashboardProps): ReactEl
                         <li className="rounded border border-border bg-surface p-2" key={target.id}>
                             <div className="flex items-start justify-between gap-3">
                                 <div>
-                                    <p className={TYPOGRAPHY.cardTitle}>
-                                        {target.title}
-                                    </p>
+                                    <p className={TYPOGRAPHY.cardTitle}>{target.title}</p>
                                     <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
                                         {target.description}
                                     </p>
                                     <p className={`mt-1 ${TYPOGRAPHY.micro} text-muted-foreground`}>
-                                        {t("code-city:refactoringComp.modulePrefix", { name: target.module })}
+                                        {t("code-city:refactoringComp.modulePrefix", {
+                                            name: target.module,
+                                        })}
                                     </p>
                                 </div>
                                 <span
                                     className={`rounded border px-2 py-0.5 ${TYPOGRAPHY.micro} ${resolveRiskClassName(target.riskScore)}`}
                                 >
-                                    {t("code-city:refactoringComp.riskLabel", { score: target.riskScore })}
+                                    {t("code-city:refactoringComp.riskLabel", {
+                                        score: target.riskScore,
+                                    })}
                                 </span>
                             </div>
                             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-foreground">
                                 <span className="rounded border border-border bg-surface px-2 py-0.5">
-                                    {t("code-city:refactoringComp.roiLabel", { score: target.roiScore })}
+                                    {t("code-city:refactoringComp.roiLabel", {
+                                        score: target.roiScore,
+                                    })}
                                 </span>
                                 <span className="rounded border border-border bg-surface px-2 py-0.5">
-                                    {t("code-city:refactoringComp.effortLabel", { score: target.effortScore })}
+                                    {t("code-city:refactoringComp.effortLabel", {
+                                        score: target.effortScore,
+                                    })}
                                 </span>
                             </div>
                             <button
-                                aria-label={t("code-city:refactoringComp.ariaInspectTarget", { title: target.title })}
+                                aria-label={t("code-city:refactoringComp.ariaInspectTarget", {
+                                    title: target.title,
+                                })}
                                 className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
                                 onClick={(): void => {
                                     props.onSelectTarget?.(target)

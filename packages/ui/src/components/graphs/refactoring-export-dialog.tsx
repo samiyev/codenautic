@@ -108,8 +108,12 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
                                 }
                             }}
                         >
-                            <option value="jira">{t("code-city:refactoringExportComp.destinationOptions.jira")}</option>
-                            <option value="github">{t("code-city:refactoringExportComp.destinationOptions.github")}</option>
+                            <option value="jira">
+                                {t("code-city:refactoringExportComp.destinationOptions.jira")}
+                            </option>
+                            <option value="github">
+                                {t("code-city:refactoringExportComp.destinationOptions.github")}
+                            </option>
                         </select>
                     </label>
 
@@ -148,7 +152,10 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
                                     key={target.id}
                                 >
                                     <input
-                                        aria-label={t("code-city:refactoringExportComp.ariaSelectTarget", { title: target.title })}
+                                        aria-label={t(
+                                            "code-city:refactoringExportComp.ariaSelectTarget",
+                                            { title: target.title },
+                                        )}
                                         checked={selectedTargetIds.includes(target.id)}
                                         className="mt-0.5 h-4 w-4 rounded border-border"
                                         onChange={(): void => {
@@ -157,11 +164,12 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
                                         type="checkbox"
                                     />
                                     <div className="min-w-0">
-                                        <p className={TYPOGRAPHY.cardTitle}>
-                                            {target.title}
-                                        </p>
+                                        <p className={TYPOGRAPHY.cardTitle}>{target.title}</p>
                                         <p className={TYPOGRAPHY.captionMuted}>
-                                            {t("code-city:refactoringExportComp.moduleRoi", { module: target.module, roi: target.roiScore })}
+                                            {t("code-city:refactoringExportComp.moduleRoi", {
+                                                module: target.module,
+                                                roi: target.roiScore,
+                                            })}
                                         </p>
                                     </div>
                                 </li>
@@ -181,7 +189,10 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
                                 templateTitle,
                             })
                             setLastExportLabel(
-                                t("code-city:refactoringExportComp.exportedTasks", { count: selectedTargets.length, destination }),
+                                t("code-city:refactoringExportComp.exportedTasks", {
+                                    count: selectedTargets.length,
+                                    destination,
+                                }),
                             )
                             setIsDialogOpen(false)
                         }}
