@@ -369,6 +369,9 @@ describe("Provider modules registration", () => {
             register(_jobType: string, _processor: (payload: unknown) => Promise<void>): void {
                 return
             },
+            get(_jobType: string): ((payload: unknown) => Promise<void>) | undefined {
+                return undefined
+            },
         }
         const runtime: IWorkerRuntime = {
             start(): Promise<void> {

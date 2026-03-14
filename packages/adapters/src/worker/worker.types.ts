@@ -160,6 +160,11 @@ export interface IWorkerQueueService {
 }
 
 /**
+ * Worker processor callback.
+ */
+export type WorkerProcessor = (payload: unknown) => Promise<void>
+
+/**
  * Processor registry contract used by worker adapters.
  */
 export interface IWorkerProcessorRegistry {
@@ -169,7 +174,15 @@ export interface IWorkerProcessorRegistry {
      * @param jobType Logical job type.
      * @param processor Processor callback.
      */
-    register(jobType: string, processor: (payload: unknown) => Promise<void>): void
+    register(jobType: string, processor: WorkerProcessor): void
+
+    /**
+     * Looks up processor callback by job type.
+     *
+     * @param jobType Logical job type.
+     * @returns Registered callback or undefined.
+     */
+    get(jobType: string): WorkerProcessor | undefined
 }
 
 /**

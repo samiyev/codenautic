@@ -23,6 +23,10 @@ export {
     type IBullMqQueueJob,
     type IBullMqQueueServiceOptions,
 } from "./bullmq-queue-service.impl"
+export {
+    WorkerProcessorRegistry,
+    type IWorkerProcessorRegistryOptions,
+} from "./worker-processor-registry.impl"
 export {WORKER_TOKENS} from "./worker.tokens"
 export {
     WORKER_QUEUE_JOB_STATUS,
@@ -30,6 +34,7 @@ export {
     type IWorkerDequeuedJob,
     type IWorkerJobPayload,
     type IWorkerProcessorRegistry,
+    type WorkerProcessor,
     type WorkerQueueJobStatus,
     type IWorkerQueueService,
     type IWorkerRuntime,

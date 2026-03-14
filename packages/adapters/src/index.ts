@@ -322,6 +322,7 @@ export {
     type IBullMqWorkerInstance,
     type IBullMqWorkerRuntimeJob,
     type IBullMqWorkerRuntimeOptions,
+    type IWorkerProcessorRegistryOptions,
     WORKER_QUEUE_JOB_STATUS,
     WORKER_TOKENS,
     WORKER_RUNTIME_STATUS,
@@ -329,6 +330,7 @@ export {
     type IWorkerDequeuedJob,
     type IWorkerJobPayload,
     type IWorkerProcessorRegistry,
+    type WorkerProcessor,
     type WorkerQueueJobStatus,
     type IWorkerQueueService,
     type IWorkerRuntime,
@@ -336,5 +338,6 @@ export {
     type WorkerPayloadProcessor,
     type WorkerProcessorResolver,
     type WorkerRuntimeStatus,
+    WorkerProcessorRegistry,
     registerWorkerModule,
 } from "./worker"
