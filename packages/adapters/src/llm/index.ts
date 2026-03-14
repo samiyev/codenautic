@@ -29,6 +29,15 @@ export {
     type AnthropicProviderErrorSource,
 } from "./anthropic-provider.error"
 export {
+    GoogleProvider,
+    type IGoogleGenAIClient,
+    type IGoogleProviderOptions,
+} from "./google-provider"
+export {
+    GoogleProviderError,
+    type IGoogleProviderErrorDetails,
+} from "./google-provider.error"
+export {
     OpenAIProvider,
     type IOpenAIClient,
     type IOpenAIProviderOptions,
