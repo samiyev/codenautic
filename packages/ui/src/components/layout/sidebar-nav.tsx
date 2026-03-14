@@ -180,8 +180,7 @@ export function SidebarNav(props: ISidebarNavProps): ReactElement {
 
     const renderItem = (item: ISidebarItem): ReactElement => {
         const isNavigable = item.to !== undefined && item.isDisabled !== true
-        const isActive =
-            item.to !== undefined && isItemActive(item.to) && item.isDisabled !== true
+        const isActive = item.to !== undefined && isItemActive(item.to) && item.isDisabled !== true
 
         const handlePress = (): void => {
             if (props.onNavigate !== undefined) {
@@ -231,7 +230,9 @@ export function SidebarNav(props: ISidebarNavProps): ReactElement {
                     type="button"
                     onClick={handlePress}
                 >
-                    <span className={`inline-flex shrink-0 items-center justify-center ${isActive ? "text-primary" : "text-text-subtle group-hover:text-foreground"}`}>
+                    <span
+                        className={`inline-flex shrink-0 items-center justify-center ${isActive ? "text-primary" : "text-text-subtle group-hover:text-foreground"}`}
+                    >
                         {item.icon}
                     </span>
                     <span className="truncate">{item.label}</span>
@@ -243,28 +244,32 @@ export function SidebarNav(props: ISidebarNavProps): ReactElement {
     return (
         <nav aria-label="Main navigation" className="flex h-full flex-col">
             <div className="flex-1 space-y-3 overflow-y-auto">
-                {groups.map((group, groupIndex): ReactElement => (
-                    <div key={group.label ?? `group-${String(groupIndex)}`}>
-                        {group.label !== undefined && isCollapsed !== true ? (
-                            <p className={`mb-1 px-2 ${TYPOGRAPHY.overline}`} style={{ fontSize: "10px" }}>
-                                {group.label}
-                            </p>
-                        ) : null}
-                        {isCollapsed && groupIndex > 0 ? (
-                            <div aria-hidden="true" className="mx-auto mb-1.5 mt-0.5 h-px w-4 bg-border/40" />
-                        ) : null}
-                        <ul className="flex flex-col gap-px">
-                            {group.items.map(renderItem)}
-                        </ul>
-                    </div>
-                ))}
+                {groups.map(
+                    (group, groupIndex): ReactElement => (
+                        <div key={group.label ?? `group-${String(groupIndex)}`}>
+                            {group.label !== undefined && isCollapsed !== true ? (
+                                <p
+                                    className={`mb-1 px-2 ${TYPOGRAPHY.overline}`}
+                                    style={{ fontSize: "10px" }}
+                                >
+                                    {group.label}
+                                </p>
+                            ) : null}
+                            {isCollapsed && groupIndex > 0 ? (
+                                <div
+                                    aria-hidden="true"
+                                    className="mx-auto mb-1.5 mt-0.5 h-px w-4 bg-border/40"
+                                />
+                            ) : null}
+                            <ul className="flex flex-col gap-px">{group.items.map(renderItem)}</ul>
+                        </div>
+                    ),
+                )}
             </div>
 
             {/* Utility items pinned to bottom */}
             <div className="mt-1 border-t border-border/30 pt-1.5">
-                <ul className="flex flex-col gap-px">
-                    {utilityItems.map(renderItem)}
-                </ul>
+                <ul className="flex flex-col gap-px">{utilityItems.map(renderItem)}</ul>
             </div>
         </nav>
     )

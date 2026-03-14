@@ -3,13 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import { ChevronDown } from "@/components/icons/app-icons"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
-import {
-    Avatar,
-    Dropdown,
-    DropdownItem,
-    DropdownMenu,
-    DropdownTrigger,
-} from "@/components/ui"
+import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@/components/ui"
 
 /**
  * Organization option for workspace switcher.
@@ -59,8 +53,7 @@ export function SidebarFooter(props: ISidebarFooterProps): ReactElement {
     const isCollapsed = props.isCollapsed === true
 
     const activeOrganization = props.organizations?.find(
-        (organization): boolean =>
-            organization.id === props.activeOrganizationId,
+        (organization): boolean => organization.id === props.activeOrganizationId,
     )
 
     const displayName = props.userName ?? t("navigation:userMenu.defaultName")
@@ -76,18 +69,10 @@ export function SidebarFooter(props: ISidebarFooterProps): ReactElement {
                     variant="light"
                 >
                     {isCollapsed ? (
-                        <Avatar
-                            className="shrink-0"
-                            label={displayName}
-                            size="sm"
-                        />
+                        <Avatar className="shrink-0" label={displayName} size="sm" />
                     ) : (
                         <span className="flex w-full items-center gap-2.5">
-                            <Avatar
-                                className="shrink-0"
-                                label={displayName}
-                                size="sm"
-                            />
+                            <Avatar className="shrink-0" label={displayName} size="sm" />
                             <span className="flex min-w-0 flex-1 flex-col">
                                 <span className={`truncate ${TYPOGRAPHY.cardTitle}`}>
                                     {displayName}
@@ -110,7 +95,10 @@ export function SidebarFooter(props: ISidebarFooterProps): ReactElement {
                         <p className="text-xs text-text-subtle">{displayEmail}</p>
                     </DropdownItem>
                     {props.organizations !== undefined && props.organizations.length > 1 ? (
-                        <DropdownItem key="org-separator" className="pointer-events-none opacity-60">
+                        <DropdownItem
+                            key="org-separator"
+                            className="pointer-events-none opacity-60"
+                        >
                             <p className="text-[10px] font-semibold uppercase tracking-wider text-text-subtle">
                                 {t("navigation:userMenu.workspace")}
                             </p>
@@ -121,7 +109,11 @@ export function SidebarFooter(props: ISidebarFooterProps): ReactElement {
                               (organization): ReactElement => (
                                   <DropdownItem
                                       key={`org-${organization.id}`}
-                                      className={organization.id === props.activeOrganizationId ? "font-medium text-primary" : ""}
+                                      className={
+                                          organization.id === props.activeOrganizationId
+                                              ? "font-medium text-primary"
+                                              : ""
+                                      }
                                       onPress={(): void => {
                                           props.onOrganizationChange?.(organization.id)
                                       }}

@@ -27,13 +27,14 @@ export interface ISidebarActionsProps {
 export function SidebarActions(props: ISidebarActionsProps): ReactElement {
     const { t } = useTranslation(["navigation"])
     const isCollapsed = props.isCollapsed === true
-    const hasNotifications =
-        props.notificationCount !== undefined && props.notificationCount > 0
+    const hasNotifications = props.notificationCount !== undefined && props.notificationCount > 0
 
     const bellButton = (
         <Button
             isIconOnly
-            aria-label={t("navigation:toolbar.notifications", { count: props.notificationCount ?? 0 })}
+            aria-label={t("navigation:toolbar.notifications", {
+                count: props.notificationCount ?? 0,
+            })}
             className="h-7 min-h-7 w-7"
             radius="full"
             size="sm"
