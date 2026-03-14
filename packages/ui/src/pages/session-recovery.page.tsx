@@ -20,11 +20,7 @@ export function SessionRecoveryPage(): ReactElement {
             subtitle={t("system:sessionRecovery.pageSubtitle")}
             title={t("system:sessionRecovery.pageTitle")}
         >
-            <Alert
-                color="primary"
-                title={t("system:sessionRecovery.guidanceTitle")}
-                variant="flat"
-            >
+            <Alert color="primary" title={t("system:sessionRecovery.guidanceTitle")} variant="flat">
                 {t("system:sessionRecovery.guidanceMessage")}
             </Alert>
 

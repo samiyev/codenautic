@@ -2,6 +2,7 @@ import type { ReactElement } from "react"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useDynamicTranslation } from "@/lib/i18n"
 import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
 import { PageShell } from "@/components/layout/page-shell"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -348,6 +349,7 @@ function formatProgressLabel(percent: number): string {
  */
 export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
     const { t } = useTranslation(["system"])
+    const { td } = useDynamicTranslation(["system"])
     const jobId =
         props.jobId?.trim().length === 0 ? DEFAULT_JOB_ID : (props.jobId ?? DEFAULT_JOB_ID)
     const state = useScanProgressEvents(jobId, {
@@ -372,34 +374,25 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
         if (raw === "lessThanMinute") {
             return t("system:scanProgress.lessThanMinute")
         }
-        return (t as unknown as (key: string, options: Record<string, string>) => string)(
-            "system:scanProgress.etaMinutes",
-            { minutes: raw },
-        )
-    }, [progressState.etaSeconds, t])
+        return td("system:scanProgress.etaMinutes", { minutes: raw })
+    }, [progressState.etaSeconds, td])
 
     return (
         <PageShell
-            subtitle={(t as unknown as (key: string, options: Record<string, string>) => string)(
-                "system:scanProgress.pageSubtitle",
-                { jobId },
-            )}
+            subtitle={td("system:scanProgress.pageSubtitle", { jobId })}
             title={t("system:scanProgress.pageTitle")}
         >
             {batchRepositoriesCount > 1 ? (
                 <p className="text-sm text-muted-foreground">
-                    {(t as unknown as (key: string, options: Record<string, string>) => string)(
-                        "system:scanProgress.batchOnboarding",
-                        { count: String(batchRepositoriesCount) },
-                    )}
+                    {td("system:scanProgress.batchOnboarding", {
+                        count: String(batchRepositoriesCount),
+                    })}
                 </p>
             ) : null}
 
             <Card>
                 <CardHeader>
-                    <p className={TYPOGRAPHY.cardTitle}>
-                        {t("system:scanProgress.currentStatus")}
-                    </p>
+                    <p className={TYPOGRAPHY.cardTitle}>{t("system:scanProgress.currentStatus")}</p>
                 </CardHeader>
                 <CardBody className="space-y-4">
                     <div className="rounded-lg border border-border bg-surface p-3">
@@ -421,22 +414,14 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                         </div>
                         <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
                             <span>
-                                {(
-                                    t as unknown as (
-                                        key: string,
-                                        options: Record<string, string>,
-                                    ) => string
-                                )("system:scanProgress.progressLabel", {
+                                {td("system:scanProgress.progressLabel", {
                                     percent: String(progressState.percent),
                                 })}
                             </span>
                             <span>
-                                {(
-                                    t as unknown as (
-                                        key: string,
-                                        options: Record<string, string>,
-                                    ) => string
-                                )("system:scanProgress.etaLabel", { eta: etaDisplay })}
+                                {td("system:scanProgress.etaLabel", {
+                                    eta: etaDisplay,
+                                })}
                             </span>
                         </div>
                     </div>
@@ -507,9 +492,7 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
             <Card>
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <p className={TYPOGRAPHY.cardTitle}>
-                            {t("system:scanProgress.stageLogs")}
-                        </p>
+                        <p className={TYPOGRAPHY.cardTitle}>{t("system:scanProgress.stageLogs")}</p>
                         <p
                             className={`text-xs ${progressState.isDone ? "text-success" : "text-muted-foreground"}`}
                         >
