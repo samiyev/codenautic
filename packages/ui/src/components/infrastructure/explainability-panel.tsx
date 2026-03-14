@@ -123,7 +123,10 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                             <p className="text-sm font-semibold text-foreground">
                                 {t("common:explainabilityPanel.topFactors")}
                             </p>
-                            <ul aria-label="Explainability factors" className="space-y-2">
+                            <ul
+                                aria-label={t("common:ariaLabel.explainabilityPanel.factors")}
+                                className="space-y-2"
+                            >
                                 {props.factors.map(
                                     (factor): ReactElement => (
                                         <li
@@ -150,7 +153,7 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                                 {t("common:explainabilityPanel.knownLimitations")}
                             </p>
                             <ul
-                                aria-label="Explainability limitations"
+                                aria-label={t("common:ariaLabel.explainabilityPanel.limitations")}
                                 className="list-disc space-y-1 pl-5 text-sm text-text-tertiary"
                             >
                                 {props.limitations.map(
@@ -174,7 +177,9 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                             {snippet.length > 0 ? (
                                 <Textarea
                                     isReadOnly
-                                    aria-label="Explainability export snippet"
+                                    aria-label={t(
+                                        "common:ariaLabel.explainabilityPanel.exportSnippet",
+                                    )}
                                     value={snippet}
                                 />
                             ) : null}
