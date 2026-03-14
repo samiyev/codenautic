@@ -18,10 +18,10 @@ describe("SidebarFooter", (): void => {
         expect(screen.getAllByText("User").length).toBeGreaterThan(0)
     })
 
-    it("вычисляет initials 'CN', когда userName не задан", (): void => {
+    it("рендерит avatar, когда userName не задан", (): void => {
         renderWithProviders(<SidebarFooter />)
 
-        expect(screen.getAllByText("CN").length).toBeGreaterThan(0)
+        expect(screen.getByRole("button", { name: /User/i })).not.toBeNull()
     })
 
     it("рендерит workspace switcher trigger, когда переданы organizations", (): void => {
@@ -51,10 +51,10 @@ describe("SidebarFooter", (): void => {
         expect(screen.getByText("Workspace")).not.toBeNull()
     })
 
-    it("не рендерит workspace switcher, когда organizations не переданы", (): void => {
+    it("рендерит user trigger без org label, когда organizations не переданы", (): void => {
         renderWithProviders(<SidebarFooter userName="Test User" />)
 
-        expect(screen.queryByText("Workspace")).toBeNull()
+        expect(screen.getByRole("button", { name: /Test User/i })).not.toBeNull()
     })
 
     it("скрывает текст и показывает только иконки в collapsed режиме", (): void => {
@@ -175,7 +175,7 @@ describe("SidebarFooter", (): void => {
         expect(screen.getByText("user@example.com")).not.toBeNull()
     })
 
-    it("открывает workspace dropdown с организациями при клике", async (): Promise<void> => {
+    it("открывает unified dropdown с организациями при клике", async (): Promise<void> => {
         const user = userEvent.setup()
 
         renderWithProviders(
@@ -190,12 +190,8 @@ describe("SidebarFooter", (): void => {
             />,
         )
 
-        const workspaceTrigger = screen.getByText("Org Alpha").closest("button")
-        expect(workspaceTrigger).not.toBeNull()
-
-        if (workspaceTrigger !== null) {
-            await user.click(workspaceTrigger)
-        }
+        const trigger = screen.getByRole("button", { name: /Test User/i })
+        await user.click(trigger)
 
         expect(screen.getByText("Org Beta")).not.toBeNull()
         expect(screen.getByText("Org Gamma")).not.toBeNull()
@@ -215,12 +211,11 @@ describe("SidebarFooter", (): void => {
         expect(screen.getAllByText("Jane Doe").length).toBeGreaterThan(0)
     })
 
-    it("отображает initials пользователя в sr-only span", (): void => {
+    it("рендерит dropdown trigger для пользователя", (): void => {
         renderWithProviders(<SidebarFooter userName="John Smith" />)
 
-        const srOnlySpans = screen.getAllByText("JO")
-        const hasSrOnly = srOnlySpans.some((span): boolean => span.classList.contains("sr-only"))
-        expect(hasSrOnly).toBe(true)
+        const trigger = screen.getByRole("button", { name: /John Smith/i })
+        expect(trigger.getAttribute("aria-haspopup")).toBe("true")
     })
 
     it("показывает ChevronDown иконку в expanded режиме с organizations", (): void => {
@@ -265,7 +260,7 @@ describe("SidebarFooter", (): void => {
             await user.click(userTrigger)
         }
 
-        expect(screen.getByLabelText("User")).not.toBeNull()
+        expect(screen.getByLabelText("Test User")).not.toBeNull()
     })
 
     it("рендерит user dropdown trigger с aria-haspopup", (): void => {
@@ -278,7 +273,7 @@ describe("SidebarFooter", (): void => {
         expect(hasPopupTrigger).toBe(true)
     })
 
-    it("рендерит workspace trigger с aria-haspopup когда organizations переданы", (): void => {
+    it("рендерит unified trigger с aria-haspopup когда organizations переданы", (): void => {
         renderWithProviders(
             <SidebarFooter
                 organizations={[{ id: "org-1", label: "CodeNautic" }]}
@@ -291,7 +286,7 @@ describe("SidebarFooter", (): void => {
         const popupTriggers = allTriggers.filter(
             (button): boolean => button.getAttribute("aria-haspopup") === "true",
         )
-        expect(popupTriggers.length).toBe(2)
+        expect(popupTriggers.length).toBe(1)
     })
 
     it("when workspace org is selected, then calls onOrganizationChange with a string key", async (): Promise<void> => {
@@ -310,12 +305,8 @@ describe("SidebarFooter", (): void => {
             />,
         )
 
-        const workspaceTrigger = screen.getByText("Org Alpha").closest("button")
-        expect(workspaceTrigger).not.toBeNull()
-
-        if (workspaceTrigger !== null) {
-            await user.click(workspaceTrigger)
-        }
+        const trigger = screen.getByRole("button", { name: /Test User/i })
+        await user.click(trigger)
 
         const orgBetaOption = screen.getByText("Org Beta")
         await user.click(orgBetaOption)
