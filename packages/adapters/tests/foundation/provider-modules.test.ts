@@ -371,6 +371,19 @@ describe("Provider modules registration", () => {
             stop(): Promise<void> {
                 return Promise.resolve()
             },
+            healthCheck(): ReturnType<IWorkerRuntime["healthCheck"]> {
+                return {
+                    queueName: "worker-queue",
+                    status: "IDLE",
+                    isHealthy: false,
+                    activeJobs: 0,
+                    prefetch: 1,
+                    gracefulShutdownTimeoutMs: 30_000,
+                    startedAt: null,
+                    stoppedAt: null,
+                    lastFailure: null,
+                }
+            },
         }
 
         registerWorkerModule(container, {

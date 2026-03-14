@@ -307,11 +307,24 @@ export {
 export {type IRegisterReviewModuleOptions, registerReviewModule} from "./review"
 export {type IRegisterRuleModuleOptions, registerRuleModule} from "./rule"
 export {
+    BULLMQ_WORKER_PREFETCH,
+    BullMqWorkerRuntime,
+    DEFAULT_WORKER_GRACEFUL_SHUTDOWN_TIMEOUT_MS,
+    type BullMqWorkerFactory,
+    type IBullMqWorkerFactoryOptions,
+    type IBullMqWorkerInstance,
+    type IBullMqWorkerRuntimeJob,
+    type IBullMqWorkerRuntimeOptions,
     WORKER_TOKENS,
+    WORKER_RUNTIME_STATUS,
     type IRegisterWorkerModuleOptions,
     type IWorkerJobPayload,
     type IWorkerProcessorRegistry,
     type IWorkerQueueService,
     type IWorkerRuntime,
+    type IWorkerRuntimeHealth,
+    type WorkerPayloadProcessor,
+    type WorkerProcessorResolver,
+    type WorkerRuntimeStatus,
     registerWorkerModule,
 } from "./worker"

@@ -19,6 +19,73 @@ export interface IWorkerJobPayload {
 }
 
 /**
+ * Runtime lifecycle statuses for worker adapter.
+ */
+export const WORKER_RUNTIME_STATUS = {
+    Idle: "IDLE",
+    Running: "RUNNING",
+    Stopping: "STOPPING",
+    Stopped: "STOPPED",
+    Degraded: "DEGRADED",
+} as const
+
+/**
+ * Worker runtime lifecycle status.
+ */
+export type WorkerRuntimeStatus =
+    (typeof WORKER_RUNTIME_STATUS)[keyof typeof WORKER_RUNTIME_STATUS]
+
+/**
+ * Health snapshot for worker runtime.
+ */
+export interface IWorkerRuntimeHealth {
+    /**
+     * Queue name served by this runtime.
+     */
+    readonly queueName: string
+
+    /**
+     * Current runtime lifecycle state.
+     */
+    readonly status: WorkerRuntimeStatus
+
+    /**
+     * True when runtime is healthy and currently consuming jobs.
+     */
+    readonly isHealthy: boolean
+
+    /**
+     * Number of currently active jobs.
+     */
+    readonly activeJobs: number
+
+    /**
+     * Worker prefetch/concurrency value.
+     */
+    readonly prefetch: number
+
+    /**
+     * Graceful shutdown timeout in milliseconds.
+     */
+    readonly gracefulShutdownTimeoutMs: number
+
+    /**
+     * Runtime start timestamp.
+     */
+    readonly startedAt: Date | null
+
+    /**
+     * Runtime stop timestamp.
+     */
+    readonly stoppedAt: Date | null
+
+    /**
+     * Last failure message captured by runtime.
+     */
+    readonly lastFailure: string | null
+}
+
+/**
  * Queue service contract used by worker adapters.
  */
 export interface IWorkerQueueService {
@@ -57,5 +124,9 @@ export interface IWorkerRuntime {
      * Stops runtime gracefully.
      */
     stop(): Promise<void>
-}
 
+    /**
+     * Returns current runtime health snapshot.
+     */
+    healthCheck(): IWorkerRuntimeHealth
+}
