@@ -2,7 +2,7 @@ import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useDynamicTranslation } from "@/lib/i18n"
-import { Alert, Button } from "@/components/ui"
+import { Alert, Button } from "@heroui/react"
 
 import type { IOnboardingWizardState } from "../use-onboarding-wizard-state"
 import {
@@ -62,7 +62,7 @@ export function BulkScanJobsMonitor({ state }: IBulkScanJobsMonitorProps): React
                         }}
                         size="sm"
                         type="button"
-                        variant="light"
+                        variant="ghost"
                     >
                         {t("onboarding:bulk.pauseButton")}
                     </Button>
@@ -73,18 +73,17 @@ export function BulkScanJobsMonitor({ state }: IBulkScanJobsMonitorProps): React
                         }}
                         size="sm"
                         type="button"
-                        variant="light"
+                        variant="ghost"
                     >
                         {t("onboarding:bulk.resumeButton")}
                     </Button>
                     <Button
-                        color="danger"
+                        variant="danger"
                         onPress={(): void => {
                             state.handleCancelAll()
                         }}
                         size="sm"
                         type="button"
-                        variant="ghost"
                     >
                         {t("onboarding:bulk.cancelAllButton")}
                     </Button>
@@ -137,7 +136,7 @@ export function BulkScanJobsMonitor({ state }: IBulkScanJobsMonitorProps): React
                             </p>
 
                             {job.errorMessage === undefined ? null : (
-                                <Alert color="danger" className="mt-2">
+                                <Alert status="danger" className="mt-2">
                                     {job.errorMessage}
                                 </Alert>
                             )}
@@ -162,13 +161,12 @@ export function BulkScanJobsMonitor({ state }: IBulkScanJobsMonitorProps): React
                             <div className="mt-2 flex gap-2">
                                 {job.status === "error" ? (
                                     <Button
-                                        color="danger"
+                                        variant="danger"
                                         onPress={(): void => {
                                             state.handleRetryJob(job.id)
                                         }}
                                         size="sm"
                                         type="button"
-                                        variant="ghost"
                                     >
                                         {t("onboarding:bulk.retryButton")}
                                     </Button>
@@ -176,13 +174,12 @@ export function BulkScanJobsMonitor({ state }: IBulkScanJobsMonitorProps): React
                                 {isBulkScanTerminal(job.status) ||
                                 job.status === "paused" ? null : (
                                     <Button
-                                        color="danger"
+                                        variant="danger"
                                         onPress={(): void => {
                                             state.handleCancelJob(job.id)
                                         }}
                                         size="sm"
                                         type="button"
-                                        variant="ghost"
                                     >
                                         {t("onboarding:bulk.cancelButton")}
                                     </Button>

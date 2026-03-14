@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Card, CardBody, CardHeader } from "@/components/ui"
+import { Card, CardContent, CardHeader } from "@heroui/react"
 import { PageShell } from "@/components/layout/page-shell"
 
 import type { IOnboardingWizardPageProps } from "./onboarding-wizard-types"
@@ -31,7 +31,7 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
                 <CardHeader>
                     <WizardStepIndicator state={state} />
                 </CardHeader>
-                <CardBody>
+                <CardContent>
                     <form
                         className="space-y-4"
                         onSubmit={(event): void => {
@@ -45,7 +45,7 @@ export function OnboardingWizardPage(props: IOnboardingWizardPageProps): ReactEl
                         <BulkScanJobsMonitor state={state} />
                         <WizardStepsNavigator state={state} />
                     </form>
-                </CardBody>
+                </CardContent>
             </Card>
         </PageShell>
     )
