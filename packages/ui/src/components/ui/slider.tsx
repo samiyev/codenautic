@@ -1,11 +1,5 @@
 import { type ReactElement } from "react"
-import {
-    SliderFill,
-    SliderOutput,
-    SliderRoot,
-    SliderThumb,
-    SliderTrack,
-} from "@heroui/react"
+import { SliderFill, SliderOutput, SliderRoot, SliderThumb, SliderTrack } from "@heroui/react"
 
 /**
  * Свойства Slider-компонента.
@@ -73,8 +67,20 @@ export function Slider(props: ISliderProps): ReactElement {
             isDisabled={isDisabled}
             maxValue={maxValue}
             minValue={minValue}
-            onChange={onChange !== undefined ? (v: number | number[]): void => { onChange(Array.isArray(v) ? v[0] ?? 0 : v) } : undefined}
-            onChangeEnd={onChangeEnd !== undefined ? (v: number | number[]): void => { onChangeEnd(Array.isArray(v) ? v[0] ?? 0 : v) } : undefined}
+            onChange={
+                onChange !== undefined
+                    ? (v: number | number[]): void => {
+                          onChange(Array.isArray(v) ? (v[0] ?? 0) : v)
+                      }
+                    : undefined
+            }
+            onChangeEnd={
+                onChangeEnd !== undefined
+                    ? (v: number | number[]): void => {
+                          onChangeEnd(Array.isArray(v) ? (v[0] ?? 0) : v)
+                      }
+                    : undefined
+            }
             step={step}
             value={value}
         >
