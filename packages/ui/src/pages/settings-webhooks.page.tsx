@@ -445,7 +445,7 @@ export function SettingsWebhooksPage(): ReactElement {
                                 value={search}
                             />
                             <select
-                                aria-label="Filter webhooks by status"
+                                aria-label={t("settings:ariaLabel.webhooks.filterByStatus")}
                                 className={NATIVE_FORM.select}
                                 value={statusFilter}
                                 onChange={(event): void => {
