@@ -513,6 +513,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                     }}
                 />
                 <Button
+                    color="primary"
                     size="sm"
                     variant={density === "compact" ? "solid" : "flat"}
                     onPress={(): void => {
@@ -522,6 +523,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                     {t("common:dataTable.compact")}
                 </Button>
                 <Button
+                    color="primary"
                     size="sm"
                     variant={density === "comfortable" ? "solid" : "flat"}
                     onPress={(): void => {
@@ -545,6 +547,7 @@ export function EnterpriseDataTable<TRow>(props: IEnterpriseDataTableProps<TRow>
                 <Button
                     aria-label={t("common:dataTable.columnSettings")}
                     size="sm"
+                    color="primary"
                     variant={isColumnControlsOpen ? "solid" : "flat"}
                     onPress={(): void => {
                         setIsColumnControlsOpen((previous): boolean => !previous)
