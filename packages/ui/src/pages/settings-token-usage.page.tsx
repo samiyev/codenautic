@@ -12,7 +12,7 @@ import {
     type TDashboardDateRange,
 } from "@/components/dashboard/dashboard-date-range-filter"
 import { type IMetricGridMetric, MetricsGrid } from "@/components/dashboard/metrics-grid"
-import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader } from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -287,7 +287,7 @@ function UsageTable(props: {
             <CardHeader>
                 <p className={TYPOGRAPHY.sectionTitle}>{props.title}</p>
             </CardHeader>
-            <CardBody>
+            <CardContent>
                 <EnterpriseDataTable
                     ariaLabel={`${props.title} token usage`}
                     columns={[
@@ -328,7 +328,7 @@ function UsageTable(props: {
                     id={`token-usage-${props.title.toLowerCase().replace(/\s+/g, "-")}`}
                     rows={props.rows}
                 />
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
@@ -483,12 +483,9 @@ export function SettingsTokenUsagePage(): ReactElement {
                 onRescan={handleRescan}
             />
             {freshnessActionMessage.length > 0 ? (
-                <Alert
-                    color="primary"
-                    title={t("settings:tokenUsage.freshnessAction")}
-                    variant="flat"
-                >
-                    {freshnessActionMessage}
+                <Alert status="accent">
+                    <Alert.Title>{t("settings:tokenUsage.freshnessAction")}</Alert.Title>
+                    <Alert.Description>{freshnessActionMessage}</Alert.Description>
                 </Alert>
             ) : null}
             <ExplainabilityPanel
@@ -519,30 +516,27 @@ export function SettingsTokenUsagePage(): ReactElement {
                             setSelectedTab("by-model")
                         }}
                         size="sm"
-                        color="primary"
-                        variant={selectedTab === "by-model" ? "solid" : "flat"}
+                        variant={selectedTab === "by-model" ? "primary" : "secondary"}
                     >
                         {t("settings:tokenUsage.byModel")}
                     </Button>
                     <Button
                         aria-pressed={selectedTab === "by-developer"}
-                        color="primary"
                         onPress={(): void => {
                             setSelectedTab("by-developer")
                         }}
                         size="sm"
-                        variant={selectedTab === "by-developer" ? "solid" : "flat"}
+                        variant={selectedTab === "by-developer" ? "primary" : "secondary"}
                     >
                         {t("settings:tokenUsage.byDeveloper")}
                     </Button>
                     <Button
                         aria-pressed={selectedTab === "by-ccr"}
-                        color="primary"
                         onPress={(): void => {
                             setSelectedTab("by-ccr")
                         }}
                         size="sm"
-                        variant={selectedTab === "by-ccr" ? "solid" : "flat"}
+                        variant={selectedTab === "by-ccr" ? "primary" : "secondary"}
                     >
                         {t("settings:tokenUsage.byCcr")}
                     </Button>

@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Card, CardBody, CardHeader, Chip, Input } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, Chip, Input } from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -99,9 +99,9 @@ function createMemberDisplayName(email: string): string {
     return normalized.length > 0 ? normalized : "New Member"
 }
 
-function mapRoleChipColor(role: TTeamMemberRole): "default" | "primary" | "success" | "warning" {
+function mapRoleChipColor(role: TTeamMemberRole): "default" | "accent" | "success" | "warning" {
     if (role === "admin") {
-        return "primary"
+        return "accent"
     }
     if (role === "lead") {
         return "success"
@@ -143,7 +143,7 @@ function TeamDirectoryCard(props: {
             <CardHeader>
                 <p className={TYPOGRAPHY.sectionTitle}>{t("settings:team.teams")}</p>
             </CardHeader>
-            <CardBody className="space-y-2">
+            <CardContent className="space-y-2">
                 {props.teams.map((team): ReactElement => {
                     const isActive = props.activeTeamId === team.id
 
@@ -171,7 +171,7 @@ function TeamDirectoryCard(props: {
                         </button>
                     )
                 })}
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
@@ -197,13 +197,13 @@ function TeamMembersCard(props: {
             <CardHeader>
                 <p className={TYPOGRAPHY.sectionTitle}>{t("settings:team.members")}</p>
             </CardHeader>
-            <CardBody className="space-y-3">
+            <CardContent className="space-y-3">
                 <div className="grid gap-3 md:grid-cols-[1fr_180px_auto]">
                     <Input
-                        label={t("settings:team.inviteMemberByEmail")}
+                        aria-label={t("settings:team.inviteMemberByEmail")}
                         placeholder="new.member@acme.dev"
                         value={props.inviteEmail}
-                        onValueChange={props.onInviteEmailChange}
+                        onChange={(e): void => { props.onInviteEmailChange(e.target.value) }}
                     />
                     <select
                         aria-label={t("settings:ariaLabel.team.inviteRole")}
@@ -266,7 +266,7 @@ function TeamMembersCard(props: {
                                         <Chip
                                             color={mapRoleChipColor(member.role)}
                                             size="sm"
-                                            variant="flat"
+                                            variant="soft"
                                         >
                                             {member.role}
                                         </Chip>
@@ -312,7 +312,7 @@ function TeamMembersCard(props: {
                         })}
                     </p>
                 )}
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
@@ -331,7 +331,7 @@ function TeamRepositoriesCard(props: {
             <CardHeader>
                 <p className={TYPOGRAPHY.sectionTitle}>{t("settings:team.repositoryAssignment")}</p>
             </CardHeader>
-            <CardBody className="space-y-2">
+            <CardContent className="space-y-2">
                 {props.repositories.map((repository): ReactElement => {
                     const isSelected = props.team.repositories.includes(repository)
 
@@ -364,7 +364,7 @@ function TeamRepositoriesCard(props: {
                         })}
                     </p>
                 )}
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
@@ -561,30 +561,27 @@ export function SettingsTeamPage(): ReactElement {
             title={t("settings:team.pageTitle")}
             description={t("settings:team.pageSubtitle")}
         >
-            <Alert
-                color="primary"
-                title={t("settings:team.rbacPreviewRole", { role: activeUiRole })}
-                variant="flat"
-            >
-                {t("settings:team.rbacDescription")}
+            <Alert status="accent">
+                <Alert.Title>{t("settings:team.rbacPreviewRole", { role: activeUiRole })}</Alert.Title>
+                <Alert.Description>{t("settings:team.rbacDescription")}</Alert.Description>
             </Alert>
 
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>{t("settings:team.createTeam")}</p>
                 </CardHeader>
-                <CardBody className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+                <CardContent className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
                     <Input
-                        label={t("settings:team.teamName")}
+                        aria-label={t("settings:team.teamName")}
                         placeholder={t("settings:team.teamNamePlaceholder")}
                         value={newTeamName}
-                        onValueChange={setNewTeamName}
+                        onChange={(e): void => { setNewTeamName(e.target.value) }}
                     />
                     <Input
-                        label={t("settings:team.description")}
+                        aria-label={t("settings:team.description")}
                         placeholder={t("settings:team.descriptionPlaceholder")}
                         value={newTeamDescription}
-                        onValueChange={setNewTeamDescription}
+                        onChange={(e): void => { setNewTeamDescription(e.target.value) }}
                     />
                     {createTeamPolicy.visibility === "hidden" ? null : (
                         <div className="flex items-end">
@@ -597,7 +594,7 @@ export function SettingsTeamPage(): ReactElement {
                             </Button>
                         </div>
                     )}
-                </CardBody>
+                </CardContent>
             </Card>
             {createTeamPolicy.reason === undefined ||
             createTeamPolicy.visibility === "enabled" ? null : (
@@ -607,19 +604,19 @@ export function SettingsTeamPage(): ReactElement {
             )}
 
             {activeTeam === undefined ? (
-                <Alert color="warning" title={t("settings:team.noActiveTeamTitle")} variant="flat">
-                    {t("settings:team.noActiveTeamDescription")}
+                <Alert status="warning">
+                    <Alert.Title>{t("settings:team.noActiveTeamTitle")}</Alert.Title>
+                    <Alert.Description>{t("settings:team.noActiveTeamDescription")}</Alert.Description>
                 </Alert>
             ) : (
-                <Alert
-                    color="primary"
-                    title={t("settings:team.activeTeamTitle", { name: activeTeam.name })}
-                    variant="flat"
-                >
-                    {t("settings:team.activeTeamDescription", {
-                        members: activeTeam.members.length,
-                        repos: activeTeam.repositories.length,
-                    })}
+                <Alert status="accent">
+                    <Alert.Title>{t("settings:team.activeTeamTitle", { name: activeTeam.name })}</Alert.Title>
+                    <Alert.Description>
+                        {t("settings:team.activeTeamDescription", {
+                            members: activeTeam.members.length,
+                            repos: activeTeam.repositories.length,
+                        })}
+                    </Alert.Description>
                 </Alert>
             )}
 
