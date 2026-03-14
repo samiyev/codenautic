@@ -12,15 +12,15 @@ const TEST_OWNERS: ReadonlyArray<ICityOwnershipOverlayOwnerEntry> = [
     {
         color: "#0f766e",
         fileIds: ["src/api/auth.ts", "src/api/repository.ts"],
-        ownerId: "alice",
-        ownerName: "Alice Rivera",
+        ownerId: "neo",
+        ownerName: "Neo",
         primaryFileId: "src/api/auth.ts",
     },
     {
         color: "#2563eb",
         fileIds: ["src/worker/index.ts"],
-        ownerId: "max",
-        ownerName: "Max H.",
+        ownerId: "trinity",
+        ownerName: "Trinity",
         primaryFileId: "src/worker/index.ts",
     },
 ]
@@ -31,7 +31,7 @@ describe("CityOwnershipOverlay", (): void => {
 
         expect(screen.getByText("Ownership overlay")).not.toBeNull()
         expect(screen.getByLabelText("Ownership legend")).not.toBeNull()
-        expect(screen.getByText("Alice Rivera")).not.toBeNull()
+        expect(screen.getByText("Neo")).not.toBeNull()
         expect(screen.getByText("Files: 2")).not.toBeNull()
         expect(screen.getByRole("button", { name: "Disable ownership colors" })).not.toBeNull()
     })
@@ -58,19 +58,19 @@ describe("CityOwnershipOverlay", (): void => {
         const onSelectOwner = vi.fn()
         renderWithProviders(
             <CityOwnershipOverlay
-                activeOwnerId="alice"
+                activeOwnerId="neo"
                 isEnabled={true}
                 onSelectOwner={onSelectOwner}
                 owners={TEST_OWNERS}
             />,
         )
 
-        await user.click(screen.getByRole("button", { name: "Focus ownership Alice Rivera" }))
+        await user.click(screen.getByRole("button", { name: "Focus ownership Neo" }))
 
         expect(onSelectOwner).toHaveBeenCalledTimes(1)
         expect(onSelectOwner).toHaveBeenCalledWith(
             expect.objectContaining({
-                ownerId: "alice",
+                ownerId: "neo",
                 primaryFileId: "src/api/auth.ts",
             }),
         )
