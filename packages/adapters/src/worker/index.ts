@@ -34,6 +34,13 @@ export {
     type IWorkerProcessorMetrics,
 } from "./base-worker-processor.impl"
 export {
+    DEFAULT_WORKER_CORRELATION_ID_FIELD,
+    WorkerPinoLogger,
+    type IWorkerPinoLoggerLike,
+    type IWorkerPinoLoggerOptions,
+    type IWorkerTaskLogContext,
+} from "./pino-worker-logger.impl"
+export {
     DEFAULT_REDIS_INITIAL_BACKOFF_MS,
     DEFAULT_REDIS_MAX_BACKOFF_MS,
     DEFAULT_REDIS_MAX_RECONNECT_ATTEMPTS,

@@ -1,4 +1,4 @@
-import {Container} from "@codenautic/core"
+import {Container, TOKENS, type ILogger} from "@codenautic/core"
 
 import {bindConstantSingleton} from "../shared/bind-constant-singleton"
 import {WORKER_TOKENS} from "./worker.tokens"
@@ -13,6 +13,11 @@ import type {
  * Registration options for worker adapter module.
  */
 export interface IRegisterWorkerModuleOptions {
+    /**
+     * Optional structured logger adapter for workers.
+     */
+    readonly logger?: ILogger
+
     /**
      * Optional queue service adapter.
      */
@@ -44,6 +49,11 @@ export function registerWorkerModule(
     container: Container,
     options: IRegisterWorkerModuleOptions,
 ): void {
+    if (options.logger !== undefined) {
+        bindConstantSingleton(container, WORKER_TOKENS.Logger, options.logger)
+        bindConstantSingleton(container, TOKENS.Common.Logger, options.logger)
+    }
+
     if (options.queueService !== undefined) {
         bindConstantSingleton(container, WORKER_TOKENS.QueueService, options.queueService)
     }

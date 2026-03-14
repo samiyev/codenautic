@@ -4,6 +4,7 @@ import {
     Container,
     TOKENS,
     type IInboxRepository,
+    type ILogger,
     type IOutboxRelayService,
     type IOutboxRepository,
     UniqueId,
@@ -356,6 +357,23 @@ describe("Provider modules registration", () => {
 
     test("registerWorkerModule binds optional worker adapters", () => {
         const container = new Container()
+        const logger: ILogger = {
+            info(_message: string, _context?: Record<string, unknown>): Promise<void> {
+                return Promise.resolve()
+            },
+            warn(_message: string, _context?: Record<string, unknown>): Promise<void> {
+                return Promise.resolve()
+            },
+            error(_message: string, _context?: Record<string, unknown>): Promise<void> {
+                return Promise.resolve()
+            },
+            debug(_message: string, _context?: Record<string, unknown>): Promise<void> {
+                return Promise.resolve()
+            },
+            child(_context: Record<string, unknown>): ILogger {
+                return this
+            },
+        }
         const queueService: IWorkerQueueService = {
             enqueue(_payload): Promise<string> {
                 return Promise.resolve("job-1")
@@ -430,12 +448,15 @@ describe("Provider modules registration", () => {
         }
 
         registerWorkerModule(container, {
+            logger,
             queueService,
             processorRegistry,
             redisConnectionManager,
             runtime,
         })
 
+        const resolvedLogger = container.resolve(WORKER_TOKENS.Logger)
+        const resolvedCoreLogger = container.resolve(TOKENS.Common.Logger)
         const resolvedQueueService = container.resolve(WORKER_TOKENS.QueueService)
         const resolvedProcessorRegistry = container.resolve(WORKER_TOKENS.ProcessorRegistry)
         const resolvedRedisConnectionManager = container.resolve(
@@ -443,6 +464,8 @@ describe("Provider modules registration", () => {
         )
         const resolvedRuntime = container.resolve(WORKER_TOKENS.Runtime)
 
+        expect(resolvedLogger).toBe(logger)
+        expect(resolvedCoreLogger).toBe(logger)
         expect(resolvedQueueService).toBe(queueService)
         expect(resolvedProcessorRegistry).toBe(processorRegistry)
         expect(resolvedRedisConnectionManager).toBe(redisConnectionManager)
