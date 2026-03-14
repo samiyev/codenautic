@@ -1,7 +1,7 @@
 import { type FormEvent, type ReactElement, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button } from "@/components/ui"
+import { Button } from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { FormSection } from "@/components/forms/form-section"
 import { FormGroup } from "@/components/forms/form-group"
@@ -457,9 +457,8 @@ export function SettingsCodeReviewPage(): ReactElement {
                     {ccrSummaryState}
                 </p>
                 <Button
-                    color="primary"
+                    variant="primary"
                     type="button"
-                    variant="solid"
                     onPress={handleSummarySettingsSave}
                 >
                     {t("settings:codeReview.saveCcrSummarySettings")}
@@ -469,7 +468,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                         ccrSummary.generateSummary.isPending || normalizedRepositoryId.length === 0
                     }
                     type="button"
-                    variant="flat"
+                    variant="secondary"
                     onPress={handleGenerateCcrSummary}
                 >
                     {t("settings:codeReview.generateCcrSummaryPreview")}
@@ -599,7 +598,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                 <p className={TYPOGRAPHY.captionMuted} data-testid="ide-sync-state">
                     {ideSyncState}
                 </p>
-                <Button color="primary" type="button" variant="solid" onPress={handleIdeSyncSave}>
+                <Button variant="primary" type="button" onPress={handleIdeSyncSave}>
                     {t("settings:codeReview.saveIdeSyncSettings")}
                 </Button>
             </FormSection>

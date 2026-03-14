@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Card, CardBody, CardHeader, Chip, Input, Switch } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, Chip, Input, Switch } from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -274,7 +274,7 @@ export function SettingsByokPage(): ReactElement {
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>{t("settings:byok.addApiKey")}</p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-[180px_1fr_1fr_auto]">
                         <select
                             aria-label={t("settings:ariaLabel.byok.provider")}
@@ -306,28 +306,28 @@ export function SettingsByokPage(): ReactElement {
                             <option value="gitlab">{t("settings:byok.providerGitlab")}</option>
                         </select>
                         <Input
-                            label={t("settings:byok.keyLabel")}
+                            aria-label={t("settings:byok.keyLabel")}
                             placeholder={t("settings:byok.keyLabelPlaceholder")}
                             value={form.label}
-                            onValueChange={(value): void => {
+                            onChange={(e): void => {
                                 setForm(
                                     (previous): ICreateKeyFormState => ({
                                         ...previous,
-                                        label: value,
+                                        label: e.target.value,
                                     }),
                                 )
                             }}
                         />
                         <Input
-                            label={t("settings:byok.apiKeySecret")}
+                            aria-label={t("settings:byok.apiKeySecret")}
                             placeholder={t("settings:byok.apiKeySecretPlaceholder")}
                             type="password"
                             value={form.secret}
-                            onValueChange={(value): void => {
+                            onChange={(e): void => {
                                 setForm(
                                     (previous): ICreateKeyFormState => ({
                                         ...previous,
-                                        secret: value,
+                                        secret: e.target.value,
                                     }),
                                 )
                             }}
@@ -335,21 +335,18 @@ export function SettingsByokPage(): ReactElement {
                         <div className="flex items-end">
                             <Button
                                 className="w-full md:w-auto"
-                                color="primary"
+                                variant="primary"
                                 onPress={handleCreateKey}
                             >
                                 {t("settings:byok.addKey")}
                             </Button>
                         </div>
                     </div>
-                    <Alert
-                        color="primary"
-                        title={t("settings:byok.secretsMaskedTitle")}
-                        variant="flat"
-                    >
-                        {t("settings:byok.secretsMaskedDescription")}
+                    <Alert status="accent">
+                        <Alert.Title>{t("settings:byok.secretsMaskedTitle")}</Alert.Title>
+                        <Alert.Description>{t("settings:byok.secretsMaskedDescription")}</Alert.Description>
                     </Alert>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <div className="grid gap-4 md:grid-cols-4">
@@ -359,9 +356,9 @@ export function SettingsByokPage(): ReactElement {
                             {t("settings:byok.totalKeys")}
                         </p>
                     </CardHeader>
-                    <CardBody>
+                    <CardContent>
                         <p className="text-2xl font-semibold text-foreground">{stats.totalKeys}</p>
-                    </CardBody>
+                    </CardContent>
                 </Card>
                 <Card>
                     <CardHeader>
@@ -369,9 +366,9 @@ export function SettingsByokPage(): ReactElement {
                             {t("settings:byok.activeKeys")}
                         </p>
                     </CardHeader>
-                    <CardBody>
+                    <CardContent>
                         <p className="text-2xl font-semibold text-foreground">{stats.activeKeys}</p>
-                    </CardBody>
+                    </CardContent>
                 </Card>
                 <Card>
                     <CardHeader>
@@ -379,11 +376,11 @@ export function SettingsByokPage(): ReactElement {
                             {t("settings:byok.usageRequests")}
                         </p>
                     </CardHeader>
-                    <CardBody>
+                    <CardContent>
                         <p className="text-2xl font-semibold text-foreground">
                             {stats.totalRequests}
                         </p>
-                    </CardBody>
+                    </CardContent>
                 </Card>
                 <Card>
                     <CardHeader>
@@ -391,11 +388,11 @@ export function SettingsByokPage(): ReactElement {
                             {t("settings:byok.usageTokens")}
                         </p>
                     </CardHeader>
-                    <CardBody>
+                    <CardContent>
                         <p className="text-2xl font-semibold text-foreground">
                             {stats.totalTokens}
                         </p>
-                    </CardBody>
+                    </CardContent>
                 </Card>
             </div>
 
@@ -405,7 +402,7 @@ export function SettingsByokPage(): ReactElement {
                         {t("settings:byok.providerUsageStats")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-2">
+                <CardContent className="space-y-2">
                     {providerUsage.map(
                         (entry): ReactElement => (
                             <div
@@ -425,21 +422,18 @@ export function SettingsByokPage(): ReactElement {
                             </div>
                         ),
                     )}
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>{t("settings:byok.configuredKeys")}</p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     {keys.length === 0 ? (
-                        <Alert
-                            color="warning"
-                            title={t("settings:byok.noKeysConfiguredTitle")}
-                            variant="flat"
-                        >
-                            {t("settings:byok.noKeysConfiguredDescription")}
+                        <Alert status="warning">
+                            <Alert.Title>{t("settings:byok.noKeysConfiguredTitle")}</Alert.Title>
+                            <Alert.Description>{t("settings:byok.noKeysConfiguredDescription")}</Alert.Description>
                         </Alert>
                     ) : (
                         keys.map(
@@ -482,7 +476,7 @@ export function SettingsByokPage(): ReactElement {
                                             <Chip
                                                 color={entry.isActive ? "success" : "default"}
                                                 size="sm"
-                                                variant="flat"
+                                                variant="soft"
                                             >
                                                 {entry.isActive
                                                     ? t("settings:byok.active")
@@ -492,8 +486,8 @@ export function SettingsByokPage(): ReactElement {
                                                 aria-label={`Active key ${entry.label}`}
                                                 isSelected={entry.isActive}
                                                 size="sm"
-                                                onValueChange={(value): void => {
-                                                    handleToggleActive(entry.id, value)
+                                                onChange={(isSelected: boolean): void => {
+                                                    handleToggleActive(entry.id, isSelected)
                                                 }}
                                             >
                                                 {t("settings:byok.activeLabel")}
@@ -501,7 +495,7 @@ export function SettingsByokPage(): ReactElement {
                                             <div className="flex gap-2">
                                                 <Button
                                                     size="sm"
-                                                    variant="flat"
+                                                    variant="secondary"
                                                     onPress={(): void => {
                                                         handleRotateKey(entry.id)
                                                     }}
@@ -511,9 +505,8 @@ export function SettingsByokPage(): ReactElement {
                                                     })}
                                                 </Button>
                                                 <Button
-                                                    color="danger"
+                                                    variant="danger"
                                                     size="sm"
-                                                    variant="ghost"
                                                     onPress={(): void => {
                                                         handleDeleteKey(entry.id)
                                                     }}
@@ -529,7 +522,7 @@ export function SettingsByokPage(): ReactElement {
                             ),
                         )
                     )}
-                </CardBody>
+                </CardContent>
             </Card>
         </FormLayout>
     )
