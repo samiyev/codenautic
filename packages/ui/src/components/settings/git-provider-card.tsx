@@ -57,6 +57,7 @@ export function GitProviderCard(props: IGitProviderCardProps): ReactElement {
                     </Chip>
                     <Button
                         className="w-full"
+                        color="primary"
                         isLoading={props.isLoading === true}
                         size="sm"
                         variant={props.connected ? "bordered" : "solid"}
