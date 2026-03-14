@@ -1,6 +1,9 @@
 # Co-Change & Temporal Coupling — ASERG Research
 
 > Temporal coupling (файлы, которые часто меняются вместе) — одна из core метрик для нашего Causal Analysis.
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [Luciana Silva — Google Scholar](https://scholar.google.com.br/citations?user=4eDqx6AAAAAJ)
 
 ## Ключевые работы
 

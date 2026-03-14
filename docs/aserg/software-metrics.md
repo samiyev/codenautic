@@ -1,6 +1,10 @@
 # Software Metrics & Complexity — ASERG Research
 
 > Метрики кода — фундамент для CodeCity visualization, Predictive Analytics и ScoreRisk.
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [ASERG Theses](https://aserg.labsoft.dcc.ufmg.br/theses/) ·
+> [Andre Hora — Google Scholar](https://scholar.google.com.br/citations?user=XBKBZ3YAAAAJ)
 
 ## Ключевые работы
 

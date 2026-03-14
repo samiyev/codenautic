@@ -1,6 +1,11 @@
 # API Evolution & Breaking Changes — ASERG Research
 
 > ASERG — лидер в исследовании API breaking changes. Релевантно для нашего pipeline (detection) и для agent-produced code.
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [APIDiff — GitHub](https://github.com/aserg-ufmg/apidiff) ·
+> [apiwave — GitHub](https://github.com/andrehora/apiwave) ·
+> [Aline Brito — Google Scholar](https://scholar.google.com.br/citations?user=DS7MpP8AAAAJ)
 
 ## Ключевые работы
 

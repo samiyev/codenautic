@@ -1,6 +1,10 @@
 # Architecture Conformance & Drift — ASERG Research
 
 > Architecture Drift Detection — одна из ключевых планируемых возможностей CodeNautic.
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [DCL — GitHub](https://github.com/rterrabh/DCL) ·
+> [Ricardo Terra — Google Scholar](https://scholar.google.com.br/citations?user=dVEwlKsAAAAJ)
 
 ## Ключевые работы
 

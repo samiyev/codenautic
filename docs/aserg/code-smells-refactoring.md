@@ -1,6 +1,11 @@
 # Code Smells & Refactoring — ASERG Research
 
 > Одно из ядровых направлений ASERG. Прямо релевантно для CodeNautic pipeline (DetectPatterns, GenerateSuggestions).
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [RefDiff — GitHub](https://github.com/aserg-ufmg/RefDiff) ·
+> [RefDiff 2.0 — GitHub](https://github.com/aserg-ufmg/RefDiff) ·
+> [Danilo Silva — Google Scholar](https://scholar.google.com.br/citations?user=5JeHSCgAAAAJ)
 
 ## Ключевые работы
 

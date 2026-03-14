@@ -1,6 +1,10 @@
 # Code Review Tools — ASERG Research
 
 > RAID — refactoring-aware code reviews. Ближайший академический аналог нашего подхода к code review.
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [RAID — GitHub](https://github.com/rodrigo-brito/raid) ·
+> [Rodrigo Brito — Google Scholar](https://scholar.google.com.br/citations?user=3BQQXIYAAAAJ)
 
 ## Ключевые работы
 

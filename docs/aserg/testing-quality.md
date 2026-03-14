@@ -1,6 +1,9 @@
 # Testing & Test Quality — ASERG Research
 
 > Тестирование — ещё одно сильное направление ASERG. Релевантно для нашего pipeline (CheckImplementation) и для оценки качества тестов в PR.
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [Andre Hora — Google Scholar](https://scholar.google.com.br/citations?user=XBKBZ3YAAAAJ)
 
 ## Ключевые работы
 

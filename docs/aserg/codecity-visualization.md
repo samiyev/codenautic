@@ -1,6 +1,10 @@
 # CodeCity & Software Visualization — ASERG Research
 
 > GoCity — реализация CodeCity концепции от ASERG. Напрямую релевантно для нашего CodeCity модуля.
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [GoCity — GitHub](https://github.com/rodrigo-brito/gocity) ·
+> [GoCity — Live Demo](https://go-city.github.io/)
 
 ## Ключевые работы
 

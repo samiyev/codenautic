@@ -1,6 +1,10 @@
 # JavaScript & Frontend — ASERG Research
 
 > ASERG активно исследует JavaScript экосистему и React. Релевантно для нашего UI (React) и для анализа JS-кода клиентов.
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [JSClassFinder — GitHub](https://github.com/niccoloschiavon/JSClassFinder) ·
+> [Fabio Ferreira — Google Scholar](https://scholar.google.com.br/citations?user=pOBrxpQAAAAJ)
 
 ## Ключевые работы
 

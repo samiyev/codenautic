@@ -1,6 +1,10 @@
 # AI Coding Agents — ASERG Research
 
 > Самая свежая тема ASERG (2024-2026). Прямо пересекается с Stripe Minions и косвенно с CodeNautic.
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [Marco Tulio Valente — Google Scholar](https://scholar.google.com.br/citations?user=1wzDCa0AAAAJ) ·
+> [softengbook.org](https://softengbook.org/)
 
 ## Ключевые работы
 

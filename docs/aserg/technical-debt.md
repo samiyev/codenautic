@@ -1,6 +1,9 @@
 # Technical Debt — ASERG Research
 
 > ASERG — одна из ведущих групп по исследованию Self-Admitted Technical Debt (SATD).
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [Laerte Xavier — Google Scholar](https://scholar.google.com.br/citations?user=nSMEqWYAAAAJ)
 
 ## Ключевые работы
 

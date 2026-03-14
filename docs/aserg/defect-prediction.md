@@ -1,6 +1,9 @@
 # Defect Prediction — ASERG Research
 
 > Predictive Analytics — планируемая возможность CodeNautic. ASERG исследует предсказание дефектов и performance regression.
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [ASERG Theses](https://aserg.labsoft.dcc.ufmg.br/theses/)
 
 ## Ключевые работы
 

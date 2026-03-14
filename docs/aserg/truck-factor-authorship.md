@@ -1,6 +1,10 @@
 # Truck Factor & Code Authorship — ASERG Research
 
 > ASERG разработал основные алгоритмы для вычисления Truck Factor. Прямо релевантно для нашего Bus Factor и Knowledge Map.
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [Truck Factor tool — GitHub](https://github.com/aserg-ufmg/Truck-Factor) ·
+> [Guilherme Avelino — Google Scholar](https://scholar.google.com.br/citations?user=0B-4xFAAAAAJ)
 
 ## Ключевые работы
 

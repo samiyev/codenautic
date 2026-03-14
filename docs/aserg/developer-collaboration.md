@@ -1,6 +1,11 @@
 # Developer Collaboration & Open Source — ASERG Research
 
 > ASERG исследует как разработчики сотрудничают, что делает проекты успешными/провальными. Релевантно для Team Metrics и Knowledge Map.
+>
+> **Источники:** [ASERG Publications](https://aserg.labsoft.dcc.ufmg.br/publications/) ·
+> [APISonar — GitHub](https://github.com/andrehora/apisonar) ·
+> [Hudson Borges — Google Scholar](https://scholar.google.com.br/citations?user=V9GFXlYAAAAJ) ·
+> [João Montandon — Google Scholar](https://scholar.google.com.br/citations?user=R5TjmnsAAAAJ)
 
 ## Ключевые работы
 
