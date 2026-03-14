@@ -1,8 +1,8 @@
 import { type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Building2, ChevronDown } from "@/components/icons/app-icons"
-import { LocaleSwitcher } from "@/components/layout/locale-switcher"
+import { ChevronDown } from "@/components/icons/app-icons"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import {
     Avatar,
     Dropdown,
@@ -48,8 +48,8 @@ export interface ISidebarFooterProps {
 }
 
 /**
- * Sidebar footer with workspace switcher, locale toggle, and user avatar.
- * Renders compact (icon-only) or expanded depending on sidebar state.
+ * Unified sidebar footer — single dropdown trigger with avatar, name, and org.
+ * Pattern: Linear/Notion-style compact user block.
  *
  * @param props Footer configuration.
  * @returns Sidebar footer element.
@@ -63,104 +63,74 @@ export function SidebarFooter(props: ISidebarFooterProps): ReactElement {
             organization.id === props.activeOrganizationId,
     )
 
-    const initials =
-        props.userName !== undefined
-            ? props.userName.slice(0, 2).toUpperCase()
-            : "CN"
-
-    const defaultName = t("navigation:userMenu.defaultName")
-    const defaultEmail = t("navigation:userMenu.defaultEmail")
+    const displayName = props.userName ?? t("navigation:userMenu.defaultName")
+    const displayEmail = props.userEmail ?? t("navigation:userMenu.defaultEmail")
+    const orgLabel = activeOrganization?.label ?? t("navigation:userMenu.workspace")
 
     return (
-        <div className="mt-auto border-t border-border pt-2">
-            {/* Workspace switcher */}
-            {props.organizations !== undefined ? (
-                <Dropdown>
-                    <DropdownTrigger
-                        className={`w-full justify-start gap-2 px-2 ${isCollapsed ? "min-w-0" : ""}`}
-                        size="sm"
-                        variant="light"
-                    >
-                        <span className="inline-flex items-center gap-2 truncate">
-                            <Building2
-                                aria-hidden="true"
-                                className="shrink-0 text-text-subtle"
-                                size={15}
-                            />
-                            {isCollapsed ? null : (
-                                <>
-                                    <span className="truncate text-sm text-foreground">
-                                        {activeOrganization?.label ??
-                                            t("navigation:userMenu.workspace")}
-                                    </span>
-                                    <ChevronDown
-                                        aria-hidden="true"
-                                        className="shrink-0 text-text-subtle"
-                                        size={14}
-                                    />
-                                </>
-                            )}
-                        </span>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                        aria-label={t("navigation:userMenu.workspace")}
-                        selectedKeys={
-                            props.activeOrganizationId !== undefined
-                                ? new Set([props.activeOrganizationId])
-                                : new Set<string>()
-                        }
-                        selectionMode="single"
-                        onSelectionChange={(keys): void => {
-                            const selected = [...keys][0]
-                            if (typeof selected === "string") {
-                                props.onOrganizationChange?.(selected)
-                            }
-                        }}
-                    >
-                        {props.organizations.map(
-                            (organization): ReactElement => (
-                                <DropdownItem key={organization.id}>
-                                    {organization.label}
-                                </DropdownItem>
-                            ),
-                        )}
-                    </DropdownMenu>
-                </Dropdown>
-            ) : null}
-
-            {/* Locale switcher */}
-            <div className={`px-2 py-1 ${isCollapsed ? "flex justify-center" : ""}`}>
-                <LocaleSwitcher />
-            </div>
-
-            {/* User avatar + menu */}
-            <Dropdown>
+        <div className="mt-auto border-t border-border/40 pt-2">
+            <Dropdown placement="top-start">
                 <DropdownTrigger
-                    className={`w-full justify-start gap-2 px-2 ${isCollapsed ? "min-w-0" : ""}`}
+                    className={`w-full gap-2 rounded-lg px-2 py-1.5 ${isCollapsed ? "justify-center min-w-0" : "justify-start"}`}
                     size="sm"
                     variant="light"
                 >
-                    <span className="inline-flex items-center gap-2 truncate">
+                    {isCollapsed ? (
                         <Avatar
                             className="shrink-0"
-                            label={props.userName ?? defaultName}
+                            label={displayName}
                             size="sm"
                         />
-                        {isCollapsed ? null : (
-                            <span className="truncate text-sm text-foreground">
-                                {props.userName ?? defaultName}
+                    ) : (
+                        <span className="flex w-full items-center gap-2.5">
+                            <Avatar
+                                className="shrink-0"
+                                label={displayName}
+                                size="sm"
+                            />
+                            <span className="flex min-w-0 flex-1 flex-col">
+                                <span className={`truncate ${TYPOGRAPHY.cardTitle}`}>
+                                    {displayName}
+                                </span>
+                                <span className="truncate text-[11px] text-text-subtle">
+                                    {orgLabel}
+                                </span>
                             </span>
-                        )}
-                        <span className="sr-only">{initials}</span>
-                    </span>
+                            <ChevronDown
+                                aria-hidden="true"
+                                className="shrink-0 text-text-subtle"
+                                size={14}
+                            />
+                        </span>
+                    )}
                 </DropdownTrigger>
-                <DropdownMenu aria-label={t("navigation:userMenu.defaultName")}>
-                    <DropdownItem key="name">
-                        {props.userName ?? defaultName}
+                <DropdownMenu aria-label={displayName}>
+                    <DropdownItem key="identity" isReadOnly className="opacity-100">
+                        <p className={TYPOGRAPHY.cardTitle}>{displayName}</p>
+                        <p className="text-xs text-text-subtle">{displayEmail}</p>
                     </DropdownItem>
-                    <DropdownItem key="email">
-                        {props.userEmail ?? defaultEmail}
-                    </DropdownItem>
+                    {props.organizations !== undefined && props.organizations.length > 1 ? (
+                        <DropdownItem key="org-separator" isReadOnly className="opacity-60">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-subtle">
+                                {t("navigation:userMenu.workspace")}
+                            </p>
+                        </DropdownItem>
+                    ) : null}
+                    {props.organizations !== undefined
+                        ? props.organizations.map(
+                              (organization): ReactElement => (
+                                  <DropdownItem
+                                      key={`org-${organization.id}`}
+                                      className={organization.id === props.activeOrganizationId ? "font-medium text-primary" : ""}
+                                      onPress={(): void => {
+                                          props.onOrganizationChange?.(organization.id)
+                                      }}
+                                  >
+                                      {organization.label}
+                                  </DropdownItem>
+                              ),
+                          )
+                        : null}
                     <DropdownItem
                         key="settings"
                         onPress={(): void => {
