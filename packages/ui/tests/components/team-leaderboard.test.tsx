@@ -8,8 +8,8 @@ import { renderWithProviders } from "../utils/render"
 const TEST_ENTRIES: ReadonlyArray<ITeamLeaderboardEntry> = [
     {
         fileIds: ["src/api/auth.ts"],
-        ownerId: "alice",
-        ownerName: "Alice",
+        ownerId: "neo",
+        ownerName: "Neo",
         ownership: { month: 64, quarter: 61, sprint: 67 },
         primaryFileId: "src/api/auth.ts",
         quality: { month: 88, quarter: 84, sprint: 92 },
@@ -17,8 +17,8 @@ const TEST_ENTRIES: ReadonlyArray<ITeamLeaderboardEntry> = [
     },
     {
         fileIds: ["src/worker/retry.ts"],
-        ownerId: "bob",
-        ownerName: "Bob",
+        ownerId: "trinity",
+        ownerName: "Trinity",
         ownership: { month: 73, quarter: 70, sprint: 79 },
         primaryFileId: "src/worker/retry.ts",
         quality: { month: 76, quarter: 74, sprint: 78 },
@@ -26,8 +26,8 @@ const TEST_ENTRIES: ReadonlyArray<ITeamLeaderboardEntry> = [
     },
     {
         fileIds: ["src/ui/list.tsx"],
-        ownerId: "charlie",
-        ownerName: "Charlie",
+        ownerId: "morpheus",
+        ownerName: "Morpheus",
         ownership: { month: 86, quarter: 91, sprint: 82 },
         primaryFileId: "src/ui/list.tsx",
         quality: { month: 71, quarter: 69, sprint: 74 },
@@ -45,20 +45,20 @@ describe("TeamLeaderboard", (): void => {
         let rankButtons = screen.getAllByRole("button", {
             name: /Inspect leaderboard contributor /,
         })
-        expect(rankButtons[0]?.getAttribute("aria-label")).toContain("Alice")
+        expect(rankButtons[0]?.getAttribute("aria-label")).toContain("Neo")
 
         await user.click(screen.getByRole("button", { name: "Metric velocity" }))
         rankButtons = screen.getAllByRole("button", {
             name: /Inspect leaderboard contributor /,
         })
-        expect(rankButtons[0]?.getAttribute("aria-label")).toContain("Bob")
+        expect(rankButtons[0]?.getAttribute("aria-label")).toContain("Trinity")
 
         await user.click(screen.getByRole("button", { name: "Metric ownership" }))
         await user.click(screen.getByRole("button", { name: "Quarter" }))
         rankButtons = screen.getAllByRole("button", {
             name: /Inspect leaderboard contributor /,
         })
-        expect(rankButtons[0]?.getAttribute("aria-label")).toContain("Charlie")
+        expect(rankButtons[0]?.getAttribute("aria-label")).toContain("Morpheus")
     })
 
     it("вызывает onSelectEntry при выборе участника", async (): Promise<void> => {
@@ -69,13 +69,13 @@ describe("TeamLeaderboard", (): void => {
         )
 
         await user.click(
-            screen.getByRole("button", { name: "Inspect leaderboard contributor Alice" }),
+            screen.getByRole("button", { name: "Inspect leaderboard contributor Neo" }),
         )
 
         expect(onSelectEntry).toHaveBeenCalledTimes(1)
         expect(onSelectEntry).toHaveBeenCalledWith(
             expect.objectContaining({
-                ownerId: "alice",
+                ownerId: "neo",
                 primaryFileId: "src/api/auth.ts",
             }),
         )
