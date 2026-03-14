@@ -8,7 +8,7 @@ import { renderWithProviders } from "../utils/render"
 const TEST_AUDIT_LOGS = [
     {
         action: "member.invited" as const,
-        actor: "Ari Karimov",
+        actor: "Neo Anderson",
         details: "Invited anya@acme.dev to Platform Enablement team.",
         id: "audit-test-1",
         occurredAt: "2026-03-04T09:13:00Z",
@@ -16,7 +16,7 @@ const TEST_AUDIT_LOGS = [
     },
     {
         action: "role.changed" as const,
-        actor: "Mila Davletova",
+        actor: "Trinity",
         details: "Changed role for oliver@acme.dev from viewer to developer.",
         id: "audit-test-2",
         occurredAt: "2026-03-03T10:13:00Z",
@@ -24,7 +24,7 @@ const TEST_AUDIT_LOGS = [
     },
     {
         action: "policy.updated" as const,
-        actor: "Ari Karimov",
+        actor: "Neo Anderson",
         details: "Updated review policy for critical repositories.",
         id: "audit-test-3",
         occurredAt: "2026-02-20T10:13:00Z",
@@ -42,7 +42,7 @@ describe("SettingsAuditLogsPage", (): void => {
 
         await user.selectOptions(
             screen.getByRole("combobox", { name: "Filter by actor" }),
-            "Ari Karimov",
+            "Neo Anderson",
         )
         expect(screen.getByText("Showing 2 of 3 entries.")).not.toBeNull()
 
