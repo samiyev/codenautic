@@ -70,7 +70,7 @@ export function AiSummaryWidget(props: IAiSummaryWidgetProps): ReactElement {
                     {summary}
                 </p>
                 <div className="flex gap-2">
-                    <Button onPress={handleRegenerate}>
+                    <Button color="primary" onPress={handleRegenerate}>
                         {t("reports:aiSummary.regenerateSummary")}
                     </Button>
                     <Button variant="flat" onPress={handleCopySummary}>
