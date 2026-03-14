@@ -1,6 +1,6 @@
 import type { ReactElement } from "react"
 
-import { TYPOGRAPHY } from "@/lib/constants/typography"
+import { FormLayout } from "@/components/forms/form-layout"
 
 import {
     BlueprintSection,
@@ -22,18 +22,16 @@ export function SettingsContractValidationPage(): ReactElement {
     const state = useContractValidationState()
 
     return (
-        <section className="space-y-4">
-            <h1 className={TYPOGRAPHY.pageTitle}>Contract validation</h1>
-            <p className={TYPOGRAPHY.pageSubtitle}>
-                Validate schema/version for import/export payloads and preview before apply.
-            </p>
-
+        <FormLayout
+            title="Contract validation"
+            description="Validate schema/version for import/export payloads and preview before apply."
+        >
             <ContractSection state={state} />
             <BlueprintSection state={state} />
             <DriftViolationsSection state={state} />
             <DriftTrendSection state={state} />
             <DriftAlertsSection state={state} />
             <GuardrailsSection state={state} />
-        </section>
+        </FormLayout>
     )
 }

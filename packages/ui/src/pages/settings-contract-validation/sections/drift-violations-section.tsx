@@ -104,7 +104,7 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                         </label>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                        <Button onPress={state.handleExportDriftReport}>Export drift report</Button>
+                        <Button color="primary" onPress={state.handleExportDriftReport}>Export drift report</Button>
                         <span className="text-xs text-text-secondary">
                             Filtered violations:{" "}
                             {String(state.filteredSortedDriftViolations.length)}
@@ -172,6 +172,7 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                         {DRIFT_CODE_CITY_FILES.map(
                             (file): ReactElement => (
                                 <Button
+                                    color="primary"
                                     key={file.id}
                                     size="sm"
                                     variant={
