@@ -51,7 +51,7 @@ describe("FormNumberField", (): void => {
         renderWithProviders(<NumberFieldHarness defaultValue={42} />)
 
         const input = screen.getByRole("spinbutton", { name: "Limit" })
-        expect(input.value).toBe("42")
+        expect((input as HTMLInputElement).value).toBe("42")
     })
 
     it("when user clears and types a number, then updates the value", async (): Promise<void> => {
@@ -69,6 +69,6 @@ describe("FormNumberField", (): void => {
         renderWithProviders(<NumberFieldHarness />)
 
         const input = screen.getByRole("spinbutton", { name: "Limit" })
-        expect(input.type).toBe("number")
+        expect((input as HTMLInputElement).type).toBe("number")
     })
 })

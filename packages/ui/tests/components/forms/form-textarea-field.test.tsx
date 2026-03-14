@@ -43,7 +43,7 @@ describe("FormTextareaField", (): void => {
         renderWithProviders(<TextareaHarness defaultValue="Initial text" />)
 
         const textarea = screen.getByRole("textbox", { name: "Description" })
-        expect(textarea.value).toBe("Initial text")
+        expect((textarea as HTMLTextAreaElement).value).toBe("Initial text")
     })
 
     it("when helperText is provided, then renders helper text", (): void => {
