@@ -115,7 +115,9 @@ export function SettingsCodeReviewPage(): ReactElement {
         detailLevel: CCR_SUMMARY_DETAIL_LEVEL.standard,
         maxSuggestions: 8,
     })
-    const [ccrSummaryState, setCcrSummaryState] = useState<string>(t("settings:codeReview.notSavedYet"))
+    const [ccrSummaryState, setCcrSummaryState] = useState<string>(
+        t("settings:codeReview.notSavedYet"),
+    )
     const [promptOverride, setPromptOverride] = useState<string>(DEFAULT_CCR_PROMPT_OVERRIDE)
     const [ideSyncSettings, setIdeSyncSettings] = useState<IIdeSyncSettings>({
         enabled: true,
@@ -192,7 +194,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                 setIgnoredPaths(response.config.ignorePatterns)
                 showToastSuccess(params.successMessage)
             })
-            .catch((): void => {
+            .catch((_error: unknown): void => {
                 showToastInfo(t("settings:codeReview.toast.unableToSaveRepoConfig"))
             })
     }
@@ -256,7 +258,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                 setDryRunResult(response.result)
                 showToastSuccess(t("settings:codeReview.toast.dryRunCompleted"))
             })
-            .catch((): void => {
+            .catch((_error: unknown): void => {
                 showToastInfo(t("settings:codeReview.toast.unableToRunDryRun"))
             })
     }
@@ -276,7 +278,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                 setReviewMode(response.config.reviewMode)
                 showToastSuccess(t("settings:codeReview.toast.reviewCadenceSaved"))
             })
-            .catch((): void => {
+            .catch((_error: unknown): void => {
                 showToastInfo(t("settings:codeReview.toast.unableToSaveReviewCadence"))
             })
     }
@@ -314,7 +316,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                 setCcrSummaryState(t("settings:codeReview.ccrSummaryGenerated"))
                 showToastSuccess(t("settings:codeReview.toast.ccrSummaryGenerated"))
             })
-            .catch((): void => {
+            .catch((_error: unknown): void => {
                 setCcrSummaryState(t("settings:codeReview.unableToGenerateCcrSummary"))
                 showToastInfo(t("settings:codeReview.toast.unableToGenerateCcrSummary"))
             })
@@ -429,9 +431,15 @@ export function SettingsCodeReviewPage(): ReactElement {
                             )
                         }}
                     >
-                        <option value={CCR_SUMMARY_DETAIL_LEVEL.concise}>{t("settings:codeReview.detailConcise")}</option>
-                        <option value={CCR_SUMMARY_DETAIL_LEVEL.standard}>{t("settings:codeReview.detailStandard")}</option>
-                        <option value={CCR_SUMMARY_DETAIL_LEVEL.deep}>{t("settings:codeReview.detailDeep")}</option>
+                        <option value={CCR_SUMMARY_DETAIL_LEVEL.concise}>
+                            {t("settings:codeReview.detailConcise")}
+                        </option>
+                        <option value={CCR_SUMMARY_DETAIL_LEVEL.standard}>
+                            {t("settings:codeReview.detailStandard")}
+                        </option>
+                        <option value={CCR_SUMMARY_DETAIL_LEVEL.deep}>
+                            {t("settings:codeReview.detailDeep")}
+                        </option>
                     </select>
                     <SuggestionLimitConfig
                         value={ccrSummarySettings.maxSuggestions}
@@ -448,7 +456,12 @@ export function SettingsCodeReviewPage(): ReactElement {
                 <p className={TYPOGRAPHY.captionMuted} data-testid="ccr-summary-state">
                     {ccrSummaryState}
                 </p>
-                <Button color="primary" type="button" variant="solid" onPress={handleSummarySettingsSave}>
+                <Button
+                    color="primary"
+                    type="button"
+                    variant="solid"
+                    onPress={handleSummarySettingsSave}
+                >
                     {t("settings:codeReview.saveCcrSummarySettings")}
                 </Button>
                 <Button
@@ -471,10 +484,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                 />
                 {ccrSummary.summaryQuery.data === undefined ||
                 ccrSummary.summaryQuery.data === null ? (
-                    <p
-                        className={TYPOGRAPHY.captionMuted}
-                        data-testid="ccr-summary-output-empty"
-                    >
+                    <p className={TYPOGRAPHY.captionMuted} data-testid="ccr-summary-output-empty">
                         {t("settings:codeReview.generateSummaryHint")}
                     </p>
                 ) : (
@@ -486,12 +496,14 @@ export function SettingsCodeReviewPage(): ReactElement {
                                 data-testid="ccr-summary-output"
                             >
                                 <p className={TYPOGRAPHY.captionMuted}>
-                                    {t("settings:codeReview.generatedAt", { date: generatedSummary.result.generatedAt })}
+                                    {t("settings:codeReview.generatedAt", {
+                                        date: generatedSummary.result.generatedAt,
+                                    })}
                                 </p>
-                                <p className={TYPOGRAPHY.body}>
-                                    {generatedSummary.result.summary}
-                                </p>
-                                <ul className={`list-disc space-y-1 pl-5 ${TYPOGRAPHY.captionMuted}`}>
+                                <p className={TYPOGRAPHY.body}>{generatedSummary.result.summary}</p>
+                                <ul
+                                    className={`list-disc space-y-1 pl-5 ${TYPOGRAPHY.captionMuted}`}
+                                >
                                     {generatedSummary.result.highlights.map(
                                         (highlight): ReactElement => (
                                             <li key={highlight}>{highlight}</li>
@@ -541,9 +553,15 @@ export function SettingsCodeReviewPage(): ReactElement {
                             )
                         }}
                     >
-                        <option value={IDE_SYNC_PROVIDER.vscode}>{t("settings:codeReview.ideProviderVscode")}</option>
-                        <option value={IDE_SYNC_PROVIDER.jetbrains}>{t("settings:codeReview.ideProviderJetbrains")}</option>
-                        <option value={IDE_SYNC_PROVIDER.both}>{t("settings:codeReview.ideProviderBoth")}</option>
+                        <option value={IDE_SYNC_PROVIDER.vscode}>
+                            {t("settings:codeReview.ideProviderVscode")}
+                        </option>
+                        <option value={IDE_SYNC_PROVIDER.jetbrains}>
+                            {t("settings:codeReview.ideProviderJetbrains")}
+                        </option>
+                        <option value={IDE_SYNC_PROVIDER.both}>
+                            {t("settings:codeReview.ideProviderBoth")}
+                        </option>
                     </select>
                 </FormGroup>
                 <FormGroup>
@@ -590,36 +608,31 @@ export function SettingsCodeReviewPage(): ReactElement {
                 heading={t("settings:codeReview.mcpHeading")}
             >
                 <div className={`grid ${GAP.card} sm:grid-cols-3`}>
-                    <article className={`rounded-md border border-border bg-surface ${PADDING.card}`}>
+                    <article
+                        className={`rounded-md border border-border bg-surface ${PADDING.card}`}
+                    >
                         <p className={TYPOGRAPHY.overline}>
                             {t("settings:codeReview.totalToolCalls")}
                         </p>
-                        <p
-                            className={TYPOGRAPHY.metricValue}
-                            data-testid="mcp-total-calls"
-                        >
+                        <p className={TYPOGRAPHY.metricValue} data-testid="mcp-total-calls">
                             {mcpTotalCalls}
                         </p>
                     </article>
-                    <article className={`rounded-md border border-border bg-surface ${PADDING.card}`}>
+                    <article
+                        className={`rounded-md border border-border bg-surface ${PADDING.card}`}
+                    >
                         <p className={TYPOGRAPHY.overline}>
                             {t("settings:codeReview.successRate")}
                         </p>
-                        <p
-                            className={TYPOGRAPHY.metricValue}
-                            data-testid="mcp-success-rate"
-                        >
+                        <p className={TYPOGRAPHY.metricValue} data-testid="mcp-success-rate">
                             {mcpSuccessRate}%
                         </p>
                     </article>
-                    <article className={`rounded-md border border-border bg-surface ${PADDING.card}`}>
-                        <p className={TYPOGRAPHY.overline}>
-                            {t("settings:codeReview.avgLatency")}
-                        </p>
-                        <p
-                            className={TYPOGRAPHY.metricValue}
-                            data-testid="mcp-avg-latency"
-                        >
+                    <article
+                        className={`rounded-md border border-border bg-surface ${PADDING.card}`}
+                    >
+                        <p className={TYPOGRAPHY.overline}>{t("settings:codeReview.avgLatency")}</p>
+                        <p className={TYPOGRAPHY.metricValue} data-testid="mcp-avg-latency">
                             {mcpAverageLatencyMs} ms
                         </p>
                     </article>

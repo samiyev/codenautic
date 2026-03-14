@@ -254,7 +254,6 @@ export function SettingsConcurrencyPage(): ReactElement {
             title={t("settings:concurrency.pageTitle")}
             description={t("settings:concurrency.pageSubtitle")}
         >
-
             <FormSection heading={t("settings:concurrency.snapshotVersions")}>
                 <div className="flex flex-wrap gap-2">
                     <Chip size="sm" variant="flat">
@@ -286,11 +285,7 @@ export function SettingsConcurrencyPage(): ReactElement {
                     value={localDraft.values.severityThreshold}
                     onChange={(event): void => {
                         const nextValue = event.currentTarget.value
-                        if (
-                            nextValue === "low" ||
-                            nextValue === "medium" ||
-                            nextValue === "high"
-                        ) {
+                        if (nextValue === "low" || nextValue === "medium" || nextValue === "high") {
                             setLocalDraft(
                                 (previous): IAdminConfigSnapshot => ({
                                     ...previous,
@@ -325,7 +320,9 @@ export function SettingsConcurrencyPage(): ReactElement {
                     {t("settings:concurrency.requireReviewerApproval")}
                 </Switch>
                 <div className="flex flex-wrap gap-2">
-                    <Button color="primary" onPress={handleSave}>{t("settings:concurrency.saveSettingsOptimistic")}</Button>
+                    <Button color="primary" onPress={handleSave}>
+                        {t("settings:concurrency.saveSettingsOptimistic")}
+                    </Button>
                     <Button variant="flat" onPress={handleSimulateRemoteChange}>
                         {t("settings:concurrency.simulateExternalUpdate")}
                     </Button>
@@ -334,7 +331,11 @@ export function SettingsConcurrencyPage(): ReactElement {
 
             <FormSection heading={t("settings:concurrency.conflictResolutionAudit")}>
                 {audit.length === 0 ? (
-                    <Alert color="warning" title={t("settings:concurrency.noConcurrencyDecisionsTitle")} variant="flat">
+                    <Alert
+                        color="warning"
+                        title={t("settings:concurrency.noConcurrencyDecisionsTitle")}
+                        variant="flat"
+                    >
                         {t("settings:concurrency.noConcurrencyDecisionsDescription")}
                     </Alert>
                 ) : (
@@ -381,8 +382,16 @@ export function SettingsConcurrencyPage(): ReactElement {
                                         key={row.field}
                                     >
                                         <p className="font-semibold text-foreground">{row.field}</p>
-                                        <p>{t("settings:concurrency.local", { value: row.localValue })}</p>
-                                        <p>{t("settings:concurrency.remote", { value: row.remoteValue })}</p>
+                                        <p>
+                                            {t("settings:concurrency.local", {
+                                                value: row.localValue,
+                                            })}
+                                        </p>
+                                        <p>
+                                            {t("settings:concurrency.remote", {
+                                                value: row.remoteValue,
+                                            })}
+                                        </p>
                                     </li>
                                 ),
                             )}
