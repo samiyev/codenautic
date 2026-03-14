@@ -5,7 +5,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { useDynamicTranslation } from "@/lib/i18n"
 import { ReportScheduleDialog } from "@/components/reports/report-schedule-dialog"
 import { ReportTemplateEditor } from "@/components/reports/report-template-editor"
-import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader } from "@heroui/react"
 import { PageShell } from "@/components/layout/page-shell"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -178,7 +178,7 @@ export function ReportGeneratorPage(): ReactElement {
             <div className="flex flex-wrap gap-2">
                 <Button
                     size="sm"
-                    variant="flat"
+                    variant="secondary"
                     onPress={(): void => {
                         void navigate({
                             to: "/reports",
@@ -189,7 +189,7 @@ export function ReportGeneratorPage(): ReactElement {
                 </Button>
                 <Button
                     size="sm"
-                    variant="flat"
+                    variant="secondary"
                     onPress={(): void => {
                         void navigate({
                             to: "/reports/viewer",
@@ -206,7 +206,7 @@ export function ReportGeneratorPage(): ReactElement {
                         {t("reports:generator.configurationTitle")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-2">
                         <label className="space-y-1 text-sm">
                             <span className="font-semibold text-foreground">
@@ -307,14 +307,14 @@ export function ReportGeneratorPage(): ReactElement {
                         </div>
                     </fieldset>
                     <div className="flex gap-2">
-                        <Button color="primary" onPress={handlePreviewReport}>
+                        <Button variant="primary" onPress={handlePreviewReport}>
                             {t("reports:generator.previewReport")}
                         </Button>
-                        <Button variant="flat" onPress={handleGenerateReport}>
+                        <Button variant="secondary" onPress={handleGenerateReport}>
                             {t("reports:generator.generateReport")}
                         </Button>
                     </div>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <ReportScheduleDialog />
@@ -324,21 +324,15 @@ export function ReportGeneratorPage(): ReactElement {
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>{t("reports:generator.previewTitle")}</p>
                 </CardHeader>
-                <CardBody className="space-y-3">
-                    <Alert
-                        color="primary"
-                        title={t("reports:generator.previewStatusTitle")}
-                        variant="flat"
-                    >
-                        {previewStatus}
+                <CardContent className="space-y-3">
+                    <Alert status="accent">
+                        <Alert.Title>{t("reports:generator.previewStatusTitle")}</Alert.Title>
+                        <Alert.Description>{previewStatus}</Alert.Description>
                     </Alert>
                     {selectedSectionLabels.length === 0 ? (
-                        <Alert
-                            color="warning"
-                            title={t("reports:generator.selectedSectionsTitle")}
-                            variant="flat"
-                        >
-                            {t("reports:generator.selectAtLeastOneSection")}
+                        <Alert status="warning">
+                            <Alert.Title>{t("reports:generator.selectedSectionsTitle")}</Alert.Title>
+                            <Alert.Description>{t("reports:generator.selectAtLeastOneSection")}</Alert.Description>
                         </Alert>
                     ) : (
                         <ul
@@ -358,14 +352,11 @@ export function ReportGeneratorPage(): ReactElement {
                     >
                         {JSON.stringify(previewPayload, null, 2)}
                     </pre>
-                    <Alert
-                        color="success"
-                        title={t("reports:generator.generationStatusTitle")}
-                        variant="flat"
-                    >
-                        {generationStatus}
+                    <Alert status="success">
+                        <Alert.Title>{t("reports:generator.generationStatusTitle")}</Alert.Title>
+                        <Alert.Description>{generationStatus}</Alert.Description>
                     </Alert>
-                </CardBody>
+                </CardContent>
             </Card>
         </PageShell>
     )

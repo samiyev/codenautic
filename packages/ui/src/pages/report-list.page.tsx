@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "@tanstack/react-router"
 
 import { useDynamicTranslation } from "@/lib/i18n"
-import { Alert, Button, Card, CardBody, CardHeader } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader } from "@heroui/react"
 import { PageShell } from "@/components/layout/page-shell"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -147,10 +147,10 @@ export function ReportListPage(): ReactElement {
     return (
         <PageShell subtitle={t("reports:list.pageSubtitle")} title={t("reports:list.pageTitle")}>
             <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="flat" onPress={handleOpenGenerator}>
+                <Button size="sm" variant="secondary" onPress={handleOpenGenerator}>
                     {t("reports:list.openGenerator")}
                 </Button>
-                <Button size="sm" variant="flat" onPress={handleOpenViewer}>
+                <Button size="sm" variant="secondary" onPress={handleOpenViewer}>
                     {t("reports:list.openViewer")}
                 </Button>
             </div>
@@ -159,7 +159,7 @@ export function ReportListPage(): ReactElement {
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>{t("reports:list.filtersTitle")}</p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-3">
                         <label className="space-y-1 text-sm">
                             <span className="font-semibold text-foreground">
@@ -212,16 +212,15 @@ export function ReportListPage(): ReactElement {
                             />
                         </label>
                     </div>
-                    <Alert
-                        color="primary"
-                        title={t("reports:list.filterSummaryTitle")}
-                        variant="flat"
-                    >
-                        {td("reports:list.filteredReports", {
-                            count: String(filteredReports.length),
-                        })}
+                    <Alert status="accent">
+                        <Alert.Title>{t("reports:list.filterSummaryTitle")}</Alert.Title>
+                        <Alert.Description>
+                            {td("reports:list.filteredReports", {
+                                count: String(filteredReports.length),
+                            })}
+                        </Alert.Description>
                     </Alert>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <Card>
@@ -230,14 +229,11 @@ export function ReportListPage(): ReactElement {
                         {t("reports:list.generatedReportsTitle")}
                     </p>
                 </CardHeader>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     {filteredReports.length === 0 ? (
-                        <Alert
-                            color="warning"
-                            title={t("reports:list.noReportsTitle")}
-                            variant="flat"
-                        >
-                            {t("reports:list.noReportsHint")}
+                        <Alert status="warning">
+                            <Alert.Title>{t("reports:list.noReportsTitle")}</Alert.Title>
+                            <Alert.Description>{t("reports:list.noReportsHint")}</Alert.Description>
                         </Alert>
                     ) : (
                         <ul
@@ -272,14 +268,14 @@ export function ReportListPage(): ReactElement {
                                         <div className="mt-2 flex gap-2">
                                             <Button
                                                 size="sm"
-                                                variant="flat"
+                                                variant="secondary"
                                                 onPress={handleOpenViewer}
                                             >
                                                 {t("reports:list.openViewer")}
                                             </Button>
                                             <Button
                                                 size="sm"
-                                                variant="flat"
+                                                variant="secondary"
                                                 onPress={(): void => {
                                                     handleRegenerateReport(report.id)
                                                 }}
@@ -289,9 +285,8 @@ export function ReportListPage(): ReactElement {
                                                 })}
                                             </Button>
                                             <Button
-                                                color="danger"
+                                                variant="danger"
                                                 size="sm"
-                                                variant="flat"
                                                 onPress={(): void => {
                                                     handleDeleteReport(report.id)
                                                 }}
@@ -306,14 +301,11 @@ export function ReportListPage(): ReactElement {
                             )}
                         </ul>
                     )}
-                    <Alert
-                        color="primary"
-                        title={t("reports:list.actionStatusTitle")}
-                        variant="flat"
-                    >
-                        {actionStatus}
+                    <Alert status="accent">
+                        <Alert.Title>{t("reports:list.actionStatusTitle")}</Alert.Title>
+                        <Alert.Description>{actionStatus}</Alert.Description>
                     </Alert>
-                </CardBody>
+                </CardContent>
             </Card>
         </PageShell>
     )
