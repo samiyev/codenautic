@@ -1,4 +1,4 @@
-import type { ReactElement } from "react"
+import { type ReactElement, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 
 /**
@@ -53,9 +53,56 @@ export function GuidedTourOverlay(props: IGuidedTourOverlayProps): ReactElement 
 
     const isFirstStep = normalizedStepIndex === 0
     const isLastStep = normalizedStepIndex === lastStepIndex
+    const dialogRef = useRef<HTMLElement>(null)
+
+    useEffect((): void => {
+        const container = dialogRef.current
+        if (container === null) {
+            return
+        }
+        const focusable = container.querySelector<HTMLElement>("button:not([disabled])")
+        focusable?.focus()
+    }, [normalizedStepIndex])
+
+    useEffect((): (() => void) => {
+        const container = dialogRef.current
+        if (container === null) {
+            return (): void => {}
+        }
+
+        const handleKeyDown = (event: KeyboardEvent): void => {
+            if (event.key !== "Tab") {
+                return
+            }
+            const focusableElements = container.querySelectorAll<HTMLElement>(
+                "button:not([disabled]), [tabindex]:not([tabindex='-1'])",
+            )
+            if (focusableElements.length === 0) {
+                return
+            }
+            const first = focusableElements[0]
+            const last = focusableElements[focusableElements.length - 1]
+            if (first === undefined || last === undefined) {
+                return
+            }
+            if (event.shiftKey === true && document.activeElement === first) {
+                event.preventDefault()
+                last.focus()
+            } else if (event.shiftKey !== true && document.activeElement === last) {
+                event.preventDefault()
+                first.focus()
+            }
+        }
+
+        container.addEventListener("keydown", handleKeyDown)
+        return (): void => {
+            container.removeEventListener("keydown", handleKeyDown)
+        }
+    }, [normalizedStepIndex])
 
     return (
         <aside
+            ref={dialogRef}
             aria-label={t("code-city:guidedTour.overlayAriaLabel")}
             className="sticky top-3 z-20 rounded-lg border border-hud-border bg-hud-surface/95 p-3 text-sm text-hud-text shadow-xl"
             data-dark-hud=""

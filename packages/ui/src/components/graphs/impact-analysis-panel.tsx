@@ -4,6 +4,11 @@ import { useTranslation } from "react-i18next"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
+ * Максимум отображаемых impact seed записей в панели.
+ */
+const MAX_VISIBLE_IMPACT_SEEDS = 6
+
+/**
  * Элемент impact seed для анализа blast radius.
  */
 export interface IImpactAnalysisSeed {
@@ -139,7 +144,7 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
             </p>
 
             <ul className="mt-3 space-y-2">
-                {props.seeds.slice(0, 6).map(
+                {props.seeds.slice(0, MAX_VISIBLE_IMPACT_SEEDS).map(
                     (seed): ReactElement => (
                         <li
                             className="flex items-start gap-2 rounded border border-border bg-surface p-2"
