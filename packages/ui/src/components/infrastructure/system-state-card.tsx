@@ -1,6 +1,6 @@
 import type { ReactElement } from "react"
 
-import { Button, Card, CardBody } from "@/components/ui"
+import { Button, Card, CardContent } from "@heroui/react"
 import { useDynamicTranslation } from "@/lib/i18n"
 
 type TSystemStateVariant = "empty" | "error" | "loading" | "partial"
@@ -54,18 +54,18 @@ export function SystemStateCard(props: ISystemStateCardProps): ReactElement {
     const { td } = useDynamicTranslation(["common"])
     return (
         <Card className={mapStateTone(props.variant)}>
-            <CardBody className="space-y-2 p-4">
+            <CardContent className="space-y-2 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em]">
                     {td(mapStateLabelKey(props.variant))}
                 </p>
                 <p className="text-base font-semibold">{props.title}</p>
                 <p className="text-sm opacity-90">{props.description}</p>
                 {props.ctaLabel !== undefined && props.onCtaPress !== undefined ? (
-                    <Button size="sm" variant="flat" onPress={props.onCtaPress}>
+                    <Button size="sm" variant="secondary" onPress={props.onCtaPress}>
                         {props.ctaLabel}
                     </Button>
                 ) : null}
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
