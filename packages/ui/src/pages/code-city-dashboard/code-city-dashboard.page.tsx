@@ -1,4 +1,7 @@
 import type { ReactElement } from "react"
+import { useTranslation } from "react-i18next"
+
+import { PageShell } from "@/components/layout/page-shell"
 
 import type { ICodeCityDashboardPageProps } from "./code-city-dashboard-types"
 import {
@@ -22,10 +25,11 @@ import { useCodeCityDashboardState } from "./use-code-city-dashboard-state"
  * @returns Страница CodeCity dashboard.
  */
 export function CodeCityDashboardPage(props: ICodeCityDashboardPageProps = {}): ReactElement {
+    const { t } = useTranslation(["code-city"])
     const state = useCodeCityDashboardState(props.initialRepositoryId)
 
     return (
-        <section className="relative space-y-4">
+        <PageShell layout="spacious" title={t("code-city:controls.dashboardTitle")}>
             <TourSection state={state} />
             <ControlsSection state={state} />
             <OverviewSection state={state} />
@@ -36,6 +40,6 @@ export function CodeCityDashboardPage(props: ICodeCityDashboardPageProps = {}): 
             <OwnershipSection state={state} />
             <AnalysisSection state={state} />
             <VisualizationSection state={state} />
-        </section>
+        </PageShell>
     )
 }
