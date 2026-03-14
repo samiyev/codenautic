@@ -5,7 +5,7 @@ import { useDynamicTranslation } from "@/lib/i18n"
 import { ContextPreview } from "@/components/settings/context-preview"
 import { ContextSourceCard } from "@/components/settings/context-source-card"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
-import { Button, Card, CardBody, CardHeader, Chip, Input, Switch } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, Chip, Input, Switch } from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { useExternalContext } from "@/lib/hooks/queries/use-external-context"
@@ -418,7 +418,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                         {t("settings:integrations.connectionHealthSummary")}
                     </p>
                 </CardHeader>
-                <CardBody className="grid gap-2 text-sm sm:grid-cols-3">
+                <CardContent className="grid gap-2 text-sm sm:grid-cols-3">
                     <p className="rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-success">
                         {t("settings:integrations.connected")}{" "}
                         <span className="font-semibold">{summary.connected}</span>
@@ -431,7 +431,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                         {t("settings:integrations.disconnected")}{" "}
                         <span className="font-semibold">{summary.disconnected}</span>
                     </p>
-                </CardBody>
+                </CardContent>
             </Card>
 
             <div className="space-y-4">
@@ -450,19 +450,19 @@ export function SettingsIntegrationsPage(): ReactElement {
                                 <Chip
                                     color={mapStatusChipColor(integration.status)}
                                     size="sm"
-                                    variant="flat"
+                                    variant="soft"
                                 >
                                     {td(
                                         `settings:integrations.${mapStatusLabelKey(integration.status)}`,
                                     )}
                                 </Chip>
                             </CardHeader>
-                            <CardBody className="space-y-3">
+                            <CardContent className="space-y-3">
                                 <div className="grid gap-3 md:grid-cols-2">
                                     <Input
-                                        label={t("settings:integrations.workspaceEndpoint")}
-                                        onValueChange={(value): void => {
-                                            setWorkspace(integration.provider, value)
+                                        aria-label={t("settings:integrations.workspaceEndpoint")}
+                                        onChange={(e): void => {
+                                            setWorkspace(integration.provider, e.target.value)
                                         }}
                                         placeholder={resolveWorkspacePlaceholder(
                                             integration.provider,
@@ -470,9 +470,9 @@ export function SettingsIntegrationsPage(): ReactElement {
                                         value={integration.workspace}
                                     />
                                     <Input
-                                        label={t("settings:integrations.target")}
-                                        onValueChange={(value): void => {
-                                            setTarget(integration.provider, value)
+                                        aria-label={t("settings:integrations.target")}
+                                        onChange={(e): void => {
+                                            setTarget(integration.provider, e.target.value)
                                         }}
                                         placeholder={resolveTargetPlaceholder(integration.provider)}
                                         value={integration.target}
@@ -482,16 +482,16 @@ export function SettingsIntegrationsPage(): ReactElement {
                                 <div className="flex flex-wrap items-center gap-4 text-sm">
                                     <Switch
                                         isSelected={integration.syncEnabled}
-                                        onValueChange={(value): void => {
-                                            setSyncEnabled(integration.provider, value)
+                                        onChange={(isSelected: boolean): void => {
+                                            setSyncEnabled(integration.provider, isSelected)
                                         }}
                                     >
                                         {t("settings:integrations.enableSync")}
                                     </Switch>
                                     <Switch
                                         isSelected={integration.notificationsEnabled}
-                                        onValueChange={(value): void => {
-                                            setNotificationsEnabled(integration.provider, value)
+                                        onChange={(isSelected: boolean): void => {
+                                            setNotificationsEnabled(integration.provider, isSelected)
                                         }}
                                     >
                                         {t("settings:integrations.enableNotifications")}
@@ -512,8 +512,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                                             handleToggleConnection(integration.provider)
                                         }}
                                         size="sm"
-                                        color="primary"
-                                        variant={integration.connected === true ? "flat" : "solid"}
+                                        variant={integration.connected === true ? "secondary" : "primary"}
                                     >
                                         {integration.connected === true
                                             ? t("settings:integrations.disconnect")
@@ -524,7 +523,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                                             handleSaveConfiguration(integration.provider)
                                         }}
                                         size="sm"
-                                        variant="light"
+                                        variant="ghost"
                                     >
                                         {t("settings:integrations.saveConfiguration")}
                                     </Button>
@@ -539,7 +538,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                                     {integration.lastSyncAt ??
                                         t("settings:integrations.notSyncedYet")}
                                 </p>
-                            </CardBody>
+                            </CardContent>
                         </Card>
                     ),
                 )}
@@ -556,7 +555,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                         </p>
                     </div>
                 </CardHeader>
-                <CardBody className="space-y-4">
+                <CardContent className="space-y-4">
                     {externalContext.sourcesQuery.isPending ? (
                         <p aria-live="polite" className="text-sm text-muted-foreground">
                             {t("settings:integrations.loadingContextSources")}
@@ -595,7 +594,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                             />
                         </div>
                     )}
-                </CardBody>
+                </CardContent>
             </Card>
         </FormLayout>
     )

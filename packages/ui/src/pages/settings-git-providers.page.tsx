@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button, Card, CardBody } from "@/components/ui"
+import { Button, Card, CardContent } from "@heroui/react"
 import {
     GIT_PROVIDER_CONNECTION_STATUS,
     type IGitProviderConnection,
@@ -119,7 +119,7 @@ export function SettingsGitProvidersPage(): ReactElement {
         >
             <GitProvidersList providers={providerCards} />
             <Card>
-                <CardBody className="space-y-3">
+                <CardContent className="space-y-3">
                     <p className="text-sm font-medium text-foreground">
                         {t("settings:gitProviders.connectivityChecks")}
                     </p>
@@ -138,8 +138,7 @@ export function SettingsGitProvidersPage(): ReactElement {
                                     />
                                     <Button
                                         size="sm"
-                                        color="primary"
-                                        variant="flat"
+                                        variant="secondary"
                                         onPress={(): void => {
                                             void gitProviders.updateConnection.mutateAsync({
                                                 connected: provider.connected !== true,
@@ -160,7 +159,7 @@ export function SettingsGitProvidersPage(): ReactElement {
                             ? t("settings:gitProviders.tokenConfigured")
                             : t("settings:gitProviders.noTokensConfigured")}
                     </p>
-                </CardBody>
+                </CardContent>
             </Card>
         </FormLayout>
     )
