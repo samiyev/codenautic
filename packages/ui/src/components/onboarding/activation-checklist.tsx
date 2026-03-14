@@ -2,7 +2,7 @@ import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "@tanstack/react-router"
 
-import { Alert, Button, Card, CardBody, CardHeader, Chip } from "@/components/ui"
+import { Alert, Button, Card, CardContent, CardHeader, Chip } from "@heroui/react"
 import {
     getWindowLocalStorage,
     safeStorageGetJson,
@@ -191,13 +191,14 @@ export function ActivationChecklist(props: IActivationChecklistProps): ReactElem
         <Card>
             <CardHeader className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-base font-semibold text-foreground">Activation checklist</p>
-                <Chip size="sm" variant="flat">
+                <Chip size="sm" variant="soft">
                     Progress: {progressPercent}%
                 </Chip>
             </CardHeader>
-            <CardBody className="space-y-3">
-                <Alert color="primary" title="Path to first value" variant="flat">
-                    Complete steps to reach first successful scan and visible insights.
+            <CardContent className="space-y-3">
+                <Alert status="accent">
+                    <Alert.Title>Path to first value</Alert.Title>
+                    <Alert.Description>Complete steps to reach first successful scan and visible insights.</Alert.Description>
                 </Alert>
                 <ul
                     aria-label={t("common:ariaLabel.activationChecklist.steps")}
@@ -223,7 +224,7 @@ export function ActivationChecklist(props: IActivationChecklistProps): ReactElem
                                     <Chip
                                         color={isCompleted ? "success" : "warning"}
                                         size="sm"
-                                        variant="flat"
+                                        variant="soft"
                                     >
                                         {isCompleted ? "done" : "pending"}
                                     </Chip>
@@ -237,7 +238,7 @@ export function ActivationChecklist(props: IActivationChecklistProps): ReactElem
                                     </Link>
                                     <Button
                                         size="sm"
-                                        variant="flat"
+                                        variant="secondary"
                                         onPress={(): void => {
                                             handleToggleStep(step.id)
                                         }}
@@ -252,7 +253,7 @@ export function ActivationChecklist(props: IActivationChecklistProps): ReactElem
                 <div className="flex justify-end">
                     <Button
                         size="sm"
-                        variant="flat"
+                        variant="secondary"
                         onPress={(): void => {
                             updateState({
                                 ...state,
@@ -263,7 +264,7 @@ export function ActivationChecklist(props: IActivationChecklistProps): ReactElem
                         Dismiss checklist
                     </Button>
                 </div>
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
