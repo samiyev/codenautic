@@ -1,12 +1,7 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
-import {
-    FORECAST_CONFIDENCE_FILL,
-    FORECAST_HISTORICAL_STROKE,
-    FORECAST_LINE_STROKE,
-    FORECAST_ZONE_FILL,
-} from "@/lib/constants/graph-colors"
+import { GRAPH_EXPORT_PALETTE } from "@/lib/constants/graph-colors"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
@@ -148,7 +143,7 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
                     viewBox={`0 0 ${String(chartWidth + horizontalPadding * 2)} ${String(chartHeight + verticalPadding * 2)}`}
                 >
                     <rect
-                        fill={FORECAST_ZONE_FILL}
+                        fill={GRAPH_EXPORT_PALETTE.forecast.zoneFill}
                         height={String(chartHeight)}
                         opacity="0.35"
                         width={String(chartWidth - forecastStartX)}
@@ -156,7 +151,7 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
                         y={String(verticalPadding)}
                     />
                     <polygon
-                        fill={FORECAST_CONFIDENCE_FILL}
+                        fill={GRAPH_EXPORT_PALETTE.forecast.confidenceFill}
                         opacity="0.35"
                         points={confidencePath}
                         transform={`translate(${String(horizontalPadding)} ${String(verticalPadding)})`}
@@ -164,14 +159,14 @@ export function TrendForecastChart(props: ITrendForecastChartProps): ReactElemen
                     <path
                         d={historicalPath}
                         fill="none"
-                        stroke={FORECAST_HISTORICAL_STROKE}
+                        stroke={GRAPH_EXPORT_PALETTE.forecast.historicalStroke}
                         strokeWidth="2"
                         transform={`translate(${String(horizontalPadding)} ${String(verticalPadding)})`}
                     />
                     <path
                         d={forecastPath}
                         fill="none"
-                        stroke={FORECAST_LINE_STROKE}
+                        stroke={GRAPH_EXPORT_PALETTE.forecast.lineStroke}
                         strokeDasharray="6 4"
                         strokeWidth="2"
                         transform={`translate(${String(horizontalPadding)} ${String(verticalPadding)})`}

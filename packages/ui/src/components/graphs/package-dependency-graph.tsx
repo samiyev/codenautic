@@ -1,7 +1,7 @@
-import { type ReactElement, useEffect, useMemo, useRef, useState } from "react"
+import { type ChangeEvent, type ReactElement, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button, Card, CardBody, CardHeader, Input } from "@/components/ui"
+import { Button, Card, CardContent, CardHeader, Input } from "@heroui/react"
 import { XyFlowGraph } from "@/components/graphs/xyflow-graph"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { exportGraphAsJson } from "@/components/graphs/graph-export"
@@ -251,9 +251,9 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
         return (
             <Card aria-label={title}>
                 <CardHeader>{title}</CardHeader>
-                <CardBody>
+                <CardContent>
                     <p>{emptyStateLabel}</p>
-                </CardBody>
+                </CardContent>
             </Card>
         )
     }
@@ -270,19 +270,18 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         aria-label={t("code-city:packageDependency.ariaLabelFilter")}
                         placeholder={t("code-city:packageDependency.placeholderFilter")}
                         value={state.query}
-                        onValueChange={(nextQuery): void => {
+                        onChange={(event: ChangeEvent<HTMLInputElement>): void => {
                             setState(
                                 (previous): IPackageDependencyGraphState => ({
                                     ...previous,
-                                    query: nextQuery,
+                                    query: event.target.value,
                                 }),
                             )
                         }}
                     />
                     {relationTypes.length > 0 ? (
                         <Button
-                            color="default"
-                            onPress={(): void => {
+                                                        onPress={(): void => {
                                 setState(
                                     (previous): IPackageDependencyGraphState => ({
                                         ...previous,
@@ -290,15 +289,14 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                     }),
                                 )
                             }}
-                            variant="flat"
+                            variant="secondary"
                         >
                             {t("code-city:packageDependency.clearRelationFilters")}
                         </Button>
                     ) : null}
                     {state.query.length > 0 ? (
                         <Button
-                            color="default"
-                            onPress={(): void => {
+                                                        onPress={(): void => {
                                 setState(
                                     (previous): IPackageDependencyGraphState => ({
                                         ...previous,
@@ -306,13 +304,12 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                     }),
                                 )
                             }}
-                            variant="flat"
+                            variant="secondary"
                         >
                             {t("code-city:packageDependency.reset")}
                         </Button>
                     ) : null}
                     <Button
-                        color={state.showImpactPaths ? "success" : "default"}
                         isDisabled={state.selectedNodeId === undefined}
                         onPress={(): void => {
                             setState(
@@ -322,13 +319,12 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                 }),
                             )
                         }}
-                        variant={state.showImpactPaths ? "flat" : "bordered"}
+                        variant={state.showImpactPaths ? "secondary" : "outline"}
                     >
                         {t("code-city:packageDependency.highlightImpactPaths")}
                     </Button>
                     <Button
-                        color="default"
-                        onPress={(): void => {
+                                                onPress={(): void => {
                             setState(
                                 (previousState): IPackageDependencyGraphState => ({
                                     ...previousState,
@@ -349,14 +345,13 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                 }),
                             )
                         }}
-                        variant="flat"
+                        variant="secondary"
                     >
                         {state.viewMode === "clustered"
                             ? t("code-city:packageDependency.switchToDetailed")
                             : t("code-city:packageDependency.switchToClustered")}
                     </Button>
                     <Button
-                        color={state.focusPathOnly ? "primary" : "default"}
                         isDisabled={state.selectedNodeId === undefined}
                         onPress={(): void => {
                             setState(
@@ -366,13 +361,12 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                 }),
                             )
                         }}
-                        variant={state.focusPathOnly ? "flat" : "bordered"}
+                        variant={state.focusPathOnly ? "primary" : "outline"}
                     >
                         {t("code-city:packageDependency.focusPath")}
                     </Button>
                     <Button
-                        color="default"
-                        isDisabled={state.viewMode !== "clustered" || state.isClusterDetailLoading}
+                                                isDisabled={state.viewMode !== "clustered" || state.isClusterDetailLoading}
                         onPress={(): void => {
                             if (state.viewMode !== "clustered") {
                                 return
@@ -411,7 +405,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                 )
                             }, CLUSTER_DETAILS_DELAY_MS)
                         }}
-                        variant="flat"
+                        variant="secondary"
                     >
                         {state.lodMode === "details"
                             ? t("code-city:packageDependency.lodDetails")
@@ -419,7 +413,6 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                     </Button>
                     {hugeGraphFallbackMode ? (
                         <Button
-                            color={state.forceGraphRenderInHugeMode ? "warning" : "default"}
                             onPress={(): void => {
                                 setState(
                                     (previousState): IPackageDependencyGraphState => ({
@@ -429,7 +422,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                     }),
                                 )
                             }}
-                            variant="flat"
+                            variant="secondary"
                         >
                             {state.forceGraphRenderInHugeMode
                                 ? t("code-city:packageDependency.useHugeGraphFallback")
@@ -438,8 +431,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                     ) : null}
                     {state.viewMode === "clustered" && selectedClusterLayer !== undefined ? (
                         <Button
-                            color="default"
-                            onPress={(): void => {
+                                                        onPress={(): void => {
                                 setState(
                                     (previousState): IPackageDependencyGraphState => ({
                                         ...previousState,
@@ -450,7 +442,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                     }),
                                 )
                             }}
-                            variant="light"
+                            variant="ghost"
                         >
                             {state.expandedLayerIds.includes(selectedClusterLayer)
                                 ? t("code-city:packageDependency.collapse", {
@@ -469,9 +461,8 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                             return (
                                 <Button
                                     key={relationType}
-                                    color="default"
-                                    size="sm"
-                                    variant={isActive ? "flat" : "light"}
+                                                                        size="sm"
+                                    variant={isActive ? "secondary" : "ghost"}
                                     onPress={(): void => {
                                         const selectedRelationTypes = toggleRelationFilter(
                                             state.selectedRelationTypes,
@@ -492,7 +483,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                     </div>
                 ) : null}
             </CardHeader>
-            <CardBody className="gap-4">
+            <CardContent className="gap-4">
                 {state.viewMode === "clustered" ? (
                     <p className="text-xs text-foreground-500">
                         {t("code-city:packageDependency.clusterMode")}
@@ -516,7 +507,6 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         </p>
                         <div className="flex flex-wrap gap-2">
                             <Button
-                                color="warning"
                                 onPress={(): void => {
                                     exportGraphAsJson(`${title} fallback`, {
                                         relationCount: filteredRelations.length,
@@ -526,7 +516,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                                     })
                                 }}
                                 size="sm"
-                                variant="flat"
+                                variant="secondary"
                             >
                                 {t("code-city:packageDependency.exportFallbackJson")}
                             </Button>
@@ -677,7 +667,7 @@ export function PackageDependencyGraph(props: IPackageDependencyGraphProps): Rea
                         </p>
                     )}
                 </section>
-            </CardBody>
+            </CardContent>
         </Card>
     )
 }
