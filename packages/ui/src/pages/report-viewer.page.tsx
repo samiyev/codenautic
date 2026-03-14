@@ -199,7 +199,10 @@ export function ReportViewerPage(): ReactElement {
                             </Button>
                         </div>
                     </div>
-                    <ChartContainer aria-label="Report trend chart" height="xl">
+                    <ChartContainer
+                        aria-label={t("reports:ariaLabel.viewer.trendChart")}
+                        height="xl"
+                    >
                         <LineChart
                             data={REPORT_TREND_POINTS}
                             margin={{ bottom: 8, left: 8, right: 12, top: 12 }}
@@ -224,7 +227,10 @@ export function ReportViewerPage(): ReactElement {
                             />
                         </LineChart>
                     </ChartContainer>
-                    <ChartContainer aria-label="Report sections distribution chart" height="xl">
+                    <ChartContainer
+                        aria-label={t("reports:ariaLabel.viewer.sectionsDistributionChart")}
+                        height="xl"
+                    >
                         <BarChart
                             data={SECTION_DISTRIBUTION_POINTS}
                             margin={{ bottom: 8, left: 8, right: 12, top: 12 }}
@@ -262,7 +268,9 @@ export function ReportViewerPage(): ReactElement {
                         title={t("reports:viewer.shareLinkTitle")}
                         variant="flat"
                     >
-                        <span aria-label="Report share link">{shareLink}</span>
+                        <span aria-label={t("reports:ariaLabel.viewer.shareLink")}>
+                            {shareLink}
+                        </span>
                     </Alert>
                 </CardBody>
             </Card>

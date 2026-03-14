@@ -1,4 +1,5 @@
 import { type ChangeEvent, type ReactElement, useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { FileDependencyGraph } from "@/components/graphs/file-dependency-graph"
 import { CodeCityTreemap } from "@/components/graphs/codecity-treemap"
@@ -51,6 +52,7 @@ import {
  * @returns Секция с визуализацией health score.
  */
 function RepositoryHealthScore(props: { readonly score: number }): ReactElement {
+    const { t } = useTranslation(["reviews"])
     const score = clampScore(props.score)
     const chipColor = resolveHealthChipColor(score)
     const progressColor =
@@ -62,7 +64,7 @@ function RepositoryHealthScore(props: { readonly score: number }): ReactElement 
 
     return (
         <section
-            aria-label="Repository health score"
+            aria-label={t("reviews:ariaLabel.repositoryOverview.healthScore")}
             className="rounded-lg border border-border p-3"
         >
             <div className="flex items-end justify-between">
@@ -359,6 +361,7 @@ function RescanScheduleDialog(props: {
  * @returns Страница с метриками, архитектурным резюме и health score.
  */
 export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactElement {
+    const { t } = useTranslation(["reviews"])
     const repository = getRepositoryOverviewById(props.repositoryId)
     const defaultReschedule = createRescanScheduleFromCron(
         getRepositoryDefaultSchedule(props.repositoryId),
@@ -535,7 +538,7 @@ export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactEl
                 />
             ) : null}
 
-            <section aria-label="Key metrics">
+            <section aria-label={t("reviews:ariaLabel.repositoryOverview.keyMetrics")}>
                 <MetricsGrid metrics={repository.keyMetrics} />
             </section>
 
