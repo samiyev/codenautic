@@ -8,6 +8,8 @@ import {
     WORKER_RUNTIME_STATUS,
     type IBullMqWorkerFactoryOptions,
     type IBullMqWorkerInstance,
+    type IWorkerSignalProcess,
+    type WorkerShutdownSignal,
 } from "../../src/worker"
 
 /**
@@ -59,6 +61,78 @@ class ScriptedWorker implements IBullMqWorkerInstance {
     public close(force?: boolean): Promise<void> {
         this.closeCalls.push(force)
         return this.closeBehavior(force)
+    }
+}
+
+/**
+ * Process-like signal emitter used to test graceful shutdown subscriptions.
+ */
+class FakeSignalProcess implements IWorkerSignalProcess {
+    private readonly listeners = new Map<WorkerShutdownSignal, Set<() => void>>()
+
+    /**
+     * Registers one listener for provided signal.
+     *
+     * @param signal Process signal.
+     * @param listener Callback.
+     * @returns Process reference.
+     */
+    public on(signal: WorkerShutdownSignal, listener: () => void): IWorkerSignalProcess {
+        const existing = this.listeners.get(signal)
+        if (existing !== undefined) {
+            existing.add(listener)
+            return this
+        }
+
+        this.listeners.set(signal, new Set([listener]))
+        return this
+    }
+
+    /**
+     * Removes one listener for provided signal.
+     *
+     * @param signal Process signal.
+     * @param listener Callback.
+     * @returns Process reference.
+     */
+    public off(signal: WorkerShutdownSignal, listener: () => void): IWorkerSignalProcess {
+        const existing = this.listeners.get(signal)
+        if (existing === undefined) {
+            return this
+        }
+
+        existing.delete(listener)
+        if (existing.size === 0) {
+            this.listeners.delete(signal)
+        }
+
+        return this
+    }
+
+    /**
+     * Emits one signal to registered listeners.
+     *
+     * @param signal Process signal.
+     */
+    public emit(signal: WorkerShutdownSignal): void {
+        const existing = this.listeners.get(signal)
+        if (existing === undefined) {
+            return
+        }
+
+        for (const listener of existing.values()) {
+            listener()
+        }
+    }
+
+    /**
+     * Returns current listener count for signal.
+     *
+     * @param signal Process signal.
+     * @returns Listener count.
+     */
+    public listenerCount(signal: WorkerShutdownSignal): number {
+        return this.listeners.get(signal)?.size ?? 0
     }
 }
 
@@ -212,6 +286,31 @@ describe("BullMqWorkerRuntime", () => {
         gracefulCloseDeferred.resolve()
     })
 
+    test("handles SIGTERM by triggering graceful stop and unsubscribing listeners", async () => {
+        const signalProcess = new FakeSignalProcess()
+        const worker = new ScriptedWorker((): Promise<void> => Promise.resolve())
+        const runtime = new BullMqWorkerRuntime({
+            queueName: "review-jobs",
+            connection: createConnectionOptions(),
+            resolveProcessor: () => undefined,
+            workerFactory: (): IBullMqWorkerInstance => worker,
+            signalProcess,
+            shutdownSignals: ["SIGTERM"],
+        })
+
+        await runtime.start()
+        expect(signalProcess.listenerCount("SIGTERM")).toBe(1)
+
+        signalProcess.emit("SIGTERM")
+        await waitUntil(
+            () => runtime.healthCheck().status === WORKER_RUNTIME_STATUS.Stopped,
+            "Runtime did not stop after SIGTERM",
+        )
+
+        expect(worker.closeCalls).toEqual([undefined])
+        expect(signalProcess.listenerCount("SIGTERM")).toBe(0)
+    })
+
     test("validates runtime options and surfaces factory failures in health state", async () => {
         expect(
             () =>
@@ -230,6 +329,15 @@ describe("BullMqWorkerRuntime", () => {
                     shutdownTimeoutMs: 0,
                 }),
         ).toThrow("shutdownTimeoutMs must be greater than zero")
+        expect(
+            () =>
+                new BullMqWorkerRuntime({
+                    queueName: "review-jobs",
+                    connection: createConnectionOptions(),
+                    resolveProcessor: () => undefined,
+                    shutdownSignals: [],
+                }),
+        ).toThrow("shutdownSignals must contain at least one signal")
 
         const runtime = new BullMqWorkerRuntime({
             queueName: "review-jobs",
@@ -279,6 +387,28 @@ function createDeferred<T>(): IDeferred<T> {
         resolve,
         reject,
     }
+}
+
+/**
+ * Waits until predicate becomes true.
+ *
+ * @param predicate Condition predicate.
+ * @param errorMessage Error message on timeout.
+ */
+async function waitUntil(
+    predicate: () => boolean,
+    errorMessage: string,
+): Promise<void> {
+    const maxAttempts = 20
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        if (predicate()) {
+            return
+        }
+
+        await Promise.resolve()
+    }
+
+    throw new Error(errorMessage)
 }
 
 /**

@@ -4,6 +4,7 @@ export {
 } from "./worker.module"
 export {
     BULLMQ_WORKER_PREFETCH,
+    DEFAULT_WORKER_SHUTDOWN_SIGNALS,
     BullMqWorkerRuntime,
     DEFAULT_WORKER_GRACEFUL_SHUTDOWN_TIMEOUT_MS,
     type BullMqWorkerFactory,
@@ -11,6 +12,9 @@ export {
     type IBullMqWorkerInstance,
     type IBullMqWorkerRuntimeJob,
     type IBullMqWorkerRuntimeOptions,
+    type IWorkerSignalProcess,
+    type WorkerShutdownSignal,
+    type WorkerSignalShutdownErrorHandler,
     type WorkerPayloadProcessor,
     type WorkerProcessorResolver,
 } from "./bullmq-worker-runtime.impl"

@@ -23,6 +23,49 @@ export const DEFAULT_WORKER_GRACEFUL_SHUTDOWN_TIMEOUT_MS = 30_000
 export type WorkerPayloadProcessor = (payload: unknown) => Promise<void>
 
 /**
+ * Supported process signals for worker shutdown.
+ */
+export type WorkerShutdownSignal = "SIGTERM" | "SIGINT"
+
+/**
+ * Default process signals used for graceful shutdown.
+ */
+export const DEFAULT_WORKER_SHUTDOWN_SIGNALS: readonly WorkerShutdownSignal[] = [
+    "SIGTERM",
+] as const
+
+/**
+ * Process-like signal API used by runtime for testable signal handling.
+ */
+export interface IWorkerSignalProcess {
+    /**
+     * Subscribes one signal listener.
+     *
+     * @param signal Process signal.
+     * @param listener Signal callback.
+     * @returns Process reference.
+     */
+    on(signal: WorkerShutdownSignal, listener: () => void): IWorkerSignalProcess
+
+    /**
+     * Unsubscribes one signal listener.
+     *
+     * @param signal Process signal.
+     * @param listener Signal callback.
+     * @returns Process reference.
+     */
+    off(signal: WorkerShutdownSignal, listener: () => void): IWorkerSignalProcess
+}
+
+/**
+ * Callback invoked when signal-driven graceful shutdown fails.
+ */
+export type WorkerSignalShutdownErrorHandler = (
+    error: Error,
+    signal: WorkerShutdownSignal,
+) => void
+
+/**
  * Processor resolver by logical job type.
  */
 export type WorkerProcessorResolver = (
@@ -126,6 +169,21 @@ export interface IBullMqWorkerRuntimeOptions {
      * Optional clock for deterministic tests.
      */
     readonly now?: () => Date
+
+    /**
+     * Optional process-like signal API for graceful shutdown wiring.
+     */
+    readonly signalProcess?: IWorkerSignalProcess
+
+    /**
+     * Optional set of process signals triggering graceful shutdown.
+     */
+    readonly shutdownSignals?: readonly WorkerShutdownSignal[]
+
+    /**
+     * Optional callback invoked when signal shutdown fails.
+     */
+    readonly onSignalShutdownError?: WorkerSignalShutdownErrorHandler
 }
 
 /**
@@ -138,12 +196,16 @@ export class BullMqWorkerRuntime implements IWorkerRuntime {
     private readonly shutdownTimeoutMs: number
     private readonly workerFactory: BullMqWorkerFactory
     private readonly now: () => Date
+    private readonly signalProcess: IWorkerSignalProcess
+    private readonly shutdownSignals: readonly WorkerShutdownSignal[]
+    private readonly onSignalShutdownError: WorkerSignalShutdownErrorHandler
     private worker: IBullMqWorkerInstance | null = null
     private activeJobs = 0
     private status: WorkerRuntimeStatus = WORKER_RUNTIME_STATUS.Idle
     private startedAt: Date | null = null
     private stoppedAt: Date | null = null
     private lastFailure: string | null = null
+    private readonly signalHandlers = new Map<WorkerShutdownSignal, () => void>()
 
     /**
      * Creates runtime instance.
@@ -160,6 +222,12 @@ export class BullMqWorkerRuntime implements IWorkerRuntime {
         )
         this.workerFactory = options.workerFactory ?? defaultBullMqWorkerFactory
         this.now = options.now ?? defaultNow
+        this.signalProcess = options.signalProcess ?? defaultSignalProcess
+        this.shutdownSignals = normalizeShutdownSignals(
+            options.shutdownSignals ?? DEFAULT_WORKER_SHUTDOWN_SIGNALS,
+        )
+        this.onSignalShutdownError =
+            options.onSignalShutdownError ?? defaultSignalShutdownErrorHandler
     }
 
     /**
@@ -183,6 +251,7 @@ export class BullMqWorkerRuntime implements IWorkerRuntime {
             this.startedAt = this.now()
             this.stoppedAt = null
             this.lastFailure = null
+            this.registerShutdownHandlers()
         } catch (error: unknown) {
             this.status = WORKER_RUNTIME_STATUS.Degraded
             this.lastFailure = toErrorMessage(error)
@@ -196,6 +265,7 @@ export class BullMqWorkerRuntime implements IWorkerRuntime {
      * Stops worker runtime. Waits for graceful close and force-closes on timeout.
      */
     public async stop(): Promise<void> {
+        this.unregisterShutdownHandlers()
         if (this.worker === null) {
             this.status = WORKER_RUNTIME_STATUS.Stopped
             this.stoppedAt = this.now()
@@ -268,6 +338,55 @@ export class BullMqWorkerRuntime implements IWorkerRuntime {
         } finally {
             this.activeJobs = Math.max(0, this.activeJobs - 1)
         }
+    }
+
+    /**
+     * Registers process signal handlers for graceful shutdown.
+     */
+    private registerShutdownHandlers(): void {
+        if (this.signalHandlers.size > 0) {
+            return
+        }
+
+        for (const signal of this.shutdownSignals) {
+            const handler = (): void => {
+                this.handleShutdownSignal(signal)
+            }
+            this.signalHandlers.set(signal, handler)
+            this.signalProcess.on(signal, handler)
+        }
+    }
+
+    /**
+     * Unregisters previously attached process signal handlers.
+     */
+    private unregisterShutdownHandlers(): void {
+        for (const [signal, handler] of this.signalHandlers.entries()) {
+            this.signalProcess.off(signal, handler)
+        }
+
+        this.signalHandlers.clear()
+    }
+
+    /**
+     * Handles one process signal by initiating graceful shutdown.
+     *
+     * @param signal Received process signal.
+     */
+    private handleShutdownSignal(signal: WorkerShutdownSignal): void {
+        if (
+            this.status === WORKER_RUNTIME_STATUS.Stopping ||
+            this.status === WORKER_RUNTIME_STATUS.Stopped
+        ) {
+            return
+        }
+
+        void this.stop().catch((error: unknown): void => {
+            const normalizedError = toError(error)
+            this.status = WORKER_RUNTIME_STATUS.Degraded
+            this.lastFailure = normalizedError.message
+            this.onSignalShutdownError(normalizedError, signal)
+        })
     }
 }
 
@@ -439,6 +558,51 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  */
 function defaultNow(): Date {
     return new Date()
+}
+
+/**
+ * Default process-like object used for signal subscriptions.
+ */
+const defaultSignalProcess: IWorkerSignalProcess = process
+
+/**
+ * Validates and normalizes shutdown signals list.
+ *
+ * @param signals Raw signals.
+ * @returns Normalized unique signals preserving order.
+ */
+function normalizeShutdownSignals(
+    signals: readonly WorkerShutdownSignal[],
+): readonly WorkerShutdownSignal[] {
+    if (signals.length === 0) {
+        throw new Error("shutdownSignals must contain at least one signal")
+    }
+
+    const normalized: WorkerShutdownSignal[] = []
+    for (const signal of signals) {
+        if (signal !== "SIGTERM" && signal !== "SIGINT") {
+            throw new Error("shutdownSignals contains unsupported signal")
+        }
+        if (normalized.includes(signal) === false) {
+            normalized.push(signal)
+        }
+    }
+
+    return normalized
+}
+
+/**
+ * Default no-op shutdown error callback.
+ *
+ * @param error Shutdown error.
+ * @param signal Received signal.
+ */
+function defaultSignalShutdownErrorHandler(
+    error: Error,
+    signal: WorkerShutdownSignal,
+): void {
+    void error
+    void signal
 }
 
 /**
