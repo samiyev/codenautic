@@ -539,7 +539,7 @@ export function MyWorkPage(): ReactElement {
                     <div className="flex flex-wrap gap-2">
                         <select
                             aria-label={t("dashboard:myWork.triageScopeAriaLabel")}
-                            className="w-full rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 md:max-w-[220px]"
+                            className="w-full rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 focus:border-accent/50 focus:ring-1 focus:ring-accent/20 md:max-w-[220px]"
                             value={scope}
                             onChange={(event): void => {
                                 const nextScope = event.currentTarget.value
@@ -559,7 +559,7 @@ export function MyWorkPage(): ReactElement {
 
                         <select
                             aria-label={t("dashboard:myWork.reviewerRoleAriaLabel")}
-                            className="w-full rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 md:max-w-[220px]"
+                            className="w-full rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 focus:border-accent/50 focus:ring-1 focus:ring-accent/20 md:max-w-[220px]"
                             value={reviewerRole}
                             onChange={(event): void => {
                                 const nextRole = event.currentTarget.value
@@ -587,7 +587,11 @@ export function MyWorkPage(): ReactElement {
                     {breachCount > 0 ? (
                         <Alert status="danger">
                             <Alert.Title>{t("dashboard:myWork.escalationWatchlist")}</Alert.Title>
-                            <Alert.Description>{td("dashboard:myWork.slaBreachAlert", { count: String(breachCount) })}</Alert.Description>
+                            <Alert.Description>
+                                {td("dashboard:myWork.slaBreachAlert", {
+                                    count: String(breachCount),
+                                })}
+                            </Alert.Description>
                         </Alert>
                     ) : null}
                 </CardContent>
@@ -621,7 +625,7 @@ export function MyWorkPage(): ReactElement {
                                     <li
                                         className={[
                                             "rounded-lg border p-3",
-                                            "transition-colors duration-150 hover:bg-surface-muted/30",
+                                            "transition-colors duration-150 hover:bg-surface-secondary/30",
                                             slaState === "breach"
                                                 ? "border-danger/30 border-l-4 border-l-danger/60 bg-danger/3"
                                                 : slaState === "warning"
@@ -674,7 +678,7 @@ export function MyWorkPage(): ReactElement {
                                                 {slaLabelMap[slaState]}
                                             </Chip>
                                         </div>
-                                        <p className="mt-1 text-xs text-text-secondary">
+                                        <p className="mt-1 text-xs text-muted">
                                             {item.repository} · {t("dashboard:myWork.createdLabel")}{" "}
                                             {formatTimestamp(item.timestamp)} ·{" "}
                                             {t("dashboard:myWork.dueLabel")}{" "}
@@ -821,7 +825,7 @@ export function MyWorkPage(): ReactElement {
                             {auditTrail.map(
                                 (entry): ReactElement => (
                                     <li
-                                        className="text-xs text-text-tertiary"
+                                        className="text-xs text-muted"
                                         key={entry.id}
                                     >{`${entry.itemId} ${auditActionMap[entry.action]} at ${formatTimestamp(entry.timestamp)}`}</li>
                                 ),

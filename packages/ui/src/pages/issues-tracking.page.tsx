@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState, type ChangeEvent, type ReactElement } fro
 import { useTranslation } from "react-i18next"
 
 import { useDynamicTranslation } from "@/lib/i18n"
-import { Button, Card, CardContent } from "@heroui/react"
-import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
+import { Button, Card, CardContent, Table } from "@heroui/react"
 import { PageShell } from "@/components/layout/page-shell"
 import { InfiniteScrollContainer } from "@/components/infrastructure/infinite-scroll-container"
 import { useFilterPersistence } from "@/lib/hooks/use-filter-persistence"
@@ -80,16 +79,16 @@ function createIssueStatusLabels(t: (key: string) => string): Record<TIssueTrack
 }
 
 const ISSUE_STATUS_STYLES: Record<TIssueTrackingStatus, string> = {
-    dismissed: "bg-surface-muted text-foreground",
+    dismissed: "bg-surface-secondary text-foreground",
     fixed: "bg-success/15 text-success",
-    in_progress: "bg-primary/15 text-primary",
+    in_progress: "bg-accent/15 text-accent",
     open: "bg-danger/15 text-danger",
 }
 
 const ISSUE_SEVERITY_STYLES: Record<TIssueTrackingSeverity, string> = {
     critical: "bg-danger/15 text-danger border border-danger/30",
     high: "bg-warning/15 text-warning border border-warning/30",
-    low: "bg-primary/10 text-primary border border-primary/30",
+    low: "bg-accent/10 text-accent border border-accent/30",
     medium: "bg-accent/15 text-accent border border-accent/30",
 }
 
@@ -240,19 +239,6 @@ function formatIssueDate(raw: string): string {
     })
 }
 
-function estimateIssueRowHeight(
-    issue: IIssueTrackingIssue,
-    density: "comfortable" | "compact",
-): number {
-    const baseHeight = density === "compact" ? 44 : 58
-    const titleLineCount = Math.max(1, Math.ceil(issue.title.length / 56))
-    const messageLineCount = Math.max(1, Math.ceil(issue.message.length / 52))
-    const actionLineCount = ISSUE_ACTIONS_BY_STATUS[issue.status].length > 2 ? 2 : 1
-    const extraLines = Math.max(titleLineCount, messageLineCount, actionLineCount) - 1
-
-    return baseHeight + extraLines * 16
-}
-
 /**
  * Страница issues tracking с фильтрами и virtual-scrolling списком.
  *
@@ -378,14 +364,14 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
             <div className="grid gap-3 rounded-xl border border-border/40 bg-surface/40 p-3 backdrop-blur-sm md:grid-cols-4">
                 <input
                     aria-label={t("dashboard:issuesTracking.searchAriaLabel")}
-                    className="rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 placeholder:text-muted-foreground focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                    className="rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 placeholder:text-muted focus:border-accent/50 focus:ring-1 focus:ring-accent/20"
                     placeholder={t("dashboard:issuesTracking.searchPlaceholder")}
                     value={filters.search}
                     onChange={handleSearchChange}
                 />
                 <select
                     aria-label={t("dashboard:issuesTracking.filterByStatus")}
-                    className="rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                    className="rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 focus:border-accent/50 focus:ring-1 focus:ring-accent/20"
                     value={filters.status}
                     onChange={handleSelectChange("status")}
                 >
@@ -400,13 +386,11 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
                 </select>
                 <select
                     aria-label={t("dashboard:issuesTracking.filterBySeverity")}
-                    className="rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+                    className="rounded-lg border border-border/50 bg-surface/80 px-3 py-2 text-sm text-foreground outline-none backdrop-blur-sm transition-colors duration-150 focus:border-accent/50 focus:ring-1 focus:ring-accent/20"
                     value={filters.severity}
                     onChange={handleSelectChange("severity")}
                 >
-                    <option value="all">
-                        {t("dashboard:issuesTracking.allSeverities")}
-                    </option>
+                    <option value="all">{t("dashboard:issuesTracking.allSeverities")}</option>
                     {ISSUE_SEVERITY_OPTIONS.map(
                         (severity): ReactElement => (
                             <option key={severity} value={severity}>
@@ -415,9 +399,7 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
                         ),
                     )}
                 </select>
-                <p
-                    className="flex items-center rounded-lg border border-border/30 bg-surface-muted/40 px-3 py-2 text-sm text-muted-foreground"
-                >
+                <p className="flex items-center rounded-lg border border-border/30 bg-surface-secondary/40 px-3 py-2 text-sm text-muted">
                     {td("dashboard:issuesTracking.issueCount", {
                         filtered: String(filteredIssues.length),
                         total: String(sourceIssues.length),
@@ -433,127 +415,105 @@ export function IssuesTrackingPage(props: IIssueTrackingPageProps = {}): ReactEl
                         loadingText={t("dashboard:issuesTracking.loadingMoreIssues")}
                         onLoadMore={handleLoadMore}
                     >
-                        <EnterpriseDataTable
-                            ariaLabel={t("dashboard:issuesTracking.issueListAriaLabel")}
-                            columns={[
-                                {
-                                    accessor: (issue): string => issue.id,
-                                    header: t("dashboard:issuesTracking.columnIssueId"),
-                                    id: "id",
-                                    pin: "left",
-                                    size: 130,
-                                },
-                                {
-                                    accessor: (issue): string => issue.title,
-                                    header: t("dashboard:issuesTracking.columnTitle"),
-                                    id: "title",
-                                    size: 260,
-                                },
-                                {
-                                    accessor: (issue): string => issue.repository,
-                                    header: t("dashboard:issuesTracking.columnRepository"),
-                                    id: "repository",
-                                    size: 220,
-                                },
-                                {
-                                    accessor: (issue): string => issue.filePath,
-                                    header: t("dashboard:issuesTracking.columnFile"),
-                                    id: "filePath",
-                                    size: 220,
-                                },
-                                {
-                                    accessor: (issue): string => issue.owner,
-                                    header: t("dashboard:issuesTracking.columnOwner"),
-                                    id: "owner",
-                                    size: 140,
-                                },
-                                {
-                                    accessor: (issue): string => issue.detectedAt,
-                                    cell: (issue): string => formatIssueDate(issue.detectedAt),
-                                    header: t("dashboard:issuesTracking.columnDetectedAt"),
-                                    id: "detectedAt",
-                                    size: 170,
-                                },
-                                {
-                                    accessor: (issue): string => issue.status,
-                                    cell: (issue): ReactElement => (
-                                        <span
-                                            className={`rounded-full px-2 py-0.5 text-xs ${ISSUE_STATUS_STYLES[issue.status]}`}
-                                        >
-                                            {ISSUE_STATUS_LABELS[issue.status]}
-                                        </span>
-                                    ),
-                                    header: t("dashboard:issuesTracking.columnStatus"),
-                                    id: "status",
-                                    size: 160,
-                                },
-                                {
-                                    accessor: (issue): string => issue.severity,
-                                    cell: (issue): ReactElement => (
-                                        <span
-                                            className={`rounded-full border px-2 py-0.5 text-xs ${ISSUE_SEVERITY_STYLES[issue.severity]}`}
-                                        >
-                                            {ISSUE_SEVERITY_LABELS[issue.severity]}
-                                        </span>
-                                    ),
-                                    header: t("dashboard:issuesTracking.columnSeverity"),
-                                    id: "severity",
-                                    size: 150,
-                                },
-                                {
-                                    accessor: (issue): string => issue.message,
-                                    header: t("dashboard:issuesTracking.columnMessage"),
-                                    id: "message",
-                                    size: 280,
-                                },
-                                {
-                                    accessor: (issue): string =>
-                                        ISSUE_ACTIONS_BY_STATUS[issue.status].join(","),
-                                    cell: (issue): ReactElement => (
-                                        <div className="flex flex-wrap items-center gap-1">
-                                            {ISSUE_ACTIONS_BY_STATUS[issue.status].map(
-                                                (action): ReactElement => (
-                                                    <Button
-                                                        aria-label={`${action} issue ${issue.id}`}
-                                                        key={`${issue.id}-${action}`}
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        onPress={(): void => {
-                                                            handleAction(issue, action)
-                                                        }}
-                                                    >
-                                                        {ISSUE_ACTION_LABELS[action]}
-                                                    </Button>
-                                                ),
-                                            )}
-                                        </div>
-                                    ),
-                                    enableGlobalFilter: false,
-                                    header: t("dashboard:issuesTracking.columnActions"),
-                                    id: "actions",
-                                    isHideable: false,
-                                    size: 280,
-                                },
-                            ]}
-                            emptyMessage={t("dashboard:issuesTracking.noIssuesFound")}
-                            getRowId={(issue): string => issue.id}
-                            id="issues-tracking-table"
-                            rows={visibleIssues}
-                            stickyHeader={{
-                                enabled: true,
-                                topOffset: 0,
-                                withShadow: true,
-                            }}
-                            virtualization={{
-                                estimateRowHeight: {
-                                    comfortable: 58,
-                                    compact: 44,
-                                },
-                                maxBodyHeight: 560,
-                                overscan: 12,
-                                rowHeightEstimator: estimateIssueRowHeight,
-                            }}
-                        />
+                        <Table>
+                            <Table.ScrollContainer>
+                                <Table.Content
+                                    aria-label={t("dashboard:issuesTracking.issueListAriaLabel")}
+                                >
+                                    <Table.Header>
+                                        <Table.Column isRowHeader>
+                                            {t("dashboard:issuesTracking.columnIssueId")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:issuesTracking.columnTitle")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:issuesTracking.columnRepository")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:issuesTracking.columnFile")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:issuesTracking.columnOwner")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:issuesTracking.columnDetectedAt")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:issuesTracking.columnStatus")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:issuesTracking.columnSeverity")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:issuesTracking.columnMessage")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:issuesTracking.columnActions")}
+                                        </Table.Column>
+                                    </Table.Header>
+                                    <Table.Body>
+                                        {visibleIssues.map(
+                                            (issue): ReactElement => (
+                                                <Table.Row key={issue.id}>
+                                                    <Table.Cell>{issue.id}</Table.Cell>
+                                                    <Table.Cell>{issue.title}</Table.Cell>
+                                                    <Table.Cell>{issue.repository}</Table.Cell>
+                                                    <Table.Cell>{issue.filePath}</Table.Cell>
+                                                    <Table.Cell>{issue.owner}</Table.Cell>
+                                                    <Table.Cell>
+                                                        {formatIssueDate(issue.detectedAt)}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <span
+                                                            className={`rounded-full px-2 py-0.5 text-xs ${ISSUE_STATUS_STYLES[issue.status]}`}
+                                                        >
+                                                            {ISSUE_STATUS_LABELS[issue.status]}
+                                                        </span>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <span
+                                                            className={`rounded-full border px-2 py-0.5 text-xs ${ISSUE_SEVERITY_STYLES[issue.severity]}`}
+                                                        >
+                                                            {ISSUE_SEVERITY_LABELS[issue.severity]}
+                                                        </span>
+                                                    </Table.Cell>
+                                                    <Table.Cell>{issue.message}</Table.Cell>
+                                                    <Table.Cell>
+                                                        <div className="flex flex-wrap items-center gap-1">
+                                                            {ISSUE_ACTIONS_BY_STATUS[
+                                                                issue.status
+                                                            ].map(
+                                                                (action): ReactElement => (
+                                                                    <Button
+                                                                        aria-label={`${action} issue ${issue.id}`}
+                                                                        key={`${issue.id}-${action}`}
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        onPress={(): void => {
+                                                                            handleAction(
+                                                                                issue,
+                                                                                action,
+                                                                            )
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            ISSUE_ACTION_LABELS[
+                                                                                action
+                                                                            ]
+                                                                        }
+                                                                    </Button>
+                                                                ),
+                                                            )}
+                                                        </div>
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            ),
+                                        )}
+                                    </Table.Body>
+                                </Table.Content>
+                            </Table.ScrollContainer>
+                        </Table>
                     </InfiniteScrollContainer>
                 </CardContent>
             </Card>
