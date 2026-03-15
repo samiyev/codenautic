@@ -12,22 +12,6 @@ vi.mock("@/lib/motion", () => ({
     EASING: { move: [0, 0, 1, 1] },
     STAGGER_DELAY: 0,
     STAGGER_ITEM_VARIANTS: {},
-    StaggerContainer: ({
-        children,
-        ariaLabel,
-        className,
-    }: {
-        readonly children: React.ReactNode
-        readonly ariaLabel?: string
-        readonly className?: string
-        readonly as?: React.ElementType
-    }): React.ReactElement => (
-        <div aria-label={ariaLabel} className={className}>
-            {children}
-        </div>
-    ),
-    useReducedMotion: (): boolean => true,
-    useCountUp: ({ target }: { readonly target: number }): number => target,
     AnimatedAlert: ({
         children,
         isVisible,
