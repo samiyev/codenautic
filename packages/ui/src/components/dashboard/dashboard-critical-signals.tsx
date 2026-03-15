@@ -1,6 +1,8 @@
 import type { ReactElement } from "react"
 import { AlertTriangle } from "@/components/icons/app-icons"
 
+import { AnimatePresence, motion } from "motion/react"
+
 import { Alert } from "@heroui/react"
 import {
     DataFreshnessPanel,
@@ -10,7 +12,7 @@ import {
     ExplainabilityPanel,
     type IExplainabilityFactor,
 } from "@/components/infrastructure/explainability-panel"
-import { AnimatedAlert } from "@/lib/motion"
+
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
@@ -53,20 +55,32 @@ export interface IDashboardCriticalSignalsProps {
 export function DashboardCriticalSignals(props: IDashboardCriticalSignalsProps): ReactElement {
     return (
         <div className="space-y-3 rounded-xl border border-border/40 bg-surface/40 p-4 backdrop-blur-sm">
-            <AnimatedAlert isVisible={props.isDegraded === true}>
-                <div className="flex items-start gap-3 rounded-lg border border-warning/30 bg-warning/8 p-3">
-                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-warning/15">
-                        <AlertTriangle aria-hidden="true" className="h-4 w-4 text-warning" />
-                    </div>
-                    <div>
-                        <p className={`${TYPOGRAPHY.cardTitle} text-warning`}>Ops notice</p>
-                        <p className="mt-0.5 text-sm text-foreground/80">
-                            Provider health degraded in this window. Check settings and review queue
-                            for mitigation.
-                        </p>
-                    </div>
-                </div>
-            </AnimatedAlert>
+            <AnimatePresence>
+                {props.isDegraded === true ? (
+                    <motion.div
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        initial={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.25, ease: [0.0, 0.0, 0.2, 1.0] }}
+                    >
+                        <div className="flex items-start gap-3 rounded-lg border border-warning/30 bg-warning/8 p-3">
+                            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-warning/15">
+                                <AlertTriangle
+                                    aria-hidden="true"
+                                    className="h-4 w-4 text-warning"
+                                />
+                            </div>
+                            <div>
+                                <p className={`${TYPOGRAPHY.cardTitle} text-warning`}>Ops notice</p>
+                                <p className="mt-0.5 text-sm text-foreground/80">
+                                    Provider health degraded in this window. Check settings and
+                                    review queue for mitigation.
+                                </p>
+                            </div>
+                        </div>
+                    </motion.div>
+                ) : null}
+            </AnimatePresence>
 
             <DataFreshnessPanel
                 isRefreshing={props.isRefreshing}
@@ -77,12 +91,21 @@ export function DashboardCriticalSignals(props: IDashboardCriticalSignalsProps):
                 onRefresh={props.onRefresh}
                 onRescan={props.onRescan}
             />
-            <AnimatedAlert isVisible={props.freshnessActionMessage.length > 0}>
-                <Alert status="accent">
-                    <Alert.Title>Freshness action</Alert.Title>
-                    <Alert.Description>{props.freshnessActionMessage}</Alert.Description>
-                </Alert>
-            </AnimatedAlert>
+            <AnimatePresence>
+                {props.freshnessActionMessage.length > 0 ? (
+                    <motion.div
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        initial={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.25, ease: [0.0, 0.0, 0.2, 1.0] }}
+                    >
+                        <Alert status="accent">
+                            <Alert.Title>Freshness action</Alert.Title>
+                            <Alert.Description>{props.freshnessActionMessage}</Alert.Description>
+                        </Alert>
+                    </motion.div>
+                ) : null}
+            </AnimatePresence>
             <ExplainabilityPanel
                 confidence={props.confidence}
                 dataWindow={props.dataWindow}
