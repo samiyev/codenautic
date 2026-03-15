@@ -5,8 +5,8 @@
  * построения impact analysis seeds, review history heat entries и форматирования.
  */
 
-import type { ICodeCityTreemapFileDescriptor } from "@/components/graphs/codecity-treemap"
-import type { IImpactAnalysisSeed } from "@/components/graphs/impact-analysis-panel"
+import type { ICodeCityTreemapFileDescriptor } from "@/components/codecity/codecity-treemap"
+import type { IImpactAnalysisSeed } from "@/components/predictions/impact-analysis-panel"
 import type { ICcrDiffFile, ICcrRowData } from "@/pages/ccr-data"
 
 import type {
