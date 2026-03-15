@@ -106,6 +106,12 @@ export {
     type IAstFileMetricsProviderErrorDetails,
 } from "./ast-file-metrics-provider.error"
 export {
+    AST_FILE_METRICS_CACHING_ERROR_CODE,
+    AstFileMetricsCachingError,
+    type AstFileMetricsCachingErrorCode,
+    type IAstFileMetricsCachingErrorDetails,
+} from "./ast-file-metrics-caching.error"
+export {
     AST_SERVICE_MULTI_REPO_GRAPH_FEDERATION_ERROR_CODE,
     AstServiceMultiRepoGraphFederationError,
     type AstServiceMultiRepoGraphFederationErrorCode,
@@ -520,6 +526,14 @@ export {
     type AstFileMetricsProviderResolveRepositoryPath,
     type IAstFileMetricsProviderOptions,
 } from "./ast-file-metrics-provider"
+export {
+    AstFileMetricsCachingProvider,
+    type AstFileMetricsCachingExecuteGit,
+    type AstFileMetricsCachingNow,
+    type AstFileMetricsCachingResolveCommitSha,
+    type AstFileMetricsCachingResolveRepositoryPath,
+    type IAstFileMetricsCachingProviderOptions,
+} from "./ast-file-metrics-caching-provider"
 export {
     AstCyclomaticComplexityService,
     type IAstCyclomaticComplexityFileInput,
