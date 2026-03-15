@@ -1,162 +1,10 @@
+import type {
+    IPackageDependencyNode,
+    IPackageDependencyRelation,
+} from "@/components/dependency-graphs/package-dependency-graph"
+import type { ICodeCityDashboardRepositoryProfile } from "@/pages/code-city-dashboard/code-city-dashboard-types"
+
 import type { IHttpClient } from "../http-client"
-
-/**
- * Файл в профиле репозитория CodeCity.
- */
-export interface ICodeCityFile {
-    /**
-     * Уникальный идентификатор файла.
-     */
-    readonly id: string
-    /**
-     * Путь к файлу.
-     */
-    readonly path: string
-    /**
-     * Количество строк кода.
-     */
-    readonly loc: number
-    /**
-     * Цикломатическая сложность.
-     */
-    readonly complexity: number
-    /**
-     * Покрытие тестами (0–100).
-     */
-    readonly coverage: number
-    /**
-     * Частота изменений.
-     */
-    readonly churn: number
-    /**
-     * Количество найденных проблем.
-     */
-    readonly issueCount: number
-}
-
-/**
- * Контрибьютор CodeCity профиля.
- */
-export interface ICodeCityContributor {
-    /**
-     * Идентификатор владельца.
-     */
-    readonly ownerId: string
-    /**
-     * Отображаемое имя.
-     */
-    readonly ownerName: string
-    /**
-     * Цвет для overlay.
-     */
-    readonly color: string
-    /**
-     * Количество коммитов.
-     */
-    readonly commitCount: number
-}
-
-/**
- * Точка тренда health score.
- */
-export interface ICodeCityHealthTrendPoint {
-    /**
-     * Временная метка (ISO 8601).
-     */
-    readonly timestamp: string
-    /**
-     * Значение health score.
-     */
-    readonly healthScore: number
-    /**
-     * Аннотация события (если есть).
-     */
-    readonly annotation?: string
-}
-
-/**
- * Temporal coupling между файлами.
- */
-export interface ICodeCityTemporalCoupling {
-    /**
-     * Идентификатор исходного файла.
-     */
-    readonly sourceFileId: string
-    /**
-     * Идентификатор целевого файла.
-     */
-    readonly targetFileId: string
-    /**
-     * Сила связи (0–1).
-     */
-    readonly strength: number
-}
-
-/**
- * Профиль репозитория для CodeCity.
- */
-export interface ICodeCityRepositoryProfile {
-    /**
-     * Уникальный идентификатор репозитория.
-     */
-    readonly id: string
-    /**
-     * Отображаемое имя.
-     */
-    readonly name: string
-    /**
-     * Набор файлов для treemap.
-     */
-    readonly files: ReadonlyArray<ICodeCityFile>
-    /**
-     * Контрибьюторы репозитория.
-     */
-    readonly contributors: ReadonlyArray<ICodeCityContributor>
-    /**
-     * Тренд health score.
-     */
-    readonly healthTrend: ReadonlyArray<ICodeCityHealthTrendPoint>
-    /**
-     * Temporal coupling связи.
-     */
-    readonly temporalCouplings: ReadonlyArray<ICodeCityTemporalCoupling>
-}
-
-/**
- * Узел графа зависимостей CodeCity.
- */
-export interface ICodeCityDependencyNode {
-    /**
-     * Уникальный идентификатор узла.
-     */
-    readonly id: string
-    /**
-     * Отображаемая метка.
-     */
-    readonly label: string
-    /**
-     * Тип узла.
-     */
-    readonly type: "repository" | "package" | "module"
-}
-
-/**
- * Связь графа зависимостей CodeCity.
- */
-export interface ICodeCityDependencyRelation {
-    /**
-     * Идентификатор источника.
-     */
-    readonly source: string
-    /**
-     * Идентификатор цели.
-     */
-    readonly target: string
-    /**
-     * Вес связи (0–1).
-     */
-    readonly weight: number
-}
 
 /**
  * Ответ списка профилей CodeCity.
@@ -165,7 +13,7 @@ export interface IListCodeCityProfilesResponse {
     /**
      * Профили репозиториев.
      */
-    readonly profiles: ReadonlyArray<ICodeCityRepositoryProfile>
+    readonly profiles: ReadonlyArray<ICodeCityDashboardRepositoryProfile>
 }
 
 /**
@@ -175,11 +23,11 @@ export interface ICodeCityDependencyGraphResponse {
     /**
      * Узлы графа зависимостей.
      */
-    readonly nodes: ReadonlyArray<ICodeCityDependencyNode>
+    readonly nodes: ReadonlyArray<IPackageDependencyNode>
     /**
      * Связи графа зависимостей.
      */
-    readonly relations: ReadonlyArray<ICodeCityDependencyRelation>
+    readonly relations: ReadonlyArray<IPackageDependencyRelation>
 }
 
 /**
