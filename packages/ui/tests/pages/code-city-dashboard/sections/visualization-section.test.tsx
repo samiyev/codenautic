@@ -98,7 +98,13 @@ vi.mock("@/components/codecity/root-cause-chain-viewer", () => ({
 describe("VisualizationSection", (): void => {
     it("when rendered, then shows package dependency graph and 3D scene", (): void => {
         const state = createMockCodeCityState()
-        renderWithProviders(<VisualizationSection state={state} />)
+        renderWithProviders(
+            <VisualizationSection
+                dependencyNodes={[]}
+                dependencyRelations={[]}
+                state={state}
+            />,
+        )
 
         expect(screen.getByText(/dep-nodes:/)).not.toBeNull()
         expect(screen.getByText("3d-files:1")).not.toBeNull()
@@ -106,7 +112,13 @@ describe("VisualizationSection", (): void => {
 
     it("when rendered, then shows scatter, health trend and root cause viewer", (): void => {
         const state = createMockCodeCityState()
-        renderWithProviders(<VisualizationSection state={state} />)
+        renderWithProviders(
+            <VisualizationSection
+                dependencyNodes={[]}
+                dependencyRelations={[]}
+                state={state}
+            />,
+        )
 
         expect(screen.getByText("scatter-files:1")).not.toBeNull()
         expect(screen.getByText("health-points:1")).not.toBeNull()
@@ -115,7 +127,13 @@ describe("VisualizationSection", (): void => {
 
     it("when rendered, then shows treemap with profile files", (): void => {
         const state = createMockCodeCityState()
-        renderWithProviders(<VisualizationSection state={state} />)
+        renderWithProviders(
+            <VisualizationSection
+                dependencyNodes={[]}
+                dependencyRelations={[]}
+                state={state}
+            />,
+        )
 
         expect(screen.getByText("treemap-files:1")).not.toBeNull()
         expect(screen.getByText("treemap-highlighted:none")).not.toBeNull()
