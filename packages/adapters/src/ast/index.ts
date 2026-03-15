@@ -112,6 +112,12 @@ export {
     type IAstFileMetricsCachingErrorDetails,
 } from "./ast-file-metrics-caching.error"
 export {
+    AST_FULL_REPO_SCANNER_ERROR_CODE,
+    AstFullRepoScannerError,
+    type AstFullRepoScannerErrorCode,
+    type IAstFullRepoScannerErrorDetails,
+} from "./ast-full-repo-scanner.error"
+export {
     AST_SERVICE_MULTI_REPO_GRAPH_FEDERATION_ERROR_CODE,
     AstServiceMultiRepoGraphFederationError,
     type AstServiceMultiRepoGraphFederationErrorCode,
@@ -534,6 +540,15 @@ export {
     type AstFileMetricsCachingResolveRepositoryPath,
     type IAstFileMetricsCachingProviderOptions,
 } from "./ast-file-metrics-caching-provider"
+export {
+    AstFullRepoScannerService,
+    type AstFullRepoScannerGenerateScanId,
+    type AstFullRepoScannerListDirectory,
+    type AstFullRepoScannerNow,
+    type AstFullRepoScannerReadFile,
+    type AstFullRepoScannerResolveRepositoryPath,
+    type IAstFullRepoScannerServiceOptions,
+} from "./ast-full-repo-scanner.service"
 export {
     AstCyclomaticComplexityService,
     type IAstCyclomaticComplexityFileInput,
