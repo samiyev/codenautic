@@ -22,6 +22,12 @@ export {
     type IAstSemanticCodeUnderstandingErrorDetails,
 } from "./ast-semantic-code-understanding.error"
 export {
+    AST_CROSS_FILE_REFERENCE_RESOLUTION_ERROR_CODE,
+    AstCrossFileReferenceResolutionError,
+    type AstCrossFileReferenceResolutionErrorCode,
+    type IAstCrossFileReferenceResolutionErrorDetails,
+} from "./ast-cross-file-reference-resolution.error"
+export {
     AST_CODE_CHUNK_EMBEDDING_GENERATOR_ERROR_CODE,
     AstCodeChunkEmbeddingGeneratorError,
     type AstCodeChunkEmbeddingGeneratorErrorCode,
@@ -135,6 +141,18 @@ export {
     type IAstSemanticModuleInsight,
     type IAstSemanticModuleMetrics,
 } from "./ast-semantic-code-understanding.service"
+export {
+    AST_CROSS_FILE_REFERENCE_TYPE,
+    AstCrossFileReferenceResolutionService,
+    type AstCrossFileReferenceType,
+    type IAstCrossFileReference,
+    type IAstCrossFileReferenceResolutionInput,
+    type IAstCrossFileReferenceResolutionResult,
+    type IAstCrossFileReferenceResolutionService,
+    type IAstCrossFileReferenceResolutionServiceOptions,
+    type IAstCrossFileReferenceResolutionSummary,
+    type IAstUnresolvedCrossFileReference,
+} from "./ast-cross-file-reference-resolution.service"
 export {
     AST_CODE_GRAPH_IMPACT_ANALYSIS_DIRECTION,
     AstCodeGraphImpactAnalysisService,
