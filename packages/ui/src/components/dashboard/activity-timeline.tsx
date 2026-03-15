@@ -1,7 +1,6 @@
 import type { ReactElement } from "react"
 
 import { Card, CardContent, CardHeader } from "@heroui/react"
-import { EmptyState } from "@/components/states/empty-state"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { ActivityTimelineItem } from "./activity-timeline-item"
 
@@ -68,10 +67,10 @@ export function ActivityTimeline(props: IActivityTimelineProps): ReactElement {
             </CardHeader>
             <CardContent className="pt-4">
                 {props.items.length === 0 ? (
-                    <EmptyState
-                        description="No recent activity to display."
-                        title="No activity yet"
-                    />
+                    <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                        <h3 className={TYPOGRAPHY.subsectionTitle}>No activity yet</h3>
+                        <p className="max-w-sm text-sm text-muted">No recent activity to display.</p>
+                    </div>
                 ) : (
                     <div className="space-y-5">
                         {Object.entries(groupedEntries).map(
