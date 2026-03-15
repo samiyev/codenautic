@@ -1,6 +1,194 @@
 import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import type {
+    ICreateTeamRequest,
+    IInviteTeamMemberRequest,
+    ITeam,
+    ITeamMember,
+    IUpdateTeamMemberRoleRequest,
+    IUpdateTeamRepositoriesRequest,
+    TTeamMemberRole,
+} from "@/lib/api/endpoints/teams.endpoint"
+import type { IUseTeamsResult } from "@/lib/hooks/queries/use-teams"
+
+const DEFAULT_TEAMS: ITeam[] = [
+    {
+        id: "team-1",
+        name: "Platform UX",
+        description: "Owns the design system.",
+        repositories: ["api-gateway", "ui-dashboard"],
+        members: [
+            { id: "tm-1", name: "Mila", email: "mila@acme.dev", role: "developer" },
+        ],
+    },
+    {
+        id: "team-2",
+        name: "Review Enablement",
+        description: "Builds review infrastructure.",
+        repositories: ["review-pipeline"],
+        members: [
+            { id: "tm-2", name: "Neo", email: "neo@acme.dev", role: "admin" },
+        ],
+    },
+]
+
+/**
+ * Мутабельный стейт для команд.
+ */
+const teamState: { teams: ITeam[] } = {
+    teams: DEFAULT_TEAMS.map((t): ITeam => ({
+        ...t,
+        repositories: [...t.repositories],
+        members: [...t.members],
+    })),
+}
+
+let nextTeamId = 100
+let nextMemberId = 200
+
+vi.mock("@/lib/hooks/queries/use-teams", async () => {
+    const { useState } = await import("react")
+
+    return {
+        useTeams: (): IUseTeamsResult => {
+            const [teams, setTeams] = useState<ITeam[]>(() =>
+                teamState.teams.map((t): ITeam => ({
+                    ...t,
+                    repositories: [...t.repositories],
+                    members: [...t.members],
+                })),
+            )
+
+            return {
+                teamsQuery: {
+                    data: { teams, total: teams.length },
+                    isLoading: false,
+                    isError: false,
+                    error: null,
+                } as unknown as IUseTeamsResult["teamsQuery"],
+                createTeam: {
+                    mutate: (
+                        data: ICreateTeamRequest,
+                        options?: {
+                            readonly onSuccess?: (response: {
+                                readonly team: ITeam
+                            }) => void
+                        },
+                    ): void => {
+                        nextTeamId += 1
+                        const newTeam: ITeam = {
+                            id: `team-${String(nextTeamId)}`,
+                            name: data.name,
+                            description: data.description,
+                            repositories: [],
+                            members: [],
+                        }
+                        setTeams((prev): ITeam[] => [...prev, newTeam])
+                        if (options?.onSuccess !== undefined) {
+                            options.onSuccess({ team: newTeam })
+                        }
+                    },
+                    isPending: false,
+                } as unknown as IUseTeamsResult["createTeam"],
+                inviteMember: {
+                    mutate: (
+                        data: IInviteTeamMemberRequest,
+                        options?: { readonly onSuccess?: () => void },
+                    ): void => {
+                        nextMemberId += 1
+                        const localPart = data.email.split("@")[0] ?? ""
+                        const name = localPart
+                            .split(/[.\-_]/)
+                            .map(
+                                (part: string): string =>
+                                    part.charAt(0).toUpperCase() + part.slice(1),
+                            )
+                            .join(" ")
+                        const newMember: ITeamMember = {
+                            id: `tm-${String(nextMemberId)}`,
+                            name,
+                            email: data.email,
+                            role: data.role,
+                        }
+                        setTeams(
+                            (prev): ITeam[] =>
+                                prev.map(
+                                    (t): ITeam =>
+                                        t.id === data.teamId
+                                            ? {
+                                                  ...t,
+                                                  members: [...t.members, newMember],
+                                              }
+                                            : t,
+                                ),
+                        )
+                        if (options?.onSuccess !== undefined) {
+                            options.onSuccess()
+                        }
+                    },
+                    isPending: false,
+                } as unknown as IUseTeamsResult["inviteMember"],
+                updateMemberRole: {
+                    mutate: (
+                        data: IUpdateTeamMemberRoleRequest,
+                        options?: { readonly onSuccess?: () => void },
+                    ): void => {
+                        setTeams(
+                            (prev): ITeam[] =>
+                                prev.map(
+                                    (t): ITeam =>
+                                        t.id === data.teamId
+                                            ? {
+                                                  ...t,
+                                                  members: t.members.map(
+                                                      (m): ITeamMember =>
+                                                          m.id === data.memberId
+                                                              ? { ...m, role: data.role }
+                                                              : m,
+                                                  ),
+                                              }
+                                            : t,
+                                ),
+                        )
+                        if (options?.onSuccess !== undefined) {
+                            options.onSuccess()
+                        }
+                    },
+                    isPending: false,
+                } as unknown as IUseTeamsResult["updateMemberRole"],
+                removeMember: {
+                    mutate: vi.fn(),
+                    isPending: false,
+                } as unknown as IUseTeamsResult["removeMember"],
+                updateRepositories: {
+                    mutate: (
+                        data: IUpdateTeamRepositoriesRequest,
+                        options?: { readonly onSuccess?: () => void },
+                    ): void => {
+                        setTeams(
+                            (prev): ITeam[] =>
+                                prev.map(
+                                    (t): ITeam =>
+                                        t.id === data.teamId
+                                            ? {
+                                                  ...t,
+                                                  repositories: [...data.repositoryIds],
+                                              }
+                                            : t,
+                                ),
+                        )
+                        if (options?.onSuccess !== undefined) {
+                            options.onSuccess()
+                        }
+                    },
+                    isPending: false,
+                } as unknown as IUseTeamsResult["updateRepositories"],
+            }
+        },
+    }
+})
 
 import { SettingsTeamPage } from "@/pages/settings-team.page"
 import { renderWithProviders } from "../utils/render"
@@ -8,6 +196,13 @@ import { renderWithProviders } from "../utils/render"
 describe("SettingsTeamPage", (): void => {
     beforeEach((): void => {
         window.localStorage.setItem("codenautic:rbac:role", "admin")
+        teamState.teams = DEFAULT_TEAMS.map((t): ITeam => ({
+            ...t,
+            repositories: [...t.repositories],
+            members: [...t.members],
+        }))
+        nextTeamId = 100
+        nextMemberId = 200
     })
 
     afterEach((): void => {
