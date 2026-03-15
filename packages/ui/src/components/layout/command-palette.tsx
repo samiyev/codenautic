@@ -12,8 +12,9 @@ import { Command } from "cmdk"
 import { AnimatePresence, motion } from "motion/react"
 
 import { useDynamicTranslation } from "@/lib/i18n"
+import { useReducedMotion } from "motion/react"
+
 import { TYPOGRAPHY } from "@/lib/constants/typography"
-import { DURATION, EASING, useReducedMotion } from "@/lib/motion"
 
 import type { ICommandPaletteItem, TCommandPaletteGroup } from "./command-palette.constants"
 import {
@@ -151,7 +152,9 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
         })
 
         return GROUP_ORDER.filter((group): boolean => map.has(group)).map(
-            (group): {
+            (
+                group,
+            ): {
                 readonly group: TCommandPaletteGroup
                 readonly items: ReadonlyArray<ICommandPaletteItem>
             } => ({
@@ -303,19 +306,13 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
                         </Command.Empty>
 
                         {pinnedItems.length > 0 ? (
-                            <Command.Group
-                                heading={translateGroupLabel("actions")}
-                                value="pinned"
-                            >
+                            <Command.Group heading={translateGroupLabel("actions")} value="pinned">
                                 {pinnedItems.map(renderItem)}
                             </Command.Group>
                         ) : null}
 
                         {recentItems.length > 0 ? (
-                            <Command.Group
-                                heading={translateGroupLabel("general")}
-                                value="recent"
-                            >
+                            <Command.Group heading={translateGroupLabel("general")} value="recent">
                                 {recentItems.map(renderItem)}
                             </Command.Group>
                         ) : null}
@@ -340,7 +337,7 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
         </div>
     )
 
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion === true) {
         if (props.isOpen !== true) {
             return null
         }
@@ -356,8 +353,8 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
                     exit={{ opacity: 0, scale: 0.95 }}
                     initial={{ opacity: 0, scale: 0.95 }}
                     transition={{
-                        duration: DURATION.normal,
-                        ease: EASING.enter,
+                        duration: 0.25,
+                        ease: [0.0, 0.0, 0.2, 1.0],
                     }}
                 >
                     {paletteContent}
