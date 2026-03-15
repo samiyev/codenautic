@@ -5,42 +5,41 @@ import { Alert, Button, Card, CardContent, CardHeader, Chip, Table } from "@hero
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastSuccess } from "@/lib/notifications/toast"
+import type {
+    IAuditLogEntry,
+    TAuditAction,
+} from "@/lib/api/endpoints/audit-logs.endpoint"
+import { useAuditLogs } from "@/lib/hooks/queries/use-audit-logs"
 
-type TAuditAction =
-    | "integration.connected"
-    | "member.invited"
-    | "policy.updated"
-    | "role.changed"
-    | "schedule.updated"
-
-interface IAuditLogEntry {
-    /** Уникальный идентификатор записи. */
-    readonly id: string
-    /** Дата-время события в ISO формате. */
-    readonly occurredAt: string
-    /** Инициатор действия. */
+/**
+ * Внутренние фильтры страницы (UI state).
+ */
+interface IPageAuditFilters {
+    /**
+     * Фильтр по актору.
+     */
     readonly actor: string
-    /** Тип изменения. */
-    readonly action: TAuditAction
-    /** Сущность, на которую повлияло изменение. */
-    readonly target: string
-    /** Расшифровка изменения. */
-    readonly details: string
-}
-
-interface IAuditFilters {
-    /** Фильтр по актору. */
-    readonly actor: string
-    /** Фильтр по типу действия. */
+    /**
+     * Фильтр по типу действия.
+     */
     readonly action: "all" | TAuditAction
-    /** Нижняя граница даты YYYY-MM-DD. */
+    /**
+     * Нижняя граница даты YYYY-MM-DD.
+     */
     readonly dateFrom: string
-    /** Верхняя граница даты YYYY-MM-DD. */
+    /**
+     * Верхняя граница даты YYYY-MM-DD.
+     */
     readonly dateTo: string
 }
 
+/**
+ * Props страницы аудит-логов.
+ */
 interface ISettingsAuditLogsPageProps {
-    /** Необязательный внешний список логов для тестов/интеграции. */
+    /**
+     * Необязательный внешний список логов для тестов/интеграции.
+     */
     readonly logs?: ReadonlyArray<IAuditLogEntry>
 }
 
@@ -221,7 +220,7 @@ function triggerCsvDownload(csvPayload: string, fileName: string): void {
 
 function filterAuditLogs(
     logs: ReadonlyArray<IAuditLogEntry>,
-    filters: IAuditFilters,
+    filters: IPageAuditFilters,
 ): ReadonlyArray<IAuditLogEntry> {
     const fromBoundary = parseDateBoundary(filters.dateFrom, "from")
     const toBoundary = parseDateBoundary(filters.dateTo, "to")
@@ -245,13 +244,28 @@ function filterAuditLogs(
  */
 export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): ReactElement {
     const { t } = useTranslation(["settings"])
-    const sourceLogs = props.logs ?? ALL_AUDIT_LOGS
-    const [filters, setFilters] = useState<IAuditFilters>({
+    const [filters, setFilters] = useState<IPageAuditFilters>({
         action: "all",
         actor: "all",
         dateFrom: "",
         dateTo: "",
     })
+
+    const { logsQuery } = useAuditLogs({
+        filters: {
+            actor: filters.actor !== "all" ? filters.actor : undefined,
+            action: filters.action !== "all" ? filters.action : undefined,
+            dateFrom:
+                filters.dateFrom.length > 0 ? filters.dateFrom : undefined,
+            dateTo: filters.dateTo.length > 0 ? filters.dateTo : undefined,
+            page: 1,
+            limit: 200,
+        },
+        enabled: props.logs === undefined,
+    })
+
+    const serverLogs = logsQuery.data?.items ?? []
+    const sourceLogs = props.logs ?? (serverLogs.length > 0 ? serverLogs : ALL_AUDIT_LOGS)
     const [exportMessage, setExportMessage] = useState<string>("")
 
     const actorOptions = useMemo((): ReadonlyArray<string> => {
@@ -301,7 +315,7 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                                     return
                                 }
                                 setFilters(
-                                    (previous): IAuditFilters => ({
+                                    (previous): IPageAuditFilters => ({
                                         ...previous,
                                         actor: nextValue,
                                     }),
@@ -333,7 +347,7 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                                     nextValue === "schedule.updated"
                                 ) {
                                     setFilters(
-                                        (previous): IAuditFilters => ({
+                                        (previous): IPageAuditFilters => ({
                                             ...previous,
                                             action: nextValue,
                                         }),
@@ -371,7 +385,7 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                                 onChange={(event): void => {
                                     const nextDateFrom = event.currentTarget.value
                                     setFilters(
-                                        (previous): IAuditFilters => ({
+                                        (previous): IPageAuditFilters => ({
                                             ...previous,
                                             dateFrom: nextDateFrom,
                                         }),
@@ -392,7 +406,7 @@ export function SettingsAuditLogsPage(props: ISettingsAuditLogsPageProps = {}): 
                                 onChange={(event): void => {
                                     const nextDateTo = event.currentTarget.value
                                     setFilters(
-                                        (previous): IAuditFilters => ({
+                                        (previous): IPageAuditFilters => ({
                                             ...previous,
                                             dateTo: nextDateTo,
                                         }),
