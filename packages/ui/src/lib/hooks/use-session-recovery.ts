@@ -47,10 +47,6 @@ export function useSessionRecovery(): ISessionRecoveryResult {
     const lastDraftWriteRef = useRef<number>(0)
 
     useEffect((): (() => void) | void => {
-        if (typeof window === "undefined") {
-            return
-        }
-
         const handleSessionExpired = (event: CustomEvent<ISessionExpiredEventDetail>): void => {
             const detail = event.detail
             const code = detail?.code === 419 ? 419 : 401
