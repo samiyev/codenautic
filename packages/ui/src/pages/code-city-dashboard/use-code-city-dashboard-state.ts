@@ -184,7 +184,10 @@ export function useCodeCityDashboardState(args: IUseCodeCityDashboardStateArgs) 
         )
     }, [guidedTourSteps, guidedTourStepIndex])
 
-    const currentProfile = useMemo(() => resolveDashboardProfile(repositoryId), [repositoryId])
+    const currentProfile = useMemo(
+        () => resolveDashboardProfile(repositoryId, repositories),
+        [repositoryId, repositories],
+    )
 
     const rootCauseIssues = useMemo(
         () => buildRootCauseIssues(currentProfile.files),
