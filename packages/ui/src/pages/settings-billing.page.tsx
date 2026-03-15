@@ -194,10 +194,7 @@ export function SettingsBillingPage(): ReactElement {
     const handleApplyBillingChange = (): void => {
         const isPlanDowngrade = PLAN_PRIORITY[draftPlan] < PLAN_PRIORITY[billingSnapshot.plan]
         if (isPlanDowngrade) {
-            const downgradeConfirmed =
-                typeof window === "undefined"
-                    ? true
-                    : window.confirm(t("settings:billing.confirmDowngrade"))
+            const downgradeConfirmed = window.confirm(t("settings:billing.confirmDowngrade"))
             if (downgradeConfirmed !== true) {
                 setLastOutcome(t("settings:billing.billingChangeCancelled"))
                 showToastInfo(t("settings:billing.toast.downgradeCancelled"))
