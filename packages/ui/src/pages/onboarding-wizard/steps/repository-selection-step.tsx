@@ -117,7 +117,7 @@ https://github.com/owner/repo-b`,
 
                     <div className="max-h-60 space-y-2 overflow-auto rounded-md border border-border p-2">
                         {state.parsedBulkList.repositories.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted">
                                 {t("onboarding:repository.bulkEmptyHint")}
                             </p>
                         ) : null}

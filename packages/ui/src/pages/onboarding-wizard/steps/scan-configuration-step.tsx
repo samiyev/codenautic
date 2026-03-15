@@ -119,7 +119,7 @@ export function ScanConfigurationStep({ state }: IScanConfigurationStepProps): R
                     <p className="text-sm font-semibold text-foreground">
                         {t("onboarding:scan.templateRegistry")}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted">
                         {t("onboarding:scan.templateRegistryHint")}
                     </p>
                     <div className="mt-2">
@@ -192,7 +192,7 @@ export function ScanConfigurationStep({ state }: IScanConfigurationStepProps): R
                             {t("onboarding:scan.auditLogTitle")}
                         </summary>
                         {state.templateAuditLog.length === 0 ? (
-                            <p className="mt-2 text-sm text-muted-foreground">
+                            <p className="mt-2 text-sm text-muted">
                                 {t("onboarding:scan.auditLogEmpty")}
                             </p>
                         ) : null}
@@ -210,10 +210,10 @@ export function ScanConfigurationStep({ state }: IScanConfigurationStepProps): R
                                                 <p className="text-xs">
                                                     {entry.templateName} — {entry.templateVersion}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground">
+                                                <p className="text-xs text-muted">
                                                     {entry.appliedAt}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground">
+                                                <p className="text-xs text-muted">
                                                     {td("onboarding:scan.auditLogFrom", {
                                                         before: formatTemplateTags(
                                                             entry.before.tags,
