@@ -150,6 +150,25 @@ export {
     type LangSmithTracerErrorCode,
 } from "./langsmith-tracer.error"
 export {
+    LANGCHAIN_CALLBACK_EVENT_TYPE,
+    LangChainCallbackHandler,
+    type ILangChainCallbackDispatchInput,
+    type ILangChainCallbackErrorInput,
+    type ILangChainCallbackEvent,
+    type ILangChainCallbackHandler,
+    type ILangChainCallbackHandlerOptions,
+    type ILangChainCallbackRunInput,
+    type ILangChainCallbackSink,
+    type ILangChainCallbackTokenInput,
+    type LangChainCallbackEventType,
+} from "./langchain-callback-handler"
+export {
+    LANGCHAIN_CALLBACK_HANDLER_ERROR_CODE,
+    LangChainCallbackHandlerError,
+    type ILangChainCallbackHandlerErrorDetails,
+    type LangChainCallbackHandlerErrorCode,
+} from "./langchain-callback-handler.error"
+export {
     LlmChainBuilder,
     type ILlmChainBuilder,
     type ILlmChainBuilderOptions,
