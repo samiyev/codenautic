@@ -6,7 +6,6 @@ import { Alert, Button, Card, CardContent, CardHeader, Chip, Input, Switch } fro
 import { getWindowLocalStorage, safeStorageGet, safeStorageSet } from "@/lib/utils/safe-storage"
 import { useAuthAccess } from "@/lib/auth/auth-access"
 import { resolveDeepLinkGuard } from "@/lib/navigation/deep-link-guard"
-import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -435,10 +434,12 @@ export function SettingsNotificationsPage(): ReactElement {
     }
 
     return (
-        <FormLayout
-            title={t("settings:notifications.pageTitle")}
-            description={t("settings:notifications.pageSubtitle")}
-        >
+        <div className="space-y-6 mx-auto max-w-[1400px]">
+            <div className="space-y-1.5">
+                <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:notifications.pageTitle")}</h1>
+                <p className={TYPOGRAPHY.bodyMuted}>{t("settings:notifications.pageSubtitle")}</p>
+            </div>
+            <div className="space-y-6">
             <Card>
                 <CardHeader className="flex flex-wrap items-center justify-between gap-2">
                     <p className={TYPOGRAPHY.sectionTitle}>{t("settings:notifications.inbox")}</p>
@@ -840,6 +841,7 @@ export function SettingsNotificationsPage(): ReactElement {
                     )}
                 </CardContent>
             </Card>
-        </FormLayout>
+            </div>
+        </div>
     )
 }
