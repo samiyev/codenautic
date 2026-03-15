@@ -1,7 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { HealthTrendChart, type IHealthTrendPoint } from "@/components/graphs/health-trend-chart"
+import { HealthTrendChart, type IHealthTrendPoint } from "@/components/codecity/health-trend-chart"
 import { renderWithProviders } from "../utils/render"
 
 const SAMPLE_POINTS: ReadonlyArray<IHealthTrendPoint> = [

@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     CausalOverlaySelector,
     type TCausalOverlayMode,
-} from "@/components/graphs/causal-overlay-selector"
+} from "@/components/codecity/overlays/causal-overlay-selector"
 import { renderWithProviders } from "../utils/render"
 
 describe("CausalOverlaySelector", (): void => {

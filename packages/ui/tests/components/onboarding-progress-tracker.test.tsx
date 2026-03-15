@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import {
     OnboardingProgressTracker,
     type IOnboardingProgressModuleDescriptor,
-} from "@/components/graphs/onboarding-progress-tracker"
+} from "@/components/codecity/onboarding-progress-tracker"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_MODULES: ReadonlyArray<IOnboardingProgressModuleDescriptor> = [

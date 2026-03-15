@@ -8,10 +8,10 @@ import {
     type TCodeCityCameraPreset,
     type ICodeCity3DSceneImpactedFileDescriptor,
     type ICodeCity3DSceneFileDescriptor,
-} from "@/components/graphs/codecity-3d-scene"
+} from "@/components/codecity/codecity-3d-scene"
 import { renderWithProviders } from "../utils/render"
 
-vi.mock("@/components/graphs/codecity-3d-scene-renderer", () => {
+vi.mock("@/components/codecity/codecity-3d-scene-renderer", () => {
     return {
         CodeCity3DSceneRenderer: (props: {
             readonly cameraPreset: TCodeCityCameraPreset

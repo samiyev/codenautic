@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     KnowledgeSiloPanel,
     type IKnowledgeSiloPanelEntry,
-} from "@/components/graphs/knowledge-silo-panel"
+} from "@/components/team-analytics/knowledge-silo-panel"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_ENTRIES: ReadonlyArray<IKnowledgeSiloPanelEntry> = [

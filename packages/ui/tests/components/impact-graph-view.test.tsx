@@ -6,7 +6,7 @@ import {
     ImpactGraphView,
     type IImpactGraphEdge,
     type IImpactGraphNode,
-} from "@/components/graphs/impact-graph-view"
+} from "@/components/predictions/impact-graph-view"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_NODES: ReadonlyArray<IImpactGraphNode> = [

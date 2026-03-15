@@ -13,12 +13,12 @@ import {
     resolveCodeCityHealthAuraColor,
     resolveCodeCityBuildingImpactProfile,
     resolveCodeCityBuildingColor,
-} from "@/components/graphs/codecity-3d-scene-renderer"
+} from "@/components/codecity/codecity-3d-scene-renderer"
 import type {
     ICodeCity3DCausalCouplingDescriptor,
     ICodeCity3DSceneFileDescriptor,
     ICodeCity3DSceneImpactedFileDescriptor,
-} from "@/components/graphs/codecity-3d-scene"
+} from "@/components/codecity/codecity-3d-scene"
 
 describe("CodeCity3DSceneRenderer building generation", (): void => {
     it("строит здания из файлов по правилам height=LOC, width=complexity, color=coverage", (): void => {

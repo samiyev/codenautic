@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
-import { computeCodeCityLayout } from "@/components/graphs/codecity-3d-layout.worker"
-import type { ICodeCity3DSceneFileDescriptor } from "@/components/graphs/codecity-3d-scene"
+import { computeCodeCityLayout } from "@/components/codecity/codecity-3d-layout.worker"
+import type { ICodeCity3DSceneFileDescriptor } from "@/components/codecity/codecity-3d-scene"
 
 describe("codecity-3d-layout worker", (): void => {
     it("вычисляет districts и buildings для snapshot без блокировки UI-потока", (): void => {

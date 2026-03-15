@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     KnowledgeMapExportWidget,
     type TKnowledgeMapExportFormat,
-} from "@/components/graphs/knowledge-map-export-widget"
+} from "@/components/team-analytics/knowledge-map-export-widget"
 import { renderWithProviders } from "../utils/render"
 
 const { mockExportKnowledgeMapAsSvg, mockExportKnowledgeMapAsPng } = vi.hoisted(() => ({
@@ -13,7 +13,7 @@ const { mockExportKnowledgeMapAsSvg, mockExportKnowledgeMapAsPng } = vi.hoisted(
     mockExportKnowledgeMapAsPng: vi.fn(async (): Promise<void> => {}),
 }))
 
-vi.mock("@/components/graphs/knowledge-map-export", () => ({
+vi.mock("@/components/team-analytics/knowledge-map-export", () => ({
     exportKnowledgeMapAsPng: mockExportKnowledgeMapAsPng,
     exportKnowledgeMapAsSvg: mockExportKnowledgeMapAsSvg,
 }))

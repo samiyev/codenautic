@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     HotAreaHighlights,
     type IHotAreaHighlightDescriptor,
-} from "@/components/graphs/hot-area-highlights"
+} from "@/components/codecity/hot-area-highlights"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_HIGHLIGHTS: ReadonlyArray<IHotAreaHighlightDescriptor> = [
