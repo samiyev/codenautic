@@ -124,6 +124,6 @@ describe("PredictionAccuracyWidget", (): void => {
             "[aria-label^='Inspect prediction accuracy case']",
         )
         const firstButton = buttons[0]
-        expect(firstButton?.className).toContain("border-primary")
+        expect(firstButton?.className).toContain("border-accent")
     })
 })

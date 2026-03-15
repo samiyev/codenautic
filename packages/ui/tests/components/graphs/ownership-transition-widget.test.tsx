@@ -86,6 +86,6 @@ describe("OwnershipTransitionWidget", (): void => {
 
         const items = container.querySelectorAll("li")
         const secondItem = items[1]
-        expect(secondItem?.className).toContain("border-primary")
+        expect(secondItem?.className).toContain("border-accent")
     })
 })
