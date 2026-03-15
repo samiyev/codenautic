@@ -130,6 +130,12 @@ export {
     type IAstImportViolationDetectorErrorDetails,
 } from "./ast-import-violation-detector.error"
 export {
+    AST_MODULE_BOUNDARY_VALIDATOR_ERROR_CODE,
+    AstModuleBoundaryValidatorError,
+    type AstModuleBoundaryValidatorErrorCode,
+    type IAstModuleBoundaryValidatorErrorDetails,
+} from "./ast-module-boundary-validator.error"
+export {
     AST_FILE_METRICS_PROVIDER_ERROR_CODE,
     AstFileMetricsProviderError,
     type AstFileMetricsProviderErrorCode,
@@ -655,6 +661,20 @@ export {
     type IAstImportViolationDetectorServiceOptions,
     type IAstImportViolationDetectorSummary,
 } from "./ast-import-violation-detector.service"
+export {
+    AST_MODULE_BOUNDARY_VIOLATION_KIND,
+    AstModuleBoundaryValidatorService,
+    type AstModuleBoundaryValidatorLoadImports,
+    type AstModuleBoundaryValidatorNow,
+    type AstModuleBoundaryValidatorSleep,
+    type AstModuleBoundaryViolationKind,
+    type IAstModuleBoundaryValidatorInput,
+    type IAstModuleBoundaryValidatorResult,
+    type IAstModuleBoundaryValidatorService,
+    type IAstModuleBoundaryValidatorServiceOptions,
+    type IAstModuleBoundaryValidatorSummary,
+    type IAstModuleBoundaryViolation,
+} from "./ast-module-boundary-validator.service"
 export {
     AstFileMetricsProvider,
     type AstFileMetricsProviderReadFile,
