@@ -13,10 +13,6 @@ export {
     ExplainabilityPanel,
 } from "./explainability-panel"
 export {
-    type IInfiniteScrollContainerProps,
-    InfiniteScrollContainer,
-} from "./infinite-scroll-container"
-export {
     type TSystemStateVariant,
     type ISystemStateCardProps,
     SystemStateCard,
