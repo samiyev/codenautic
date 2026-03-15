@@ -8,7 +8,7 @@
 
 import type { ReactElement } from "react"
 
-import type { ICcrRowData } from "@/pages/ccr-data"
+import type { ICcrRowData } from "@/lib/types/ccr-types"
 import type { ICcrWorkspaceContextResponse } from "@/lib/api/endpoints/ccr-workspace.endpoint"
 
 import { useCcrReviewState } from "./hooks/use-ccr-review-state"
