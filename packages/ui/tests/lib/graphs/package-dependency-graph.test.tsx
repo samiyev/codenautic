@@ -6,17 +6,17 @@ import {
     type IPackageDependencyNode,
     PackageDependencyGraph,
     buildPackageDependencyGraphData,
-} from "@/components/graphs/package-dependency-graph"
+} from "@/components/dependency-graphs/package-dependency-graph"
 
 const { mockExportGraphAsJson } = vi.hoisted(() => ({
     mockExportGraphAsJson: vi.fn((): void => {}),
 }))
 
-vi.mock("@/components/graphs/graph-export", () => ({
+vi.mock("@/components/dependency-graphs/graph-export", () => ({
     exportGraphAsJson: mockExportGraphAsJson,
 }))
 
-vi.mock("@/components/graphs/xyflow-graph", () => ({
+vi.mock("@/components/dependency-graphs/xyflow-graph", () => ({
     XyFlowGraph: ({
         ariaLabel,
         edges,

@@ -5,9 +5,9 @@ import { describe, expect, it, vi } from "vitest"
 import {
     FileDependencyGraph,
     buildFileDependencyGraphData,
-} from "@/components/graphs/file-dependency-graph"
+} from "@/components/dependency-graphs/file-dependency-graph"
 
-vi.mock("@/components/graphs/xyflow-graph", () => ({
+vi.mock("@/components/dependency-graphs/xyflow-graph", () => ({
     XyFlowGraph: ({
         ariaLabel,
         edges,

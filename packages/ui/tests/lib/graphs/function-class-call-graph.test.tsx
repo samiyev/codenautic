@@ -5,9 +5,9 @@ import { describe, expect, it, vi } from "vitest"
 import {
     FunctionClassCallGraph,
     buildFunctionCallGraphData,
-} from "@/components/graphs/function-class-call-graph"
+} from "@/components/dependency-graphs/function-class-call-graph"
 
-vi.mock("@/components/graphs/xyflow-graph", () => ({
+vi.mock("@/components/dependency-graphs/xyflow-graph", () => ({
     XyFlowGraph: ({
         ariaLabel,
         edges,

@@ -2,8 +2,8 @@ import { render, screen, waitFor } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { XyFlowGraph } from "@/components/graphs/xyflow-graph"
-import type { IGraphEdge, IGraphNode } from "@/components/graphs/xyflow-graph-layout"
+import { XyFlowGraph } from "@/components/dependency-graphs/xyflow-graph"
+import type { IGraphEdge, IGraphNode } from "@/components/dependency-graphs/xyflow-graph-layout"
 
 const { mockRenderer } = vi.hoisted(() => ({
     mockRenderer: vi.fn(
@@ -21,7 +21,7 @@ const { mockRenderer } = vi.hoisted(() => ({
     ),
 }))
 
-vi.mock("@/components/graphs/xyflow-graph-renderer", () => ({
+vi.mock("@/components/dependency-graphs/xyflow-graph-renderer", () => ({
     default: (props: {
         readonly nodes: ReadonlyArray<IGraphNode>
         readonly edges: ReadonlyArray<IGraphEdge>

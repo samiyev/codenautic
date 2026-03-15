@@ -7,8 +7,8 @@ import {
     exportGraphAsJson,
     exportGraphAsSvg,
     exportGraphAsPng,
-} from "@/components/graphs/graph-export"
-import type { IGraphEdge, IGraphLayoutNode } from "@/components/graphs/xyflow-graph-layout"
+} from "@/components/dependency-graphs/graph-export"
+import type { IGraphEdge, IGraphLayoutNode } from "@/components/dependency-graphs/xyflow-graph-layout"
 
 describe("graph-export", (): void => {
     it("нормализует название файла под export", (): void => {

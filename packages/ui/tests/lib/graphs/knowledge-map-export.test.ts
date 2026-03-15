@@ -6,7 +6,7 @@ import {
     exportKnowledgeMapAsSvg,
     exportKnowledgeMapAsPng,
     type IKnowledgeMapExportModel,
-} from "@/components/graphs/knowledge-map-export"
+} from "@/components/team-analytics/knowledge-map-export"
 
 const TEST_MODEL: IKnowledgeMapExportModel = {
     metadata: {

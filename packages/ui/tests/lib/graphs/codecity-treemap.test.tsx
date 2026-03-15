@@ -7,7 +7,7 @@ import {
     type ICodeCityTreemapFileDescriptor,
     type ICodeCityTreemapImpactedFileDescriptor,
     type ICodeCityTreemapTemporalCouplingDescriptor,
-} from "@/components/graphs/codecity-treemap"
+} from "@/components/codecity/codecity-treemap"
 
 interface ICodeCityTreemapNodeData {
     readonly color?: string

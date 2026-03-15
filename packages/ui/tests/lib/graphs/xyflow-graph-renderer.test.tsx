@@ -3,11 +3,11 @@ import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import type { IGraphEdge, IGraphNode } from "@/components/graphs/xyflow-graph-layout"
-import { XYFlowGraphRenderer } from "@/components/graphs/xyflow-graph-renderer"
-import { exportGraphAsPng, exportGraphAsSvg } from "@/components/graphs/graph-export"
+import type { IGraphEdge, IGraphNode } from "@/components/dependency-graphs/xyflow-graph-layout"
+import { XYFlowGraphRenderer } from "@/components/dependency-graphs/xyflow-graph-renderer"
+import { exportGraphAsPng, exportGraphAsSvg } from "@/components/dependency-graphs/graph-export"
 
-vi.mock("@/components/graphs/graph-export", () => ({
+vi.mock("@/components/dependency-graphs/graph-export", () => ({
     exportGraphAsPng: vi.fn(async (): Promise<void> => {}),
     exportGraphAsSvg: vi.fn(() => {}),
 }))
