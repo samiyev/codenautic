@@ -124,6 +124,12 @@ export {
     type IAstBlueprintParserErrorDetails,
 } from "./ast-blueprint-parser.error"
 export {
+    AST_IMPORT_VIOLATION_DETECTOR_ERROR_CODE,
+    AstImportViolationDetectorError,
+    type AstImportViolationDetectorErrorCode,
+    type IAstImportViolationDetectorErrorDetails,
+} from "./ast-import-violation-detector.error"
+export {
     AST_FILE_METRICS_PROVIDER_ERROR_CODE,
     AstFileMetricsProviderError,
     type AstFileMetricsProviderErrorCode,
@@ -634,6 +640,21 @@ export {
     type IAstBlueprintParserServiceOptions,
     type IAstBlueprintRuleDefinition,
 } from "./ast-blueprint-parser.service"
+export {
+    AST_IMPORT_VIOLATION_KIND,
+    AstImportViolationDetectorService,
+    type AstImportViolationDetectorLoadImports,
+    type AstImportViolationDetectorNow,
+    type AstImportViolationDetectorSleep,
+    type AstImportViolationKind,
+    type IAstImportEdgeInput,
+    type IAstImportViolation,
+    type IAstImportViolationDetectorInput,
+    type IAstImportViolationDetectorResult,
+    type IAstImportViolationDetectorService,
+    type IAstImportViolationDetectorServiceOptions,
+    type IAstImportViolationDetectorSummary,
+} from "./ast-import-violation-detector.service"
 export {
     AstFileMetricsProvider,
     type AstFileMetricsProviderReadFile,
