@@ -13,24 +13,14 @@ vi.mock("@/lib/motion", () => ({
     EASING: { move: [0, 0, 1, 1] },
     STAGGER_DELAY: 0,
     STAGGER_ITEM_VARIANTS: {},
-    StaggerContainer: ({
-        children,
-        ariaLabel,
-        className,
-    }: {
-        readonly children: React.ReactNode
-        readonly ariaLabel?: string
-        readonly className?: string
-        readonly as?: React.ElementType
-    }): React.ReactElement => (
-        <div aria-label={ariaLabel} className={className}>
-            {children}
-        </div>
-    ),
-    useReducedMotion: (): boolean => true,
-    useCountUp: ({ target }: { readonly target: number }): number => target,
     CHART_DATA_TRANSITION: {},
     CHART_DATA_TRANSITION_NONE: {},
+}))
+
+vi.mock("react-countup", () => ({
+    default: ({ end, formattingFn }: { readonly end: number; readonly formattingFn?: (value: number) => string }): React.ReactElement => (
+        <span>{formattingFn !== undefined ? formattingFn(end) : String(end)}</span>
+    ),
 }))
 
 vi.mock("motion/react", () => ({
