@@ -5,6 +5,9 @@ import { Alert, Button, Card, CardContent, CardHeader, Chip, Input } from "@hero
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
+import { useCustomRules } from "@/lib/hooks/queries"
+import type { ICustomRule } from "@/lib/api/endpoints/custom-rules.endpoint"
+import { CUSTOM_RULE_SCOPE, CUSTOM_RULE_SEVERITY, CUSTOM_RULE_STATUS, CUSTOM_RULE_TYPE } from "@/lib/api/endpoints/custom-rules.endpoint"
 
 type TRuleCategory = "architecture" | "performance" | "security" | "style"
 type TRuleSource = "custom" | "prebuilt"
@@ -109,13 +112,32 @@ function formatCategoryLabel(category: TRuleCategory): string {
 }
 
 /**
+ * Маппит API custom rule в локальный шаблон правила.
+ *
+ * @param apiRule - Правило из API.
+ * @returns Локальный шаблон для отображения.
+ */
+function mapCustomRuleToTemplate(apiRule: ICustomRule): IRuleTemplate {
+    return {
+        id: apiRule.id,
+        name: apiRule.title,
+        description: apiRule.rule,
+        category: "architecture" as TRuleCategory,
+        source: "custom",
+        expression: apiRule.rule,
+        testPattern: apiRule.rule,
+    }
+}
+
+/**
  * Страница библиотеки правил.
  *
  * @returns UI для browse/import/custom/test сценариев правил.
  */
 export function SettingsRulesLibraryPage(): ReactElement {
     const { t } = useTranslation(["settings"])
-    const [rules, setRules] = useState<ReadonlyArray<IRuleTemplate>>(PREBUILT_RULES)
+    const { customRulesQuery, createRule } = useCustomRules()
+    const [localCustomRules, setLocalCustomRules] = useState<ReadonlyArray<IRuleTemplate>>([])
     const [importedRuleIds, setImportedRuleIds] = useState<ReadonlyArray<string>>([])
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedCategory, setSelectedCategory] = useState<"all" | TRuleCategory>("all")
@@ -126,6 +148,17 @@ export function SettingsRulesLibraryPage(): ReactElement {
     const [testRuleId, setTestRuleId] = useState(PREBUILT_RULES[0]?.id ?? "")
     const [testInput, setTestInput] = useState("")
     const [testResult, setTestResult] = useState<IRuleTestResult | undefined>(undefined)
+
+    const apiCustomRules = useMemo((): ReadonlyArray<IRuleTemplate> => {
+        if (customRulesQuery.data === undefined) {
+            return []
+        }
+        return customRulesQuery.data.rules.map(mapCustomRuleToTemplate)
+    }, [customRulesQuery.data])
+
+    const rules = useMemo((): ReadonlyArray<IRuleTemplate> => {
+        return [...localCustomRules, ...apiCustomRules, ...PREBUILT_RULES]
+    }, [localCustomRules, apiCustomRules])
 
     const filteredRules = useMemo((): ReadonlyArray<IRuleTemplate> => {
         const normalizedQuery = searchQuery.trim().toLowerCase()
@@ -186,12 +219,25 @@ export function SettingsRulesLibraryPage(): ReactElement {
             testPattern: normalizedExpression,
         }
 
-        setRules((previous): ReadonlyArray<IRuleTemplate> => [nextRule, ...previous])
+        setLocalCustomRules((previous): ReadonlyArray<IRuleTemplate> => [nextRule, ...previous])
         setImportedRuleIds((previous): ReadonlyArray<string> => [nextRule.id, ...previous])
         setTestRuleId(nextRule.id)
         setCustomName("")
         setCustomDescription("")
         setCustomExpression("")
+
+        void createRule.mutateAsync({
+            title: normalizedName,
+            rule: normalizedExpression,
+            type: CUSTOM_RULE_TYPE.prompt,
+            scope: CUSTOM_RULE_SCOPE.file,
+            severity: CUSTOM_RULE_SEVERITY.medium,
+            status: CUSTOM_RULE_STATUS.active,
+            examples: [],
+        }).catch((_error: unknown): void => {
+            showToastError(t("settings:rulesLibrary.toast.customRuleNameTooShort"))
+        })
+
         showToastSuccess(
             t("settings:rulesLibrary.toast.customRuleCreated", { name: nextRule.name }),
         )
