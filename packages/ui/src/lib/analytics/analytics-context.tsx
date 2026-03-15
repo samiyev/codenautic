@@ -77,8 +77,8 @@ type TAnalyticsHookState = {
 
 const AnalyticsContext = createContext<TAnalyticsHookState | undefined>(undefined)
 const DEFAULT_ANALYTICS_ENDPOINT = "/api/v1/analytics/events"
-const DEFAULT_QUEUE_STORAGE_KEY = "codenautic:ui:analytics:queue"
-const DEFAULT_SESSION_STORAGE_KEY = "codenautic:ui:analytics:session-id"
+const DEFAULT_QUEUE_STORAGE_KEY = "cn:analytics:queue"
+const DEFAULT_SESSION_STORAGE_KEY = "cn:analytics:session-id"
 
 /**
  * Провайдер с централизованным analytics SDK.
