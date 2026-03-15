@@ -100,6 +100,12 @@ export {
     type IAstBatchProcessingErrorDetails,
 } from "./ast-batch-processing.error"
 export {
+    AST_MEMORY_PRESSURE_MANAGER_ERROR_CODE,
+    AstMemoryPressureManagerError,
+    type AstMemoryPressureManagerErrorCode,
+    type IAstMemoryPressureManagerErrorDetails,
+} from "./ast-memory-pressure-manager.error"
+export {
     AST_PISCINA_WORKER_POOL_ERROR_CODE,
     AstPiscinaWorkerPoolError,
     type AstPiscinaWorkerPoolErrorCode,
@@ -362,6 +368,20 @@ export {
     type IAstBatchProcessingServiceOptions,
     type IAstBatchProcessingSummary,
 } from "./ast-batch-processing.service"
+export {
+    AST_MEMORY_PRESSURE_STATE,
+    AstMemoryPressureManagerService,
+    type AstMemoryPressureNow,
+    type AstMemoryPressureShouldRetry,
+    type AstMemoryPressureSleep,
+    type AstMemoryPressureSnapshotProvider,
+    type AstMemoryPressureState,
+    type IAstMemoryPressureManagerService,
+    type IAstMemoryPressureManagerServiceOptions,
+    type IAstMemoryPressureManagerStatus,
+    type IAstMemoryPressureRetryPolicy,
+    type IAstMemoryUsageSample,
+} from "./ast-memory-pressure-manager.service"
 export {
     AstPiscinaWorkerPoolService,
     type AstPiscinaWorkerPoolShouldRetry,
