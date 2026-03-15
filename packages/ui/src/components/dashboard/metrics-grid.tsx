@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
 import { motion } from "motion/react"
 
-import { StaggerContainer, STAGGER_ITEM_VARIANTS } from "@/lib/motion"
+import { STAGGER_ITEM_VARIANTS } from "@/lib/motion"
 
 import { MetricCard, type IMetricCardProps, type TMetricTrendDirection } from "./metric-card"
 
@@ -29,10 +29,18 @@ export interface IMetricsGridProps {
  */
 export function MetricsGrid(props: IMetricsGridProps): ReactElement {
     return (
-        <StaggerContainer
-            ariaLabel="KPI metrics"
-            as="section"
+        <motion.section
+            animate="visible"
+            aria-label="KPI metrics"
             className="grid gap-3 md:gap-4 md:grid-cols-2 xl:grid-cols-4"
+            initial="hidden"
+            variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                    opacity: 1,
+                    transition: { staggerChildren: 0.06 },
+                },
+            }}
         >
             {props.metrics.map((metric): ReactElement => {
                 const { id, ...cardProps } = metric
@@ -42,7 +50,7 @@ export function MetricsGrid(props: IMetricsGridProps): ReactElement {
                     </motion.div>
                 )
             })}
-        </StaggerContainer>
+        </motion.section>
     )
 }
 
