@@ -1,16 +1,11 @@
-import { type ReactElement } from "react"
+import { type ChangeEvent, type ReactElement } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
+import { Button, Input, ListBox, ListBoxItem, Select, Switch } from "@heroui/react"
 
-import {
-    FormNumberField,
-    FormSelectField,
-    FormSubmitButton,
-    FormSwitchField,
-    type IFormSelectOption,
-} from "@/components/forms"
+import { FormField, type IFormSelectOption } from "@/components/forms"
 import {
     CODE_REVIEW_CADENCE_OPTIONS,
     CODE_REVIEW_SEVERITY_OPTIONS,
@@ -66,39 +61,200 @@ export function CodeReviewForm(props: ICodeReviewFormProps): ReactElement {
 
     return (
         <form className="space-y-4" onSubmit={handleSubmit}>
-            <FormSelectField
+            <FormField
                 control={form.control}
                 id="code-review-cadence"
                 label={t("settings:codeReviewForm.reviewCadence")}
                 name="cadence"
-                options={cadenceOptions}
+                renderField={({
+                    field,
+                    hasError,
+                    fieldId,
+                    accessibilityLabel,
+                    ariaDescribedBy,
+                }): ReactElement => {
+                    const selectedKey = field.value === undefined ? null : String(field.value)
+
+                    return (
+                        <Select
+                            aria-describedby={ariaDescribedBy}
+                            aria-label={accessibilityLabel}
+                            aria-invalid={hasError}
+                            name={field.name}
+                            id={fieldId}
+                            selectedKey={selectedKey}
+                            onSelectionChange={(key): void => {
+                                const nextValue = typeof key === "string" ? key : undefined
+                                field.onChange(nextValue)
+                            }}
+                        >
+                            <Select.Trigger>
+                                <Select.Value />
+                            </Select.Trigger>
+                            <Select.Popover>
+                                <ListBox>
+                                    {cadenceOptions.map(
+                                        (option): ReactElement => (
+                                            <ListBoxItem
+                                                key={option.value}
+                                                id={option.value}
+                                                textValue={option.label}
+                                                isDisabled={option.isDisabled}
+                                            >
+                                                <div className="flex flex-col">
+                                                    <span>{option.label}</span>
+                                                    {option.description === undefined ? null : (
+                                                        <span className="text-xs text-muted">
+                                                            {option.description}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </ListBoxItem>
+                                        ),
+                                    )}
+                                </ListBox>
+                            </Select.Popover>
+                        </Select>
+                    )
+                }}
             />
-            <FormSelectField
+            <FormField
                 control={form.control}
                 id="code-review-severity"
                 label={t("settings:codeReviewForm.severityThreshold")}
                 name="severity"
-                options={severityOptions}
+                renderField={({
+                    field,
+                    hasError,
+                    fieldId,
+                    accessibilityLabel,
+                    ariaDescribedBy,
+                }): ReactElement => {
+                    const selectedKey = field.value === undefined ? null : String(field.value)
+
+                    return (
+                        <Select
+                            aria-describedby={ariaDescribedBy}
+                            aria-label={accessibilityLabel}
+                            aria-invalid={hasError}
+                            name={field.name}
+                            id={fieldId}
+                            selectedKey={selectedKey}
+                            onSelectionChange={(key): void => {
+                                const nextValue = typeof key === "string" ? key : undefined
+                                field.onChange(nextValue)
+                            }}
+                        >
+                            <Select.Trigger>
+                                <Select.Value />
+                            </Select.Trigger>
+                            <Select.Popover>
+                                <ListBox>
+                                    {severityOptions.map(
+                                        (option): ReactElement => (
+                                            <ListBoxItem
+                                                key={option.value}
+                                                id={option.value}
+                                                textValue={option.label}
+                                                isDisabled={option.isDisabled}
+                                            >
+                                                <div className="flex flex-col">
+                                                    <span>{option.label}</span>
+                                                    {option.description === undefined ? null : (
+                                                        <span className="text-xs text-muted">
+                                                            {option.description}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </ListBoxItem>
+                                        ),
+                                    )}
+                                </ListBox>
+                            </Select.Popover>
+                        </Select>
+                    )
+                }}
             />
-            <FormNumberField
+            <FormField
                 control={form.control}
                 id="code-review-suggestions-limit"
-                inputProps={{
-                    min: 1,
-                    placeholder: t("settings:codeReviewForm.suggestionsLimitPlaceholder"),
-                }}
                 label={t("settings:codeReviewForm.suggestionsLimit")}
                 name="suggestionsLimit"
+                renderField={({
+                    field,
+                    hasError,
+                    fieldId,
+                    accessibilityLabel,
+                    ariaDescribedBy,
+                }): ReactElement => {
+                    const value = field.value === undefined ? "" : `${field.value as number}`
+
+                    return (
+                        <Input
+                            aria-describedby={ariaDescribedBy}
+                            aria-label={accessibilityLabel}
+                            aria-invalid={hasError}
+                            id={fieldId}
+                            inputMode="decimal"
+                            min={1}
+                            name={field.name}
+                            placeholder={t("settings:codeReviewForm.suggestionsLimitPlaceholder")}
+                            type="number"
+                            value={value}
+                            onBlur={field.onBlur}
+                            onChange={(event: ChangeEvent<HTMLInputElement>): void => {
+                                const nextValue = event.target.value
+
+                                if (nextValue === "") {
+                                    field.onChange(undefined)
+                                    return
+                                }
+
+                                const parsedNumber = Number(nextValue)
+                                if (Number.isNaN(parsedNumber) === true) {
+                                    field.onChange(undefined)
+                                    return
+                                }
+
+                                field.onChange(parsedNumber)
+                            }}
+                        />
+                    )
+                }}
             />
-            <FormSwitchField
+            <FormField
                 control={form.control}
+                gapClass="gap-1"
                 helperText={t("settings:codeReviewForm.enableDriftSignalsHelper")}
+                hideLabel={true}
                 label={t("settings:codeReviewForm.enableDriftSignals")}
                 name="enableDriftSignals"
+                showRequiredMarker={false}
+                renderField={({
+                    field,
+                    hasError,
+                    accessibilityLabel,
+                    ariaDescribedBy,
+                }): ReactElement => (
+                    <Switch
+                        aria-describedby={ariaDescribedBy}
+                        aria-label={accessibilityLabel}
+                        aria-invalid={hasError}
+                        name={field.name}
+                        isSelected={field.value === true}
+                        onChange={field.onChange}
+                    >
+                        {t("settings:codeReviewForm.enableDriftSignals")}
+                    </Switch>
+                )}
             />
-            <FormSubmitButton isSubmitting={form.formState.isSubmitting}>
+            <Button
+                aria-busy={form.formState.isSubmitting}
+                isDisabled={form.formState.isSubmitting}
+                type="submit"
+            >
                 {t("settings:codeReviewForm.saveReviewConfig")}
-            </FormSubmitButton>
+            </Button>
         </form>
     )
 }
