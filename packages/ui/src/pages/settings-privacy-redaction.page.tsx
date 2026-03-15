@@ -124,13 +124,21 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
         >
             {hasSensitiveData ? (
                 <Alert status="danger">
-                    <Alert.Title>{t("settings:privacyRedaction.sensitiveFragmentsDetectedTitle")}</Alert.Title>
-                    <Alert.Description>{t("settings:privacyRedaction.sensitiveFragmentsDetectedDescription")}</Alert.Description>
+                    <Alert.Title>
+                        {t("settings:privacyRedaction.sensitiveFragmentsDetectedTitle")}
+                    </Alert.Title>
+                    <Alert.Description>
+                        {t("settings:privacyRedaction.sensitiveFragmentsDetectedDescription")}
+                    </Alert.Description>
                 </Alert>
             ) : (
                 <Alert status="success">
-                    <Alert.Title>{t("settings:privacyRedaction.noSensitiveFragmentsTitle")}</Alert.Title>
-                    <Alert.Description>{t("settings:privacyRedaction.noSensitiveFragmentsDescription")}</Alert.Description>
+                    <Alert.Title>
+                        {t("settings:privacyRedaction.noSensitiveFragmentsTitle")}
+                    </Alert.Title>
+                    <Alert.Description>
+                        {t("settings:privacyRedaction.noSensitiveFragmentsDescription")}
+                    </Alert.Description>
                 </Alert>
             )}
 
@@ -139,7 +147,9 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
                     aria-label={t("settings:ariaLabel.privacyRedaction.sourceText")}
                     className="min-h-[150px]"
                     value={sourceText}
-                    onChange={(e): void => { setSourceText(e.target.value) }}
+                    onChange={(e): void => {
+                        setSourceText(e.target.value)
+                    }}
                 />
                 <div className="flex flex-wrap gap-2">
                     <Button variant="primary" onPress={handleApplyRedaction}>
@@ -164,13 +174,13 @@ export function SettingsPrivacyRedactionPage(): ReactElement {
                                     key={`${hit.type}-${String(index)}`}
                                 >
                                     <p className="font-semibold text-foreground">{hit.type}</p>
-                                    <p className="text-text-secondary">{hit.value}</p>
+                                    <p className="text-muted">{hit.value}</p>
                                 </li>
                             ),
                         )}
                     </ul>
                 ) : (
-                    <p className="text-sm text-text-secondary">
+                    <p className="text-sm text-muted">
                         {t("settings:privacyRedaction.noHitsMessage")}
                     </p>
                 )}

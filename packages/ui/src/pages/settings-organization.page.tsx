@@ -10,6 +10,7 @@ import {
     Chip,
     Input,
     Switch,
+    Table,
 } from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
@@ -306,11 +307,7 @@ function BillingCard(props: {
                     <Button onPress={props.onRetryPayment} size="sm" variant="ghost">
                         {t("settings:organization.retryPayment")}
                     </Button>
-                    <Button
-                        onPress={props.onConfirmCriticalAction}
-                        size="sm"
-                        variant="danger"
-                    >
+                    <Button onPress={props.onConfirmCriticalAction} size="sm" variant="danger">
                         {t("settings:organization.confirmBillingAction")}
                     </Button>
                 </div>
@@ -340,7 +337,9 @@ function MembersCard(props: {
                 <div className="grid gap-3 md:grid-cols-[1fr_180px_auto]">
                     <Input
                         aria-label={t("settings:organization.inviteByEmail")}
-                        onChange={(e): void => { props.onInviteEmailChange(e.target.value) }}
+                        onChange={(e): void => {
+                            props.onInviteEmailChange(e.target.value)
+                        }}
                         placeholder="new.member@acme.dev"
                         value={props.inviteEmail}
                     />
@@ -373,80 +372,98 @@ function MembersCard(props: {
                     </div>
                 </div>
 
-                <table
-                    aria-label={t("settings:ariaLabel.organization.membersTable")}
-                    className="w-full text-sm"
-                >
-                    <thead>
-                        <tr className="border-b border-border text-left text-xs text-text-secondary">
-                            <th className="px-3 py-2">{t("settings:organization.tableNameHeader")}</th>
-                            <th className="px-3 py-2">{t("settings:organization.tableEmailHeader")}</th>
-                            <th className="px-3 py-2">{t("settings:organization.tableRoleHeader")}</th>
-                            <th className="px-3 py-2">{t("settings:organization.tableActionsHeader")}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {props.members.length === 0 ? (
-                            <tr>
-                                <td className="px-3 py-4 text-center text-text-secondary" colSpan={4}>
-                                    {t("settings:organization.noMembersFound")}
-                                </td>
-                            </tr>
-                        ) : (
-                            props.members.map(
-                                (member): ReactElement => (
-                                    <tr key={member.id} className="border-b border-border">
-                                        <td className="px-3 py-2">{member.name}</td>
-                                        <td className="px-3 py-2">{member.email}</td>
-                                        <td className="px-3 py-2">
-                                            <div className="flex items-center gap-2">
-                                                <Chip
-                                                    color={mapMemberRoleColor(member.role)}
-                                                    size="sm"
-                                                    variant="soft"
-                                                >
-                                                    {member.role}
-                                                </Chip>
-                                                <select
-                                                    aria-label={`Role for ${member.email}`}
-                                                    className={NATIVE_FORM.select}
-                                                    value={member.role}
-                                                    onChange={(event): void => {
-                                                        const role = event.currentTarget.value
-                                                        if (
-                                                            role === "viewer" ||
-                                                            role === "developer" ||
-                                                            role === "lead" ||
-                                                            role === "admin"
-                                                        ) {
-                                                            props.onRoleChange(member.id, role)
-                                                        }
-                                                    }}
-                                                >
-                                                    <option value="viewer">viewer</option>
-                                                    <option value="developer">developer</option>
-                                                    <option value="lead">lead</option>
-                                                    <option value="admin">admin</option>
-                                                </select>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 py-2">
-                                            <Button
-                                                onPress={(): void => {
-                                                    props.onRemoveMember(member.id)
-                                                }}
-                                                size="sm"
-                                                variant="danger"
-                                            >
-                                                {t("settings:organization.remove")}
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ),
-                            )
-                        )}
-                    </tbody>
-                </table>
+                <Table>
+                    <Table.ScrollContainer>
+                        <Table.Content
+                            aria-label={t("settings:ariaLabel.organization.membersTable")}
+                        >
+                            <Table.Header>
+                                <Table.Column isRowHeader>
+                                    {t("settings:organization.tableNameHeader")}
+                                </Table.Column>
+                                <Table.Column>
+                                    {t("settings:organization.tableEmailHeader")}
+                                </Table.Column>
+                                <Table.Column>
+                                    {t("settings:organization.tableRoleHeader")}
+                                </Table.Column>
+                                <Table.Column>
+                                    {t("settings:organization.tableActionsHeader")}
+                                </Table.Column>
+                            </Table.Header>
+                            <Table.Body>
+                                {props.members.length === 0 ? (
+                                    <Table.Row>
+                                        <Table.Cell>
+                                            {t("settings:organization.noMembersFound")}
+                                        </Table.Cell>
+                                        <Table.Cell>{""}</Table.Cell>
+                                        <Table.Cell>{""}</Table.Cell>
+                                        <Table.Cell>{""}</Table.Cell>
+                                    </Table.Row>
+                                ) : (
+                                    props.members.map(
+                                        (member): ReactElement => (
+                                            <Table.Row key={member.id}>
+                                                <Table.Cell>{member.name}</Table.Cell>
+                                                <Table.Cell>{member.email}</Table.Cell>
+                                                <Table.Cell>
+                                                    <div className="flex items-center gap-2">
+                                                        <Chip
+                                                            color={mapMemberRoleColor(member.role)}
+                                                            size="sm"
+                                                            variant="soft"
+                                                        >
+                                                            {member.role}
+                                                        </Chip>
+                                                        <select
+                                                            aria-label={`Role for ${member.email}`}
+                                                            className={NATIVE_FORM.select}
+                                                            value={member.role}
+                                                            onChange={(event): void => {
+                                                                const role =
+                                                                    event.currentTarget.value
+                                                                if (
+                                                                    role === "viewer" ||
+                                                                    role === "developer" ||
+                                                                    role === "lead" ||
+                                                                    role === "admin"
+                                                                ) {
+                                                                    props.onRoleChange(
+                                                                        member.id,
+                                                                        role,
+                                                                    )
+                                                                }
+                                                            }}
+                                                        >
+                                                            <option value="viewer">viewer</option>
+                                                            <option value="developer">
+                                                                developer
+                                                            </option>
+                                                            <option value="lead">lead</option>
+                                                            <option value="admin">admin</option>
+                                                        </select>
+                                                    </div>
+                                                </Table.Cell>
+                                                <Table.Cell>
+                                                    <Button
+                                                        onPress={(): void => {
+                                                            props.onRemoveMember(member.id)
+                                                        }}
+                                                        size="sm"
+                                                        variant="danger"
+                                                    >
+                                                        {t("settings:organization.remove")}
+                                                    </Button>
+                                                </Table.Cell>
+                                            </Table.Row>
+                                        ),
+                                    )
+                                )}
+                            </Table.Body>
+                        </Table.Content>
+                    </Table.ScrollContainer>
+                </Table>
             </CardContent>
         </Card>
     )
@@ -466,7 +483,7 @@ function ByokCard(props: {
                 <p className={TYPOGRAPHY.sectionTitle}>{t("settings:organization.byokTitle")}</p>
             </CardHeader>
             <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted">
                     {t("settings:organization.byokDescription")}
                 </p>
                 <div className="flex flex-wrap items-center gap-4">
@@ -483,7 +500,7 @@ function ByokCard(props: {
                         {t("settings:organization.llmKeyConfigured")}
                     </Switch>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted">
                     {t("settings:organization.activeKeyRef")}: {props.byok.maskedKeyRef}
                 </p>
                 <div>
@@ -507,39 +524,51 @@ function AuditLogsCard(props: { readonly logs: ReadonlyArray<IAuditLogEntry> }):
                 </p>
             </CardHeader>
             <CardContent>
-                <table
-                    aria-label={t("settings:ariaLabel.organization.auditLogsTable")}
-                    className="w-full text-sm"
-                >
-                    <thead>
-                        <tr className="border-b border-border text-left text-xs text-text-secondary">
-                            <th className="px-3 py-2">{t("settings:organization.auditTimeHeader")}</th>
-                            <th className="px-3 py-2">{t("settings:organization.auditActorHeader")}</th>
-                            <th className="px-3 py-2">{t("settings:organization.auditActionHeader")}</th>
-                            <th className="px-3 py-2">{t("settings:organization.auditDetailsHeader")}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {props.logs.length === 0 ? (
-                            <tr>
-                                <td className="px-3 py-4 text-center text-text-secondary" colSpan={4}>
-                                    {t("settings:organization.noAuditEntries")}
-                                </td>
-                            </tr>
-                        ) : (
-                            props.logs.map(
-                                (log): ReactElement => (
-                                    <tr key={log.id} className="border-b border-border">
-                                        <td className="px-3 py-2">{log.timestamp}</td>
-                                        <td className="px-3 py-2">{log.actor}</td>
-                                        <td className="px-3 py-2">{log.action}</td>
-                                        <td className="px-3 py-2">{log.details}</td>
-                                    </tr>
-                                ),
-                            )
-                        )}
-                    </tbody>
-                </table>
+                <Table>
+                    <Table.ScrollContainer>
+                        <Table.Content
+                            aria-label={t("settings:ariaLabel.organization.auditLogsTable")}
+                        >
+                            <Table.Header>
+                                <Table.Column isRowHeader>
+                                    {t("settings:organization.auditTimeHeader")}
+                                </Table.Column>
+                                <Table.Column>
+                                    {t("settings:organization.auditActorHeader")}
+                                </Table.Column>
+                                <Table.Column>
+                                    {t("settings:organization.auditActionHeader")}
+                                </Table.Column>
+                                <Table.Column>
+                                    {t("settings:organization.auditDetailsHeader")}
+                                </Table.Column>
+                            </Table.Header>
+                            <Table.Body>
+                                {props.logs.length === 0 ? (
+                                    <Table.Row>
+                                        <Table.Cell>
+                                            {t("settings:organization.noAuditEntries")}
+                                        </Table.Cell>
+                                        <Table.Cell>{""}</Table.Cell>
+                                        <Table.Cell>{""}</Table.Cell>
+                                        <Table.Cell>{""}</Table.Cell>
+                                    </Table.Row>
+                                ) : (
+                                    props.logs.map(
+                                        (log): ReactElement => (
+                                            <Table.Row key={log.id}>
+                                                <Table.Cell>{log.timestamp}</Table.Cell>
+                                                <Table.Cell>{log.actor}</Table.Cell>
+                                                <Table.Cell>{log.action}</Table.Cell>
+                                                <Table.Cell>{log.details}</Table.Cell>
+                                            </Table.Row>
+                                        ),
+                                    )
+                                )}
+                            </Table.Body>
+                        </Table.Content>
+                    </Table.ScrollContainer>
+                </Table>
             </CardContent>
         </Card>
     )
