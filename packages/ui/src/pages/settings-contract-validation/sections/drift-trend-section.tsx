@@ -1,9 +1,8 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
-import { CartesianGrid, Line, LineChart, ReferenceDot, Tooltip, XAxis, YAxis } from "recharts"
+import { CartesianGrid, Line, LineChart, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 import { Alert, Card, CardContent, CardHeader } from "@heroui/react"
-import { ChartContainer } from "@/components/charts/chart-container"
 import { CHART_GRID_DASH, CHART_STROKE_WIDTH } from "@/lib/constants/chart-recharts-defaults"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -151,10 +150,7 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                     <p className="text-sm text-muted">
                         Drift score trend over time with architecture change annotations.
                     </p>
-                    <ChartContainer
-                        aria-label={t("settings:ariaLabel.contractValidation.driftScoreTrendChart")}
-                        height="xl"
-                    >
+                    <div aria-label={t("settings:ariaLabel.contractValidation.driftScoreTrendChart")} className="h-72 w-full"><ResponsiveContainer height="100%" minHeight={1} minWidth={1} width="100%">
                         <LineChart
                             data={DRIFT_TREND_POINTS}
                             margin={{
@@ -195,7 +191,7 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                                 ),
                             )}
                         </LineChart>
-                    </ChartContainer>
+                    </ResponsiveContainer></div>
                     <Alert status="accent">
                         <Alert.Title>Trend summary</Alert.Title>
                         <Alert.Description>{state.driftTrendSummary}</Alert.Description>
