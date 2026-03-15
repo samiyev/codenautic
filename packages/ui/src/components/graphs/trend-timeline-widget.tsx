@@ -47,7 +47,7 @@ export interface ITrendTimelineWidgetProps {
 
 function resolveEntryClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-primary bg-primary/10"
+        ? "border-accent bg-accent/10"
         : "border-border bg-surface hover:border-border"
     return `w-full rounded-lg border p-2 text-left transition ${baseClassName}`
 }
@@ -125,7 +125,7 @@ export function TrendTimelineWidget(props: ITrendTimelineWidgetProps): ReactElem
                                                 key={metric.label}
                                             >
                                                 <p
-                                                    className={`${TYPOGRAPHY.micro} text-muted-foreground`}
+                                                    className={`${TYPOGRAPHY.micro} text-muted`}
                                                 >
                                                     {metric.label}
                                                 </p>

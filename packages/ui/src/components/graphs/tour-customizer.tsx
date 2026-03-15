@@ -178,7 +178,7 @@ export function TourCustomizer(props: ITourCustomizerProps): ReactElement {
 
             <button
                 aria-label={t("code-city:tourCustomizer.addStopAriaLabel")}
-                className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
+                className="mt-2 rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent"
                 onClick={handleAddStop}
                 type="button"
             >
@@ -202,7 +202,7 @@ export function TourCustomizer(props: ITourCustomizerProps): ReactElement {
                                 handleDropOnStep(step.id, event)
                             }}
                         >
-                            <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
+                            <p className={`${TYPOGRAPHY.micro} text-muted`}>
                                 {t("code-city:tourCustomizer.stepIdPrefix")} {step.id}
                             </p>
                             <label
