@@ -120,6 +120,20 @@ export {
     type INovitaProviderErrorDetails,
 } from "./novita-provider.error"
 export {
+    LangChainAdapter,
+    type ILangChainAdapterInput,
+    type ILangChainAdapterOptions,
+    type ILangChainChatModel,
+    type ILangChainEmbeddings,
+    type LangChainRequestMapper,
+} from "./langchain-adapter"
+export {
+    LANGCHAIN_ADAPTER_ERROR_CODE,
+    LangChainAdapterError,
+    type ILangChainAdapterErrorDetails,
+    type LangChainAdapterErrorCode,
+} from "./langchain-adapter.error"
+export {
     AnthropicRequestAcl,
     AnthropicResponseAcl,
     LLM_ACL_PROVIDER,
