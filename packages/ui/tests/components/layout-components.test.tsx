@@ -5,6 +5,27 @@ import { describe, expect, it, vi } from "vitest"
 
 import type { TThemeMode } from "@/lib/theme/use-theme"
 import { renderWithProviders } from "../utils/render"
+
+vi.mock("@/lib/theme/use-theme", () => ({
+    useTheme: (): {
+        mode: "dark" | "light" | "system"
+        preset: string
+        presets: ReadonlyArray<{ readonly id: string; readonly label: string }>
+        resolvedMode: "dark" | "light"
+        setMode: (m: string) => void
+        setPreset: (p: string) => void
+    } => ({
+        mode: "system",
+        preset: "sunrise",
+        presets: [
+            { id: "moonstone", label: "Moonstone" },
+            { id: "sunrise", label: "Sunrise" },
+        ],
+        resolvedMode: "light",
+        setMode: (): void => {},
+        setPreset: (): void => {},
+    }),
+}))
 import {
     DashboardLayout,
     Header,
