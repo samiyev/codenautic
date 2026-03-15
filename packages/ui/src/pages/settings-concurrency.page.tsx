@@ -1,4 +1,4 @@
-import { type ReactElement, useMemo, useState } from "react"
+import { type ReactElement, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import {
@@ -15,53 +15,43 @@ import {
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
+import { useAdminConfig } from "@/lib/hooks/queries/use-admin-config"
+import type { IAdminConfigSnapshot } from "@/lib/api/endpoints/admin-config.endpoint"
 
-type TSeverity = "high" | "low" | "medium"
 type TConflictDecision = "merge" | "reload" | "retry"
 
-interface IAdminConfigValues {
-    /** Severity threshold policy. */
-    readonly severityThreshold: TSeverity
-    /** Ignore paths configuration. */
-    readonly ignorePaths: string
-    /** Toggle для обязательного reviewer approval. */
-    readonly requireReviewerApproval: boolean
-}
-
-interface IAdminConfigSnapshot {
-    /** ETag/version для optimistic concurrency. */
-    readonly etag: number
-    /** Значения админ-конфига. */
-    readonly values: IAdminConfigValues
-}
-
 interface IConfigConflictState {
-    /** Локальный snapshot оператора. */
+    /**
+     * Локальный snapshot оператора.
+     */
     readonly local: IAdminConfigSnapshot
-    /** Актуальный snapshot backend. */
+    /**
+     * Актуальный snapshot backend.
+     */
     readonly remote: IAdminConfigSnapshot
 }
 
 interface IConcurrencyAuditEntry {
-    /** Идентификатор события. */
+    /**
+     * Идентификатор события.
+     */
     readonly id: string
-    /** Решение оператора при конфликте. */
+    /**
+     * Решение оператора при конфликте.
+     */
     readonly decision: TConflictDecision
-    /** ETag после применения решения. */
+    /**
+     * ETag после применения решения.
+     */
     readonly resultingEtag: number
-    /** Краткий итог. */
+    /**
+     * Краткий итог.
+     */
     readonly summary: string
-    /** Время события. */
+    /**
+     * Время события.
+     */
     readonly occurredAt: string
-}
-
-const DEFAULT_REMOTE_CONFIG: IAdminConfigSnapshot = {
-    etag: 7,
-    values: {
-        ignorePaths: "dist/**,coverage/**",
-        requireReviewerApproval: true,
-        severityThreshold: "medium",
-    },
 }
 
 function formatTimestamp(rawValue: string): string {
@@ -122,11 +112,27 @@ function resolveDiffRows(
  */
 export function SettingsConcurrencyPage(): ReactElement {
     const { t } = useTranslation(["settings"])
-    const [remoteSnapshot, setRemoteSnapshot] =
-        useState<IAdminConfigSnapshot>(DEFAULT_REMOTE_CONFIG)
-    const [localDraft, setLocalDraft] = useState<IAdminConfigSnapshot>(DEFAULT_REMOTE_CONFIG)
+    const { configQuery, updateConfig } = useAdminConfig()
+
+    const DEFAULT_SNAPSHOT: IAdminConfigSnapshot = {
+        etag: 1,
+        values: {
+            ignorePaths: "",
+            requireReviewerApproval: false,
+            severityThreshold: "medium",
+        },
+    }
+
+    const remoteSnapshot: IAdminConfigSnapshot = configQuery.data?.config ?? DEFAULT_SNAPSHOT
+    const [localDraft, setLocalDraft] = useState<IAdminConfigSnapshot>(remoteSnapshot)
     const [conflictState, setConflictState] = useState<IConfigConflictState | undefined>(undefined)
     const [audit, setAudit] = useState<ReadonlyArray<IConcurrencyAuditEntry>>([])
+
+    useEffect((): void => {
+        if (configQuery.data !== undefined) {
+            setLocalDraft(configQuery.data.config)
+        }
+    }, [configQuery.data])
 
     const diffRows = useMemo((): ReadonlyArray<{
         readonly field: string
@@ -159,43 +165,45 @@ export function SettingsConcurrencyPage(): ReactElement {
         )
     }
 
-    const applySave = (nextSnapshot: IAdminConfigSnapshot): void => {
-        setRemoteSnapshot(nextSnapshot)
-        setLocalDraft(nextSnapshot)
-    }
-
     const handleSave = (): void => {
-        if (localDraft.etag !== remoteSnapshot.etag) {
-            setConflictState({
-                local: localDraft,
-                remote: remoteSnapshot,
-            })
-            showToastInfo(t("settings:concurrency.toast.concurrencyConflictDetected"))
-            return
-        }
+        updateConfig.mutate(
+            { values: localDraft.values, etag: localDraft.etag },
+            {
+                onSuccess: (result): void => {
+                    if (result.conflict === true) {
+                        setConflictState({
+                            local: localDraft,
+                            remote: result.serverConfig,
+                        })
+                        showToastInfo(t("settings:concurrency.toast.concurrencyConflictDetected"))
+                        return
+                    }
 
-        const nextSnapshot: IAdminConfigSnapshot = {
-            etag: remoteSnapshot.etag + 1,
-            values: localDraft.values,
-        }
-        applySave(nextSnapshot)
-        appendAudit("retry", nextSnapshot.etag, "Config saved without conflict.")
-        showToastSuccess(t("settings:concurrency.toast.configSaved"))
+                    setLocalDraft(result.config)
+                    appendAudit("retry", result.config.etag, "Config saved without conflict.")
+                    showToastSuccess(t("settings:concurrency.toast.configSaved"))
+                },
+            },
+        )
     }
 
     const handleSimulateRemoteChange = (): void => {
-        const nextRemoteSnapshot: IAdminConfigSnapshot = {
-            etag: remoteSnapshot.etag + 1,
-            values: {
-                ignorePaths: "dist/**,coverage/**,generated/**",
-                requireReviewerApproval: true,
-                severityThreshold:
-                    remoteSnapshot.values.severityThreshold === "medium" ? "high" : "medium",
-            },
+        const simulatedValues = {
+            ignorePaths: "dist/**,coverage/**,generated/**",
+            requireReviewerApproval: true as const,
+            severityThreshold:
+                remoteSnapshot.values.severityThreshold === "medium"
+                    ? ("high" as const)
+                    : ("medium" as const),
         }
-
-        setRemoteSnapshot(nextRemoteSnapshot)
-        showToastInfo(t("settings:concurrency.toast.externalUpdateApplied"))
+        updateConfig.mutate(
+            { values: simulatedValues, etag: remoteSnapshot.etag },
+            {
+                onSuccess: (): void => {
+                    showToastInfo(t("settings:concurrency.toast.externalUpdateApplied"))
+                },
+            },
+        )
     }
 
     const handleConflictMerge = (): void => {
@@ -203,14 +211,19 @@ export function SettingsConcurrencyPage(): ReactElement {
             return
         }
 
-        const nextSnapshot: IAdminConfigSnapshot = {
-            etag: conflictState.remote.etag + 1,
-            values: conflictState.local.values,
-        }
-        applySave(nextSnapshot)
-        appendAudit("merge", nextSnapshot.etag, "Conflict merged with local priority.")
-        setConflictState(undefined)
-        showToastSuccess(t("settings:concurrency.toast.conflictResolvedByMerge"))
+        updateConfig.mutate(
+            { values: conflictState.local.values, etag: conflictState.remote.etag },
+            {
+                onSuccess: (result): void => {
+                    if (result.conflict !== true) {
+                        setLocalDraft(result.config)
+                        appendAudit("merge", result.config.etag, "Conflict merged with local priority.")
+                    }
+                    setConflictState(undefined)
+                    showToastSuccess(t("settings:concurrency.toast.conflictResolvedByMerge"))
+                },
+            },
+        )
     }
 
     const handleConflictReload = (): void => {
