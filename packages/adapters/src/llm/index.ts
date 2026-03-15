@@ -150,6 +150,22 @@ export {
     type LangSmithTracerErrorCode,
 } from "./langsmith-tracer.error"
 export {
+    LlmChainBuilder,
+    type ILlmChainBuilder,
+    type ILlmChainBuilderOptions,
+    type ILlmChainDefinition,
+    type ILlmChainExecutionInput,
+    type ILlmChainExecutionResult,
+    type ILlmChainStepDefinition,
+    type ILlmChainStepResult,
+} from "./llm-chain-builder"
+export {
+    LLM_CHAIN_BUILDER_ERROR_CODE,
+    LlmChainBuilderError,
+    type ILlmChainBuilderErrorDetails,
+    type LlmChainBuilderErrorCode,
+} from "./llm-chain-builder.error"
+export {
     PromptTemplateManager,
     type IPromptTemplateDefinition,
     type IPromptTemplateManager,
