@@ -67,9 +67,7 @@ describe("CommandPalette", (): void => {
             />,
         )
 
-        expect(
-            screen.getByRole("dialog", { name: "Global command palette" }),
-        ).not.toBeNull()
+        expect(screen.getByRole("dialog", { name: "Global command palette" })).not.toBeNull()
         expect(screen.getByPlaceholderText("Search commands, routes and actions...")).not.toBeNull()
         expect(screen.getByText("Dashboard")).not.toBeNull()
         expect(screen.getByText("CCR Management")).not.toBeNull()
@@ -112,9 +110,7 @@ describe("CommandPalette", (): void => {
         const searchInput = screen.getByPlaceholderText("Search commands, routes and actions...")
         await user.type(searchInput, "xyznonexistent999")
 
-        expect(
-            screen.getByText("No results found for current query."),
-        ).not.toBeNull()
+        expect(screen.getByText("No results found for current query.")).not.toBeNull()
     })
 
     it("when user presses Escape, then calls onClose", async (): Promise<void> => {
@@ -248,9 +244,7 @@ describe("CommandPalette", (): void => {
             />,
         )
 
-        expect(
-            screen.getByRole("dialog", { name: "Global command palette" }),
-        ).not.toBeNull()
+        expect(screen.getByRole("dialog", { name: "Global command palette" })).not.toBeNull()
     })
 
     it("when localStorage contains non-array, then gracefully renders palette", (): void => {
@@ -267,9 +261,7 @@ describe("CommandPalette", (): void => {
             />,
         )
 
-        expect(
-            screen.getByRole("dialog", { name: "Global command palette" }),
-        ).not.toBeNull()
+        expect(screen.getByRole("dialog", { name: "Global command palette" })).not.toBeNull()
     })
 
     it("when empty routes, then shows no items", (): void => {
@@ -323,8 +315,6 @@ describe("CommandPalette", (): void => {
             />,
         )
 
-        expect(
-            screen.getByText("Use Arrow keys, Enter to open, and Esc to close."),
-        ).not.toBeNull()
+        expect(screen.getByText("Use Arrow keys, Enter to open, and Esc to close.")).not.toBeNull()
     })
 })
