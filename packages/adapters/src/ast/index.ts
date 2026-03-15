@@ -34,6 +34,12 @@ export {
     type IAstCrossFileAnalyzerErrorDetails,
 } from "./ast-cross-file-analyzer.error"
 export {
+    AST_DEPENDENCY_CHAIN_RESOLVER_ERROR_CODE,
+    AstDependencyChainResolverError,
+    type AstDependencyChainResolverErrorCode,
+    type IAstDependencyChainResolverErrorDetails,
+} from "./ast-dependency-chain-resolver.error"
+export {
     AST_CODE_CHUNK_EMBEDDING_GENERATOR_ERROR_CODE,
     AstCodeChunkEmbeddingGeneratorError,
     type AstCodeChunkEmbeddingGeneratorErrorCode,
@@ -164,6 +170,15 @@ export {
     type IAstImportExportGraphSummary,
     type IAstUnresolvedImportExportReference,
 } from "./ast-import-export-graph-builder"
+export {
+    AstDependencyChainResolverService,
+    type IAstDependencyChain,
+    type IAstDependencyChainResolverInput,
+    type IAstDependencyChainResolverResult,
+    type IAstDependencyChainResolverService,
+    type IAstDependencyChainResolverServiceOptions,
+    type IAstDependencyChainResolverSummary,
+} from "./ast-dependency-chain-resolver.service"
 export {
     AST_CROSS_FILE_REFERENCE_TYPE,
     AstCrossFileReferenceResolutionService,
