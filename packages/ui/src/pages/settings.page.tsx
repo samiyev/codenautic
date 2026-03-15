@@ -10,8 +10,25 @@ import { PageShell } from "@/components/layout/page-shell"
 import { LINK_CLASSES, TYPOGRAPHY } from "@/lib/constants/typography"
 import { GAP } from "@/lib/constants/spacing"
 import { useUiRole } from "@/lib/permissions/ui-policy"
-import { STAGGER_ITEM_VARIANTS } from "@/lib/motion"
 import { createSettingsNavGroups } from "@/lib/navigation/settings-nav-items"
+
+/**
+ * Stagger item animation variants for settings cards.
+ */
+const STAGGER_ITEM_VARIANTS = {
+    hidden: {
+        opacity: 0,
+        y: 12,
+    },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.25,
+            ease: [0.0, 0.0, 0.2, 1.0],
+        },
+    },
+} as const
 
 /**
  * Settings overview page with grouped navigation cards.
