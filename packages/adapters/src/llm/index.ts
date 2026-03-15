@@ -176,6 +176,22 @@ export {
     type LlmCallLoggerErrorCode,
 } from "./llm-call-logger.error"
 export {
+    PREDICTION_TREND_DIRECTION,
+    PredictionExplainPrompt,
+    type IPredictionExplainPrompt,
+    type IPredictionExplainPromptInput,
+    type IPredictionExplainPromptOptions,
+    type IPredictionMetricInput,
+    type IPredictionTrendInput,
+    type PredictionTrendDirection,
+} from "./prediction-explain-prompt"
+export {
+    PREDICTION_EXPLAIN_PROMPT_ERROR_CODE,
+    PredictionExplainPromptError,
+    type IPredictionExplainPromptErrorDetails,
+    type PredictionExplainPromptErrorCode,
+} from "./prediction-explain-prompt.error"
+export {
     LANGCHAIN_CALLBACK_EVENT_TYPE,
     LangChainCallbackHandler,
     type ILangChainCallbackDispatchInput,
