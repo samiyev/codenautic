@@ -18,56 +18,18 @@ import { SystemStateCard } from "@/components/infrastructure/system-state-card"
 import { PageShell } from "@/components/layout/page-shell"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
+import { useTriage } from "@/lib/hooks/queries/use-triage"
+import type {
+    ITriageItem,
+    TTriageAction,
+    TTriageScope,
+    TTriageStatus,
+    TTriageEscalationLevel,
+} from "@/lib/api/endpoints/triage.endpoint"
 
-type TTriageCategory =
-    | "assigned_ccr"
-    | "critical_issue"
-    | "inbox_notification"
-    | "pending_approval"
-    | "stuck_job"
 type TTriageSeverity = "critical" | "high" | "medium"
-type TTriageScope = "mine" | "repo" | "team"
-type TTriageStatus = "assigned" | "blocked" | "done" | "in_progress" | "snoozed" | "unassigned"
-type TTriageOwner = "me" | "team" | "unassigned"
 type TReviewerRole = "admin" | "developer" | "lead" | "viewer"
 type TSlaState = "breach" | "healthy" | "warning"
-type TAuditAction =
-    | "assign_to_me"
-    | "escalate"
-    | "mark_done"
-    | "mark_read"
-    | "open_context"
-    | "snooze"
-    | "start_work"
-
-interface ITriageItem {
-    /** Идентификатор triage item. */
-    readonly id: string
-    /** Категория triage. */
-    readonly category: TTriageCategory
-    /** Заголовок item. */
-    readonly title: string
-    /** Приоритет/severity. */
-    readonly severity: TTriageSeverity
-    /** Репозиторий источника. */
-    readonly repository: string
-    /** Owner item. */
-    readonly owner: TTriageOwner
-    /** Deep-link в целевой контекст. */
-    readonly deepLink: string
-    /** Временная метка. */
-    readonly timestamp: string
-    /** Read status. */
-    readonly isRead: boolean
-    /** Lifecycle status. */
-    readonly status: TTriageStatus
-    /** Deadline для SLA. */
-    readonly dueAt: string
-    /** Целевой SLA в минутах. */
-    readonly slaMinutes: number
-    /** Уровень эскалации. */
-    readonly escalationLevel: "none" | "warn" | "critical"
-}
 
 interface IAuditEntry {
     /** Уникальный id записи. */
@@ -75,88 +37,10 @@ interface IAuditEntry {
     /** Item, к которому относится запись. */
     readonly itemId: string
     /** Тип выполненного действия. */
-    readonly action: TAuditAction
+    readonly action: TTriageAction
     /** Когда произошло действие. */
     readonly timestamp: string
 }
-
-const TRIAGE_ITEMS_DEFAULT: ReadonlyArray<ITriageItem> = [
-    {
-        category: "assigned_ccr",
-        deepLink: "/reviews/412",
-        dueAt: "2026-03-04T11:00:00Z",
-        escalationLevel: "none",
-        id: "MW-1001",
-        isRead: false,
-        owner: "me",
-        repository: "repo-ui",
-        severity: "high",
-        slaMinutes: 120,
-        status: "in_progress",
-        timestamp: "2026-03-04T10:10:00Z",
-        title: "CCR #412 needs final response",
-    },
-    {
-        category: "critical_issue",
-        deepLink: "/issues",
-        dueAt: "2026-03-04T10:30:00Z",
-        escalationLevel: "warn",
-        id: "MW-1002",
-        isRead: false,
-        owner: "team",
-        repository: "repo-core",
-        severity: "critical",
-        slaMinutes: 60,
-        status: "unassigned",
-        timestamp: "2026-03-04T09:42:00Z",
-        title: "Tenant boundary regression in auth middleware",
-    },
-    {
-        category: "inbox_notification",
-        deepLink: "/settings-notifications",
-        dueAt: "2026-03-04T11:20:00Z",
-        escalationLevel: "none",
-        id: "MW-1003",
-        isRead: true,
-        owner: "me",
-        repository: "repo-ui",
-        severity: "medium",
-        slaMinutes: 240,
-        status: "assigned",
-        timestamp: "2026-03-04T08:30:00Z",
-        title: "Notification digest pending confirmation",
-    },
-    {
-        category: "stuck_job",
-        deepLink: "/settings-jobs",
-        dueAt: "2026-03-04T10:20:00Z",
-        escalationLevel: "warn",
-        id: "MW-1004",
-        isRead: false,
-        owner: "unassigned",
-        repository: "repo-api",
-        severity: "high",
-        slaMinutes: 45,
-        status: "blocked",
-        timestamp: "2026-03-04T08:15:00Z",
-        title: "Scan worker stuck on queue heartbeat",
-    },
-    {
-        category: "pending_approval",
-        deepLink: "/reviews/409",
-        dueAt: "2026-03-04T10:45:00Z",
-        escalationLevel: "none",
-        id: "MW-1005",
-        isRead: false,
-        owner: "team",
-        repository: "repo-api",
-        severity: "high",
-        slaMinutes: 90,
-        status: "assigned",
-        timestamp: "2026-03-04T07:58:00Z",
-        title: "Approval pending for CCR #409",
-    },
-]
 
 const ASSIGNABLE_ROLES: ReadonlyArray<TReviewerRole> = ["developer", "lead", "admin"]
 const ESCALATION_ROLES: ReadonlyArray<TReviewerRole> = ["lead", "admin"]
@@ -169,7 +53,7 @@ const MAX_AUDIT_TRAIL_ENTRIES = 12
 function formatTimestamp(rawValue: string): string {
     const date = new Date(rawValue)
     if (Number.isNaN(date.getTime())) {
-        return "—"
+        return "\u2014"
     }
 
     return date.toLocaleString([], {
@@ -241,7 +125,7 @@ function getStatusColor(
 }
 
 function getEscalationColor(
-    level: ITriageItem["escalationLevel"],
+    level: TTriageEscalationLevel,
 ): "danger" | "default" | "warning" {
     if (level === "critical") {
         return "danger"
@@ -262,7 +146,10 @@ export function MyWorkPage(): ReactElement {
     const { td } = useDynamicTranslation(["dashboard"])
     const [scope, setScope] = useState<TTriageScope>("mine")
     const [reviewerRole, setReviewerRole] = useState<TReviewerRole>("lead")
-    const [items, setItems] = useState<ReadonlyArray<ITriageItem>>(TRIAGE_ITEMS_DEFAULT)
+
+    const { triageQuery, performAction } = useTriage({ scope })
+    const items = triageQuery.data?.items ?? []
+
     const [lastActionSummary, setLastActionSummary] = useState(
         t("dashboard:myWork.noTriageActions"),
     )
@@ -279,7 +166,7 @@ export function MyWorkPage(): ReactElement {
     )
 
     const auditActionMap = useMemo(
-        (): Record<TAuditAction, string> => ({
+        (): Record<TTriageAction, string> => ({
             assign_to_me: t("dashboard:myWork.assignToMe"),
             escalate: t("dashboard:myWork.escalate"),
             mark_done: t("dashboard:myWork.markDone"),
@@ -292,17 +179,7 @@ export function MyWorkPage(): ReactElement {
     )
 
     const filteredItems = useMemo((): ReadonlyArray<ITriageItem> => {
-        const scopeItems = items.filter((item): boolean => {
-            if (scope === "mine") {
-                return item.owner === "me"
-            }
-            if (scope === "team") {
-                return item.owner === "team" || item.owner === "me"
-            }
-            return item.repository === "repo-api" || item.repository === "repo-core"
-        })
-
-        return [...scopeItems].sort((left, right): number => {
+        return [...items].sort((left, right): number => {
             const severityDelta = severityWeight(right.severity) - severityWeight(left.severity)
             if (severityDelta !== 0) {
                 return severityDelta
@@ -316,7 +193,7 @@ export function MyWorkPage(): ReactElement {
 
             return new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime()
         })
-    }, [items, nowTimestamp, scope])
+    }, [items, nowTimestamp])
 
     useEffect((): (() => void) | void => {
         const handleKeyboardShortcut = (event: KeyboardEvent): void => {
@@ -353,7 +230,7 @@ export function MyWorkPage(): ReactElement {
         }
     }, [])
 
-    const addAuditEntry = (itemId: string, action: TAuditAction): void => {
+    const addAuditEntry = (itemId: string, action: TTriageAction): void => {
         setAuditTrail((previous): ReadonlyArray<IAuditEntry> => {
             const nextEntry: IAuditEntry = {
                 action,
@@ -366,61 +243,29 @@ export function MyWorkPage(): ReactElement {
         })
     }
 
+    const dispatchAction = (itemId: string, action: TTriageAction): void => {
+        performAction.mutate({ id: itemId, action })
+        addAuditEntry(itemId, action)
+    }
+
     const handleAssignToMe = (itemId: string): void => {
         if (isRoleAllowed(reviewerRole, ASSIGNABLE_ROLES) !== true) {
             setLastActionSummary(t("dashboard:myWork.cannotAssign"))
             return
         }
 
-        setItems(
-            (previous): ReadonlyArray<ITriageItem> =>
-                previous.map((item): ITriageItem => {
-                    if (item.id !== itemId) {
-                        return item
-                    }
-                    return {
-                        ...item,
-                        owner: "me",
-                        status: item.status === "unassigned" ? "assigned" : item.status,
-                    }
-                }),
-        )
+        dispatchAction(itemId, "assign_to_me")
         setLastActionSummary(`Assigned ${itemId} to current reviewer.`)
-        addAuditEntry(itemId, "assign_to_me")
     }
 
     const handleMarkRead = (itemId: string): void => {
-        setItems(
-            (previous): ReadonlyArray<ITriageItem> =>
-                previous.map((item): ITriageItem => {
-                    if (item.id !== itemId) {
-                        return item
-                    }
-                    return {
-                        ...item,
-                        isRead: true,
-                    }
-                }),
-        )
+        dispatchAction(itemId, "mark_read")
         setLastActionSummary(`Marked ${itemId} as read.`)
-        addAuditEntry(itemId, "mark_read")
     }
 
     const handleSnooze = (itemId: string): void => {
-        setItems(
-            (previous): ReadonlyArray<ITriageItem> =>
-                previous.map((item): ITriageItem => {
-                    if (item.id !== itemId) {
-                        return item
-                    }
-                    return {
-                        ...item,
-                        status: "snoozed",
-                    }
-                }),
-        )
+        dispatchAction(itemId, "snooze")
         setLastActionSummary(`Snoozed ${itemId} until next triage cycle.`)
-        addAuditEntry(itemId, "snooze")
         showToastInfo(t("dashboard:myWork.itemSnoozed"))
     }
 
@@ -444,22 +289,8 @@ export function MyWorkPage(): ReactElement {
             return
         }
 
-        setItems(
-            (previous): ReadonlyArray<ITriageItem> =>
-                previous.map((item): ITriageItem => {
-                    if (item.id !== itemId) {
-                        return item
-                    }
-                    return {
-                        ...item,
-                        escalationLevel: item.escalationLevel === "none" ? "warn" : "critical",
-                        status: item.status === "done" ? item.status : "blocked",
-                    }
-                }),
-        )
-
+        dispatchAction(itemId, "escalate")
         setLastActionSummary(`Escalated ${itemId} and notified owner channel.`)
-        addAuditEntry(itemId, "escalate")
         showToastInfo(t("dashboard:myWork.escalationSent"))
     }
 
@@ -469,22 +300,8 @@ export function MyWorkPage(): ReactElement {
             return
         }
 
-        setItems(
-            (previous): ReadonlyArray<ITriageItem> =>
-                previous.map((item): ITriageItem => {
-                    if (item.id !== itemId) {
-                        return item
-                    }
-
-                    return {
-                        ...item,
-                        owner: item.owner === "unassigned" ? "me" : item.owner,
-                        status: "in_progress",
-                    }
-                }),
-        )
+        dispatchAction(itemId, "start_work")
         setLastActionSummary(`Moved ${itemId} to in_progress.`)
-        addAuditEntry(itemId, "start_work")
     }
 
     const handleMarkDone = (itemId: string): void => {
@@ -493,20 +310,8 @@ export function MyWorkPage(): ReactElement {
             return
         }
 
-        setItems(
-            (previous): ReadonlyArray<ITriageItem> =>
-                previous.map((item): ITriageItem => {
-                    if (item.id !== itemId) {
-                        return item
-                    }
-                    return {
-                        ...item,
-                        status: "done",
-                    }
-                }),
-        )
+        dispatchAction(itemId, "mark_done")
         setLastActionSummary(`Marked ${itemId} as done.`)
-        addAuditEntry(itemId, "mark_done")
     }
 
     const breachCount = filteredItems.filter((item): boolean => {
