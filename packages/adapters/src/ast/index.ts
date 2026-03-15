@@ -118,6 +118,12 @@ export {
     type IAstFullRepoScannerErrorDetails,
 } from "./ast-full-repo-scanner.error"
 export {
+    AST_INCREMENTAL_DIFF_SCANNER_ERROR_CODE,
+    AstIncrementalDiffScannerError,
+    type AstIncrementalDiffScannerErrorCode,
+    type IAstIncrementalDiffScannerErrorDetails,
+} from "./ast-incremental-diff-scanner.error"
+export {
     AST_SERVICE_MULTI_REPO_GRAPH_FEDERATION_ERROR_CODE,
     AstServiceMultiRepoGraphFederationError,
     type AstServiceMultiRepoGraphFederationErrorCode,
@@ -549,6 +555,18 @@ export {
     type AstFullRepoScannerResolveRepositoryPath,
     type IAstFullRepoScannerServiceOptions,
 } from "./ast-full-repo-scanner.service"
+export {
+    AstIncrementalDiffScannerService,
+    type AstIncrementalDiffScannerExecuteGit,
+    type AstIncrementalDiffScannerGenerateScanId,
+    type AstIncrementalDiffScannerNow,
+    type AstIncrementalDiffScannerReadFile,
+    type AstIncrementalDiffScannerResolveChangedFilePaths,
+    type AstIncrementalDiffScannerResolveRepositoryPath,
+    type IAstIncrementalDiffScannerProgress,
+    type IAstIncrementalDiffScannerProgressCallback,
+    type IAstIncrementalDiffScannerServiceOptions,
+} from "./ast-incremental-diff-scanner.service"
 export {
     AstCyclomaticComplexityService,
     type IAstCyclomaticComplexityFileInput,
