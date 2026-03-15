@@ -1,10 +1,13 @@
 import { MockStore } from "./mock-store"
 import {
+    seedAdminConfig,
     seedAuth,
+    seedByok,
     seedCodeCity,
     seedContractValidation,
     seedDashboard,
     seedIssues,
+    seedNotifications,
     seedOrganization,
     seedProviders,
     seedReports,
@@ -12,10 +15,9 @@ import {
     seedReviews,
     seedRules,
     seedSettings,
+    seedSso,
     seedTeams,
     seedTriage,
-    seedByok,
-    seedSso,
 } from "./seed"
 
 /**
@@ -33,6 +35,7 @@ let instance: MockStore | undefined
  */
 export function createMockStore(): MockStore {
     const store = new MockStore()
+    seedAdminConfig(store.adminConfig)
     seedAuth(store.auth)
     seedContractValidation(store.contractValidation)
     seedDashboard(store.dashboard)
@@ -43,6 +46,7 @@ export function createMockStore(): MockStore {
     seedRepositories(store.repositories)
     seedCodeCity(store.codeCity)
     seedIssues(store.issues)
+    seedNotifications(store.notifications)
     seedReports(store.reports)
     seedTeams(store.teams)
     seedOrganization(store.organization)
@@ -76,6 +80,7 @@ export function getMockStore(): MockStore {
 export function resetMockStore(): void {
     if (instance !== undefined) {
         instance.reset()
+        seedAdminConfig(instance.adminConfig)
         seedAuth(instance.auth)
         seedContractValidation(instance.contractValidation)
         seedDashboard(instance.dashboard)
@@ -86,6 +91,7 @@ export function resetMockStore(): void {
         seedRepositories(instance.repositories)
         seedCodeCity(instance.codeCity)
         seedIssues(instance.issues)
+        seedNotifications(instance.notifications)
         seedReports(instance.reports)
         seedTeams(instance.teams)
         seedOrganization(instance.organization)
