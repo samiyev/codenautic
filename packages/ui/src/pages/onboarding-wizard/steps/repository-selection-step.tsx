@@ -1,9 +1,17 @@
-import { useMemo, type ReactElement } from "react"
+import { useMemo, type ChangeEvent, type ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useDynamicTranslation } from "@/lib/i18n"
-import { Alert, Button, Checkbox } from "@heroui/react"
-import { FormRadioGroupField, FormTextField, FormTextareaField } from "@/components/forms"
+import {
+    Alert,
+    Button,
+    Checkbox,
+    Input,
+    Radio,
+    RadioGroup,
+    TextArea as Textarea,
+} from "@heroui/react"
+import { FormField } from "@/components/forms"
 import type { IFormSelectOption } from "@/components/forms"
 
 import type { IOnboardingWizardState } from "../use-onboarding-wizard-state"
@@ -50,37 +58,108 @@ export function RepositorySelectionStep({
 
     return (
         <section className="space-y-3">
-            <FormRadioGroupField<IOnboardingFormValues, "onboardingMode">
+            <FormField<IOnboardingFormValues, "onboardingMode">
                 control={state.form.control}
                 helperText={t("onboarding:repository.modeHelper")}
                 label={t("onboarding:repository.modeLabel")}
+                labelElement="span"
                 name="onboardingMode"
-                options={onboardingModeOptions}
+                renderField={({
+                    field,
+                    hasError,
+                    accessibilityLabel,
+                    ariaDescribedBy,
+                }): ReactElement => (
+                    <RadioGroup
+                        aria-describedby={ariaDescribedBy}
+                        aria-label={accessibilityLabel}
+                        aria-invalid={hasError}
+                        name={field.name}
+                        value={field.value ?? ""}
+                        onChange={(value: string): void => {
+                            field.onChange(value)
+                        }}
+                    >
+                        {onboardingModeOptions.map(
+                            (option): ReactElement => (
+                                <Radio
+                                    key={option.value}
+                                    isDisabled={option.isDisabled}
+                                    value={option.value}
+                                >
+                                    {option.label}
+                                </Radio>
+                            ),
+                        )}
+                    </RadioGroup>
+                )}
             />
 
             {state.isSingleMode ? (
-                <FormTextField<IOnboardingFormValues, "repositoryUrl">
+                <FormField<IOnboardingFormValues, "repositoryUrl">
                     control={state.form.control}
                     id="repository-url"
                     label={t("onboarding:repository.urlLabel")}
                     name="repositoryUrl"
                     helperText={t("onboarding:repository.urlHelper")}
-                    inputProps={{
-                        placeholder: t("onboarding:repository.urlPlaceholder"),
-                        type: "url",
+                    renderField={({
+                        field,
+                        hasError,
+                        fieldId,
+                        accessibilityLabel,
+                        ariaDescribedBy,
+                    }): ReactElement => {
+                        const value = typeof field.value === "string" ? field.value : ""
+
+                        return (
+                            <Input
+                                aria-describedby={ariaDescribedBy}
+                                aria-label={accessibilityLabel}
+                                aria-invalid={hasError}
+                                id={fieldId}
+                                name={field.name}
+                                placeholder={t("onboarding:repository.urlPlaceholder")}
+                                type="url"
+                                value={value}
+                                onBlur={field.onBlur}
+                                onChange={field.onChange}
+                            />
+                        )
                     }}
                 />
             ) : (
                 <>
-                    <FormTextareaField<IOnboardingFormValues, "repositoryUrlList">
+                    <FormField<IOnboardingFormValues, "repositoryUrlList">
                         control={state.form.control}
                         id="repository-url-list"
                         label={t("onboarding:repository.bulkListLabel")}
                         name="repositoryUrlList"
-                        textareaProps={{
-                            className: "min-h-[150px]",
-                            placeholder: `https://github.com/owner/repo-a
-https://github.com/owner/repo-b`,
+                        renderField={({
+                            field,
+                            hasError,
+                            fieldId,
+                            accessibilityLabel,
+                            ariaDescribedBy,
+                        }): ReactElement => {
+                            const value = field.value === undefined ? "" : field.value
+
+                            return (
+                                <Textarea
+                                    aria-describedby={ariaDescribedBy}
+                                    aria-label={accessibilityLabel}
+                                    aria-invalid={hasError}
+                                    className="min-h-[150px]"
+                                    id={fieldId}
+                                    name={field.name}
+                                    placeholder={`https://github.com/owner/repo-a
+https://github.com/owner/repo-b`}
+                                    value={value}
+                                    onBlur={field.onBlur}
+                                    onChange={(event: ChangeEvent<HTMLTextAreaElement>): void => {
+                                        field.onChange(event.target.value)
+                                    }}
+                                />
+                            )
                         }}
                     />
 
