@@ -2,8 +2,8 @@ import type {
     ICodeCityTreemapFileDescriptor,
     ICodeCityTreemapImpactedFileDescriptor,
     ICodeCityTreemapTemporalCouplingDescriptor,
-} from "@/components/graphs/codecity-treemap"
-import type { IHealthTrendPoint } from "@/components/graphs/health-trend-chart"
+} from "@/components/codecity/codecity-treemap"
+import type { IHealthTrendPoint } from "@/components/codecity/health-trend-chart"
 
 /**
  * Допустимые значения метрики для CodeCity dashboard.

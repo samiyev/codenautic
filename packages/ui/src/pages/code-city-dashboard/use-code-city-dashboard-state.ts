@@ -1,8 +1,8 @@
 import { type ChangeEvent, useMemo, useState } from "react"
 
-import type { TCausalOverlayMode } from "@/components/graphs/causal-overlay-selector"
-import type { IGuidedTourStep } from "@/components/graphs/guided-tour-overlay"
-import type { IRootCauseChainFocusPayload } from "@/components/graphs/root-cause-chain-viewer"
+import type { TCausalOverlayMode } from "@/components/codecity/overlays/causal-overlay-selector"
+import type { IGuidedTourStep } from "@/components/codecity/guided-tour-overlay"
+import type { IRootCauseChainFocusPayload } from "@/components/codecity/root-cause-chain-viewer"
 import type {
     TCodeCityDashboardMetric,
     IExploreNavigationFocusState,

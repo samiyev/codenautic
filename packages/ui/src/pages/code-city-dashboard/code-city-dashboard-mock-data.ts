@@ -1,8 +1,8 @@
 import type {
     IPackageDependencyNode,
     IPackageDependencyRelation,
-} from "@/components/graphs/package-dependency-graph"
-import type { IGuidedTourStep } from "@/components/graphs/guided-tour-overlay"
+} from "@/components/dependency-graphs/package-dependency-graph"
+import type { IGuidedTourStep } from "@/components/codecity/guided-tour-overlay"
 
 import type {
     ICodeCityDashboardMetricOption,
@@ -211,14 +211,14 @@ export const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardR
                     impactType: "changed",
                 },
                 {
-                    fileId: "src/components/graphs/codecity-treemap.tsx",
+                    fileId: "src/components/codecity/codecity-treemap.tsx",
                     impactType: "impacted",
                 },
             ],
             temporalCouplings: [
                 {
                     sourceFileId: "src/pages/ccr-management.page.tsx",
-                    targetFileId: "src/components/graphs/codecity-treemap.tsx",
+                    targetFileId: "src/components/codecity/codecity-treemap.tsx",
                     strength: 0.74,
                 },
                 {
@@ -294,7 +294,7 @@ export const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardR
                     ownerId: "niobe",
                 },
                 {
-                    fileId: "src/components/graphs/codecity-treemap.tsx",
+                    fileId: "src/components/codecity/codecity-treemap.tsx",
                     ownerId: "tank",
                 },
                 {
@@ -323,12 +323,12 @@ export const CODE_CITY_DASHBOARD_REPOSITORIES: ReadonlyArray<ICodeCityDashboardR
                     churn: 1,
                     complexity: 18,
                     coverage: 90,
-                    id: "src/components/graphs/codecity-treemap.tsx",
+                    id: "src/components/codecity/codecity-treemap.tsx",
                     issueCount: 0,
                     bugIntroductions: { "7d": 0, "30d": 1, "90d": 2 },
                     lastReviewAt: "2026-02-07T09:00:00Z",
                     loc: 142,
-                    path: "src/components/graphs/codecity-treemap.tsx",
+                    path: "src/components/codecity/codecity-treemap.tsx",
                 },
                 {
                     churn: 3,
