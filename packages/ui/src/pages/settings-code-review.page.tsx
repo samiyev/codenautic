@@ -2,9 +2,6 @@ import { type FormEvent, type ReactElement, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@heroui/react"
-import { FormLayout } from "@/components/forms/form-layout"
-import { FormSection } from "@/components/forms/form-section"
-import { FormGroup } from "@/components/forms/form-group"
 import { CCRSummaryPreview } from "@/components/settings/ccr-summary-preview"
 import { CodeReviewForm } from "@/components/settings/code-review-form"
 import { ConfigurationEditor } from "@/components/settings/configuration-editor"
@@ -331,10 +328,7 @@ export function SettingsCodeReviewPage(): ReactElement {
     }
 
     return (
-        <FormLayout
-            description={t("settings:codeReview.pageDescription")}
-            title={t("settings:codeReview.pageTitle")}
-        >
+        <div className="space-y-6 mx-auto max-w-[1400px]"><div className="space-y-1.5"><h1 className={TYPOGRAPHY.pageTitle}>{t("settings:codeReview.pageTitle")}</h1><p className={TYPOGRAPHY.bodyMuted}>{t("settings:codeReview.pageDescription")}</p></div><div className="space-y-6">
             <ConfigurationEditor
                 configYaml={configYaml}
                 hasLoadError={repoConfig.repoConfigQuery.error !== null}
@@ -361,11 +355,9 @@ export function SettingsCodeReviewPage(): ReactElement {
                 onApply={handleCadenceSave}
                 onModeChange={handleCadenceModeChange}
             />
-            <FormSection
-                description={t("settings:codeReview.ccrSummaryDescription")}
-                heading={t("settings:codeReview.ccrSummaryHeading")}
-            >
-                <FormGroup withDivider>
+            <section className="space-y-4 rounded-lg border border-border/50 bg-surface-tertiary p-4"><div className="space-y-1"><h3 className={TYPOGRAPHY.subsectionTitle}>{t("settings:codeReview.ccrSummaryHeading")}</h3><p className={TYPOGRAPHY.bodyMuted}>{t("settings:codeReview.ccrSummaryDescription")}</p></div><div className="space-y-3">
+                <>
+                    <div className="space-y-3">
                     <label className={`flex items-center gap-2 ${TYPOGRAPHY.body}`}>
                         <input
                             checked={ccrSummarySettings.enabled}
@@ -411,8 +403,10 @@ export function SettingsCodeReviewPage(): ReactElement {
                         />
                         {t("settings:codeReview.includeTimeline")}
                     </label>
-                </FormGroup>
-                <FormGroup>
+                    </div>
+                    <hr className="border-border" />
+                </>
+                <div className="space-y-3">
                     <select
                         aria-label={t("settings:ariaLabel.codeReview.summaryDetailLevel")}
                         className={NATIVE_FORM.select}
@@ -452,7 +446,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                             )
                         }}
                     />
-                </FormGroup>
+                </div>
                 <p className={TYPOGRAPHY.captionMuted} data-testid="ccr-summary-state">
                     {ccrSummaryState}
                 </p>
@@ -509,12 +503,10 @@ export function SettingsCodeReviewPage(): ReactElement {
                         )
                     })()
                 )}
-            </FormSection>
-            <FormSection
-                description={t("settings:codeReview.ideSyncDescription")}
-                heading={t("settings:codeReview.ideSyncHeading")}
-            >
-                <FormGroup withDivider>
+            </div></section>
+            <section className="space-y-4 rounded-lg border border-border/50 bg-surface-tertiary p-4"><div className="space-y-1"><h3 className={TYPOGRAPHY.subsectionTitle}>{t("settings:codeReview.ideSyncHeading")}</h3><p className={TYPOGRAPHY.bodyMuted}>{t("settings:codeReview.ideSyncDescription")}</p></div><div className="space-y-3">
+                <>
+                    <div className="space-y-3">
                     <label className={`flex items-center gap-2 ${TYPOGRAPHY.body}`}>
                         <input
                             checked={ideSyncSettings.enabled}
@@ -558,8 +550,10 @@ export function SettingsCodeReviewPage(): ReactElement {
                             {t("settings:codeReview.ideProviderBoth")}
                         </option>
                     </select>
-                </FormGroup>
-                <FormGroup>
+                    </div>
+                    <hr className="border-border" />
+                </>
+                <div className="space-y-3">
                     <label className={`flex items-center gap-2 ${TYPOGRAPHY.body}`}>
                         <input
                             checked={ideSyncSettings.syncOnPush}
@@ -590,18 +584,15 @@ export function SettingsCodeReviewPage(): ReactElement {
                         />
                         {t("settings:codeReview.autoOpenDiffs")}
                     </label>
-                </FormGroup>
+                </div>
                 <p className={TYPOGRAPHY.captionMuted} data-testid="ide-sync-state">
                     {ideSyncState}
                 </p>
                 <Button variant="primary" type="button" onPress={handleIdeSyncSave}>
                     {t("settings:codeReview.saveIdeSyncSettings")}
                 </Button>
-            </FormSection>
-            <FormSection
-                description={t("settings:codeReview.mcpDescription")}
-                heading={t("settings:codeReview.mcpHeading")}
-            >
+            </div></section>
+            <section className="space-y-4 rounded-lg border border-border/50 bg-surface-tertiary p-4"><div className="space-y-1"><h3 className={TYPOGRAPHY.subsectionTitle}>{t("settings:codeReview.mcpHeading")}</h3><p className={TYPOGRAPHY.bodyMuted}>{t("settings:codeReview.mcpDescription")}</p></div><div className="space-y-3">
                 <div className={`grid ${GAP.card} sm:grid-cols-3`}>
                     <article
                         className={`rounded-md border border-border bg-surface ${PADDING.card}`}
@@ -633,7 +624,7 @@ export function SettingsCodeReviewPage(): ReactElement {
                     </article>
                 </div>
                 <MCPToolList items={DEFAULT_MCP_TOOL_USAGE_STATS} />
-            </FormSection>
+            </div></section>
             <DryRunResultViewer
                 isRunning={dryRun.runDryRun.isPending}
                 result={dryRunResult}
@@ -660,6 +651,6 @@ export function SettingsCodeReviewPage(): ReactElement {
                     {t("settings:codeReview.resetIgnorePaths")}
                 </Button>
             </form>
-        </FormLayout>
+        </div></div>
     )
 }
