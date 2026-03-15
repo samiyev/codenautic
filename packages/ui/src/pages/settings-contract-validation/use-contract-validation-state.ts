@@ -1,10 +1,18 @@
-import { type ChangeEvent, type Dispatch, type SetStateAction, useMemo, useState } from "react"
+import {
+    type ChangeEvent,
+    type Dispatch,
+    type SetStateAction,
+    useEffect,
+    useMemo,
+    useState,
+} from "react"
 
 import type {
     ICodeCityTreemapFileDescriptor,
     ICodeCityTreemapImpactedFileDescriptor,
 } from "@/components/codecity/codecity-treemap"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
+import { useContractValidation } from "@/lib/hooks/queries"
 
 import type {
     IArchitectureDifference,
@@ -44,6 +52,12 @@ import {
  * @returns Readonly object with state values, computed data and handler functions.
  */
 export function useContractValidationState(): IContractValidationStateReturn {
+    /* ------------------------------------------------------------------ */
+    /*  API hooks                                                          */
+    /* ------------------------------------------------------------------ */
+
+    const contractValidationApi = useContractValidation()
+
     /* ------------------------------------------------------------------ */
     /*  State                                                              */
     /* ------------------------------------------------------------------ */
@@ -107,6 +121,55 @@ export function useContractValidationState(): IContractValidationStateReturn {
     )
 
     /* ------------------------------------------------------------------ */
+    /*  Sync API data into local state                                     */
+    /* ------------------------------------------------------------------ */
+
+    const apiBlueprintYaml = contractValidationApi.blueprintQuery.data?.yaml
+    useEffect((): void => {
+        if (apiBlueprintYaml !== undefined) {
+            setBlueprintYaml(apiBlueprintYaml)
+            setBlueprintValidationResult(parseBlueprintYaml(apiBlueprintYaml))
+        }
+    }, [apiBlueprintYaml])
+
+    const apiGuardrailsYaml = contractValidationApi.guardrailsQuery.data?.yaml
+    useEffect((): void => {
+        if (apiGuardrailsYaml !== undefined) {
+            setGuardrailsYaml(apiGuardrailsYaml)
+            setGuardrailsValidationResult(parseGuardrailsYaml(apiGuardrailsYaml))
+        }
+    }, [apiGuardrailsYaml])
+
+    const apiViolations = contractValidationApi.violationsQuery.data?.violations
+    const driftViolations = useMemo((): ReadonlyArray<IDriftViolation> => {
+        if (apiViolations !== undefined && apiViolations.length > 0) {
+            return apiViolations.map(
+                (v, index): IDriftViolation => ({
+                    id: v.id ?? `api-violation-${String(index)}`,
+                    affectedFiles: [v.filePath],
+                    rationale: v.description,
+                    rule: v.rule,
+                    severity: v.severity as TDriftSeverity,
+                }),
+            )
+        }
+        return DEFAULT_DRIFT_VIOLATIONS
+    }, [apiViolations])
+
+    const apiTrendPoints = contractValidationApi.trendQuery.data?.points
+    const trendPoints = useMemo((): ReadonlyArray<IDriftTrendPoint> => {
+        if (apiTrendPoints !== undefined && apiTrendPoints.length > 0) {
+            return apiTrendPoints.map(
+                (p): IDriftTrendPoint => ({
+                    period: p.date,
+                    driftScore: p.violations,
+                }),
+            )
+        }
+        return DRIFT_TREND_POINTS
+    }, [apiTrendPoints])
+
+    /* ------------------------------------------------------------------ */
     /*  Derived / memoized data                                            */
     /* ------------------------------------------------------------------ */
 
@@ -128,7 +191,7 @@ export function useContractValidationState(): IContractValidationStateReturn {
 
     const filteredSortedDriftViolations = useMemo((): ReadonlyArray<IDriftViolation> => {
         const normalizedSearchQuery = driftSearchQuery.trim().toLowerCase()
-        return DEFAULT_DRIFT_VIOLATIONS.filter((violation): boolean => {
+        return driftViolations.filter((violation): boolean => {
             const matchesSeverity =
                 driftSeverityFilter === "all" || violation.severity === driftSeverityFilter
             const matchesSearch =
@@ -144,12 +207,12 @@ export function useContractValidationState(): IContractValidationStateReturn {
             .sort((left, right): number => {
                 return compareDriftViolations(left, right, driftSortMode)
             })
-    }, [driftSearchQuery, driftSeverityFilter, driftSortMode])
+    }, [driftViolations, driftSearchQuery, driftSeverityFilter, driftSortMode])
 
     const driftOverlayImpactedFiles =
         useMemo((): ReadonlyArray<ICodeCityTreemapImpactedFileDescriptor> => {
             const impactedByFileId = new Map<string, ICodeCityTreemapImpactedFileDescriptor>()
-            for (const violation of DEFAULT_DRIFT_VIOLATIONS) {
+            for (const violation of driftViolations) {
                 const affectedFileIds = resolveDriftViolationFileIds(violation)
                 for (const fileId of affectedFileIds) {
                     impactedByFileId.set(fileId, {
@@ -159,14 +222,14 @@ export function useContractValidationState(): IContractValidationStateReturn {
                 }
             }
             return Array.from(impactedByFileId.values())
-        }, [])
+        }, [driftViolations])
 
     const driftViolationsByFileId = useMemo((): ReadonlyMap<
         string,
         ReadonlyArray<IDriftViolation>
     > => {
         const violationsByFileId = new Map<string, IDriftViolation[]>()
-        for (const violation of DEFAULT_DRIFT_VIOLATIONS) {
+        for (const violation of driftViolations) {
             const affectedFileIds = resolveDriftViolationFileIds(violation)
             for (const fileId of affectedFileIds) {
                 const currentViolations = violationsByFileId.get(fileId)
@@ -178,7 +241,7 @@ export function useContractValidationState(): IContractValidationStateReturn {
             }
         }
         return violationsByFileId
-    }, [])
+    }, [driftViolations])
 
     const selectedDriftOverlayFile = useMemo((): ICodeCityTreemapFileDescriptor | undefined => {
         if (selectedDriftOverlayFileId === undefined) {
@@ -214,12 +277,12 @@ export function useContractValidationState(): IContractValidationStateReturn {
     }, [architectureDifferences])
 
     const driftTrendAnnotations = useMemo(() => {
-        return DRIFT_TREND_POINTS.filter((point): boolean => point.architectureChange !== undefined)
-    }, [])
+        return trendPoints.filter((point): boolean => point.architectureChange !== undefined)
+    }, [trendPoints])
 
     const driftTrendSummary = useMemo((): string => {
-        const baselinePoint = DRIFT_TREND_POINTS.at(0)
-        const latestPoint = DRIFT_TREND_POINTS.at(-1)
+        const baselinePoint = trendPoints.at(0)
+        const latestPoint = trendPoints.at(-1)
         if (baselinePoint === undefined || latestPoint === undefined) {
             return "No drift trend data available."
         }
@@ -233,14 +296,14 @@ export function useContractValidationState(): IContractValidationStateReturn {
         return `Current drift score: ${String(latestPoint.driftScore)} (${String(
             Math.abs(delta),
         )} points ${direction} vs baseline).`
-    }, [])
+    }, [trendPoints])
 
     const driftAlertRelevantViolationCount = useMemo((): number => {
         const thresholdPriority = DRIFT_SEVERITY_PRIORITY[driftAlertSeverityThreshold]
-        return DEFAULT_DRIFT_VIOLATIONS.filter((violation): boolean => {
+        return driftViolations.filter((violation): boolean => {
             return DRIFT_SEVERITY_PRIORITY[violation.severity] >= thresholdPriority
         }).length
-    }, [driftAlertSeverityThreshold])
+    }, [driftAlertSeverityThreshold, driftViolations])
 
     const driftAlertWouldTrigger = useMemo((): boolean => {
         return driftAlertRelevantViolationCount >= driftAlertViolationThreshold
@@ -296,6 +359,12 @@ export function useContractValidationState(): IContractValidationStateReturn {
             showToastError("Blueprint apply blocked.")
             return
         }
+
+        void contractValidationApi.updateBlueprint
+            .mutateAsync(blueprintYaml)
+            .catch((_error: unknown): void => {
+                showToastError("Failed to save blueprint.")
+            })
 
         setLastBlueprintApplyState(
             `Applied architecture blueprint with ${String(
@@ -395,6 +464,12 @@ export function useContractValidationState(): IContractValidationStateReturn {
             showToastError("Architecture guardrails apply blocked.")
             return
         }
+
+        void contractValidationApi.updateGuardrails
+            .mutateAsync(guardrailsYaml)
+            .catch((_error: unknown): void => {
+                showToastError("Failed to save guardrails.")
+            })
 
         setGuardrailsApplyStatus(
             `Applied architecture guardrails with ${String(
