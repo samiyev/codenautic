@@ -7,7 +7,6 @@
     "scripts": {
         "build:analyze": "bun run codegen && vite build --mode analyze",
         "build": "bun run codegen && vite build",
-        "build-storybook": "storybook build",
         "clean": "rm -rf dist coverage",
         "codegen": "openapi-typescript openapi/schema.yaml -o src/lib/api/generated/index.ts",
         "codegen:check": "openapi-typescript openapi/schema.yaml -o src/lib/api/generated/index.ts --check",
@@ -17,7 +16,6 @@
         "lint": "eslint . --fix",
         "perf:check": "bun run build:analyze && bun ./scripts/check-performance-budgets.mjs",
         "preview": "vite preview",
-        "storybook": "bun ./scripts/run-storybook.mjs",
         "test": "vitest run",
         "test:coverage": "vitest run --no-file-parallelism --coverage",
         "typecheck": "tsc --noEmit"
@@ -63,12 +61,6 @@
     "devDependencies": {
         "@eslint/js": "^9.20.0",
         "@sentry/vite-plugin": "^4.9.1",
-        "@storybook/addon-a11y": "8",
-        "@storybook/addon-essentials": "8",
-        "@storybook/addon-themes": "8",
-        "@storybook/blocks": "8",
-        "@storybook/react": "8",
-        "@storybook/react-vite": "8",
         "@tailwindcss/postcss": "^4.0.0",
         "@tanstack/react-query-devtools": "^5.91.3",
         "@tanstack/router-plugin": "^1.161.1",
@@ -89,7 +81,6 @@
         "openapi-typescript": "^7.13.0",
         "prettier": "^3.5.0",
         "rollup-plugin-visualizer": "^7.0.0",
-        "storybook": "8",
         "tailwindcss": "^4.0.0",
         "typescript": "^5.7.0",
         "typescript-eslint": "^8.24.0",
