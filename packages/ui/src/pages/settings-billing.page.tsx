@@ -5,31 +5,15 @@ import { Alert, Button, Chip, Tabs } from "@heroui/react"
 import { SettingsTokenUsagePage } from "@/pages/settings-token-usage.page"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
+import { useBilling } from "@/lib/hooks/queries/use-billing"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
-
-type TPlanName = "enterprise" | "pro" | "starter"
-type TBillingStatus = "active" | "canceled" | "past_due" | "trial"
-type TPlanHistoryAction = "invoice_paid" | "plan_change" | "status_change"
-
-interface IPlanHistoryEntry {
-    /** Уникальный идентификатор события. */
-    readonly id: string
-    /** Исполнитель изменения. */
-    readonly actor: string
-    /** Тип операции. */
-    readonly action: TPlanHistoryAction
-    /** Итог операции. */
-    readonly outcome: string
-    /** Время изменения. */
-    readonly occurredAt: string
-}
-
-interface IBillingSnapshot {
-    /** Активный план в backend snapshot. */
-    readonly plan: TPlanName
-    /** Billing lifecycle state. */
-    readonly status: TBillingStatus
-}
+import type {
+    IBillingSnapshot,
+    IPlanHistoryEntry,
+    TPlanName,
+    TBillingStatus,
+    TPlanHistoryAction,
+} from "@/lib/api/endpoints/billing.endpoint"
 
 interface IEntitledFeature {
     /** Уникальный id фичи. */
@@ -64,27 +48,10 @@ const ENTITLED_FEATURES: ReadonlyArray<IEntitledFeature> = [
     },
 ]
 
-const INITIAL_BILLING_SNAPSHOT: IBillingSnapshot = {
+const DEFAULT_SNAPSHOT: IBillingSnapshot = {
     plan: "pro",
     status: "active",
 }
-
-const INITIAL_HISTORY: ReadonlyArray<IPlanHistoryEntry> = [
-    {
-        action: "plan_change",
-        actor: "System",
-        id: "BILL-2001",
-        occurredAt: "2026-03-03T16:12:00Z",
-        outcome: "Upgraded from starter to pro",
-    },
-    {
-        action: "status_change",
-        actor: "Neo Anderson",
-        id: "BILL-2002",
-        occurredAt: "2026-03-02T10:40:00Z",
-        outcome: "Set status to trial for workspace onboarding",
-    },
-]
 
 function formatTimestamp(rawValue: string): string {
     const date = new Date(rawValue)
@@ -152,11 +119,14 @@ function buildPaywallBanner(status: TBillingStatus): {
  */
 export function SettingsBillingPage(): ReactElement {
     const { t } = useTranslation(["settings"])
+    const { billingQuery } = useBilling()
+    const initialSnapshot = billingQuery.data?.snapshot ?? DEFAULT_SNAPSHOT
+    const initialHistory = billingQuery.data?.history ?? []
     const [billingSnapshot, setBillingSnapshot] =
-        useState<IBillingSnapshot>(INITIAL_BILLING_SNAPSHOT)
-    const [draftPlan, setDraftPlan] = useState<TPlanName>(INITIAL_BILLING_SNAPSHOT.plan)
-    const [draftStatus, setDraftStatus] = useState<TBillingStatus>(INITIAL_BILLING_SNAPSHOT.status)
-    const [history, setHistory] = useState<ReadonlyArray<IPlanHistoryEntry>>(INITIAL_HISTORY)
+        useState<IBillingSnapshot>(initialSnapshot)
+    const [draftPlan, setDraftPlan] = useState<TPlanName>(initialSnapshot.plan)
+    const [draftStatus, setDraftStatus] = useState<TBillingStatus>(initialSnapshot.status)
+    const [history, setHistory] = useState<ReadonlyArray<IPlanHistoryEntry>>(initialHistory)
     const [lastOutcome, setLastOutcome] = useState<string>(
         t("settings:billing.noBillingActionsYet"),
     )
