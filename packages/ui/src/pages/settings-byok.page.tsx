@@ -272,7 +272,7 @@ export function SettingsByokPage(): ReactElement {
                         <div className="flex items-end">
                             <Button
                                 className="w-full md:w-auto"
-                                isLoading={createKey.isPending}
+                                isDisabled={createKey.isPending}
                                 variant="primary"
                                 onPress={handleCreateKey}
                             >
