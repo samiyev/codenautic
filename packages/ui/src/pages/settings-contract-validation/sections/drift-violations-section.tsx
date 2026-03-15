@@ -36,12 +36,12 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                     <p className={TYPOGRAPHY.sectionTitle}>Drift analysis report</p>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    <p className="text-sm text-text-secondary">
+                    <p className="text-sm text-muted">
                         Review architecture drift violations with severity and affected files. Use
                         filters, sorting and export to share actionable reports.
                     </p>
                     <div className="grid gap-2 md:grid-cols-3">
-                        <label className="space-y-1 text-sm text-text-tertiary">
+                        <label className="space-y-1 text-sm text-muted">
                             Search
                             <input
                                 aria-label={t(
@@ -56,7 +56,7 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                                 }}
                             />
                         </label>
-                        <label className="space-y-1 text-sm text-text-tertiary">
+                        <label className="space-y-1 text-sm text-muted">
                             Severity filter
                             <select
                                 aria-label={t(
@@ -94,7 +94,7 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                                 </option>
                             </select>
                         </label>
-                        <label className="space-y-1 text-sm text-text-tertiary">
+                        <label className="space-y-1 text-sm text-muted">
                             Sort
                             <select
                                 aria-label={t(
@@ -133,7 +133,7 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                         <Button variant="primary" onPress={state.handleExportDriftReport}>
                             Export drift report
                         </Button>
-                        <span className="text-xs text-text-secondary">
+                        <span className="text-xs text-muted">
                             Filtered violations:{" "}
                             {String(state.filteredSortedDriftViolations.length)}
                         </span>
@@ -141,7 +141,9 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                     {state.filteredSortedDriftViolations.length === 0 ? (
                         <Alert status="warning">
                             <Alert.Title>No drift violations found</Alert.Title>
-                            <Alert.Description>Change filters or search query to see drift analysis data.</Alert.Description>
+                            <Alert.Description>
+                                Change filters or search query to see drift analysis data.
+                            </Alert.Description>
                         </Alert>
                     ) : (
                         <ul
@@ -165,7 +167,7 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                                             </span>
                                         </div>
                                         <p className="text-foreground">{violation.rationale}</p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-xs text-muted">
                                             Affected files: {violation.affectedFiles.join(", ")}
                                         </p>
                                     </li>
@@ -193,7 +195,7 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                     <p className={TYPOGRAPHY.sectionTitle}>Drift overlay CodeCity</p>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    <p className="text-sm text-text-secondary">
+                    <p className="text-sm text-muted">
                         Files violating architecture blueprint are highlighted in red. Click any
                         highlighted file to inspect related drift violations.
                     </p>
@@ -233,43 +235,45 @@ export function DriftViolationsSection({ state }: IDriftViolationsSectionProps):
                     {state.selectedDriftOverlayFile === undefined ? (
                         <Alert status="accent">
                             <Alert.Title>Drift violation details</Alert.Title>
-                            <Alert.Description>Select a highlighted file in the treemap to view violation details.</Alert.Description>
+                            <Alert.Description>
+                                Select a highlighted file in the treemap to view violation details.
+                            </Alert.Description>
                         </Alert>
                     ) : (
                         <Alert status="danger">
                             <Alert.Title>Drift violation details</Alert.Title>
                             <Alert.Description>
-                            <p className="mb-2 text-sm">
-                                File:{" "}
-                                <span className="font-semibold">
-                                    {state.selectedDriftOverlayFile.path}
-                                </span>
-                            </p>
-                            {state.selectedDriftOverlayViolations.length === 0 ? (
-                                <p className="text-sm">
-                                    No mapped drift violations for selected file.
+                                <p className="mb-2 text-sm">
+                                    File:{" "}
+                                    <span className="font-semibold">
+                                        {state.selectedDriftOverlayFile.path}
+                                    </span>
                                 </p>
-                            ) : (
-                                <ul
-                                    aria-label={t(
-                                        "settings:ariaLabel.contractValidation.selectedDriftFileViolations",
-                                    )}
-                                    className="space-y-1"
-                                >
-                                    {state.selectedDriftOverlayViolations.map(
-                                        (violation): ReactElement => (
-                                            <li
-                                                key={`${state.selectedDriftOverlayFile?.id ?? "unknown"}-${violation.id}`}
-                                            >
-                                                <span className="font-semibold">
-                                                    {violation.severity}
-                                                </span>
-                                                : {violation.rule}
-                                            </li>
-                                        ),
-                                    )}
-                                </ul>
-                            )}
+                                {state.selectedDriftOverlayViolations.length === 0 ? (
+                                    <p className="text-sm">
+                                        No mapped drift violations for selected file.
+                                    </p>
+                                ) : (
+                                    <ul
+                                        aria-label={t(
+                                            "settings:ariaLabel.contractValidation.selectedDriftFileViolations",
+                                        )}
+                                        className="space-y-1"
+                                    >
+                                        {state.selectedDriftOverlayViolations.map(
+                                            (violation): ReactElement => (
+                                                <li
+                                                    key={`${state.selectedDriftOverlayFile?.id ?? "unknown"}-${violation.id}`}
+                                                >
+                                                    <span className="font-semibold">
+                                                        {violation.severity}
+                                                    </span>
+                                                    : {violation.rule}
+                                                </li>
+                                            ),
+                                        )}
+                                    </ul>
+                                )}
                             </Alert.Description>
                         </Alert>
                     )}

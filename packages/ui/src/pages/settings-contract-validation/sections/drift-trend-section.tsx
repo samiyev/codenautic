@@ -41,7 +41,7 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                     <p className={TYPOGRAPHY.sectionTitle}>Blueprint vs reality view</p>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    <p className="text-sm text-text-secondary">
+                    <p className="text-sm text-muted">
                         Compare intended architecture from blueprint with actual runtime structure.
                         Differences are color-coded to highlight missing and unexpected modules.
                     </p>
@@ -65,7 +65,7 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                                             <p className="font-semibold text-foreground">
                                                 {node.layer} / {node.module}
                                             </p>
-                                            <p className="text-muted-foreground">
+                                            <p className="text-muted">
                                                 Depends on:{" "}
                                                 {node.dependsOn.length === 0
                                                     ? "\u2014"
@@ -95,7 +95,7 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                                             <p className="font-semibold text-foreground">
                                                 {node.layer} / {node.module}
                                             </p>
-                                            <p className="text-muted-foreground">
+                                            <p className="text-muted">
                                                 Depends on:{" "}
                                                 {node.dependsOn.length === 0
                                                     ? "\u2014"
@@ -148,7 +148,7 @@ export function DriftTrendSection({ state }: IDriftTrendSectionProps): ReactElem
                     <p className={TYPOGRAPHY.sectionTitle}>Drift trend chart</p>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    <p className="text-sm text-text-secondary">
+                    <p className="text-sm text-muted">
                         Drift score trend over time with architecture change annotations.
                     </p>
                     <ChartContainer
