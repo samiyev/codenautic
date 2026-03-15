@@ -8,10 +8,10 @@ import { renderWithProviders } from "../../utils/render"
 vi.mock("@/lib/motion", () => ({
     DURATION: { normal: 0 },
     EASING: { move: [0, 0, 1, 1] },
-    useReducedMotion: (): boolean => true,
 }))
 
 vi.mock("motion/react", () => ({
+    useReducedMotion: (): boolean => true,
     motion: new Proxy(
         {},
         {
