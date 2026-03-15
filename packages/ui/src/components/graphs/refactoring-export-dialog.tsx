@@ -86,7 +86,7 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
 
             <button
                 aria-label={t("code-city:refactoringExportComp.ariaOpenDialog")}
-                className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
+                className="mt-3 rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent"
                 onClick={(): void => {
                     setIsDialogOpen(true)
                 }}
@@ -184,7 +184,7 @@ export function RefactoringExportDialog(props: IRefactoringExportDialogProps): R
 
                     <button
                         aria-label={t("code-city:refactoringExportComp.ariaExportPlan")}
-                        className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                        className="mt-3 rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent disabled:cursor-not-allowed disabled:opacity-50"
                         disabled={selectedTargets.length === 0}
                         onClick={(): void => {
                             props.onExport?.({

@@ -85,7 +85,7 @@ function resolveRiskClassName(riskScore: number): string {
         return "border-danger/40 bg-danger/15 text-danger"
     }
     if (riskScore >= 50) {
-        return "border-warning/40 bg-warning/15 text-on-warning"
+        return "border-warning/40 bg-warning/15 text-warning-foreground"
     }
     return "border-success/40 bg-success/15 text-success"
 }
@@ -194,7 +194,7 @@ export function RefactoringDashboard(props: IRefactoringDashboardProps): ReactEl
                                     <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
                                         {target.description}
                                     </p>
-                                    <p className={`mt-1 ${TYPOGRAPHY.micro} text-muted-foreground`}>
+                                    <p className={`mt-1 ${TYPOGRAPHY.micro} text-muted`}>
                                         {t("code-city:refactoringComp.modulePrefix", {
                                             name: target.module,
                                         })}
@@ -224,7 +224,7 @@ export function RefactoringDashboard(props: IRefactoringDashboardProps): ReactEl
                                 aria-label={t("code-city:refactoringComp.ariaInspectTarget", {
                                     title: target.title,
                                 })}
-                                className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
+                                className="mt-2 rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent"
                                 onClick={(): void => {
                                     props.onSelectTarget?.(target)
                                 }}

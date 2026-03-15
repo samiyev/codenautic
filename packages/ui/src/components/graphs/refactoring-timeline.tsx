@@ -76,7 +76,7 @@ export function RefactoringTimeline(props: IRefactoringTimelineProps): ReactElem
                                     </p>
                                 </div>
                                 <span
-                                    className={`rounded border border-primary/40 bg-primary/15 px-2 py-0.5 ${TYPOGRAPHY.micro} text-on-primary`}
+                                    className={`rounded border border-accent/40 bg-accent/15 px-2 py-0.5 ${TYPOGRAPHY.micro} text-accent-foreground`}
                                 >
                                     {String(task.durationWeeks)}w
                                 </span>
@@ -84,7 +84,7 @@ export function RefactoringTimeline(props: IRefactoringTimelineProps): ReactElem
 
                             <div className="relative mt-2 h-6 rounded border border-border bg-surface">
                                 <div
-                                    className="absolute bottom-1 top-1 rounded bg-primary/35"
+                                    className="absolute bottom-1 top-1 rounded bg-accent/35"
                                     style={{
                                         left: `${String(startOffsetPercent)}%`,
                                         width: `${String(widthPercent)}%`,
@@ -101,7 +101,7 @@ export function RefactoringTimeline(props: IRefactoringTimelineProps): ReactElem
 
                             <button
                                 aria-label={`Inspect timeline task ${task.title}`}
-                                className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
+                                className="mt-2 rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent"
                                 onClick={(): void => {
                                     props.onSelectTask?.(task)
                                 }}
