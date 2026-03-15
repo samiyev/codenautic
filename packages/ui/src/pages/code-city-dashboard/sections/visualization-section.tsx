@@ -9,10 +9,11 @@ import { PackageDependencyGraph } from "@/components/dependency-graphs/package-d
 import { RootCauseChainViewer } from "@/components/codecity/root-cause-chain-viewer"
 import { Card, CardContent, CardHeader } from "@heroui/react"
 
-import {
-    CODE_CITY_DASHBOARD_REPOSITORY_NODES,
-    CODE_CITY_DASHBOARD_REPOSITORY_RELATIONS,
-} from "../code-city-dashboard-mock-data"
+import type {
+    IPackageDependencyNode,
+    IPackageDependencyRelation,
+} from "@/components/dependency-graphs/package-dependency-graph"
+
 import type { ICodeCityDashboardState } from "../use-code-city-dashboard-state"
 
 /**
@@ -21,6 +22,10 @@ import type { ICodeCityDashboardState } from "../use-code-city-dashboard-state"
 export interface IVisualizationSectionProps {
     /** Состояние дашборда. */
     readonly state: ICodeCityDashboardState
+    /** Узлы графа зависимостей между репозиториями. */
+    readonly dependencyNodes: ReadonlyArray<IPackageDependencyNode>
+    /** Ребра графа зависимостей между репозиториями. */
+    readonly dependencyRelations: ReadonlyArray<IPackageDependencyRelation>
 }
 
 /**
@@ -29,7 +34,11 @@ export interface IVisualizationSectionProps {
  * @param props Конфигурация.
  * @returns Секция визуализации.
  */
-export function VisualizationSection({ state }: IVisualizationSectionProps): ReactElement {
+export function VisualizationSection({
+    state,
+    dependencyNodes,
+    dependencyRelations,
+}: IVisualizationSectionProps): ReactElement {
     const { t } = useTranslation(["code-city"])
 
     return (
@@ -43,8 +52,8 @@ export function VisualizationSection({ state }: IVisualizationSectionProps): Rea
                 <CardContent>
                     <PackageDependencyGraph
                         height="360px"
-                        nodes={CODE_CITY_DASHBOARD_REPOSITORY_NODES}
-                        relations={CODE_CITY_DASHBOARD_REPOSITORY_RELATIONS}
+                        nodes={dependencyNodes}
+                        relations={dependencyRelations}
                         showControls={true}
                         showMiniMap={true}
                         title={t("code-city:visualization.crossRepositoryPackageDependencies")}
