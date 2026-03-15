@@ -108,9 +108,6 @@ export function safeStorageSetJson(
  * @returns localStorage or `undefined` in SSR/restricted contexts.
  */
 export function getWindowLocalStorage(): Storage | undefined {
-    if (typeof window === "undefined") {
-        return undefined
-    }
     try {
         return window.localStorage
     } catch {
@@ -124,9 +121,6 @@ export function getWindowLocalStorage(): Storage | undefined {
  * @returns sessionStorage or `undefined` in SSR/restricted contexts.
  */
 export function getWindowSessionStorage(): Storage | undefined {
-    if (typeof window === "undefined") {
-        return undefined
-    }
     try {
         return window.sessionStorage
     } catch {
