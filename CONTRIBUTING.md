@@ -204,7 +204,6 @@ The `ui` package uses **Vitest** (not `bun test`):
 cd packages/ui && bun run test                      # Vitest
 cd packages/ui && npx vitest run tests/file.test.tsx # Single file
 cd packages/ui && bun run dev                       # Vite dev server
-cd packages/ui && bun run storybook                 # Storybook
 ```
 
 ---
