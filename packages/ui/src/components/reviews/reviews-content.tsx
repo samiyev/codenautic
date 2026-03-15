@@ -2,10 +2,12 @@ import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useDebounceValue } from "usehooks-ts"
 
-import { Table } from "@heroui/react"
-import { StyledLink } from "@/components/layout/styled-link"
-import { TYPOGRAPHY } from "@/lib/constants/typography"
-import { InfiniteScrollContainer } from "@/components/infrastructure/infinite-scroll-container"
+import { Link } from "@tanstack/react-router"
+
+import InfiniteScroll from "react-infinite-scroll-component"
+
+import { Skeleton, Table } from "@heroui/react"
+import { LINK_CLASSES, TYPOGRAPHY } from "@/lib/constants/typography"
 import { ReviewsFilters } from "./reviews-filters"
 import { type IReviewRow } from "./reviews-table"
 import { ReviewStatusBadge } from "./review-status-badge"
@@ -112,11 +114,11 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
                     {t("reviews:content.noMatchingFilters")}
                 </p>
             ) : null}
-            <InfiniteScrollContainer
+            <InfiniteScroll
+                dataLength={filteredRows.length}
                 hasMore={props.hasMore}
-                isLoading={props.isLoadingMore}
-                loadingText={t("reviews:content.loadingMore")}
-                onLoadMore={props.onLoadMore}
+                loader={<Skeleton className="mx-auto mt-2 h-8 w-48 rounded-lg" />}
+                next={props.onLoadMore}
             >
                 <Table>
                     <Table.ScrollContainer>
@@ -137,15 +139,15 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
                                     (row): ReactElement => (
                                         <Table.Row key={row.id}>
                                             <Table.Cell>
-                                                <StyledLink
-                                                    className={TYPOGRAPHY.cardTitle}
+                                                <Link
+                                                    className={`${LINK_CLASSES} ${TYPOGRAPHY.cardTitle}`}
                                                     params={{
                                                         reviewId: row.id,
                                                     }}
                                                     to="/reviews/$reviewId"
                                                 >
                                                     {row.id}
-                                                </StyledLink>
+                                                </Link>
                                             </Table.Cell>
                                             <Table.Cell>{row.title}</Table.Cell>
                                             <Table.Cell>{row.repository}</Table.Cell>
@@ -162,7 +164,7 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
                         </Table.Content>
                     </Table.ScrollContainer>
                 </Table>
-            </InfiniteScrollContainer>
+            </InfiniteScroll>
         </section>
     )
 }
