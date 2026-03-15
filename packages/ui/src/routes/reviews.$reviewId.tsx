@@ -1,16 +1,16 @@
 import type { ReactElement } from "react"
 import { Suspense, lazy } from "react"
 
-import { createFileRoute } from "@tanstack/react-router"
+import { Link, createFileRoute } from "@tanstack/react-router"
 
 import { RouteSuspenseFallback } from "@/app/route-suspense-fallback"
-import { StyledLink } from "@/components/layout/styled-link"
 import { AuthBoundary } from "@/lib/auth/auth-boundary"
 import { DashboardLayout } from "@/components/layout"
 import type {
     ICcrWorkspaceContextResponse,
     ICcrWorkspaceRow,
 } from "@/lib/api/endpoints/ccr-workspace.endpoint"
+import { LINK_CLASSES } from "@/lib/constants/typography"
 import { useCcrWorkspace } from "@/lib/hooks/queries"
 import { getCcrById, type ICcrRowData } from "@/pages/ccr-data"
 
@@ -71,9 +71,9 @@ function ReviewRouteFallback(): ReactElement {
             <p className="mt-1 text-sm text-danger">
                 Review not found. Open available CCR list to pick active review.
             </p>
-            <StyledLink className="mt-3 inline-block text-sm" to="/reviews">
+            <Link className={`${LINK_CLASSES} mt-3 inline-block text-sm`} to="/reviews">
                 Back to reviews
-            </StyledLink>
+            </Link>
         </div>
     )
 }
