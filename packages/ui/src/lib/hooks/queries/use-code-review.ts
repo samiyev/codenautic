@@ -63,7 +63,7 @@ export function useCodeReview(args: IUseCodeReviewQueryArgs = {}): IUseCodeRevie
             return api.codeReview.getCodeReview(resolvedReviewId)
         },
         enabled: isQueryEnabled,
-        refetchOnWindowFocus: false,
+
     })
 
     const triggerReview = useMutation({
