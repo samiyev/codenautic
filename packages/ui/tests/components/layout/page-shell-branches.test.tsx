@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from "vitest"
 import { PageShell } from "@/components/layout/page-shell"
 import { renderWithProviders } from "../../utils/render"
 
-vi.mock("@/lib/motion", async (importOriginal) => {
-    const actual = await importOriginal<typeof import("@/lib/motion")>()
+vi.mock("motion/react", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("motion/react")>()
     return {
         ...actual,
         useReducedMotion: (): boolean => true,
