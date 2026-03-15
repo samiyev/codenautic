@@ -2,7 +2,7 @@ import { type ReactElement, Suspense, lazy, useCallback, useMemo, useState } fro
 import { useTranslation } from "react-i18next"
 
 import { useDynamicTranslation } from "@/lib/i18n"
-import { Link } from "@tanstack/react-router"
+import { Link, type LinkProps } from "@tanstack/react-router"
 
 import { Alert, Button, Card, CardContent, CardHeader, Skeleton } from "@heroui/react"
 import { ActivationChecklist } from "@/components/onboarding/activation-checklist"
@@ -251,7 +251,14 @@ export function DashboardMissionControlPage(): ReactElement {
     const flowMetrics = flowMetricsQuery.data?.points ?? []
     const tokenUsageByModel = tokenUsageQuery.data?.byModel ?? []
     const tokenUsageTrend = tokenUsageQuery.data?.costTrend ?? []
-    const workQueueEntries = workQueueQuery.data?.entries ?? []
+    const workQueueEntries = useMemo(
+        () =>
+            (workQueueQuery.data?.entries ?? []).map((entry) => ({
+                ...entry,
+                route: entry.route as LinkProps["to"],
+            })),
+        [workQueueQuery.data],
+    )
     const timelineEntries = timelineQuery.data?.entries ?? []
 
     const opsBanner = useMemo(
