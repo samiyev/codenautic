@@ -2,7 +2,7 @@ import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ChangeEvent, FormEvent, ReactElement } from "react"
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { describe, expect, it, vi } from "vitest"
 import {
     Button,
@@ -18,7 +18,6 @@ import {
 } from "@heroui/react"
 import { Eye, EyeOff } from "@/components/icons/app-icons"
 
-import { FormField } from "@/components/forms"
 import { renderWithProviders } from "../utils/render"
 
 interface IFormValues {
@@ -58,10 +57,8 @@ function TextFieldHarness(props: ITextFieldHarnessProps): ReactElement {
 
     return (
         <form onSubmit={submitForm}>
-            <FormField<IFormValues, "email">
+            <Controller<IFormValues, "email">
                 control={form.control}
-                helperText="Введите корпоративный email"
-                label="Email"
                 name="email"
                 rules={{
                     minLength: {
@@ -70,32 +67,40 @@ function TextFieldHarness(props: ITextFieldHarnessProps): ReactElement {
                     },
                     required: "Обязательное поле",
                 }}
-                renderField={({
-                    field,
-                    hasError,
-                    fieldId,
-                    accessibilityLabel,
-                    ariaDescribedBy,
-                }): ReactElement => {
+                render={({ field, fieldState }): ReactElement => {
+                    const errorMessage =
+                        typeof fieldState.error?.message === "string"
+                            ? fieldState.error.message
+                            : undefined
+                    const hasError = errorMessage !== undefined
                     const value = typeof field.value === "string" ? field.value : ""
 
                     return (
-                        <Input
-                            aria-describedby={ariaDescribedBy}
-                            aria-label={accessibilityLabel}
-                            aria-invalid={hasError}
-                            id={fieldId}
-                            name={field.name}
-                            value={value}
-                            onBlur={field.onBlur}
-                            onChange={field.onChange}
-                        />
+                        <div className="flex flex-col gap-1.5">
+                            <label htmlFor="email">Email</label>
+                            <Input
+                                aria-invalid={hasError}
+                                aria-label="Email"
+                                id="email"
+                                name={field.name}
+                                value={value}
+                                onBlur={field.onBlur}
+                                onChange={field.onChange}
+                            />
+                            {hasError ? (
+                                <p className="text-xs text-danger" role="alert">
+                                    {errorMessage}
+                                </p>
+                            ) : (
+                                <p className="text-xs text-muted">
+                                    Введите корпоративный email
+                                </p>
+                            )}
+                        </div>
                     )
                 }}
             />
-            <Button type="submit">
-                Отправить
-            </Button>
+            <Button type="submit">Отправить</Button>
         </form>
     )
 }
@@ -120,51 +125,54 @@ function PasswordHarness(props: IPasswordHarnessProps): ReactElement {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
     return (
-        <FormField<IFormValues, "password">
+        <Controller<IFormValues, "password">
             control={form.control}
-            label="Password"
             name="password"
-            renderField={({
-                field,
-                hasError,
-                fieldId,
-                accessibilityLabel,
-                ariaDescribedBy,
-            }): ReactElement => {
+            render={({ field, fieldState }): ReactElement => {
+                const hasError = fieldState.error?.message !== undefined
                 const value = field.value === undefined ? "" : field.value
 
                 return (
-                    <div className="relative">
-                        <Input
-                            aria-describedby={ariaDescribedBy}
-                            aria-label={accessibilityLabel}
-                            aria-invalid={hasError}
-                            className="pe-10"
-                            id={fieldId}
-                            minLength={8}
-                            name={field.name}
-                            placeholder="••••••••"
-                            type={isPasswordVisible ? "text" : "password"}
-                            value={value}
-                            onBlur={field.onBlur}
-                            onChange={field.onChange}
-                        />
-                        <Button
-                            aria-label={
-                                isPasswordVisible ? "Hide password text" : "Show password text"
-                            }
-                            className="absolute right-1 top-1/2 -translate-y-1/2"
-                            isIconOnly
-                            size="sm"
-                            variant="ghost"
-                            onPress={(): void => {
-                                setIsPasswordVisible(
-                                    (previousValue: boolean): boolean => !previousValue,
-                                )
-                            }}
-                        >
-                            {isPasswordVisible ? <Eye size={16} /> : <EyeOff size={16} />}
-                        </Button>
+                    <div className="flex flex-col gap-1.5">
+                        <label htmlFor="password">Password</label>
+                        <div className="relative">
+                            <Input
+                                aria-label="Password"
+                                aria-invalid={hasError}
+                                className="pe-10"
+                                id="password"
+                                minLength={8}
+                                name={field.name}
+                                placeholder="••••••••"
+                                type={isPasswordVisible ? "text" : "password"}
+                                value={value}
+                                onBlur={field.onBlur}
+                                onChange={field.onChange}
+                            />
+                            <Button
+                                aria-label={
+                                    isPasswordVisible
+                                        ? "Hide password text"
+                                        : "Show password text"
+                                }
+                                className="absolute right-1 top-1/2 -translate-y-1/2"
+                                isIconOnly
+                                size="sm"
+                                variant="ghost"
+                                onPress={(): void => {
+                                    setIsPasswordVisible(
+                                        (previousValue: boolean): boolean =>
+                                            !previousValue,
+                                    )
+                                }}
+                            >
+                                {isPasswordVisible ? (
+                                    <Eye size={16} />
+                                ) : (
+                                    <EyeOff size={16} />
+                                )}
+                            </Button>
+                        </div>
                     </div>
                 )
             }}
@@ -199,10 +207,8 @@ function FullFormHarness(props: IFormSubmitCaptureProps): ReactElement {
 
     return (
         <form onSubmit={submitForm}>
-            <FormField<IFormValues, "email">
+            <Controller<IFormValues, "email">
                 control={form.control}
-                helperText="Корпоративный email"
-                label="Email"
                 name="email"
                 rules={{
                     pattern: {
@@ -211,32 +217,29 @@ function FullFormHarness(props: IFormSubmitCaptureProps): ReactElement {
                     },
                     required: "Email обязателен",
                 }}
-                renderField={({
-                    field,
-                    hasError,
-                    fieldId,
-                    accessibilityLabel,
-                    ariaDescribedBy,
-                }): ReactElement => {
+                render={({ field, fieldState }): ReactElement => {
+                    const hasError = fieldState.error?.message !== undefined
                     const value = typeof field.value === "string" ? field.value : ""
 
                     return (
-                        <Input
-                            aria-describedby={ariaDescribedBy}
-                            aria-label={accessibilityLabel}
-                            aria-invalid={hasError}
-                            id={fieldId}
-                            name={field.name}
-                            value={value}
-                            onBlur={field.onBlur}
-                            onChange={field.onChange}
-                        />
+                        <div className="flex flex-col gap-1.5">
+                            <label htmlFor="email">Email</label>
+                            <Input
+                                aria-label="Email"
+                                aria-invalid={hasError}
+                                id="email"
+                                name={field.name}
+                                value={value}
+                                onBlur={field.onBlur}
+                                onChange={field.onChange}
+                            />
+                            <p className="text-xs text-muted">Корпоративный email</p>
+                        </div>
                     )
                 }}
             />
-            <FormField<IFormValues, "password">
+            <Controller<IFormValues, "password">
                 control={form.control}
-                label="Password"
                 name="password"
                 rules={{
                     minLength: {
@@ -245,148 +248,149 @@ function FullFormHarness(props: IFormSubmitCaptureProps): ReactElement {
                     },
                     required: "Пароль обязателен",
                 }}
-                renderField={({
-                    field,
-                    hasError,
-                    fieldId,
-                    accessibilityLabel,
-                    ariaDescribedBy,
-                }): ReactElement => {
+                render={({ field, fieldState }): ReactElement => {
+                    const hasError = fieldState.error?.message !== undefined
                     const value = field.value === undefined ? "" : field.value
 
                     return (
-                        <div className="relative">
-                            <Input
-                                aria-describedby={ariaDescribedBy}
-                                aria-label={accessibilityLabel}
-                                aria-invalid={hasError}
-                                className="pe-10"
-                                id={fieldId}
-                                minLength={8}
-                                name={field.name}
-                                placeholder="••••••••"
-                                type={isPasswordVisible ? "text" : "password"}
-                                value={value}
-                                onBlur={field.onBlur}
-                                onChange={field.onChange}
-                            />
-                            <Button
-                                aria-label={
-                                    isPasswordVisible ? "Hide password text" : "Show password text"
-                                }
-                                className="absolute right-1 top-1/2 -translate-y-1/2"
-                                isIconOnly
-                                size="sm"
-                                variant="ghost"
-                                onPress={(): void => {
-                                    setIsPasswordVisible(
-                                        (previousValue: boolean): boolean => !previousValue,
-                                    )
-                                }}
-                            >
-                                {isPasswordVisible ? <Eye size={16} /> : <EyeOff size={16} />}
-                            </Button>
+                        <div className="flex flex-col gap-1.5">
+                            <label htmlFor="password">Password</label>
+                            <div className="relative">
+                                <Input
+                                    aria-label="Password"
+                                    aria-invalid={hasError}
+                                    className="pe-10"
+                                    id="password"
+                                    minLength={8}
+                                    name={field.name}
+                                    placeholder="••••••••"
+                                    type={isPasswordVisible ? "text" : "password"}
+                                    value={value}
+                                    onBlur={field.onBlur}
+                                    onChange={field.onChange}
+                                />
+                                <Button
+                                    aria-label={
+                                        isPasswordVisible
+                                            ? "Hide password text"
+                                            : "Show password text"
+                                    }
+                                    className="absolute right-1 top-1/2 -translate-y-1/2"
+                                    isIconOnly
+                                    size="sm"
+                                    variant="ghost"
+                                    onPress={(): void => {
+                                        setIsPasswordVisible(
+                                            (previousValue: boolean): boolean =>
+                                                !previousValue,
+                                        )
+                                    }}
+                                >
+                                    {isPasswordVisible ? (
+                                        <Eye size={16} />
+                                    ) : (
+                                        <EyeOff size={16} />
+                                    )}
+                                </Button>
+                            </div>
                         </div>
                     )
                 }}
             />
-            <FormField<IFormValues, "description">
+            <Controller<IFormValues, "description">
                 control={form.control}
-                label="Описание"
                 name="description"
-                rules={{
-                    required: "Описание обязательно",
-                }}
-                renderField={({
-                    field,
-                    hasError,
-                    fieldId,
-                    accessibilityLabel,
-                    ariaDescribedBy,
-                }): ReactElement => {
+                rules={{ required: "Описание обязательно" }}
+                render={({ field, fieldState }): ReactElement => {
+                    const hasError = fieldState.error?.message !== undefined
                     const value = field.value === undefined ? "" : field.value
 
                     return (
-                        <Textarea
-                            aria-describedby={ariaDescribedBy}
-                            aria-label={accessibilityLabel}
-                            aria-invalid={hasError}
-                            id={fieldId}
-                            name={field.name}
-                            value={value}
-                            onBlur={field.onBlur}
-                            onChange={(event: ChangeEvent<HTMLTextAreaElement>): void => {
-                                field.onChange(event.target.value)
-                            }}
-                        />
+                        <div className="flex flex-col gap-1.5">
+                            <label htmlFor="description">Описание</label>
+                            <Textarea
+                                aria-label="Описание"
+                                aria-invalid={hasError}
+                                id="description"
+                                name={field.name}
+                                value={value}
+                                onBlur={field.onBlur}
+                                onChange={(event: ChangeEvent<HTMLTextAreaElement>): void => {
+                                    field.onChange(event.target.value)
+                                }}
+                            />
+                        </div>
                     )
                 }}
             />
-            <FormField<IFormValues, "provider">
+            <Controller<IFormValues, "provider">
                 control={form.control}
-                label="Поставщик"
                 name="provider"
-                rules={{
-                    required: "Выберите поставщика",
-                }}
-                renderField={({
-                    field,
-                    hasError,
-                    fieldId,
-                    accessibilityLabel,
-                    ariaDescribedBy,
-                }): ReactElement => {
-                    const selectedKey = field.value === undefined ? null : String(field.value)
+                rules={{ required: "Выберите поставщика" }}
+                render={({ field, fieldState }): ReactElement => {
+                    const hasError = fieldState.error?.message !== undefined
+                    const selectedKey =
+                        field.value === undefined ? null : String(field.value)
 
                     return (
-                        <Select
-                            aria-describedby={ariaDescribedBy}
-                            aria-label={accessibilityLabel}
-                            aria-invalid={hasError}
-                            name={field.name}
-                            id={fieldId}
-                            selectedKey={selectedKey}
-                            onSelectionChange={(key): void => {
-                                const nextValue = typeof key === "string" ? key : undefined
-                                field.onChange(nextValue)
-                            }}
-                        >
-                            <Select.Trigger>
-                                <Select.Value />
-                            </Select.Trigger>
-                            <Select.Popover>
-                                <ListBox>
-                                    <ListBoxItem key="openai" id="openai" textValue="OpenAI">
-                                        <div className="flex flex-col">
-                                            <span>OpenAI</span>
-                                        </div>
-                                    </ListBoxItem>
-                                    <ListBoxItem
-                                        key="anthropic"
-                                        id="anthropic"
-                                        textValue="Anthropic"
-                                    >
-                                        <div className="flex flex-col">
-                                            <span>Anthropic</span>
-                                        </div>
-                                    </ListBoxItem>
-                                    <ListBoxItem key="ollama" id="ollama" textValue="Ollama">
-                                        <div className="flex flex-col">
-                                            <span>Ollama</span>
-                                            <span className="text-xs text-muted">
-                                                Локальная модель
-                                            </span>
-                                        </div>
-                                    </ListBoxItem>
-                                </ListBox>
-                            </Select.Popover>
-                        </Select>
+                        <div className="flex flex-col gap-1.5">
+                            <label htmlFor="provider">Поставщик</label>
+                            <Select
+                                aria-label="Поставщик"
+                                aria-invalid={hasError}
+                                name={field.name}
+                                id="provider"
+                                selectedKey={selectedKey}
+                                onSelectionChange={(key): void => {
+                                    const nextValue =
+                                        typeof key === "string" ? key : undefined
+                                    field.onChange(nextValue)
+                                }}
+                            >
+                                <Select.Trigger>
+                                    <Select.Value />
+                                </Select.Trigger>
+                                <Select.Popover>
+                                    <ListBox>
+                                        <ListBoxItem
+                                            key="openai"
+                                            id="openai"
+                                            textValue="OpenAI"
+                                        >
+                                            <div className="flex flex-col">
+                                                <span>OpenAI</span>
+                                            </div>
+                                        </ListBoxItem>
+                                        <ListBoxItem
+                                            key="anthropic"
+                                            id="anthropic"
+                                            textValue="Anthropic"
+                                        >
+                                            <div className="flex flex-col">
+                                                <span>Anthropic</span>
+                                            </div>
+                                        </ListBoxItem>
+                                        <ListBoxItem
+                                            key="ollama"
+                                            id="ollama"
+                                            textValue="Ollama"
+                                        >
+                                            <div className="flex flex-col">
+                                                <span>Ollama</span>
+                                                <span className="text-xs text-muted">
+                                                    Локальная модель
+                                                </span>
+                                            </div>
+                                        </ListBoxItem>
+                                    </ListBox>
+                                </Select.Popover>
+                            </Select>
+                        </div>
                     )
                 }}
             />
-            <FormField<IFormValues, "issueLimit">
+            <Controller<IFormValues, "issueLimit">
                 control={form.control}
-                label="Лимит задач"
                 name="issueLimit"
                 rules={{
                     min: {
@@ -395,65 +399,54 @@ function FullFormHarness(props: IFormSubmitCaptureProps): ReactElement {
                     },
                     required: "Лимит обязателен",
                 }}
-                renderField={({
-                    field,
-                    hasError,
-                    fieldId,
-                    accessibilityLabel,
-                    ariaDescribedBy,
-                }): ReactElement => {
-                    const value = field.value === undefined ? "" : String(field.value)
+                render={({ field, fieldState }): ReactElement => {
+                    const hasError = fieldState.error?.message !== undefined
+                    const value =
+                        field.value === undefined ? "" : String(field.value)
 
                     return (
-                        <Input
-                            aria-describedby={ariaDescribedBy}
-                            aria-label={accessibilityLabel}
-                            aria-invalid={hasError}
-                            id={fieldId}
-                            inputMode="decimal"
-                            min={1}
-                            name={field.name}
-                            placeholder="0"
-                            type="number"
-                            value={value}
-                            onBlur={field.onBlur}
-                            onChange={(event: ChangeEvent<HTMLInputElement>): void => {
-                                const nextValue = event.target.value
+                        <div className="flex flex-col gap-1.5">
+                            <label htmlFor="issueLimit">Лимит задач</label>
+                            <Input
+                                aria-label="Лимит задач"
+                                aria-invalid={hasError}
+                                id="issueLimit"
+                                inputMode="decimal"
+                                min={1}
+                                name={field.name}
+                                placeholder="0"
+                                type="number"
+                                value={value}
+                                onBlur={field.onBlur}
+                                onChange={(
+                                    event: ChangeEvent<HTMLInputElement>,
+                                ): void => {
+                                    const nextValue = event.target.value
 
-                                if (nextValue === "") {
-                                    field.onChange(undefined)
-                                    return
-                                }
+                                    if (nextValue === "") {
+                                        field.onChange(undefined)
+                                        return
+                                    }
 
-                                const parsedNumber = Number(nextValue)
-                                if (Number.isNaN(parsedNumber) === true) {
-                                    field.onChange(undefined)
-                                    return
-                                }
+                                    const parsedNumber = Number(nextValue)
+                                    if (Number.isNaN(parsedNumber) === true) {
+                                        field.onChange(undefined)
+                                        return
+                                    }
 
-                                field.onChange(parsedNumber)
-                            }}
-                        />
+                                    field.onChange(parsedNumber)
+                                }}
+                            />
+                        </div>
                     )
                 }}
             />
-            <FormField<IFormValues, "enableFeature">
+            <Controller<IFormValues, "enableFeature">
                 control={form.control}
-                gapClass="gap-1"
-                hideLabel={true}
-                label="Включить функцию"
                 name="enableFeature"
-                showRequiredMarker={false}
-                renderField={({
-                    field,
-                    hasError,
-                    accessibilityLabel,
-                    ariaDescribedBy,
-                }): ReactElement => (
+                render={({ field }): ReactElement => (
                     <Checkbox
-                        aria-describedby={ariaDescribedBy}
-                        aria-label={accessibilityLabel}
-                        aria-invalid={hasError}
+                        aria-label="Включить функцию"
                         isSelected={field.value === true}
                         name={field.name}
                         onChange={field.onChange}
@@ -462,23 +455,12 @@ function FullFormHarness(props: IFormSubmitCaptureProps): ReactElement {
                     </Checkbox>
                 )}
             />
-            <FormField<IFormValues, "sendNotifications">
+            <Controller<IFormValues, "sendNotifications">
                 control={form.control}
-                gapClass="gap-1"
-                hideLabel={true}
-                label="Уведомления"
                 name="sendNotifications"
-                showRequiredMarker={false}
-                renderField={({
-                    field,
-                    hasError,
-                    accessibilityLabel,
-                    ariaDescribedBy,
-                }): ReactElement => (
+                render={({ field }): ReactElement => (
                     <Switch
-                        aria-describedby={ariaDescribedBy}
-                        aria-label={accessibilityLabel}
-                        aria-invalid={hasError}
+                        aria-label="Уведомления"
                         name={field.name}
                         isSelected={field.value === true}
                         onChange={field.onChange}
@@ -487,42 +469,37 @@ function FullFormHarness(props: IFormSubmitCaptureProps): ReactElement {
                     </Switch>
                 )}
             />
-            <FormField<IFormValues, "mode">
+            <Controller<IFormValues, "mode">
                 control={form.control}
-                label="Режим"
-                labelElement="span"
                 name="mode"
-                rules={{
-                    required: "Выберите режим",
+                rules={{ required: "Выберите режим" }}
+                render={({ field, fieldState }): ReactElement => {
+                    const hasError = fieldState.error?.message !== undefined
+
+                    return (
+                        <div className="flex flex-col gap-1.5">
+                            <span>Режим</span>
+                            <RadioGroup
+                                aria-label="Режим"
+                                aria-invalid={hasError}
+                                name={field.name}
+                                value={field.value ?? ""}
+                                onChange={(value: string): void => {
+                                    field.onChange(value)
+                                }}
+                            >
+                                <Radio key="strict" value="strict">
+                                    Строгий
+                                </Radio>
+                                <Radio key="relaxed" value="relaxed">
+                                    Свободный
+                                </Radio>
+                            </RadioGroup>
+                        </div>
+                    )
                 }}
-                renderField={({
-                    field,
-                    hasError,
-                    accessibilityLabel,
-                    ariaDescribedBy,
-                }): ReactElement => (
-                    <RadioGroup
-                        aria-describedby={ariaDescribedBy}
-                        aria-label={accessibilityLabel}
-                        aria-invalid={hasError}
-                        name={field.name}
-                        value={field.value ?? ""}
-                        onChange={(value: string): void => {
-                            field.onChange(value)
-                        }}
-                    >
-                        <Radio key="strict" value="strict">
-                            Строгий
-                        </Radio>
-                        <Radio key="relaxed" value="relaxed">
-                            Свободный
-                        </Radio>
-                    </RadioGroup>
-                )}
             />
-            <Button type="submit">
-                Сохранить
-            </Button>
+            <Button type="submit">Сохранить</Button>
         </form>
     )
 }
