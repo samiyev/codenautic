@@ -7,10 +7,14 @@ import { renderWithProviders } from "../../utils/render"
 vi.mock("@/lib/motion", () => ({
     DURATION: { normal: 0 },
     EASING: { move: [0, 0, 1, 1] },
-    useReducedMotion: (): boolean => true,
-    useCountUp: ({ target }: { readonly target: number }): number => target,
     CHART_DATA_TRANSITION: {},
     CHART_DATA_TRANSITION_NONE: {},
+}))
+
+vi.mock("react-countup", () => ({
+    default: ({ end, formattingFn }: { readonly end: number; readonly formattingFn?: (value: number) => string }): React.ReactElement => (
+        <span>{formattingFn !== undefined ? formattingFn(end) : String(end)}</span>
+    ),
 }))
 
 function createProps(overrides: Partial<IMetricCardProps> = {}): IMetricCardProps {
