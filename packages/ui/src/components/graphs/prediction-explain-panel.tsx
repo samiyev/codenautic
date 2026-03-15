@@ -77,7 +77,7 @@ export function PredictionExplainPanel(props: IPredictionExplainPanelProps): Rea
                 {props.entries.slice(0, MAX_VISIBLE_EXPLAIN_ENTRIES).map((entry): ReactElement => {
                     const isActive = selectedEntry?.fileId === entry.fileId
                     const className = isActive
-                        ? "border-primary bg-primary/10"
+                        ? "border-accent bg-accent/10"
                         : "border-border bg-surface hover:border-border"
                     return (
                         <button

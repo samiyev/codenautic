@@ -85,7 +85,7 @@ function resolveHotspotClassName(
     riskLevel: TCodeCityTreemapPredictionRiskLevel,
 ): string {
     const baseClassName = isActive
-        ? "border-primary bg-primary/10"
+        ? "border-accent bg-accent/10"
         : "border-border bg-surface hover:border-border"
     const highRiskClassName = riskLevel === "high" ? "border-dashed" : ""
 
