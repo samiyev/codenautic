@@ -117,9 +117,7 @@ export function BlueprintSection({ state }: IBlueprintSectionProps): ReactElemen
                                     }}
                                 >
                                     {line.comment === undefined ? null : (
-                                        <span className="text-muted">
-                                            {line.comment}
-                                        </span>
+                                        <span className="text-muted">{line.comment}</span>
                                     )}
                                     {line.key === undefined ? null : (
                                         <span className="text-sky-300">{line.key}</span>
