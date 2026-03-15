@@ -549,7 +549,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                 <CardHeader>
                     <div className="flex items-start justify-between gap-3">
                         <div>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted">
                                 {t("reviews:detail.ccrReview")}
                             </p>
                             <h1 className={TYPOGRAPHY.pageTitle}>{ccr.title}</h1>
@@ -567,7 +567,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     {t("reviews:detail.liveReviewUnavailable")}
                                 </p>
                             )}
-                            <p className="mt-2 text-xs uppercase tracking-[0.08em] text-muted-foreground">
+                            <p className="mt-2 text-xs uppercase tracking-[0.08em] text-muted">
                                 {t("reviews:detail.reviewDecisionLabel")}{" "}
                                 {translatedDecisionLabels[reviewDecision]}
                             </p>
@@ -576,7 +576,9 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             {reviewDecisionPolicy.visibility === "hidden" ? null : (
                                 <>
                                     <Button
-                                        variant={reviewDecision === "approved" ? "tertiary" : "ghost"}
+                                        variant={
+                                            reviewDecision === "approved" ? "tertiary" : "ghost"
+                                        }
                                         isDisabled={reviewDecisionPolicy.visibility === "disabled"}
                                         onPress={(): void => {
                                             handleReviewDecisionChange("approved")
@@ -612,7 +614,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             )}
                             {reviewFinishPolicy.visibility ===
                             "hidden" ? null : reviewFinishPolicy.visibility === "disabled" ? (
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-sm text-muted">
                                     {t("reviews:detail.finishReviewUnavailable")}{" "}
                                     {reviewFinishPolicy.reason ??
                                         t("reviews:detail.insufficientRolePermissions")}
@@ -659,7 +661,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                         </CardHeader>
                         <CardContent className="space-y-2">
                             {ccrDiffFiles.length === 0 ? (
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-sm text-muted">
                                     {t("reviews:detail.noDiffFiles")}
                                 </p>
                             ) : (
@@ -669,7 +671,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         <button
                                             className={`w-full rounded-lg border px-3 py-2 text-left text-sm ${
                                                 isActive
-                                                    ? "border-primary/30 bg-primary/10 text-on-primary"
+                                                    ? "border-accent/30 bg-accent/10 text-accent-foreground"
                                                     : "border-border bg-surface text-foreground"
                                             }`}
                                             key={file.filePath}
@@ -810,7 +812,9 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                 </select>
                             </div>
                             <Alert status={isReviewHistoryHeatmapEnabled ? "success" : "accent"}>
-                                <Alert.Title>{t("reviews:detail.reviewHistoryHeatmapTitle")}</Alert.Title>
+                                <Alert.Title>
+                                    {t("reviews:detail.reviewHistoryHeatmapTitle")}
+                                </Alert.Title>
                                 <Alert.Description>
                                     {isReviewHistoryHeatmapEnabled
                                         ? t("reviews:detail.heatmapEnabled", {
@@ -877,7 +881,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                                 <li key={filePath}>
                                                     <button
                                                         aria-label={`Open neighborhood file ${filePath}`}
-                                                        className="w-full rounded border border-border bg-surface px-2 py-1 text-left text-xs text-foreground hover:bg-surface-muted"
+                                                        className="w-full rounded border border-border bg-surface px-2 py-1 text-left text-xs text-foreground hover:bg-surface-secondary"
                                                         type="button"
                                                         onClick={(): void => {
                                                             setActiveFilePath(filePath)
@@ -988,7 +992,9 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             </ul>
                         </CardContent>
                     </Card>
-                    <Alert status={decisionBadge.color === "primary" ? "accent" : decisionBadge.color}>
+                    <Alert
+                        status={decisionBadge.color === "primary" ? "accent" : decisionBadge.color}
+                    >
                         {t("reviews:detail.reviewStatusMessage")}{" "}
                         <strong>{translatedDecisionLabels[reviewDecision]}</strong>.{" "}
                         {t("reviews:detail.reviewStatusHint")}
@@ -1006,7 +1012,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                     return translatedFilterLabels[filter]
                                 }).join(", ")}
                             </p>
-                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
                                 <Chip size="sm" variant="soft">
                                     {t("reviews:detail.visible")} {visibleTraceCount}
                                 </Chip>
@@ -1026,7 +1032,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                                 aria-label={`Open trace for ${traceItem.id}`}
                                                 className={`w-full rounded-lg border px-3 py-2 text-left text-xs transition ${
                                                     isActive
-                                                        ? "border-primary/30 bg-primary/10 text-on-primary"
+                                                        ? "border-accent/30 bg-accent/10 text-accent-foreground"
                                                         : "border-border bg-surface text-foreground hover:bg-surface"
                                                 }`}
                                                 type="button"
@@ -1036,7 +1042,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                             >
                                                 <p className="font-semibold">{traceItem.id}</p>
                                                 <p className="truncate">{traceItem.remark}</p>
-                                                <p className="mt-1 text-[11px] text-muted-foreground">
+                                                <p className="mt-1 text-[11px] text-muted">
                                                     {traceItem.filePath}
                                                 </p>
                                             </button>
@@ -1151,8 +1157,12 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                             </div>
                             {latestActiveTraceFeedback === undefined ? (
                                 <Alert status="warning">
-                                    <Alert.Title>{t("reviews:detail.noFeedbackYetTitle")}</Alert.Title>
-                                    <Alert.Description>{t("reviews:detail.noFeedbackYetHint")}</Alert.Description>
+                                    <Alert.Title>
+                                        {t("reviews:detail.noFeedbackYetTitle")}
+                                    </Alert.Title>
+                                    <Alert.Description>
+                                        {t("reviews:detail.noFeedbackYetHint")}
+                                    </Alert.Description>
                                 </Alert>
                             ) : (
                                 <div className="rounded-lg border border-border bg-surface p-3 text-xs text-foreground">

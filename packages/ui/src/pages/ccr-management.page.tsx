@@ -269,14 +269,14 @@ function CcrFiltersPanel(props: ICcrFiltersPanelProps): ReactElement {
         "px-3 py-2 text-sm text-foreground",
         "outline-none backdrop-blur-sm",
         "transition-colors duration-150",
-        "focus:border-primary/50 focus:ring-1 focus:ring-primary/20",
+        "focus:border-accent/50 focus:ring-1 focus:ring-accent/20",
     ].join(" ")
 
     return (
         <div className="grid gap-3 rounded-xl border border-border/40 bg-surface/40 p-3 backdrop-blur-sm md:grid-cols-4">
             <input
                 aria-label={t("reviews:management.searchAriaLabel")}
-                className={`${selectClass} placeholder:text-muted-foreground`}
+                className={`${selectClass} placeholder:text-muted`}
                 name="search"
                 placeholder={t("reviews:management.searchPlaceholder")}
                 value={props.filterState.search}
@@ -340,15 +340,15 @@ function CcrFilterPresetsPanel(props: ICcrFilterPresetsPanelProps): ReactElement
         "px-3 py-1.5 text-sm text-foreground",
         "outline-none backdrop-blur-sm",
         "transition-colors duration-150",
-        "focus:border-primary/50 focus:ring-1 focus:ring-primary/20",
-        "placeholder:text-muted-foreground",
+        "focus:border-accent/50 focus:ring-1 focus:ring-accent/20",
+        "placeholder:text-muted",
     ].join(" ")
 
     const btnClass = [
         "rounded-lg border border-border/50 bg-surface/60",
         "px-3 py-1.5 text-xs font-medium text-foreground",
         "transition-all duration-150",
-        "hover:border-primary/30 hover:bg-surface-muted",
+        "hover:border-accent/30 hover:bg-surface-secondary",
         "disabled:cursor-not-allowed disabled:opacity-40",
     ].join(" ")
 
