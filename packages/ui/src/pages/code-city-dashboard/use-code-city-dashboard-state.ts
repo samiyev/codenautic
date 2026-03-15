@@ -1,4 +1,4 @@
-import { type ChangeEvent, useMemo, useState } from "react"
+import { type ChangeEvent, useEffect, useMemo, useState } from "react"
 
 import type { TCausalOverlayMode } from "@/components/codecity/overlays/causal-overlay-selector"
 import type { IGuidedTourStep } from "@/components/codecity/guided-tour-overlay"
@@ -9,7 +9,10 @@ import type {
     IExploreNavigationFocusState,
     TDashboardOnboardingAreaId,
 } from "./code-city-dashboard-types"
-import { CODE_CITY_GUIDED_TOUR_STEPS } from "./code-city-dashboard-constants"
+import {
+    CODE_CITY_GUIDED_TOUR_STEPS,
+    EMPTY_DASHBOARD_PROFILE,
+} from "./code-city-dashboard-constants"
 import {
     resolveDefaultDashboardRepository,
     resolveDashboardProfile,
@@ -101,8 +104,12 @@ export function useCodeCityDashboardState(args: IUseCodeCityDashboardStateArgs) 
     )
 
     const defaultRepository = useMemo(
-        (): ICodeCityDashboardRepositoryProfile =>
-            resolveDefaultDashboardRepository(repositories),
+        (): ICodeCityDashboardRepositoryProfile => {
+            if (repositories.length === 0) {
+                return EMPTY_DASHBOARD_PROFILE
+            }
+            return resolveDefaultDashboardRepository(repositories)
+        },
         [repositories],
     )
 
@@ -117,6 +124,16 @@ export function useCodeCityDashboardState(args: IUseCodeCityDashboardStateArgs) 
     }, [initialRepositoryId, repositoryOptions, defaultRepository])
 
     const [repositoryId, setRepositoryId] = useState<string>(resolvedInitialRepositoryId)
+
+    useEffect((): void => {
+        if (
+            repositories.length > 0 &&
+            (repositoryId === "" || repositoryOptions.includes(repositoryId) === false)
+        ) {
+            setRepositoryId(resolvedInitialRepositoryId)
+        }
+    }, [repositories, repositoryId, repositoryOptions, resolvedInitialRepositoryId])
+
     const [metric, setMetric] = useState<TCodeCityDashboardMetric>("complexity")
     const [overlayMode, setOverlayMode] = useState<TCausalOverlayMode>("impact")
     const [exploreNavigationFocus, setExploreNavigationFocus] =
@@ -184,10 +201,12 @@ export function useCodeCityDashboardState(args: IUseCodeCityDashboardStateArgs) 
         )
     }, [guidedTourSteps, guidedTourStepIndex])
 
-    const currentProfile = useMemo(
-        () => resolveDashboardProfile(repositoryId, repositories),
-        [repositoryId, repositories],
-    )
+    const currentProfile = useMemo((): ICodeCityDashboardRepositoryProfile => {
+        if (repositories.length === 0) {
+            return EMPTY_DASHBOARD_PROFILE
+        }
+        return resolveDashboardProfile(repositoryId, repositories)
+    }, [repositoryId, repositories])
 
     const rootCauseIssues = useMemo(
         () => buildRootCauseIssues(currentProfile.files),
