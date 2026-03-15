@@ -6,7 +6,7 @@ import {
     getCcrDiffById,
     getCcrReviewThreadsById,
     MOCK_CCR_ROWS,
-} from "@/pages/ccr-data"
+} from "../fixtures/ccr-data"
 
 describe("getCcrById", (): void => {
     it("when given known id, then returns matching CCR row", (): void => {
