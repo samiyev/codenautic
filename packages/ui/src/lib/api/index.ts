@@ -3,7 +3,9 @@ import { AuthApi } from "./endpoints/auth.endpoint"
 import { CCRSummaryApi } from "./endpoints/ccr-summary.endpoint"
 import { CcrWorkspaceApi } from "./endpoints/ccr-workspace.endpoint"
 import { CodeReviewApi } from "./endpoints/code-review.endpoint"
+import { ContractValidationApi } from "./endpoints/contract-validation.endpoint"
 import { CustomRulesApi } from "./endpoints/custom-rules.endpoint"
+import { DashboardApi } from "./endpoints/dashboard.endpoint"
 import { ExternalContextApi } from "./endpoints/external-context.endpoint"
 import { PermissionsApi } from "./endpoints/permissions.endpoint"
 import { FeatureFlagsApi } from "./endpoints/feature-flags.endpoint"
@@ -11,6 +13,8 @@ import { SystemApi } from "./endpoints/system.endpoint"
 import { RepoConfigApi } from "./endpoints/repo-config.endpoint"
 import { DryRunApi } from "./endpoints/dry-run.endpoint"
 import { GitProvidersApi } from "./endpoints/git-providers.endpoint"
+import { RepositoryApi } from "./endpoints/repository.endpoint"
+import { CodeCityApi } from "./endpoints/code-city.endpoint"
 import { FetchHttpClient } from "./http-client"
 
 /**
@@ -24,13 +28,17 @@ export function createApiContracts(): {
     readonly codeReview: CodeReviewApi
     readonly ccrSummary: CCRSummaryApi
     readonly ccrWorkspace: CcrWorkspaceApi
+    readonly contractValidation: ContractValidationApi
     readonly customRules: CustomRulesApi
+    readonly dashboard: DashboardApi
     readonly externalContext: ExternalContextApi
     readonly featureFlags: FeatureFlagsApi
     readonly permissions: PermissionsApi
     readonly repoConfig: RepoConfigApi
     readonly dryRun: DryRunApi
     readonly gitProviders: GitProvidersApi
+    readonly repositories: RepositoryApi
+    readonly codeCity: CodeCityApi
 } {
     const config = createApiConfig(resolveUiEnv(import.meta.env))
     const httpClient = new FetchHttpClient(config)
@@ -41,13 +49,17 @@ export function createApiContracts(): {
         codeReview: new CodeReviewApi(httpClient),
         ccrSummary: new CCRSummaryApi(httpClient),
         ccrWorkspace: new CcrWorkspaceApi(httpClient),
+        contractValidation: new ContractValidationApi(httpClient),
         customRules: new CustomRulesApi(httpClient),
+        dashboard: new DashboardApi(httpClient),
         externalContext: new ExternalContextApi(httpClient),
         permissions: new PermissionsApi(httpClient),
         featureFlags: new FeatureFlagsApi(httpClient),
         repoConfig: new RepoConfigApi(httpClient),
         dryRun: new DryRunApi(httpClient),
         gitProviders: new GitProvidersApi(httpClient),
+        repositories: new RepositoryApi(httpClient),
+        codeCity: new CodeCityApi(httpClient),
     }
 }
 
@@ -67,10 +79,12 @@ export type { IPermissionsApi } from "./endpoints/permissions.endpoint"
 export type { ICCRSummaryApi } from "./endpoints/ccr-summary.endpoint"
 export type { ICcrWorkspaceApi } from "./endpoints/ccr-workspace.endpoint"
 export type { ICodeReviewApi } from "./endpoints/code-review.endpoint"
+export type { IContractValidationApi } from "./endpoints/contract-validation.endpoint"
 export type { ICustomRulesApi } from "./endpoints/custom-rules.endpoint"
 export type { IExternalContextApi } from "./endpoints/external-context.endpoint"
 export type { IRepoConfigApi } from "./endpoints/repo-config.endpoint"
 export type { IDryRunApi } from "./endpoints/dry-run.endpoint"
+export type { IDashboardApi } from "./endpoints/dashboard.endpoint"
 export type { IGitProvidersApi } from "./endpoints/git-providers.endpoint"
 export type {
     IDelayFunction,
@@ -83,4 +97,6 @@ export type {
 } from "./http-client"
 export type { IFeatureFlagsApi } from "./endpoints/feature-flags.endpoint"
 export type { ISystemApi } from "./endpoints/system.endpoint"
+export type { IRepositoryApi } from "./endpoints/repository.endpoint"
+export type { ICodeCityApi } from "./endpoints/code-city.endpoint"
 export type { TSystemHealthResponse, THealthStatus } from "./types"
