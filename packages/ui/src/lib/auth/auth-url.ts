@@ -89,10 +89,6 @@ export function isCurrentPage(path: string): boolean {
  * @returns Санитизированный path приложения.
  */
 export function resolveBoundaryRoutePath(routePath: string | undefined): string {
-    if (typeof window === "undefined") {
-        return sanitizeAppDestinationPath(routePath, "/")
-    }
-
     return sanitizeAppDestinationPath(routePath, window.location.pathname)
 }
 
