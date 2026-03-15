@@ -113,6 +113,6 @@ describe("PredictionDashboard", (): void => {
             "[aria-label^='Inspect prediction dashboard hotspot']",
         )
         const firstButton = buttons[0]
-        expect(firstButton?.className).toContain("border-primary")
+        expect(firstButton?.className).toContain("border-accent")
     })
 })

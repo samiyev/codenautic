@@ -66,7 +66,7 @@ describe("PredictionExplainPanel", (): void => {
 
         const buttons = container.querySelectorAll("[aria-label^='Inspect prediction explanation']")
         const secondButton = buttons[1]
-        expect(secondButton?.className).toContain("border-primary")
+        expect(secondButton?.className).toContain("border-accent")
     })
 
     it("when entries is empty, then shows no-selection text", (): void => {
