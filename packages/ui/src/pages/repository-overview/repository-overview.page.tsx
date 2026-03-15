@@ -81,7 +81,7 @@ function RepositoryHealthScore(props: { readonly score: number }): ReactElement 
                     aria-valuemax={100}
                     aria-valuemin={0}
                     aria-valuenow={score}
-                    className="h-2.5 w-full rounded-full bg-surface-muted"
+                    className="h-2.5 w-full rounded-full bg-surface-secondary"
                     role="meter"
                 >
                     <span
@@ -115,7 +115,7 @@ function TechnologyStackList(props: {
                             <p className="text-sm font-semibold text-foreground">
                                 {entry.name} <span className="font-normal">{entry.version}</span>
                             </p>
-                            <p className="text-sm text-muted-foreground">{entry.note}</p>
+                            <p className="text-sm text-muted">{entry.note}</p>
                         </div>
                     ),
                 )}
@@ -149,7 +149,7 @@ function ArchitectureSummaryList(props: {
                                 </Chip>
                                 <p className="text-sm font-semibold text-foreground">{line.area}</p>
                             </div>
-                            <p className="text-sm text-muted-foreground">{line.summary}</p>
+                            <p className="text-sm text-muted">{line.summary}</p>
                         </section>
                     )
                 })}
@@ -220,7 +220,7 @@ function RescanScheduleDialog(props: {
                     </button>
                 </div>
 
-                <p className="mb-4 text-sm text-muted-foreground">
+                <p className="mb-4 text-sm text-muted">
                     Последний scan: {formatOverviewTimestamp(props.lastScanAt)}
                 </p>
 

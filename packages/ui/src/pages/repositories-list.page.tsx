@@ -3,8 +3,7 @@ import { useTranslation } from "react-i18next"
 import { Link } from "@tanstack/react-router"
 
 import { useDynamicTranslation } from "@/lib/i18n"
-import { Button, Card, CardContent, CardHeader } from "@heroui/react"
-import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
+import { Button, Card, CardContent, CardHeader, Table } from "@heroui/react"
 import { PageShell } from "@/components/layout/page-shell"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
@@ -175,7 +174,7 @@ function mapStatusClasses(status: TRepositoryStatus): string {
     }
 
     if (status === "scanning") {
-        return "bg-primary/10 text-primary border-primary/30"
+        return "bg-accent/10 text-accent border-accent/30"
     }
 
     return "bg-danger/10 text-danger border-danger/30"
@@ -281,7 +280,7 @@ function RepositoryScanErrorRecovery(props: {
               })
 
     return (
-        <section className="mt-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-on-danger">
+        <section className="mt-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger-foreground">
             <p className="text-xs font-semibold uppercase tracking-[0.1em] text-danger">
                 {t("dashboard:repositoriesList.scanError")}
             </p>
@@ -326,7 +325,7 @@ function RepositoriesEmptyState(): ReactElement {
     return (
         <section className="rounded-lg border border-dashed border-border bg-surface p-6 text-center">
             <p className={TYPOGRAPHY.cardTitle}>{t("dashboard:repositoriesList.noRepositories")}</p>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-muted">
                 {t("dashboard:repositoriesList.noRepositoriesHint")}
             </p>
             <Link
@@ -460,102 +459,90 @@ export function RepositoriesListPage(props: IRepositoryListPageProps): ReactElem
                                 value={repoErrorCount}
                             />
                         </div>
-                        <EnterpriseDataTable
-                            ariaLabel={t("dashboard:repositoriesList.tableAriaLabel")}
-                            columns={[
-                                {
-                                    accessor: (item): string => item.name,
-                                    cell: (item): ReactElement => {
-                                        const repositoryId = getRepositoryId(item)
-                                        return (
-                                            <Link
-                                                aria-label={td(
-                                                    "dashboard:repositoriesList.openOverviewAriaLabel",
-                                                    {
-                                                        owner: item.owner,
-                                                        name: item.name,
-                                                    },
-                                                )}
-                                                className="font-medium text-foreground underline-offset-4 hover:underline"
-                                                params={{ repositoryId }}
-                                                to="/repositories/$repositoryId"
-                                            >
-                                                {item.name}
-                                            </Link>
-                                        )
-                                    },
-                                    header: t("dashboard:repositoriesList.columnRepository"),
-                                    id: "repository",
-                                    pin: "left",
-                                    size: 220,
-                                },
-                                {
-                                    accessor: (item): string => item.owner,
-                                    header: t("dashboard:repositoriesList.columnOwner"),
-                                    id: "owner",
-                                    size: 170,
-                                },
-                                {
-                                    accessor: (item): string => item.branch,
-                                    header: t("dashboard:repositoriesList.columnBranch"),
-                                    id: "branch",
-                                    size: 150,
-                                },
-                                {
-                                    accessor: (item): string => formatScanDate(item.lastScanAt),
-                                    header: t("dashboard:repositoriesList.columnLastScan"),
-                                    id: "lastScan",
-                                    size: 190,
-                                },
-                                {
-                                    accessor: (item): string => mapStatusToLabel(item.status, td),
-                                    cell: (item): ReactElement => (
-                                        <RepositoryStatusBadge status={item.status} />
-                                    ),
-                                    header: t("dashboard:repositoriesList.columnStatus"),
-                                    id: "status",
-                                    size: 150,
-                                },
-                                {
-                                    accessor: (item): number => item.issueCount,
-                                    header: t("dashboard:repositoriesList.columnIssues"),
-                                    id: "issueCount",
-                                    size: 120,
-                                },
-                                {
-                                    accessor: (item): string =>
-                                        item.scanError === undefined
-                                            ? "healthy"
-                                            : item.scanError.message,
-                                    cell: (item): ReactElement => {
-                                        if (
-                                            item.scanError === undefined ||
-                                            item.status !== "error"
-                                        ) {
-                                            return (
-                                                <span className={TYPOGRAPHY.captionMuted}>—</span>
-                                            )
-                                        }
-
-                                        return (
-                                            <RepositoryScanErrorRecovery
-                                                onRetryScan={props.onRetryScan}
-                                                repositoryId={getRepositoryId(item)}
-                                                scanError={item.scanError}
-                                            />
-                                        )
-                                    },
-                                    enableGlobalFilter: false,
-                                    header: t("dashboard:repositoriesList.columnRecovery"),
-                                    id: "recovery",
-                                    size: 360,
-                                },
-                            ]}
-                            emptyMessage={t("dashboard:repositoriesList.emptyMessage")}
-                            getRowId={(item): string => getRepositoryId(item)}
-                            id="repositories-list-table"
-                            rows={visible}
-                        />
+                        <Table>
+                            <Table.ScrollContainer>
+                                <Table.Content
+                                    aria-label={t("dashboard:repositoriesList.tableAriaLabel")}
+                                >
+                                    <Table.Header>
+                                        <Table.Column isRowHeader>
+                                            {t("dashboard:repositoriesList.columnRepository")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:repositoriesList.columnOwner")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:repositoriesList.columnBranch")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:repositoriesList.columnLastScan")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:repositoriesList.columnStatus")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:repositoriesList.columnIssues")}
+                                        </Table.Column>
+                                        <Table.Column>
+                                            {t("dashboard:repositoriesList.columnRecovery")}
+                                        </Table.Column>
+                                    </Table.Header>
+                                    <Table.Body>
+                                        {visible.map(
+                                            (item): ReactElement => (
+                                                <Table.Row key={getRepositoryId(item)}>
+                                                    <Table.Cell>
+                                                        <Link
+                                                            aria-label={td(
+                                                                "dashboard:repositoriesList.openOverviewAriaLabel",
+                                                                {
+                                                                    owner: item.owner,
+                                                                    name: item.name,
+                                                                },
+                                                            )}
+                                                            className="font-medium text-foreground underline-offset-4 hover:underline"
+                                                            params={{
+                                                                repositoryId: getRepositoryId(item),
+                                                            }}
+                                                            to="/repositories/$repositoryId"
+                                                        >
+                                                            {item.name}
+                                                        </Link>
+                                                    </Table.Cell>
+                                                    <Table.Cell>{item.owner}</Table.Cell>
+                                                    <Table.Cell>{item.branch}</Table.Cell>
+                                                    <Table.Cell>
+                                                        {formatScanDate(item.lastScanAt)}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <RepositoryStatusBadge
+                                                            status={item.status}
+                                                        />
+                                                    </Table.Cell>
+                                                    <Table.Cell>{item.issueCount}</Table.Cell>
+                                                    <Table.Cell>
+                                                        {item.scanError === undefined ||
+                                                        item.status !== "error" ? (
+                                                            <span
+                                                                className={TYPOGRAPHY.captionMuted}
+                                                            >
+                                                                {"\u2014"}
+                                                            </span>
+                                                        ) : (
+                                                            <RepositoryScanErrorRecovery
+                                                                onRetryScan={props.onRetryScan}
+                                                                repositoryId={getRepositoryId(item)}
+                                                                scanError={item.scanError}
+                                                            />
+                                                        )}
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            ),
+                                        )}
+                                    </Table.Body>
+                                </Table.Content>
+                            </Table.ScrollContainer>
+                        </Table>
                     </CardContent>
                 </Card>
             )}
