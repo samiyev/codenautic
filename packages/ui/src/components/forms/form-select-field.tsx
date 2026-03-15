@@ -82,7 +82,7 @@ export function FormSelectField<
                                             <div className="flex flex-col">
                                                 <span>{option.label}</span>
                                                 {option.description === undefined ? null : (
-                                                    <span className="text-xs text-muted-foreground">
+                                                    <span className="text-xs text-muted">
                                                         {option.description}
                                                     </span>
                                                 )}

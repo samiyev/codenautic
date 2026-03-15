@@ -23,5 +23,5 @@ export function pickFieldMessage(
         return null
     }
 
-    return <p className="text-xs text-muted-foreground">{helperText}</p>
+    return <p className="text-xs text-muted">{helperText}</p>
 }
