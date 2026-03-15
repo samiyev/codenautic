@@ -5,46 +5,18 @@ import { Alert, Button, Card, CardContent, CardHeader, Chip, Input, Switch } fro
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
+import { useWebhooks } from "@/lib/hooks/queries/use-webhooks"
 import {
     showToastError,
     showToastInfo,
     showToastSuccess,
     showToastWarning,
 } from "@/lib/notifications/toast"
-
-type TWebhookDeliveryStatus = "disconnected" | "failed" | "retrying" | "success"
-
-interface IWebhookEndpoint {
-    /** Идентификатор endpoint. */
-    readonly id: string
-    /** URL webhook endpoint. */
-    readonly url: string
-    /** Подписанные event types. */
-    readonly eventTypes: ReadonlyArray<string>
-    /** Маскированный секрет. */
-    readonly secretPreview: string
-    /** Включен ли endpoint. */
-    readonly isEnabled: boolean
-    /** Время последней доставки. */
-    readonly lastDeliveryAt?: string
-    /** Статус последней доставки. */
-    readonly status: TWebhookDeliveryStatus
-}
-
-interface IWebhookDeliveryLog {
-    /** Идентификатор лога. */
-    readonly id: string
-    /** ID endpoint, которому принадлежит лог. */
-    readonly endpointId: string
-    /** Время события доставки. */
-    readonly timestamp: string
-    /** HTTP статус доставки. */
-    readonly httpStatus: number
-    /** Статус доставки. */
-    readonly status: TWebhookDeliveryStatus
-    /** Короткое сообщение. */
-    readonly message: string
-}
+import type {
+    IWebhookDeliveryLog,
+    IWebhookEndpoint,
+    TWebhookDeliveryStatus,
+} from "@/lib/api/endpoints/webhooks.endpoint"
 
 interface ICreateWebhookFormState {
     /** URL endpoint. */
@@ -52,71 +24,6 @@ interface ICreateWebhookFormState {
     /** Типы событий через запятую. */
     readonly eventTypesCsv: string
 }
-
-const INITIAL_WEBHOOKS: ReadonlyArray<IWebhookEndpoint> = [
-    {
-        eventTypes: ["review.completed", "review.failed"],
-        id: "wh-1001",
-        isEnabled: true,
-        lastDeliveryAt: "2026-03-04 10:18",
-        secretPreview: "whsec_****32af",
-        status: "success",
-        url: "https://hooks.acme.dev/code-review",
-    },
-    {
-        eventTypes: ["scan.completed", "scan.failed", "scan.partial"],
-        id: "wh-1002",
-        isEnabled: true,
-        lastDeliveryAt: "2026-03-04 10:03",
-        secretPreview: "whsec_****14bc",
-        status: "retrying",
-        url: "https://hooks.acme.dev/scan-events",
-    },
-    {
-        eventTypes: ["provider.degraded", "provider.recovered"],
-        id: "wh-1003",
-        isEnabled: false,
-        lastDeliveryAt: "2026-03-04 09:56",
-        secretPreview: "whsec_****9e42",
-        status: "failed",
-        url: "https://hooks.acme.dev/provider-health",
-    },
-]
-
-const INITIAL_DELIVERY_LOGS: ReadonlyArray<IWebhookDeliveryLog> = [
-    {
-        endpointId: "wh-1001",
-        httpStatus: 200,
-        id: "log-1",
-        message: "Delivered review.completed payload.",
-        status: "success",
-        timestamp: "2026-03-04 10:18:12",
-    },
-    {
-        endpointId: "wh-1002",
-        httpStatus: 502,
-        id: "log-2",
-        message: "Remote endpoint unavailable, retry scheduled.",
-        status: "retrying",
-        timestamp: "2026-03-04 10:03:31",
-    },
-    {
-        endpointId: "wh-1002",
-        httpStatus: 429,
-        id: "log-3",
-        message: "Rate limited by remote endpoint.",
-        status: "failed",
-        timestamp: "2026-03-04 09:58:17",
-    },
-    {
-        endpointId: "wh-1003",
-        httpStatus: 401,
-        id: "log-4",
-        message: "Invalid secret signature on receiver side.",
-        status: "failed",
-        timestamp: "2026-03-04 09:56:04",
-    },
-]
 
 function parseEventTypes(value: string): ReadonlyArray<string> {
     return value
@@ -205,12 +112,15 @@ function hasUrlPrefix(url: string): boolean {
  */
 export function SettingsWebhooksPage(): ReactElement {
     const { t } = useTranslation(["settings"])
-    const [webhooks, setWebhooks] = useState<ReadonlyArray<IWebhookEndpoint>>(INITIAL_WEBHOOKS)
+    const { webhooksQuery } = useWebhooks()
+    const initialWebhooks = webhooksQuery.data?.webhooks ?? []
+    const initialDeliveryLogs = webhooksQuery.data?.deliveryLogs ?? []
+    const [webhooks, setWebhooks] = useState<ReadonlyArray<IWebhookEndpoint>>(initialWebhooks)
     const [deliveryLogs, setDeliveryLogs] =
-        useState<ReadonlyArray<IWebhookDeliveryLog>>(INITIAL_DELIVERY_LOGS)
+        useState<ReadonlyArray<IWebhookDeliveryLog>>(initialDeliveryLogs)
     const [search, setSearch] = useState("")
     const [statusFilter, setStatusFilter] = useState<"all" | TWebhookDeliveryStatus>("all")
-    const [activeEndpointId, setActiveEndpointId] = useState<string>(INITIAL_WEBHOOKS[0]?.id ?? "")
+    const [activeEndpointId, setActiveEndpointId] = useState<string>(initialWebhooks[0]?.id ?? "")
     const [createForm, setCreateForm] = useState<ICreateWebhookFormState>({
         eventTypesCsv: "",
         url: "",
