@@ -100,7 +100,6 @@ bun add @codenautic/ui
 | 3D             | Three.js (CodeCity visualization)                                      |
 | i18n           | i18next                                                                |
 | Тесты          | Vitest, happy-dom, MSW (API mocking)                                   |
-| Components     | Storybook 8                                                            |
 | Observability  | Sentry, Pyroscope, OpenTelemetry                                       |
 | Analytics      | OSS/self-hostable ingestion + OpenTelemetry events (no mandatory SaaS) |
 
@@ -124,7 +123,7 @@ bun add @codenautic/ui
 
 | Область                         | Основной выбор                                              | Что покрывает                                                                              | Target limits (первые версии)                                                                               | OSS plan B при упоре                                                                 |
 | ------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| UI компоненты + a11y            | HeroUI v3 (React Aria)                                      | Button/Input/Select/Modal/Drawer/Tabs/Dropdown/Skeleton и т.д., единая a11y-модель         | HeroUI v3 beta: держим слой адаптеров и Storybook-coverage на базовых компонентах                           | React Aria Components (RAC) + свой ui-kit поверх Tailwind токенов                    |
+| UI компоненты + a11y            | HeroUI v3 (React Aria)                                      | Button/Input/Select/Modal/Drawer/Tabs/Dropdown/Skeleton и т.д., единая a11y-модель         | HeroUI v3 RC: компоненты используются напрямую, тестируются через Vitest                                    | React Aria Components (RAC) + свой ui-kit поверх Tailwind токенов                    |
 | Command palette / global search | HeroUI v3 overlay + backend/локальный индекс                | Cmd+K palette, навигация по сущностям, запуск actions                                      | 10k+ сущностей: debounce + memoized index, tenant/permission-safe фильтрация (`WEB-SRCH-004`)               | `cmdk` или `kbar` (MIT) если нужен готовый headless command menu                     |
 | Keyboard shortcuts              | Свой registry + hooks                                       | Глобальные и page-scope шорткаты, focus management, cheatsheet (`WEB-KBD-001..002`)        | Конфликт-матрица комбинаций, не перехватывать ввод/IME                                                      | `tinykeys` или `react-hotkeys-hook` как лёгкая OSS-основа                            |
 | Enterprise tables               | TanStack Table (`@tanstack/react-table`) + TanStack Virtual | Колонки (hide/pin/reorder/resize), density, keyboard nav, row actions, export, saved views | 10k+ строк на странице с виртуализацией (`WEB-TBL-001`), выше: агрегация/серверный paging                   | `react-virtuoso` для сложных/динамических высот строк + усиление серверной агрегации |
@@ -280,8 +279,6 @@ bun run typecheck      # Проверка типов (tsc --noEmit)
 bun run test           # Тесты (vitest, happy-dom)
 bun run codegen        # OpenAPI → generated types
 bun run codegen:check  # Проверка синхронизации schema и generated types
-bun run storybook      # Storybook dev (port 7230)
-bun run build-storybook # Storybook build
 ```
 
 `dev` и `build` автоматически запускают `codegen`, чтобы DTO оставались актуальными после изменения `openapi/schema.yaml`.
