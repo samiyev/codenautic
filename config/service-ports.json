@@ -5,7 +5,6 @@
     "settingsService": 7130,
     "webhooks": 7140,
     "mcpSse": 7210,
-    "uiPreview": 7220,
-    "storybook": 7230
+    "uiPreview": 7220
   }
 }
