@@ -45,7 +45,7 @@ export function renderWithProviders(
     })
 
     if (typeof window !== "undefined" && options.themeMode !== undefined) {
-        window.localStorage.setItem("codenautic:ui:theme-mode", options.themeMode)
+        window.localStorage.setItem("cn:theme-mode", options.themeMode)
     }
 
     const wrapWithProviders = (content: ReactElement): ReactElement => (
