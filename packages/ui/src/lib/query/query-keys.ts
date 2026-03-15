@@ -2,6 +2,12 @@
  * Единый factory для React Query ключей.
  */
 export const queryKeys = {
+    adminConfig: {
+        all: (): readonly ["admin-config"] => ["admin-config"] as const,
+        config: (): readonly ["admin-config", "config"] => {
+            return ["admin-config", "config"] as const
+        },
+    },
     auth: {
         session: (): readonly ["auth", "session"] => ["auth", "session"] as const,
     },
@@ -141,6 +147,18 @@ export const queryKeys = {
         },
         byId: (reportId: string): readonly ["reports", "by-id", string] => {
             return ["reports", "by-id", reportId] as const
+        },
+    },
+    notifications: {
+        all: (): readonly ["notifications"] => ["notifications"] as const,
+        history: (): readonly ["notifications", "history"] => {
+            return ["notifications", "history"] as const
+        },
+        channels: (): readonly ["notifications", "channels"] => {
+            return ["notifications", "channels"] as const
+        },
+        muteRules: (): readonly ["notifications", "mute-rules"] => {
+            return ["notifications", "mute-rules"] as const
         },
     },
     issues: {
