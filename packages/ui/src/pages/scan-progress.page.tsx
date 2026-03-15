@@ -6,66 +6,11 @@ import { useDynamicTranslation } from "@/lib/i18n"
 import { Alert, Button, Card, CardContent, CardHeader } from "@heroui/react"
 import { PageShell } from "@/components/layout/page-shell"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
+import { useScanProgress } from "@/lib/hooks/queries/use-scan-progress"
+import type { IScanProgressEvent, TScanPhase } from "@/lib/api/endpoints/scan-progress.endpoint"
 
 const PHASES = ["queue", "clone", "analysis", "indexing", "report"] as const
 const DEFAULT_JOB_ID = "scan-job-local"
-const DEFAULT_SEED_EVENTS: ReadonlyArray<IScanProgressEvent> = [
-    {
-        etaSeconds: 240,
-        log: "Подготовка пайплайна сканирования",
-        message: "Проверка доступа к репозиторию",
-        phase: "queue",
-        percent: 5,
-        phaseCompleted: false,
-        timestamp: createRelativeIsoTime(-90),
-    },
-    {
-        etaSeconds: 180,
-        log: "Получен репозиторий, запуск загрузки",
-        message: "Клонирование репозитория",
-        phase: "clone",
-        percent: 18,
-        phaseCompleted: false,
-        timestamp: createRelativeIsoTime(-70),
-    },
-    {
-        etaSeconds: 120,
-        log: "Найдены все целевые файлы",
-        message: "Сборка графа зависимостей",
-        phase: "analysis",
-        percent: 42,
-        phaseCompleted: false,
-        timestamp: createRelativeIsoTime(-45),
-    },
-    {
-        etaSeconds: 60,
-        log: "Создан список правил и приоритетов",
-        message: "Индексация",
-        phase: "indexing",
-        percent: 74,
-        phaseCompleted: false,
-        timestamp: createRelativeIsoTime(-20),
-    },
-]
-
-type TScanPhase = (typeof PHASES)[number]
-
-interface IScanProgressEvent {
-    /** Название шага, который сейчас выполняется. */
-    readonly phase: TScanPhase
-    /** Процент выполнения всего пайплайна. */
-    readonly percent: number
-    /** Количество секунд до предполагаемого завершения. */
-    readonly etaSeconds: number
-    /** Короткий статус сообщения для пользователя. */
-    readonly message: string
-    /** Опциональный лог этой стадии. */
-    readonly log?: string
-    /** Явно завершена ли текущая фаза. */
-    readonly phaseCompleted: boolean
-    /** Таймштамп события. */
-    readonly timestamp: string
-}
 
 interface IScanProgressPageProps {
     /** Идентификатор скана для заголовка и SSE. */
@@ -279,9 +224,13 @@ function useScanProgressEvents(
     jobId: string,
     props: IScanProgressPageProps,
 ): IUseScanProgressState {
-    const [events, setEvents] = useState<ReadonlyArray<IScanProgressEvent>>(props.seedEvents ?? [])
+    const hasSSE = props.eventSourceUrl !== undefined
+    const { progressQuery } = useScanProgress({ jobId, enabled: hasSSE !== true })
+    const apiEvents = progressQuery.data?.events ?? []
+
+    const [sseEvents, setSseEvents] = useState<ReadonlyArray<IScanProgressEvent>>([])
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
-    const [isLive, setIsLive] = useState(props.eventSourceUrl !== undefined)
+    const [isLive, setIsLive] = useState(hasSSE)
 
     useEffect((): (() => void) | undefined => {
         if (props.eventSourceUrl === undefined) {
@@ -293,7 +242,7 @@ function useScanProgressEvents(
         const closeSource = createEventSource(
             sourceUrl,
             (nextEvent): void => {
-                setEvents((previous): ReadonlyArray<IScanProgressEvent> => [...previous, nextEvent])
+                setSseEvents((previous): ReadonlyArray<IScanProgressEvent> => [...previous, nextEvent])
                 setErrorMessage(undefined)
             },
             (message): void => {
@@ -312,7 +261,13 @@ function useScanProgressEvents(
         }
     }, [jobId, props.eventSourceUrl])
 
-    return { events, errorMessage, isLive }
+    const resolvedEvents = hasSSE
+        ? [...(props.seedEvents ?? []), ...sseEvents]
+        : apiEvents.length > 0
+            ? apiEvents
+            : (props.seedEvents ?? [])
+
+    return { events: resolvedEvents, errorMessage, isLive }
 }
 
 function formatSecondsToMinutes(totalSeconds: number): string {
