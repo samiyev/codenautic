@@ -16,8 +16,6 @@ import {
     resolveHealthChipColor,
     resolveHealthLabel,
     isRescanScheduleMode,
-    getRepositoryOverviewById,
-    getRepositoryDefaultSchedule,
     resolveCodeCityTreemapFiles,
 } from "@/pages/repository-overview/repository-overview-utils"
 
@@ -341,31 +339,6 @@ describe("isRescanScheduleMode", (): void => {
 
     it("when value is unknown, then returns false", (): void => {
         expect(isRescanScheduleMode("biweekly")).toBe(false)
-    })
-})
-
-describe("getRepositoryOverviewById", (): void => {
-    it("when given known id, then returns profile", (): void => {
-        const result = getRepositoryOverviewById("frontend-team/ui-dashboard")
-
-        expect(result).not.toBeUndefined()
-        expect(result?.id).toBe("frontend-team/ui-dashboard")
-    })
-
-    it("when given unknown id, then returns undefined", (): void => {
-        expect(getRepositoryOverviewById("unknown/repo")).toBeUndefined()
-    })
-})
-
-describe("getRepositoryDefaultSchedule", (): void => {
-    it("when given known repository, then returns cron string", (): void => {
-        const result = getRepositoryDefaultSchedule("frontend-team/ui-dashboard")
-
-        expect(result.length).toBeGreaterThan(0)
-    })
-
-    it("when given unknown repository, then returns manual", (): void => {
-        expect(getRepositoryDefaultSchedule("unknown/repo")).toBe("manual")
     })
 })
 
