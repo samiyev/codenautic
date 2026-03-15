@@ -3,6 +3,7 @@ import type { IGuidedTourStep } from "@/components/codecity/guided-tour-overlay"
 import type {
     ICodeCityDashboardMetricOption,
     ICodeCityDashboardOnboardingAreaDescriptor,
+    ICodeCityDashboardRepositoryProfile,
 } from "./code-city-dashboard-types"
 
 /**
@@ -22,6 +23,23 @@ export const CODE_CITY_DASHBOARD_METRICS: ReadonlyArray<ICodeCityDashboardMetric
         value: "churn",
     },
 ] as const
+
+/**
+ * Пустой профиль-заглушка, используемый пока данные загружаются из API.
+ */
+export const EMPTY_DASHBOARD_PROFILE: ICodeCityDashboardRepositoryProfile = {
+    id: "",
+    label: "",
+    description: "",
+    files: [],
+    impactedFiles: [],
+    compareFiles: [],
+    temporalCouplings: [],
+    healthTrend: [],
+    contributors: [],
+    ownership: [],
+    contributorCollaborations: [],
+}
 
 /**
  * Шаги guided tour для CodeCity dashboard.
