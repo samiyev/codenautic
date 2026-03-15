@@ -6,7 +6,6 @@ import { ContextPreview } from "@/components/settings/context-preview"
 import { ContextSourceCard } from "@/components/settings/context-source-card"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
 import { Button, Card, CardContent, CardHeader, Chip, Input, Switch } from "@heroui/react"
-import { FormLayout } from "@/components/forms/form-layout"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { useExternalContext } from "@/lib/hooks/queries/use-external-context"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -408,10 +407,7 @@ export function SettingsIntegrationsPage(): ReactElement {
     )
 
     return (
-        <FormLayout
-            title={t("settings:integrations.pageTitle")}
-            description={t("settings:integrations.pageSubtitle")}
-        >
+        <div className="space-y-6 mx-auto max-w-[1400px]"><div className="space-y-1.5"><h1 className={TYPOGRAPHY.pageTitle}>{t("settings:integrations.pageTitle")}</h1><p className={TYPOGRAPHY.bodyMuted}>{t("settings:integrations.pageSubtitle")}</p></div><div className="space-y-6">
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>
@@ -443,9 +439,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                                     <p className={TYPOGRAPHY.sectionTitle}>
                                         {integration.provider}
                                     </p>
-                                    <p className="text-sm text-muted">
-                                        {integration.description}
-                                    </p>
+                                    <p className="text-sm text-muted">{integration.description}</p>
                                 </div>
                                 <Chip
                                     color={mapStatusChipColor(integration.status)}
@@ -601,6 +595,6 @@ export function SettingsIntegrationsPage(): ReactElement {
                     )}
                 </CardContent>
             </Card>
-        </FormLayout>
+        </div></div>
     )
 }
