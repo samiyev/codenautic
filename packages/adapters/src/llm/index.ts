@@ -192,6 +192,19 @@ export {
     type PredictionExplainPromptErrorCode,
 } from "./prediction-explain-prompt.error"
 export {
+    OnboardingSummaryPrompt,
+    type IOnboardingSummaryMetricInput,
+    type IOnboardingSummaryPrompt,
+    type IOnboardingSummaryPromptInput,
+    type IOnboardingSummaryPromptOptions,
+} from "./onboarding-summary-prompt"
+export {
+    ONBOARDING_SUMMARY_PROMPT_ERROR_CODE,
+    OnboardingSummaryPromptError,
+    type IOnboardingSummaryPromptErrorDetails,
+    type OnboardingSummaryPromptErrorCode,
+} from "./onboarding-summary-prompt.error"
+export {
     LANGCHAIN_CALLBACK_EVENT_TYPE,
     LangChainCallbackHandler,
     type ILangChainCallbackDispatchInput,
