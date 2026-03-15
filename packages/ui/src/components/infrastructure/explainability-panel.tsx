@@ -1,7 +1,7 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button, Modal, TextArea } from "@heroui/react"
+import { Button, Drawer, TextArea, useOverlayState } from "@heroui/react"
 import { useDynamicTranslation } from "@/lib/i18n"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -54,7 +54,7 @@ function formatImpactLabel(impact: TFactorImpact, t: (key: string) => string): s
 export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElement {
     const { t } = useTranslation(["common"])
     const { td } = useDynamicTranslation(["common"])
-    const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
+    const drawerState = useOverlayState()
     const [snippet, setSnippet] = useState<string>("")
     const exportSnippet = useMemo((): string => {
         const factorSummary = props.factors
@@ -84,7 +84,7 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                         size="sm"
                         variant="secondary"
                         onPress={(): void => {
-                            setIsDrawerOpen(true)
+                            drawerState.open()
                         }}
                     >
                         {t("common:explainabilityPanel.whyThisScore")}
@@ -92,16 +92,16 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                 </div>
             </section>
 
-            <Modal isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-                <Modal.Backdrop>
-                    <Modal.Container className="!items-stretch !justify-end !p-0">
-                        <Modal.Dialog className="!m-0 !h-full !w-[min(92vw,460px)] !rounded-none bg-surface text-foreground">
-                            <div className="border-b border-border px-4 py-3">
+            <Drawer state={drawerState}>
+                <Drawer.Backdrop>
+                    <Drawer.Content placement="right">
+                        <Drawer.Dialog>
+                            <Drawer.Header>
                                 <h2 className={TYPOGRAPHY.sectionTitle}>
                                     {t("common:explainabilityPanel.explainability")}
                                 </h2>
-                            </div>
-                            <div className="flex-1 overflow-y-auto space-y-3 px-4 py-3">
+                            </Drawer.Header>
+                            <Drawer.Body>
                                 <dl className="grid grid-cols-[130px_1fr] gap-x-2 gap-y-2 text-sm">
                                     <dt className="text-muted">
                                         {t("common:explainabilityPanel.signal")}
@@ -190,11 +190,11 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                                         />
                                     ) : null}
                                 </section>
-                            </div>
-                        </Modal.Dialog>
-                    </Modal.Container>
-                </Modal.Backdrop>
-            </Modal>
+                            </Drawer.Body>
+                        </Drawer.Dialog>
+                    </Drawer.Content>
+                </Drawer.Backdrop>
+            </Drawer>
         </>
     )
 }
