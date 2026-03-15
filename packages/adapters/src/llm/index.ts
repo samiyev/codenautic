@@ -102,6 +102,15 @@ export {
     type IOpenRouterProviderErrorDetails,
 } from "./openrouter-provider.error"
 export {
+    CerebrasProvider,
+    type ICerebrasClient,
+    type ICerebrasProviderOptions,
+} from "./cerebras-provider"
+export {
+    CerebrasProviderError,
+    type ICerebrasProviderErrorDetails,
+} from "./cerebras-provider.error"
+export {
     AnthropicRequestAcl,
     AnthropicResponseAcl,
     LLM_ACL_PROVIDER,
