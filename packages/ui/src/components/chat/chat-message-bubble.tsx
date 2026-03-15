@@ -157,10 +157,6 @@ function renderCodeReferenceLink(
                     }
 
                     event.preventDefault()
-                    if (typeof window === "undefined" || typeof window.open !== "function") {
-                        return
-                    }
-
                     window.open(href, "_blank", "noopener,noreferrer")
                 }}
                 rel="noreferrer"
