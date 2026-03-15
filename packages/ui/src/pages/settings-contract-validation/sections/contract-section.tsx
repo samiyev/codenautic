@@ -37,7 +37,9 @@ export function ContractSection({ state }: IContractSectionProps): ReactElement 
                         aria-label={t("settings:ariaLabel.contractValidation.contractJson")}
                         className="min-h-[250px]"
                         value={state.rawContract}
-                        onChange={(e): void => { state.setRawContract(e.target.value) }}
+                        onChange={(e): void => {
+                            state.setRawContract(e.target.value)
+                        }}
                     />
                     <div className="flex gap-2">
                         <Button variant="primary" onPress={state.handleValidateContract}>

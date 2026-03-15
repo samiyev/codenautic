@@ -33,7 +33,7 @@ export function DriftAlertsSection({ state }: IDriftAlertsSectionProps): ReactEl
                 <p className={TYPOGRAPHY.sectionTitle}>Drift alert configuration</p>
             </CardHeader>
             <CardContent className="space-y-3">
-                <p className="text-sm text-text-secondary">
+                <p className="text-sm text-muted">
                     Configure drift alerts by severity threshold, violation count, and delivery
                     channels.
                 </p>
