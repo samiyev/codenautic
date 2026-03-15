@@ -5,11 +5,9 @@ import { App } from "@/app/app"
 import "@/app/globals.css"
 import { initializeI18n } from "@/lib/i18n/i18n"
 import { syncHtmlLangAttribute } from "@/lib/i18n/use-locale"
-import { initializeTheme } from "@/lib/theme/use-theme"
 import { initializeSentryBrowser } from "@/lib/monitoring/sentry"
 import { initializeWebVitalsMonitoring } from "@/lib/monitoring/web-vitals"
 
-initializeTheme()
 const isSentryInitialized = initializeSentryBrowser(import.meta.env)
 initializeWebVitalsMonitoring({
     enabled: isSentryInitialized,
