@@ -150,6 +150,18 @@ export {
     type LangSmithTracerErrorCode,
 } from "./langsmith-tracer.error"
 export {
+    LangSmithTracingService,
+    type ILangSmithTracingClient,
+    type ILangSmithTracingService,
+    type ILangSmithTracingServiceOptions,
+} from "./langsmith-tracing-service"
+export {
+    LANGSMITH_TRACING_SERVICE_ERROR_CODE,
+    LangSmithTracingServiceError,
+    type ILangSmithTracingServiceErrorDetails,
+    type LangSmithTracingServiceErrorCode,
+} from "./langsmith-tracing-service.error"
+export {
     LANGCHAIN_CALLBACK_EVENT_TYPE,
     LangChainCallbackHandler,
     type ILangChainCallbackDispatchInput,
