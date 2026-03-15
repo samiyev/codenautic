@@ -28,6 +28,12 @@ export {
     type IAstCrossFileReferenceResolutionErrorDetails,
 } from "./ast-cross-file-reference-resolution.error"
 export {
+    AST_CROSS_FILE_ANALYZER_ERROR_CODE,
+    AstCrossFileAnalyzerError,
+    type AstCrossFileAnalyzerErrorCode,
+    type IAstCrossFileAnalyzerErrorDetails,
+} from "./ast-cross-file-analyzer.error"
+export {
     AST_CODE_CHUNK_EMBEDDING_GENERATOR_ERROR_CODE,
     AstCodeChunkEmbeddingGeneratorError,
     type AstCodeChunkEmbeddingGeneratorErrorCode,
@@ -141,6 +147,12 @@ export {
     type IAstSemanticModuleInsight,
     type IAstSemanticModuleMetrics,
 } from "./ast-semantic-code-understanding.service"
+export {
+    AstCrossFileAnalyzer,
+    type IAstCrossFileAnalysisContext,
+    type IAstCrossFileAnalyzerFile,
+    type IAstCrossFileAnalyzerInput,
+} from "./ast-cross-file-analyzer"
 export {
     AST_CROSS_FILE_REFERENCE_TYPE,
     AstCrossFileReferenceResolutionService,
