@@ -5,14 +5,13 @@ import {
     DataFreshnessPanel,
     type IProvenanceContext,
 } from "@/components/infrastructure/data-freshness-panel"
-import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 import { ExplainabilityPanel } from "@/components/infrastructure/explainability-panel"
 import {
     DashboardDateRangeFilter,
     type TDashboardDateRange,
 } from "@/components/dashboard/dashboard-date-range-filter"
 import { type IMetricGridMetric, MetricsGrid } from "@/components/dashboard/metrics-grid"
-import { Alert, Button, Card, CardContent, CardHeader } from "@heroui/react"
+import { Alert, Button, Card, CardContent, CardHeader, Table } from "@heroui/react"
 import { FormLayout } from "@/components/forms/form-layout"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -288,46 +287,48 @@ function UsageTable(props: {
                 <p className={TYPOGRAPHY.sectionTitle}>{props.title}</p>
             </CardHeader>
             <CardContent>
-                <EnterpriseDataTable
-                    ariaLabel={`${props.title} token usage`}
-                    columns={[
-                        {
-                            accessor: (row): string => row.key,
-                            header: t("settings:tokenUsage.columnGroup"),
-                            id: "group",
-                            pin: "left",
-                            size: 220,
-                        },
-                        {
-                            accessor: (row): string => formatTokens(row.promptTokens),
-                            header: t("settings:tokenUsage.columnPromptTokens"),
-                            id: "promptTokens",
-                            size: 170,
-                        },
-                        {
-                            accessor: (row): string => formatTokens(row.completionTokens),
-                            header: t("settings:tokenUsage.columnCompletionTokens"),
-                            id: "completionTokens",
-                            size: 180,
-                        },
-                        {
-                            accessor: (row): string => formatTokens(row.totalTokens),
-                            header: t("settings:tokenUsage.columnTotalTokens"),
-                            id: "totalTokens",
-                            size: 170,
-                        },
-                        {
-                            accessor: (row): string => formatCostUsd(row.estimatedCostUsd),
-                            header: t("settings:tokenUsage.columnEstimatedCost"),
-                            id: "estimatedCost",
-                            size: 180,
-                        },
-                    ]}
-                    emptyMessage={t("settings:tokenUsage.noUsageData")}
-                    getRowId={(row): string => row.key}
-                    id={`token-usage-${props.title.toLowerCase().replace(/\s+/g, "-")}`}
-                    rows={props.rows}
-                />
+                <Table>
+                    <Table.ScrollContainer>
+                        <Table.Content aria-label={`${props.title} token usage`}>
+                            <Table.Header>
+                                <Table.Column isRowHeader>
+                                    {t("settings:tokenUsage.columnGroup")}
+                                </Table.Column>
+                                <Table.Column>
+                                    {t("settings:tokenUsage.columnPromptTokens")}
+                                </Table.Column>
+                                <Table.Column>
+                                    {t("settings:tokenUsage.columnCompletionTokens")}
+                                </Table.Column>
+                                <Table.Column>
+                                    {t("settings:tokenUsage.columnTotalTokens")}
+                                </Table.Column>
+                                <Table.Column>
+                                    {t("settings:tokenUsage.columnEstimatedCost")}
+                                </Table.Column>
+                            </Table.Header>
+                            <Table.Body>
+                                {props.rows.map(
+                                    (row): ReactElement => (
+                                        <Table.Row key={row.key}>
+                                            <Table.Cell>{row.key}</Table.Cell>
+                                            <Table.Cell>
+                                                {formatTokens(row.promptTokens)}
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                {formatTokens(row.completionTokens)}
+                                            </Table.Cell>
+                                            <Table.Cell>{formatTokens(row.totalTokens)}</Table.Cell>
+                                            <Table.Cell>
+                                                {formatCostUsd(row.estimatedCostUsd)}
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    ),
+                                )}
+                            </Table.Body>
+                        </Table.Content>
+                    </Table.ScrollContainer>
+                </Table>
             </CardContent>
         </Card>
     )

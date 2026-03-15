@@ -1,7 +1,5 @@
-import { type ReactElement, useMemo, useRef, useState } from "react"
+import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-
-import { useVirtualizer } from "@tanstack/react-virtual"
 
 import { Alert, Button, Card, CardContent, CardHeader, Chip, Input, Switch } from "@heroui/react"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
@@ -218,8 +216,6 @@ export function SettingsWebhooksPage(): ReactElement {
         eventTypesCsv: "",
         url: "",
     })
-    const endpointsListRef = useRef<HTMLDivElement | null>(null)
-    const logsListRef = useRef<HTMLDivElement | null>(null)
 
     const filteredWebhooks = useMemo((): ReadonlyArray<IWebhookEndpoint> => {
         const normalizedSearch = normalizeSearch(search)
@@ -244,18 +240,6 @@ export function SettingsWebhooksPage(): ReactElement {
         return deliveryLogs.filter((entry): boolean => entry.endpointId === activeEndpointId)
     }, [activeEndpointId, deliveryLogs])
 
-    const endpointsVirtualizer = useVirtualizer({
-        count: filteredWebhooks.length,
-        estimateSize: (): number => 132,
-        getScrollElement: (): HTMLDivElement | null => endpointsListRef.current,
-        overscan: 6,
-    })
-    const logsVirtualizer = useVirtualizer({
-        count: selectedEndpointLogs.length,
-        estimateSize: (): number => 84,
-        getScrollElement: (): HTMLDivElement | null => logsListRef.current,
-        overscan: 8,
-    })
 
     const activeEndpoint = webhooks.find((item): boolean => item.id === activeEndpointId)
 
@@ -440,7 +424,9 @@ export function SettingsWebhooksPage(): ReactElement {
                         <div className="flex flex-wrap gap-2">
                             <Input
                                 className="min-w-[200px]"
-                                onChange={(e): void => { setSearch(e.target.value) }}
+                                onChange={(e): void => {
+                                    setSearch(e.target.value)
+                                }}
                                 placeholder={t("settings:webhooks.searchPlaceholder")}
                                 value={search}
                             />
@@ -476,34 +462,18 @@ export function SettingsWebhooksPage(): ReactElement {
                     </CardHeader>
                     <CardContent>
                         <div
-                            ref={endpointsListRef}
                             className="max-h-[520px] overflow-auto rounded-lg border border-border"
                         >
-                            <div
-                                className="relative"
-                                style={{ height: `${endpointsVirtualizer.getTotalSize()}px` }}
-                            >
-                                {endpointsVirtualizer
-                                    .getVirtualItems()
-                                    .map((virtualItem): ReactElement | null => {
-                                        const webhook = filteredWebhooks[virtualItem.index]
-                                        if (webhook === undefined) {
-                                            return null
-                                        }
+                            {filteredWebhooks.map((webhook): ReactElement => {
+                                const isActive = webhook.id === activeEndpointId
 
-                                        const isActive = webhook.id === activeEndpointId
-
-                                        return (
-                                            <article
-                                                className={`absolute left-0 top-0 w-full border-b border-border px-3 py-3 ${
-                                                    isActive ? "bg-primary/10/50" : "bg-surface"
-                                                }`}
-                                                key={webhook.id}
-                                                style={{
-                                                    height: `${virtualItem.size}px`,
-                                                    transform: `translateY(${virtualItem.start}px)`,
-                                                }}
-                                            >
+                                return (
+                                    <article
+                                        className={`border-b border-border px-3 py-3 ${
+                                            isActive ? "bg-accent/10" : "bg-surface"
+                                        }`}
+                                        key={webhook.id}
+                                    >
                                                 <div className="flex items-start justify-between gap-3">
                                                     <button
                                                         className="min-w-0 text-left"
@@ -515,14 +485,14 @@ export function SettingsWebhooksPage(): ReactElement {
                                                         <p className="truncate text-sm font-semibold text-foreground">
                                                             {webhook.url}
                                                         </p>
-                                                        <p className="mt-1 text-xs text-muted-foreground">
+                                                        <p className="mt-1 text-xs text-muted">
                                                             {t("settings:webhooks.events", {
                                                                 events: webhook.eventTypes.join(
                                                                     ", ",
                                                                 ),
                                                             })}
                                                         </p>
-                                                        <p className="text-xs text-muted-foreground">
+                                                        <p className="text-xs text-muted">
                                                             {t("settings:webhooks.secret", {
                                                                 preview: webhook.secretPreview,
                                                             })}
@@ -542,7 +512,10 @@ export function SettingsWebhooksPage(): ReactElement {
                                                     <Switch
                                                         isSelected={webhook.isEnabled}
                                                         onChange={(isSelected: boolean): void => {
-                                                            handleToggleEndpoint(webhook.id, isSelected)
+                                                            handleToggleEndpoint(
+                                                                webhook.id,
+                                                                isSelected,
+                                                            )
                                                         }}
                                                     >
                                                         {t("settings:webhooks.enabled")}
@@ -574,15 +547,14 @@ export function SettingsWebhooksPage(): ReactElement {
                                                         {t("settings:webhooks.delete")}
                                                     </Button>
                                                 </div>
-                                                <p className="mt-1 text-xs text-muted-foreground">
+                                                <p className="mt-1 text-xs text-muted">
                                                     {t("settings:webhooks.lastDelivery")}
                                                     {webhook.lastDeliveryAt ??
                                                         t("settings:webhooks.notDelivered")}
                                                 </p>
-                                            </article>
-                                        )
-                                    })}
-                            </div>
+                                    </article>
+                                )
+                            })}
                         </div>
                     </CardContent>
                 </Card>
@@ -601,32 +573,15 @@ export function SettingsWebhooksPage(): ReactElement {
                             </Alert>
                         ) : null}
                         <div
-                            ref={logsListRef}
                             className="max-h-[520px] overflow-auto rounded-lg border border-border"
                         >
-                            <div
-                                className="relative"
-                                style={{ height: `${logsVirtualizer.getTotalSize()}px` }}
-                            >
-                                {logsVirtualizer
-                                    .getVirtualItems()
-                                    .map((virtualItem): ReactElement | null => {
-                                        const log = selectedEndpointLogs[virtualItem.index]
-                                        if (log === undefined) {
-                                            return null
-                                        }
-
-                                        return (
+                            {selectedEndpointLogs.map((log): ReactElement => (
                                             <article
-                                                className="absolute left-0 top-0 w-full border-b border-border px-3 py-3"
+                                                className="border-b border-border px-3 py-3"
                                                 key={log.id}
-                                                style={{
-                                                    height: `${virtualItem.size}px`,
-                                                    transform: `translateY(${virtualItem.start}px)`,
-                                                }}
                                             >
                                                 <div className="flex items-start justify-between gap-2">
-                                                    <p className="text-xs text-muted-foreground">
+                                                    <p className="text-xs text-muted">
                                                         {log.timestamp}
                                                     </p>
                                                     <Chip
@@ -640,15 +595,13 @@ export function SettingsWebhooksPage(): ReactElement {
                                                 <p className="mt-1 text-sm text-foreground">
                                                     {log.message}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground">
+                                                <p className="text-xs text-muted">
                                                     {t("settings:webhooks.httpStatus", {
                                                         status: log.httpStatus,
                                                     })}
                                                 </p>
                                             </article>
-                                        )
-                                    })}
-                            </div>
+                            ))}
                         </div>
                     </CardContent>
                 </Card>
