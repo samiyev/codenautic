@@ -1,6 +1,90 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
+
+import type { IUseJobsResult } from "@/lib/hooks/queries/use-jobs"
+
+vi.mock("@/lib/hooks/queries/use-jobs", () => {
+    return {
+        useJobs: (): IUseJobsResult => {
+            return {
+                jobsQuery: {
+                    data: {
+                        jobs: [
+                            {
+                                etaLabel: "2m",
+                                id: "JOB-4101",
+                                kind: "review",
+                                retryCount: 0,
+                                retryLimit: 3,
+                                scope: "acme/review-pipeline",
+                                status: "running",
+                            },
+                            {
+                                errorDetails:
+                                    "Queue connection timeout in scan-worker. Last heartbeat was 4m ago.",
+                                etaLabel: "unknown",
+                                id: "JOB-4102",
+                                kind: "scan",
+                                retryCount: 2,
+                                retryLimit: 3,
+                                scope: "acme/api-gateway",
+                                status: "stuck",
+                            },
+                            {
+                                errorDetails:
+                                    "Analytics aggregation failed due to malformed payload from provider.",
+                                etaLabel: "unknown",
+                                id: "JOB-4103",
+                                kind: "analytics",
+                                retryCount: 1,
+                                retryLimit: 2,
+                                scope: "acme/platform-insights",
+                                status: "failed",
+                            },
+                            {
+                                etaLabel: "9m",
+                                id: "JOB-4104",
+                                kind: "review",
+                                retryCount: 0,
+                                retryLimit: 3,
+                                scope: "acme/ui-dashboard",
+                                status: "queued",
+                            },
+                        ],
+                        audit: [
+                            {
+                                action: "retry",
+                                actor: "Morpheus",
+                                id: "J-AUD-001",
+                                jobId: "JOB-4055",
+                                occurredAt: "2026-03-04T08:55:00Z",
+                                outcome: "Retry accepted by queue worker.",
+                            },
+                        ],
+                    },
+                    isLoading: false,
+                    isError: false,
+                    error: null,
+                } as unknown as IUseJobsResult["jobsQuery"],
+                schedulesQuery: {
+                    data: undefined,
+                    isLoading: false,
+                    isError: false,
+                    error: null,
+                } as unknown as IUseJobsResult["schedulesQuery"],
+                performAction: {
+                    mutate: vi.fn(),
+                    isPending: false,
+                } as unknown as IUseJobsResult["performAction"],
+                updateSchedule: {
+                    mutate: vi.fn(),
+                    isPending: false,
+                } as unknown as IUseJobsResult["updateSchedule"],
+            }
+        },
+    }
+})
 
 import { SettingsJobsPage } from "@/pages/settings-jobs.page"
 import { renderWithProviders } from "../utils/render"
