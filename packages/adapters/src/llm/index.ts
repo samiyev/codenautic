@@ -162,6 +162,20 @@ export {
     type LangSmithTracingServiceErrorCode,
 } from "./langsmith-tracing-service.error"
 export {
+    LLM_CALL_LOG_EVENT_KIND,
+    LlmCallLogger,
+    type ILlmCallLogInput,
+    type ILlmCallLogger,
+    type ILlmCallLoggerOptions,
+    type LlmCallLogEventKind,
+} from "./llm-call-logger"
+export {
+    LLM_CALL_LOGGER_ERROR_CODE,
+    LlmCallLoggerError,
+    type ILlmCallLoggerErrorDetails,
+    type LlmCallLoggerErrorCode,
+} from "./llm-call-logger.error"
+export {
     LANGCHAIN_CALLBACK_EVENT_TYPE,
     LangChainCallbackHandler,
     type ILangChainCallbackDispatchInput,
