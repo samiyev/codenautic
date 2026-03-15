@@ -34,6 +34,12 @@ export {
     type IAstFunctionCallChainBuilderErrorDetails,
 } from "./ast-function-call-chain-builder.error"
 export {
+    AST_FUNCTION_BODY_EXTRACTOR_ERROR_CODE,
+    AstFunctionBodyExtractorError,
+    type AstFunctionBodyExtractorErrorCode,
+    type IAstFunctionBodyExtractorErrorDetails,
+} from "./ast-function-body-extractor.error"
+export {
     AST_SEMANTIC_CODE_UNDERSTANDING_ERROR_CODE,
     AstSemanticCodeUnderstandingError,
     type AstSemanticCodeUnderstandingErrorCode,
@@ -306,6 +312,14 @@ export {
     type IAstFunctionCallChainBuilderSummary,
     type IAstFunctionCallChainNode,
 } from "./ast-function-call-chain-builder.service"
+export {
+    AstFunctionBodyExtractorService,
+    type IAstExtractedFunctionBody,
+    type IAstFunctionBodyExtractorInput,
+    type IAstFunctionBodyExtractorResult,
+    type IAstFunctionBodyExtractorService,
+    type IAstFunctionBodyExtractorSummary,
+} from "./ast-function-body-extractor.service"
 export {
     AST_SEMANTIC_MODULE_ROLE,
     AstSemanticCodeUnderstandingService,
