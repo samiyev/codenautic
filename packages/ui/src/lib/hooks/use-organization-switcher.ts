@@ -142,10 +142,7 @@ export function useOrganizationSwitcher(): IOrganizationSwitcherResult {
             return
         }
 
-        const isConfirmed =
-            typeof window === "undefined"
-                ? true
-                : window.confirm(`Switch workspace to ${organization.label}?`)
+        const isConfirmed = window.confirm(`Switch workspace to ${organization.label}?`)
         if (isConfirmed !== true) {
             return
         }
