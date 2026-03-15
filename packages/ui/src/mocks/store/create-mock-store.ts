@@ -52,5 +52,6 @@ export function resetMockStore(): void {
         seedSettings(instance.settings)
         seedRules(instance.rules)
         seedProviders(instance.providers)
+        seedReviews(instance.reviews)
     }
 }
