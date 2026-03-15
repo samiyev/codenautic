@@ -66,16 +66,16 @@ export function ChangeRiskGauge(props: IChangeRiskGaugeProps): ReactElement {
                     <div className="h-full flex-1 bg-danger/70" />
                 </div>
                 <div
-                    className={`flex items-center justify-between ${TYPOGRAPHY.micro} text-muted-foreground`}
+                    className={`flex items-center justify-between ${TYPOGRAPHY.micro} text-muted`}
                 >
                     <span>{t("code-city:riskGauge.green")}</span>
                     <span>{t("code-city:riskGauge.yellow")}</span>
                     <span>{t("code-city:riskGauge.red")}</span>
                 </div>
-                <div className="rounded border border-primary/30 bg-primary/10 p-2">
-                    <p className={`${TYPOGRAPHY.overline} text-on-primary`}>Current risk score</p>
-                    <p className="text-lg font-semibold text-on-primary">{String(clampedScore)}</p>
-                    <p className="text-xs text-on-primary">Zone: {riskZone}</p>
+                <div className="rounded border border-accent/30 bg-accent/10 p-2">
+                    <p className={`${TYPOGRAPHY.overline} text-accent-foreground`}>Current risk score</p>
+                    <p className="text-lg font-semibold text-accent-foreground">{String(clampedScore)}</p>
+                    <p className="text-xs text-accent-foreground">Zone: {riskZone}</p>
                 </div>
             </div>
 
@@ -96,7 +96,7 @@ export function ChangeRiskGauge(props: IChangeRiskGaugeProps): ReactElement {
                             </div>
                             <button
                                 aria-label={`Inspect risk point ${point.label}`}
-                                className="rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
+                                className="rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent"
                                 onClick={(): void => {
                                     props.onSelectHistoricalPoint?.(point)
                                 }}
