@@ -6,7 +6,6 @@ import { TYPOGRAPHY } from "@/lib/constants/typography"
 import {
     Avatar as HeroUIAvatar,
     AvatarFallback,
-
     Dropdown,
     DropdownItem,
     DropdownMenu,
@@ -76,102 +75,108 @@ export function SidebarFooter(props: ISidebarFooterProps): ReactElement {
                     className={`w-full gap-2 rounded-lg px-2 py-1.5 ${isCollapsed ? "justify-center min-w-0" : "justify-start"}`}
                 >
                     {isCollapsed ? (
-                        <HeroUIAvatar className="shrink-0"><AvatarFallback>{displayName.slice(0, 2).toUpperCase()}</AvatarFallback></HeroUIAvatar>
+                        <HeroUIAvatar className="shrink-0">
+                            <AvatarFallback>{displayName.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        </HeroUIAvatar>
                     ) : (
                         <span className="flex w-full items-center gap-2.5">
-                            <HeroUIAvatar className="shrink-0"><AvatarFallback>{displayName.slice(0, 2).toUpperCase()}</AvatarFallback></HeroUIAvatar>
+                            <HeroUIAvatar className="shrink-0">
+                                <AvatarFallback>
+                                    {displayName.slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                            </HeroUIAvatar>
                             <span className="flex min-w-0 flex-1 flex-col">
                                 <span className={`truncate ${TYPOGRAPHY.cardTitle}`}>
                                     {displayName}
                                 </span>
-                                <span className="truncate text-[11px] text-text-subtle">
+                                <span className="truncate text-[11px] text-muted">
                                     {orgLabel}
                                 </span>
                             </span>
                             <ChevronDown
                                 aria-hidden="true"
-                                className="shrink-0 text-text-subtle"
+                                className="shrink-0 text-muted"
                                 size={14}
                             />
                         </span>
                     )}
                 </DropdownTrigger>
                 <DropdownPopover>
-            <DropdownMenu aria-label={displayName}>
-                    <DropdownItem key="identity" className="pointer-events-none opacity-100">
-                        <p className={TYPOGRAPHY.cardTitle}>{displayName}</p>
-                        <p className="text-xs text-text-subtle">{displayEmail}</p>
-                    </DropdownItem>
-                    {props.organizations !== undefined && props.organizations.length > 1 ? (
-                        <DropdownItem
-                            key="org-separator"
-                            className="pointer-events-none opacity-60"
-                        >
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-subtle">
-                                {t("navigation:userMenu.workspace")}
-                            </p>
+                    <DropdownMenu aria-label={displayName}>
+                        <DropdownItem key="identity" className="pointer-events-none opacity-100">
+                            <p className={TYPOGRAPHY.cardTitle}>{displayName}</p>
+                            <p className="text-xs text-muted">{displayEmail}</p>
                         </DropdownItem>
-                    ) : null}
-                    {props.organizations !== undefined
-                        ? props.organizations.map(
-                              (organization): ReactElement => (
-                                  <DropdownItem
-                                      key={`org-${organization.id}`}
-                                      className={
-                                          organization.id === props.activeOrganizationId
-                                              ? "font-medium text-primary"
-                                              : ""
-                                      }
-                                      onPress={(): void => {
-                                          props.onOrganizationChange?.(organization.id)
-                                      }}
-                                  >
-                                      {organization.label}
-                                  </DropdownItem>
-                              ),
-                          )
-                        : null}
-                    <DropdownItem
-                        key="settings"
-                        onPress={(): void => {
-                            props.onOpenSettings?.()
-                        }}
-                    >
-                        {t("navigation:userMenu.openSettings")}
-                    </DropdownItem>
-                    <DropdownItem
-                        key="billing"
-                        onPress={(): void => {
-                            props.onOpenBilling?.()
-                        }}
-                    >
-                        {t("navigation:userMenu.openBilling")}
-                    </DropdownItem>
-                    <DropdownItem
-                        key="help"
-                        onPress={(): void => {
-                            props.onOpenHelp?.()
-                        }}
-                    >
-                        {t("navigation:userMenu.helpDiagnostics")}
-                    </DropdownItem>
-                    {props.onSignOut === undefined ? null : (
+                        {props.organizations !== undefined && props.organizations.length > 1 ? (
+                            <DropdownItem
+                                key="org-separator"
+                                className="pointer-events-none opacity-60"
+                            >
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+                                    {t("navigation:userMenu.workspace")}
+                                </p>
+                            </DropdownItem>
+                        ) : null}
+                        {props.organizations !== undefined
+                            ? props.organizations.map(
+                                  (organization): ReactElement => (
+                                      <DropdownItem
+                                          key={`org-${organization.id}`}
+                                          className={
+                                              organization.id === props.activeOrganizationId
+                                                  ? "font-medium text-accent"
+                                                  : ""
+                                          }
+                                          onPress={(): void => {
+                                              props.onOrganizationChange?.(organization.id)
+                                          }}
+                                      >
+                                          {organization.label}
+                                      </DropdownItem>
+                                  ),
+                              )
+                            : null}
                         <DropdownItem
-                            key="logout"
-                            className="text-danger hover:text-danger"
+                            key="settings"
                             onPress={(): void => {
-                                const signOut = props.onSignOut
-                                if (signOut === undefined) {
-                                    return
-                                }
-
-                                void signOut()
+                                props.onOpenSettings?.()
                             }}
                         >
-                            {t("navigation:userMenu.signOut")}
+                            {t("navigation:userMenu.openSettings")}
                         </DropdownItem>
-                    )}
-                </DropdownMenu>
+                        <DropdownItem
+                            key="billing"
+                            onPress={(): void => {
+                                props.onOpenBilling?.()
+                            }}
+                        >
+                            {t("navigation:userMenu.openBilling")}
+                        </DropdownItem>
+                        <DropdownItem
+                            key="help"
+                            onPress={(): void => {
+                                props.onOpenHelp?.()
+                            }}
+                        >
+                            {t("navigation:userMenu.helpDiagnostics")}
+                        </DropdownItem>
+                        {props.onSignOut === undefined ? null : (
+                            <DropdownItem
+                                key="logout"
+                                className="text-danger hover:text-danger"
+                                onPress={(): void => {
+                                    const signOut = props.onSignOut
+                                    if (signOut === undefined) {
+                                        return
+                                    }
+
+                                    void signOut()
+                                }}
+                            >
+                                {t("navigation:userMenu.signOut")}
+                            </DropdownItem>
+                        )}
+                    </DropdownMenu>
                 </DropdownPopover>
             </Dropdown>
         </div>

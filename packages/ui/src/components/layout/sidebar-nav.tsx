@@ -205,8 +205,8 @@ export function SidebarNav(props: ISidebarNavProps): ReactElement {
                         aria-label={item.label}
                         className={`flex h-8 w-full items-center justify-center rounded-md transition-colors duration-100 ${
                             isActive
-                                ? "bg-primary/12 text-primary"
-                                : "text-text-secondary hover:bg-surface-hover hover:text-foreground"
+                                ? "bg-accent/12 text-accent"
+                                : "text-muted hover:bg-surface-hover hover:text-foreground"
                         } ${item.isDisabled === true ? "pointer-events-none opacity-40" : ""}`}
                         type="button"
                         onClick={handlePress}
@@ -224,14 +224,14 @@ export function SidebarNav(props: ISidebarNavProps): ReactElement {
                     aria-disabled={item.isDisabled === true ? true : undefined}
                     className={`group flex h-8 w-full items-center gap-2.5 rounded-md px-2 text-[13px] transition-colors duration-100 ${
                         isActive
-                            ? "bg-primary/10 font-medium text-primary"
-                            : "text-text-secondary hover:bg-surface-hover hover:text-foreground"
+                            ? "bg-accent/10 font-medium text-accent"
+                            : "text-muted hover:bg-surface-hover hover:text-foreground"
                     } ${item.isDisabled === true ? "pointer-events-none opacity-40" : ""}`}
                     type="button"
                     onClick={handlePress}
                 >
                     <span
-                        className={`inline-flex shrink-0 items-center justify-center ${isActive ? "text-primary" : "text-text-subtle group-hover:text-foreground"}`}
+                        className={`inline-flex shrink-0 items-center justify-center ${isActive ? "text-accent" : "text-muted group-hover:text-foreground"}`}
                     >
                         {item.icon}
                     </span>
