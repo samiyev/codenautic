@@ -38,7 +38,7 @@ function resolveRiskBadgeClassName(riskLevel: TCodeCityTreemapPredictionRiskLeve
         return "border-danger/40 bg-danger/20 text-danger"
     }
     if (riskLevel === "medium") {
-        return "border-warning/40 bg-warning/20 text-on-warning"
+        return "border-warning/40 bg-warning/20 text-warning-foreground"
     }
     return "border-sky-300 bg-sky-500/20 text-sky-900"
 }
@@ -58,7 +58,7 @@ function resolveRowClassName(
     riskLevel: TCodeCityTreemapPredictionRiskLevel,
 ): string {
     const baseClassName = isActive
-        ? "border-primary bg-primary/10"
+        ? "border-accent bg-accent/10"
         : "border-border bg-surface hover:border-border"
     const dashedClassName = riskLevel === "high" ? "border-dashed" : ""
 
