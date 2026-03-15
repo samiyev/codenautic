@@ -16,6 +16,12 @@ export {
     type IAstCodeDeduplicationErrorDetails,
 } from "./ast-code-deduplication.error"
 export {
+    AST_FUNCTION_SIMILARITY_ERROR_CODE,
+    AstFunctionSimilarityError,
+    type AstFunctionSimilarityErrorCode,
+    type IAstFunctionSimilarityErrorDetails,
+} from "./ast-function-similarity.error"
+export {
     AST_SEMANTIC_CODE_UNDERSTANDING_ERROR_CODE,
     AstSemanticCodeUnderstandingError,
     type AstSemanticCodeUnderstandingErrorCode,
@@ -261,6 +267,17 @@ export {
     type IAstCodeDeduplicationSummary,
     type IAstCodeDuplicatePair,
 } from "./ast-code-deduplication.service"
+export {
+    AstFunctionSimilarityService,
+    type AstFunctionSimilarityLlmValidator,
+    type IAstFunctionSimilarityInput,
+    type IAstFunctionSimilarityLlmValidationInput,
+    type IAstFunctionSimilarityLlmValidationResult,
+    type IAstFunctionSimilarityResult,
+    type IAstFunctionSimilarityService,
+    type IAstFunctionSimilarityServiceOptions,
+    type IAstFunctionSimilarityTarget,
+} from "./ast-function-similarity.service"
 export {
     AST_SEMANTIC_MODULE_ROLE,
     AstSemanticCodeUnderstandingService,
