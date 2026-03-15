@@ -18,6 +18,8 @@ import { SettingsCollection } from "./collections/settings-collection"
 import { SsoCollection } from "./collections/sso-collection"
 import { TeamsCollection } from "./collections/teams-collection"
 import { TriageCollection } from "./collections/triage-collection"
+import { TokenUsageCollection } from "./collections/token-usage-collection"
+import { AuditLogsCollection } from "./collections/audit-logs-collection"
 import { WebhooksCollection } from "./collections/webhooks-collection"
 
 /**
@@ -133,6 +135,16 @@ export class MockStore {
     public readonly billing: BillingCollection
 
     /**
+     * Коллекция token usage: записи расхода токенов, агрегация.
+     */
+    public readonly tokenUsage: TokenUsageCollection
+
+    /**
+     * Коллекция audit logs: записи аудит-лога, фильтрация.
+     */
+    public readonly auditLogs: AuditLogsCollection
+
+    /**
      * Создаёт новый экземпляр MockStore с пустыми коллекциями.
      */
     public constructor() {
@@ -157,6 +169,8 @@ export class MockStore {
         this.jobs = new JobsCollection()
         this.webhooks = new WebhooksCollection()
         this.billing = new BillingCollection()
+        this.tokenUsage = new TokenUsageCollection()
+        this.auditLogs = new AuditLogsCollection()
     }
 
     /**
@@ -184,5 +198,7 @@ export class MockStore {
         this.jobs.clear()
         this.webhooks.clear()
         this.billing.clear()
+        this.tokenUsage.clear()
+        this.auditLogs.clear()
     }
 }
