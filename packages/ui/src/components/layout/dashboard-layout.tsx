@@ -118,10 +118,6 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
     }, [])
 
     useEffect((): (() => void) | void => {
-        if (typeof window === "undefined") {
-            return
-        }
-
         const handleKeyboardShortcut = (event: KeyboardEvent): void => {
             if (
                 (event.ctrlKey !== true && event.metaKey !== true) ||
@@ -142,10 +138,6 @@ export function DashboardLayout(props: IDashboardLayoutProps): ReactElement {
     }, [openCommandPalette])
 
     useEffect((): (() => void) | void => {
-        if (typeof window === "undefined") {
-            return
-        }
-
         const handleOpenCommandPalette = (): void => {
             openCommandPalette()
         }
