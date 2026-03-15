@@ -158,7 +158,9 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
                 <p className={`${TYPOGRAPHY.overline} text-accent-foreground`}>
                     {t("code-city:roiCalculator.estimatedRoiScore")}
                 </p>
-                <p className="text-lg font-semibold text-accent-foreground">{String(scenarioRoiScore)}</p>
+                <p className="text-lg font-semibold text-accent-foreground">
+                    {String(scenarioRoiScore)}
+                </p>
                 <p className="text-xs text-accent-foreground">
                     {t("code-city:roiCalculator.selectedFiles", { count: selectedTargets.length })}
                 </p>
