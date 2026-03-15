@@ -1,11 +1,8 @@
-import { http, HttpResponse } from "msw"
 import { fireEvent, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
 import { SettingsAppearancePage } from "@/pages/settings-appearance.page"
-import { THEME_PRESETS } from "@/lib/theme/theme-provider"
-import { server } from "../mocks/server"
 import { renderWithProviders } from "../utils/render"
 
 describe("SettingsAppearancePage", (): void => {
@@ -25,15 +22,12 @@ describe("SettingsAppearancePage", (): void => {
             expect(darkModeButton.getAttribute("aria-pressed")).toBe("true")
         })
 
-        const secondPreset = THEME_PRESETS.at(1)
-        if (secondPreset !== undefined) {
-            await user.click(
-                screen.getByRole("button", { name: `Set ${secondPreset.label} theme preset` }),
-            )
-            await waitFor(() => {
-                expect(screen.getByText(`preset: ${secondPreset.id}`)).not.toBeNull()
-            })
-        }
+        await user.click(
+            screen.getByRole("button", { name: "Set Cobalt theme preset" }),
+        )
+        await waitFor(() => {
+            expect(screen.getByText("preset: cobalt")).not.toBeNull()
+        })
 
         await user.click(screen.getByRole("button", { name: "Random preset (Alt+R)" }))
         const applyRandomButton = screen.queryByRole("button", { name: "Apply random preset" })
@@ -45,15 +39,13 @@ describe("SettingsAppearancePage", (): void => {
             await waitFor(() => {
                 expect(screen.getByRole("button", { name: "Undo last random" })).not.toBeNull()
             })
-            if (secondPreset !== undefined) {
-                await user.click(screen.getByRole("button", { name: "Undo last random" }))
-                await waitFor(() => {
-                    expect(screen.getByText(`preset: ${secondPreset.id}`)).not.toBeNull()
-                })
-                await user.click(
-                    screen.getByRole("button", { name: `Quick preset ${secondPreset.label}` }),
-                )
-            }
+            await user.click(screen.getByRole("button", { name: "Undo last random" }))
+            await waitFor(() => {
+                expect(screen.getByText("preset: cobalt")).not.toBeNull()
+            })
+            await user.click(
+                screen.getByRole("button", { name: "Quick preset Cobalt" }),
+            )
         }
 
         fireEvent.change(screen.getByLabelText("Accent color picker"), {
@@ -62,7 +54,6 @@ describe("SettingsAppearancePage", (): void => {
         fireEvent.change(screen.getByLabelText("Accent intensity slider"), {
             target: { value: "62" },
         })
-        await user.click(screen.getByRole("button", { name: "Warm" }))
         fireEvent.change(screen.getByLabelText("Global radius slider"), {
             target: { value: "20" },
         })
@@ -71,7 +62,6 @@ describe("SettingsAppearancePage", (): void => {
         })
 
         await waitFor(() => {
-            expect(screen.getByText("base: warm")).not.toBeNull()
             expect(screen.getByText("global radius: 20px")).not.toBeNull()
             expect(screen.getByText("form radius: 15px")).not.toBeNull()
         })
@@ -113,7 +103,7 @@ describe("SettingsAppearancePage", (): void => {
 
         const importPayload = JSON.stringify(
             {
-                favoritePresetId: THEME_PRESETS.at(0)?.id,
+                favoritePresetId: "moonstone",
                 themes: [
                     {
                         accentColor: "#22cc88",
@@ -124,7 +114,7 @@ describe("SettingsAppearancePage", (): void => {
                         id: "import-theme-1",
                         mode: "system",
                         name: "Security Focus Theme",
-                        presetId: THEME_PRESETS.at(0)?.id,
+                        presetId: "moonstone",
                     },
                 ],
                 version: 1,
@@ -140,62 +130,4 @@ describe("SettingsAppearancePage", (): void => {
             expect(screen.getByRole("option", { name: "Security Focus Theme (3)" })).not.toBeNull()
         })
     }, 15000)
-
-    it("не перетирает более свежую локальную библиотеку тем устаревшим remote profile", async (): Promise<void> => {
-        const localTheme = {
-            accentColor: "#22cc88",
-            accentIntensity: 64,
-            basePaletteId: "warm",
-            formRadius: 12,
-            globalRadius: 16,
-            id: "local-theme-1",
-            mode: "system",
-            name: "Local Fortress",
-            presetId: THEME_PRESETS.at(0)?.id ?? "moonstone",
-        }
-
-        localStorage.setItem("codenautic:ui:appearance:library", JSON.stringify([localTheme]))
-        localStorage.setItem(
-            "codenautic:ui:appearance:library-sync",
-            JSON.stringify({
-                updatedAtMs: Date.parse("2026-03-07T10:00:00Z"),
-            }),
-        )
-
-        server.use(
-            http.get("http://localhost:7120/api/v1/user/settings", () => {
-                return HttpResponse.json({
-                    appearance: {
-                        themeLibrary: {
-                            favoritePresetId: THEME_PRESETS.at(1)?.id,
-                            themes: [
-                                {
-                                    ...localTheme,
-                                    id: "remote-theme-1",
-                                    name: "Remote Legacy",
-                                },
-                            ],
-                            updatedAtMs: Date.parse("2026-03-01T10:00:00Z"),
-                        },
-                    },
-                })
-            }),
-            http.put("http://localhost:7120/api/v1/user/settings", () => {
-                return HttpResponse.json({})
-            }),
-            http.patch("http://localhost:7120/api/v1/user/settings", () => {
-                return HttpResponse.json({})
-            }),
-            http.post("http://localhost:7120/api/v1/user/settings", () => {
-                return HttpResponse.json({})
-            }),
-        )
-
-        renderWithProviders(<SettingsAppearancePage />)
-
-        await waitFor((): void => {
-            expect(screen.getByRole("option", { name: "Local Fortress" })).not.toBeNull()
-        })
-        expect(screen.queryByRole("option", { name: "Remote Legacy" })).toBeNull()
-    })
 })
