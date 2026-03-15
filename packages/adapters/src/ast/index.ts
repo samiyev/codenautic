@@ -82,6 +82,12 @@ export {
     type IAstServiceResultCachingErrorDetails,
 } from "./ast-service-result-caching.error"
 export {
+    AST_SERVICE_MULTI_REPO_GRAPH_FEDERATION_ERROR_CODE,
+    AstServiceMultiRepoGraphFederationError,
+    type AstServiceMultiRepoGraphFederationErrorCode,
+    type IAstServiceMultiRepoGraphFederationErrorDetails,
+} from "./ast-service-multi-repo-graph-federation.error"
+export {
     AST_SEMANTIC_CODE_UNDERSTANDING_ERROR_CODE,
     AstSemanticCodeUnderstandingError,
     type AstSemanticCodeUnderstandingErrorCode,
@@ -464,6 +470,22 @@ export {
     type IAstServiceResultCachingService,
     type IAstServiceResultCachingServiceOptions,
 } from "./ast-service-result-caching.service"
+export {
+    AstServiceMultiRepoGraphFederationService,
+    type AstServiceMultiRepoGraphFederationNow,
+    type AstServiceMultiRepoGraphFederationShouldRetry,
+    type AstServiceMultiRepoGraphFederationSleep,
+    type IAstFederatedCodeGraphEdge,
+    type IAstFederatedCodeGraphNode,
+    type IAstFederatedRepositorySummary,
+    type IAstMultiRepoGraphFederationResult,
+    type IAstMultiRepoGraphFederationSummary,
+    type IAstServiceMultiRepoGraphFederationInput,
+    type IAstServiceMultiRepoGraphFederationRepositoryInput,
+    type IAstServiceMultiRepoGraphFederationRetryPolicyInput,
+    type IAstServiceMultiRepoGraphFederationService,
+    type IAstServiceMultiRepoGraphFederationServiceOptions,
+} from "./ast-service-multi-repo-graph-federation.service"
 export {
     AST_SEMANTIC_MODULE_ROLE,
     AstSemanticCodeUnderstandingService,
