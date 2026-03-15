@@ -58,12 +58,12 @@ function resolveTrendBadgeClassName(trend: TDistrictTrendDirection): string {
     if (trend === "degrading") {
         return "border-danger/40 bg-danger/15 text-danger"
     }
-    return "border-border bg-surface-muted text-foreground"
+    return "border-border bg-surface-secondary text-foreground"
 }
 
 function resolveRowClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-primary bg-primary/10"
+        ? "border-accent bg-accent/10"
         : "border-border bg-surface hover:border-border"
     return `w-full rounded-lg border p-2 text-left transition ${baseClassName}`
 }
@@ -132,7 +132,7 @@ function TrendDirectionIcon(props: { readonly trend: TDistrictTrendDirection }):
     return (
         <svg
             aria-hidden="true"
-            className="h-3.5 w-3.5 text-muted-foreground"
+            className="h-3.5 w-3.5 text-muted"
             fill="none"
             viewBox="0 0 24 24"
         >

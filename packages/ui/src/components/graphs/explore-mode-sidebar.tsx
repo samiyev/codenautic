@@ -97,7 +97,7 @@ export function ExploreModeSidebar(props: IExploreModeSidebarProps): ReactElemen
                                     <p className={`mt-1 ${TYPOGRAPHY.captionMuted}`}>
                                         {path.description}
                                     </p>
-                                    <p className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">
+                                    <p className="mt-1 text-[11px] uppercase tracking-wide text-muted">
                                         {t("code-city:exploreSidebar.rolePrefix")} {path.role} ·{" "}
                                         {t("code-city:exploreSidebar.filesPrefix")}{" "}
                                         {String(path.fileChainIds.length)}
@@ -107,7 +107,7 @@ export function ExploreModeSidebar(props: IExploreModeSidebarProps): ReactElemen
                                     aria-label={t("code-city:exploreSidebar.navigateAriaLabel", {
                                         title: path.title,
                                     })}
-                                    className="rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
+                                    className="rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent"
                                     onClick={(): void => {
                                         props.onNavigatePath(path)
                                     }}
