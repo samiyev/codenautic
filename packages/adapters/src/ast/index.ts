@@ -106,6 +106,12 @@ export {
     type IAstMemoryPressureManagerErrorDetails,
 } from "./ast-memory-pressure-manager.error"
 export {
+    AST_STREAMING_METRICS_COLLECTOR_ERROR_CODE,
+    AstStreamingMetricsCollectorError,
+    type AstStreamingMetricsCollectorErrorCode,
+    type IAstStreamingMetricsCollectorErrorDetails,
+} from "./ast-streaming-metrics-collector.error"
+export {
     AST_WORKER_TASK_EXECUTOR_ERROR_CODE,
     AstWorkerTaskExecutorError,
     type AstWorkerTaskExecutorErrorCode,
@@ -388,6 +394,18 @@ export {
     type IAstMemoryPressureRetryPolicy,
     type IAstMemoryUsageSample,
 } from "./ast-memory-pressure-manager.service"
+export {
+    AstStreamingMetricsCollectorService,
+    type AstStreamingMetricsCollectorNow,
+    type AstStreamingMetricsCollectorShouldRetry,
+    type AstStreamingMetricsCollectorSleep,
+    type IAstStreamingMetricsCheckpoint,
+    type IAstStreamingMetricsCollectorInput,
+    type IAstStreamingMetricsCollectorRetryPolicy,
+    type IAstStreamingMetricsCollectorService,
+    type IAstStreamingMetricsCollectorServiceOptions,
+    type IAstStreamingMetricsCollectorSnapshot,
+} from "./ast-streaming-metrics-collector.service"
 export {
     AstWorkerTaskExecutorService,
     type AstWorkerTaskExecutorNow,
