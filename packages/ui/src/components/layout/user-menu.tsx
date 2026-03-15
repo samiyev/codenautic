@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next"
 import {
     Avatar as HeroUIAvatar,
     AvatarFallback,
-
     Dropdown,
     DropdownItem,
     DropdownMenu,
@@ -49,9 +48,7 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
 
     return (
         <Dropdown>
-            <DropdownTrigger
-                className="h-8 min-h-8 rounded-full px-1"
-            >
+            <DropdownTrigger className="h-8 min-h-8 rounded-full px-1">
                 <span className="inline-flex items-center gap-2 rounded-full">
                     <HeroUIAvatar>
                         <AvatarFallback>{initials}</AvatarFallback>
@@ -63,52 +60,52 @@ export function UserMenu(props: IUserMenuProps): ReactElement {
                 </span>
             </DropdownTrigger>
             <DropdownPopover>
-            <DropdownMenu aria-label={t("navigation:userMenuAriaLabel")}>
-                <DropdownItem key="name">{props.userName ?? defaultName}</DropdownItem>
-                <DropdownItem key="email">
-                    {props.userEmail ?? t("navigation:userMenu.defaultEmail")}
-                </DropdownItem>
-                <DropdownItem
-                    key="settings"
-                    onPress={(): void => {
-                        props.onOpenSettings?.()
-                    }}
-                >
-                    {t("navigation:userMenu.openSettings")}
-                </DropdownItem>
-                <DropdownItem
-                    key="billing"
-                    onPress={(): void => {
-                        props.onOpenBilling?.()
-                    }}
-                >
-                    {t("navigation:userMenu.openBilling")}
-                </DropdownItem>
-                <DropdownItem
-                    key="help"
-                    onPress={(): void => {
-                        props.onOpenHelp?.()
-                    }}
-                >
-                    {t("navigation:userMenu.helpDiagnostics")}
-                </DropdownItem>
-                {props.onSignOut === undefined ? null : (
+                <DropdownMenu aria-label={t("navigation:userMenuAriaLabel")}>
+                    <DropdownItem key="name">{props.userName ?? defaultName}</DropdownItem>
+                    <DropdownItem key="email">
+                        {props.userEmail ?? t("navigation:userMenu.defaultEmail")}
+                    </DropdownItem>
                     <DropdownItem
-                        key="logout"
-                        className="text-danger hover:text-danger"
+                        key="settings"
                         onPress={(): void => {
-                            const signOut = props.onSignOut
-                            if (signOut === undefined) {
-                                return
-                            }
-
-                            void signOut()
+                            props.onOpenSettings?.()
                         }}
                     >
-                        {t("navigation:userMenu.signOut")}
+                        {t("navigation:userMenu.openSettings")}
                     </DropdownItem>
-                )}
-            </DropdownMenu>
+                    <DropdownItem
+                        key="billing"
+                        onPress={(): void => {
+                            props.onOpenBilling?.()
+                        }}
+                    >
+                        {t("navigation:userMenu.openBilling")}
+                    </DropdownItem>
+                    <DropdownItem
+                        key="help"
+                        onPress={(): void => {
+                            props.onOpenHelp?.()
+                        }}
+                    >
+                        {t("navigation:userMenu.helpDiagnostics")}
+                    </DropdownItem>
+                    {props.onSignOut === undefined ? null : (
+                        <DropdownItem
+                            key="logout"
+                            className="text-danger hover:text-danger"
+                            onPress={(): void => {
+                                const signOut = props.onSignOut
+                                if (signOut === undefined) {
+                                    return
+                                }
+
+                                void signOut()
+                            }}
+                        >
+                            {t("navigation:userMenu.signOut")}
+                        </DropdownItem>
+                    )}
+                </DropdownMenu>
             </DropdownPopover>
         </Dropdown>
     )

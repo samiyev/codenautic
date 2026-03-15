@@ -69,7 +69,7 @@ export function ThemeToggle(props: IThemeToggleProps): ReactElement {
                     }}
                     presets={presets}
                 />
-                <p className="px-1 text-xs text-text-secondary">
+                <p className="px-1 text-xs text-muted">
                     Preset: {getPresetLabel(presets, preset)}
                 </p>
                 <p className="sr-only" aria-live="polite">
@@ -138,7 +138,7 @@ function ThemePresetButtons({
             {presets.map((themePreset): ReactElement => {
                 const isActive = themePreset.id === currentPreset
                 const style = {
-                    background: `linear-gradient(135deg, ${themePreset.light.primary} 0%, ${themePreset.light.accent} 45%, ${themePreset.light.surface} 100%)`,
+                    background: `linear-gradient(135deg, ${themePreset.light.accent} 0%, ${themePreset.light.success} 45%, ${themePreset.light.surface} 100%)`,
                 }
 
                 return (
@@ -171,7 +171,6 @@ function ThemePalettePreview({
 }: {
     readonly palette:
         | {
-              readonly primary: string
               readonly accent: string
               readonly success: string
           }
@@ -185,7 +184,7 @@ function ThemePalettePreview({
         <div aria-hidden="true" className="mt-2 flex gap-2">
             <span
                 className="h-3 w-8 rounded-full border border-border"
-                style={{ backgroundColor: palette.primary }}
+                style={{ backgroundColor: palette.accent }}
             />
             <span
                 className="h-3 w-8 rounded-full border border-border"
@@ -211,12 +210,12 @@ function getPresetLabel(presets: ReadonlyArray<IThemePreset>, presetId: string):
 function getPresetPalette(
     presets: ReadonlyArray<{
         readonly id: string
-        readonly light: Record<"primary" | "accent" | "success", string>
-        readonly dark: Record<"primary" | "accent" | "success", string>
+        readonly light: Record<"accent" | "success", string>
+        readonly dark: Record<"accent" | "success", string>
     }>,
     presetId: string,
     resolvedMode: "light" | "dark",
-): { readonly primary: string; readonly accent: string; readonly success: string } | undefined {
+): { readonly accent: string; readonly success: string } | undefined {
     const activePreset = presets.find((item): boolean => item.id === presetId)
     if (activePreset === undefined) {
         return undefined
