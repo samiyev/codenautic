@@ -40,7 +40,6 @@ vi.mock("@/lib/motion", () => ({
     CHART_DATA_TRANSITION: {},
     CHART_DATA_TRANSITION_NONE: {},
     STAGGER_DELAY: 0,
-    STAGGER_ITEM_VARIANTS: {},
     AnimatedAlert: ({
         children,
         isVisible,
