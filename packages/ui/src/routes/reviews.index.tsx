@@ -7,11 +7,7 @@ import { RouteSuspenseFallback } from "@/app/route-suspense-fallback"
 import { AuthBoundary } from "@/lib/auth/auth-boundary"
 import { DashboardLayout } from "@/components/layout"
 import { type ICcrFilters } from "@/pages/ccr-management.page"
-import {
-    buildSearchFromRoute,
-    persistReviewsFilters,
-    sanitizeForRouter,
-} from "./reviews"
+import { buildSearchFromRoute, persistReviewsFilters, sanitizeForRouter } from "./reviews"
 
 const LazyCcrManagementPage = lazy(
     async (): Promise<{
