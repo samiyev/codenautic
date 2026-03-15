@@ -12,7 +12,6 @@ import {
     Switch,
     Table,
 } from "@heroui/react"
-import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -483,9 +482,7 @@ function ByokCard(props: {
                 <p className={TYPOGRAPHY.sectionTitle}>{t("settings:organization.byokTitle")}</p>
             </CardHeader>
             <CardContent className="space-y-3">
-                <p className="text-sm text-muted">
-                    {t("settings:organization.byokDescription")}
-                </p>
+                <p className="text-sm text-muted">{t("settings:organization.byokDescription")}</p>
                 <div className="flex flex-wrap items-center gap-4">
                     <Switch
                         isSelected={props.byok.gitProviderTokenConfigured}
@@ -702,10 +699,7 @@ export function SettingsOrganizationPage(): ReactElement {
     }
 
     return (
-        <FormLayout
-            title={t("settings:organization.pageTitle")}
-            description={t("settings:organization.pageSubtitle")}
-        >
+        <div className="space-y-6 mx-auto max-w-[1400px]"><div className="space-y-1.5"><h1 className={TYPOGRAPHY.pageTitle}>{t("settings:organization.pageTitle")}</h1><p className={TYPOGRAPHY.bodyMuted}>{t("settings:organization.pageSubtitle")}</p></div><div className="space-y-6">
             {billingError === undefined ? null : <Alert color="danger">{billingError}</Alert>}
 
             <OrganizationProfileCard
@@ -750,6 +744,6 @@ export function SettingsOrganizationPage(): ReactElement {
                 }}
             />
             <AuditLogsCard logs={auditLogs} />
-        </FormLayout>
+        </div></div>
     )
 }
