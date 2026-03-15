@@ -197,7 +197,9 @@ export function SettingsSsoPage(): ReactElement {
                         {isSamlSaved ? (
                             <Alert status="success">
                                 <Alert.Title>{t("settings:sso.samlConfigSavedTitle")}</Alert.Title>
-                                <Alert.Description>{t("settings:sso.samlConfigSavedDescription")}</Alert.Description>
+                                <Alert.Description>
+                                    {t("settings:sso.samlConfigSavedDescription")}
+                                </Alert.Description>
                             </Alert>
                         ) : null}
                     </CardContent>
@@ -250,7 +252,7 @@ export function SettingsSsoPage(): ReactElement {
                                 )
                             }}
                         />
-                        <p className="text-xs text-text-secondary">
+                        <p className="text-xs text-muted">
                             {t("settings:sso.secretPreview", {
                                 preview: getMaskedSecret(
                                     oidcConfig.clientSecret,
@@ -274,7 +276,9 @@ export function SettingsSsoPage(): ReactElement {
                         {isOidcSaved ? (
                             <Alert status="success">
                                 <Alert.Title>{t("settings:sso.oidcConfigSavedTitle")}</Alert.Title>
-                                <Alert.Description>{t("settings:sso.oidcConfigSavedDescription")}</Alert.Description>
+                                <Alert.Description>
+                                    {t("settings:sso.oidcConfigSavedDescription")}
+                                </Alert.Description>
                             </Alert>
                         ) : null}
                     </CardContent>

@@ -152,7 +152,7 @@ function TeamDirectoryCard(props: {
                             key={team.id}
                             className={`w-full rounded-lg border px-3 py-2 text-left transition ${
                                 isActive
-                                    ? "border-primary bg-[color:color-mix(in_oklab,var(--primary)_12%,var(--surface))]"
+                                    ? "border-accent bg-[color:color-mix(in_oklab,var(--accent)_12%,var(--surface))]"
                                     : "border-border bg-surface"
                             }`}
                             type="button"
@@ -161,8 +161,8 @@ function TeamDirectoryCard(props: {
                             }}
                         >
                             <p className="text-sm font-semibold text-foreground">{team.name}</p>
-                            <p className="text-xs text-text-secondary">{team.description}</p>
-                            <p className="mt-1 text-xs text-text-secondary">
+                            <p className="text-xs text-muted">{team.description}</p>
+                            <p className="mt-1 text-xs text-muted">
                                 {t("settings:team.membersCount", {
                                     count: team.members.length,
                                     repos: team.repositories.length,
@@ -203,7 +203,9 @@ function TeamMembersCard(props: {
                         aria-label={t("settings:team.inviteMemberByEmail")}
                         placeholder="new.member@acme.dev"
                         value={props.inviteEmail}
-                        onChange={(e): void => { props.onInviteEmailChange(e.target.value) }}
+                        onChange={(e): void => {
+                            props.onInviteEmailChange(e.target.value)
+                        }}
                     />
                     <select
                         aria-label={t("settings:ariaLabel.team.inviteRole")}
@@ -241,7 +243,7 @@ function TeamMembersCard(props: {
                     </div>
                 </div>
                 {props.invitePolicy.reason === undefined || isInviteDisabled === false ? null : (
-                    <p className="text-xs text-text-secondary">
+                    <p className="text-xs text-muted">
                         {t("settings:team.invitePolicy", { reason: props.invitePolicy.reason })}
                     </p>
                 )}
@@ -258,7 +260,7 @@ function TeamMembersCard(props: {
                                         <p className="text-sm font-semibold text-foreground">
                                             {member.name}
                                         </p>
-                                        <p className="text-xs text-text-secondary">
+                                        <p className="text-xs text-muted">
                                             {member.email}
                                         </p>
                                     </div>
@@ -306,7 +308,7 @@ function TeamMembersCard(props: {
                 </ul>
                 {props.roleManagementPolicy.reason === undefined ||
                 isRoleManagementHidden ? null : (
-                    <p className="text-xs text-text-secondary">
+                    <p className="text-xs text-muted">
                         {t("settings:team.rolePolicy", {
                             reason: props.roleManagementPolicy.reason,
                         })}
@@ -342,7 +344,7 @@ function TeamRepositoriesCard(props: {
                         >
                             <input
                                 checked={isSelected}
-                                className="h-4 w-4 accent-primary"
+                                className="h-4 w-4 accent-accent"
                                 disabled={isAssignmentDisabled}
                                 type="checkbox"
                                 onChange={(event): void => {
@@ -358,7 +360,7 @@ function TeamRepositoriesCard(props: {
                 })}
                 {props.assignmentPolicy.reason === undefined ||
                 isAssignmentDisabled === false ? null : (
-                    <p className="text-xs text-text-secondary">
+                    <p className="text-xs text-muted">
                         {t("settings:team.repositoryPolicy", {
                             reason: props.assignmentPolicy.reason,
                         })}
@@ -562,7 +564,9 @@ export function SettingsTeamPage(): ReactElement {
             description={t("settings:team.pageSubtitle")}
         >
             <Alert status="accent">
-                <Alert.Title>{t("settings:team.rbacPreviewRole", { role: activeUiRole })}</Alert.Title>
+                <Alert.Title>
+                    {t("settings:team.rbacPreviewRole", { role: activeUiRole })}
+                </Alert.Title>
                 <Alert.Description>{t("settings:team.rbacDescription")}</Alert.Description>
             </Alert>
 
@@ -575,13 +579,17 @@ export function SettingsTeamPage(): ReactElement {
                         aria-label={t("settings:team.teamName")}
                         placeholder={t("settings:team.teamNamePlaceholder")}
                         value={newTeamName}
-                        onChange={(e): void => { setNewTeamName(e.target.value) }}
+                        onChange={(e): void => {
+                            setNewTeamName(e.target.value)
+                        }}
                     />
                     <Input
                         aria-label={t("settings:team.description")}
                         placeholder={t("settings:team.descriptionPlaceholder")}
                         value={newTeamDescription}
-                        onChange={(e): void => { setNewTeamDescription(e.target.value) }}
+                        onChange={(e): void => {
+                            setNewTeamDescription(e.target.value)
+                        }}
                     />
                     {createTeamPolicy.visibility === "hidden" ? null : (
                         <div className="flex items-end">
@@ -598,7 +606,7 @@ export function SettingsTeamPage(): ReactElement {
             </Card>
             {createTeamPolicy.reason === undefined ||
             createTeamPolicy.visibility === "enabled" ? null : (
-                <p className="text-xs text-text-secondary">
+                <p className="text-xs text-muted">
                     {t("settings:team.createTeamPolicy", { reason: createTeamPolicy.reason })}
                 </p>
             )}
@@ -606,11 +614,15 @@ export function SettingsTeamPage(): ReactElement {
             {activeTeam === undefined ? (
                 <Alert status="warning">
                     <Alert.Title>{t("settings:team.noActiveTeamTitle")}</Alert.Title>
-                    <Alert.Description>{t("settings:team.noActiveTeamDescription")}</Alert.Description>
+                    <Alert.Description>
+                        {t("settings:team.noActiveTeamDescription")}
+                    </Alert.Description>
                 </Alert>
             ) : (
                 <Alert status="accent">
-                    <Alert.Title>{t("settings:team.activeTeamTitle", { name: activeTeam.name })}</Alert.Title>
+                    <Alert.Title>
+                        {t("settings:team.activeTeamTitle", { name: activeTeam.name })}
+                    </Alert.Title>
                     <Alert.Description>
                         {t("settings:team.activeTeamDescription", {
                             members: activeTeam.members.length,
