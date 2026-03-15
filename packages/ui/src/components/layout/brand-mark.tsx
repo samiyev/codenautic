@@ -20,8 +20,8 @@ export function BrandMark(props: IBrandMarkProps): ReactElement {
 
     return (
         <div className="flex items-center gap-2 px-1 py-1">
-            <div className="brand-mark-logo relative flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-primary">
-                <span className="text-xs font-bold text-primary-foreground">CN</span>
+            <div className="brand-mark-logo relative flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-accent">
+                <span className="text-xs font-bold text-accent-foreground">CN</span>
             </div>
             {isCompact !== true ? (
                 <span className="font-display text-sm font-semibold tracking-tight text-foreground">

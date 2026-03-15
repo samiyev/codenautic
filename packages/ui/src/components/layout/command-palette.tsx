@@ -314,7 +314,7 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
                     role="listbox"
                 >
                     {filteredItems.length === 0 ? (
-                        <p className="px-3 py-4 text-sm text-text-subtle">
+                        <p className="px-3 py-4 text-sm text-muted">
                             {t("navigation:commandPalette.noResults")}
                         </p>
                     ) : (
@@ -324,7 +324,7 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
                                     key={section.group}
                                     className="border-b border-border last:border-b-0"
                                 >
-                                    <p className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-text-subtle">
+                                    <p className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted">
                                         {translateGroupLabel(section.group)}
                                     </p>
                                     {section.items.map((item): ReactElement => {
@@ -339,7 +339,7 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
                                                 key={item.id}
                                                 aria-selected={isActive}
                                                 className={`grid grid-cols-[1fr_auto] items-center gap-2 px-3 py-2 text-sm transition-colors duration-150 ${
-                                                    isActive ? "bg-primary/10" : "bg-transparent"
+                                                    isActive ? "bg-accent/10" : "bg-transparent"
                                                 }`}
                                                 id={createCommandPaletteOptionId(
                                                     item.id,
@@ -368,7 +368,7 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
                                                 </button>
                                                 <button
                                                     aria-label={`${isPinned ? t("navigation:commandPalette.pinned") : t("navigation:commandPalette.pin")} ${item.label}`}
-                                                    className="rounded border border-border px-2 py-1 text-[11px] text-text-secondary transition-colors duration-150 hover:bg-surface-muted"
+                                                    className="rounded border border-border px-2 py-1 text-[11px] text-muted transition-colors duration-150 hover:bg-surface-secondary"
                                                     type="button"
                                                     onClick={(): void => {
                                                         togglePinned(item.path)
