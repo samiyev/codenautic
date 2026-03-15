@@ -143,6 +143,7 @@ const TIMELINE_PLAYBACK_INTERVAL_MS = 1200
 const CAUSAL_REPLAY_BASE_INTERVAL_MS = 1500
 const CAUSAL_REPLAY_SPEED_OPTIONS = [0.5, 1, 2] as const
 const CHAIN_NAVIGATION_INTERVAL_MS = 900
+const EMPTY_FILE_IDS: ReadonlyArray<string> = []
 const GPU_MEMORY_BUDGET_MB = 220
 const ESTIMATED_GPU_COST_PER_BUILDING_MB = 1.1
 const WEAK_DEVICE_MAX_CORES = 4
@@ -216,31 +217,36 @@ function createCodeCityTimelineSnapshots(
  * @param files Набор файлов в текущем snapshot.
  * @returns Решение по режиму рендера + причина.
  */
-function resolveCodeCityRenderCapability(
-    files: ReadonlyArray<ICodeCity3DSceneFileDescriptor>,
-): ICodeCity3DRenderCapability {
-    if (typeof document === "undefined") {
-        return {
-            isWebGlSupported: false,
-            reason: "code-city:scene3d.webglUnavailable",
-            shouldUse2DFallback: true,
-        }
-    }
+/**
+ * Hardware detection result (WebGL support + device strength).
+ */
+interface ICodeCity3DHardwareCapability {
+    /** Whether WebGL is supported at all. */
+    readonly isWebGlSupported: boolean
+    /** Whether the device is too weak for 3D rendering. */
+    readonly isWeakDevice: boolean
+}
 
+/**
+ * Detects hardware WebGL capability.
+ * Releases temporary WebGL contexts to prevent context exhaustion.
+ *
+ * @returns Hardware capability result.
+ */
+function detectHardwareCapability(): ICodeCity3DHardwareCapability {
     const canvas = document.createElement("canvas")
-    const webGlContext = canvas.getContext("webgl")
     const webGl2Context = canvas.getContext("webgl2")
-    if (webGlContext === null && webGl2Context === null) {
-        return {
-            isWebGlSupported: false,
-            reason: "code-city:scene3d.webglUnavailable",
-            shouldUse2DFallback: true,
-        }
+    const webGlContext = webGl2Context === null ? canvas.getContext("webgl") : null
+
+    if (webGl2Context === null && webGlContext === null) {
+        return { isWebGlSupported: false, isWeakDevice: false }
     }
 
-    const contextWithMetrics = (webGl2Context ?? webGlContext) as {
+    const activeContext = webGl2Context ?? webGlContext
+    const contextWithMetrics = activeContext as {
         readonly MAX_TEXTURE_SIZE?: number
         getParameter?: (parameter: number) => unknown
+        getExtension?: (name: string) => { loseContext?: () => void } | null
     } | null
     const maxTextureSize =
         contextWithMetrics !== null &&
@@ -248,14 +254,49 @@ function resolveCodeCityRenderCapability(
         typeof contextWithMetrics.getParameter === "function"
             ? Number(contextWithMetrics.getParameter(contextWithMetrics.MAX_TEXTURE_SIZE))
             : 8192
+
+    /** Release WebGL context immediately after reading metrics. */
+    if (
+        contextWithMetrics !== null &&
+        typeof contextWithMetrics.getExtension === "function"
+    ) {
+        const loseContextExt = contextWithMetrics.getExtension("WEBGL_lose_context")
+        if (loseContextExt !== null && typeof loseContextExt.loseContext === "function") {
+            loseContextExt.loseContext()
+        }
+    }
+
     const navigatorWithMemory = navigator as Navigator & { readonly deviceMemory?: number }
     const hardwareCores = navigator.hardwareConcurrency ?? 8
     const deviceMemory = navigatorWithMemory.deviceMemory ?? 8
-    const weakDevice =
+    const isWeakDevice =
         hardwareCores <= WEAK_DEVICE_MAX_CORES ||
         deviceMemory <= WEAK_DEVICE_MAX_MEMORY_GB ||
         maxTextureSize < WEAK_DEVICE_MIN_TEXTURE_SIZE
-    if (weakDevice) {
+
+    return { isWebGlSupported: true, isWeakDevice }
+}
+
+/**
+ * Resolves render capability based on hardware capability and file count budget.
+ *
+ * @param hardware Hardware detection result.
+ * @param fileCount Number of files in snapshot.
+ * @returns Решение по режиму рендера + причина.
+ */
+function resolveRenderCapability(
+    hardware: ICodeCity3DHardwareCapability,
+    fileCount: number,
+): ICodeCity3DRenderCapability {
+    if (hardware.isWebGlSupported === false) {
+        return {
+            isWebGlSupported: false,
+            reason: "code-city:scene3d.webglUnavailable",
+            shouldUse2DFallback: true,
+        }
+    }
+
+    if (hardware.isWeakDevice) {
         return {
             isWebGlSupported: true,
             reason: "code-city:scene3d.weakGpu",
@@ -263,7 +304,7 @@ function resolveCodeCityRenderCapability(
         }
     }
 
-    const estimatedGpuUsageMb = files.length * ESTIMATED_GPU_COST_PER_BUILDING_MB
+    const estimatedGpuUsageMb = fileCount * ESTIMATED_GPU_COST_PER_BUILDING_MB
     if (estimatedGpuUsageMb > GPU_MEMORY_BUDGET_MB) {
         return {
             isWebGlSupported: true,
@@ -307,9 +348,12 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
             id: "snapshot-fallback",
             label: "Commit #1",
         }
+    const hardwareCapability = useMemo((): ICodeCity3DHardwareCapability => {
+        return detectHardwareCapability()
+    }, [])
     const renderCapability = useMemo((): ICodeCity3DRenderCapability => {
-        return resolveCodeCityRenderCapability(currentSnapshot.files)
-    }, [currentSnapshot.files])
+        return resolveRenderCapability(hardwareCapability, currentSnapshot.files.length)
+    }, [hardwareCapability, currentSnapshot.files.length])
 
     useEffect((): void => {
         setTimelineIndex((currentIndex): number => {
@@ -421,7 +465,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
     }, [fileById, props.navigationChainFileIds])
     const hoveredFile = hoveredFileId !== undefined ? fileById.get(hoveredFileId) : undefined
     const selectedFile = selectedFileId !== undefined ? fileById.get(selectedFileId) : undefined
-    const navigationChainFileIds = props.navigationChainFileIds ?? []
+    const navigationChainFileIds = props.navigationChainFileIds ?? EMPTY_FILE_IDS
 
     useEffect((): void => {
         setChainNavigationIndex(0)
