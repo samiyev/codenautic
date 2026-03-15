@@ -123,9 +123,13 @@ export function ReportScheduleDialog(): ReactElement {
                             </select>
                         </label>
                         <Alert status="accent">
-                            <Alert.Title>{t("reports:scheduleDialog.schedulePreviewTitle")}</Alert.Title>
+                            <Alert.Title>
+                                {t("reports:scheduleDialog.schedulePreviewTitle")}
+                            </Alert.Title>
                             <Alert.Description>
-                                <span aria-label={t("reports:ariaLabel.scheduleDialog.previewValue")}>
+                                <span
+                                    aria-label={t("reports:ariaLabel.scheduleDialog.previewValue")}
+                                >
                                     {schedulePreview}
                                 </span>
                             </Alert.Description>

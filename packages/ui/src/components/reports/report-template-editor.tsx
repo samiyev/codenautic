@@ -67,7 +67,9 @@ export function ReportTemplateEditor(): ReactElement {
     const [brandLogoUrl, setBrandLogoUrl] = useState<string>(
         "https://assets.codenautic.app/logo.svg",
     )
-    const [brandAccentColor, setBrandAccentColor] = useState<string>(GRAPH_EXPORT_PALETTE.report.defaultAccentColor)
+    const [brandAccentColor, setBrandAccentColor] = useState<string>(
+        GRAPH_EXPORT_PALETTE.report.defaultAccentColor,
+    )
     const [sections, setSections] =
         useState<ReadonlyArray<ITemplateSection>>(DEFAULT_TEMPLATE_SECTIONS)
     const [draggedSectionId, setDraggedSectionId] = useState<string | undefined>()
