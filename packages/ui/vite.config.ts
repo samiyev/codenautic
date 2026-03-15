@@ -56,7 +56,6 @@ export default defineConfig(({ mode }) => {
             __CODENAUTIC_UI_PORT__: JSON.stringify(servicePorts.ui),
             __CODENAUTIC_API_PORT__: JSON.stringify(servicePorts.api),
             __CODENAUTIC_UI_PREVIEW_PORT__: JSON.stringify(servicePorts.uiPreview),
-            __CODENAUTIC_STORYBOOK_PORT__: JSON.stringify(servicePorts.storybook),
         },
         server: {
             port: servicePorts.ui,
