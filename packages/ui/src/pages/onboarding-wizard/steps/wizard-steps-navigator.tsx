@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next"
 
 import { useDynamicTranslation } from "@/lib/i18n"
 import { Button } from "@heroui/react"
-import { FormSubmitButton } from "@/components/forms"
 
 import type { IOnboardingWizardState } from "../use-onboarding-wizard-state"
 import { WIZARD_STEPS } from "../onboarding-wizard-types"
@@ -38,14 +37,9 @@ export function WizardStepsNavigator({ state }: IWizardStepsNavigatorProps): Rea
                 {t("onboarding:navigator.backButton")}
             </Button>
             {state.isFinalStep ? (
-                <FormSubmitButton
-                    buttonProps={{
-                        isDisabled: state.isStarted,
-                    }}
-                    submittingText={t("onboarding:navigator.submittingButton")}
-                >
+                <Button isDisabled={state.isStarted} type="submit">
                     {t("onboarding:navigator.submitButton")}
-                </FormSubmitButton>
+                </Button>
             ) : (
                 <Button
                     onPress={(): void => {
