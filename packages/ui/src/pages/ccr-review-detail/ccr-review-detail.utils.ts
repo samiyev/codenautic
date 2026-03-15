@@ -7,7 +7,7 @@
 
 import type { ICodeCityTreemapFileDescriptor } from "@/components/codecity/codecity-treemap"
 import type { IImpactAnalysisSeed } from "@/components/predictions/impact-analysis-panel"
-import type { ICcrDiffFile, ICcrRowData } from "@/pages/ccr-data"
+import type { ICcrDiffFile, ICcrRowData } from "@/lib/types/ccr-types"
 
 import type {
     IFileNeighborhoodDetails,
