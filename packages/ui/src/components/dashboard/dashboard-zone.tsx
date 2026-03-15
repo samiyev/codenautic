@@ -15,7 +15,7 @@ export type TDashboardZonePriority = "primary" | "secondary" | "tertiary"
  * Маппинг приоритета зоны на CSS-классы left-border + padding.
  */
 const ZONE_PRIORITY_STYLES: Record<TDashboardZonePriority, string> = {
-    primary: "border-l-4 border-l-primary/60 pl-4",
+    primary: "border-l-4 border-l-accent/60 pl-4",
     secondary: "border-l-2 border-l-border pl-3",
     tertiary: "border-l border-l-border/50 pl-3 opacity-90",
 }
@@ -56,7 +56,7 @@ export function DashboardZone(props: IDashboardZoneProps): ReactElement | null {
         <section className={`space-y-3 ${priorityClass}`}>
             <button
                 aria-expanded={isExpanded}
-                className="group flex w-full items-center gap-2 rounded-md py-1 text-left transition-colors duration-150 hover:bg-surface-muted/50"
+                className="group flex w-full items-center gap-2 rounded-md py-1 text-left transition-colors duration-150 hover:bg-surface-secondary/50"
                 type="button"
                 onClick={(): void => {
                     setIsExpanded((prev): boolean => !prev)
@@ -64,7 +64,7 @@ export function DashboardZone(props: IDashboardZoneProps): ReactElement | null {
             >
                 <span
                     aria-hidden="true"
-                    className="flex h-6 w-6 items-center justify-center rounded-md bg-surface-muted/60 text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary"
+                    className="flex h-6 w-6 items-center justify-center rounded-md bg-surface-secondary/60 text-muted transition-colors group-hover:bg-accent/10 group-hover:text-accent"
                 >
                     {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                 </span>

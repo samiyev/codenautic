@@ -72,7 +72,9 @@ const TEAM_OPTIONS: ReadonlyArray<{ readonly value: TTeamScope; readonly label: 
  * @param callback Callback для обновления scope-значения.
  * @returns Обработчик onSelectionChange.
  */
-function createScopeHandler<T extends string>(callback: (value: T) => void): (key: Key | null) => void {
+function createScopeHandler<T extends string>(
+    callback: (value: T) => void,
+): (key: Key | null) => void {
     return (key: Key | null): void => {
         if (key === null) {
             return
@@ -104,7 +106,11 @@ export function DashboardScopeFilters(props: IDashboardScopeFiltersProps): React
                     <ListBox>
                         {ORG_OPTIONS.map(
                             (option): ReactElement => (
-                                <ListBoxItem key={option.value} id={option.value} textValue={option.label}>
+                                <ListBoxItem
+                                    key={option.value}
+                                    id={option.value}
+                                    textValue={option.label}
+                                >
                                     {option.label}
                                 </ListBoxItem>
                             ),
@@ -126,7 +132,11 @@ export function DashboardScopeFilters(props: IDashboardScopeFiltersProps): React
                     <ListBox>
                         {REPO_OPTIONS.map(
                             (option): ReactElement => (
-                                <ListBoxItem key={option.value} id={option.value} textValue={option.label}>
+                                <ListBoxItem
+                                    key={option.value}
+                                    id={option.value}
+                                    textValue={option.label}
+                                >
                                     {option.label}
                                 </ListBoxItem>
                             ),
@@ -146,7 +156,11 @@ export function DashboardScopeFilters(props: IDashboardScopeFiltersProps): React
                     <ListBox>
                         {TEAM_OPTIONS.map(
                             (option): ReactElement => (
-                                <ListBoxItem key={option.value} id={option.value} textValue={option.label}>
+                                <ListBoxItem
+                                    key={option.value}
+                                    id={option.value}
+                                    textValue={option.label}
+                                >
                                     {option.label}
                                 </ListBoxItem>
                             ),
