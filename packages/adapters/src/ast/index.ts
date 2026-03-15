@@ -106,6 +106,12 @@ export {
     type IAstTypeScriptImportResolverErrorDetails,
 } from "./ast-typescript-import-resolver.error"
 export {
+    AST_PYTHON_IMPORT_RESOLVER_ERROR_CODE,
+    AstPythonImportResolverError,
+    type AstPythonImportResolverErrorCode,
+    type IAstPythonImportResolverErrorDetails,
+} from "./ast-python-import-resolver.error"
+export {
     AST_BATCH_PROCESSING_ERROR_CODE,
     AstBatchProcessingError,
     type AstBatchProcessingErrorCode,
@@ -404,6 +410,11 @@ export {
     type AstTypeScriptImportResolverReadFile,
     type IAstTypeScriptImportResolverOptions,
 } from "./ast-typescript-import-resolver"
+export {
+    AstPythonImportResolver,
+    type AstPythonImportResolverReadDirectory,
+    type IAstPythonImportResolverOptions,
+} from "./ast-python-import-resolver"
 export {
     AstBatchProcessingService,
     type AstBatchProcessingNow,
