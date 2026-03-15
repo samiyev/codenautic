@@ -338,7 +338,7 @@ export function FileDependencyGraph(props: IFileDependencyGraphProps): ReactElem
                     {state.query.length > 0 ? (
                         <Button
                             variant="secondary"
-                                                        onPress={(): void => {
+                            onPress={(): void => {
                                 setState((previousState) => ({
                                     ...previousState,
                                     query: "",
