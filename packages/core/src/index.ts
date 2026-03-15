@@ -16,6 +16,7 @@ export {type IGitBlame} from "./application/ports/outbound/git/git-blame.port"
 export {type IGitPipelineStatusProvider} from "./application/ports/outbound/git/git-pipeline-status.port"
 export {type IGitProvider} from "./application/ports/outbound/git/git-provider.port"
 export {type IFileMetricsProvider} from "./application/ports/outbound/analysis/file-metrics-provider"
+export {type IOwnershipProvider} from "./application/ports/outbound/knowledge/ownership-provider.port"
 export {type IIssueAggregationProvider} from "./application/ports/outbound/review/issue-aggregation-provider"
 export {type IAnalyticsService} from "./application/ports/outbound/analytics/analytics-service.port"
 export {
@@ -190,6 +191,11 @@ export {
     type IDeleteSystemSettingOutput,
 } from "./application/dto/common/system-setting.dto"
 export {type IFileMetricsDTO} from "./application/dto/analytics"
+export {
+    type IFileOwnership,
+    type IFileOwnershipContributor,
+    type IOwnershipContributor,
+} from "./application/dto/knowledge"
 export {
     AST_FUNCTION_KIND,
     AST_IMPORT_KIND,

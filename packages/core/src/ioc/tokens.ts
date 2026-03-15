@@ -16,6 +16,7 @@ import type {ICodeGraphClusteringService} from "../application/ports/outbound/gr
 import type {ICodeGraphDiffService} from "../application/ports/outbound/graph/code-graph-diff-service.port"
 import type {ICodeGraphPageRankService} from "../application/ports/outbound/graph/code-graph-page-rank-service.port"
 import type {IGraphRepository} from "../application/ports/outbound/graph/code-graph-repository.port"
+import type {IOwnershipProvider} from "../application/ports/outbound/knowledge/ownership-provider.port"
 import type {ILLMProvider} from "../application/ports/outbound/llm/llm-provider.port"
 import type {IConversationThreadRepository} from "../application/ports/outbound/messaging/conversation-thread-repository.port"
 import type {IInboxRepository} from "../application/ports/outbound/messaging/inbox-repository.port"
@@ -73,6 +74,9 @@ export const TOKENS = {
             "core.analysis.file-metrics-provider",
         ),
         GraphRepository: createToken<IGraphRepository>("core.analysis.graph-repository"),
+        OwnershipProvider: createToken<IOwnershipProvider>(
+            "core.analysis.ownership-provider",
+        ),
     },
     Audit: {
         LogRepository: createToken<IAuditLogRepository>("core.audit.log-repository"),

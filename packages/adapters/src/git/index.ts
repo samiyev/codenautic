@@ -60,6 +60,16 @@ export {
     type GitProviderFactoryErrorCode,
 } from "./git-provider-factory.error"
 export {
+    GIT_OWNERSHIP_PROVIDER_ERROR_CODE,
+    GitOwnershipProviderError,
+    type GitOwnershipProviderErrorCode,
+    type IGitOwnershipProviderErrorDetails,
+} from "./git-ownership-provider.error"
+export {
+    GitOwnershipProvider,
+    type IGitOwnershipProviderOptions,
+} from "./git-ownership-provider"
+export {
     GitHubProvider,
     type IGitHubBatchReviewRequest,
     type IGitHubOctokitClient,
