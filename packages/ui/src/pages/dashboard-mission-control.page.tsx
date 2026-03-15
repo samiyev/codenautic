@@ -1,4 +1,4 @@
-import { type ReactElement, Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react"
+import { type ReactElement, Suspense, lazy, useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { useDynamicTranslation } from "@/lib/i18n"
@@ -24,6 +24,7 @@ import {
     type TTeamScope,
 } from "@/components/dashboard/dashboard-scope-filters"
 import { PageShell } from "@/components/layout/page-shell"
+import { useDashboard } from "@/lib/hooks/queries/use-dashboard"
 import { useUiRole } from "@/lib/permissions/ui-policy"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { LINK_CLASSES, TYPOGRAPHY } from "@/lib/constants/typography"
@@ -100,8 +101,6 @@ function DashboardLoadingSkeleton(): ReactElement {
         </div>
     )
 }
-
-type TMockDataModule = typeof import("./dashboard-mock-data")
 
 const DashboardContent = lazy(async () => {
     const module = await import("@/components/dashboard/dashboard-content")
