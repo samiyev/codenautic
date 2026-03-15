@@ -80,6 +80,23 @@ describe("SidebarNav", (): void => {
         renderWithProviders(<SidebarNav />)
 
         expect(screen.getByText("Reviews")).not.toBeNull()
-        expect(screen.getByText("Operations")).not.toBeNull()
+        expect(screen.getByText("Intelligence")).not.toBeNull()
+    })
+
+    it("when rendered, then does not show removed navigation items", (): void => {
+        renderWithProviders(<SidebarNav />)
+
+        expect(screen.queryByText("Onboarding")).toBeNull()
+        expect(screen.queryByText("Scan Progress")).toBeNull()
+        expect(screen.queryByText("Operations")).toBeNull()
+        expect(screen.queryByText("Analytics")).toBeNull()
+    })
+
+    it("when rendered, then shows My Work as the first item", (): void => {
+        renderWithProviders(<SidebarNav />)
+
+        const buttons = screen.getAllByRole("button")
+        const firstButton = buttons[0]
+        expect(firstButton?.textContent).toContain("My Work")
     })
 })
