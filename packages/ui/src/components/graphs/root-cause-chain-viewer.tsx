@@ -32,7 +32,7 @@ interface IRootCauseChainViewerProps {
 
 const SEVERITY_TONE: Readonly<Record<IRootCauseIssueDescriptor["severity"], string>> = {
     critical: "bg-danger/15 text-danger",
-    high: "bg-warning/15 text-on-warning",
+    high: "bg-warning/15 text-warning-foreground",
     low: "bg-success/15 text-success",
     medium: "bg-warning/15 text-warning",
 }
@@ -94,7 +94,7 @@ export function RootCauseChainViewer(props: IRootCauseChainViewerProps): ReactEl
 
     if (props.issues.length === 0 || selectedIssue === undefined) {
         return (
-            <p className="rounded-md border border-border bg-surface px-3 py-2 text-sm text-muted-foreground">
+            <p className="rounded-md border border-border bg-surface px-3 py-2 text-sm text-muted">
                 No causal issues available for this scope.
             </p>
         )
@@ -109,7 +109,7 @@ export function RootCauseChainViewer(props: IRootCauseChainViewerProps): ReactEl
                             aria-label={`Open causal issue ${issue.title}`}
                             className={`w-full rounded-md border px-3 py-2 text-left transition ${
                                 selectedIssue.id === issue.id
-                                    ? "border-primary/40 bg-primary/10"
+                                    ? "border-accent/40 bg-accent/10"
                                     : "border-border bg-surface hover:border-border"
                             }`}
                             key={issue.id}
@@ -147,7 +147,7 @@ export function RootCauseChainViewer(props: IRootCauseChainViewerProps): ReactEl
                                         aria-label={`Open chain node ${node.label}`}
                                         className={`w-full rounded border px-2 py-1.5 text-left text-sm transition ${
                                             selectedNode?.id === node.id
-                                                ? "border-primary/40 bg-primary/10"
+                                                ? "border-accent/40 bg-accent/10"
                                                 : "border-border bg-surface hover:border-border"
                                         }`}
                                         onClick={(): void => {
@@ -169,7 +169,7 @@ export function RootCauseChainViewer(props: IRootCauseChainViewerProps): ReactEl
                 {selectedNode !== undefined ? (
                     <article className="rounded-md border border-border bg-surface p-3">
                         <p className={TYPOGRAPHY.cardTitle}>{selectedNode.label}</p>
-                        <p className="mt-1 text-sm text-muted-foreground">
+                        <p className="mt-1 text-sm text-muted">
                             {selectedNode.description}
                         </p>
                     </article>

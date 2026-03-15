@@ -154,7 +154,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
             <div className="mt-3 inline-flex rounded-lg border border-border bg-surface p-1">
                 <button
                     aria-pressed={mode === "before"}
-                    className={`rounded px-2 py-1 text-xs font-semibold ${mode === "before" ? "bg-surface text-foreground shadow-sm" : "text-muted-foreground"}`}
+                    className={`rounded px-2 py-1 text-xs font-semibold ${mode === "before" ? "bg-surface text-foreground shadow-sm" : "text-muted"}`}
                     onClick={(): void => {
                         setMode("before")
                     }}
@@ -164,7 +164,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
                 </button>
                 <button
                     aria-pressed={mode === "after"}
-                    className={`rounded px-2 py-1 text-xs font-semibold ${mode === "after" ? "bg-primary/20 text-on-primary shadow-sm" : "text-muted-foreground"}`}
+                    className={`rounded px-2 py-1 text-xs font-semibold ${mode === "after" ? "bg-accent/20 text-accent-foreground shadow-sm" : "text-muted"}`}
                     onClick={(): void => {
                         setMode("after")
                     }}
@@ -213,7 +213,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
 
             <div className="mt-3 grid gap-2 md:grid-cols-3">
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
+                    <p className={`${TYPOGRAPHY.micro} text-muted`}>
                         {t("code-city:simulationPanel.complexity")}
                     </p>
                     <p className={TYPOGRAPHY.sectionTitle}>{String(activeMetrics.complexity)}</p>
@@ -224,7 +224,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
                     </p>
                 </div>
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
+                    <p className={`${TYPOGRAPHY.micro} text-muted`}>
                         {t("code-city:simulationPanel.risk")}
                     </p>
                     <p className={TYPOGRAPHY.sectionTitle}>{String(activeMetrics.risk)}</p>
@@ -235,7 +235,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
                     </p>
                 </div>
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
+                    <p className={`${TYPOGRAPHY.micro} text-muted`}>
                         {t("code-city:simulationPanel.maintainability")}
                     </p>
                     <p className={TYPOGRAPHY.sectionTitle}>
@@ -253,7 +253,7 @@ export function SimulationPanel(props: ISimulationPanelProps): ReactElement {
 
             <button
                 aria-label={t("code-city:simulationPanel.ariaLabelPreview")}
-                className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-3 rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={selectedTargets.length === 0}
                 onClick={(): void => {
                     props.onPreviewScenario?.({

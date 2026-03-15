@@ -154,19 +154,19 @@ export function ROICalculatorWidget(props: IROICalculatorWidgetProps): ReactElem
                 />
             </label>
 
-            <div className="mt-3 rounded border border-primary/30 bg-primary/10 p-2">
-                <p className={`${TYPOGRAPHY.overline} text-on-primary`}>
+            <div className="mt-3 rounded border border-accent/30 bg-accent/10 p-2">
+                <p className={`${TYPOGRAPHY.overline} text-accent-foreground`}>
                     {t("code-city:roiCalculator.estimatedRoiScore")}
                 </p>
-                <p className="text-lg font-semibold text-on-primary">{String(scenarioRoiScore)}</p>
-                <p className="text-xs text-on-primary">
+                <p className="text-lg font-semibold text-accent-foreground">{String(scenarioRoiScore)}</p>
+                <p className="text-xs text-accent-foreground">
                     {t("code-city:roiCalculator.selectedFiles", { count: selectedTargets.length })}
                 </p>
             </div>
 
             <button
                 aria-label={t("code-city:roiCalculator.ariaLabelApply")}
-                className="mt-2 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-2 rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={selectedTargets.length === 0}
                 onClick={(): void => {
                     props.onApplyScenario?.(selectedTargets.map((target): string => target.fileId))
