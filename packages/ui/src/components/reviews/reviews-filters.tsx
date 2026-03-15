@@ -58,7 +58,9 @@ export function ReviewsFilters(props: IReviewsFiltersProps): ReactElement {
                 </Select.Trigger>
                 <Select.Popover>
                     <ListBox>
-                        <ListBoxItem id="all" textValue={t("reviews:filters.allStatuses")}>{t("reviews:filters.allStatuses")}</ListBoxItem>
+                        <ListBoxItem id="all" textValue={t("reviews:filters.allStatuses")}>
+                            {t("reviews:filters.allStatuses")}
+                        </ListBoxItem>
                         {props.statusOptions.map(
                             (status): ReactElement => (
                                 <ListBoxItem key={status} id={status} textValue={status}>
@@ -81,7 +83,9 @@ export function ReviewsFilters(props: IReviewsFiltersProps): ReactElement {
                 </Select.Trigger>
                 <Select.Popover>
                     <ListBox>
-                        <ListBoxItem id="all" textValue={t("reviews:filters.allAssignees")}>{t("reviews:filters.allAssignees")}</ListBoxItem>
+                        <ListBoxItem id="all" textValue={t("reviews:filters.allAssignees")}>
+                            {t("reviews:filters.allAssignees")}
+                        </ListBoxItem>
                         {props.assigneeOptions.map(
                             (assignee): ReactElement => (
                                 <ListBoxItem key={assignee} id={assignee} textValue={assignee}>

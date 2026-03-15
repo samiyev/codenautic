@@ -1,10 +1,10 @@
 import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { Table } from "@heroui/react"
 import { StyledLink } from "@/components/layout/styled-link"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { useDebounce } from "@/lib/hooks/use-debounce"
-import { EnterpriseDataTable } from "@/components/infrastructure/enterprise-data-table"
 import { InfiniteScrollContainer } from "@/components/infrastructure/infinite-scroll-container"
 import { ReviewsFilters } from "./reviews-filters"
 import { type IReviewRow } from "./reviews-table"
@@ -26,15 +26,6 @@ export interface IReviewsContentProps {
     readonly isLoadingMore: boolean
     /** Callback для подгрузки следующего чанка. */
     readonly onLoadMore: () => Promise<void> | void
-}
-
-function estimateCcrRowHeight(row: IReviewRow, density: "comfortable" | "compact"): number {
-    const baseHeight = density === "compact" ? 44 : 58
-    const titleLineCount = Math.max(1, Math.ceil(row.title.length / 62))
-    const repositoryLineCount = Math.max(1, Math.ceil(row.repository.length / 40))
-    const maxLineCount = Math.max(titleLineCount, repositoryLineCount)
-
-    return baseHeight + (maxLineCount - 1) * 16
 }
 
 /**
@@ -109,7 +100,7 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
                 />
             ) : null}
             {hasActiveFilter ? (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted">
                     {t("reviews:content.showingFiltered", {
                         filtered: String(filteredRows.length),
                         total: String(props.rows.length),
@@ -117,7 +108,7 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
                 </p>
             ) : null}
             {filteredRows.length === 0 && props.rows.length > 0 && hasActiveFilter ? (
-                <p className="py-6 text-center text-sm text-text-secondary">
+                <p className="py-6 text-center text-sm text-muted">
                     {t("reviews:content.noMatchingFilters")}
                 </p>
             ) : null}
@@ -127,82 +118,50 @@ export function ReviewsContent(props: IReviewsContentProps): ReactElement {
                 loadingText={t("reviews:content.loadingMore")}
                 onLoadMore={props.onLoadMore}
             >
-                <EnterpriseDataTable
-                    ariaLabel={t("reviews:content.tableAriaLabel")}
-                    columns={[
-                        {
-                            accessor: (row): string => row.id,
-                            cell: (row): ReactElement => (
-                                <StyledLink
-                                    className={TYPOGRAPHY.cardTitle}
-                                    params={{ reviewId: row.id }}
-                                    to="/reviews/$reviewId"
-                                >
-                                    {row.id}
-                                </StyledLink>
-                            ),
-                            header: t("reviews:content.columnCcrId"),
-                            id: "id",
-                            pin: "left",
-                            size: 140,
-                        },
-                        {
-                            accessor: (row): string => row.title,
-                            header: t("reviews:content.columnTitle"),
-                            id: "title",
-                            size: 280,
-                        },
-                        {
-                            accessor: (row): string => row.repository,
-                            header: t("reviews:content.columnRepository"),
-                            id: "repository",
-                            size: 200,
-                        },
-                        {
-                            accessor: (row): string => row.assignee,
-                            header: t("reviews:content.columnAssignee"),
-                            id: "assignee",
-                            size: 180,
-                        },
-                        {
-                            accessor: (row): number => row.comments,
-                            header: t("reviews:content.columnComments"),
-                            id: "comments",
-                            size: 120,
-                        },
-                        {
-                            accessor: (row): string => row.updatedAt,
-                            header: t("reviews:content.columnUpdatedAt"),
-                            id: "updatedAt",
-                            size: 180,
-                        },
-                        {
-                            accessor: (row): string => row.status,
-                            cell: (row): ReactElement => <ReviewStatusBadge status={row.status} />,
-                            header: t("reviews:content.columnStatus"),
-                            id: "status",
-                            size: 180,
-                        },
-                    ]}
-                    emptyMessage={t("reviews:content.emptyMessage")}
-                    getRowId={(row): string => row.id}
-                    id="ccr-management-table"
-                    rows={filteredRows}
-                    stickyHeader={{
-                        enabled: true,
-                        topOffset: 0,
-                        withShadow: true,
-                    }}
-                    virtualization={{
-                        estimateRowHeight: {
-                            comfortable: 58,
-                            compact: 44,
-                        },
-                        maxBodyHeight: 560,
-                        overscan: 12,
-                        rowHeightEstimator: estimateCcrRowHeight,
-                    }}
-                />
+                <Table>
+                    <Table.ScrollContainer>
+                        <Table.Content aria-label={t("reviews:content.tableAriaLabel")}>
+                            <Table.Header>
+                                <Table.Column isRowHeader>
+                                    {t("reviews:content.columnCcrId")}
+                                </Table.Column>
+                                <Table.Column>{t("reviews:content.columnTitle")}</Table.Column>
+                                <Table.Column>{t("reviews:content.columnRepository")}</Table.Column>
+                                <Table.Column>{t("reviews:content.columnAssignee")}</Table.Column>
+                                <Table.Column>{t("reviews:content.columnComments")}</Table.Column>
+                                <Table.Column>{t("reviews:content.columnUpdatedAt")}</Table.Column>
+                                <Table.Column>{t("reviews:content.columnStatus")}</Table.Column>
+                            </Table.Header>
+                            <Table.Body>
+                                {filteredRows.map(
+                                    (row): ReactElement => (
+                                        <Table.Row key={row.id}>
+                                            <Table.Cell>
+                                                <StyledLink
+                                                    className={TYPOGRAPHY.cardTitle}
+                                                    params={{
+                                                        reviewId: row.id,
+                                                    }}
+                                                    to="/reviews/$reviewId"
+                                                >
+                                                    {row.id}
+                                                </StyledLink>
+                                            </Table.Cell>
+                                            <Table.Cell>{row.title}</Table.Cell>
+                                            <Table.Cell>{row.repository}</Table.Cell>
+                                            <Table.Cell>{row.assignee}</Table.Cell>
+                                            <Table.Cell>{row.comments}</Table.Cell>
+                                            <Table.Cell>{row.updatedAt}</Table.Cell>
+                                            <Table.Cell>
+                                                <ReviewStatusBadge status={row.status} />
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    ),
+                                )}
+                            </Table.Body>
+                        </Table.Content>
+                    </Table.ScrollContainer>
+                </Table>
             </InfiniteScrollContainer>
         </section>
     )
