@@ -1,9 +1,25 @@
 import type { ReactElement } from "react"
 import { motion } from "motion/react"
 
-import { STAGGER_ITEM_VARIANTS } from "@/lib/motion"
-
 import { MetricCard, type IMetricCardProps, type TMetricTrendDirection } from "./metric-card"
+
+/**
+ * Stagger item animation variants for metric cards.
+ */
+const STAGGER_ITEM_VARIANTS = {
+    hidden: {
+        opacity: 0,
+        y: 12,
+    },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.25,
+            ease: [0.0, 0.0, 0.2, 1.0],
+        },
+    },
+} as const
 
 /**
  * Metric for the dashboard grid.
