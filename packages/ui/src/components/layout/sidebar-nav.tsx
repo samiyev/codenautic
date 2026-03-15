@@ -6,15 +6,15 @@ import { useLocation, useNavigate } from "@tanstack/react-router"
 import {
     Bug,
     Building2,
-    ChartNoAxesColumn,
     ChartPie,
     FolderKanban,
     GitPullRequest,
     House,
     Inbox,
     LifeBuoy,
-    Rocket,
+    Lightbulb,
     Settings,
+    TrendingUp,
 } from "@/components/icons/app-icons"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
@@ -67,24 +67,19 @@ function createSidebarGroups(
         {
             items: [
                 {
-                    icon: <House aria-hidden="true" size={16} />,
-                    label: t("navigation:sidebar.dashboard"),
-                    to: "/",
-                },
-                {
-                    icon: <Building2 aria-hidden="true" size={16} />,
-                    label: t("navigation:sidebar.codeCity"),
-                    to: "/dashboard/code-city",
-                },
-                {
                     icon: <Inbox aria-hidden="true" size={16} />,
                     label: t("navigation:sidebar.myWork"),
                     to: "/my-work",
                 },
+                {
+                    icon: <House aria-hidden="true" size={16} />,
+                    label: t("navigation:sidebar.dashboard"),
+                    to: "/",
+                },
             ],
         },
         {
-            label: t("navigation:sidebarGroup.reviews", { defaultValue: "Reviews" }),
+            label: t("navigation:sidebarGroup.reviews"),
             items: [
                 {
                     icon: <GitPullRequest aria-hidden="true" size={16} />,
@@ -99,18 +94,7 @@ function createSidebarGroups(
             ],
         },
         {
-            label: t("navigation:sidebarGroup.operations", { defaultValue: "Operations" }),
             items: [
-                {
-                    icon: <Rocket aria-hidden="true" size={16} />,
-                    label: t("navigation:sidebar.onboarding"),
-                    to: "/onboarding",
-                },
-                {
-                    icon: <ChartNoAxesColumn aria-hidden="true" size={16} />,
-                    label: t("navigation:sidebar.scanProgress"),
-                    to: "/scan-progress",
-                },
                 {
                     icon: <FolderKanban aria-hidden="true" size={16} />,
                     label: t("navigation:sidebar.repositories"),
@@ -119,12 +103,22 @@ function createSidebarGroups(
             ],
         },
         {
-            label: t("navigation:sidebarGroup.analytics", { defaultValue: "Analytics" }),
+            label: t("navigation:sidebarGroup.intelligence"),
             items: [
+                {
+                    icon: <Building2 aria-hidden="true" size={16} />,
+                    label: t("navigation:sidebar.codeCity"),
+                    to: "/dashboard/code-city",
+                },
                 {
                     icon: <ChartPie aria-hidden="true" size={16} />,
                     label: t("navigation:sidebar.reports"),
                     to: "/reports",
+                },
+                {
+                    icon: <TrendingUp aria-hidden="true" size={16} />,
+                    label: t("navigation:sidebar.adoptionAnalytics"),
+                    to: "/adoption-analytics",
                 },
             ],
         },
