@@ -219,9 +219,7 @@ export function ActivationChecklist(props: IActivationChecklistProps): ReactElem
                                         <p className="text-sm font-semibold text-foreground">
                                             {step.title}
                                         </p>
-                                        <p className="text-xs text-muted">
-                                            {step.description}
-                                        </p>
+                                        <p className="text-xs text-muted">{step.description}</p>
                                     </div>
                                     <Chip
                                         color={isCompleted ? "success" : "warning"}
