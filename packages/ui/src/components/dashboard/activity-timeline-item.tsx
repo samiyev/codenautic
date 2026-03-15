@@ -33,7 +33,7 @@ export function ActivityTimelineItem(props: IActivityTimelineItemProps): ReactEl
             <div className="relative flex flex-col items-center">
                 {/* Dot */}
                 <div className="relative z-10 mt-1.5 flex h-3 w-3 items-center justify-center">
-                    <div className="h-2.5 w-2.5 rounded-full bg-primary/80 ring-2 ring-primary/20" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-accent/80 ring-2 ring-accent/20" />
                 </div>
 
                 {/* Connector line */}
@@ -51,15 +51,15 @@ export function ActivityTimelineItem(props: IActivityTimelineItemProps): ReactEl
                     <p className={TYPOGRAPHY.overline}>{props.time}</p>
                 </div>
                 <p className={`mt-0.5 ${TYPOGRAPHY.cardTitle}`}>{props.title}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">{props.description}</p>
+                <p className="mt-0.5 text-sm text-muted">{props.description}</p>
                 {props.details !== undefined ? (
                     <details className="mt-2">
                         <summary
-                            className={`cursor-pointer select-none text-xs font-medium text-primary transition-colors hover:text-primary/80`}
+                            className={`cursor-pointer select-none text-xs font-medium text-accent transition-colors hover:text-accent/80`}
                         >
                             View details
                         </summary>
-                        <p className="mt-1.5 rounded-md bg-surface-muted/50 p-2 text-sm text-muted-foreground">
+                        <p className="mt-1.5 rounded-md bg-surface-secondary/50 p-2 text-sm text-muted">
                             {props.details}
                         </p>
                     </details>

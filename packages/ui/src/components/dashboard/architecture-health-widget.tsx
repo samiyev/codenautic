@@ -71,12 +71,12 @@ export function ArchitectureHealthWidget(props: IArchitectureHealthWidgetProps):
                             <PolarGrid stroke="var(--chart-grid)" strokeOpacity={0.5} />
                             <PolarAngleAxis
                                 dataKey="metric"
-                                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                                tick={{ fill: "var(--muted)", fontSize: 11 }}
                             />
                             <PolarRadiusAxis
                                 angle={30}
                                 domain={[0, 100]}
-                                tick={{ fill: "var(--muted-foreground)", fontSize: 10 }}
+                                tick={{ fill: "var(--muted)", fontSize: 10 }}
                             />
                             <Radar
                                 {...CHART_DATA_TRANSITION}
