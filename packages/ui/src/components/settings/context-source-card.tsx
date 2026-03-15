@@ -63,7 +63,7 @@ export function ContextSourceCard(props: IContextSourceCardProps): ReactElement 
         <Card
             className={
                 props.selected === true
-                    ? "border-2 border-primary-300"
+                    ? "border-2 border-accent/30"
                     : "border border-default-200"
             }
             role={props.onSelect !== undefined ? "button" : undefined}
@@ -89,7 +89,17 @@ export function ContextSourceCard(props: IContextSourceCardProps): ReactElement 
                     <h3 className={`truncate ${TYPOGRAPHY.cardTitle}`}>{source.name}</h3>
                     <p className="text-xs text-foreground-500">{source.type}</p>
                 </div>
-                <Chip color={resolveStatusColor(source.status) === "success" ? "accent" : resolveStatusColor(source.status) === "warning" ? "accent" : undefined} size="sm" variant="soft">
+                <Chip
+                    color={
+                        resolveStatusColor(source.status) === "success"
+                            ? "accent"
+                            : resolveStatusColor(source.status) === "warning"
+                              ? "accent"
+                              : undefined
+                    }
+                    size="sm"
+                    variant="soft"
+                >
                     {formatStatusLabel(source.status)}
                 </Chip>
             </CardHeader>
