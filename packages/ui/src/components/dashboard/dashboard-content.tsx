@@ -5,8 +5,25 @@ import { AlertTriangle, ChevronRight } from "@/components/icons/app-icons"
 import { Link, type LinkProps } from "@tanstack/react-router"
 
 import { Card, CardContent, CardHeader } from "@heroui/react"
-import { STAGGER_ITEM_VARIANTS } from "@/lib/motion"
 import { LINK_CLASSES, TYPOGRAPHY } from "@/lib/constants/typography"
+
+/**
+ * Stagger item animation variants for work queue cards.
+ */
+const STAGGER_ITEM_VARIANTS = {
+    hidden: {
+        opacity: 0,
+        y: 12,
+    },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.25,
+            ease: [0.0, 0.0, 0.2, 1.0],
+        },
+    },
+} as const
 import { ActivityTimeline, type IActivityTimelineEntry } from "./activity-timeline"
 import { StatusDistributionChart, type IStatusDistributionPoint } from "./status-distribution-chart"
 
