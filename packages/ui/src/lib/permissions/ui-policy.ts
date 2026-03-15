@@ -227,10 +227,6 @@ export function useUiRole(): TUiRole {
             return
         }
 
-        if (typeof window === "undefined") {
-            return
-        }
-
         const handleRoleChanged = (): void => {
             setRole(readUiRoleFromStorage())
         }
