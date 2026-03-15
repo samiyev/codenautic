@@ -58,6 +58,12 @@ export {
     type IAstInterfaceContractValidatorErrorDetails,
 } from "./ast-interface-contract-validator.error"
 export {
+    AST_TYPE_FLOW_ANALYZER_ERROR_CODE,
+    AstTypeFlowAnalyzerError,
+    type AstTypeFlowAnalyzerErrorCode,
+    type IAstTypeFlowAnalyzerErrorDetails,
+} from "./ast-type-flow-analyzer.error"
+export {
     AST_CODE_CHUNK_EMBEDDING_GENERATOR_ERROR_CODE,
     AstCodeChunkEmbeddingGeneratorError,
     type AstCodeChunkEmbeddingGeneratorErrorCode,
@@ -227,6 +233,16 @@ export {
     type IAstInterfaceContractValidatorServiceOptions,
     type IAstInterfaceContractValidatorSummary,
 } from "./ast-interface-contract-validator.service"
+export {
+    AstTypeFlowAnalyzerService,
+    type IAstTypeFlow,
+    type IAstTypeFlowAnalyzerInput,
+    type IAstTypeFlowAnalyzerResult,
+    type IAstTypeFlowAnalyzerService,
+    type IAstTypeFlowAnalyzerServiceOptions,
+    type IAstTypeFlowAnalyzerSummary,
+    type IAstUnresolvedTypeFlow,
+} from "./ast-type-flow-analyzer.service"
 export {
     AstDependencyChainResolverService,
     type IAstDependencyChain,
