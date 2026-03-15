@@ -572,4 +572,91 @@ describe("GitOwnershipProvider", () => {
 
         throw new Error("Expected getContributors to wrap provider failure")
     })
+
+    test("builds ownership timeline from file history", async () => {
+        const {provider} = createOwnershipProviderFixture({
+            getCommitHistory(): Promise<readonly ICommitInfo[]> {
+                return Promise.resolve([
+                    createCommit("Alice", "alice@example.com", "2026-03-01T10:00:00.000Z"),
+                    createCommit("Bob", "bob@example.com", "2026-03-02T10:00:00.000Z"),
+                    createCommit("Alice", "alice@example.com", "2026-03-03T10:00:00.000Z"),
+                ])
+            },
+        })
+
+        const timeline = await provider.getOwnershipTimeline("repo-1", "src/file.ts")
+
+        expect(timeline.filePath).toBe("src/file.ts")
+        expect(timeline.entries).toHaveLength(3)
+        expect(timeline.handoffs).toHaveLength(2)
+        expect(timeline.currentOwner).toBe("Alice")
+    })
+
+    test("passes default ref and max history count to getOwnershipTimeline history call", async () => {
+        const refs: string[] = []
+        const optionsBatch: Array<Parameters<IGitProvider["getCommitHistory"]>[1]> = []
+        const {provider} = createOwnershipProviderFixture(
+            {
+                getCommitHistory(
+                    ref: string,
+                    options?: Parameters<IGitProvider["getCommitHistory"]>[1],
+                ): Promise<readonly ICommitInfo[]> {
+                    refs.push(ref)
+                    optionsBatch.push(options)
+                    return Promise.resolve([])
+                },
+            },
+            {
+                defaultRef: "release",
+                maxHistoryCount: 42,
+            },
+        )
+
+        await provider.getOwnershipTimeline("repo-1", "src/file.ts")
+
+        expect(refs).toEqual(["release"])
+        expect(optionsBatch[0]?.path).toBe("src/file.ts")
+        expect(optionsBatch[0]?.maxCount).toBe(42)
+    })
+
+    test("throws when file path is empty for getOwnershipTimeline", async () => {
+        const {provider} = createOwnershipProviderFixture()
+
+        try {
+            await provider.getOwnershipTimeline("repo-1", " ")
+        } catch (error) {
+            expect(error).toBeInstanceOf(GitOwnershipProviderError)
+            if (error instanceof GitOwnershipProviderError) {
+                expect(error.code).toBe(GIT_OWNERSHIP_PROVIDER_ERROR_CODE.INVALID_FILE_PATH)
+            }
+            return
+        }
+
+        throw new Error("Expected getOwnershipTimeline to throw for empty file path")
+    })
+
+    test("wraps getOwnershipTimeline provider failure with typed error", async () => {
+        const {provider} = createOwnershipProviderFixture({
+            getCommitHistory(): Promise<readonly ICommitInfo[]> {
+                return Promise.reject(new Error("timeline failed"))
+            },
+        })
+
+        try {
+            await provider.getOwnershipTimeline("repo-1", "src/file.ts")
+        } catch (error) {
+            expect(error).toBeInstanceOf(GitOwnershipProviderError)
+            if (error instanceof GitOwnershipProviderError) {
+                expect(error.code).toBe(
+                    GIT_OWNERSHIP_PROVIDER_ERROR_CODE.GET_OWNERSHIP_TIMELINE_FAILED,
+                )
+                expect(error.repositoryId).toBe("repo-1")
+                expect(error.filePath).toBe("src/file.ts")
+                expect(error.causeMessage).toBe("timeline failed")
+            }
+            return
+        }
+
+        throw new Error("Expected getOwnershipTimeline to wrap provider failure")
+    })
 })

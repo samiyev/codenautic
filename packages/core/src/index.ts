@@ -194,7 +194,11 @@ export {type IFileMetricsDTO} from "./application/dto/analytics"
 export {
     type IFileOwnership,
     type IFileOwnershipContributor,
+    type IOwnershipHandoff,
+    type IOwnershipPeriod,
     type IOwnershipContributor,
+    type IOwnershipTimeline,
+    type IOwnershipTimelineEntry,
 } from "./application/dto/knowledge"
 export {
     AST_FUNCTION_KIND,

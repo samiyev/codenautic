@@ -6,12 +6,14 @@ import type {
     IGitProvider,
     IOwnershipContributor,
     IOwnershipProvider,
+    IOwnershipTimeline,
 } from "@codenautic/core"
 
 import {
     GIT_OWNERSHIP_PROVIDER_ERROR_CODE,
     GitOwnershipProviderError,
 } from "./git-ownership-provider.error"
+import {buildOwnershipTimeline} from "./git-ownership-timeline"
 
 const DEFAULT_REF = "HEAD"
 const DEFAULT_MAX_HISTORY_COUNT = 200
@@ -129,6 +131,39 @@ export class GitOwnershipProvider implements IOwnershipProvider {
                 .sort(compareOwnershipContributors)
         } catch (error) {
             throw wrapContributorsFailure(error, normalizedRepositoryId)
+        }
+    }
+
+    /**
+     * Builds ownership timeline for one repository file.
+     *
+     * @param repositoryId Repository identifier.
+     * @param filePath Repository-relative file path.
+     * @returns Ownership timeline with running totals and handoffs.
+     */
+    public async getOwnershipTimeline(
+        repositoryId: string,
+        filePath: string,
+    ): Promise<IOwnershipTimeline> {
+        const normalizedRepositoryId = validateRepositoryId(repositoryId)
+        const normalizedFilePath = validateFilePath(filePath)
+
+        try {
+            const history = await this.gitProvider.getCommitHistory(this.defaultRef, {
+                path: normalizedFilePath,
+                maxCount: this.maxHistoryCount,
+            })
+
+            return buildOwnershipTimeline({
+                filePath: normalizedFilePath,
+                commits: history,
+            })
+        } catch (error) {
+            throw wrapOwnershipTimelineFailure(
+                error,
+                normalizedRepositoryId,
+                normalizedFilePath,
+            )
         }
     }
 
@@ -679,6 +714,34 @@ function wrapContributorsFailure(
         {
             repositoryId,
             operation: "getContributors",
+            causeMessage: resolveCauseMessage(error),
+        },
+    )
+}
+
+/**
+ * Wraps unknown ownership timeline failure into typed provider error.
+ *
+ * @param error Original error.
+ * @param repositoryId Repository identifier.
+ * @param filePath File path.
+ * @returns Typed ownership provider error.
+ */
+function wrapOwnershipTimelineFailure(
+    error: unknown,
+    repositoryId: string,
+    filePath: string,
+): GitOwnershipProviderError {
+    if (error instanceof GitOwnershipProviderError) {
+        return error
+    }
+
+    return new GitOwnershipProviderError(
+        GIT_OWNERSHIP_PROVIDER_ERROR_CODE.GET_OWNERSHIP_TIMELINE_FAILED,
+        {
+            repositoryId,
+            filePath,
+            operation: "getOwnershipTimeline",
             causeMessage: resolveCauseMessage(error),
         },
     )

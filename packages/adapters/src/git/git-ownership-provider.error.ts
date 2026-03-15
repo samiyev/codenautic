@@ -9,6 +9,7 @@ export const GIT_OWNERSHIP_PROVIDER_ERROR_CODE = {
     INVALID_BUS_FACTOR_THRESHOLD: "INVALID_BUS_FACTOR_THRESHOLD",
     GET_FILE_OWNERSHIP_FAILED: "GET_FILE_OWNERSHIP_FAILED",
     GET_CONTRIBUTORS_FAILED: "GET_CONTRIBUTORS_FAILED",
+    GET_OWNERSHIP_TIMELINE_FAILED: "GET_OWNERSHIP_TIMELINE_FAILED",
 } as const
 
 /**
@@ -120,6 +121,10 @@ const GIT_OWNERSHIP_PROVIDER_ERROR_MESSAGES: Readonly<
         details: IGitOwnershipProviderErrorDetails,
     ): string =>
         `Failed to load contributors for repository ${details.repositoryId ?? "<unknown>"}`,
+    [GIT_OWNERSHIP_PROVIDER_ERROR_CODE.GET_OWNERSHIP_TIMELINE_FAILED]: (
+        details: IGitOwnershipProviderErrorDetails,
+    ): string =>
+        `Failed to build ownership timeline for repository ${details.repositoryId ?? "<unknown>"}`,
 }
 
 /**

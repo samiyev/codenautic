@@ -70,6 +70,10 @@ export {
     type IGitOwnershipProviderOptions,
 } from "./git-ownership-provider"
 export {
+    buildOwnershipTimeline,
+    type IBuildOwnershipTimelineInput,
+} from "./git-ownership-timeline"
+export {
     GitHubProvider,
     type IGitHubBatchReviewRequest,
     type IGitHubOctokitClient,
