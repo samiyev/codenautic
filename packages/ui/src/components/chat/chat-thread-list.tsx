@@ -152,9 +152,7 @@ export function ChatThreadList(props: IChatThreadListProps): ReactElement {
                                             {thread.title}
                                         </p>
                                         <p className="text-xs text-muted">{thread.repo}</p>
-                                        <p className="text-xs text-muted">
-                                            CCR: {thread.ccr}
-                                        </p>
+                                        <p className="text-xs text-muted">CCR: {thread.ccr}</p>
                                     </button>
                                     <div className="flex items-center gap-1">
                                         <Button
