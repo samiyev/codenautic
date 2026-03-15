@@ -11,7 +11,57 @@ import {
 
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
-import { pickFieldMessage } from "./form-field-utils"
+/**
+ * Опция для select-поля.
+ */
+export interface IFormSelectOption {
+    /** Значение опции. */
+    readonly value: string
+    /** Лейбл опции. */
+    readonly label: string
+    /** Дополнительный подпоясняющий текст. */
+    readonly description?: string
+    /** Блокирован ли выбор пункта. */
+    readonly isDisabled?: boolean
+}
+
+/**
+ * Опция для radio-group.
+ */
+export interface IFormRadioOption {
+    /** Значение радиокнопки. */
+    readonly value: string
+    /** Отображаемый текст. */
+    readonly label: string
+    /** Отключена ли опция. */
+    readonly isDisabled?: boolean
+}
+
+/**
+ * Утилита для выбора текста ошибки или helper-текста.
+ *
+ * @param errorMessage Сообщение ошибки.
+ * @param helperText Текст-подсказка.
+ * @returns Актуальный текст для снизу у поля.
+ */
+function pickFieldMessage(
+    errorMessage: string | undefined,
+    helperText: string | undefined,
+): ReactNode | null {
+    if (errorMessage !== undefined && errorMessage !== "") {
+        return (
+            <p className="text-xs text-danger" role="alert">
+                {errorMessage}
+            </p>
+        )
+    }
+
+    if (helperText === undefined || helperText === "") {
+        return null
+    }
+
+    return <p className="text-xs text-muted">{helperText}</p>
+}
 
 /**
  * Правила валидации для generic form field.
