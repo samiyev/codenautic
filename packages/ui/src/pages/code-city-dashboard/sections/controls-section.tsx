@@ -5,7 +5,7 @@ import { CausalOverlaySelector } from "@/components/codecity/overlays/causal-ove
 import { Card, CardContent, CardHeader } from "@heroui/react"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 
-import { CODE_CITY_DASHBOARD_METRICS } from "../code-city-dashboard-mock-data"
+import { CODE_CITY_DASHBOARD_METRICS } from "../code-city-dashboard-constants"
 import type { ICodeCityDashboardState } from "../use-code-city-dashboard-state"
 
 /**
