@@ -5,15 +5,13 @@ import type { IGuidedTourStep } from "@/components/codecity/guided-tour-overlay"
 import type { IRootCauseChainFocusPayload } from "@/components/codecity/root-cause-chain-viewer"
 import type {
     TCodeCityDashboardMetric,
+    ICodeCityDashboardRepositoryProfile,
     IExploreNavigationFocusState,
     TDashboardOnboardingAreaId,
 } from "./code-city-dashboard-types"
+import { CODE_CITY_GUIDED_TOUR_STEPS } from "./code-city-dashboard-constants"
 import {
-    CODE_CITY_DASHBOARD_REPOSITORIES,
-    CODE_CITY_GUIDED_TOUR_STEPS,
-} from "./code-city-dashboard-mock-data"
-import {
-    DEFAULT_DASHBOARD_REPOSITORY,
+    resolveDefaultDashboardRepository,
     resolveDashboardProfile,
     isCodeCityMetric,
     resolveRepositoryOptions,
@@ -74,27 +72,49 @@ import {
 } from "./builders/ownership-knowledge-builders"
 
 /**
+ * Параметры хука useCodeCityDashboardState.
+ */
+export interface IUseCodeCityDashboardStateArgs {
+    /**
+     * Профили репозиториев, загруженные из API.
+     */
+    readonly repositories: ReadonlyArray<ICodeCityDashboardRepositoryProfile>
+    /**
+     * Идентификатор репозитория по умолчанию.
+     */
+    readonly initialRepositoryId?: string
+}
+
+/**
  * Custom hook, инкапсулирующий всё состояние и вычисления CodeCity dashboard.
  *
- * @param initialRepositoryId Идентификатор репозитория по умолчанию.
+ * @param args Параметры: профили репозиториев и опциональный начальный repositoryId.
  * @returns Состояние, вычисленные данные и обработчики событий.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- ReturnType used as exported type alias
-export function useCodeCityDashboardState(initialRepositoryId?: string) {
+export function useCodeCityDashboardState(args: IUseCodeCityDashboardStateArgs) {
+    const { repositories, initialRepositoryId } = args
+
     const repositoryOptions = useMemo(
-        (): ReadonlyArray<string> => resolveRepositoryOptions(CODE_CITY_DASHBOARD_REPOSITORIES),
-        [],
+        (): ReadonlyArray<string> => resolveRepositoryOptions(repositories),
+        [repositories],
+    )
+
+    const defaultRepository = useMemo(
+        (): ICodeCityDashboardRepositoryProfile =>
+            resolveDefaultDashboardRepository(repositories),
+        [repositories],
     )
 
     const resolvedInitialRepositoryId = useMemo((): string => {
         if (initialRepositoryId === undefined) {
-            return DEFAULT_DASHBOARD_REPOSITORY.id
+            return defaultRepository.id
         }
         if (repositoryOptions.includes(initialRepositoryId)) {
             return initialRepositoryId
         }
-        return DEFAULT_DASHBOARD_REPOSITORY.id
-    }, [initialRepositoryId, repositoryOptions])
+        return defaultRepository.id
+    }, [initialRepositoryId, repositoryOptions, defaultRepository])
 
     const [repositoryId, setRepositoryId] = useState<string>(resolvedInitialRepositoryId)
     const [metric, setMetric] = useState<TCodeCityDashboardMetric>("complexity")
