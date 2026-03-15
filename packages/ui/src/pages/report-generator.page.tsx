@@ -331,8 +331,12 @@ export function ReportGeneratorPage(): ReactElement {
                     </Alert>
                     {selectedSectionLabels.length === 0 ? (
                         <Alert status="warning">
-                            <Alert.Title>{t("reports:generator.selectedSectionsTitle")}</Alert.Title>
-                            <Alert.Description>{t("reports:generator.selectAtLeastOneSection")}</Alert.Description>
+                            <Alert.Title>
+                                {t("reports:generator.selectedSectionsTitle")}
+                            </Alert.Title>
+                            <Alert.Description>
+                                {t("reports:generator.selectAtLeastOneSection")}
+                            </Alert.Description>
                         </Alert>
                     ) : (
                         <ul

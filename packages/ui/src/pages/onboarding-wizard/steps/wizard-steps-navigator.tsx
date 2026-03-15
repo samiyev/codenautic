@@ -100,7 +100,7 @@ export function WizardStepIndicator({ state }: IWizardStepIndicatorProps): React
                         type="button"
                     >
                         <div
-                            className={`rounded-md px-2 py-2 ${isActive ? "bg-foreground text-background" : isCompleted ? "bg-surface-muted text-foreground" : "bg-surface text-muted-foreground"}`}
+                            className={`rounded-md px-2 py-2 ${isActive ? "bg-foreground text-background" : isCompleted ? "bg-surface-secondary text-foreground" : "bg-surface text-muted"}`}
                         >
                             <p className="text-xs font-semibold uppercase tracking-wider">
                                 {td("onboarding:steps.stepLabel", { number: String(index + 1) })}
