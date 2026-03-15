@@ -3,8 +3,8 @@ import type { TTenantId, TUiRole } from "@/lib/access/access-types"
 export const MULTI_TAB_SYNC_CHANNEL = "codenautic:multi-tab-sync"
 export const TENANT_STORAGE_KEY = "codenautic:tenant:active"
 export const UI_ROLE_STORAGE_KEY = "codenautic:rbac:role"
-export const THEME_MODE_STORAGE_KEY = "codenautic:ui:theme-mode"
-export const THEME_PRESET_STORAGE_KEY = "codenautic:ui:theme-preset"
+export const THEME_MODE_STORAGE_KEY = "cn:theme-mode"
+export const THEME_PRESET_STORAGE_KEY = "cn:theme-preset"
 
 export type TMultiTabSyncMessage =
     | {
