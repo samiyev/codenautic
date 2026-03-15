@@ -61,7 +61,7 @@ export function useGitProviders(args: IUseGitProvidersArgs = {}): IUseGitProvide
             return api.gitProviders.listProviders()
         },
         enabled,
-        refetchOnWindowFocus: false,
+
     })
 
     const updateConnection = useMutation<
