@@ -76,6 +76,12 @@ export {
     type IAstImpactRadiusCalculatorErrorDetails,
 } from "./ast-impact-radius-calculator.error"
 export {
+    AST_CROSS_FILE_ISSUE_AGGREGATOR_ERROR_CODE,
+    AstCrossFileIssueAggregatorError,
+    type AstCrossFileIssueAggregatorErrorCode,
+    type IAstCrossFileIssueAggregatorErrorDetails,
+} from "./ast-cross-file-issue-aggregator.error"
+export {
     AST_CODE_CHUNK_EMBEDDING_GENERATOR_ERROR_CODE,
     AstCodeChunkEmbeddingGeneratorError,
     type AstCodeChunkEmbeddingGeneratorErrorCode,
@@ -279,6 +285,21 @@ export {
     type IAstImpactRadiusCalculatorServiceOptions,
     type IAstImpactRadiusCalculatorSummary,
 } from "./ast-impact-radius-calculator.service"
+export {
+    AST_CROSS_FILE_ISSUE_SEVERITY,
+    AST_CROSS_FILE_ISSUE_SOURCE,
+    AstCrossFileIssueAggregatorService,
+    type AstCrossFileIssueSeverity,
+    type AstCrossFileIssueSource,
+    type IAstCrossFileIssue,
+    type IAstCrossFileIssueAggregatorInput,
+    type IAstCrossFileIssueAggregatorResult,
+    type IAstCrossFileIssueAggregatorService,
+    type IAstCrossFileIssueAggregatorServiceOptions,
+    type IAstCrossFileIssueAggregatorSummary,
+    type IAstCrossFileIssueFileSummary,
+    type IAstCrossFileIssueInput,
+} from "./ast-cross-file-issue-aggregator.service"
 export {
     AstDependencyChainResolverService,
     type IAstDependencyChain,
