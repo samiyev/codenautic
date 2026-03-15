@@ -12,10 +12,12 @@ export {
     mapExternalLinearIssue,
     mapExternalPostHogFeatureFlag,
     mapExternalSentryError,
+    mapExternalTrelloCard,
     mapJiraContext,
     mapLinearContext,
     mapPostHogContext,
     mapSentryContext,
+    mapTrelloContext,
 } from "./context-acl-mapper"
 export {
     AsanaContextAcl,
@@ -31,6 +33,8 @@ export {
     LinearIssueAcl,
     PostHogContextAcl,
     PostHogFeatureFlagAcl,
+    TrelloCardAcl,
+    TrelloContextAcl,
     SentryErrorAcl,
     JiraContextAcl,
     LinearContextAcl,

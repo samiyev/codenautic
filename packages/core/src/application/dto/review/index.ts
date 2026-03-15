@@ -34,6 +34,9 @@ export {
     type ILinearSubIssue,
     type IPostHogFeatureFlag,
     type ISentryError,
+    type ITrelloCard,
+    type ITrelloLabel,
+    type ITrelloMember,
 } from "./external-context.dto"
 export {
     type ISuggestionClusterDTO,

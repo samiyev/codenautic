@@ -10,6 +10,7 @@ export const EXTERNAL_CONTEXT_SOURCE = [
     "CLICKUP",
     "DATADOG",
     "POSTHOG",
+    "TRELLO",
 ] as const
 
 /**
@@ -311,6 +312,91 @@ export interface IClickUpTask {
      * Optional normalized task custom fields.
      */
     readonly customFields?: readonly IClickUpCustomField[]
+}
+
+/**
+ * External label model for Trello platform.
+ */
+export interface ITrelloLabel {
+    /**
+     * Stable Trello label identifier.
+     */
+    readonly id: string
+
+    /**
+     * Human-readable label name.
+     */
+    readonly name: string
+
+    /**
+     * Optional label color.
+     */
+    readonly color?: string
+}
+
+/**
+ * External member model for Trello platform.
+ */
+export interface ITrelloMember {
+    /**
+     * Stable Trello member identifier.
+     */
+    readonly id: string
+
+    /**
+     * Human-readable member name.
+     */
+    readonly fullName: string
+
+    /**
+     * Optional Trello username.
+     */
+    readonly username?: string
+}
+
+/**
+ * External card model for Trello platform.
+ */
+export interface ITrelloCard {
+    /**
+     * Stable Trello card identifier.
+     */
+    readonly id: string
+
+    /**
+     * Human-readable card title.
+     */
+    readonly title: string
+
+    /**
+     * Current normalized card status.
+     */
+    readonly status: string
+
+    /**
+     * Optional normalized card description.
+     */
+    readonly description?: string
+
+    /**
+     * Optional normalized due date in ISO format.
+     */
+    readonly dueDate?: string
+
+    /**
+     * Optional normalized list name.
+     */
+    readonly listName?: string
+
+    /**
+     * Optional normalized labels.
+     */
+    readonly labels?: readonly ITrelloLabel[]
+
+    /**
+     * Optional normalized members.
+     */
+    readonly members?: readonly ITrelloMember[]
 }
 
 /**

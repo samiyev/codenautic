@@ -19,6 +19,8 @@ export {
     LinearIssueAcl,
     PostHogContextAcl,
     PostHogFeatureFlagAcl,
+    TrelloCardAcl,
+    TrelloContextAcl,
     SentryContextAcl,
     SentryErrorAcl,
     mapAsanaContext,
@@ -34,10 +36,12 @@ export {
     mapExternalLinearIssue,
     mapExternalPostHogFeatureFlag,
     mapExternalSentryError,
+    mapExternalTrelloCard,
     mapJiraContext,
     mapLinearContext,
     mapPostHogContext,
     mapSentryContext,
+    mapTrelloContext,
 } from "./acl"
 export {type IBugsnagContextData} from "./bugsnag.types"
 export {
@@ -46,6 +50,7 @@ export {
     type IDatadogLogEntry,
 } from "./datadog.types"
 export {type IPostHogContextData} from "./posthog.types"
+export {type ITrelloContextData} from "./trello.types"
 export {
     AsanaProvider,
     type IAsanaApiClient,
@@ -89,6 +94,15 @@ export {
     type IPostHogProviderOptions,
     type IPostHogResponseHeaders,
 } from "./posthog-provider"
+export {
+    TrelloProvider,
+    type ITrelloApiClient,
+    type ITrelloApiResponse,
+    type ITrelloGetCardRequest,
+    type ITrelloGetListRequest,
+    type ITrelloProviderOptions,
+    type ITrelloResponseHeaders,
+} from "./trello-provider"
 export {
     JiraProvider,
     type IJiraApiClient,
@@ -141,6 +155,10 @@ export {
     PostHogProviderError,
     type IPostHogProviderErrorDetails,
 } from "./posthog-provider.error"
+export {
+    TrelloProviderError,
+    type ITrelloProviderErrorDetails,
+} from "./trello-provider.error"
 export {
     JiraProviderError,
     type IJiraProviderErrorDetails,

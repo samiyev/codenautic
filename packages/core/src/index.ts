@@ -121,6 +121,7 @@ export {
     type ILinearProvider,
     type IPostHogProvider,
     type ISentryProvider,
+    type ITrelloProvider,
 } from "./application/ports/outbound/review/external-context-provider.port"
 export {
     type ICodeChunkEmbeddingDTO,
@@ -442,6 +443,9 @@ export {
     type IJiraTicket,
     type IPostHogFeatureFlag,
     type ISentryError,
+    type ITrelloCard,
+    type ITrelloLabel,
+    type ITrelloMember,
     type IReviewResultDTO,
     type IReviewResultMetricsDTO,
     type ISuggestionClusterDTO,

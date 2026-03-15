@@ -12,9 +12,13 @@ import type {
     ILinearSubIssue,
     IPostHogFeatureFlag,
     ISentryError,
+    ITrelloCard,
+    ITrelloLabel,
+    ITrelloMember,
 } from "@codenautic/core"
 import type {IDatadogAlert, IDatadogContextData, IDatadogLogEntry} from "../datadog.types"
 import type {IPostHogContextData} from "../posthog.types"
+import type {ITrelloContextData} from "../trello.types"
 
 const DEFAULT_FETCHED_AT = new Date(0)
 const EMPTY_RECORD: Readonly<Record<string, unknown>> = {}
@@ -366,6 +370,58 @@ export function mapPostHogContext(payload: unknown): IExternalContext {
 
     return {
         source: "POSTHOG",
+        data: contextData,
+        fetchedAt: resolveFetchedAt(root),
+    }
+}
+
+/**
+ * Normalizes external Trello payload to shared card DTO.
+ *
+ * @param payload External Trello payload.
+ * @returns Normalized Trello card DTO.
+ */
+export function mapExternalTrelloCard(payload: unknown): ITrelloCard {
+    const root = toRecord(payload) ?? EMPTY_RECORD
+    const card = toRecord(root["card"]) ?? root
+    const description = extractRichText(card["desc"] ?? card["description"])
+    const dueDate = normalizeIsoTimestamp(card["due"] ?? card["dueDate"])
+    const listName = resolveTrelloListName(card)
+    const labels = resolveTrelloLabels(card)
+    const members = resolveTrelloMembers(card)
+
+    return {
+        id: readIdentifier(card, ["id", "cardId"], "UNKNOWN"),
+        title: readText(card, ["name", "title"], "(no title)"),
+        status: resolveTrelloStatus(card),
+        ...(description !== undefined ? {description} : {}),
+        ...(dueDate !== undefined ? {dueDate} : {}),
+        ...(listName !== undefined ? {listName} : {}),
+        ...(labels !== undefined ? {labels} : {}),
+        ...(members !== undefined ? {members} : {}),
+    }
+}
+
+/**
+ * Normalizes external Trello context payload.
+ *
+ * @param payload External Trello payload.
+ * @returns Shared external context.
+ */
+export function mapTrelloContext(payload: unknown): IExternalContext {
+    const root = toRecord(payload) ?? EMPTY_RECORD
+    const card = mapExternalTrelloCard(payload)
+    const labels = card.labels?.map((label) => {
+        return label.name
+    })
+    const contextData: ITrelloContextData = {
+        card,
+        ...(card.listName !== undefined ? {listName: card.listName} : {}),
+        ...(labels !== undefined ? {labels} : {}),
+    }
+
+    return {
+        source: "TRELLO",
         data: contextData,
         fetchedAt: resolveFetchedAt(root),
     }
@@ -2512,6 +2568,185 @@ function resolvePostHogTags(
 }
 
 /**
+ * Resolves normalized Trello card status.
+ *
+ * @param card Trello card payload.
+ * @returns Deterministic status label.
+ */
+function resolveTrelloStatus(card: Readonly<Record<string, unknown>>): string {
+    const explicitStatus = readText(card, ["status"])
+    if (explicitStatus.length > 0) {
+        return explicitStatus.toLowerCase()
+    }
+
+    if (card["closed"] === true) {
+        return "archived"
+    }
+
+    if (card["dueComplete"] === true) {
+        return "completed"
+    }
+
+    const list = toRecord(card["list"])
+    if (list?.["closed"] === true) {
+        return "archived"
+    }
+
+    return "open"
+}
+
+/**
+ * Resolves normalized Trello list name.
+ *
+ * @param card Trello card payload.
+ * @returns List name when available.
+ */
+function resolveTrelloListName(card: Readonly<Record<string, unknown>>): string | undefined {
+    const list = toRecord(card["list"])
+    const listName = readText(list, ["name"], readText(card, ["listName", "list_name"]))
+
+    return listName.length > 0 ? listName : undefined
+}
+
+/**
+ * Resolves normalized Trello labels.
+ *
+ * @param card Trello card payload.
+ * @returns Trello labels when available.
+ */
+function resolveTrelloLabels(
+    card: Readonly<Record<string, unknown>>,
+): readonly ITrelloLabel[] | undefined {
+    const labels = toArray(card["labels"]).flatMap((labelCandidate) => {
+        const label = mapTrelloLabel(labelCandidate)
+        return label === undefined ? [] : [label]
+    })
+
+    if (labels.length === 0) {
+        return undefined
+    }
+
+    return deduplicateTrelloLabels(labels)
+}
+
+/**
+ * Maps Trello label candidate to normalized label DTO.
+ *
+ * @param candidate Trello label candidate.
+ * @returns Normalized label when candidate is valid.
+ */
+function mapTrelloLabel(candidate: unknown): ITrelloLabel | undefined {
+    const label = toRecord(candidate)
+    if (label === null) {
+        return undefined
+    }
+
+    const id = readIdentifier(label, ["id"])
+    const name = readText(label, ["name", "label"], id)
+    if (id.length === 0 && name.length === 0) {
+        return undefined
+    }
+
+    const color = readText(label, ["color"])
+    return {
+        id: id.length > 0 ? id : name,
+        name,
+        ...(color.length > 0 ? {color} : {}),
+    }
+}
+
+/**
+ * Resolves normalized Trello members.
+ *
+ * @param card Trello card payload.
+ * @returns Trello members when available.
+ */
+function resolveTrelloMembers(
+    card: Readonly<Record<string, unknown>>,
+): readonly ITrelloMember[] | undefined {
+    const members = toArray(card["members"]).flatMap((memberCandidate) => {
+        const member = mapTrelloMember(memberCandidate)
+        return member === undefined ? [] : [member]
+    })
+
+    if (members.length === 0) {
+        return undefined
+    }
+
+    return deduplicateTrelloMembers(members)
+}
+
+/**
+ * Maps Trello member candidate to normalized member DTO.
+ *
+ * @param candidate Trello member candidate.
+ * @returns Normalized member when candidate is valid.
+ */
+function mapTrelloMember(candidate: unknown): ITrelloMember | undefined {
+    const member = toRecord(candidate)
+    if (member === null) {
+        return undefined
+    }
+
+    const id = readIdentifier(member, ["id"], "UNKNOWN")
+    const fullName = readText(member, ["fullName", "name"], id)
+    if (id === "UNKNOWN" && fullName.length === 0) {
+        return undefined
+    }
+
+    const username = readText(member, ["username"])
+    return {
+        id,
+        fullName: fullName.length > 0 ? fullName : id,
+        ...(username.length > 0 ? {username} : {}),
+    }
+}
+
+/**
+ * Deduplicates Trello labels by identifier while preserving order.
+ *
+ * @param labels Trello labels.
+ * @returns Deduplicated labels.
+ */
+function deduplicateTrelloLabels(labels: readonly ITrelloLabel[]): readonly ITrelloLabel[] {
+    const seen = new Set<string>()
+    const deduplicated: ITrelloLabel[] = []
+
+    for (const label of labels) {
+        if (seen.has(label.id)) {
+            continue
+        }
+
+        seen.add(label.id)
+        deduplicated.push(label)
+    }
+
+    return deduplicated
+}
+
+/**
+ * Deduplicates Trello members by identifier while preserving order.
+ *
+ * @param members Trello members.
+ * @returns Deduplicated members.
+ */
+function deduplicateTrelloMembers(members: readonly ITrelloMember[]): readonly ITrelloMember[] {
+    const seen = new Set<string>()
+    const deduplicated: ITrelloMember[] = []
+
+    for (const member of members) {
+        if (seen.has(member.id)) {
+            continue
+        }
+
+        seen.add(member.id)
+        deduplicated.push(member)
+    }
+
+    return deduplicated
+}
+
+/**
  * Resolves normalized Datadog tags from monitor payload.
  *
  * @param monitor Datadog monitor payload.
@@ -2746,6 +2981,7 @@ function resolveFetchedAt(root: Readonly<Record<string, unknown>>): Date {
         ...resolveRootFetchedAtCandidates(root),
         ...resolveMonitorFetchedAtCandidates(root),
         ...resolveFeatureFlagFetchedAtCandidates(root),
+        ...resolveCardFetchedAtCandidates(root),
     ]
 
     for (const candidate of candidates) {
@@ -2777,6 +3013,9 @@ function resolveRootFetchedAtCandidates(root: Readonly<Record<string, unknown>>)
         root["updated_at"],
         root["lastSeen"],
         root["last_seen"],
+        root["dateLastActivity"],
+        root["date_last_activity"],
+        root["lastActivity"],
         root["dateCreated"],
         root["timestamp"],
     ]
@@ -2831,6 +3070,29 @@ function resolveFeatureFlagFetchedAtCandidates(
 }
 
 /**
+ * Resolves card-level fetched-at candidates.
+ *
+ * @param root Payload root object.
+ * @returns Card-level date candidates.
+ */
+function resolveCardFetchedAtCandidates(root: Readonly<Record<string, unknown>>): readonly unknown[] {
+    const card = resolveCardRoot(root)
+    if (card === null) {
+        return []
+    }
+
+    return [
+        card["dateLastActivity"],
+        card["date_last_activity"],
+        card["lastActivity"],
+        card["dateCreated"],
+        card["updatedAt"],
+        card["updated_at"],
+        card["timestamp"],
+    ]
+}
+
+/**
  * Resolves PostHog feature-flag root object from supported wrappers.
  *
  * @param root Payload root object.
@@ -2850,6 +3112,23 @@ function resolveFeatureFlagRoot(
     }
 
     return toRecord(root["flag"])
+}
+
+/**
+ * Resolves Trello card root object from supported wrappers.
+ *
+ * @param root Payload root object.
+ * @returns Card root object or null.
+ */
+function resolveCardRoot(
+    root: Readonly<Record<string, unknown>>,
+): Readonly<Record<string, unknown>> | null {
+    const directCard = toRecord(root["card"])
+    if (directCard !== null) {
+        return directCard
+    }
+
+    return toRecord(root["trelloCard"])
 }
 
 /**

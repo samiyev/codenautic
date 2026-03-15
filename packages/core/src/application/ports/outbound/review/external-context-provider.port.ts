@@ -8,6 +8,7 @@ import type {
     ILinearIssue,
     IPostHogFeatureFlag,
     ISentryError,
+    ITrelloCard,
 } from "../../../dto/review/external-context.dto"
 
 /**
@@ -117,4 +118,17 @@ export interface IPostHogProvider {
      * @returns PostHog feature flag payload or null when not found.
      */
     getFeatureFlag(featureFlagKey: string): Promise<IPostHogFeatureFlag | null>
+}
+
+/**
+ * Trello-specific provider contract.
+ */
+export interface ITrelloProvider {
+    /**
+     * Loads Trello card by identifier.
+     *
+     * @param cardId Trello card identifier.
+     * @returns Trello card payload or null when not found.
+     */
+    getCard(cardId: string): Promise<ITrelloCard | null>
 }

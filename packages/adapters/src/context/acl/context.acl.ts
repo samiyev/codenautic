@@ -8,6 +8,7 @@ import type {
     ILinearIssue,
     IPostHogFeatureFlag,
     ISentryError,
+    ITrelloCard,
 } from "@codenautic/core"
 import type {IDatadogAlert, IDatadogLogEntry} from "../datadog.types"
 
@@ -25,10 +26,12 @@ import {
     mapExternalLinearIssue,
     mapExternalPostHogFeatureFlag,
     mapExternalSentryError,
+    mapExternalTrelloCard,
     mapJiraContext,
     mapLinearContext,
     mapPostHogContext,
     mapSentryContext,
+    mapTrelloContext,
 } from "./context-acl-mapper"
 
 /**
@@ -308,6 +311,46 @@ export class PostHogContextAcl implements IAntiCorruptionLayer<unknown, IExterna
      */
     public toDomain(external: unknown): IExternalContext {
         return mapPostHogContext(external)
+    }
+}
+
+/**
+ * Trello card ACL adapter.
+ */
+export class TrelloCardAcl implements IAntiCorruptionLayer<unknown, ITrelloCard> {
+    /**
+     * Creates Trello card ACL adapter.
+     */
+    public constructor() {}
+
+    /**
+     * Converts external Trello card payload to domain DTO.
+     *
+     * @param external External Trello payload.
+     * @returns Domain Trello card DTO.
+     */
+    public toDomain(external: unknown): ITrelloCard {
+        return mapExternalTrelloCard(external)
+    }
+}
+
+/**
+ * Trello context ACL adapter.
+ */
+export class TrelloContextAcl implements IAntiCorruptionLayer<unknown, IExternalContext> {
+    /**
+     * Creates Trello context ACL adapter.
+     */
+    public constructor() {}
+
+    /**
+     * Converts external Trello payload to shared external context.
+     *
+     * @param external External Trello payload.
+     * @returns Shared external context.
+     */
+    public toDomain(external: unknown): IExternalContext {
+        return mapTrelloContext(external)
     }
 }
 

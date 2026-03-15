@@ -7,6 +7,7 @@ import type {
     ILinearIssue,
     IPostHogFeatureFlag,
     ISentryError,
+    ITrelloCard,
 } from "../../../../src/application/dto/review/external-context.dto"
 
 describe("IExternalContext review DTO", () => {
@@ -184,5 +185,43 @@ describe("IExternalContext review DTO", () => {
         expect(featureFlag.status).toBe("active")
         expect(featureFlag.rolloutPercentage).toBe(55)
         expect(payload.source).toBe("POSTHOG")
+    })
+
+    test("supports enriched Trello card payload with members and labels", () => {
+        const card: ITrelloCard = {
+            id: "card-991",
+            title: "Sync review stage metadata",
+            status: "in-progress",
+            description: "Keep Trello context adapter aligned with core DTO contracts.",
+            dueDate: "2026-03-20T00:00:00.000Z",
+            listName: "In Progress",
+            labels: [
+                {
+                    id: "label-1",
+                    name: "review",
+                    color: "green",
+                },
+            ],
+            members: [
+                {
+                    id: "member-1",
+                    fullName: "Grace Hopper",
+                    username: "ghopper",
+                },
+            ],
+        }
+        const payload: IExternalContext = {
+            source: "TRELLO",
+            data: {
+                card,
+                listName: card.listName,
+            },
+            fetchedAt: new Date("2026-03-16T08:00:00.000Z"),
+        }
+
+        expect(card.status).toBe("in-progress")
+        expect(card.labels?.[0]?.name).toBe("review")
+        expect(card.members?.[0]?.username).toBe("ghopper")
+        expect(payload.source).toBe("TRELLO")
     })
 })
