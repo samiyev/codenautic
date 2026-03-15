@@ -21,6 +21,9 @@ import { TriageCollection } from "./collections/triage-collection"
 import { TokenUsageCollection } from "./collections/token-usage-collection"
 import { AuditLogsCollection } from "./collections/audit-logs-collection"
 import { WebhooksCollection } from "./collections/webhooks-collection"
+import { AdoptionAnalyticsCollection } from "./collections/adoption-analytics-collection"
+import { ProviderStatusCollection } from "./collections/provider-status-collection"
+import { ScanProgressCollection } from "./collections/scan-progress-collection"
 
 /**
  * Централизованное in-memory хранилище для mock API слоя MSW.
@@ -145,6 +148,21 @@ export class MockStore {
     public readonly auditLogs: AuditLogsCollection
 
     /**
+     * Коллекция adoption analytics: funnel, workflow health, KPI.
+     */
+    public readonly adoptionAnalytics: AdoptionAnalyticsCollection
+
+    /**
+     * Коллекция provider status: состояние провайдера, очередь действий.
+     */
+    public readonly providerStatus: ProviderStatusCollection
+
+    /**
+     * Коллекция scan progress: события прогресса сканирования.
+     */
+    public readonly scanProgress: ScanProgressCollection
+
+    /**
      * Создаёт новый экземпляр MockStore с пустыми коллекциями.
      */
     public constructor() {
@@ -171,6 +189,9 @@ export class MockStore {
         this.billing = new BillingCollection()
         this.tokenUsage = new TokenUsageCollection()
         this.auditLogs = new AuditLogsCollection()
+        this.adoptionAnalytics = new AdoptionAnalyticsCollection()
+        this.providerStatus = new ProviderStatusCollection()
+        this.scanProgress = new ScanProgressCollection()
     }
 
     /**
@@ -200,5 +221,8 @@ export class MockStore {
         this.billing.clear()
         this.tokenUsage.clear()
         this.auditLogs.clear()
+        this.adoptionAnalytics.clear()
+        this.providerStatus.clear()
+        this.scanProgress.clear()
     }
 }
