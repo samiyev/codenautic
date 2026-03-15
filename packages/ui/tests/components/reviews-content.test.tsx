@@ -5,16 +5,21 @@ const intersectionObserverState = {
     isIntersecting: false,
 }
 
-vi.mock("@/lib/hooks/use-intersection-observer", () => {
+vi.mock("usehooks-ts", () => {
     return {
         useIntersectionObserver: (): {
+            readonly ref: (node?: Element | null) => void
             readonly isIntersecting: boolean
-            readonly targetRef: { current: HTMLDivElement | null }
+            readonly entry: IntersectionObserverEntry | undefined
         } => {
             return {
+                ref: (): void => {},
                 isIntersecting: intersectionObserverState.isIntersecting,
-                targetRef: { current: null },
+                entry: undefined,
             }
+        },
+        useDebounceValue: <T,>(value: T): [T, unknown] => {
+            return [value, (): void => {}]
         },
     }
 })
