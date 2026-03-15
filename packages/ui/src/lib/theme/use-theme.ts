@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useSyncExternalStore } from "react"
 import { useTheme as useNextTheme } from "next-themes"
 
 /**
@@ -47,21 +47,56 @@ function isValidPreset(value: string | null): value is TThemePreset {
 }
 
 /**
- * Читает пресет из localStorage.
- *
- * @returns Сохранённый пресет или значение по умолчанию.
+ * Shared preset store for cross-component synchronization.
  */
-function readStoredPreset(): TThemePreset {
+const presetListeners = new Set<() => void>()
+let currentPreset: TThemePreset = (() => {
     const stored = localStorage.getItem(PRESET_STORAGE_KEY)
     if (isValidPreset(stored)) {
         return stored
     }
     return DEFAULT_PRESET
+})()
+
+/**
+ * Подписка на изменения пресета.
+ *
+ * @param cb Callback при изменении.
+ * @returns Функция отписки.
+ */
+function subscribePreset(cb: () => void): () => void {
+    presetListeners.add(cb)
+    return (): void => {
+        presetListeners.delete(cb)
+    }
+}
+
+/**
+ * Возвращает текущий снапшот пресета.
+ *
+ * @returns Текущий пресет.
+ */
+function getPresetSnapshot(): TThemePreset {
+    return currentPreset
+}
+
+/**
+ * Устанавливает новый пресет и уведомляет подписчиков.
+ *
+ * @param p Новый пресет.
+ */
+function updatePreset(p: TThemePreset): void {
+    currentPreset = p
+    localStorage.setItem(PRESET_STORAGE_KEY, p)
+    document.documentElement.setAttribute("data-theme", p)
+    presetListeners.forEach((cb): void => {
+        cb()
+    })
 }
 
 /**
  * Hook для управления темой приложения.
- * Использует next-themes для mode (light/dark/system) и localStorage для preset.
+ * Использует next-themes для mode (light/dark/system) и shared store для preset.
  *
  * @returns Состояние темы и функции управления.
  */
@@ -74,7 +109,7 @@ export function useTheme(): {
     setPreset: (p: TThemePreset) => void
 } {
     const { theme, setTheme, resolvedTheme } = useNextTheme()
-    const [preset, setPresetState] = useState<TThemePreset>(readStoredPreset)
+    const preset = useSyncExternalStore(subscribePreset, getPresetSnapshot, getPresetSnapshot)
 
     const mode: TThemeMode = (theme as TThemeMode | undefined) ?? "system"
     const resolvedMode: "dark" | "light" = resolvedTheme === "dark" ? "dark" : "light"
@@ -87,9 +122,7 @@ export function useTheme(): {
     )
 
     const stableSetPreset = useCallback((p: TThemePreset): void => {
-        setPresetState(p)
-        localStorage.setItem(PRESET_STORAGE_KEY, p)
-        document.documentElement.setAttribute("data-theme", p)
+        updatePreset(p)
     }, [])
 
     useEffect((): void => {
