@@ -70,6 +70,12 @@ export {
     type IAstSharedStateDetectorErrorDetails,
 } from "./ast-shared-state-detector.error"
 export {
+    AST_IMPACT_RADIUS_CALCULATOR_ERROR_CODE,
+    AstImpactRadiusCalculatorError,
+    type AstImpactRadiusCalculatorErrorCode,
+    type IAstImpactRadiusCalculatorErrorDetails,
+} from "./ast-impact-radius-calculator.error"
+export {
     AST_CODE_CHUNK_EMBEDDING_GENERATOR_ERROR_CODE,
     AstCodeChunkEmbeddingGeneratorError,
     type AstCodeChunkEmbeddingGeneratorErrorCode,
@@ -262,6 +268,17 @@ export {
     type IAstSharedStateDetectorSummary,
     type IAstSharedStateIssue,
 } from "./ast-shared-state-detector.service"
+export {
+    AST_IMPACT_RADIUS_DIRECTION,
+    AstImpactRadiusCalculatorService,
+    type AstImpactRadiusDirection,
+    type IAstImpactedFile,
+    type IAstImpactRadiusCalculatorInput,
+    type IAstImpactRadiusCalculatorResult,
+    type IAstImpactRadiusCalculatorService,
+    type IAstImpactRadiusCalculatorServiceOptions,
+    type IAstImpactRadiusCalculatorSummary,
+} from "./ast-impact-radius-calculator.service"
 export {
     AstDependencyChainResolverService,
     type IAstDependencyChain,
