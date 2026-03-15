@@ -2,8 +2,7 @@ import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Chip } from "@heroui/react"
-import { FormLayout } from "@/components/forms/form-layout"
-import { FormSection } from "@/components/forms/form-section"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
@@ -264,10 +263,7 @@ export function SettingsBillingPage(): ReactElement {
     }
 
     return (
-        <FormLayout
-            title="Billing lifecycle"
-            description="Manage trial/active/past-due/canceled states, feature entitlements, and plan transitions with explicit outcomes."
-        >
+        <div className="space-y-6 mx-auto max-w-[1400px]"><div className="space-y-1.5"><h1 className={TYPOGRAPHY.pageTitle}>Billing lifecycle</h1><p className={TYPOGRAPHY.bodyMuted}>Manage trial/active/past-due/canceled states, feature entitlements, and plan transitions with explicit outcomes.</p></div><div className="space-y-6">
             {paywallBanner === null ? (
                 <Alert status="success">
                     <Alert.Title>Billing status is healthy</Alert.Title>
@@ -282,7 +278,7 @@ export function SettingsBillingPage(): ReactElement {
                 </Alert>
             )}
 
-            <FormSection heading="Current billing snapshot">
+            <section className="space-y-4 rounded-lg border border-border/50 bg-surface-tertiary p-4"><div className="space-y-1"><h3 className={TYPOGRAPHY.subsectionTitle}>Current billing snapshot</h3></div><div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <Chip
                         color={mapStatusChipColor(billingSnapshot.status)}
@@ -355,9 +351,9 @@ export function SettingsBillingPage(): ReactElement {
                     <Alert.Title>Last billing action</Alert.Title>
                     <Alert.Description>{lastOutcome}</Alert.Description>
                 </Alert>
-            </FormSection>
+            </div></section>
 
-            <FormSection heading="Premium feature lock/unlock state">
+            <section className="space-y-4 rounded-lg border border-border/50 bg-surface-tertiary p-4"><div className="space-y-1"><h3 className={TYPOGRAPHY.subsectionTitle}>Premium feature lock/unlock state</h3></div><div className="space-y-3">
                 <ul
                     aria-label={t("settings:ariaLabel.billing.entitlementFeaturesList")}
                     className="space-y-2"
@@ -381,17 +377,15 @@ export function SettingsBillingPage(): ReactElement {
                                     </Chip>
                                 </div>
                                 {feature.lockReason === undefined ? null : (
-                                    <p className="mt-1 text-xs text-muted">
-                                        {feature.lockReason}
-                                    </p>
+                                    <p className="mt-1 text-xs text-muted">{feature.lockReason}</p>
                                 )}
                             </li>
                         ),
                     )}
                 </ul>
-            </FormSection>
+            </div></section>
 
-            <FormSection heading="Plan change history">
+            <section className="space-y-4 rounded-lg border border-border/50 bg-surface-tertiary p-4"><div className="space-y-1"><h3 className={TYPOGRAPHY.subsectionTitle}>Plan change history</h3></div><div className="space-y-3">
                 <ul aria-label={t("settings:ariaLabel.billing.historyList")} className="space-y-2">
                     {history.map(
                         (entry): ReactElement => (
@@ -410,7 +404,7 @@ export function SettingsBillingPage(): ReactElement {
                         ),
                     )}
                 </ul>
-            </FormSection>
-        </FormLayout>
+            </div></section>
+        </div></div>
     )
 }
