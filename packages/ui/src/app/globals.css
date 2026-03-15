@@ -60,28 +60,20 @@
      */
     --color-background: var(--background);
     --color-foreground: var(--foreground);
-    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
     --color-surface: var(--surface);
-    --color-surface-muted: var(--surface-muted);
+    --color-surface-secondary: var(--surface-secondary);
     --color-border: var(--border);
-    --color-ring: var(--ring);
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
+    --color-focus: var(--focus);
     --color-accent: var(--accent);
     --color-accent-foreground: var(--accent-foreground);
     --color-success: var(--success);
     --color-warning: var(--warning);
     --color-danger: var(--danger);
     --color-code-surface: var(--code-surface);
-    --color-on-success: var(--on-success);
-    --color-on-warning: var(--on-warning);
-    --color-on-danger: var(--on-danger);
-    --color-on-primary: var(--on-primary);
-
-    /* Semantic text hierarchy */
-    --color-text-subtle: var(--text-subtle);
-    --color-text-secondary: var(--text-secondary);
-    --color-text-tertiary: var(--text-tertiary);
+    --color-success-foreground: var(--success-foreground);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-danger-foreground: var(--danger-foreground);
 
     /* Chart palette */
     --color-chart-primary: var(--chart-primary);
@@ -102,7 +94,7 @@
     --color-hud-border: var(--hud-border, oklch(0.28 0.002 0 / 0.5));
     --color-hud-text: var(--hud-text, oklch(0.96 0.002 0));
     --color-hud-text-muted: var(--hud-text-muted, oklch(0.65 0.004 0));
-    --color-hud-accent: var(--hud-accent, var(--primary));
+    --color-hud-accent: var(--hud-accent, var(--accent));
 }
 
 /* Sunrise light defaults — source of truth: theme-presets.ts THEME_PRESETS sunrise.light */
@@ -110,28 +102,20 @@
     color-scheme: light;
     --background: oklch(0.99 0.01 68);
     --foreground: oklch(0.245 0.02 61);
-    --muted-foreground: oklch(0.55 0.015 61);
+    --muted: oklch(0.55 0.015 61);
     --surface: oklch(0.995 0.008 66);
-    --surface-muted: oklch(0.956 0.015 73);
+    --surface-secondary: oklch(0.956 0.015 73);
     --border: oklch(0.886 0.01 70);
-    --ring: oklch(0.68 0.132 72);
-    --primary: oklch(0.67 0.16 74);
-    --primary-foreground: oklch(0.985 0.012 64);
-    --accent: oklch(0.76 0.15 34);
-    --accent-foreground: oklch(0.98 0.008 38);
+    --focus: oklch(0.68 0.132 72);
+    --accent: oklch(0.67 0.16 74);
+    --accent-foreground: oklch(0.985 0.012 64);
     --success: oklch(0.72 0.14 149);
     --warning: oklch(0.81 0.15 63);
     --danger: oklch(0.64 0.2 24);
     --code-surface: oklch(0.16 0.015 68);
-    --on-success: oklch(0.35 0.08 149);
-    --on-warning: oklch(0.35 0.08 63);
-    --on-danger: oklch(0.35 0.08 24);
-    --on-primary: oklch(0.35 0.08 74);
-
-    /* Semantic text hierarchy */
-    --text-subtle: oklch(0.52 0.003 66);
-    --text-secondary: oklch(0.44 0.003 66);
-    --text-tertiary: oklch(0.36 0.003 66);
+    --success-foreground: oklch(0.35 0.08 149);
+    --warning-foreground: oklch(0.35 0.08 63);
+    --danger-foreground: oklch(0.35 0.08 24);
 
     /* Chart palette */
     --chart-primary: oklch(0.55 0.22 260);
@@ -147,36 +131,6 @@
     --sidebar-bg: oklch(0.96 0.008 68);
     --header-bg: color-mix(in oklch, var(--surface) 88%, transparent);
     --content-bg: color-mix(in oklch, var(--surface) 88%, transparent);
-
-    /*
-     * HeroUI v3 compatibility layer.
-     * Maps HeroUI internal variables to our core tokens so all HeroUI
-     * components (Button, Modal, Select, Input…) follow the active theme.
-     * @see https://v3.heroui.com/docs/react/getting-started/theming
-     */
-    --default: var(--surface-muted);
-    --default-foreground: var(--foreground);
-    --field-background: var(--surface);
-    --field-foreground: var(--foreground);
-    --field-placeholder: var(--muted-foreground);
-    --focus: var(--ring);
-    --muted: var(--muted-foreground);
-    --overlay: var(--surface);
-    --overlay-foreground: var(--foreground);
-    --scrollbar: var(--border);
-    --segment: var(--surface);
-    --segment-foreground: var(--foreground);
-    --separator: var(--border);
-    --success-foreground: oklch(0.98 0.0165 149);
-    --warning-foreground: oklch(0.15 0.05 63);
-    --danger-foreground: oklch(0.98 0.02 24);
-    --surface-foreground: var(--foreground);
-    --surface-secondary: var(--surface-muted);
-    --surface-secondary-foreground: var(--foreground);
-    --surface-tertiary: var(--surface-muted);
-    --surface-tertiary-foreground: var(--foreground);
-    --radius: 0.5rem;
-    --field-radius: 0.125rem;
 }
 
 /* Sunrise dark defaults — source of truth: theme-presets.ts THEME_PRESETS sunrise.dark */
@@ -184,28 +138,20 @@
     color-scheme: dark;
     --background: oklch(0.208 0.028 58);
     --foreground: oklch(0.94 0.012 66);
-    --muted-foreground: oklch(0.65 0.015 66);
+    --muted: oklch(0.65 0.015 66);
     --surface: oklch(0.26 0.027 64);
-    --surface-muted: oklch(0.32 0.026 67);
+    --surface-secondary: oklch(0.32 0.026 67);
     --border: oklch(0.415 0.03 64);
-    --ring: oklch(0.73 0.125 70);
-    --primary: oklch(0.71 0.168 74);
-    --primary-foreground: oklch(0.245 0.02 61);
-    --accent: oklch(0.78 0.148 32);
-    --accent-foreground: oklch(0.98 0.012 30);
+    --focus: oklch(0.73 0.125 70);
+    --accent: oklch(0.71 0.168 74);
+    --accent-foreground: oklch(0.245 0.02 61);
     --success: oklch(0.77 0.132 149);
     --warning: oklch(0.83 0.14 62);
     --danger: oklch(0.74 0.2 26);
     --code-surface: oklch(0.16 0.015 68);
-    --on-success: oklch(0.88 0.06 149);
-    --on-warning: oklch(0.88 0.06 62);
-    --on-danger: oklch(0.88 0.06 26);
-    --on-primary: oklch(0.88 0.06 74);
-
-    /* Semantic text hierarchy */
-    --text-subtle: oklch(0.64 0.003 66);
-    --text-secondary: oklch(0.73 0.003 66);
-    --text-tertiary: oklch(0.82 0.003 66);
+    --success-foreground: oklch(0.88 0.06 149);
+    --warning-foreground: oklch(0.88 0.06 62);
+    --danger-foreground: oklch(0.88 0.06 26);
 
     /* Chart palette */
     --chart-primary: oklch(0.65 0.2 260);
@@ -221,32 +167,6 @@
     --sidebar-bg: oklch(0.14 0.008 68);
     --header-bg: color-mix(in oklch, var(--surface) 88%, transparent);
     --content-bg: color-mix(in oklch, var(--surface) 88%, transparent);
-
-    --success-foreground: oklch(0.15 0.03 149);
-    --warning-foreground: oklch(0.98 0.02 62);
-    --danger-foreground: oklch(0.98 0.02 26);
-
-    /* HeroUI v3 compatibility (duplicated from :root for reliable cascading) */
-    --default: var(--surface-muted);
-    --default-foreground: var(--foreground);
-    --field-background: var(--surface);
-    --field-foreground: var(--foreground);
-    --field-placeholder: var(--muted-foreground);
-    --focus: var(--ring);
-    --muted: var(--muted-foreground);
-    --overlay: var(--surface);
-    --overlay-foreground: var(--foreground);
-    --scrollbar: var(--border);
-    --segment: var(--surface);
-    --segment-foreground: var(--foreground);
-    --separator: var(--border);
-    --surface-foreground: var(--foreground);
-    --surface-secondary: var(--surface-muted);
-    --surface-secondary-foreground: var(--foreground);
-    --surface-tertiary: var(--surface-muted);
-    --surface-tertiary-foreground: var(--foreground);
-    --radius: 0.5rem;
-    --field-radius: 0.125rem;
 }
 
 *,
@@ -294,8 +214,8 @@ a {
     --hud-surface-elevated: oklch(from var(--code-surface) calc(l + 0.08) c h / 0.9);
     --hud-border: oklch(from var(--border) l c h / 0.5);
     --hud-text: var(--foreground);
-    --hud-text-muted: var(--muted-foreground);
-    --hud-accent: var(--primary);
+    --hud-text-muted: var(--muted);
+    --hud-accent: var(--accent);
 }
 
 /* Shimmer animation for skeleton loading states */
@@ -335,9 +255,9 @@ a {
 .brand-mark-logo {
     background: linear-gradient(
         135deg,
-        var(--primary) 0%,
-        color-mix(in oklch, var(--primary) 80%, var(--accent)) 50%,
-        var(--primary) 100%
+        var(--accent) 0%,
+        color-mix(in oklch, var(--accent) 80%, var(--focus)) 50%,
+        var(--accent) 100%
     );
     background-size: 200% 200%;
     animation: brand-gradient-shift 6s ease-in-out infinite;
@@ -347,8 +267,8 @@ a {
 .nav-active-indicator {
     width: 3px;
     border-radius: 999px;
-    background: var(--primary);
-    box-shadow: 0 0 6px color-mix(in oklch, var(--primary) 50%, transparent);
+    background: var(--accent);
+    box-shadow: 0 0 6px color-mix(in oklch, var(--accent) 50%, transparent);
 }
 
 /* Subtle pulse for status badges on state change */
