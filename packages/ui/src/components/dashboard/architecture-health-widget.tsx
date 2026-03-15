@@ -1,14 +1,11 @@
 import type { ReactElement } from "react"
 
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts"
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts"
 
 import { Card, CardContent, CardHeader, Chip } from "@heroui/react"
-import { EmptyState } from "@/components/states/empty-state"
-import { ChartContainer } from "@/components/charts/chart-container"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { CHART_FILL_OPACITY } from "@/lib/constants/chart-recharts-defaults"
 import { VIOLATION_SCORE_MULTIPLIER } from "@/lib/constants/chart-constants"
-import { CHART_DATA_TRANSITION } from "@/lib/motion"
 
 interface IArchitectureHealthWidgetProps {
     /** Общий health score. */
@@ -61,12 +58,12 @@ export function ArchitectureHealthWidget(props: IArchitectureHealthWidgetProps):
                     Health score, layer violations and DDD compliance in one architecture widget.
                 </p>
                 {radarData.length === 0 ? (
-                    <EmptyState
-                        description="No architecture health data available."
-                        title="No data"
-                    />
+                    <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                        <h3 className={TYPOGRAPHY.subsectionTitle}>No data</h3>
+                        <p className="max-w-sm text-sm text-muted">No architecture health data available.</p>
+                    </div>
                 ) : (
-                    <ChartContainer height="md">
+                    <div className="h-60 w-full"><ResponsiveContainer height="100%" minHeight={1} minWidth={1} width="100%">
                         <RadarChart data={radarData}>
                             <PolarGrid stroke="var(--chart-grid)" strokeOpacity={0.5} />
                             <PolarAngleAxis
@@ -79,7 +76,7 @@ export function ArchitectureHealthWidget(props: IArchitectureHealthWidgetProps):
                                 tick={{ fill: "var(--muted)", fontSize: 10 }}
                             />
                             <Radar
-                                {...CHART_DATA_TRANSITION}
+                                {...{ animationDuration: 0, isAnimationActive: false }}
                                 dataKey="value"
                                 fill="var(--chart-primary)"
                                 fillOpacity={CHART_FILL_OPACITY}
@@ -88,7 +85,7 @@ export function ArchitectureHealthWidget(props: IArchitectureHealthWidgetProps):
                                 strokeWidth={2}
                             />
                         </RadarChart>
-                    </ChartContainer>
+                    </ResponsiveContainer></div>
                 )}
             </CardContent>
         </Card>
