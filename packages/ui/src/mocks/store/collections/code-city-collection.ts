@@ -1,8 +1,8 @@
 import type {
-    ICodeCityDependencyNode,
-    ICodeCityDependencyRelation,
-    ICodeCityRepositoryProfile,
-} from "@/lib/api/endpoints/code-city.endpoint"
+    IPackageDependencyNode,
+    IPackageDependencyRelation,
+} from "@/components/dependency-graphs/package-dependency-graph"
+import type { ICodeCityDashboardRepositoryProfile } from "@/pages/code-city-dashboard/code-city-dashboard-types"
 
 /**
  * Данные для seed-инициализации CodeCityCollection.
@@ -11,15 +11,15 @@ export interface ICodeCitySeedData {
     /**
      * Профили репозиториев CodeCity.
      */
-    readonly profiles: ReadonlyArray<ICodeCityRepositoryProfile>
+    readonly profiles: ReadonlyArray<ICodeCityDashboardRepositoryProfile>
     /**
      * Узлы графа зависимостей.
      */
-    readonly dependencyNodes: ReadonlyArray<ICodeCityDependencyNode>
+    readonly dependencyNodes: ReadonlyArray<IPackageDependencyNode>
     /**
      * Связи графа зависимостей.
      */
-    readonly dependencyRelations: ReadonlyArray<ICodeCityDependencyRelation>
+    readonly dependencyRelations: ReadonlyArray<IPackageDependencyRelation>
 }
 
 /**
@@ -32,24 +32,24 @@ export class CodeCityCollection {
     /**
      * Хранилище профилей репозиториев по ID.
      */
-    private profiles: Map<string, ICodeCityRepositoryProfile> = new Map()
+    private profiles: Map<string, ICodeCityDashboardRepositoryProfile> = new Map()
 
     /**
      * Узлы графа зависимостей.
      */
-    private nodes: ReadonlyArray<ICodeCityDependencyNode> = []
+    private nodes: ReadonlyArray<IPackageDependencyNode> = []
 
     /**
      * Связи графа зависимостей.
      */
-    private relations: ReadonlyArray<ICodeCityDependencyRelation> = []
+    private relations: ReadonlyArray<IPackageDependencyRelation> = []
 
     /**
      * Возвращает список всех профилей CodeCity.
      *
      * @returns Массив всех профилей.
      */
-    public listProfiles(): ReadonlyArray<ICodeCityRepositoryProfile> {
+    public listProfiles(): ReadonlyArray<ICodeCityDashboardRepositoryProfile> {
         return Array.from(this.profiles.values())
     }
 
@@ -59,7 +59,7 @@ export class CodeCityCollection {
      * @param repoId - Идентификатор репозитория.
      * @returns Профиль или undefined, если не найден.
      */
-    public getProfileById(repoId: string): ICodeCityRepositoryProfile | undefined {
+    public getProfileById(repoId: string): ICodeCityDashboardRepositoryProfile | undefined {
         return this.profiles.get(repoId)
     }
 
@@ -68,7 +68,7 @@ export class CodeCityCollection {
      *
      * @returns Массив узлов.
      */
-    public getDependencyNodes(): ReadonlyArray<ICodeCityDependencyNode> {
+    public getDependencyNodes(): ReadonlyArray<IPackageDependencyNode> {
         return this.nodes
     }
 
@@ -77,7 +77,7 @@ export class CodeCityCollection {
      *
      * @returns Массив связей.
      */
-    public getDependencyRelations(): ReadonlyArray<ICodeCityDependencyRelation> {
+    public getDependencyRelations(): ReadonlyArray<IPackageDependencyRelation> {
         return this.relations
     }
 
