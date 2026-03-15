@@ -9,26 +9,12 @@ import { ActivationChecklist } from "@/components/onboarding/activation-checklis
 import { PageShell } from "@/components/layout/page-shell"
 import { LINK_CLASSES, TYPOGRAPHY } from "@/lib/constants/typography"
 import { GAP } from "@/lib/constants/spacing"
+import {
+    STAGGER_CONTAINER_VARIANTS,
+    STAGGER_ITEM_VARIANTS,
+} from "@/lib/constants/animation"
 import { useUiRole } from "@/lib/permissions/ui-policy"
 import { createSettingsNavGroups } from "@/lib/navigation/settings-nav-items"
-
-/**
- * Stagger item animation variants for settings cards.
- */
-const STAGGER_ITEM_VARIANTS = {
-    hidden: {
-        opacity: 0,
-        y: 12,
-    },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: {
-            duration: 0.25,
-            ease: [0.0, 0.0, 0.2, 1.0],
-        },
-    },
-} as const
 
 /**
  * Settings overview page with grouped navigation cards.
@@ -52,13 +38,7 @@ export function SettingsPage(): ReactElement {
                 animate="visible"
                 className={`grid ${GAP.section} sm:grid-cols-2 lg:grid-cols-3`}
                 initial="hidden"
-                variants={{
-                    hidden: { opacity: 0 },
-                    visible: {
-                        opacity: 1,
-                        transition: { staggerChildren: 0.06 },
-                    },
-                }}
+                variants={STAGGER_CONTAINER_VARIANTS}
             >
                 {settingsGroups.map((group) => (
                     <motion.div key={group.key} variants={STAGGER_ITEM_VARIANTS}>
