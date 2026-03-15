@@ -5,9 +5,7 @@
  * WCAG-расчёты контрастности, трансформации цветов и логику Theme Library.
  */
 
-import type { IThemeLibraryProfileTheme } from "@/lib/theme/theme-library-profile-sync"
-import type { ThemeMode, ThemePresetId } from "@/lib/theme/theme-provider"
-import { isSurfaceToneId, type TSurfaceToneId } from "@/lib/theme/theme-surface-tones"
+import type { TThemeMode, TThemePreset } from "@/lib/theme/use-theme"
 import {
     getWindowLocalStorage,
     safeStorageGet,
@@ -62,11 +60,11 @@ export interface IUserThemeLibraryItem {
     /**
      * Режим темы.
      */
-    readonly mode: ThemeMode
+    readonly mode: TThemeMode
     /**
      * Пресет темы.
      */
-    readonly presetId: ThemePresetId
+    readonly presetId: TThemePreset
     /**
      * Базовый accent цвет.
      */
@@ -78,7 +76,7 @@ export interface IUserThemeLibraryItem {
     /**
      * Базовая палитра.
      */
-    readonly basePaletteId: TSurfaceToneId
+    readonly basePaletteId: "cool" | "neutral" | "warm"
     /**
      * Глобальный радиус.
      */
@@ -104,7 +102,7 @@ export interface IThemeLibraryImportEnvelope {
     /**
      * Опциональный favorite preset.
      */
-    readonly favoritePresetId?: ThemePresetId
+    readonly favoritePresetId?: TThemePreset
 }
 
 /**
@@ -188,25 +186,6 @@ export function readStoredNumber(
     }
 
     return parsed
-}
-
-/**
- * Читает базовую палитру из localStorage с валидацией.
- *
- * @param storageKey - Ключ в localStorage.
- * @param fallback - Палитра по умолчанию.
- * @returns Валидный идентификатор палитры.
- */
-export function readStoredBasePalette(
-    storageKey: string,
-    fallback: TSurfaceToneId,
-): TSurfaceToneId {
-    const rawValue = readLocalStorageItem(storageKey)
-    if (isSurfaceToneId(rawValue)) {
-        return rawValue
-    }
-
-    return fallback
 }
 
 /**
@@ -416,30 +395,30 @@ export function resolveThemeNameConflict(
 }
 
 /**
- * Type guard: проверяет, является ли значение валидным ThemeMode.
+ * Type guard: проверяет, является ли значение валидным TThemeMode.
  *
  * @param value - Проверяемое значение.
  * @returns true если значение — "dark", "light" или "system".
  */
-export function isThemeModeValue(value: unknown): value is ThemeMode {
+export function isThemeModeValue(value: unknown): value is TThemeMode {
     return value === "dark" || value === "light" || value === "system"
 }
 
 /**
- * Type guard: проверяет, является ли значение валидным ThemePresetId.
+ * Type guard: проверяет, является ли значение валидным TThemePreset.
  *
  * @param value - Проверяемое значение.
  * @param availablePresetIds - Список допустимых preset id.
  * @returns true если значение входит в список доступных preset id.
  */
-export function isThemePresetIdValue(
+export function isThemePresetValue(
     value: unknown,
-    availablePresetIds: ReadonlyArray<ThemePresetId>,
-): value is ThemePresetId {
+    availablePresetIds: ReadonlyArray<TThemePreset>,
+): value is TThemePreset {
     if (typeof value !== "string") {
         return false
     }
-    return availablePresetIds.includes(value as ThemePresetId)
+    return availablePresetIds.includes(value as TThemePreset)
 }
 
 /**
@@ -451,7 +430,7 @@ export function isThemePresetIdValue(
  */
 export function parseThemeLibraryItem(
     value: unknown,
-    availablePresetIds: ReadonlyArray<ThemePresetId>,
+    availablePresetIds: ReadonlyArray<TThemePreset>,
 ): IUserThemeLibraryItem | undefined {
     if (typeof value !== "object" || value === null || Array.isArray(value)) {
         return undefined
@@ -492,17 +471,18 @@ export function parseThemeLibraryItem(
     if (isThemeModeValue(rawValue.mode) !== true) {
         return undefined
     }
-    if (isSurfaceToneId(rawValue.basePaletteId) !== true) {
+    const validBasePaletteIds = ["cool", "neutral", "warm"]
+    if (validBasePaletteIds.includes(rawValue.basePaletteId as string) !== true) {
         return undefined
     }
-    if (isThemePresetIdValue(rawValue.presetId, availablePresetIds) !== true) {
+    if (isThemePresetValue(rawValue.presetId, availablePresetIds) !== true) {
         return undefined
     }
 
     return {
         accentColor: rawValue.accentColor.toLowerCase(),
         accentIntensity: rawValue.accentIntensity,
-        basePaletteId: rawValue.basePaletteId,
+        basePaletteId: rawValue.basePaletteId as "cool" | "neutral" | "warm",
         formRadius: rawValue.formRadius,
         globalRadius: rawValue.globalRadius,
         id: rawValue.id,
@@ -519,7 +499,7 @@ export function parseThemeLibraryItem(
  * @returns Массив валидных элементов библиотеки.
  */
 export function readStoredThemeLibrary(
-    availablePresetIds: ReadonlyArray<ThemePresetId>,
+    availablePresetIds: ReadonlyArray<TThemePreset>,
 ): ReadonlyArray<IUserThemeLibraryItem> {
     const rawValue = readLocalStorageItem(APPEARANCE_LIBRARY_STORAGE_KEY)
     if (rawValue === undefined) {
@@ -550,18 +530,18 @@ export function readStoredThemeLibrary(
  * Читает закреплённый (favorite) preset из localStorage.
  *
  * @param availablePresetIds - Список допустимых preset id.
- * @returns ThemePresetId или undefined если не найден или невалиден.
+ * @returns TThemePreset или undefined если не найден или невалиден.
  */
 export function readStoredFavoritePreset(
-    availablePresetIds: ReadonlyArray<ThemePresetId>,
-): ThemePresetId | undefined {
+    availablePresetIds: ReadonlyArray<TThemePreset>,
+): TThemePreset | undefined {
     const rawValue = readLocalStorageItem(APPEARANCE_LIBRARY_FAVORITE_PRESET_STORAGE_KEY)
     if (rawValue === undefined) {
         return undefined
     }
 
-    if (availablePresetIds.includes(rawValue as ThemePresetId)) {
-        return rawValue as ThemePresetId
+    if (availablePresetIds.includes(rawValue as TThemePreset)) {
+        return rawValue as TThemePreset
     }
 
     return undefined
@@ -603,54 +583,6 @@ export function writeStoredThemeLibraryUpdatedAtMs(updatedAtMs: number): void {
 }
 
 /**
- * Конвертирует элемент библиотеки в формат профиля для синхронизации.
- *
- * @param theme - Элемент библиотеки тем.
- * @returns Объект для профиля.
- */
-export function toProfileTheme(theme: IUserThemeLibraryItem): IThemeLibraryProfileTheme {
-    return {
-        accentColor: theme.accentColor,
-        accentIntensity: theme.accentIntensity,
-        basePaletteId: theme.basePaletteId,
-        formRadius: theme.formRadius,
-        globalRadius: theme.globalRadius,
-        id: theme.id,
-        mode: theme.mode,
-        name: theme.name,
-        presetId: theme.presetId,
-    }
-}
-
-/**
- * Конвертирует тему из формата профиля в элемент библиотеки.
- *
- * @param theme - Тема из профиля.
- * @param availablePresetIds - Список допустимых preset id.
- * @returns Элемент библиотеки или undefined если preset не поддерживается.
- */
-export function fromProfileTheme(
-    theme: IThemeLibraryProfileTheme,
-    availablePresetIds: ReadonlyArray<ThemePresetId>,
-): IUserThemeLibraryItem | undefined {
-    if (availablePresetIds.includes(theme.presetId as ThemePresetId) === false) {
-        return undefined
-    }
-
-    return {
-        accentColor: theme.accentColor,
-        accentIntensity: theme.accentIntensity,
-        basePaletteId: theme.basePaletteId,
-        formRadius: theme.formRadius,
-        globalRadius: theme.globalRadius,
-        id: theme.id,
-        mode: theme.mode,
-        name: theme.name,
-        presetId: theme.presetId as ThemePresetId,
-    }
-}
-
-/**
  * Формирует payload для экспорта библиотеки тем в JSON.
  *
  * @param themes - Массив тем для экспорта.
@@ -659,7 +591,7 @@ export function fromProfileTheme(
  */
 export function buildThemeLibraryExportPayload(
     themes: ReadonlyArray<IUserThemeLibraryItem>,
-    favoritePresetId: ThemePresetId | undefined,
+    favoritePresetId: TThemePreset | undefined,
 ): IThemeLibraryImportEnvelope {
     return {
         favoritePresetId,
@@ -677,7 +609,7 @@ export function buildThemeLibraryExportPayload(
  */
 export function parseThemeLibraryImportPayload(
     rawJson: string,
-    availablePresetIds: ReadonlyArray<ThemePresetId>,
+    availablePresetIds: ReadonlyArray<TThemePreset>,
 ): IThemeLibraryImportEnvelope | undefined {
     try {
         const parsed = JSON.parse(rawJson) as unknown
@@ -703,8 +635,8 @@ export function parseThemeLibraryImportPayload(
 
         const favoritePresetId =
             typeof record.favoritePresetId === "string" &&
-            availablePresetIds.includes(record.favoritePresetId as ThemePresetId)
-                ? (record.favoritePresetId as ThemePresetId)
+            availablePresetIds.includes(record.favoritePresetId as TThemePreset)
+                ? (record.favoritePresetId as TThemePreset)
                 : undefined
 
         return {
