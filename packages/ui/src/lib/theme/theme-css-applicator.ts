@@ -10,23 +10,20 @@ import type { ThemeMode, ThemeResolvedMode } from "./theme-types"
 const THEME_CSS_VARIABLES: ReadonlyArray<keyof IThemePalette> = [
     "background",
     "foreground",
-    "mutedForeground",
+    "muted",
     "surface",
-    "surfaceMuted",
+    "surfaceSecondary",
     "border",
-    "ring",
-    "primary",
-    "primaryForeground",
+    "focus",
     "accent",
     "accentForeground",
     "success",
     "warning",
     "danger",
     "codeSurface",
-    "onSuccess",
-    "onWarning",
-    "onDanger",
-    "onPrimary",
+    "successForeground",
+    "warningForeground",
+    "dangerForeground",
 ]
 
 /**
@@ -35,7 +32,7 @@ const THEME_CSS_VARIABLES: ReadonlyArray<keyof IThemePalette> = [
  * @param str Строка в camelCase.
  * @returns Строка в kebab-case.
  *
- * @example camelToKebab("surfaceMuted") // "surface-muted"
+ * @example camelToKebab("surfaceSecondary") // "surface-secondary"
  */
 export function camelToKebab(str: string): string {
     return str.replace(/[A-Z]/g, (letter): string => `-${letter.toLowerCase()}`)
@@ -85,7 +82,7 @@ const SURFACE_TONE_CSS_VARIABLES: ReadonlyArray<keyof ISurfaceTonePalette> = [
     "background",
     "foreground",
     "surface",
-    "surfaceMuted",
+    "surfaceSecondary",
     "border",
 ]
 
