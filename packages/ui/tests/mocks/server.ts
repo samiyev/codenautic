@@ -741,6 +741,21 @@ export const server = setupServer(
             ],
         })
     }),
+    http.get("http://localhost:7120/api/v1/token-usage", () => {
+        return HttpResponse.json({
+            rows: [],
+            records: [],
+        })
+    }),
+    http.get("http://localhost:7120/api/v1/audit-logs", () => {
+        return HttpResponse.json({
+            items: [],
+            total: 0,
+            page: 1,
+            limit: 20,
+            totalPages: 0,
+        })
+    }),
     http.get(
         "http://localhost:7120/api/v1/code-city/profiles/:repoId/dependency-graph",
         () => {
