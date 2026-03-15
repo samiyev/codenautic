@@ -66,6 +66,7 @@ export function createApiContracts(): {
     return {
         system: new SystemApi(httpClient),
         auth: new AuthApi(httpClient),
+        billing: new BillingApi(httpClient),
         codeReview: new CodeReviewApi(httpClient),
         ccrSummary: new CCRSummaryApi(httpClient),
         ccrWorkspace: new CcrWorkspaceApi(httpClient),
@@ -78,6 +79,7 @@ export function createApiContracts(): {
         repoConfig: new RepoConfigApi(httpClient),
         dryRun: new DryRunApi(httpClient),
         gitProviders: new GitProvidersApi(httpClient),
+        jobs: new JobsApi(httpClient),
         repositories: new RepositoryApi(httpClient),
         codeCity: new CodeCityApi(httpClient),
         organization: new OrganizationApi(httpClient),
@@ -85,6 +87,7 @@ export function createApiContracts(): {
         issues: new IssuesApi(httpClient),
         reports: new ReportsApi(httpClient),
         triage: new TriageApi(httpClient),
+        webhooks: new WebhooksApi(httpClient),
         byok: new ByokApi(httpClient),
         sso: new SsoApi(httpClient),
     }
@@ -131,6 +134,9 @@ export type { ITeamsApi } from "./endpoints/teams.endpoint"
 export type { IIssuesApi } from "./endpoints/issues.endpoint"
 export type { IReportsApi } from "./endpoints/reports.endpoint"
 export type { ITriageApi } from "./endpoints/triage.endpoint"
+export type { IJobsApi } from "./endpoints/jobs.endpoint"
+export type { IWebhooksApi } from "./endpoints/webhooks.endpoint"
+export type { IBillingApi } from "./endpoints/billing.endpoint"
 export type { IByokApi } from "./endpoints/byok.endpoint"
 export type { ISsoApi } from "./endpoints/sso.endpoint"
 export type { TSystemHealthResponse, THealthStatus } from "./types"
