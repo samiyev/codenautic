@@ -130,12 +130,7 @@ function TrendDirectionIcon(props: { readonly trend: TDistrictTrendDirection }):
         )
     }
     return (
-        <svg
-            aria-hidden="true"
-            className="h-3.5 w-3.5 text-muted"
-            fill="none"
-            viewBox="0 0 24 24"
-        >
+        <svg aria-hidden="true" className="h-3.5 w-3.5 text-muted" fill="none" viewBox="0 0 24 24">
             <path
                 d="M4 12H20"
                 stroke="currentColor"
