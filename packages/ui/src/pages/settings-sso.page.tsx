@@ -2,7 +2,6 @@ import { type ReactElement, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardContent, CardHeader, Input, TextArea } from "@heroui/react"
-import { FormLayout } from "@/components/forms/form-layout"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
@@ -129,10 +128,7 @@ export function SettingsSsoPage(): ReactElement {
     }
 
     return (
-        <FormLayout
-            title={t("settings:sso.pageTitle")}
-            description={t("settings:sso.pageSubtitle")}
-        >
+        <div className="space-y-6 mx-auto max-w-[1400px]"><div className="space-y-1.5"><h1 className={TYPOGRAPHY.pageTitle}>{t("settings:sso.pageTitle")}</h1><p className={TYPOGRAPHY.bodyMuted}>{t("settings:sso.pageSubtitle")}</p></div><div className="space-y-6">
             <div className="grid gap-4 xl:grid-cols-2">
                 <Card>
                     <CardHeader>
@@ -295,6 +291,6 @@ export function SettingsSsoPage(): ReactElement {
                     <Alert.Description>{testState.message}</Alert.Description>
                 </Alert>
             )}
-        </FormLayout>
+        </div></div>
     )
 }
