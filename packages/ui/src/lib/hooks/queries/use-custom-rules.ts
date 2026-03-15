@@ -204,7 +204,7 @@ export function useCustomRules(args: IUseCustomRulesQueryArgs = {}): IUseCustomR
             })
         },
         enabled,
-        refetchOnWindowFocus: false,
+
     })
 
     const createRule = useMutation<
