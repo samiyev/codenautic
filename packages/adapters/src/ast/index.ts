@@ -112,6 +112,18 @@ export {
     type IAstPythonImportResolverErrorDetails,
 } from "./ast-python-import-resolver.error"
 export {
+    AST_GO_IMPORT_RESOLVER_ERROR_CODE,
+    AstGoImportResolverError,
+    type AstGoImportResolverErrorCode,
+    type IAstGoImportResolverErrorDetails,
+} from "./ast-go-import-resolver.error"
+export {
+    AST_JAVA_IMPORT_RESOLVER_ERROR_CODE,
+    AstJavaImportResolverError,
+    type AstJavaImportResolverErrorCode,
+    type IAstJavaImportResolverErrorDetails,
+} from "./ast-java-import-resolver.error"
+export {
     AST_BATCH_PROCESSING_ERROR_CODE,
     AstBatchProcessingError,
     type AstBatchProcessingErrorCode,
@@ -415,6 +427,18 @@ export {
     type AstPythonImportResolverReadDirectory,
     type IAstPythonImportResolverOptions,
 } from "./ast-python-import-resolver"
+export {
+    AstGoImportResolver,
+    type AstGoImportResolverReadDirectory,
+    type AstGoImportResolverReadFile,
+    type IAstGoImportResolverOptions,
+} from "./ast-go-import-resolver"
+export {
+    AstJavaImportResolver,
+    type AstJavaImportResolverReadDirectory,
+    type AstJavaImportResolverReadFile,
+    type IAstJavaImportResolverOptions,
+} from "./ast-java-import-resolver"
 export {
     AstBatchProcessingService,
     type AstBatchProcessingNow,
