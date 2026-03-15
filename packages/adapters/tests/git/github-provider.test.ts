@@ -28,6 +28,8 @@ type IGitHubMockPulls = {
     readonly listFiles?: AsyncMethod<unknown>
     readonly listCommits?: AsyncMethod<unknown>
     readonly createReviewComment?: AsyncMethod<unknown>
+    readonly createReview?: AsyncMethod<unknown>
+    readonly listCommentsForReview?: AsyncMethod<unknown>
 }
 type IGitHubMockIssues = {
     readonly createComment?: AsyncMethod<unknown>
@@ -218,6 +220,10 @@ function createGitHubPullsMock(
             resolveGitHubMethod(overrides?.listCommits) as IGitHubOctokitClient["pulls"]["listCommits"],
         createReviewComment:
             resolveGitHubMethod(overrides?.createReviewComment) as IGitHubOctokitClient["pulls"]["createReviewComment"],
+        createReview:
+            resolveGitHubMethod(overrides?.createReview) as IGitHubOctokitClient["pulls"]["createReview"],
+        listCommentsForReview:
+            resolveGitHubMethod(overrides?.listCommentsForReview) as IGitHubOctokitClient["pulls"]["listCommentsForReview"],
     }
 }
 
@@ -2405,6 +2411,112 @@ describe("GitHubProvider", () => {
             filePath: "src/app.ts",
             line: 12,
             side: INLINE_COMMENT_SIDE.RIGHT,
+        })
+    })
+
+    test("creates batch review through createReview and fetches review comments", async () => {
+        const createReview = createQueuedAsyncMethod([
+            createDataHandler({
+                id: 901,
+            }),
+        ])
+        const listCommentsForReview = createQueuedAsyncMethod([
+            createDataHandler([
+                {
+                    id: 51,
+                    body: "Inline one",
+                    created_at: "2026-03-08T14:10:00.000Z",
+                    user: {
+                        login: "review-bot",
+                    },
+                },
+                {
+                    id: 52,
+                    body: "Inline two",
+                    created_at: "2026-03-08T14:11:00.000Z",
+                    user: {
+                        login: "review-bot",
+                    },
+                },
+            ]),
+        ])
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                pulls: {
+                    createReview,
+                    listCommentsForReview,
+                },
+            }),
+        })
+
+        const comments = await provider.createReview("21", {
+            body: " Batch review body ",
+            comments: [
+                {
+                    id: "1",
+                    body: "Inline one",
+                    author: "me",
+                    createdAt: "now",
+                    filePath: "src/app.ts",
+                    line: 14,
+                    side: INLINE_COMMENT_SIDE.RIGHT,
+                },
+                {
+                    id: "2",
+                    body: "Inline two",
+                    author: "me",
+                    createdAt: "now",
+                    filePath: "src/lib.ts",
+                    line: 7,
+                    side: INLINE_COMMENT_SIDE.LEFT,
+                },
+            ],
+        })
+
+        expect(comments).toEqual([
+            {
+                id: "51",
+                body: "Inline one",
+                author: "review-bot",
+                createdAt: "2026-03-08T14:10:00.000Z",
+            },
+            {
+                id: "52",
+                body: "Inline two",
+                author: "review-bot",
+                createdAt: "2026-03-08T14:11:00.000Z",
+            },
+        ])
+        expect(createReview.calls[0]?.[0]).toEqual({
+            owner: "codenautic",
+            repo: "platform",
+            pull_number: 21,
+            event: "COMMENT",
+            body: "Batch review body",
+            comments: [
+                {
+                    path: "src/app.ts",
+                    line: 14,
+                    side: "RIGHT",
+                    body: "Inline one",
+                },
+                {
+                    path: "src/lib.ts",
+                    line: 7,
+                    side: "LEFT",
+                    body: "Inline two",
+                },
+            ],
+        })
+        expect(listCommentsForReview.calls[0]?.[0]).toEqual({
+            owner: "codenautic",
+            repo: "platform",
+            pull_number: 21,
+            review_id: 901,
+            per_page: 100,
+            page: 1,
         })
     })
 

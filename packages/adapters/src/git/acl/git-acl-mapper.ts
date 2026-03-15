@@ -1,9 +1,13 @@
 import {
+    INLINE_COMMENT_SIDE,
     MERGE_REQUEST_DIFF_FILE_STATUS,
+    type ICommentDTO,
+    type IInlineCommentDTO,
     type IMergeRequestAuthorDTO,
     type IMergeRequestCommitDTO,
     type IMergeRequestDTO,
     type IMergeRequestDiffFileDTO,
+    type InlineCommentSide,
     type MergeRequestDiffFileStatus,
 } from "@codenautic/core"
 
@@ -26,6 +30,28 @@ export interface IExternalGitMergeRequest {
     readonly diffFiles?: unknown
     readonly changes?: unknown
     readonly [key: string]: unknown
+}
+
+/**
+ * Provider-agnostic review comment payload returned by Git APIs.
+ */
+export interface IExternalGitReviewComment {
+    readonly id?: unknown
+    readonly body?: unknown
+    readonly user?: unknown
+    readonly created_at?: unknown
+    readonly createdAt?: unknown
+    readonly [key: string]: unknown
+}
+
+/**
+ * GitHub review draft comment payload accepted by `pulls.createReview`.
+ */
+export interface IGitHubBatchReviewComment {
+    readonly path: string
+    readonly line: number
+    readonly side: "LEFT" | "RIGHT"
+    readonly body: string
 }
 
 const EMPTY_RECORD: Readonly<Record<string, unknown>> = {}
@@ -81,6 +107,43 @@ export function mapExternalDiffFiles(rawDiffs: unknown): readonly IMergeRequestD
             oldPath,
         }
     })
+}
+
+/**
+ * Converts inline comments to GitHub batch review comment payload.
+ *
+ * @param comments Inline comments from domain contract.
+ * @returns GitHub review draft comments.
+ */
+export function toBatchReviewComments(
+    comments: readonly IInlineCommentDTO[],
+): readonly IGitHubBatchReviewComment[] {
+    return comments.map((comment): IGitHubBatchReviewComment => {
+        return {
+            path: normalizeRequiredBatchText(comment.filePath, "comment.filePath"),
+            line: normalizeBatchReviewLine(comment.line),
+            side: normalizeBatchReviewSide(comment.side),
+            body: normalizeRequiredBatchText(comment.body, "comment.body"),
+        }
+    })
+}
+
+/**
+ * Maps provider review comment payload to generic comment DTO.
+ *
+ * @param comment Provider review comment payload.
+ * @returns Generic comment DTO.
+ */
+export function reviewCommentToCommentDTO(comment: IExternalGitReviewComment): ICommentDTO {
+    const source = toRecord(comment) ?? EMPTY_RECORD
+    const user = toRecord(source["user"])
+
+    return {
+        id: readIdentifier(source, ["id"]),
+        body: readString(source, ["body"]),
+        author: readString(user, ["login", "name"]),
+        createdAt: readString(source, ["created_at", "createdAt"]),
+    }
 }
 
 /**
@@ -192,6 +255,46 @@ function normalizeHunks(rawHunks: unknown, patch: string): readonly string[] {
     }
 
     return [trimmedPatch]
+}
+
+/**
+ * Normalizes required text for batch review payload fields.
+ *
+ * @param value Raw text value.
+ * @param fieldName Field label used in error message.
+ * @returns Trimmed non-empty string.
+ */
+function normalizeRequiredBatchText(value: string, fieldName: string): string {
+    const normalized = value.trim()
+    if (normalized.length === 0) {
+        throw new Error(`${fieldName} cannot be empty`)
+    }
+
+    return normalized
+}
+
+/**
+ * Normalizes batch review line number.
+ *
+ * @param line Raw line value.
+ * @returns Positive line number.
+ */
+function normalizeBatchReviewLine(line: number): number {
+    if (Number.isInteger(line) === false || line <= 0) {
+        throw new Error("comment.line must be positive integer")
+    }
+
+    return line
+}
+
+/**
+ * Normalizes inline side to GitHub side literals.
+ *
+ * @param side Raw inline side.
+ * @returns GitHub side literal.
+ */
+function normalizeBatchReviewSide(side: InlineCommentSide): "LEFT" | "RIGHT" {
+    return side === INLINE_COMMENT_SIDE.LEFT ? INLINE_COMMENT_SIDE.LEFT : INLINE_COMMENT_SIDE.RIGHT
 }
 
 /**

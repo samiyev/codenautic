@@ -61,6 +61,7 @@ export {
 } from "./git-provider-factory.error"
 export {
     GitHubProvider,
+    type IGitHubBatchReviewRequest,
     type IGitHubOctokitClient,
     type IGitHubProviderOptions,
 } from "./github-provider"
@@ -104,9 +105,13 @@ export {
     mapExternalDiffFiles,
     mapExternalMergeRequest,
     normalizeGitAclError,
+    reviewCommentToCommentDTO,
     shouldRetryGitAclError,
+    toBatchReviewComments,
     type GitAclErrorKind,
+    type IExternalGitReviewComment,
     type IGitAclIdempotencyInput,
     type IExternalGitMergeRequest,
+    type IGitHubBatchReviewComment,
     type INormalizedGitAclError,
 } from "./acl"

@@ -10,7 +10,9 @@ import {
     mapExternalDiffFiles,
     mapExternalMergeRequest,
     normalizeGitAclError,
+    reviewCommentToCommentDTO,
     shouldRetryGitAclError,
+    toBatchReviewComments,
 } from "../../src/git/acl"
 
 describe("Git ACL contract", () => {
@@ -320,6 +322,62 @@ describe("Git ACL contract", () => {
                 hunks: [],
             },
         ])
+    })
+
+    test("maps inline comments to github batch review payload", () => {
+        const comments = toBatchReviewComments([
+            {
+                id: "1",
+                body: " First ",
+                author: "review-bot",
+                createdAt: "2026-03-08T14:10:00.000Z",
+                filePath: "src/app.ts",
+                line: 11,
+                side: "RIGHT",
+            },
+            {
+                id: "2",
+                body: "Second",
+                author: "review-bot",
+                createdAt: "2026-03-08T14:11:00.000Z",
+                filePath: "src/lib.ts",
+                line: 5,
+                side: "LEFT",
+            },
+        ])
+
+        expect(comments).toEqual([
+            {
+                path: "src/app.ts",
+                line: 11,
+                side: "RIGHT",
+                body: "First",
+            },
+            {
+                path: "src/lib.ts",
+                line: 5,
+                side: "LEFT",
+                body: "Second",
+            },
+        ])
+    })
+
+    test("maps review comment payload to generic comment dto", () => {
+        const comment = reviewCommentToCommentDTO({
+            id: 91,
+            body: "Looks good",
+            created_at: "2026-03-08T14:20:00.000Z",
+            user: {
+                login: "review-bot",
+            },
+        })
+
+        expect(comment).toEqual({
+            id: "91",
+            body: "Looks good",
+            author: "review-bot",
+            createdAt: "2026-03-08T14:20:00.000Z",
+        })
     })
 
     test("fills numeric fallback fields when external identifiers are absent", () => {

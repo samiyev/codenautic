@@ -41,9 +41,13 @@ import {
 import {
     mapExternalDiffFiles,
     mapExternalMergeRequest,
+    reviewCommentToCommentDTO,
+    toBatchReviewComments,
     normalizeGitAclError,
     shouldRetryGitAclError,
     type IExternalGitMergeRequest,
+    type IExternalGitReviewComment,
+    type IGitHubBatchReviewComment,
     type INormalizedGitAclError,
 } from "./acl"
 import {
@@ -63,6 +67,10 @@ type IssuesCreateCommentResponse =
     RestEndpointMethodTypes["issues"]["createComment"]["response"]["data"]
 type PullCreateReviewCommentResponse =
     RestEndpointMethodTypes["pulls"]["createReviewComment"]["response"]["data"]
+type PullCreateReviewResponse =
+    RestEndpointMethodTypes["pulls"]["createReview"]["response"]["data"]
+type PullListCommentsForReviewResponseItem =
+    RestEndpointMethodTypes["pulls"]["listCommentsForReview"]["response"]["data"][number]
 type ChecksCreateResponse =
     RestEndpointMethodTypes["checks"]["create"]["response"]["data"]
 type ChecksUpdateResponse =
@@ -183,6 +191,12 @@ export interface IGitHubOctokitClient {
         readonly createReviewComment: (
             params: RestEndpointMethodTypes["pulls"]["createReviewComment"]["parameters"],
         ) => Promise<{readonly data: PullCreateReviewCommentResponse}>
+        readonly createReview: (
+            params: RestEndpointMethodTypes["pulls"]["createReview"]["parameters"],
+        ) => Promise<{readonly data: PullCreateReviewResponse}>
+        readonly listCommentsForReview: (
+            params: RestEndpointMethodTypes["pulls"]["listCommentsForReview"]["parameters"],
+        ) => Promise<{readonly data: readonly PullListCommentsForReviewResponseItem[]}>
     }
 
     /**
@@ -299,6 +313,21 @@ export interface IGitHubProviderOptions {
      * Sleep implementation used between retries.
      */
     readonly sleep?: (delayMs: number) => Promise<void>
+}
+
+/**
+ * Batch review payload used for native GitHub review creation.
+ */
+export interface IGitHubBatchReviewRequest {
+    /**
+     * Review body shown in timeline.
+     */
+    readonly body: string
+
+    /**
+     * Inline comments attached to this review.
+     */
+    readonly comments: readonly IInlineCommentDTO[]
 }
 
 const DEFAULT_RETRY_MAX_ATTEMPTS = 3
@@ -737,6 +766,38 @@ export class GitHubProvider implements IGitProvider, IGitPipelineStatusProvider 
     }
 
     /**
+     * Creates batch review with inline comments and returns created review comments.
+     *
+     * @param mergeRequestId Pull request number.
+     * @param review Batch review payload.
+     * @returns Created review comments mapped to generic comment DTOs.
+     */
+    public async createReview(
+        mergeRequestId: string,
+        review: IGitHubBatchReviewRequest,
+    ): Promise<readonly ICommentDTO[]> {
+        const pullNumber = normalizePullNumber(mergeRequestId)
+        const normalizedBody = normalizeRequiredText(review.body, "body")
+        const draftComments = toBatchReviewComments(review.comments)
+        const response = await this.executeRequest(() => {
+            return this.client.pulls.createReview({
+                owner: this.owner,
+                repo: this.repo,
+                pull_number: pullNumber,
+                event: "COMMENT",
+                body: normalizedBody,
+                comments: resolveCreateReviewComments(draftComments),
+            })
+        })
+        const reviewId = normalizeReviewId(response.data.id)
+        const reviewComments = await this.listCommentsForReview(pullNumber, reviewId)
+
+        return reviewComments.map((comment): ICommentDTO => {
+            return reviewCommentToCommentDTO(comment)
+        })
+    }
+
+    /**
      * Posts inline review comment to pull request.
      *
      * @param mergeRequestId Pull request number.
@@ -979,6 +1040,43 @@ export class GitHubProvider implements IGitProvider, IGitPipelineStatusProvider 
         })
 
         return response.data
+    }
+
+    /**
+     * Lists review comments for one pull-request review across paginated responses.
+     *
+     * @param pullNumber Pull-request number.
+     * @param reviewId Pull-request review identifier.
+     * @returns Raw review comments for the review.
+     */
+    private async listCommentsForReview(
+        pullNumber: number,
+        reviewId: number,
+    ): Promise<readonly IExternalGitReviewComment[]> {
+        const comments: IExternalGitReviewComment[] = []
+        let page = 1
+
+        while (true) {
+            const response = await this.executeRequest(() => {
+                return this.client.pulls.listCommentsForReview({
+                    owner: this.owner,
+                    repo: this.repo,
+                    pull_number: pullNumber,
+                    review_id: reviewId,
+                    per_page: 100,
+                    page,
+                })
+            })
+
+            comments.push(...response.data)
+            if (response.data.length < 100) {
+                break
+            }
+
+            page += 1
+        }
+
+        return comments
     }
 
     /**
@@ -2404,6 +2502,32 @@ function normalizeCheckRunConclusion(
     }
 
     return CHECK_RUN_CONCLUSION.NEUTRAL
+}
+
+/**
+ * Normalizes review identifier from GitHub response.
+ *
+ * @param reviewId Raw review identifier.
+ * @returns Positive integer review id.
+ */
+function normalizeReviewId(reviewId: number | undefined): number {
+    if (typeof reviewId !== "number" || Number.isInteger(reviewId) === false || reviewId <= 0) {
+        throw new Error("reviewId must be positive integer")
+    }
+
+    return reviewId
+}
+
+/**
+ * Resolves optional create-review comments parameter.
+ *
+ * @param comments Normalized review draft comments.
+ * @returns Undefined for empty list or the full comments array.
+ */
+function resolveCreateReviewComments(
+    comments: readonly IGitHubBatchReviewComment[],
+): IGitHubBatchReviewComment[] | undefined {
+    return comments.length === 0 ? undefined : [...comments]
 }
 
 /**
