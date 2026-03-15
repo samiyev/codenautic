@@ -264,7 +264,7 @@ export function SettingsLlmProvidersPage(): ReactElement {
             title={t("settings:llmProviders.pageTitle")}
             description={t("settings:llmProviders.pageSubtitle")}
         >
-            <div className="rounded-md border border-primary/30 bg-primary/10 p-3 text-sm text-on-primary">
+            <div className="rounded-md border border-accent/30 bg-accent/10 p-3 text-sm text-accent-foreground">
                 {t("settings:llmProviders.byokNotice")}
             </div>
 

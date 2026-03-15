@@ -452,7 +452,7 @@ export function SettingsNotificationsPage(): ReactElement {
                     </Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
                         <Chip size="sm" variant="soft">
                             {t("settings:notifications.total", { count: notifications.length })}
                         </Chip>
@@ -472,19 +472,27 @@ export function SettingsNotificationsPage(): ReactElement {
                     </div>
                     {deepLinkGuardNotice === undefined ? null : (
                         <Alert status="accent">
-                            <Alert.Title>{t("settings:notifications.deepLinkGuardTitle")}</Alert.Title>
+                            <Alert.Title>
+                                {t("settings:notifications.deepLinkGuardTitle")}
+                            </Alert.Title>
                             <Alert.Description>{deepLinkGuardNotice}</Alert.Description>
                         </Alert>
                     )}
                     {selectedNotificationIds.length === 0 ? null : (
                         <Alert status="accent">
-                            <Alert.Title>{t("settings:notifications.bulkActionsTitle")}</Alert.Title>
+                            <Alert.Title>
+                                {t("settings:notifications.bulkActionsTitle")}
+                            </Alert.Title>
                             <Alert.Description>
                                 {t("settings:notifications.notificationsSelected", {
                                     count: selectedNotificationIds.length,
                                 })}
                                 <div className="mt-2 flex flex-wrap gap-2">
-                                    <Button size="sm" variant="secondary" onPress={handleBulkMarkRead}>
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onPress={handleBulkMarkRead}
+                                    >
                                         {t("settings:notifications.markSelectedAsRead")}
                                     </Button>
                                     <Button
@@ -502,11 +510,17 @@ export function SettingsNotificationsPage(): ReactElement {
                     )}
                     {bulkPendingState === undefined ? null : (
                         <Alert status="warning">
-                            <Alert.Title>{t("settings:notifications.bulkActionPendingSyncTitle")}</Alert.Title>
+                            <Alert.Title>
+                                {t("settings:notifications.bulkActionPendingSyncTitle")}
+                            </Alert.Title>
                             <Alert.Description>
                                 {t("settings:notifications.bulkActionPendingSyncDescription")}
                                 <div className="mt-2">
-                                    <Button size="sm" variant="secondary" onPress={handleUndoBulkAction}>
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onPress={handleUndoBulkAction}
+                                    >
                                         {t("settings:notifications.undoBulkAction")}
                                     </Button>
                                 </div>
@@ -555,7 +569,7 @@ export function SettingsNotificationsPage(): ReactElement {
                             (notification): ReactElement => (
                                 <li
                                     key={notification.id}
-                                    className={`rounded-lg border border-border bg-surface p-3${notification.isRead !== true ? " border-l-2 border-l-primary" : ""}`}
+                                    className={`rounded-lg border border-border bg-surface p-3${notification.isRead !== true ? " border-l-2 border-l-accent" : ""}`}
                                     role="listitem"
                                 >
                                     <div className="flex flex-wrap items-center gap-2">
@@ -564,7 +578,7 @@ export function SettingsNotificationsPage(): ReactElement {
                                             checked={selectedNotificationIds.includes(
                                                 notification.id,
                                             )}
-                                            className="h-4 w-4 accent-primary"
+                                            className="h-4 w-4 accent-accent"
                                             type="checkbox"
                                             onChange={(): void => {
                                                 handleToggleNotificationSelection(notification.id)
@@ -586,11 +600,11 @@ export function SettingsNotificationsPage(): ReactElement {
                                         <Chip size="sm" variant="soft">
                                             {EVENT_TYPE_LABELS[notification.type]}
                                         </Chip>
-                                        <p className="text-xs text-text-secondary">
+                                        <p className="text-xs text-muted">
                                             {formatNotificationTime(notification.occurredAt)}
                                         </p>
                                     </div>
-                                    <p className="mt-1 text-sm text-text-tertiary">
+                                    <p className="mt-1 text-sm text-muted">
                                         {notification.message}
                                     </p>
                                     <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -626,8 +640,12 @@ export function SettingsNotificationsPage(): ReactElement {
                     </ul>
                     {filteredNotifications.length === 0 ? (
                         <Alert status="warning">
-                            <Alert.Title>{t("settings:notifications.noNotificationsFoundTitle")}</Alert.Title>
-                            <Alert.Description>{t("settings:notifications.noNotificationsFoundDescription")}</Alert.Description>
+                            <Alert.Title>
+                                {t("settings:notifications.noNotificationsFoundTitle")}
+                            </Alert.Title>
+                            <Alert.Description>
+                                {t("settings:notifications.noNotificationsFoundDescription")}
+                            </Alert.Description>
                         </Alert>
                     ) : null}
                 </CardContent>
@@ -712,7 +730,7 @@ export function SettingsNotificationsPage(): ReactElement {
                     </p>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
                         <Chip size="sm" variant="soft">
                             {t("settings:notifications.enabledRules", {
                                 count: enabledMuteRulesCount,
@@ -792,7 +810,7 @@ export function SettingsNotificationsPage(): ReactElement {
                 </CardHeader>
                 <CardContent className="space-y-2">
                     {bulkAudit.length === 0 ? (
-                        <p className="text-sm text-text-secondary">
+                        <p className="text-sm text-muted">
                             {t("settings:notifications.noBulkOperations")}
                         </p>
                     ) : (
@@ -809,8 +827,8 @@ export function SettingsNotificationsPage(): ReactElement {
                                         <p className="font-semibold text-foreground">
                                             {entry.status}
                                         </p>
-                                        <p className="text-text-tertiary">{entry.summary}</p>
-                                        <p className="text-text-secondary">
+                                        <p className="text-muted">{entry.summary}</p>
+                                        <p className="text-muted">
                                             {t("settings:notifications.auditNotifications", {
                                                 ids: entry.notificationIds.join(", "),
                                             })}
