@@ -94,6 +94,12 @@ export {
     type IAstApiSurfaceChangeDetectorErrorDetails,
 } from "./ast-api-surface-change-detector.error"
 export {
+    AST_BASE_IMPORT_RESOLVER_ERROR_CODE,
+    AstBaseImportResolverError,
+    type AstBaseImportResolverErrorCode,
+    type IAstBaseImportResolverErrorDetails,
+} from "./ast-base-import-resolver.error"
+export {
     AST_BATCH_PROCESSING_ERROR_CODE,
     AstBatchProcessingError,
     type AstBatchProcessingErrorCode,
@@ -374,6 +380,18 @@ export {
     type IAstApiSurfaceChangeDetectorServiceOptions,
     type IAstApiSurfaceChangeDetectorSummary,
 } from "./ast-api-surface-change-detector.service"
+export {
+    AstBaseImportResolver,
+    type AstBaseImportResolverNow,
+    type AstBaseImportResolverPathExists,
+    type AstBaseImportResolverShouldRetry,
+    type AstBaseImportResolverSleep,
+    type IAstBaseImportResolutionInput,
+    type IAstBaseImportResolutionResult,
+    type IAstBaseImportResolverOptions,
+    type IAstBaseImportResolverRetryPolicy,
+    type IAstBaseNonRelativeImportResolutionInput,
+} from "./ast-base-import-resolver"
 export {
     AstBatchProcessingService,
     type AstBatchProcessingNow,
