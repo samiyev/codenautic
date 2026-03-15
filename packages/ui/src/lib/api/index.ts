@@ -1,4 +1,5 @@
 import { createApiConfig, resolveUiEnv } from "./config"
+import { AdminConfigApi } from "./endpoints/admin-config.endpoint"
 import { AuthApi } from "./endpoints/auth.endpoint"
 import { BillingApi } from "./endpoints/billing.endpoint"
 import { CCRSummaryApi } from "./endpoints/ccr-summary.endpoint"
@@ -15,6 +16,7 @@ import { RepoConfigApi } from "./endpoints/repo-config.endpoint"
 import { DryRunApi } from "./endpoints/dry-run.endpoint"
 import { GitProvidersApi } from "./endpoints/git-providers.endpoint"
 import { JobsApi } from "./endpoints/jobs.endpoint"
+import { NotificationsApi } from "./endpoints/notifications.endpoint"
 import { RepositoryApi } from "./endpoints/repository.endpoint"
 import { CodeCityApi } from "./endpoints/code-city.endpoint"
 import { OrganizationApi } from "./endpoints/organization.endpoint"
@@ -34,8 +36,10 @@ import { FetchHttpClient } from "./http-client"
  */
 export function createApiContracts(): {
     readonly system: SystemApi
+    readonly adminConfig: AdminConfigApi
     readonly auth: AuthApi
     readonly billing: BillingApi
+    readonly notifications: NotificationsApi
     readonly codeReview: CodeReviewApi
     readonly ccrSummary: CCRSummaryApi
     readonly ccrWorkspace: CcrWorkspaceApi
@@ -65,8 +69,10 @@ export function createApiContracts(): {
 
     return {
         system: new SystemApi(httpClient),
+        adminConfig: new AdminConfigApi(httpClient),
         auth: new AuthApi(httpClient),
         billing: new BillingApi(httpClient),
+        notifications: new NotificationsApi(httpClient),
         codeReview: new CodeReviewApi(httpClient),
         ccrSummary: new CCRSummaryApi(httpClient),
         ccrWorkspace: new CcrWorkspaceApi(httpClient),
@@ -139,4 +145,6 @@ export type { IWebhooksApi } from "./endpoints/webhooks.endpoint"
 export type { IBillingApi } from "./endpoints/billing.endpoint"
 export type { IByokApi } from "./endpoints/byok.endpoint"
 export type { ISsoApi } from "./endpoints/sso.endpoint"
+export type { IAdminConfigApi } from "./endpoints/admin-config.endpoint"
+export type { INotificationsApi } from "./endpoints/notifications.endpoint"
 export type { TSystemHealthResponse, THealthStatus } from "./types"
