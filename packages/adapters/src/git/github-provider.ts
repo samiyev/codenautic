@@ -39,6 +39,7 @@ import {
 } from "@codenautic/core"
 
 import {
+    GIT_ACL_ERROR_KIND,
     mapExternalDiffFiles,
     mapExternalMergeRequest,
     reviewCommentToCommentDTO,
@@ -71,6 +72,8 @@ type PullCreateReviewResponse =
     RestEndpointMethodTypes["pulls"]["createReview"]["response"]["data"]
 type PullDeleteReviewCommentResponse =
     RestEndpointMethodTypes["pulls"]["deleteReviewComment"]["response"]["data"]
+type PullUpdateReviewCommentResponse =
+    RestEndpointMethodTypes["pulls"]["updateReviewComment"]["response"]["data"]
 type PullListCommentsForReviewResponseItem =
     RestEndpointMethodTypes["pulls"]["listCommentsForReview"]["response"]["data"][number]
 type ChecksCreateResponse =
@@ -199,6 +202,9 @@ export interface IGitHubOctokitClient {
         readonly deleteReviewComment: (
             params: RestEndpointMethodTypes["pulls"]["deleteReviewComment"]["parameters"],
         ) => Promise<{readonly data: PullDeleteReviewCommentResponse}>
+        readonly updateReviewComment: (
+            params: RestEndpointMethodTypes["pulls"]["updateReviewComment"]["parameters"],
+        ) => Promise<{readonly data: PullUpdateReviewCommentResponse}>
         readonly listCommentsForReview: (
             params: RestEndpointMethodTypes["pulls"]["listCommentsForReview"]["parameters"],
         ) => Promise<{readonly data: readonly PullListCommentsForReviewResponseItem[]}>
@@ -210,6 +216,9 @@ export interface IGitHubOctokitClient {
     readonly issues: {
         readonly createComment: (
             params: RestEndpointMethodTypes["issues"]["createComment"]["parameters"],
+        ) => Promise<{readonly data: IssuesCreateCommentResponse}>
+        readonly updateComment: (
+            params: RestEndpointMethodTypes["issues"]["updateComment"]["parameters"],
         ) => Promise<{readonly data: IssuesCreateCommentResponse}>
     }
 
@@ -792,6 +801,53 @@ export class GitHubProvider implements IGitProvider, IGitPipelineStatusProvider 
                 comment_id: normalizedCommentId,
             })
         })
+    }
+
+    /**
+     * Updates existing comment with review-first GitHub strategy.
+     *
+     * @param mergeRequestId Pull request number.
+     * @param commentId Comment identifier.
+     * @param body Target comment body.
+     * @returns Updated comment payload.
+     */
+    public async updateComment(
+        mergeRequestId: string,
+        commentId: string,
+        body: string,
+    ): Promise<ICommentDTO> {
+        normalizePullNumber(mergeRequestId)
+        const normalizedCommentId = normalizeCommentId(commentId)
+        const normalizedBody = normalizeRequiredText(body, "body")
+
+        try {
+            const reviewCommentResponse = await this.executeRequest(() => {
+                return this.client.pulls.updateReviewComment({
+                    owner: this.owner,
+                    repo: this.repo,
+                    comment_id: normalizedCommentId,
+                    body: normalizedBody,
+                })
+            })
+
+            return reviewCommentToCommentDTO(reviewCommentResponse.data)
+        } catch (error) {
+            const normalizedError = normalizeGitAclError(error)
+            if (normalizedError.kind !== GIT_ACL_ERROR_KIND.NOT_FOUND) {
+                throw error
+            }
+
+            const issueCommentResponse = await this.executeRequest(() => {
+                return this.client.issues.updateComment({
+                    owner: this.owner,
+                    repo: this.repo,
+                    comment_id: normalizedCommentId,
+                    body: normalizedBody,
+                })
+            })
+
+            return mapComment(issueCommentResponse.data)
+        }
     }
 
     /**

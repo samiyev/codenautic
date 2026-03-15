@@ -15,6 +15,7 @@ export const GIT_PROVIDER_OPERATION_NAMES = [
     "postComment",
     "postInlineComment",
     "deleteComment",
+    "updateComment",
     "createCheckRun",
     "updateCheckRun",
     "getBlameData",

@@ -30,10 +30,12 @@ type IGitHubMockPulls = {
     readonly createReviewComment?: AsyncMethod<unknown>
     readonly createReview?: AsyncMethod<unknown>
     readonly deleteReviewComment?: AsyncMethod<unknown>
+    readonly updateReviewComment?: AsyncMethod<unknown>
     readonly listCommentsForReview?: AsyncMethod<unknown>
 }
 type IGitHubMockIssues = {
     readonly createComment?: AsyncMethod<unknown>
+    readonly updateComment?: AsyncMethod<unknown>
 }
 type IGitHubMockChecks = {
     readonly create?: AsyncMethod<unknown>
@@ -225,6 +227,8 @@ function createGitHubPullsMock(
             resolveGitHubMethod(overrides?.createReview) as IGitHubOctokitClient["pulls"]["createReview"],
         deleteReviewComment:
             resolveGitHubMethod(overrides?.deleteReviewComment) as IGitHubOctokitClient["pulls"]["deleteReviewComment"],
+        updateReviewComment:
+            resolveGitHubMethod(overrides?.updateReviewComment) as IGitHubOctokitClient["pulls"]["updateReviewComment"],
         listCommentsForReview:
             resolveGitHubMethod(overrides?.listCommentsForReview) as IGitHubOctokitClient["pulls"]["listCommentsForReview"],
     }
@@ -242,6 +246,8 @@ function createGitHubIssuesMock(
     return {
         createComment:
             resolveGitHubMethod(overrides?.createComment) as IGitHubOctokitClient["issues"]["createComment"],
+        updateComment:
+            resolveGitHubMethod(overrides?.updateComment) as IGitHubOctokitClient["issues"]["updateComment"],
     }
 }
 
@@ -2438,6 +2444,92 @@ describe("GitHubProvider", () => {
             repo: "platform",
             pull_number: 21,
             comment_id: 51,
+        })
+    })
+
+    test("updates comment through review-first path", async () => {
+        const updateReviewComment = createQueuedAsyncMethod([
+            createDataHandler({
+                id: 301,
+                body: "Updated body",
+                user: {
+                    login: "review-bot",
+                },
+                created_at: "2026-03-08T14:20:00.000Z",
+            }),
+        ])
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                pulls: {
+                    updateReviewComment,
+                },
+            }),
+        })
+
+        const updated = await provider.updateComment("21", "301", " Updated body ")
+
+        expect(updated).toEqual({
+            id: "301",
+            body: "Updated body",
+            author: "review-bot",
+            createdAt: "2026-03-08T14:20:00.000Z",
+        })
+        expect(updateReviewComment.calls[0]?.[0]).toEqual({
+            owner: "codenautic",
+            repo: "platform",
+            comment_id: 301,
+            body: "Updated body",
+        })
+    })
+
+    test("falls back to issues update when review comment update returns 404", async () => {
+        const updateReviewComment = createQueuedAsyncMethod([
+            createErrorHandler(createGitHubApiError("Not found", {status: 404})),
+        ])
+        const updateIssueComment = createQueuedAsyncMethod([
+            createDataHandler({
+                id: 302,
+                body: "Fallback body",
+                user: {
+                    login: "review-bot",
+                },
+                created_at: "2026-03-08T14:22:00.000Z",
+            }),
+        ])
+        const provider = new GitHubProvider({
+            owner: "codenautic",
+            repo: "platform",
+            client: createGitHubClientMock({
+                pulls: {
+                    updateReviewComment,
+                },
+                issues: {
+                    updateComment: updateIssueComment,
+                },
+            }),
+        })
+
+        const updated = await provider.updateComment("21", "302", " Fallback body ")
+
+        expect(updated).toEqual({
+            id: "302",
+            body: "Fallback body",
+            author: "review-bot",
+            createdAt: "2026-03-08T14:22:00.000Z",
+        })
+        expect(updateReviewComment.calls[0]?.[0]).toEqual({
+            owner: "codenautic",
+            repo: "platform",
+            comment_id: 302,
+            body: "Fallback body",
+        })
+        expect(updateIssueComment.calls[0]?.[0]).toEqual({
+            owner: "codenautic",
+            repo: "platform",
+            comment_id: 302,
+            body: "Fallback body",
         })
     })
 
