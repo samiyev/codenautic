@@ -443,7 +443,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                                     <p className={TYPOGRAPHY.sectionTitle}>
                                         {integration.provider}
                                     </p>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-sm text-muted">
                                         {integration.description}
                                     </p>
                                 </div>
@@ -491,7 +491,10 @@ export function SettingsIntegrationsPage(): ReactElement {
                                     <Switch
                                         isSelected={integration.notificationsEnabled}
                                         onChange={(isSelected: boolean): void => {
-                                            setNotificationsEnabled(integration.provider, isSelected)
+                                            setNotificationsEnabled(
+                                                integration.provider,
+                                                isSelected,
+                                            )
                                         }}
                                     >
                                         {t("settings:integrations.enableNotifications")}
@@ -512,7 +515,9 @@ export function SettingsIntegrationsPage(): ReactElement {
                                             handleToggleConnection(integration.provider)
                                         }}
                                         size="sm"
-                                        variant={integration.connected === true ? "secondary" : "primary"}
+                                        variant={
+                                            integration.connected === true ? "secondary" : "primary"
+                                        }
                                     >
                                         {integration.connected === true
                                             ? t("settings:integrations.disconnect")
@@ -529,7 +534,7 @@ export function SettingsIntegrationsPage(): ReactElement {
                                     </Button>
                                 </div>
 
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs text-muted">
                                     {t("settings:integrations.secretToken")}{" "}
                                     {integration.secretConfigured === true
                                         ? t("settings:integrations.configured")
@@ -550,14 +555,14 @@ export function SettingsIntegrationsPage(): ReactElement {
                         <p className={TYPOGRAPHY.sectionTitle}>
                             {t("settings:integrations.externalContextSources")}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted">
                             {t("settings:integrations.manageContextSources")}
                         </p>
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {externalContext.sourcesQuery.isPending ? (
-                        <p aria-live="polite" className="text-sm text-muted-foreground">
+                        <p aria-live="polite" className="text-sm text-muted">
                             {t("settings:integrations.loadingContextSources")}
                         </p>
                     ) : externalContext.sourcesQuery.error !== null ? (

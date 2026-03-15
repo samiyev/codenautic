@@ -704,7 +704,9 @@ export function SettingsJobsPage(): ReactElement {
                     </div>
 
                     <Alert status="warning">
-                        <Alert.Title>{t("settings:jobs.timezoneApplicationBoundaryTitle")}</Alert.Title>
+                        <Alert.Title>
+                            {t("settings:jobs.timezoneApplicationBoundaryTitle")}
+                        </Alert.Title>
                         <Alert.Description>
                             {t("settings:jobs.timezoneApplicationBoundaryDescription", {
                                 timezone: effectiveTimezone,
@@ -713,7 +715,7 @@ export function SettingsJobsPage(): ReactElement {
                     </Alert>
 
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-sm text-text-tertiary">{scheduleDescription}</p>
+                        <p className="text-sm text-muted">{scheduleDescription}</p>
                         <Button size="sm" variant="secondary" onPress={handleSaveSchedule}>
                             {t("settings:jobs.saveSchedule")}
                         </Button>
@@ -739,7 +741,7 @@ export function SettingsJobsPage(): ReactElement {
                                     <p className="font-semibold">
                                         {formatTimezoneDate(nextRun, effectiveTimezone)}
                                     </p>
-                                    <p className="text-xs text-text-secondary">
+                                    <p className="text-xs text-muted">
                                         {formatRelativeTime(nextRun)}
                                     </p>
                                 </li>
@@ -777,7 +779,7 @@ export function SettingsJobsPage(): ReactElement {
                                                 <p className="text-sm font-semibold text-foreground">
                                                     {job.id} · {job.kind}
                                                 </p>
-                                                <p className="text-xs text-text-secondary">
+                                                <p className="text-xs text-muted">
                                                     {job.scope}
                                                 </p>
                                             </button>
@@ -789,7 +791,7 @@ export function SettingsJobsPage(): ReactElement {
                                                 {job.status}
                                             </Chip>
                                         </div>
-                                        <p className="mt-1 text-xs text-text-secondary">
+                                        <p className="mt-1 text-xs text-muted">
                                             {t("settings:jobs.eta", {
                                                 eta: job.etaLabel,
                                                 count: job.retryCount,
@@ -855,18 +857,26 @@ export function SettingsJobsPage(): ReactElement {
                                         {t("settings:jobs.activeJob")}
                                         <strong>{activeJob.id}</strong> ({activeJob.kind})
                                     </p>
-                                    <p className="text-xs text-text-secondary">
+                                    <p className="text-xs text-muted">
                                         {t("settings:jobs.scope", { scope: activeJob.scope })}
                                     </p>
                                     {activeJob.errorDetails === undefined ? (
                                         <Alert status="success">
-                                            <Alert.Title>{t("settings:jobs.noBlockingErrorTitle")}</Alert.Title>
-                                            <Alert.Description>{t("settings:jobs.noBlockingErrorDescription")}</Alert.Description>
+                                            <Alert.Title>
+                                                {t("settings:jobs.noBlockingErrorTitle")}
+                                            </Alert.Title>
+                                            <Alert.Description>
+                                                {t("settings:jobs.noBlockingErrorDescription")}
+                                            </Alert.Description>
                                         </Alert>
                                     ) : (
                                         <Alert status="danger">
-                                            <Alert.Title>{t("settings:jobs.latestErrorTraceTitle")}</Alert.Title>
-                                            <Alert.Description>{activeJob.errorDetails}</Alert.Description>
+                                            <Alert.Title>
+                                                {t("settings:jobs.latestErrorTraceTitle")}
+                                            </Alert.Title>
+                                            <Alert.Description>
+                                                {activeJob.errorDetails}
+                                            </Alert.Description>
                                         </Alert>
                                     )}
                                 </>
@@ -894,8 +904,8 @@ export function SettingsJobsPage(): ReactElement {
                                             <p className="font-semibold text-foreground">
                                                 {entry.jobId} · {entry.action} · {entry.actor}
                                             </p>
-                                            <p className="text-text-tertiary">{entry.outcome}</p>
-                                            <p className="text-text-secondary">
+                                            <p className="text-muted">{entry.outcome}</p>
+                                            <p className="text-muted">
                                                 {formatTimestamp(entry.occurredAt)}
                                             </p>
                                         </li>
