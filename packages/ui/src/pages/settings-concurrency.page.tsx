@@ -12,8 +12,7 @@ import {
     ModalHeader,
     Switch,
 } from "@heroui/react"
-import { FormLayout } from "@/components/forms/form-layout"
-import { FormSection } from "@/components/forms/form-section"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
@@ -249,11 +248,17 @@ export function SettingsConcurrencyPage(): ReactElement {
     }
 
     return (
-        <FormLayout
-            title={t("settings:concurrency.pageTitle")}
-            description={t("settings:concurrency.pageSubtitle")}
-        >
-            <FormSection heading={t("settings:concurrency.snapshotVersions")}>
+        <div className="space-y-6 mx-auto max-w-[1400px]">
+            <div className="space-y-1.5">
+                <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:concurrency.pageTitle")}</h1>
+                <p className={TYPOGRAPHY.bodyMuted}>{t("settings:concurrency.pageSubtitle")}</p>
+            </div>
+            <div className="space-y-6">
+            <section className="space-y-4 rounded-lg border border-border/50 bg-surface-tertiary p-4">
+                <div className="space-y-1">
+                    <h3 className={TYPOGRAPHY.subsectionTitle}>{t("settings:concurrency.snapshotVersions")}</h3>
+                </div>
+                <div className="space-y-3">
                 <div className="flex flex-wrap gap-2">
                     <Chip size="sm" variant="soft">
                         {t("settings:concurrency.localEtag", { etag: localDraft.etag })}
@@ -326,9 +331,14 @@ export function SettingsConcurrencyPage(): ReactElement {
                         {t("settings:concurrency.simulateExternalUpdate")}
                     </Button>
                 </div>
-            </FormSection>
+                </div>
+            </section>
 
-            <FormSection heading={t("settings:concurrency.conflictResolutionAudit")}>
+            <section className="space-y-4 rounded-lg border border-border/50 bg-surface-tertiary p-4">
+                <div className="space-y-1">
+                    <h3 className={TYPOGRAPHY.subsectionTitle}>{t("settings:concurrency.conflictResolutionAudit")}</h3>
+                </div>
+                <div className="space-y-3">
                 {audit.length === 0 ? (
                     <Alert status="warning">
                         <Alert.Title>
@@ -361,7 +371,8 @@ export function SettingsConcurrencyPage(): ReactElement {
                         )}
                     </ul>
                 )}
-            </FormSection>
+                </div>
+            </section>
 
             <Modal
                 isOpen={conflictState !== undefined}
@@ -422,6 +433,7 @@ export function SettingsConcurrencyPage(): ReactElement {
                     </Modal.Dialog>
                 </Modal.Container>
             </Modal>
-        </FormLayout>
+            </div>
+        </div>
     )
 }
