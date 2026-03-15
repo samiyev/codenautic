@@ -4,7 +4,7 @@ import { RouterContextProvider, createMemoryHistory, createRouter } from "@tanst
 import { QueryClientProvider, type QueryClient } from "@tanstack/react-query"
 
 import { createQueryClient } from "@/lib/query/query-client"
-import { ThemeProvider, type ThemeMode } from "@/lib/theme/theme-provider"
+import type { TThemeMode } from "@/lib/theme/use-theme"
 
 import { testRouteTree } from "./test-route-tree"
 
@@ -20,8 +20,7 @@ export interface IRenderWithProvidersResult extends RenderResult {
  */
 export interface IRenderWithProvidersOptions {
     readonly queryClient?: QueryClient
-    readonly themeMode?: ThemeMode
-    readonly defaultThemeMode?: ThemeMode
+    readonly themeMode?: TThemeMode
 }
 
 /**
@@ -51,9 +50,7 @@ export function renderWithProviders(
 
     const wrapWithProviders = (content: ReactElement): ReactElement => (
         <RouterContextProvider router={router}>
-            <ThemeProvider defaultMode={options.defaultThemeMode}>
-                <QueryClientProvider client={queryClient}>{content}</QueryClientProvider>
-            </ThemeProvider>
+            <QueryClientProvider client={queryClient}>{content}</QueryClientProvider>
         </RouterContextProvider>
     )
 
