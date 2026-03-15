@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useSyncExternalStore } from "react"
+import { useCallback, useEffect, useState } from "react"
+import { useTheme as useNextTheme } from "next-themes"
 
 /**
  * Режим темы интерфейса.
@@ -23,81 +24,44 @@ const PRESETS: ReadonlyArray<{ readonly id: TThemePreset; readonly label: string
 ]
 
 /**
- * Разрешает режим темы с учётом system preference.
- *
- * @param mode Режим темы.
- * @returns Физический режим: "light" или "dark".
+ * Ключ localStorage для пресета.
  */
-function resolveMode(mode: TThemeMode): "dark" | "light" {
-    if (mode !== "system") {
-        return mode
+const PRESET_STORAGE_KEY = "cn:theme-preset"
+
+/**
+ * Пресет по умолчанию.
+ */
+const DEFAULT_PRESET: TThemePreset = "sunrise"
+
+/**
+ * Проверяет, является ли значение валидным пресетом.
+ *
+ * @param value Значение для проверки.
+ * @returns true если значение является TThemePreset.
+ */
+function isValidPreset(value: string | null): value is TThemePreset {
+    if (value === null) {
+        return false
     }
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+    return PRESETS.some((p): boolean => p.id === value)
 }
 
 /**
- * Применяет тему к document.documentElement.
+ * Читает пресет из localStorage.
  *
- * @param mode Режим темы.
- * @param preset Идентификатор пресета.
+ * @returns Сохранённый пресет или значение по умолчанию.
  */
-function apply(mode: TThemeMode, preset: TThemePreset): void {
-    const resolved = resolveMode(mode)
-    document.documentElement.setAttribute("data-theme", preset)
-    document.documentElement.classList.toggle("dark", resolved === "dark")
-    document.documentElement.style.colorScheme = resolved
-}
-
-interface ISnapshot {
-    readonly mode: TThemeMode
-    readonly preset: TThemePreset
-}
-
-const listeners = new Set<() => void>()
-let snapshot: ISnapshot = { mode: "system", preset: "sunrise" }
-
-function subscribe(cb: () => void): () => void {
-    listeners.add(cb)
-    return (): void => {
-        listeners.delete(cb)
+function readStoredPreset(): TThemePreset {
+    const stored = localStorage.getItem(PRESET_STORAGE_KEY)
+    if (isValidPreset(stored)) {
+        return stored
     }
-}
-
-function getSnapshot(): ISnapshot {
-    return snapshot
-}
-
-function setMode(m: TThemeMode): void {
-    localStorage.setItem("cn:theme-mode", m)
-    snapshot = { ...snapshot, mode: m }
-    apply(snapshot.mode, snapshot.preset)
-    listeners.forEach((cb): void => {
-        cb()
-    })
-}
-
-function setPreset(p: TThemePreset): void {
-    localStorage.setItem("cn:theme-preset", p)
-    snapshot = { ...snapshot, preset: p }
-    apply(snapshot.mode, snapshot.preset)
-    listeners.forEach((cb): void => {
-        cb()
-    })
-}
-
-/**
- * Инициализирует тему ДО React-рендера для предотвращения flash.
- * Вызывается в main.tsx перед createRoot.
- */
-export function initializeTheme(): void {
-    const mode = (localStorage.getItem("cn:theme-mode") as TThemeMode | null) ?? "system"
-    const preset = (localStorage.getItem("cn:theme-preset") as TThemePreset | null) ?? "sunrise"
-    snapshot = { mode, preset }
-    apply(mode, preset)
+    return DEFAULT_PRESET
 }
 
 /**
  * Hook для управления темой приложения.
+ * Использует next-themes для mode (light/dark/system) и localStorage для preset.
  *
  * @returns Состояние темы и функции управления.
  */
@@ -109,38 +73,34 @@ export function useTheme(): {
     setMode: (m: TThemeMode) => void
     setPreset: (p: TThemePreset) => void
 } {
-    const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+    const { theme, setTheme, resolvedTheme } = useNextTheme()
+    const [preset, setPresetState] = useState<TThemePreset>(readStoredPreset)
 
-    const stableSetMode = useCallback((m: TThemeMode): void => {
-        setMode(m)
-    }, [])
+    const mode: TThemeMode = (theme as TThemeMode | undefined) ?? "system"
+    const resolvedMode: "dark" | "light" = resolvedTheme === "dark" ? "dark" : "light"
+
+    const stableSetMode = useCallback(
+        (m: TThemeMode): void => {
+            setTheme(m)
+        },
+        [setTheme],
+    )
 
     const stableSetPreset = useCallback((p: TThemePreset): void => {
-        setPreset(p)
+        setPresetState(p)
+        localStorage.setItem(PRESET_STORAGE_KEY, p)
+        document.documentElement.setAttribute("data-theme", p)
     }, [])
 
-    useEffect((): (() => void) | undefined => {
-        if (state.mode !== "system") {
-            return undefined
-        }
-        const mq = window.matchMedia("(prefers-color-scheme: dark)")
-        const handler = (): void => {
-            apply(state.mode, state.preset)
-            listeners.forEach((cb): void => {
-                cb()
-            })
-        }
-        mq.addEventListener("change", handler)
-        return (): void => {
-            mq.removeEventListener("change", handler)
-        }
-    }, [state.mode, state.preset])
+    useEffect((): void => {
+        document.documentElement.setAttribute("data-theme", preset)
+    }, [preset])
 
     return {
-        mode: state.mode,
-        preset: state.preset,
+        mode,
+        preset,
         presets: PRESETS,
-        resolvedMode: resolveMode(state.mode),
+        resolvedMode,
         setMode: stableSetMode,
         setPreset: stableSetPreset,
     }
