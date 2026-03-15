@@ -91,4 +91,81 @@ export const queryKeys = {
             return ["git-providers", "by-id", providerId] as const
         },
     },
+    contractValidation: {
+        all: (): readonly ["contract-validation"] => ["contract-validation"] as const,
+        blueprint: (): readonly ["contract-validation", "blueprint"] => {
+            return ["contract-validation", "blueprint"] as const
+        },
+        guardrails: (): readonly ["contract-validation", "guardrails"] => {
+            return ["contract-validation", "guardrails"] as const
+        },
+        violations: (): readonly ["contract-validation", "violations"] => {
+            return ["contract-validation", "violations"] as const
+        },
+        trend: (): readonly ["contract-validation", "trend"] => {
+            return ["contract-validation", "trend"] as const
+        },
+        graph: (): readonly ["contract-validation", "graph"] => {
+            return ["contract-validation", "graph"] as const
+        },
+    },
+    repositories: {
+        all: (): readonly ["repositories"] => ["repositories"] as const,
+        list: (): readonly ["repositories", "list"] => {
+            return ["repositories", "list"] as const
+        },
+        byId: (repositoryId: string): readonly ["repositories", "by-id", string] => {
+            return ["repositories", "by-id", repositoryId] as const
+        },
+        overview: (
+            repositoryId: string,
+        ): readonly ["repositories", "overview", string] => {
+            return ["repositories", "overview", repositoryId] as const
+        },
+    },
+    codeCity: {
+        all: (): readonly ["code-city"] => ["code-city"] as const,
+        profiles: (): readonly ["code-city", "profiles"] => {
+            return ["code-city", "profiles"] as const
+        },
+        dependencyGraph: (
+            repoId: string,
+        ): readonly ["code-city", "dependency-graph", string] => {
+            return ["code-city", "dependency-graph", repoId] as const
+        },
+    },
+    dashboard: {
+        all: (): readonly ["dashboard"] => ["dashboard"] as const,
+        metrics: (
+            range: string,
+        ): readonly ["dashboard", "metrics", string] => {
+            return ["dashboard", "metrics", range] as const
+        },
+        statusDistribution: (
+            range: string,
+        ): readonly ["dashboard", "status-distribution", string] => {
+            return ["dashboard", "status-distribution", range] as const
+        },
+        teamActivity: (
+            range: string,
+        ): readonly ["dashboard", "team-activity", string] => {
+            return ["dashboard", "team-activity", range] as const
+        },
+        flowMetrics: (
+            range: string,
+        ): readonly ["dashboard", "flow-metrics", string] => {
+            return ["dashboard", "flow-metrics", range] as const
+        },
+        tokenUsage: (
+            range: string,
+        ): readonly ["dashboard", "token-usage", string] => {
+            return ["dashboard", "token-usage", range] as const
+        },
+        workQueue: (): readonly ["dashboard", "work-queue"] => {
+            return ["dashboard", "work-queue"] as const
+        },
+        timeline: (): readonly ["dashboard", "timeline"] => {
+            return ["dashboard", "timeline"] as const
+        },
+    },
 }

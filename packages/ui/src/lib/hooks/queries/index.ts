@@ -16,6 +16,11 @@ export {
     type IUseCcrWorkspaceResult,
 } from "./use-ccr-workspace"
 export {
+    useContractValidation,
+    type IUseContractValidationArgs,
+    type IUseContractValidationResult,
+} from "./use-contract-validation"
+export {
     useCustomRules,
     type IUseCustomRulesQueryArgs,
     type IUseCustomRulesResult,
@@ -52,6 +57,11 @@ export {
     type IUseReviewCadenceResult,
 } from "./use-review-cadence"
 export {
+    useDashboard,
+    type IUseDashboardArgs,
+    type IUseDashboardResult,
+} from "./use-dashboard"
+export {
     DEFAULT_ADMIN_PERMISSIONS,
     isPermissionEnabled,
     usePermissionsQuery,
@@ -59,3 +69,19 @@ export {
     type IUsePermissionsQueryArgs,
     type IUsePermissionsQueryResult,
 } from "./use-permissions-query"
+export {
+    useRepositories,
+    useRepositoryOverview,
+    type IUseRepositoriesArgs,
+    type IUseRepositoriesResult,
+    type IUseRepositoryOverviewArgs,
+    type IUseRepositoryOverviewResult,
+} from "./use-repositories"
+export {
+    useCodeCityProfiles,
+    useCodeCityDependencyGraph,
+    type IUseCodeCityProfilesArgs,
+    type IUseCodeCityProfilesResult,
+    type IUseCodeCityDependencyGraphArgs,
+    type IUseCodeCityDependencyGraphResult,
+} from "./use-code-city"
