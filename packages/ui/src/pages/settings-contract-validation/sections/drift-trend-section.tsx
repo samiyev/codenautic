@@ -10,7 +10,7 @@ import {
     BLUEPRINT_STRUCTURE_NODES,
     DRIFT_TREND_POINTS,
     REALITY_STRUCTURE_NODES,
-} from "../contract-validation-mock-data"
+} from "../contract-validation-constants"
 import { resolveArchitectureDifferenceBadgeClass } from "../drift-analysis-utils"
 import type { IContractValidationState } from "../use-contract-validation-state"
 
