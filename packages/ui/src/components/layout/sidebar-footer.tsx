@@ -89,9 +89,7 @@ export function SidebarFooter(props: ISidebarFooterProps): ReactElement {
                                 <span className={`truncate ${TYPOGRAPHY.cardTitle}`}>
                                     {displayName}
                                 </span>
-                                <span className="truncate text-[11px] text-muted">
-                                    {orgLabel}
-                                </span>
+                                <span className="truncate text-[11px] text-muted">{orgLabel}</span>
                             </span>
                             <ChevronDown
                                 aria-hidden="true"
