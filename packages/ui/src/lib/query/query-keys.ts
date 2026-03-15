@@ -213,6 +213,24 @@ export const queryKeys = {
             return ["sso", "oidc"] as const
         },
     },
+    jobs: {
+        all: (): readonly ["jobs"] => ["jobs"] as const,
+        schedules: (): readonly ["jobs", "schedules"] => {
+            return ["jobs", "schedules"] as const
+        },
+    },
+    webhooks: {
+        all: (): readonly ["webhooks"] => ["webhooks"] as const,
+        deliveries: (endpointId: string): readonly ["webhooks", "deliveries", string] => {
+            return ["webhooks", "deliveries", endpointId] as const
+        },
+    },
+    billing: {
+        all: (): readonly ["billing"] => ["billing"] as const,
+        history: (): readonly ["billing", "history"] => {
+            return ["billing", "history"] as const
+        },
+    },
     organization: {
         all: (): readonly ["organization"] => ["organization"] as const,
         profile: (): readonly ["organization", "profile"] => {
