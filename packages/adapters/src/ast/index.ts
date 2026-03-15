@@ -124,6 +124,12 @@ export {
     type IAstIncrementalDiffScannerErrorDetails,
 } from "./ast-incremental-diff-scanner.error"
 export {
+    AST_SCAN_RESULT_AGGREGATOR_ERROR_CODE,
+    AstScanResultAggregatorError,
+    type AstScanResultAggregatorErrorCode,
+    type IAstScanResultAggregatorErrorDetails,
+} from "./ast-scan-result-aggregator.error"
+export {
     AST_SERVICE_MULTI_REPO_GRAPH_FEDERATION_ERROR_CODE,
     AstServiceMultiRepoGraphFederationError,
     type AstServiceMultiRepoGraphFederationErrorCode,
@@ -567,6 +573,14 @@ export {
     type IAstIncrementalDiffScannerProgressCallback,
     type IAstIncrementalDiffScannerServiceOptions,
 } from "./ast-incremental-diff-scanner.service"
+export {
+    AstScanResultAggregatorService,
+    type IAstScanResultAggregatorService,
+    type IAstScanSummary,
+    type IAstScanSummaryLanguageStat,
+    type IAstScanSummaryMetrics,
+    type IAstScanSummaryRepository,
+} from "./ast-scan-result-aggregator.service"
 export {
     AstCyclomaticComplexityService,
     type IAstCyclomaticComplexityFileInput,
