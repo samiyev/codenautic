@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useSyncExternalStore } from "react"
 
 /**
  * Режим темы интерфейса.
@@ -48,6 +48,43 @@ function apply(mode: TThemeMode, preset: TThemePreset): void {
     document.documentElement.style.colorScheme = resolved
 }
 
+interface ISnapshot {
+    readonly mode: TThemeMode
+    readonly preset: TThemePreset
+}
+
+const listeners = new Set<() => void>()
+let snapshot: ISnapshot = { mode: "system", preset: "sunrise" }
+
+function subscribe(cb: () => void): () => void {
+    listeners.add(cb)
+    return (): void => {
+        listeners.delete(cb)
+    }
+}
+
+function getSnapshot(): ISnapshot {
+    return snapshot
+}
+
+function setMode(m: TThemeMode): void {
+    localStorage.setItem("cn:theme-mode", m)
+    snapshot = { ...snapshot, mode: m }
+    apply(snapshot.mode, snapshot.preset)
+    listeners.forEach((cb): void => {
+        cb()
+    })
+}
+
+function setPreset(p: TThemePreset): void {
+    localStorage.setItem("cn:theme-preset", p)
+    snapshot = { ...snapshot, preset: p }
+    apply(snapshot.mode, snapshot.preset)
+    listeners.forEach((cb): void => {
+        cb()
+    })
+}
+
 /**
  * Инициализирует тему ДО React-рендера для предотвращения flash.
  * Вызывается в main.tsx перед createRoot.
@@ -55,6 +92,7 @@ function apply(mode: TThemeMode, preset: TThemePreset): void {
 export function initializeTheme(): void {
     const mode = (localStorage.getItem("cn:theme-mode") as TThemeMode | null) ?? "system"
     const preset = (localStorage.getItem("cn:theme-preset") as TThemePreset | null) ?? "sunrise"
+    snapshot = { mode, preset }
     apply(mode, preset)
 }
 
@@ -71,40 +109,39 @@ export function useTheme(): {
     setMode: (m: TThemeMode) => void
     setPreset: (p: TThemePreset) => void
 } {
-    const [mode, setModeState] = useState<TThemeMode>(
-        () => (localStorage.getItem("cn:theme-mode") as TThemeMode | null) ?? "system",
-    )
-    const [preset, setPresetState] = useState<TThemePreset>(
-        () => (localStorage.getItem("cn:theme-preset") as TThemePreset | null) ?? "sunrise",
-    )
+    const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 
-    const setMode = useCallback((m: TThemeMode): void => {
-        setModeState(m)
-        localStorage.setItem("cn:theme-mode", m)
+    const stableSetMode = useCallback((m: TThemeMode): void => {
+        setMode(m)
     }, [])
 
-    const setPreset = useCallback((p: TThemePreset): void => {
-        setPresetState(p)
-        localStorage.setItem("cn:theme-preset", p)
+    const stableSetPreset = useCallback((p: TThemePreset): void => {
+        setPreset(p)
     }, [])
-
-    useEffect((): void => {
-        apply(mode, preset)
-    }, [mode, preset])
 
     useEffect((): (() => void) | undefined => {
-        if (mode !== "system") {
+        if (state.mode !== "system") {
             return undefined
         }
         const mq = window.matchMedia("(prefers-color-scheme: dark)")
         const handler = (): void => {
-            apply(mode, preset)
+            apply(state.mode, state.preset)
+            listeners.forEach((cb): void => {
+                cb()
+            })
         }
         mq.addEventListener("change", handler)
         return (): void => {
             mq.removeEventListener("change", handler)
         }
-    }, [mode, preset])
+    }, [state.mode, state.preset])
 
-    return { mode, preset, presets: PRESETS, resolvedMode: resolveMode(mode), setMode, setPreset }
+    return {
+        mode: state.mode,
+        preset: state.preset,
+        presets: PRESETS,
+        resolvedMode: resolveMode(state.mode),
+        setMode: stableSetMode,
+        setPreset: stableSetPreset,
+    }
 }
