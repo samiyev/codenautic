@@ -13,107 +13,63 @@ import {
     Table,
     Tabs,
 } from "@heroui/react"
+import type {
+    IBillingState,
+    IOrgMember,
+    IOrganizationProfile,
+    TBillingStatus,
+    TOrgMemberRole,
+    TPlanName,
+} from "@/lib/api/endpoints/organization.endpoint"
 import { SettingsTeamPage } from "@/pages/settings-team.page"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
+import { useOrganization } from "@/lib/hooks/queries/use-organization"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 
-type TPlanName = "enterprise" | "pro" | "starter"
-type TBillingStatus = "active" | "past_due" | "trial"
-type TMemberRole = "admin" | "developer" | "lead" | "viewer"
-
-interface IOrganizationProfile {
-    /** Organization display name. */
-    readonly name: string
-    /** URL slug. */
-    readonly slug: string
-    /** Default timezone. */
-    readonly timezone: string
-}
-
-interface IBillingState {
-    /** Current plan. */
-    readonly plan: TPlanName
-    /** Billing status. */
-    readonly status: TBillingStatus
-    /** Seats in use. */
-    readonly seatsUsed: number
-    /** Seats in plan. */
-    readonly seatsTotal: number
-    /** Next renewal date. */
-    readonly renewalAt: string
-    /** Payment method label. */
-    readonly paymentMethod: string
-}
-
-interface IOrganizationMember {
-    /** Member id. */
-    readonly id: string
-    /** Member name. */
-    readonly name: string
-    /** Member email. */
-    readonly email: string
-    /** Current role. */
-    readonly role: TMemberRole
-}
-
+/**
+ * Состояние BYOK-ключей (Bring Your Own Key).
+ */
 interface IByokState {
-    /** Git provider key configured. */
+    /**
+     * Ключ Git-провайдера сконфигурирован.
+     */
     readonly gitProviderTokenConfigured: boolean
-    /** LLM key configured. */
+    /**
+     * Ключ LLM-провайдера сконфигурирован.
+     */
     readonly llmKeyConfigured: boolean
-    /** Masked key reference. */
+    /**
+     * Замаскированная ссылка на ключ.
+     */
     readonly maskedKeyRef: string
 }
 
+/**
+ * Запись аудит-лога.
+ */
 interface IAuditLogEntry {
-    /** Audit record id. */
+    /**
+     * Идентификатор записи.
+     */
     readonly id: string
-    /** Timestamp in readable format. */
+    /**
+     * Метка времени в читаемом формате.
+     */
     readonly timestamp: string
-    /** Actor display name. */
+    /**
+     * Отображаемое имя актора.
+     */
     readonly actor: string
-    /** Performed action. */
+    /**
+     * Выполненное действие.
+     */
     readonly action: string
-    /** Optional payload summary. */
+    /**
+     * Описание деталей.
+     */
     readonly details: string
 }
-
-const PROFILE_DEFAULT: IOrganizationProfile = {
-    name: "Acme Platform",
-    slug: "acme-platform",
-    timezone: "UTC+05:00",
-}
-
-const BILLING_DEFAULT: IBillingState = {
-    paymentMethod: "Visa **** 8891",
-    plan: "pro",
-    renewalAt: "2026-04-01",
-    seatsTotal: 30,
-    seatsUsed: 18,
-    status: "active",
-}
-
-const MEMBERS_DEFAULT: ReadonlyArray<IOrganizationMember> = [
-    {
-        email: "neo@acme.dev",
-        id: "member-1",
-        name: "Neo Anderson",
-        role: "admin",
-    },
-    {
-        email: "trinity@acme.dev",
-        id: "member-2",
-        name: "Trinity",
-        role: "lead",
-    },
-    {
-        email: "morpheus@acme.dev",
-        id: "member-3",
-        name: "Morpheus",
-        role: "developer",
-    },
-]
 
 const AUDIT_LOGS_DEFAULT: ReadonlyArray<IAuditLogEntry> = [
     {
@@ -146,6 +102,12 @@ const AUDIT_LOGS_DEFAULT: ReadonlyArray<IAuditLogEntry> = [
     },
 ]
 
+/**
+ * Определяет цвет Chip по статусу биллинга.
+ *
+ * @param status - Статус биллинга.
+ * @returns Цвет для HeroUI Chip.
+ */
 function mapBillingStatusColor(
     status: TBillingStatus,
 ): "danger" | "success" | "warning" | "default" {
@@ -160,8 +122,14 @@ function mapBillingStatusColor(
     return "danger"
 }
 
+/**
+ * Определяет цвет Chip по роли участника.
+ *
+ * @param role - Роль участника.
+ * @returns Цвет для HeroUI Chip.
+ */
 function mapMemberRoleColor(
-    role: TMemberRole,
+    role: TOrgMemberRole,
 ): "danger" | "accent" | "success" | "warning" | "default" {
     if (role === "admin") {
         return "accent"
@@ -178,22 +146,22 @@ function mapMemberRoleColor(
     return "default"
 }
 
+/**
+ * Проверяет валидность email-адреса.
+ *
+ * @param value - Строка email для проверки.
+ * @returns true если email валиден.
+ */
 function isValidInviteEmail(value: string): boolean {
     return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value.trim())
 }
 
-function createInviteNameFromEmail(email: string): string {
-    const localPart = email.split("@")[0] ?? "new member"
-    const normalized = localPart
-        .split(/[._-]/g)
-        .map((item): string => item.trim())
-        .filter((item): boolean => item.length > 0)
-        .map((item): string => item[0]?.toUpperCase() + item.slice(1))
-        .join(" ")
-
-    return normalized.length > 0 ? normalized : "New Member"
-}
-
+/**
+ * Карточка профиля организации с формой редактирования.
+ *
+ * @param props - Свойства компонента.
+ * @returns Карточка с полями ввода и кнопкой сохранения.
+ */
 function OrganizationProfileCard(props: {
     readonly profile: IOrganizationProfile
     readonly onProfileChange: (nextProfile: IOrganizationProfile) => void
@@ -249,6 +217,12 @@ function OrganizationProfileCard(props: {
     )
 }
 
+/**
+ * Карточка биллинга с планом, метриками и действиями.
+ *
+ * @param props - Свойства компонента.
+ * @returns Карточка с данными биллинга.
+ */
 function BillingCard(props: {
     readonly billing: IBillingState
     readonly onPlanChange: (plan: TPlanName) => void
@@ -317,14 +291,20 @@ function BillingCard(props: {
     )
 }
 
+/**
+ * Карточка участников организации с приглашением и управлением ролями.
+ *
+ * @param props - Свойства компонента.
+ * @returns Карточка с таблицей участников.
+ */
 function MembersCard(props: {
-    readonly members: ReadonlyArray<IOrganizationMember>
+    readonly members: ReadonlyArray<IOrgMember>
     readonly inviteEmail: string
-    readonly inviteRole: TMemberRole
+    readonly inviteRole: TOrgMemberRole
     readonly onInviteEmailChange: (value: string) => void
-    readonly onInviteRoleChange: (value: TMemberRole) => void
+    readonly onInviteRoleChange: (value: TOrgMemberRole) => void
     readonly onInvite: () => void
-    readonly onRoleChange: (memberId: string, role: TMemberRole) => void
+    readonly onRoleChange: (memberId: string, role: TOrgMemberRole) => void
     readonly onRemoveMember: (memberId: string) => void
 }): ReactElement {
     const { t } = useTranslation(["settings"])
@@ -470,6 +450,12 @@ function MembersCard(props: {
     )
 }
 
+/**
+ * Карточка BYOK (Bring Your Own Key) с переключателями и ротацией.
+ *
+ * @param props - Свойства компонента.
+ * @returns Карточка с настройками BYOK.
+ */
 function ByokCard(props: {
     readonly byok: IByokState
     readonly onToggleGitToken: (value: boolean) => void
@@ -512,6 +498,12 @@ function ByokCard(props: {
     )
 }
 
+/**
+ * Карточка аудит-логов организации.
+ *
+ * @param props - Свойства компонента.
+ * @returns Карточка с таблицей аудит-логов.
+ */
 function AuditLogsCard(props: { readonly logs: ReadonlyArray<IAuditLogEntry> }): ReactElement {
     const { t } = useTranslation(["settings"])
 
@@ -576,15 +568,43 @@ function AuditLogsCard(props: { readonly logs: ReadonlyArray<IAuditLogEntry> }):
 /**
  * Страница настроек организации: профиль, billing, members, BYOK и audit logs.
  *
+ * Загружает данные через API (useOrganization hook) и предоставляет
+ * UI для управления профилем, биллингом и участниками.
+ *
  * @returns Organization settings UI.
  */
 export function SettingsOrganizationPage(): ReactElement {
     const { t } = useTranslation(["settings"])
-    const [profile, setProfile] = useState<IOrganizationProfile>(PROFILE_DEFAULT)
-    const [billing, setBilling] = useState<IBillingState>(BILLING_DEFAULT)
-    const [members, setMembers] = useState<ReadonlyArray<IOrganizationMember>>(MEMBERS_DEFAULT)
+    const {
+        profileQuery,
+        membersQuery,
+        billingQuery,
+        updateProfile,
+        inviteMember,
+        updateMemberRole,
+        removeMember,
+        updatePlan,
+    } = useOrganization()
+
+    const profile = profileQuery.data?.profile ?? {
+        name: "",
+        slug: "",
+        timezone: "",
+        domain: "",
+    }
+    const billing = billingQuery.data?.billing ?? {
+        plan: "starter" as TPlanName,
+        status: "trial" as TBillingStatus,
+        seatsUsed: 0,
+        seatsTotal: 0,
+        renewalAt: "",
+        paymentMethod: "",
+    }
+    const members = membersQuery.data?.members ?? []
+
+    const [editProfile, setEditProfile] = useState<IOrganizationProfile | undefined>(undefined)
     const [inviteEmail, setInviteEmail] = useState("")
-    const [inviteRole, setInviteRole] = useState<TMemberRole>("viewer")
+    const [inviteRole, setInviteRole] = useState<TOrgMemberRole>("viewer")
     const [byok, setByok] = useState<IByokState>({
         gitProviderTokenConfigured: true,
         llmKeyConfigured: true,
@@ -593,13 +613,33 @@ export function SettingsOrganizationPage(): ReactElement {
     const [billingError, setBillingError] = useState<string | undefined>(undefined)
     const auditLogs = useMemo((): ReadonlyArray<IAuditLogEntry> => AUDIT_LOGS_DEFAULT, [])
 
+    const displayProfile = editProfile ?? profile
+
+    const handleProfileChange = (nextProfile: IOrganizationProfile): void => {
+        setEditProfile(nextProfile)
+    }
+
     const handleSaveProfile = (): void => {
-        if (profile.name.trim().length === 0 || profile.slug.trim().length === 0) {
+        const targetProfile = editProfile ?? profile
+        if (targetProfile.name.trim().length === 0 || targetProfile.slug.trim().length === 0) {
             showToastError(t("settings:organization.toast.nameAndSlugRequired"))
             return
         }
 
-        showToastSuccess(t("settings:organization.toast.profileSaved"))
+        updateProfile.mutate(
+            {
+                name: targetProfile.name,
+                slug: targetProfile.slug,
+                timezone: targetProfile.timezone,
+                domain: targetProfile.domain,
+            },
+            {
+                onSuccess: (): void => {
+                    setEditProfile(undefined)
+                    showToastSuccess(t("settings:organization.toast.profileSaved"))
+                },
+            },
+        )
     }
 
     const handleInviteMember = (): void => {
@@ -609,52 +649,52 @@ export function SettingsOrganizationPage(): ReactElement {
             return
         }
 
-        const nextMember: IOrganizationMember = {
-            email: normalizedEmail,
-            id: `member-${String(members.length + 1)}`,
-            name: createInviteNameFromEmail(normalizedEmail),
-            role: inviteRole,
-        }
-        setMembers((previous): ReadonlyArray<IOrganizationMember> => [...previous, nextMember])
-        setInviteEmail("")
-        showToastSuccess(t("settings:organization.toast.invitationSent"))
+        inviteMember.mutate(
+            {
+                email: normalizedEmail,
+                role: inviteRole,
+            },
+            {
+                onSuccess: (): void => {
+                    setInviteEmail("")
+                    showToastSuccess(t("settings:organization.toast.invitationSent"))
+                },
+            },
+        )
     }
 
-    const handleMemberRoleChange = (memberId: string, role: TMemberRole): void => {
-        setMembers(
-            (previous): ReadonlyArray<IOrganizationMember> =>
-                previous.map((member): IOrganizationMember => {
-                    if (member.id !== memberId) {
-                        return member
-                    }
-
-                    return {
-                        ...member,
-                        role,
-                    }
-                }),
+    const handleMemberRoleChange = (memberId: string, role: TOrgMemberRole): void => {
+        updateMemberRole.mutate(
+            { memberId, role },
+            {
+                onSuccess: (): void => {
+                    showToastInfo(t("settings:organization.toast.memberRoleUpdated"))
+                },
+            },
         )
-        showToastInfo(t("settings:organization.toast.memberRoleUpdated"))
     }
 
     const handleRemoveMember = (memberId: string): void => {
-        setMembers(
-            (previous): ReadonlyArray<IOrganizationMember> =>
-                previous.filter((member): boolean => member.id !== memberId),
+        removeMember.mutate(
+            { memberId },
+            {
+                onSuccess: (): void => {
+                    showToastInfo(t("settings:organization.toast.memberRemoved"))
+                },
+            },
         )
-        showToastInfo(t("settings:organization.toast.memberRemoved"))
     }
 
     const handlePlanChange = (plan: TPlanName): void => {
-        setBilling(
-            (previous): IBillingState => ({
-                ...previous,
-                plan,
-                status: plan === "starter" ? "trial" : previous.status,
-            }),
+        updatePlan.mutate(
+            { plan },
+            {
+                onSuccess: (): void => {
+                    setBillingError(undefined)
+                    showToastSuccess(t("settings:organization.toast.billingPlanUpdated"))
+                },
+            },
         )
-        setBillingError(undefined)
-        showToastSuccess(t("settings:organization.toast.billingPlanUpdated"))
     }
 
     const handleRetryPayment = (): void => {
@@ -679,12 +719,6 @@ export function SettingsOrganizationPage(): ReactElement {
             return
         }
 
-        setBilling(
-            (previous): IBillingState => ({
-                ...previous,
-                status: "active",
-            }),
-        )
         setBillingError(undefined)
         showToastInfo(t("settings:organization.toast.criticalBillingActionConfirmed"))
     }
@@ -710,9 +744,9 @@ export function SettingsOrganizationPage(): ReactElement {
             {billingError === undefined ? null : <Alert color="danger">{billingError}</Alert>}
 
             <OrganizationProfileCard
-                onProfileChange={setProfile}
+                onProfileChange={handleProfileChange}
                 onSave={handleSaveProfile}
-                profile={profile}
+                profile={displayProfile}
             />
             <BillingCard
                 billing={billing}
