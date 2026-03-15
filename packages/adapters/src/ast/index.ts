@@ -100,6 +100,12 @@ export {
     type IAstBaseImportResolverErrorDetails,
 } from "./ast-base-import-resolver.error"
 export {
+    AST_TYPESCRIPT_IMPORT_RESOLVER_ERROR_CODE,
+    AstTypeScriptImportResolverError,
+    type AstTypeScriptImportResolverErrorCode,
+    type IAstTypeScriptImportResolverErrorDetails,
+} from "./ast-typescript-import-resolver.error"
+export {
     AST_BATCH_PROCESSING_ERROR_CODE,
     AstBatchProcessingError,
     type AstBatchProcessingErrorCode,
@@ -392,6 +398,12 @@ export {
     type IAstBaseImportResolverRetryPolicy,
     type IAstBaseNonRelativeImportResolutionInput,
 } from "./ast-base-import-resolver"
+export {
+    AstTypeScriptImportResolver,
+    type AstTypeScriptImportResolverReadDirectory,
+    type AstTypeScriptImportResolverReadFile,
+    type IAstTypeScriptImportResolverOptions,
+} from "./ast-typescript-import-resolver"
 export {
     AstBatchProcessingService,
     type AstBatchProcessingNow,
