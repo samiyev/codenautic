@@ -148,7 +148,7 @@ export function DataFreshnessPanel(props: IDataFreshnessPanelProps): ReactElemen
                             >
                                 {getFreshnessChipLabel(freshnessState, td)}
                             </Chip>
-                            <p className="text-xs text-text-secondary">
+                            <p className="text-xs text-muted">
                                 {td("common:freshness.lastUpdated", {
                                     time: formatRelativeTimestamp(props.lastUpdatedAt, td),
                                     absolute: formatAbsoluteTimestamp(props.lastUpdatedAt),
@@ -194,78 +194,78 @@ export function DataFreshnessPanel(props: IDataFreshnessPanelProps): ReactElemen
 
             <Modal isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                 <Modal.Backdrop>
-                <Modal.Container className="!items-stretch !justify-end !p-0">
-                <Modal.Dialog className="!m-0 !h-full !w-[min(92vw,420px)] !rounded-none bg-surface text-foreground">
-                    <div className="border-b border-border px-4 py-3">
-                        <h2 className={TYPOGRAPHY.sectionTitle}>
-                            {td("common:freshness.provenanceTitle")}
-                        </h2>
-                    </div>
-                    <div className="flex-1 overflow-y-auto space-y-3 px-4 py-3">
-                        <dl className="grid grid-cols-[130px_1fr] gap-x-2 gap-y-2 text-sm">
-                            <dt className="text-text-subtle">
-                                {td("common:freshness.provenanceSource")}
-                            </dt>
-                            <dd>{props.provenance.source}</dd>
-                            <dt className="text-text-subtle">
-                                {td("common:freshness.provenanceJobId")}
-                            </dt>
-                            <dd>{props.provenance.jobId}</dd>
-                            <dt className="text-text-subtle">
-                                {td("common:freshness.provenanceRepository")}
-                            </dt>
-                            <dd>{props.provenance.repository}</dd>
-                            <dt className="text-text-subtle">
-                                {td("common:freshness.provenanceBranch")}
-                            </dt>
-                            <dd>{props.provenance.branch}</dd>
-                            <dt className="text-text-subtle">
-                                {td("common:freshness.provenanceCommit")}
-                            </dt>
-                            <dd>{props.provenance.commit}</dd>
-                            <dt className="text-text-subtle">
-                                {td("common:freshness.provenanceDataWindow")}
-                            </dt>
-                            <dd>{props.provenance.dataWindow}</dd>
-                            <dt className="text-text-subtle">
-                                {td("common:freshness.provenancePartialData")}
-                            </dt>
-                            <dd>
-                                {props.provenance.isPartial
-                                    ? td("common:freshness.yes")
-                                    : td("common:freshness.no")}
-                            </dd>
-                            <dt className="text-text-subtle">
-                                {td("common:freshness.provenanceFailureFlags")}
-                            </dt>
-                            <dd>
-                                {props.provenance.hasFailures
-                                    ? td("common:freshness.present")
-                                    : td("common:freshness.none")}
-                            </dd>
-                        </dl>
-                        <div className="flex flex-wrap gap-2">
-                            <a
-                                className="inline-flex items-center rounded-lg border border-border px-3 py-1 text-sm"
-                                href={props.provenance.diagnosticsHref}
-                            >
-                                {td("common:freshness.openJobLogs")}
-                            </a>
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                onPress={(): void => {
-                                    if (props.onRescan !== undefined) {
-                                        props.onRescan()
-                                    }
-                                }}
-                            >
-                                {td("common:freshness.refreshRescan")}
-                            </Button>
-                        </div>
-                    </div>
-                </Modal.Dialog>
-                </Modal.Container>
+                    <Modal.Container className="!items-stretch !justify-end !p-0">
+                        <Modal.Dialog className="!m-0 !h-full !w-[min(92vw,420px)] !rounded-none bg-surface text-foreground">
+                            <div className="border-b border-border px-4 py-3">
+                                <h2 className={TYPOGRAPHY.sectionTitle}>
+                                    {td("common:freshness.provenanceTitle")}
+                                </h2>
+                            </div>
+                            <div className="flex-1 overflow-y-auto space-y-3 px-4 py-3">
+                                <dl className="grid grid-cols-[130px_1fr] gap-x-2 gap-y-2 text-sm">
+                                    <dt className="text-muted">
+                                        {td("common:freshness.provenanceSource")}
+                                    </dt>
+                                    <dd>{props.provenance.source}</dd>
+                                    <dt className="text-muted">
+                                        {td("common:freshness.provenanceJobId")}
+                                    </dt>
+                                    <dd>{props.provenance.jobId}</dd>
+                                    <dt className="text-muted">
+                                        {td("common:freshness.provenanceRepository")}
+                                    </dt>
+                                    <dd>{props.provenance.repository}</dd>
+                                    <dt className="text-muted">
+                                        {td("common:freshness.provenanceBranch")}
+                                    </dt>
+                                    <dd>{props.provenance.branch}</dd>
+                                    <dt className="text-muted">
+                                        {td("common:freshness.provenanceCommit")}
+                                    </dt>
+                                    <dd>{props.provenance.commit}</dd>
+                                    <dt className="text-muted">
+                                        {td("common:freshness.provenanceDataWindow")}
+                                    </dt>
+                                    <dd>{props.provenance.dataWindow}</dd>
+                                    <dt className="text-muted">
+                                        {td("common:freshness.provenancePartialData")}
+                                    </dt>
+                                    <dd>
+                                        {props.provenance.isPartial
+                                            ? td("common:freshness.yes")
+                                            : td("common:freshness.no")}
+                                    </dd>
+                                    <dt className="text-muted">
+                                        {td("common:freshness.provenanceFailureFlags")}
+                                    </dt>
+                                    <dd>
+                                        {props.provenance.hasFailures
+                                            ? td("common:freshness.present")
+                                            : td("common:freshness.none")}
+                                    </dd>
+                                </dl>
+                                <div className="flex flex-wrap gap-2">
+                                    <a
+                                        className="inline-flex items-center rounded-lg border border-border px-3 py-1 text-sm"
+                                        href={props.provenance.diagnosticsHref}
+                                    >
+                                        {td("common:freshness.openJobLogs")}
+                                    </a>
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onPress={(): void => {
+                                            if (props.onRescan !== undefined) {
+                                                props.onRescan()
+                                            }
+                                        }}
+                                    >
+                                        {td("common:freshness.refreshRescan")}
+                                    </Button>
+                                </div>
+                            </div>
+                        </Modal.Dialog>
+                    </Modal.Container>
                 </Modal.Backdrop>
             </Modal>
         </>

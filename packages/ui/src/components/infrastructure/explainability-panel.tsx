@@ -76,7 +76,7 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
                 <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="space-y-1">
                         <p className="text-sm font-semibold text-foreground">{props.title}</p>
-                        <p className="text-xs text-text-secondary">
+                        <p className="text-xs text-muted">
                             {`${props.signalLabel}: ${props.signalValue} · threshold ${props.threshold} · confidence ${props.confidence}`}
                         </p>
                     </div>
@@ -94,101 +94,105 @@ export function ExplainabilityPanel(props: IExplainabilityPanelProps): ReactElem
 
             <Modal isOpen={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
                 <Modal.Backdrop>
-                <Modal.Container className="!items-stretch !justify-end !p-0">
-                <Modal.Dialog className="!m-0 !h-full !w-[min(92vw,460px)] !rounded-none bg-surface text-foreground">
-                    <div className="border-b border-border px-4 py-3">
-                        <h2 className={TYPOGRAPHY.sectionTitle}>
-                            {t("common:explainabilityPanel.explainability")}
-                        </h2>
-                    </div>
-                    <div className="flex-1 overflow-y-auto space-y-3 px-4 py-3">
-                        <dl className="grid grid-cols-[130px_1fr] gap-x-2 gap-y-2 text-sm">
-                            <dt className="text-text-subtle">
-                                {t("common:explainabilityPanel.signal")}
-                            </dt>
-                            <dd>{`${props.signalLabel}: ${props.signalValue}`}</dd>
-                            <dt className="text-text-subtle">
-                                {t("common:explainabilityPanel.threshold")}
-                            </dt>
-                            <dd>{props.threshold}</dd>
-                            <dt className="text-text-subtle">
-                                {t("common:explainabilityPanel.confidence")}
-                            </dt>
-                            <dd>{props.confidence}</dd>
-                            <dt className="text-text-subtle">
-                                {t("common:explainabilityPanel.dataWindow")}
-                            </dt>
-                            <dd>{props.dataWindow}</dd>
-                        </dl>
+                    <Modal.Container className="!items-stretch !justify-end !p-0">
+                        <Modal.Dialog className="!m-0 !h-full !w-[min(92vw,460px)] !rounded-none bg-surface text-foreground">
+                            <div className="border-b border-border px-4 py-3">
+                                <h2 className={TYPOGRAPHY.sectionTitle}>
+                                    {t("common:explainabilityPanel.explainability")}
+                                </h2>
+                            </div>
+                            <div className="flex-1 overflow-y-auto space-y-3 px-4 py-3">
+                                <dl className="grid grid-cols-[130px_1fr] gap-x-2 gap-y-2 text-sm">
+                                    <dt className="text-muted">
+                                        {t("common:explainabilityPanel.signal")}
+                                    </dt>
+                                    <dd>{`${props.signalLabel}: ${props.signalValue}`}</dd>
+                                    <dt className="text-muted">
+                                        {t("common:explainabilityPanel.threshold")}
+                                    </dt>
+                                    <dd>{props.threshold}</dd>
+                                    <dt className="text-muted">
+                                        {t("common:explainabilityPanel.confidence")}
+                                    </dt>
+                                    <dd>{props.confidence}</dd>
+                                    <dt className="text-muted">
+                                        {t("common:explainabilityPanel.dataWindow")}
+                                    </dt>
+                                    <dd>{props.dataWindow}</dd>
+                                </dl>
 
-                        <section className="space-y-2">
-                            <p className="text-sm font-semibold text-foreground">
-                                {t("common:explainabilityPanel.topFactors")}
-                            </p>
-                            <ul
-                                aria-label={t("common:ariaLabel.explainabilityPanel.factors")}
-                                className="space-y-2"
-                            >
-                                {props.factors.map(
-                                    (factor): ReactElement => (
-                                        <li
-                                            className="rounded-lg border border-border bg-surface px-3 py-2"
-                                            key={factor.label}
-                                        >
-                                            <p className="text-sm font-semibold text-foreground">
-                                                {factor.label}
-                                            </p>
-                                            <p className="text-xs text-text-secondary">
-                                                {formatImpactLabel(factor.impact, td)}
-                                            </p>
-                                            <p className="text-sm text-text-tertiary">
-                                                {factor.value}
-                                            </p>
-                                        </li>
-                                    ),
-                                )}
-                            </ul>
-                        </section>
+                                <section className="space-y-2">
+                                    <p className="text-sm font-semibold text-foreground">
+                                        {t("common:explainabilityPanel.topFactors")}
+                                    </p>
+                                    <ul
+                                        aria-label={t(
+                                            "common:ariaLabel.explainabilityPanel.factors",
+                                        )}
+                                        className="space-y-2"
+                                    >
+                                        {props.factors.map(
+                                            (factor): ReactElement => (
+                                                <li
+                                                    className="rounded-lg border border-border bg-surface px-3 py-2"
+                                                    key={factor.label}
+                                                >
+                                                    <p className="text-sm font-semibold text-foreground">
+                                                        {factor.label}
+                                                    </p>
+                                                    <p className="text-xs text-muted">
+                                                        {formatImpactLabel(factor.impact, td)}
+                                                    </p>
+                                                    <p className="text-sm text-muted">
+                                                        {factor.value}
+                                                    </p>
+                                                </li>
+                                            ),
+                                        )}
+                                    </ul>
+                                </section>
 
-                        <section className="space-y-2">
-                            <p className="text-sm font-semibold text-foreground">
-                                {t("common:explainabilityPanel.knownLimitations")}
-                            </p>
-                            <ul
-                                aria-label={t("common:ariaLabel.explainabilityPanel.limitations")}
-                                className="list-disc space-y-1 pl-5 text-sm text-text-tertiary"
-                            >
-                                {props.limitations.map(
-                                    (limitation): ReactElement => (
-                                        <li key={limitation}>{limitation}</li>
-                                    ),
-                                )}
-                            </ul>
-                        </section>
+                                <section className="space-y-2">
+                                    <p className="text-sm font-semibold text-foreground">
+                                        {t("common:explainabilityPanel.knownLimitations")}
+                                    </p>
+                                    <ul
+                                        aria-label={t(
+                                            "common:ariaLabel.explainabilityPanel.limitations",
+                                        )}
+                                        className="list-disc space-y-1 pl-5 text-sm text-muted"
+                                    >
+                                        {props.limitations.map(
+                                            (limitation): ReactElement => (
+                                                <li key={limitation}>{limitation}</li>
+                                            ),
+                                        )}
+                                    </ul>
+                                </section>
 
-                        <section className="space-y-2">
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                onPress={(): void => {
-                                    setSnippet(exportSnippet)
-                                }}
-                            >
-                                {t("common:explainabilityPanel.exportSnippet")}
-                            </Button>
-                            {snippet.length > 0 ? (
-                                <TextArea
-                                    readOnly
-                                    aria-label={t(
-                                        "common:ariaLabel.explainabilityPanel.exportSnippet",
-                                    )}
-                                    value={snippet}
-                                />
-                            ) : null}
-                        </section>
-                    </div>
-                </Modal.Dialog>
-                </Modal.Container>
+                                <section className="space-y-2">
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onPress={(): void => {
+                                            setSnippet(exportSnippet)
+                                        }}
+                                    >
+                                        {t("common:explainabilityPanel.exportSnippet")}
+                                    </Button>
+                                    {snippet.length > 0 ? (
+                                        <TextArea
+                                            readOnly
+                                            aria-label={t(
+                                                "common:ariaLabel.explainabilityPanel.exportSnippet",
+                                            )}
+                                            value={snippet}
+                                        />
+                                    ) : null}
+                                </section>
+                            </div>
+                        </Modal.Dialog>
+                    </Modal.Container>
                 </Modal.Backdrop>
             </Modal>
         </>
