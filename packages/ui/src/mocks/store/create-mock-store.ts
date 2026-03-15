@@ -23,6 +23,9 @@ import {
     seedWebhooks,
     seedTokenUsage,
     seedAuditLogs,
+    seedAdoptionAnalytics,
+    seedProviderStatus,
+    seedScanProgress,
 } from "./seed"
 
 /**
@@ -63,6 +66,9 @@ export function createMockStore(): MockStore {
     seedBilling(store.billing)
     seedTokenUsage(store.tokenUsage)
     seedAuditLogs(store.auditLogs)
+    seedAdoptionAnalytics(store.adoptionAnalytics)
+    seedProviderStatus(store.providerStatus)
+    seedScanProgress(store.scanProgress)
     return store
 }
 
@@ -113,5 +119,8 @@ export function resetMockStore(): void {
         seedBilling(instance.billing)
         seedTokenUsage(instance.tokenUsage)
         seedAuditLogs(instance.auditLogs)
+        seedAdoptionAnalytics(instance.adoptionAnalytics)
+        seedProviderStatus(instance.providerStatus)
+        seedScanProgress(instance.scanProgress)
     }
 }
