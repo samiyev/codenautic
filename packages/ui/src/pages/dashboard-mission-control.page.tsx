@@ -225,50 +225,59 @@ export function DashboardMissionControlPage(): ReactElement {
     const [freshnessActionMessage, setFreshnessActionMessage] = useState<string>("")
     const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false)
     const [isPersonalizationOpen, setIsPersonalizationOpen] = useState<boolean>(true)
-    const [mockModule, setMockModule] = useState<TMockDataModule | null>(null)
 
-    useEffect((): void => {
-        void import("./dashboard-mock-data").then(setMockModule)
-    }, [])
+    const {
+        metricsQuery,
+        statusDistributionQuery,
+        teamActivityQuery,
+        flowMetricsQuery,
+        tokenUsageQuery,
+        workQueueQuery,
+        timelineQuery,
+    } = useDashboard({ range })
 
-    const metrics = useMemo(
-        () => (mockModule !== null ? mockModule.getDashboardMetrics(range) : []),
-        [mockModule, range],
-    )
-    const statusDistribution = useMemo(
-        () => (mockModule !== null ? mockModule.getStatusDistribution(range) : []),
-        [mockModule, range],
-    )
+    const isLoading =
+        metricsQuery.isLoading ||
+        statusDistributionQuery.isLoading ||
+        teamActivityQuery.isLoading ||
+        flowMetricsQuery.isLoading ||
+        tokenUsageQuery.isLoading ||
+        workQueueQuery.isLoading ||
+        timelineQuery.isLoading
+
+    const metrics = metricsQuery.data?.metrics ?? []
+    const statusDistribution = statusDistributionQuery.data?.points ?? []
+    const teamActivity = teamActivityQuery.data?.points ?? []
+    const flowMetrics = flowMetricsQuery.data?.points ?? []
+    const tokenUsageByModel = tokenUsageQuery.data?.byModel ?? []
+    const tokenUsageTrend = tokenUsageQuery.data?.costTrend ?? []
+    const workQueueEntries = workQueueQuery.data?.entries ?? []
+    const timelineEntries = timelineQuery.data?.entries ?? []
+
     const opsBanner = useMemo(
-        () =>
-            mockModule !== null
-                ? mockModule.getOpsBanner(range)
-                : { isDegraded: false, message: "" },
-        [mockModule, range],
+        (): { readonly isDegraded: boolean } => ({
+            isDegraded: range !== "1d",
+        }),
+        [range],
     )
-    const teamActivity = useMemo(
-        () => (mockModule !== null ? mockModule.getTeamActivity(range) : []),
-        [mockModule, range],
-    )
-    const flowMetrics = useMemo(
-        () => (mockModule !== null ? mockModule.getFlowMetrics(range) : []),
-        [mockModule, range],
-    )
-    const tokenUsageByModel = useMemo(
-        () => (mockModule !== null ? mockModule.getTokenUsageByModel(range) : []),
-        [mockModule, range],
-    )
-    const tokenUsageTrend = useMemo(
-        () => (mockModule !== null ? mockModule.getTokenUsageTrend(range) : []),
-        [mockModule, range],
-    )
-    const architectureHealth = useMemo(
-        () =>
-            mockModule !== null
-                ? mockModule.getArchitectureHealth(range)
-                : { dddCompliance: 0, healthScore: 0, layerViolations: 0 },
-        [mockModule, range],
-    )
+
+    const architectureHealth = useMemo((): {
+        readonly dddCompliance: number
+        readonly healthScore: number
+        readonly layerViolations: number
+    } => {
+        if (range === "1d") {
+            return { dddCompliance: 86, healthScore: 78, layerViolations: 3 }
+        }
+        if (range === "30d") {
+            return { dddCompliance: 83, healthScore: 74, layerViolations: 6 }
+        }
+        if (range === "90d") {
+            return { dddCompliance: 79, healthScore: 69, layerViolations: 9 }
+        }
+        return { dddCompliance: 85, healthScore: 76, layerViolations: 5 }
+    }, [range])
+
     const provenance = useMemo(
         (): IProvenanceContext => ({
             branch: "main",
@@ -315,7 +324,7 @@ export function DashboardMissionControlPage(): ReactElement {
         setIsFiltersOpen((prev): boolean => !prev)
     }, [])
 
-    if (mockModule === null) {
+    if (isLoading) {
         return <DashboardLoadingSkeleton />
     }
 
@@ -478,8 +487,8 @@ export function DashboardMissionControlPage(): ReactElement {
                 <Suspense fallback={<DashboardLoadingSkeleton />}>
                     <DashboardContent
                         statusDistribution={statusDistribution}
-                        timeline={mockModule.TIMELINE_ENTRIES}
-                        workQueue={mockModule.WORK_QUEUE_ENTRIES}
+                        timeline={timelineEntries}
+                        workQueue={workQueueEntries}
                     />
                 </Suspense>
             </DashboardZone>
