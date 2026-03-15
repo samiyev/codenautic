@@ -1,9 +1,10 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
 
+import { Link } from "@tanstack/react-router"
+
 import { Table } from "@heroui/react"
-import { StyledLink } from "@/components/layout/styled-link"
-import { TYPOGRAPHY } from "@/lib/constants/typography"
+import { LINK_CLASSES, TYPOGRAPHY } from "@/lib/constants/typography"
 import { type TReviewStatus } from "@/lib/types/ccr-types"
 import { ReviewStatusBadge } from "./review-status-badge"
 
@@ -70,13 +71,13 @@ export function ReviewsTable(props: IReviewsTableProps): ReactElement {
                                 (row): ReactElement => (
                                     <Table.Row key={row.id}>
                                         <Table.Cell>
-                                            <StyledLink
-                                                className={TYPOGRAPHY.cardTitle}
+                                            <Link
+                                                className={`${LINK_CLASSES} ${TYPOGRAPHY.cardTitle}`}
                                                 params={{ reviewId: row.id }}
                                                 to="/reviews/$reviewId"
                                             >
                                                 {row.id}
-                                            </StyledLink>
+                                            </Link>
                                         </Table.Cell>
                                         <Table.Cell>{row.title}</Table.Cell>
                                         <Table.Cell>{row.repository}</Table.Cell>
