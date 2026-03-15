@@ -330,4 +330,23 @@ export const queryKeys = {
             return ["dashboard", "timeline"] as const
         },
     },
+    adoptionAnalytics: {
+        all: (): readonly ["adoption-analytics"] => ["adoption-analytics"] as const,
+        byRange: (
+            range: string,
+        ): readonly ["adoption-analytics", "by-range", string] => {
+            return ["adoption-analytics", "by-range", range] as const
+        },
+    },
+    providerStatus: {
+        all: (): readonly ["provider-status"] => ["provider-status"] as const,
+    },
+    scanProgress: {
+        all: (): readonly ["scan-progress"] => ["scan-progress"] as const,
+        byJobId: (
+            jobId: string,
+        ): readonly ["scan-progress", "by-job-id", string] => {
+            return ["scan-progress", "by-job-id", jobId] as const
+        },
+    },
 }
