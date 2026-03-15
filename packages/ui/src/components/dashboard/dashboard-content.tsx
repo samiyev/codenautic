@@ -2,11 +2,11 @@ import type { ReactElement } from "react"
 import { motion } from "motion/react"
 import { AlertTriangle, ChevronRight } from "@/components/icons/app-icons"
 
+import { Link, type LinkProps } from "@tanstack/react-router"
+
 import { Card, CardContent, CardHeader } from "@heroui/react"
-import { StyledLink, type IStyledLinkProps } from "@/components/layout/styled-link"
-import { StaggerContainer, STAGGER_ITEM_VARIANTS } from "@/lib/motion"
-import { EmptyState } from "@/components/states/empty-state"
-import { TYPOGRAPHY } from "@/lib/constants/typography"
+import { STAGGER_ITEM_VARIANTS } from "@/lib/motion"
+import { LINK_CLASSES, TYPOGRAPHY } from "@/lib/constants/typography"
 import { ActivityTimeline, type IActivityTimelineEntry } from "./activity-timeline"
 import { StatusDistributionChart, type IStatusDistributionPoint } from "./status-distribution-chart"
 
@@ -23,7 +23,7 @@ export interface IWorkQueueItem {
     /** Название очереди или задачи. */
     readonly title: string
     /** Направление для deep-link (должно совпадать с зарегистрированным маршрутом). */
-    readonly route: IStyledLinkProps["to"]
+    readonly route: LinkProps["to"]
     /** Поддерживающий текст. */
     readonly description: string
 }
@@ -77,18 +77,30 @@ export function DashboardContent(props: IDashboardContentProps): ReactElement {
                             </div>
                         ) : null}
                         {props.workQueue.length === 0 ? (
-                            <EmptyState
-                                description="No items in the work queue right now."
-                                title="Queue is empty"
-                            />
+                            <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                                <h3 className={TYPOGRAPHY.subsectionTitle}>Queue is empty</h3>
+                                <p className="max-w-sm text-sm text-muted">No items in the work queue right now.</p>
+                            </div>
                         ) : (
-                            <StaggerContainer ariaLabel="Work queue" as="ul" className="space-y-2">
+                            <motion.ul
+                                animate="visible"
+                                aria-label="Work queue"
+                                className="space-y-2"
+                                initial="hidden"
+                                variants={{
+                                    hidden: { opacity: 0 },
+                                    visible: {
+                                        opacity: 1,
+                                        transition: { staggerChildren: 0.06 },
+                                    },
+                                }}
+                            >
                                 {props.workQueue.map(
                                     (item): ReactElement => (
                                         <WorkQueueCard key={item.id} item={item} />
                                     ),
                                 )}
-                            </StaggerContainer>
+                            </motion.ul>
                         )}
                     </CardContent>
                 </Card>
@@ -132,13 +144,13 @@ function WorkQueueCard(props: IWorkQueueCardProps): ReactElement {
             <div className="min-w-0 flex-1">
                 <p className={TYPOGRAPHY.cardTitle}>{item.title}</p>
                 <p className="mt-0.5 text-sm text-muted">{item.description}</p>
-                <StyledLink
-                    className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-accent transition-colors hover:text-accent/80"
+                <Link
+                    className={`${LINK_CLASSES} mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-accent transition-colors hover:text-accent/80`}
                     to={item.route}
                 >
                     Open {item.id}
                     <ChevronRight aria-hidden="true" className="h-3 w-3" />
-                </StyledLink>
+                </Link>
             </div>
         </motion.li>
     )
