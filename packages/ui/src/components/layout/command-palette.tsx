@@ -5,21 +5,17 @@ import {
     useCallback,
     useEffect,
     useMemo,
-    useRef,
     useState,
 } from "react"
 import { useTranslation } from "react-i18next"
+import { Command } from "cmdk"
 import { AnimatePresence, motion } from "motion/react"
 
 import { useDynamicTranslation } from "@/lib/i18n"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { DURATION, EASING, useReducedMotion } from "@/lib/motion"
 
-import type {
-    ICommandPaletteGroupSection,
-    ICommandPaletteItem,
-    TCommandPaletteGroup,
-} from "./command-palette.constants"
+import type { ICommandPaletteItem, TCommandPaletteGroup } from "./command-palette.constants"
 import {
     COMMAND_PALETTE_PINNED_STORAGE_KEY,
     COMMAND_PALETTE_RECENT_STORAGE_KEY,
@@ -27,8 +23,6 @@ import {
 } from "./command-palette.constants"
 import {
     createCommandPaletteItems,
-    createCommandPaletteOptionId,
-    groupCommandPaletteItems,
     readStringArrayFromStorage,
     sortByReferenceOrder,
     writeStringArrayToStorage,
@@ -61,27 +55,36 @@ export interface ICommandPaletteProps {
 }
 
 /**
+ * Ordered group keys for consistent section rendering.
+ */
+const GROUP_ORDER: ReadonlyArray<TCommandPaletteGroup> = [
+    "actions",
+    "ccrs",
+    "issues",
+    "repos",
+    "reports",
+    "settings",
+    "general",
+]
+
+/**
  * Global command palette with search, pin, recents, and keyboard navigation.
- * Extracts the full command palette UI from Header into a standalone component.
+ * Built on cmdk for automatic fuzzy search, keyboard navigation, and accessibility.
  *
  * @param props Configuration.
  * @returns Command palette modal overlay.
  */
 export function CommandPalette(props: ICommandPaletteProps): ReactElement | null {
     const { t } = useTranslation(["navigation"])
-    const [query, setQuery] = useState("")
-    const [activeIndex, setActiveIndex] = useState(0)
+    const { td } = useDynamicTranslation(["navigation"])
+    const prefersReducedMotion = useReducedMotion()
+
     const [recentCommands, setRecentCommands] = useState<ReadonlyArray<string>>(() => {
         return readStringArrayFromStorage(COMMAND_PALETTE_RECENT_STORAGE_KEY)
     })
     const [pinnedCommands, setPinnedCommands] = useState<ReadonlyArray<string>>(() => {
         return readStringArrayFromStorage(COMMAND_PALETTE_PINNED_STORAGE_KEY)
     })
-    const inputRef = useRef<HTMLInputElement | null>(null)
-    const dialogRef = useRef<HTMLDivElement | null>(null)
-    const prefersReducedMotion = useReducedMotion()
-
-    const { td } = useDynamicTranslation(["navigation"])
 
     const translateCommandLabel = useMemo(
         () =>
@@ -90,10 +93,8 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
         [td],
     )
 
-    const translateGroupLabel = useMemo(
-        () =>
-            (group: TCommandPaletteGroup): string =>
-                td(`navigation:commandPalette.group.${group}`),
+    const translateGroupLabel = useCallback(
+        (group: TCommandPaletteGroup): string => td(`navigation:commandPalette.group.${group}`),
         [td],
     )
 
@@ -101,21 +102,16 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
         return createCommandPaletteItems(props.routes, translateCommandLabel)
     }, [props.routes, translateCommandLabel])
 
-    const filteredItems = useMemo((): ReadonlyArray<ICommandPaletteItem> => {
-        const normalizedQuery = query.trim().toLowerCase()
-        const searchedItems =
-            normalizedQuery.length === 0
-                ? allItems
-                : allItems.filter((item): boolean => {
-                      const searchable = `${item.label} ${item.path} ${item.keywords}`.toLowerCase()
-                      return searchable.includes(normalizedQuery)
-                  })
-        const pinned = sortByReferenceOrder(
-            searchedItems.filter((item): boolean => pinnedCommands.includes(item.path)),
+    const pinnedItems = useMemo((): ReadonlyArray<ICommandPaletteItem> => {
+        return sortByReferenceOrder(
+            allItems.filter((item): boolean => pinnedCommands.includes(item.path)),
             pinnedCommands,
         )
-        const recent = sortByReferenceOrder(
-            searchedItems.filter((item): boolean => {
+    }, [allItems, pinnedCommands])
+
+    const recentItems = useMemo((): ReadonlyArray<ICommandPaletteItem> => {
+        return sortByReferenceOrder(
+            allItems.filter((item): boolean => {
                 return (
                     recentCommands.includes(item.path) &&
                     pinnedCommands.includes(item.path) === false
@@ -123,155 +119,164 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
             }),
             recentCommands,
         )
-        const baseline = searchedItems.filter((item): boolean => {
-            return (
-                pinnedCommands.includes(item.path) === false &&
-                recentCommands.includes(item.path) === false
-            )
+    }, [allItems, recentCommands, pinnedCommands])
+
+    const baselineItems = useMemo((): ReadonlyArray<ICommandPaletteItem> => {
+        return [...allItems]
+            .filter((item): boolean => {
+                return (
+                    pinnedCommands.includes(item.path) === false &&
+                    recentCommands.includes(item.path) === false
+                )
+            })
+            .sort((left, right): number => left.label.localeCompare(right.label))
+    }, [allItems, pinnedCommands, recentCommands])
+
+    /**
+     * Groups baseline items by their group category for rendering as Command.Group sections.
+     */
+    const groupedBaseline = useMemo((): ReadonlyArray<{
+        readonly group: TCommandPaletteGroup
+        readonly items: ReadonlyArray<ICommandPaletteItem>
+    }> => {
+        const map = new Map<TCommandPaletteGroup, ICommandPaletteItem[]>()
+
+        baselineItems.forEach((item): void => {
+            const existing = map.get(item.group)
+            if (existing === undefined) {
+                map.set(item.group, [item])
+                return
+            }
+            existing.push(item)
         })
-        const sortedBaseline = [...baseline].sort((left, right): number => {
-            return left.label.localeCompare(right.label)
-        })
 
-        return [...pinned, ...recent, ...sortedBaseline]
-    }, [allItems, query, pinnedCommands, recentCommands])
-
-    const groupedItems = useMemo((): ReadonlyArray<ICommandPaletteGroupSection> => {
-        return groupCommandPaletteItems(filteredItems)
-    }, [filteredItems])
-
-    const registerRecentCommand = (path: string): void => {
-        const nextRecent = [path, ...recentCommands.filter((item): boolean => item !== path)].slice(
-            0,
-            MAX_RECENT_COMMANDS,
+        return GROUP_ORDER.filter((group): boolean => map.has(group)).map(
+            (group): {
+                readonly group: TCommandPaletteGroup
+                readonly items: ReadonlyArray<ICommandPaletteItem>
+            } => ({
+                group,
+                items: map.get(group) ?? [],
+            }),
         )
-        setRecentCommands(nextRecent)
-        writeStringArrayToStorage(COMMAND_PALETTE_RECENT_STORAGE_KEY, nextRecent)
-    }
+    }, [baselineItems])
 
-    const restoreFocus = (): void => {
+    const registerRecentCommand = useCallback(
+        (path: string): void => {
+            const nextRecent = [
+                path,
+                ...recentCommands.filter((item): boolean => item !== path),
+            ].slice(0, MAX_RECENT_COMMANDS)
+            setRecentCommands(nextRecent)
+            writeStringArrayToStorage(COMMAND_PALETTE_RECENT_STORAGE_KEY, nextRecent)
+        },
+        [recentCommands],
+    )
+
+    const restoreFocus = useCallback((): void => {
         if (typeof window !== "undefined") {
             window.requestAnimationFrame((): void => {
                 props.invokerRef?.current?.focus()
             })
         }
-    }
+    }, [props.invokerRef])
 
-    const handleClose = (): void => {
+    const handleClose = useCallback((): void => {
         props.onClose()
         restoreFocus()
-    }
+    }, [props.onClose, restoreFocus])
 
-    const handleSelection = (item: ICommandPaletteItem): void => {
-        props.onNavigate(item.path)
-        registerRecentCommand(item.path)
-        handleClose()
-    }
+    const handleSelection = useCallback(
+        (item: ICommandPaletteItem): void => {
+            props.onNavigate(item.path)
+            registerRecentCommand(item.path)
+            handleClose()
+        },
+        [props.onNavigate, registerRecentCommand, handleClose],
+    )
 
-    const togglePinned = (path: string): void => {
-        const nextPinned = pinnedCommands.includes(path)
-            ? pinnedCommands.filter((item): boolean => item !== path)
-            : [path, ...pinnedCommands]
-        setPinnedCommands(nextPinned)
-        writeStringArrayToStorage(COMMAND_PALETTE_PINNED_STORAGE_KEY, nextPinned)
-    }
+    const togglePinned = useCallback(
+        (path: string): void => {
+            const nextPinned = pinnedCommands.includes(path)
+                ? pinnedCommands.filter((item): boolean => item !== path)
+                : [path, ...pinnedCommands]
+            setPinnedCommands(nextPinned)
+            writeStringArrayToStorage(COMMAND_PALETTE_PINNED_STORAGE_KEY, nextPinned)
+        },
+        [pinnedCommands],
+    )
 
     useEffect((): void => {
         if (props.isOpen !== true) {
             return
         }
 
-        setQuery("")
-        setActiveIndex(0)
-        inputRef.current?.focus()
+        setRecentCommands(readStringArrayFromStorage(COMMAND_PALETTE_RECENT_STORAGE_KEY))
+        setPinnedCommands(readStringArrayFromStorage(COMMAND_PALETTE_PINNED_STORAGE_KEY))
     }, [props.isOpen])
 
-    useEffect((): void => {
-        if (activeIndex < filteredItems.length) {
-            return
-        }
+    /**
+     * Renders a single command item row with select and pin buttons.
+     */
+    const renderItem = useCallback(
+        (item: ICommandPaletteItem): ReactElement => {
+            const isPinned = pinnedCommands.includes(item.path)
 
-        setActiveIndex(0)
-    }, [activeIndex, filteredItems.length])
+            return (
+                <Command.Item
+                    key={item.id}
+                    keywords={[item.keywords]}
+                    value={`${item.label} ${item.path} ${item.keywords}`}
+                    onSelect={(): void => {
+                        handleSelection(item)
+                    }}
+                >
+                    <div className="grid w-full grid-cols-[1fr_auto] items-center gap-2">
+                        <div className="text-left text-foreground">
+                            <span className="font-medium">{item.label}</span>
+                            <span className={`ml-2 ${TYPOGRAPHY.microHint}`}>{item.path}</span>
+                        </div>
+                        <button
+                            aria-label={`${isPinned ? t("navigation:commandPalette.pinned") : t("navigation:commandPalette.pin")} ${item.label}`}
+                            className="rounded border border-border px-2 py-1 text-[11px] text-muted transition-colors duration-150 hover:bg-surface-secondary"
+                            type="button"
+                            onClick={(event): void => {
+                                event.stopPropagation()
+                                togglePinned(item.path)
+                            }}
+                            onKeyDown={(event): void => {
+                                event.stopPropagation()
+                            }}
+                        >
+                            {isPinned
+                                ? t("navigation:commandPalette.pinned")
+                                : t("navigation:commandPalette.pin")}
+                        </button>
+                    </div>
+                </Command.Item>
+            )
+        },
+        [pinnedCommands, handleSelection, togglePinned, t],
+    )
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
-        if (event.key === "ArrowDown") {
-            event.preventDefault()
-            if (filteredItems.length === 0) {
-                return
+    /**
+     * Handles Escape key on the dialog overlay to close the palette.
+     */
+    const handleDialogKeyDown = useCallback(
+        (event: ReactKeyboardEvent<HTMLDivElement>): void => {
+            if (event.key === "Escape") {
+                event.preventDefault()
+                handleClose()
             }
-            setActiveIndex((prev): number => (prev + 1) % filteredItems.length)
-            return
-        }
-        if (event.key === "ArrowUp") {
-            event.preventDefault()
-            if (filteredItems.length === 0) {
-                return
-            }
-            setActiveIndex((prev): number => {
-                const next = prev - 1
-                if (next >= 0) {
-                    return next
-                }
-                return filteredItems.length - 1
-            })
-            return
-        }
-        if (event.key === "Escape") {
-            event.preventDefault()
-            handleClose()
-            return
-        }
-        if (event.key !== "Enter") {
-            return
-        }
-
-        event.preventDefault()
-        const target = filteredItems[activeIndex]
-        if (target === undefined) {
-            return
-        }
-
-        handleSelection(target)
-    }
-
-    const handleDialogKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>): void => {
-        if (event.key !== "Tab" || dialogRef.current === null) {
-            return
-        }
-
-        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
-            'input, button, [tabindex]:not([tabindex="-1"])',
-        )
-        if (focusable.length === 0) {
-            return
-        }
-
-        const first = focusable[0]
-        const last = focusable[focusable.length - 1]
-
-        if (first === undefined || last === undefined) {
-            return
-        }
-
-        if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault()
-            last.focus()
-            return
-        }
-
-        if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault()
-            first.focus()
-        }
-    }, [])
+        },
+        [handleClose],
+    )
 
     const paletteContent = (
         <div
             aria-label={t("navigation:ariaLabel.commandPalette.globalPalette")}
             aria-modal="true"
             className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16"
-            ref={dialogRef}
             role="dialog"
             onKeyDown={handleDialogKeyDown}
         >
@@ -282,110 +287,52 @@ export function CommandPalette(props: ICommandPaletteProps): ReactElement | null
                 onClick={handleClose}
             />
             <div className="relative z-10 w-full max-w-2xl rounded-xl border border-border bg-surface p-3 shadow-2xl">
-                <input
-                    aria-activedescendant={
-                        filteredItems[activeIndex] === undefined
-                            ? undefined
-                            : createCommandPaletteOptionId(
-                                  filteredItems[activeIndex].id,
-                                  activeIndex,
-                              )
-                    }
-                    aria-autocomplete="list"
-                    aria-controls="header-command-palette-results"
-                    aria-expanded={filteredItems.length > 0}
-                    aria-label={t("navigation:ariaLabel.commandPalette.searchInput")}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
-                    placeholder={t("navigation:commandPalette.placeholder")}
-                    ref={inputRef}
-                    role="combobox"
-                    type="text"
-                    value={query}
-                    onChange={(event): void => {
-                        setQuery(event.currentTarget.value)
-                        setActiveIndex(0)
-                    }}
-                    onKeyDown={handleKeyDown}
-                />
-                <div
-                    aria-label={t("navigation:ariaLabel.commandPalette.results")}
-                    className="mt-3 max-h-[60vh] overflow-y-auto rounded-lg border border-border"
-                    id="header-command-palette-results"
-                    role="listbox"
+                <Command
+                    className="flex flex-col"
+                    label={t("navigation:ariaLabel.commandPalette.globalPalette")}
                 >
-                    {filteredItems.length === 0 ? (
-                        <p className="px-3 py-4 text-sm text-muted">
-                            {t("navigation:commandPalette.noResults")}
-                        </p>
-                    ) : (
-                        groupedItems.map(
-                            (section): ReactElement => (
-                                <div
-                                    key={section.group}
-                                    className="border-b border-border last:border-b-0"
-                                >
-                                    <p className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted">
-                                        {translateGroupLabel(section.group)}
-                                    </p>
-                                    {section.items.map((item): ReactElement => {
-                                        const itemIndex = filteredItems.findIndex(
-                                            (candidate): boolean => candidate.id === item.id,
-                                        )
-                                        const isActive = itemIndex === activeIndex
-                                        const isPinned = pinnedCommands.includes(item.path)
+                    <Command.Input
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+                        placeholder={t("navigation:commandPalette.placeholder")}
+                    />
+                    <Command.List className="mt-3 max-h-[60vh] overflow-y-auto rounded-lg border border-border [&_[cmdk-item]]:px-3 [&_[cmdk-item]]:py-2 [&_[cmdk-item]]:text-sm [&_[cmdk-item]]:transition-colors [&_[cmdk-item]]:duration-150 [&_[cmdk-item][data-selected=true]]:bg-accent/10 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.08em] [&_[cmdk-group-heading]]:text-muted [&_[cmdk-group]:not(:last-child)]:border-b [&_[cmdk-group]:not(:last-child)]:border-border">
+                        <Command.Empty>
+                            <p className="px-3 py-4 text-sm text-muted">
+                                {t("navigation:commandPalette.noResults")}
+                            </p>
+                        </Command.Empty>
 
-                                        return (
-                                            <div
-                                                key={item.id}
-                                                aria-selected={isActive}
-                                                className={`grid grid-cols-[1fr_auto] items-center gap-2 px-3 py-2 text-sm transition-colors duration-150 ${
-                                                    isActive ? "bg-accent/10" : "bg-transparent"
-                                                }`}
-                                                id={createCommandPaletteOptionId(
-                                                    item.id,
-                                                    itemIndex,
-                                                )}
-                                                role="option"
-                                            >
-                                                <button
-                                                    className="text-left text-foreground"
-                                                    type="button"
-                                                    onClick={(): void => {
-                                                        handleSelection(item)
-                                                    }}
-                                                    onMouseEnter={(): void => {
-                                                        setActiveIndex(itemIndex)
-                                                    }}
-                                                >
-                                                    <span className="font-medium">
-                                                        {item.label}
-                                                    </span>
-                                                    <span
-                                                        className={`ml-2 ${TYPOGRAPHY.microHint}`}
-                                                    >
-                                                        {item.path}
-                                                    </span>
-                                                </button>
-                                                <button
-                                                    aria-label={`${isPinned ? t("navigation:commandPalette.pinned") : t("navigation:commandPalette.pin")} ${item.label}`}
-                                                    className="rounded border border-border px-2 py-1 text-[11px] text-muted transition-colors duration-150 hover:bg-surface-secondary"
-                                                    type="button"
-                                                    onClick={(): void => {
-                                                        togglePinned(item.path)
-                                                    }}
-                                                >
-                                                    {isPinned
-                                                        ? t("navigation:commandPalette.pinned")
-                                                        : t("navigation:commandPalette.pin")}
-                                                </button>
-                                            </div>
-                                        )
-                                    })}
-                                </div>
+                        {pinnedItems.length > 0 ? (
+                            <Command.Group
+                                heading={translateGroupLabel("actions")}
+                                value="pinned"
+                            >
+                                {pinnedItems.map(renderItem)}
+                            </Command.Group>
+                        ) : null}
+
+                        {recentItems.length > 0 ? (
+                            <Command.Group
+                                heading={translateGroupLabel("general")}
+                                value="recent"
+                            >
+                                {recentItems.map(renderItem)}
+                            </Command.Group>
+                        ) : null}
+
+                        {groupedBaseline.map(
+                            (section): ReactElement => (
+                                <Command.Group
+                                    key={section.group}
+                                    heading={translateGroupLabel(section.group)}
+                                    value={section.group}
+                                >
+                                    {section.items.map(renderItem)}
+                                </Command.Group>
                             ),
-                        )
-                    )}
-                </div>
+                        )}
+                    </Command.List>
+                </Command>
                 <p className={`mt-2 ${TYPOGRAPHY.microHint}`}>
                     {t("navigation:commandPalette.helpText")}
                 </p>
