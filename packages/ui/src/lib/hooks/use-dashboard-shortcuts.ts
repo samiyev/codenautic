@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react"
 import { useLocation, useNavigate } from "@tanstack/react-router"
+import { useHotkeys } from "react-hotkeys-hook"
 
-import { useKeyboardShortcuts } from "@/lib/hooks/use-keyboard-shortcuts"
 import {
+    detectShortcutConflicts,
     FOCUS_REVIEWS_FILTERS_EVENT,
     OPEN_COMMAND_PALETTE_EVENT,
     type IShortcutConflict,
@@ -29,6 +30,62 @@ export interface IDashboardShortcutsResult {
 }
 
 /**
+ * Статические определения shortcuts для conflict detection и модала помощи.
+ */
+const SHORTCUT_DEFINITIONS: ReadonlyArray<IShortcutDefinition> = [
+    {
+        handler: (): void => {},
+        id: "open-command-palette-meta",
+        keys: "meta+k",
+        label: "Open command palette",
+        scope: "global",
+    },
+    {
+        handler: (): void => {},
+        id: "open-command-palette-ctrl",
+        keys: "ctrl+k",
+        label: "Open command palette",
+        scope: "global",
+    },
+    {
+        handler: (): void => {},
+        id: "open-command-palette-slash",
+        keys: "slash",
+        label: "Open command palette",
+        scope: "global",
+    },
+    {
+        handler: (): void => {},
+        id: "goto-dashboard",
+        keys: "g d",
+        label: "Go to dashboard",
+        scope: "global",
+    },
+    {
+        handler: (): void => {},
+        id: "goto-reviews",
+        keys: "g r",
+        label: "Go to ccr management",
+        scope: "global",
+    },
+    {
+        handler: (): void => {},
+        id: "focus-reviews-filters",
+        keys: "f",
+        label: "Focus reviews filters",
+        routePredicate: (routePath: string): boolean => routePath === "/reviews",
+        scope: "page",
+    },
+    {
+        handler: (): void => {},
+        id: "open-shortcuts-help",
+        keys: "question",
+        label: "Open shortcuts help",
+        scope: "global",
+    },
+]
+
+/**
  * Управляет keyboard shortcuts для dashboard: определения, поиск, фильтрация
  * и состояние модала помощи.
  *
@@ -40,95 +97,85 @@ export function useDashboardShortcuts(): IDashboardShortcutsResult {
     const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false)
     const [shortcutsHelpQuery, setShortcutsHelpQuery] = useState("")
 
-    const shortcutDefinitions = useMemo((): ReadonlyArray<IShortcutDefinition> => {
-        return [
-            {
-                handler: (): void => {
-                    window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT))
-                },
-                id: "open-command-palette-meta",
-                keys: "meta+k",
-                label: "Open command palette",
-                scope: "global",
-            },
-            {
-                handler: (): void => {
-                    window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT))
-                },
-                id: "open-command-palette-ctrl",
-                keys: "ctrl+k",
-                label: "Open command palette",
-                scope: "global",
-            },
-            {
-                handler: (): void => {
-                    window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT))
-                },
-                id: "open-command-palette-slash",
-                keys: "slash",
-                label: "Open command palette",
-                scope: "global",
-            },
-            {
-                handler: (): void => {
-                    void navigate({ to: "/" })
-                },
-                id: "goto-dashboard",
-                keys: "g d",
-                label: "Go to dashboard",
-                scope: "global",
-            },
-            {
-                handler: (): void => {
-                    void navigate({ to: "/reviews" })
-                },
-                id: "goto-reviews",
-                keys: "g r",
-                label: "Go to ccr management",
-                scope: "global",
-            },
-            {
-                handler: (): void => {
-                    window.dispatchEvent(new CustomEvent(FOCUS_REVIEWS_FILTERS_EVENT))
-                },
-                id: "focus-reviews-filters",
-                keys: "f",
-                label: "Focus reviews filters",
-                routePredicate: (routePath: string): boolean => routePath === "/reviews",
-                scope: "page",
-            },
-            {
-                handler: (): void => {
-                    setIsShortcutsHelpOpen(true)
-                },
-                id: "open-shortcuts-help",
-                keys: "question",
-                label: "Open shortcuts help",
-                scope: "global",
-            },
-        ]
-    }, [navigate])
+    const dispatchCommandPalette = (): void => {
+        window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT))
+    }
 
-    const keyboardShortcuts = useKeyboardShortcuts({
-        routePath: location.pathname,
-        shortcuts: shortcutDefinitions,
-    })
+    useHotkeys("meta+k", dispatchCommandPalette, { preventDefault: true })
+    useHotkeys("ctrl+k", dispatchCommandPalette, { preventDefault: true })
+    useHotkeys("/", dispatchCommandPalette, { preventDefault: true })
 
-    const filteredShortcuts = useMemo(() => {
+    useHotkeys(
+        "g, d",
+        (): void => {
+            void navigate({ to: "/" })
+        },
+        { preventDefault: true },
+    )
+
+    useHotkeys(
+        "g, r",
+        (): void => {
+            void navigate({ to: "/reviews" })
+        },
+        { preventDefault: true },
+    )
+
+    useHotkeys(
+        "f",
+        (): void => {
+            if (location.pathname !== "/reviews") {
+                return
+            }
+            window.dispatchEvent(new CustomEvent(FOCUS_REVIEWS_FILTERS_EVENT))
+        },
+        { preventDefault: true },
+        [location.pathname],
+    )
+
+    useHotkeys(
+        "shift+/",
+        (): void => {
+            setIsShortcutsHelpOpen(true)
+        },
+        { preventDefault: true },
+    )
+
+    const conflicts = useMemo((): ReadonlyArray<IShortcutConflict> => {
+        return detectShortcutConflicts(SHORTCUT_DEFINITIONS)
+    }, [])
+
+    const allDescriptors = useMemo((): ReadonlyArray<IShortcutDescriptor> => {
+        return SHORTCUT_DEFINITIONS.filter((definition): boolean => {
+            if (definition.routePredicate === undefined) {
+                return true
+            }
+            return definition.routePredicate(location.pathname)
+        }).map(
+            (definition): IShortcutDescriptor => ({
+                id: definition.id,
+                keys: definition.keys,
+                label: definition.label,
+                scope: definition.scope,
+            }),
+        )
+    }, [location.pathname])
+
+    const filteredShortcuts = useMemo((): ReadonlyArray<IShortcutDescriptor> => {
         const normalizedQuery = shortcutsHelpQuery.trim().toLowerCase()
         if (normalizedQuery.length === 0) {
-            return keyboardShortcuts.shortcuts
+            return allDescriptors
         }
 
-        return keyboardShortcuts.shortcuts.filter((shortcut): boolean => {
+        return allDescriptors.filter((shortcut): boolean => {
             return `${shortcut.label} ${shortcut.keys} ${shortcut.scope}`
                 .toLowerCase()
                 .includes(normalizedQuery)
         })
-    }, [keyboardShortcuts.shortcuts, shortcutsHelpQuery])
+    }, [allDescriptors, shortcutsHelpQuery])
 
     return {
-        conflicts: keyboardShortcuts.conflicts,
+        conflicts,
         filteredShortcuts,
         isShortcutsHelpOpen,
         setIsShortcutsHelpOpen,
