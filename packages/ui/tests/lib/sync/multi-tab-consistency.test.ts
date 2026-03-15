@@ -117,10 +117,10 @@ describe("multi-tab sync constants", (): void => {
     })
 
     it("when THEME_MODE_STORAGE_KEY is accessed, then returns expected value", (): void => {
-        expect(THEME_MODE_STORAGE_KEY).toBe("codenautic:ui:theme-mode")
+        expect(THEME_MODE_STORAGE_KEY).toBe("cn:theme-mode")
     })
 
     it("when THEME_PRESET_STORAGE_KEY is accessed, then returns expected value", (): void => {
-        expect(THEME_PRESET_STORAGE_KEY).toBe("codenautic:ui:theme-preset")
+        expect(THEME_PRESET_STORAGE_KEY).toBe("cn:theme-preset")
     })
 })
