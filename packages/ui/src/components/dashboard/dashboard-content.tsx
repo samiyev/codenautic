@@ -125,15 +125,15 @@ function WorkQueueCard(props: IWorkQueueCardProps): ReactElement {
                 "transition-all duration-150",
                 isCritical
                     ? "border-warning/30 bg-warning/5 hover:bg-warning/10"
-                    : "border-border/50 bg-surface hover:bg-surface-muted",
+                    : "border-border/50 bg-surface hover:bg-surface-secondary",
             ].join(" ")}
             variants={STAGGER_ITEM_VARIANTS}
         >
             <div className="min-w-0 flex-1">
                 <p className={TYPOGRAPHY.cardTitle}>{item.title}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">{item.description}</p>
+                <p className="mt-0.5 text-sm text-muted">{item.description}</p>
                 <StyledLink
-                    className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary transition-colors hover:text-primary/80"
+                    className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-accent transition-colors hover:text-accent/80"
                     to={item.route}
                 >
                     Open {item.id}

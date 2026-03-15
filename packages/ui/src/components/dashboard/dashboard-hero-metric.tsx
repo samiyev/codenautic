@@ -82,7 +82,7 @@ export function DashboardHeroMetric(props: IDashboardHeroMetricProps): ReactElem
         <Card
             className={[
                 "relative overflow-hidden",
-                "bg-gradient-to-b from-surface to-surface-muted/50",
+                "bg-gradient-to-b from-surface to-surface-secondary/50",
                 "border border-border/60",
                 "shadow-lg",
             ].join(" ")}
@@ -159,7 +159,7 @@ export function DashboardHeroMetric(props: IDashboardHeroMetricProps): ReactElem
                     <text
                         className="text-[9px] font-medium uppercase tracking-[0.15em]"
                         dominantBaseline="hanging"
-                        fill="var(--muted-foreground)"
+                        fill="var(--muted)"
                         textAnchor="middle"
                         x={cx}
                         y={cy + 16}
