@@ -1,4 +1,4 @@
-import type { IFileDependencyNode } from "@/components/graphs/file-dependency-graph"
+import type { IFileDependencyNode } from "@/components/dependency-graphs/file-dependency-graph"
 
 import {
     DEFAULT_RESCAN_VALUES,

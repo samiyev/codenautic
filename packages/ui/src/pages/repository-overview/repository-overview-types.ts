@@ -2,15 +2,15 @@ import type { IMetricGridMetric } from "@/components/dashboard/metrics-grid"
 import type {
     IFileDependencyNode,
     IFileDependencyRelation,
-} from "@/components/graphs/file-dependency-graph"
+} from "@/components/dependency-graphs/file-dependency-graph"
 import type {
     IFunctionCallNode,
     IFunctionCallRelation,
-} from "@/components/graphs/function-class-call-graph"
+} from "@/components/dependency-graphs/function-class-call-graph"
 import type {
     IPackageDependencyNode,
     IPackageDependencyRelation,
-} from "@/components/graphs/package-dependency-graph"
+} from "@/components/dependency-graphs/package-dependency-graph"
 
 /**
  * Уровень риска компонента репозитория.

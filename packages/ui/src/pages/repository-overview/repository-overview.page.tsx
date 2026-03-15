@@ -1,10 +1,10 @@
 import { type ChangeEvent, type ReactElement, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { FileDependencyGraph } from "@/components/graphs/file-dependency-graph"
-import { CodeCityTreemap } from "@/components/graphs/codecity-treemap"
-import { FunctionClassCallGraph } from "@/components/graphs/function-class-call-graph"
-import { PackageDependencyGraph } from "@/components/graphs/package-dependency-graph"
+import { FileDependencyGraph } from "@/components/dependency-graphs/file-dependency-graph"
+import { CodeCityTreemap } from "@/components/codecity/codecity-treemap"
+import { FunctionClassCallGraph } from "@/components/dependency-graphs/function-class-call-graph"
+import { PackageDependencyGraph } from "@/components/dependency-graphs/package-dependency-graph"
 import { Link } from "@tanstack/react-router"
 
 import { Alert, Button, Card, CardContent, CardHeader, Chip } from "@heroui/react"
