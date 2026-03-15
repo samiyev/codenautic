@@ -127,11 +127,11 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
                 )}
             </ul>
 
-            <div className="mt-3 rounded border border-primary/30 bg-primary/10 p-2">
-                <p className={`${TYPOGRAPHY.overline} text-on-primary`}>
+            <div className="mt-3 rounded border border-accent/30 bg-accent/10 p-2">
+                <p className={`${TYPOGRAPHY.overline} text-accent-foreground`}>
                     {t("code-city:whatIf.aggregatedScenario")}
                 </p>
-                <p className="text-xs text-on-primary">
+                <p className="text-xs text-accent-foreground">
                     {t("code-city:whatIf.aggregatedMeta", {
                         files: String(aggregatedScenario.fileIds.length),
                         score: String(aggregatedScenario.aggregatedScore),
@@ -142,7 +142,7 @@ export function WhatIfPanel(props: IWhatIfPanelProps): ReactElement {
 
             <button
                 aria-label={t("code-city:whatIf.ariaLabelRun")}
-                className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-3 rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={aggregatedScenario.fileIds.length === 0}
                 onClick={(): void => {
                     props.onRunScenario?.(aggregatedScenario)
