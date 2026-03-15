@@ -88,6 +88,12 @@ export {
     type IAstLocCalculatorErrorDetails,
 } from "./ast-loc-calculator.error"
 export {
+    AST_CYCLOMATIC_COMPLEXITY_ERROR_CODE,
+    AstCyclomaticComplexityError,
+    type AstCyclomaticComplexityErrorCode,
+    type IAstCyclomaticComplexityErrorDetails,
+} from "./ast-cyclomatic-complexity.error"
+export {
     AST_SERVICE_MULTI_REPO_GRAPH_FEDERATION_ERROR_CODE,
     AstServiceMultiRepoGraphFederationError,
     type AstServiceMultiRepoGraphFederationErrorCode,
@@ -485,6 +491,15 @@ export {
     type IAstLocCalculatorService,
     type IAstLocCalculatorSummary,
 } from "./ast-loc-calculator.service"
+export {
+    AstCyclomaticComplexityService,
+    type IAstCyclomaticComplexityFileInput,
+    type IAstCyclomaticComplexityInput,
+    type IAstCyclomaticComplexityItem,
+    type IAstCyclomaticComplexityResult,
+    type IAstCyclomaticComplexityService,
+    type IAstCyclomaticComplexitySummary,
+} from "./ast-cyclomatic-complexity.service"
 export {
     AstServiceMultiRepoGraphFederationService,
     type AstServiceMultiRepoGraphFederationNow,
