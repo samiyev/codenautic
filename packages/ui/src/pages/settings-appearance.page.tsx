@@ -117,7 +117,7 @@ function LanguageSection(): ReactElement {
                         ),
                     )}
                 </div>
-                <div className="rounded-lg border border-border bg-surface p-3 text-sm text-text-secondary">
+                <div className="rounded-lg border border-border bg-surface p-3 text-sm text-muted">
                     <p>
                         Date preview:{" "}
                         <span className="font-medium text-foreground">
@@ -226,7 +226,7 @@ export function SettingsAppearancePage(): ReactElement {
         return presets
             .filter((themePreset): boolean => {
                 const palette = resolvedMode === "dark" ? themePreset.dark : themePreset.light
-                const primaryContrast = getContrastRatio(palette.primary, palette.surface)
+                const primaryContrast = getContrastRatio(palette.accent, palette.surface)
                 const accentContrast = getContrastRatio(palette.accent, palette.surface)
 
                 return primaryContrast >= 3 && accentContrast >= 2.6
@@ -526,7 +526,7 @@ export function SettingsAppearancePage(): ReactElement {
         root.style.setProperty("--background", activeBasePalette.background)
         root.style.setProperty("--foreground", activeBasePalette.foreground)
         root.style.setProperty("--surface", activeBasePalette.surface)
-        root.style.setProperty("--surface-muted", activeBasePalette.surfaceMuted)
+        root.style.setProperty("--surface-secondary", activeBasePalette.surfaceSecondary)
         root.style.setProperty("--border", activeBasePalette.border)
         root.style.setProperty("--radius-sm", `${smRadius}px`)
         root.style.setProperty("--radius-md", `${mdRadius}px`)
@@ -545,7 +545,7 @@ export function SettingsAppearancePage(): ReactElement {
         activeBasePalette.border,
         activeBasePalette.foreground,
         activeBasePalette.surface,
-        activeBasePalette.surfaceMuted,
+        activeBasePalette.surfaceSecondary,
         basePaletteId,
         effectiveAccentColor,
         formRadius,
@@ -758,7 +758,7 @@ export function SettingsAppearancePage(): ReactElement {
                         ) : null}
                     </div>
                     <div className="space-y-2 rounded-lg border border-border bg-surface p-3">
-                        <p className="text-xs uppercase tracking-[0.12em] text-text-subtle">
+                        <p className="text-xs uppercase tracking-[0.12em] text-muted">
                             {t("settings:appearance.quickPresets")}
                         </p>
                         <div className="flex flex-wrap gap-2">
@@ -769,7 +769,9 @@ export function SettingsAppearancePage(): ReactElement {
                                         aria-label={`Quick preset ${themePreset.label}`}
                                         className="rounded-full"
                                         size="sm"
-                                        variant={themePreset.id === preset ? "primary" : "secondary"}
+                                        variant={
+                                            themePreset.id === preset ? "primary" : "secondary"
+                                        }
                                         onPress={(): void => {
                                             setPreset(themePreset.id)
                                         }}
@@ -801,13 +803,13 @@ export function SettingsAppearancePage(): ReactElement {
                             ) : null}
                         </div>
                         {pendingRandomPreset !== undefined ? (
-                            <div className="rounded-lg border border-border bg-surface-muted p-3">
+                            <div className="rounded-lg border border-border bg-surface-secondary p-3">
                                 <p className="text-sm font-semibold text-foreground">
                                     {t("settings:appearance.previewPreset", {
                                         label: pendingRandomPreset.label,
                                     })}
                                 </p>
-                                <p className="mt-1 text-xs text-text-secondary">
+                                <p className="mt-1 text-xs text-muted">
                                     {t("settings:appearance.previewPresetHint")}
                                 </p>
                                 <div className="mt-2 flex flex-wrap gap-2">
@@ -858,12 +860,12 @@ export function SettingsAppearancePage(): ReactElement {
                                         setAccentColor(event.currentTarget.value)
                                     }}
                                 />
-                                <p className="text-xs font-mono text-text-secondary">
+                                <p className="text-xs font-mono text-muted">
                                     {effectiveAccentColor}
                                 </p>
                             </div>
                             <label
-                                className="text-xs uppercase tracking-[0.12em] text-text-subtle"
+                                className="text-xs uppercase tracking-[0.12em] text-muted"
                                 htmlFor="accent-intensity-slider"
                             >
                                 {t("settings:appearance.accentIntensity", {
@@ -874,7 +876,7 @@ export function SettingsAppearancePage(): ReactElement {
                                 aria-label={t(
                                     "settings:ariaLabel.appearance.accentIntensitySlider",
                                 )}
-                                className="w-full accent-primary"
+                                className="w-full accent-accent"
                                 id="accent-intensity-slider"
                                 max={MAX_INTENSITY}
                                 min={MIN_INTENSITY}
@@ -902,7 +904,9 @@ export function SettingsAppearancePage(): ReactElement {
                                             aria-pressed={basePaletteId === tone.id}
                                             className="rounded-full"
                                             size="sm"
-                                            variant={basePaletteId === tone.id ? "primary" : "secondary"}
+                                            variant={
+                                                basePaletteId === tone.id ? "primary" : "secondary"
+                                            }
                                             onPress={(): void => {
                                                 setBasePaletteId(tone.id)
                                             }}
@@ -912,7 +916,7 @@ export function SettingsAppearancePage(): ReactElement {
                                     ),
                                 )}
                             </div>
-                            <p className="text-xs text-text-secondary">
+                            <p className="text-xs text-muted">
                                 {getSurfaceTone(basePaletteId).description}
                             </p>
                         </div>
@@ -921,14 +925,14 @@ export function SettingsAppearancePage(): ReactElement {
                     <div className="grid gap-4 xl:grid-cols-2">
                         <div className="space-y-2 rounded-lg border border-border bg-surface p-3">
                             <label
-                                className="text-xs uppercase tracking-[0.12em] text-text-subtle"
+                                className="text-xs uppercase tracking-[0.12em] text-muted"
                                 htmlFor="global-radius-slider"
                             >
                                 {t("settings:appearance.globalRadius", { value: globalRadius })}
                             </label>
                             <input
                                 aria-label={t("settings:ariaLabel.appearance.globalRadiusSlider")}
-                                className="w-full accent-primary"
+                                className="w-full accent-accent"
                                 id="global-radius-slider"
                                 max={MAX_RADIUS}
                                 min={MIN_RADIUS}
@@ -941,14 +945,14 @@ export function SettingsAppearancePage(): ReactElement {
                         </div>
                         <div className="space-y-2 rounded-lg border border-border bg-surface p-3">
                             <label
-                                className="text-xs uppercase tracking-[0.12em] text-text-subtle"
+                                className="text-xs uppercase tracking-[0.12em] text-muted"
                                 htmlFor="form-radius-slider"
                             >
                                 {t("settings:appearance.formRadius", { value: formRadius })}
                             </label>
                             <input
                                 aria-label={t("settings:ariaLabel.appearance.formRadiusSlider")}
-                                className="w-full accent-primary"
+                                className="w-full accent-accent"
                                 id="form-radius-slider"
                                 max={MAX_FORM_RADIUS}
                                 min={MIN_FORM_RADIUS}
@@ -961,7 +965,7 @@ export function SettingsAppearancePage(): ReactElement {
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
                         <Chip size="sm" variant="soft">
                             {t("settings:appearance.chipBase", { value: basePaletteId })}
                         </Chip>
@@ -1009,7 +1013,7 @@ export function SettingsAppearancePage(): ReactElement {
                         <p className="text-sm font-semibold text-foreground">
                             {t("settings:appearance.favoritePreset")}
                         </p>
-                        <p className="mt-1 text-xs text-text-secondary">
+                        <p className="mt-1 text-xs text-muted">
                             {t("settings:appearance.chipPinned", { value: favoritePresetLabel })}
                         </p>
                         <div className="mt-2 flex flex-wrap gap-2">
@@ -1032,11 +1036,13 @@ export function SettingsAppearancePage(): ReactElement {
                             aria-label={t("settings:appearance.themeName")}
                             placeholder="Security Focus Theme"
                             value={themeDraftName}
-                            onChange={(e): void => { setThemeDraftName(e.target.value) }}
+                            onChange={(e): void => {
+                                setThemeDraftName(e.target.value)
+                            }}
                         />
                         <div className="flex flex-col gap-1">
                             <label
-                                className="text-sm text-text-tertiary"
+                                className="text-sm text-muted"
                                 htmlFor="theme-library-selected"
                             >
                                 {t("settings:appearance.libraryThemes")}
@@ -1112,7 +1118,7 @@ export function SettingsAppearancePage(): ReactElement {
                         </p>
                         <textarea
                             aria-label={t("settings:ariaLabel.appearance.themeLibraryJson")}
-                            className="min-h-28 w-full rounded-lg border border-border bg-surface-muted p-3 text-xs"
+                            className="min-h-28 w-full rounded-lg border border-border bg-surface-secondary p-3 text-xs"
                             placeholder='{"version":1,"themes":[...]}'
                             value={themeImportValue}
                             onChange={(event): void => {
@@ -1120,10 +1126,18 @@ export function SettingsAppearancePage(): ReactElement {
                             }}
                         />
                         <div className="flex flex-wrap gap-2">
-                            <Button size="sm" variant="secondary" onPress={handleExportThemeLibrary}>
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                onPress={handleExportThemeLibrary}
+                            >
                                 {t("settings:appearance.exportLibraryJson")}
                             </Button>
-                            <Button size="sm" variant="secondary" onPress={handleImportThemeLibrary}>
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                onPress={handleImportThemeLibrary}
+                            >
                                 {t("settings:appearance.importLibraryJson")}
                             </Button>
                         </div>
@@ -1140,11 +1154,11 @@ export function SettingsAppearancePage(): ReactElement {
                 <CardContent className="space-y-3">
                     <div className="grid gap-3 md:grid-cols-3">
                         <div className="rounded-lg border border-border bg-surface p-3">
-                            <p className="text-xs uppercase tracking-[0.14em] text-text-subtle">
+                            <p className="text-xs uppercase tracking-[0.14em] text-muted">
                                 {t("settings:appearance.primaryAction")}
                             </p>
                             <button
-                                className="mt-2 rounded-full border border-primary bg-primary px-3 py-1.5 text-sm text-primary-foreground"
+                                className="mt-2 rounded-full border border-accent bg-accent px-3 py-1.5 text-sm text-accent-foreground"
                                 style={{ borderRadius: `${globalRadius}px` }}
                                 type="button"
                             >
@@ -1159,16 +1173,16 @@ export function SettingsAppearancePage(): ReactElement {
                             </button>
                         </div>
                         <div className="rounded-lg border border-border bg-surface p-3">
-                            <p className="text-xs uppercase tracking-[0.14em] text-text-subtle">
+                            <p className="text-xs uppercase tracking-[0.14em] text-muted">
                                 {t("settings:appearance.accentAndSurface")}
                             </p>
                             <div className="mt-2 flex gap-2">
                                 <span className="h-6 w-6 rounded-full bg-accent" />
-                                <span className="h-6 w-6 rounded-full bg-surface-muted" />
+                                <span className="h-6 w-6 rounded-full bg-surface-secondary" />
                             </div>
                         </div>
                         <div className="rounded-lg border border-border bg-surface p-3">
-                            <p className="text-xs uppercase tracking-[0.14em] text-text-subtle">
+                            <p className="text-xs uppercase tracking-[0.14em] text-muted">
                                 {t("settings:appearance.formControls")}
                             </p>
                             <Input
@@ -1177,11 +1191,13 @@ export function SettingsAppearancePage(): ReactElement {
                                 placeholder="Preview input"
                                 style={{ borderRadius: `${formRadius}px` }}
                                 value={previewFieldValue}
-                                onChange={(e): void => { setPreviewFieldValue(e.target.value) }}
+                                onChange={(e): void => {
+                                    setPreviewFieldValue(e.target.value)
+                                }}
                             />
                         </div>
                     </div>
-                    <p className="text-xs text-text-secondary">
+                    <p className="text-xs text-muted">
                         {t("settings:appearance.presetOptions", {
                             list: presets
                                 .map((themePreset): string => themePreset.label)

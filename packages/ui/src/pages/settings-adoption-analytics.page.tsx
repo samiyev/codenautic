@@ -207,7 +207,7 @@ export function SettingsAdoptionAnalyticsPage(): ReactElement {
                             {t("settings:adoptionAnalytics.medianTimeToFirstValue")}{" "}
                             <strong>{timeToFirstValue}</strong>
                         </p>
-                        <p className="text-xs text-text-secondary">
+                        <p className="text-xs text-muted">
                             {t("settings:adoptionAnalytics.firstValueDefinition")}
                         </p>
                     </CardContent>
@@ -246,7 +246,7 @@ export function SettingsAdoptionAnalyticsPage(): ReactElement {
                                                 )}
                                             </Chip>
                                         </div>
-                                        <p className="text-xs text-text-secondary">
+                                        <p className="text-xs text-muted">
                                             {item.summary}
                                         </p>
                                     </li>
@@ -292,7 +292,7 @@ export function SettingsAdoptionAnalyticsPage(): ReactElement {
                                             {stage.count}
                                         </Chip>
                                     </div>
-                                    <p className="text-xs text-text-secondary">
+                                    <p className="text-xs text-muted">
                                         {td("settings:adoptionAnalytics.conversionDropOff", {
                                             conversion: String(conversion),
                                             dropOff: String(dropOff),
@@ -307,7 +307,9 @@ export function SettingsAdoptionAnalyticsPage(): ReactElement {
 
             <Alert status="warning">
                 <Alert.Title>{t("settings:adoptionAnalytics.privacyBoundaryTitle")}</Alert.Title>
-                <Alert.Description>{t("settings:adoptionAnalytics.privacyBoundaryDescription")}</Alert.Description>
+                <Alert.Description>
+                    {t("settings:adoptionAnalytics.privacyBoundaryDescription")}
+                </Alert.Description>
             </Alert>
         </FormLayout>
     )
