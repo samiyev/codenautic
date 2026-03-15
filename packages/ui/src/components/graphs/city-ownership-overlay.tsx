@@ -41,7 +41,7 @@ export interface ICityOwnershipOverlayProps {
 function resolveOwnerItemClassName(isActive: boolean): string {
     return [
         "w-full rounded-lg border p-2 text-left transition",
-        isActive ? "border-primary bg-primary/10" : "border-border bg-surface hover:border-border",
+        isActive ? "border-accent bg-accent/10" : "border-border bg-surface hover:border-border",
     ].join(" ")
 }
 
@@ -69,7 +69,7 @@ export function CityOwnershipOverlay(props: ICityOwnershipOverlayProps): ReactEl
                 <button
                     aria-label={toggleButtonLabel}
                     aria-pressed={props.isEnabled}
-                    className="rounded-md border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-on-primary hover:border-primary"
+                    className="rounded-md border border-accent/40 bg-accent/15 px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:border-accent"
                     type="button"
                     onClick={(): void => {
                         props.onToggleEnabled?.(props.isEnabled === false)
@@ -100,9 +100,16 @@ export function CityOwnershipOverlay(props: ICityOwnershipOverlayProps): ReactEl
                                 }}
                             >
                                 <div className="flex items-center gap-2">
-                                    <HeroUIAvatar className="h-7 w-7 shrink-0 bg-surface-muted text-xs text-foreground">
-                                        {owner.ownerAvatarUrl !== undefined ? <AvatarImage src={owner.ownerAvatarUrl} alt={owner.ownerName} /> : null}
-                                        <AvatarFallback>{owner.ownerName.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                    <HeroUIAvatar className="h-7 w-7 shrink-0 bg-surface-secondary text-xs text-foreground">
+                                        {owner.ownerAvatarUrl !== undefined ? (
+                                            <AvatarImage
+                                                src={owner.ownerAvatarUrl}
+                                                alt={owner.ownerName}
+                                            />
+                                        ) : null}
+                                        <AvatarFallback>
+                                            {owner.ownerName.slice(0, 2).toUpperCase()}
+                                        </AvatarFallback>
                                     </HeroUIAvatar>
                                     <div className="min-w-0 flex-1">
                                         <p className={`truncate ${TYPOGRAPHY.cardTitle}`}>
