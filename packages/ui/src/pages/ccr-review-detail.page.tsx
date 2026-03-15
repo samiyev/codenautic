@@ -21,7 +21,7 @@ import {
 import { ReviewCommentThread } from "@/components/reviews/review-comment-thread"
 import { CodeDiffViewer } from "@/components/reviews/code-diff-viewer"
 import { Alert, Button, Card, CardContent, CardHeader, Chip } from "@heroui/react"
-import { StyledLink } from "@/components/layout/styled-link"
+import { Link } from "@tanstack/react-router"
 import { SseStreamViewer } from "@/components/streaming/sse-stream-viewer"
 import type {
     ICcrWorkspaceContextResponse,
@@ -29,7 +29,7 @@ import type {
     ICcrWorkspaceReviewCommentThread,
 } from "@/lib/api/endpoints/ccr-workspace.endpoint"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
-import { TYPOGRAPHY } from "@/lib/constants/typography"
+import { LINK_CLASSES, TYPOGRAPHY } from "@/lib/constants/typography"
 import { useCodeReview } from "@/lib/hooks/queries"
 import { getUiActionPolicy, useUiRole } from "@/lib/permissions/ui-policy"
 import {
@@ -549,9 +549,7 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                 <CardHeader>
                     <div className="flex items-start justify-between gap-3">
                         <div>
-                            <p className="text-sm text-muted">
-                                {t("reviews:detail.ccrReview")}
-                            </p>
+                            <p className="text-sm text-muted">{t("reviews:detail.ccrReview")}</p>
                             <h1 className={TYPOGRAPHY.pageTitle}>{ccr.title}</h1>
                             <p className={TYPOGRAPHY.body}>
                                 {ccr.id} · {ccr.repository} · {ccr.team} · {ccr.status}
@@ -620,9 +618,9 @@ export function CcrReviewDetailPage(props: ICcrReviewDetailPageProps): ReactElem
                                         t("reviews:detail.insufficientRolePermissions")}
                                 </p>
                             ) : (
-                                <StyledLink className="text-sm" to="/reviews">
+                                <Link className={`${LINK_CLASSES} text-sm`} to="/reviews">
                                     {t("reviews:detail.finishReview")}
-                                </StyledLink>
+                                </Link>
                             )}
                         </div>
                     </div>
