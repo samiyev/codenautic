@@ -239,7 +239,7 @@ export function ContributorCollaborationGraph(
             <p className="text-sm font-semibold text-foreground">
                 {t("code-city:contributorCollaboration.title")}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-muted">
                 {t("code-city:contributorCollaboration.description")}
             </p>
             <div

@@ -502,12 +502,12 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                                     <p className="truncate font-medium text-foreground">
                                         {file.path}
                                     </p>
-                                    <p className="mt-1 text-muted-foreground">
+                                    <p className="mt-1 text-muted">
                                         {td("code-city:scene3d.fallbackLoc", {
                                             value: String(file.loc ?? 0),
                                         })}
                                     </p>
-                                    <p className="text-muted-foreground">
+                                    <p className="text-muted">
                                         {td("code-city:scene3d.fallbackComplexity", {
                                             value: String(file.complexity ?? 0),
                                         })}
@@ -538,7 +538,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                             aria-pressed={cameraPreset === option.id}
                             className={`rounded-md border px-2 py-1 text-xs font-medium transition ${
                                 cameraPreset === option.id
-                                    ? "border-primary/40 bg-primary/20 text-primary-foreground"
+                                    ? "border-accent/40 bg-accent/20 text-accent-foreground"
                                     : "border-hud-border bg-hud-surface/70 text-hud-text-muted hover:border-border hover:text-hud-text"
                             }`}
                             key={option.id}
@@ -553,7 +553,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                 )}
             </div>
             {navigationBreadcrumbPaths.length > 0 ? (
-                <aside className="absolute left-3 top-14 z-10 max-w-lg rounded-md border border-primary/50 bg-hud-surface/90 px-3 py-2 text-xs text-hud-text shadow-lg">
+                <aside className="absolute left-3 top-14 z-10 max-w-lg rounded-md border border-accent/50 bg-hud-surface/90 px-3 py-2 text-xs text-hud-text shadow-lg">
                     <p className="font-semibold text-hud-accent">
                         {props.navigationLabel !== undefined
                             ? td("code-city:scene3d.rootCauseTrailWithLabel", {
@@ -577,7 +577,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                                 ? t("code-city:scene3d.ariaPauseTimeline")
                                 : t("code-city:scene3d.ariaPlayTimeline")
                         }
-                        className="rounded border border-hud-border px-2 py-0.5 text-xs text-hud-text hover:border-primary/40"
+                        className="rounded border border-hud-border px-2 py-0.5 text-xs text-hud-text hover:border-accent/40"
                         onClick={(): void => {
                             setIsTimelinePlaying((isPlaying): boolean => !isPlaying)
                         }}
@@ -591,7 +591,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                 <p className="mt-2 text-hud-text-muted">{currentSnapshot?.label ?? "Commit #1"}</p>
                 <input
                     aria-label={t("code-city:scene3d.ariaCodeCityTimeline")}
-                    className="mt-2 w-full accent-primary"
+                    className="mt-2 w-full accent-accent"
                     max={Math.max(0, snapshots.length - 1)}
                     min={0}
                     onChange={(event: ChangeEvent<HTMLInputElement>): void => {
@@ -624,7 +624,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                                         ? t("code-city:scene3d.ariaPauseCausalReplay")
                                         : t("code-city:scene3d.ariaPlayCausalReplay")
                                 }
-                                className="rounded border border-hud-border px-2 py-0.5 text-xs text-hud-text hover:border-primary/40"
+                                className="rounded border border-hud-border px-2 py-0.5 text-xs text-hud-text hover:border-accent/40"
                                 onClick={(): void => {
                                     setIsCausalReplayPlaying((isPlaying): boolean => !isPlaying)
                                 }}
@@ -640,7 +640,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                         </p>
                         <input
                             aria-label={t("code-city:scene3d.ariaCausalTimeline")}
-                            className="mt-2 w-full accent-primary"
+                            className="mt-2 w-full accent-accent"
                             max={Math.max(0, causalTimelineEvents.length - 1)}
                             min={0}
                             onChange={(event: ChangeEvent<HTMLInputElement>): void => {
@@ -665,7 +665,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                                         aria-pressed={causalReplaySpeed === speed}
                                         className={`rounded border px-2 py-0.5 text-[11px] transition ${
                                             causalReplaySpeed === speed
-                                                ? "border-primary/40 bg-primary/20 text-primary-foreground"
+                                                ? "border-accent/40 bg-accent/20 text-accent-foreground"
                                                 : "border-hud-border bg-hud-surface/70 text-hud-text-muted hover:border-border hover:text-hud-text"
                                         }`}
                                         key={speed}
@@ -691,7 +691,7 @@ export function CodeCity3DScene(props: ICodeCity3DSceneProps): ReactElement {
                 ) : null}
             </div>
             {hoveredFile !== undefined ? (
-                <aside className="absolute bottom-3 left-3 z-10 rounded-md border border-primary/50 bg-hud-surface/90 px-3 py-2 text-xs text-hud-text shadow-lg">
+                <aside className="absolute bottom-3 left-3 z-10 rounded-md border border-accent/50 bg-hud-surface/90 px-3 py-2 text-xs text-hud-text shadow-lg">
                     <p className="font-semibold text-hud-accent">
                         {t("code-city:scene3d.hoverPreview")}
                     </p>
