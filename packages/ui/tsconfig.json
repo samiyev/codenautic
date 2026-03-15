@@ -39,8 +39,7 @@
         "vite.config.ts",
         "vitest.config.ts",
         "postcss.config.mjs",
-        "tests/**/*",
-        ".storybook/**/*"
+        "tests/**/*"
     ],
     "exclude": ["node_modules", "dist", "coverage"]
 }
