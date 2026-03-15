@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardContent, CardHeader, Chip, Input, Switch } from "@heroui/react"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
-import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import {
@@ -240,7 +239,6 @@ export function SettingsWebhooksPage(): ReactElement {
         return deliveryLogs.filter((entry): boolean => entry.endpointId === activeEndpointId)
     }, [activeEndpointId, deliveryLogs])
 
-
     const activeEndpoint = webhooks.find((item): boolean => item.id === activeEndpointId)
 
     const handleCreateWebhook = (): void => {
@@ -367,10 +365,7 @@ export function SettingsWebhooksPage(): ReactElement {
     }
 
     return (
-        <FormLayout
-            title={t("settings:webhooks.pageTitle")}
-            description={t("settings:webhooks.pageSubtitle")}
-        >
+        <div className="space-y-6 mx-auto max-w-[1400px]"><div className="space-y-1.5"><h1 className={TYPOGRAPHY.pageTitle}>{t("settings:webhooks.pageTitle")}</h1><p className={TYPOGRAPHY.bodyMuted}>{t("settings:webhooks.pageSubtitle")}</p></div><div className="space-y-6">
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>
@@ -461,9 +456,7 @@ export function SettingsWebhooksPage(): ReactElement {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div
-                            className="max-h-[520px] overflow-auto rounded-lg border border-border"
-                        >
+                        <div className="max-h-[520px] overflow-auto rounded-lg border border-border">
                             {filteredWebhooks.map((webhook): ReactElement => {
                                 const isActive = webhook.id === activeEndpointId
 
@@ -474,84 +467,75 @@ export function SettingsWebhooksPage(): ReactElement {
                                         }`}
                                         key={webhook.id}
                                     >
-                                                <div className="flex items-start justify-between gap-3">
-                                                    <button
-                                                        className="min-w-0 text-left"
-                                                        onClick={(): void => {
-                                                            setActiveEndpointId(webhook.id)
-                                                        }}
-                                                        type="button"
-                                                    >
-                                                        <p className="truncate text-sm font-semibold text-foreground">
-                                                            {webhook.url}
-                                                        </p>
-                                                        <p className="mt-1 text-xs text-muted">
-                                                            {t("settings:webhooks.events", {
-                                                                events: webhook.eventTypes.join(
-                                                                    ", ",
-                                                                ),
-                                                            })}
-                                                        </p>
-                                                        <p className="text-xs text-muted">
-                                                            {t("settings:webhooks.secret", {
-                                                                preview: webhook.secretPreview,
-                                                            })}
-                                                        </p>
-                                                    </button>
-                                                    <Chip
-                                                        color={mapWebhookStatusColor(
-                                                            webhook.status,
-                                                        )}
-                                                        size="sm"
-                                                        variant="soft"
-                                                    >
-                                                        {mapWebhookStatusText(webhook.status)}
-                                                    </Chip>
-                                                </div>
-                                                <div className="mt-2 flex flex-wrap items-center gap-2">
-                                                    <Switch
-                                                        isSelected={webhook.isEnabled}
-                                                        onChange={(isSelected: boolean): void => {
-                                                            handleToggleEndpoint(
-                                                                webhook.id,
-                                                                isSelected,
-                                                            )
-                                                        }}
-                                                    >
-                                                        {t("settings:webhooks.enabled")}
-                                                    </Switch>
-                                                    <Button
-                                                        onPress={(): void => {
-                                                            handleRotateSecret(webhook.id)
-                                                        }}
-                                                        size="sm"
-                                                        variant="ghost"
-                                                    >
-                                                        {t("settings:webhooks.rotateSecret")}
-                                                    </Button>
-                                                    <TestConnectionButton
-                                                        onTest={(): Promise<boolean> =>
-                                                            Promise.resolve(
-                                                                handleTestDelivery(webhook.id),
-                                                            )
-                                                        }
-                                                        providerLabel="Webhook"
-                                                    />
-                                                    <Button
-                                                        onPress={(): void => {
-                                                            handleDeleteWebhook(webhook.id)
-                                                        }}
-                                                        size="sm"
-                                                        variant="danger"
-                                                    >
-                                                        {t("settings:webhooks.delete")}
-                                                    </Button>
-                                                </div>
-                                                <p className="mt-1 text-xs text-muted">
-                                                    {t("settings:webhooks.lastDelivery")}
-                                                    {webhook.lastDeliveryAt ??
-                                                        t("settings:webhooks.notDelivered")}
+                                        <div className="flex items-start justify-between gap-3">
+                                            <button
+                                                className="min-w-0 text-left"
+                                                onClick={(): void => {
+                                                    setActiveEndpointId(webhook.id)
+                                                }}
+                                                type="button"
+                                            >
+                                                <p className="truncate text-sm font-semibold text-foreground">
+                                                    {webhook.url}
                                                 </p>
+                                                <p className="mt-1 text-xs text-muted">
+                                                    {t("settings:webhooks.events", {
+                                                        events: webhook.eventTypes.join(", "),
+                                                    })}
+                                                </p>
+                                                <p className="text-xs text-muted">
+                                                    {t("settings:webhooks.secret", {
+                                                        preview: webhook.secretPreview,
+                                                    })}
+                                                </p>
+                                            </button>
+                                            <Chip
+                                                color={mapWebhookStatusColor(webhook.status)}
+                                                size="sm"
+                                                variant="soft"
+                                            >
+                                                {mapWebhookStatusText(webhook.status)}
+                                            </Chip>
+                                        </div>
+                                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                                            <Switch
+                                                isSelected={webhook.isEnabled}
+                                                onChange={(isSelected: boolean): void => {
+                                                    handleToggleEndpoint(webhook.id, isSelected)
+                                                }}
+                                            >
+                                                {t("settings:webhooks.enabled")}
+                                            </Switch>
+                                            <Button
+                                                onPress={(): void => {
+                                                    handleRotateSecret(webhook.id)
+                                                }}
+                                                size="sm"
+                                                variant="ghost"
+                                            >
+                                                {t("settings:webhooks.rotateSecret")}
+                                            </Button>
+                                            <TestConnectionButton
+                                                onTest={(): Promise<boolean> =>
+                                                    Promise.resolve(handleTestDelivery(webhook.id))
+                                                }
+                                                providerLabel="Webhook"
+                                            />
+                                            <Button
+                                                onPress={(): void => {
+                                                    handleDeleteWebhook(webhook.id)
+                                                }}
+                                                size="sm"
+                                                variant="danger"
+                                            >
+                                                {t("settings:webhooks.delete")}
+                                            </Button>
+                                        </div>
+                                        <p className="mt-1 text-xs text-muted">
+                                            {t("settings:webhooks.lastDelivery")}
+                                            {webhook.lastDeliveryAt ??
+                                                t("settings:webhooks.notDelivered")}
+                                        </p>
                                     </article>
                                 )
                             })}
@@ -572,40 +556,38 @@ export function SettingsWebhooksPage(): ReactElement {
                                 {t("settings:webhooks.selectEndpointToInspect")}
                             </Alert>
                         ) : null}
-                        <div
-                            className="max-h-[520px] overflow-auto rounded-lg border border-border"
-                        >
-                            {selectedEndpointLogs.map((log): ReactElement => (
-                                            <article
-                                                className="border-b border-border px-3 py-3"
-                                                key={log.id}
+                        <div className="max-h-[520px] overflow-auto rounded-lg border border-border">
+                            {selectedEndpointLogs.map(
+                                (log): ReactElement => (
+                                    <article
+                                        className="border-b border-border px-3 py-3"
+                                        key={log.id}
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <p className="text-xs text-muted">{log.timestamp}</p>
+                                            <Chip
+                                                color={mapWebhookStatusColor(log.status)}
+                                                size="sm"
+                                                variant="soft"
                                             >
-                                                <div className="flex items-start justify-between gap-2">
-                                                    <p className="text-xs text-muted">
-                                                        {log.timestamp}
-                                                    </p>
-                                                    <Chip
-                                                        color={mapWebhookStatusColor(log.status)}
-                                                        size="sm"
-                                                        variant="soft"
-                                                    >
-                                                        {mapWebhookStatusText(log.status)}
-                                                    </Chip>
-                                                </div>
-                                                <p className="mt-1 text-sm text-foreground">
-                                                    {log.message}
-                                                </p>
-                                                <p className="text-xs text-muted">
-                                                    {t("settings:webhooks.httpStatus", {
-                                                        status: log.httpStatus,
-                                                    })}
-                                                </p>
-                                            </article>
-                            ))}
+                                                {mapWebhookStatusText(log.status)}
+                                            </Chip>
+                                        </div>
+                                        <p className="mt-1 text-sm text-foreground">
+                                            {log.message}
+                                        </p>
+                                        <p className="text-xs text-muted">
+                                            {t("settings:webhooks.httpStatus", {
+                                                status: log.httpStatus,
+                                            })}
+                                        </p>
+                                    </article>
+                                ),
+                            )}
                         </div>
                     </CardContent>
                 </Card>
             </div>
-        </FormLayout>
+        </div></div>
     )
 }
