@@ -277,7 +277,7 @@ describe("ccr review detail page", (): void => {
         // @ts-expect-error mock EventSource only for test
         globalThis.EventSource = EventSourceProxy
 
-        renderWithProviders(<CcrReviewDetailPage ccr={ccr} streamSourceUrl="/api/v1/ccr/stream" />)
+        renderWithProviders(<CcrReviewDetailPage ccr={ccr} streamSourceUrl="/api/v1/ccr/stream" workspaceContext={buildWorkspaceContext(ccr)} />)
 
         const startButton = screen.getByRole("button", { name: "Start" })
         await user.click(startButton)
