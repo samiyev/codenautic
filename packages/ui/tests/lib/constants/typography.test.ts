@@ -59,8 +59,8 @@ describe("TYPOGRAPHY", (): void => {
     })
 
     it("when muted variants are used, then include muted color tokens", (): void => {
-        expect(TYPOGRAPHY.bodyMuted).toContain("text-text-secondary")
-        expect(TYPOGRAPHY.pageSubtitle).toContain("text-text-secondary")
-        expect(TYPOGRAPHY.caption).toContain("text-text-subtle")
+        expect(TYPOGRAPHY.bodyMuted).toContain("text-muted")
+        expect(TYPOGRAPHY.pageSubtitle).toContain("text-muted")
+        expect(TYPOGRAPHY.caption).toContain("text-muted")
     })
 })

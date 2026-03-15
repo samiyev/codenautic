@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import {
-    CODECITY_PALETTE,
-    resolveCodeCityPalette,
-} from "@/lib/constants/codecity-colors"
+import { CODECITY_PALETTE, resolveCodeCityPalette } from "@/lib/constants/codecity-colors"
 
 describe("CODECITY_PALETTE", (): void => {
     it("when accessed, then contains all domain groups", (): void => {
