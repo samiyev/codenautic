@@ -1,49 +1,71 @@
-import { type ReactElement, useState } from "react"
+import { type ReactElement, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardContent, CardHeader, Input, TextArea } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
+import { useSso } from "@/lib/hooks/queries/use-sso"
 
+/**
+ * Локальное состояние SAML конфигурации для формы.
+ */
 interface ISamlConfigState {
-    /** SAML Entity ID (SP). */
+    /**
+     * SAML Entity ID (SP).
+     */
     readonly entityId: string
-    /** URL IdP SSO endpoint. */
+    /**
+     * URL IdP SSO endpoint.
+     */
     readonly ssoUrl: string
-    /** X.509 certificate body. */
+    /**
+     * X.509 certificate body.
+     */
     readonly x509Certificate: string
 }
 
+/**
+ * Локальное состояние OIDC конфигурации для формы.
+ */
 interface IOidcConfigState {
-    /** OIDC issuer URL. */
+    /**
+     * OIDC issuer URL.
+     */
     readonly issuerUrl: string
-    /** Client identifier. */
+    /**
+     * Client identifier.
+     */
     readonly clientId: string
-    /** Client secret (masked in UI). */
+    /**
+     * Client secret (masked in UI).
+     */
     readonly clientSecret: string
 }
 
+/**
+ * Результат теста SSO подключения.
+ */
 interface ISsoTestState {
-    /** Провайдер теста. */
+    /**
+     * Провайдер теста.
+     */
     readonly provider: "oidc" | "saml"
-    /** Результат теста. */
+    /**
+     * Результат теста.
+     */
     readonly status: "failed" | "passed"
-    /** Сообщение результата. */
+    /**
+     * Сообщение результата.
+     */
     readonly message: string
 }
 
-const INITIAL_SAML_CONFIG: ISamlConfigState = {
-    entityId: "urn:codenautic:sp:acme",
-    ssoUrl: "https://idp.acme.dev/sso/saml",
-    x509Certificate: "-----BEGIN CERTIFICATE-----\nMIIC...acme...prod\n-----END CERTIFICATE-----",
-}
-
-const INITIAL_OIDC_CONFIG: IOidcConfigState = {
-    clientId: "codenautic-web",
-    clientSecret: "",
-    issuerUrl: "https://auth.acme.dev/realms/platform",
-}
-
+/**
+ * Проверяет валидность SAML конфигурации.
+ *
+ * @param config - SAML конфигурация для проверки.
+ * @returns true если конфигурация валидна.
+ */
 function hasSamlRequiredConfig(config: ISamlConfigState): boolean {
     const hasEntityId = config.entityId.trim().length > 0
     const hasSsoUrl = config.ssoUrl.trim().startsWith("https://")
@@ -52,6 +74,12 @@ function hasSamlRequiredConfig(config: ISamlConfigState): boolean {
     return hasEntityId && hasSsoUrl && hasCertificate
 }
 
+/**
+ * Проверяет валидность OIDC конфигурации.
+ *
+ * @param config - OIDC конфигурация для проверки.
+ * @returns true если конфигурация валидна.
+ */
 function hasOidcRequiredConfig(config: IOidcConfigState): boolean {
     const hasIssuer = config.issuerUrl.trim().startsWith("https://")
     const hasClientId = config.clientId.trim().length > 0
@@ -60,12 +88,19 @@ function hasOidcRequiredConfig(config: IOidcConfigState): boolean {
     return hasIssuer && hasClientId && hasClientSecret
 }
 
+/**
+ * Возвращает маскированное представление секрета.
+ *
+ * @param secret - Секрет для маскирования.
+ * @param notConfiguredLabel - Текст при отсутствии секрета.
+ * @returns Маскированная строка или метка отсутствия.
+ */
 function getMaskedSecret(secret: string, notConfiguredLabel: string): string {
     if (secret.trim().length === 0) {
         return notConfiguredLabel
     }
 
-    return "••••••••"
+    return "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"
 }
 
 /**
@@ -75,11 +110,33 @@ function getMaskedSecret(secret: string, notConfiguredLabel: string): string {
  */
 export function SettingsSsoPage(): ReactElement {
     const { t } = useTranslation(["settings"])
-    const [samlConfig, setSamlConfig] = useState<ISamlConfigState>(INITIAL_SAML_CONFIG)
-    const [oidcConfig, setOidcConfig] = useState<IOidcConfigState>(INITIAL_OIDC_CONFIG)
+    const { samlQuery, oidcQuery, updateSaml, updateOidc, testConnection } = useSso()
+
+    const [samlConfig, setSamlConfig] = useState<ISamlConfigState>({
+        entityId: "",
+        ssoUrl: "",
+        x509Certificate: "",
+    })
+    const [oidcConfig, setOidcConfig] = useState<IOidcConfigState>({
+        issuerUrl: "",
+        clientId: "",
+        clientSecret: "",
+    })
     const [isSamlSaved, setIsSamlSaved] = useState(false)
     const [isOidcSaved, setIsOidcSaved] = useState(false)
     const [testState, setTestState] = useState<ISsoTestState | undefined>(undefined)
+
+    useEffect((): void => {
+        if (samlQuery.data !== undefined) {
+            setSamlConfig(samlQuery.data.saml)
+        }
+    }, [samlQuery.data])
+
+    useEffect((): void => {
+        if (oidcQuery.data !== undefined) {
+            setOidcConfig(oidcQuery.data.oidc)
+        }
+    }, [oidcQuery.data])
 
     const handleSaveSaml = (): void => {
         if (hasSamlRequiredConfig(samlConfig) !== true) {
@@ -87,8 +144,12 @@ export function SettingsSsoPage(): ReactElement {
             return
         }
 
-        setIsSamlSaved(true)
-        showToastSuccess(t("settings:sso.toast.samlConfigSaved"))
+        updateSaml.mutate(samlConfig, {
+            onSuccess: (): void => {
+                setIsSamlSaved(true)
+                showToastSuccess(t("settings:sso.toast.samlConfigSaved"))
+            },
+        })
     }
 
     const handleSaveOidc = (): void => {
@@ -97,34 +158,34 @@ export function SettingsSsoPage(): ReactElement {
             return
         }
 
-        setIsOidcSaved(true)
-        showToastSuccess(t("settings:sso.toast.oidcConfigSaved"))
+        updateOidc.mutate(oidcConfig, {
+            onSuccess: (): void => {
+                setIsOidcSaved(true)
+                showToastSuccess(t("settings:sso.toast.oidcConfigSaved"))
+            },
+        })
     }
 
     const handleTestSso = (provider: "oidc" | "saml"): void => {
-        const isValid =
-            provider === "saml"
-                ? hasSamlRequiredConfig(samlConfig)
-                : hasOidcRequiredConfig(oidcConfig)
+        testConnection.mutate(
+            { provider },
+            {
+                onSuccess: (response): void => {
+                    const nextState: ISsoTestState = {
+                        message: response.message,
+                        provider: response.provider,
+                        status: response.status,
+                    }
+                    setTestState(nextState)
 
-        if (isValid) {
-            const nextState: ISsoTestState = {
-                message: t("settings:sso.toast.ssoTestPassedMessage", { provider }),
-                provider,
-                status: "passed",
-            }
-            setTestState(nextState)
-            showToastSuccess(t("settings:sso.toast.ssoTestPassed"))
-            return
-        }
-
-        const failedState: ISsoTestState = {
-            message: t("settings:sso.toast.ssoTestFailedMessage", { provider }),
-            provider,
-            status: "failed",
-        }
-        setTestState(failedState)
-        showToastInfo(t("settings:sso.toast.ssoTestFailed"))
+                    if (response.status === "passed") {
+                        showToastSuccess(t("settings:sso.toast.ssoTestPassed"))
+                    } else {
+                        showToastInfo(t("settings:sso.toast.ssoTestFailed"))
+                    }
+                },
+            },
+        )
     }
 
     return (
@@ -178,10 +239,15 @@ export function SettingsSsoPage(): ReactElement {
                             }}
                         />
                         <div className="flex flex-wrap items-center gap-2">
-                            <Button variant="primary" onPress={handleSaveSaml}>
+                            <Button
+                                isLoading={updateSaml.isPending}
+                                variant="primary"
+                                onPress={handleSaveSaml}
+                            >
                                 {t("settings:sso.saveSamlConfig")}
                             </Button>
                             <Button
+                                isLoading={testConnection.isPending}
                                 variant="secondary"
                                 onPress={(): void => {
                                     handleTestSso("saml")
@@ -257,10 +323,15 @@ export function SettingsSsoPage(): ReactElement {
                             })}
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
-                            <Button variant="primary" onPress={handleSaveOidc}>
+                            <Button
+                                isLoading={updateOidc.isPending}
+                                variant="primary"
+                                onPress={handleSaveOidc}
+                            >
                                 {t("settings:sso.saveOidcConfig")}
                             </Button>
                             <Button
+                                isLoading={testConnection.isPending}
                                 variant="secondary"
                                 onPress={(): void => {
                                     handleTestSso("oidc")
