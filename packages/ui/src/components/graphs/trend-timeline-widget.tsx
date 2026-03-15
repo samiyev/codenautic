@@ -124,9 +124,7 @@ export function TrendTimelineWidget(props: ITrendTimelineWidgetProps): ReactElem
                                                 className="rounded border border-border bg-surface p-1.5"
                                                 key={metric.label}
                                             >
-                                                <p
-                                                    className={`${TYPOGRAPHY.micro} text-muted`}
-                                                >
+                                                <p className={`${TYPOGRAPHY.micro} text-muted`}>
                                                     {metric.label}
                                                 </p>
                                                 <svg
