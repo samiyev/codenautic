@@ -63,7 +63,7 @@ export function ContextPreview(props: IContextPreviewProps): ReactElement {
                                         {item.excerpt}
                                     </p>
                                     <a
-                                        className="mt-2 inline-block text-xs font-medium text-primary"
+                                        className="mt-2 inline-block text-xs font-medium text-accent"
                                         href={item.url}
                                         rel="noreferrer"
                                         target="_blank"

@@ -66,7 +66,7 @@ export function ConfigurationEditor(props: IConfigurationEditorProps): ReactElem
             <h2 className={TYPOGRAPHY.sectionTitle}>
                 {t("settings:configurationEditor.repositoryConfig")}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted">
                 {t("settings:configurationEditor.editDescription")}
             </p>
             <div className="grid gap-3 md:grid-cols-2">
