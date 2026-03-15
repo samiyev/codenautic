@@ -136,6 +136,12 @@ export {
     type IAstParallelFileParserErrorDetails,
 } from "./ast-parallel-file-parser.error"
 export {
+    AST_SCAN_PROGRESS_REPORTER_ERROR_CODE,
+    AstScanProgressReporterError,
+    type AstScanProgressReporterErrorCode,
+    type IAstScanProgressReporterErrorDetails,
+} from "./ast-scan-progress-reporter.error"
+export {
     AST_SERVICE_MULTI_REPO_GRAPH_FEDERATION_ERROR_CODE,
     AstServiceMultiRepoGraphFederationError,
     type AstServiceMultiRepoGraphFederationErrorCode,
@@ -598,6 +604,14 @@ export {
     type IAstParallelFileParserSuccessItem,
     type IAstParallelFileParserSummary,
 } from "./ast-parallel-file-parser.service"
+export {
+    AstScanProgressReporterService,
+    type AstScanProgressReporterNow,
+    type AstScanProgressReporterOnSnapshot,
+    type IAstScanProgressReporterService,
+    type IAstScanProgressReporterServiceOptions,
+    type IAstScanProgressSnapshot,
+} from "./ast-scan-progress-reporter.service"
 export {
     AstCyclomaticComplexityService,
     type IAstCyclomaticComplexityFileInput,
