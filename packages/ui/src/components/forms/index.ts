@@ -12,14 +12,3 @@ export interface IFormSelectOption {
     readonly isDisabled?: boolean
 }
 
-/**
- * Опция для radio-group.
- */
-export interface IFormRadioOption {
-    /** Значение радиокнопки. */
-    readonly value: string
-    /** Отображаемый текст. */
-    readonly label: string
-    /** Отключена ли опция. */
-    readonly isDisabled?: boolean
-}
