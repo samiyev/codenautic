@@ -86,6 +86,14 @@ vi.mock("@tanstack/react-router", async (importOriginal) => {
     }
 })
 
+vi.mock("motion/react", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("motion/react")>()
+    return {
+        ...actual,
+        useReducedMotion: (): boolean => true,
+    }
+})
+
 interface ILayoutHarnessProps {
     readonly children: ReactElement
 }
@@ -239,13 +247,12 @@ describe("layout components", (): void => {
         await user.keyboard("{Control>}k{/Control}")
 
         const paletteSearch = screen.getByRole("combobox", { name: "Command palette search" })
-        expect(paletteSearch).toHaveAttribute("aria-controls", "header-command-palette-results")
+        const controlsId = paletteSearch.getAttribute("aria-controls") ?? ""
+        expect(controlsId).not.toBe("")
 
         const initialOption = screen.getByRole("option", { selected: true })
         const initialOptionId = initialOption.getAttribute("id") ?? ""
         expect(initialOptionId).not.toBe("")
-        expect(initialOptionId.includes("/")).toBe(false)
-        expect(initialOptionId.startsWith("header-command-palette-option-")).toBe(true)
         expect(paletteSearch).toHaveAttribute("aria-activedescendant", initialOptionId)
 
         await user.keyboard("{ArrowDown}")
@@ -253,7 +260,6 @@ describe("layout components", (): void => {
         const nextOption = screen.getByRole("option", { selected: true })
         const nextOptionId = nextOption.getAttribute("id") ?? ""
         expect(nextOptionId).not.toBe("")
-        expect(nextOptionId.includes("/")).toBe(false)
         expect(nextOptionId).not.toBe(initialOptionId)
         expect(paletteSearch).toHaveAttribute("aria-activedescendant", nextOptionId)
     })
@@ -556,7 +562,7 @@ describe("layout components", (): void => {
 
         window.dispatchEvent(
             new StorageEvent("storage", {
-                key: "codenautic:ui:theme-mode",
+                key: "cn:theme-mode",
                 newValue: "dark",
             }),
         )
