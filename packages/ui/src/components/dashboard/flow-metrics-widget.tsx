@@ -12,11 +12,9 @@ import {
 } from "recharts"
 
 import { Card, CardContent, CardHeader, Chip } from "@heroui/react"
-import { EmptyState } from "@/components/states/empty-state"
-import { ChartContainer } from "@/components/charts/chart-container"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { CHART_GRID_DASH, CHART_STROKE_WIDTH } from "@/lib/constants/chart-recharts-defaults"
-import { CHART_DATA_TRANSITION } from "@/lib/motion"
+import { ResponsiveContainer } from "recharts"
 
 interface IFlowMetricsPoint {
     /** Метка периода. */
@@ -68,9 +66,7 @@ function FlowTooltip(props: TooltipContentProps<number, string>): ReactElement |
                             className="h-2 w-2 rounded-full"
                             style={{ backgroundColor: String(entry.color ?? "") }}
                         />
-                        <span className="text-xs text-muted">
-                            {String(entry.name ?? "")}:
-                        </span>
+                        <span className="text-xs text-muted">{String(entry.name ?? "")}:</span>
                         <span className="text-xs font-semibold text-foreground">
                             {String(entry.value ?? "")}
                         </span>
@@ -109,12 +105,12 @@ export function FlowMetricsWidget(props: IFlowMetricsWidgetProps): ReactElement 
                     Track flow efficiency and delivery capacity dynamics across recent windows.
                 </p>
                 {props.points.length === 0 ? (
-                    <EmptyState
-                        description="No flow metrics data available for this period."
-                        title="No data"
-                    />
+                    <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                        <h3 className={TYPOGRAPHY.subsectionTitle}>No data</h3>
+                        <p className="max-w-sm text-sm text-muted">No flow metrics data available for this period.</p>
+                    </div>
                 ) : (
-                    <ChartContainer height="lg">
+                    <div className="h-64 w-full"><ResponsiveContainer height="100%" minHeight={1} minWidth={1} width="100%">
                         <ComposedChart data={props.points}>
                             <defs>
                                 <linearGradient id={gradientPrimary} x1="0" x2="0" y1="0" y2="1">
@@ -154,11 +150,7 @@ export function FlowMetricsWidget(props: IFlowMetricsWidgetProps): ReactElement 
                                 tick={{ fontSize: 11 }}
                                 tickLine={false}
                             />
-                            <YAxis
-                                stroke="var(--muted)"
-                                tick={{ fontSize: 11 }}
-                                tickLine={false}
-                            />
+                            <YAxis stroke="var(--muted)" tick={{ fontSize: 11 }} tickLine={false} />
                             {}
                             <Tooltip content={FlowTooltip as never} />
 
@@ -178,7 +170,7 @@ export function FlowMetricsWidget(props: IFlowMetricsWidgetProps): ReactElement 
 
                             {/* Lines on top */}
                             <Line
-                                {...CHART_DATA_TRANSITION}
+                                {...{ animationDuration: 0, isAnimationActive: false }}
                                 dataKey="flowEfficiency"
                                 dot={{ fill: "var(--chart-primary)", r: 3, strokeWidth: 0 }}
                                 name="Flow efficiency"
@@ -187,7 +179,7 @@ export function FlowMetricsWidget(props: IFlowMetricsWidgetProps): ReactElement 
                                 type="monotone"
                             />
                             <Line
-                                {...CHART_DATA_TRANSITION}
+                                {...{ animationDuration: 0, isAnimationActive: false }}
                                 dataKey="deliveryCapacity"
                                 dot={{ fill: "var(--chart-secondary)", r: 3, strokeWidth: 0 }}
                                 name="Delivery capacity"
@@ -196,7 +188,7 @@ export function FlowMetricsWidget(props: IFlowMetricsWidgetProps): ReactElement 
                                 type="monotone"
                             />
                         </ComposedChart>
-                    </ChartContainer>
+                    </ResponsiveContainer></div>
                 )}
             </CardContent>
         </Card>
