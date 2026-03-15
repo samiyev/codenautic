@@ -12,7 +12,7 @@
 
 ### CCR Management — список всех ревью
 
-> `pages/ccr-management.page.tsx:550` — `CcrManagementPage`
+> `pages/ccr-management.page.tsx` — `CcrManagementPage`
 
 - Таблица CCR с колонками: ID, Title, Repository, Assignee, Comments, Updated, Status
 - Поиск по title/id/repo/assignee
@@ -20,22 +20,24 @@
 - Сохраняемые пресеты фильтров (localStorage) — save/load/update/delete
 - Infinite scroll для подгрузки данных
 
-| Компонент | Файл | Строка |
-|---|---|---|
-| ReviewsContent | `components/reviews/reviews-content.tsx` | 36 |
-| ReviewsTable | `components/reviews/reviews-table.tsx` | 42 |
-| ReviewsFilters | `components/reviews/reviews-filters.tsx` | — |
-| ReviewStatusBadge | `components/reviews/review-status-badge.tsx` | 34 |
+| Компонент | Файл |
+|---|---|
+| ReviewsContent | `components/reviews/reviews-content.tsx` |
+| ReviewsTable | `components/reviews/reviews-table.tsx` |
+| ReviewsFilters | `components/reviews/reviews-filters.tsx` |
+| ReviewStatusBadge | `components/reviews/review-status-badge.tsx` |
 
 ### CCR Review Detail — полный анализ одного CCR
 
-> `pages/ccr-review-detail.page.tsx:94` — `CcrReviewDetailPage` (~1270 строк, самая тяжёлая страница)
+> `pages/ccr-review-detail/ccr-review-detail.page.tsx` — `CcrReviewDetailPage`
+
+Декомпозированная страница-оркестратор: state hook + 4 секции.
 
 Что видит пользователь:
 
 - **Side-by-side diff** с подсветкой изменений, счётчиком added/removed строк
 - **AI-комментарии** — вложенные треды с фидбеком (false_positive / duplicate / irrelevant)
-- **SafeGuard pipeline trace** — 5 этапов фильтрации галлюцинаций: Deduplication → Hallucination → SeverityThreshold → PrioritySort → ImplementationCheck
+- **SafeGuard pipeline trace** — 3 этапа фильтрации: Deduplication → Hallucination → SeverityThreshold
 - **Risk indicator** — уровень / score / причины
 - **Chat с AI** прямо в контексте CCR (streaming token-by-token)
 - **Impact analysis** на затронутые файлы
@@ -44,31 +46,36 @@
 - **Review history heatmap**
 - **SSE stream viewer** для real-time данных
 
-| Компонент | Файл | Строка |
-|---|---|---|
-| CodeDiffViewer | `components/reviews/code-diff-viewer.tsx` | 140 |
-| ReviewCommentThread | `components/reviews/review-comment-thread.tsx` | 207 |
-| ChatPanel | `components/chat/chat-panel.tsx` | 114 |
-| ChatInput | `components/chat/chat-input.tsx` | 71 |
-| ChatMessageBubble | `components/chat/chat-message-bubble.tsx` | 301 |
-| ChatStreamingResponse | `components/chat/chat-streaming-response.tsx` | 30 |
-| ChatThreadList | `components/chat/chat-thread-list.tsx` | 54 |
-| ChatContextIndicator | `components/chat/chat-context-indicator.tsx` | — |
-| CodeCityTreemap | `components/graphs/codecity-treemap.tsx` | 501 |
-| ImpactAnalysisPanel | `components/graphs/impact-analysis-panel.tsx` | 117 |
-| SseStreamViewer | `components/streaming/sse-stream-viewer.tsx` | 111 |
+| Компонент | Файл |
+|---|---|
+| HeaderSection | `pages/ccr-review-detail/sections/header-section.tsx` |
+| SidebarFilesSection | `pages/ccr-review-detail/sections/sidebar-files-section.tsx` |
+| DiffSection | `pages/ccr-review-detail/sections/diff-section.tsx` |
+| SidebarRightSection | `pages/ccr-review-detail/sections/sidebar-right-section.tsx` |
+| useCcrReviewState | `pages/ccr-review-detail/hooks/use-ccr-review-state.ts` |
+| CodeDiffViewer | `components/reviews/code-diff-viewer.tsx` |
+| ReviewCommentThread | `components/reviews/review-comment-thread.tsx` |
+| ChatPanel | `components/chat/chat-panel.tsx` |
+| ChatInput | `components/chat/chat-input.tsx` |
+| ChatMessageBubble | `components/chat/chat-message-bubble.tsx` |
+| ChatStreamingResponse | `components/chat/chat-streaming-response.tsx` |
+| ChatThreadList | `components/chat/chat-thread-list.tsx` |
+| ChatContextIndicator | `components/chat/chat-context-indicator.tsx` |
+| CodeCityTreemap | `components/codecity/codecity-treemap.tsx` |
+| ImpactAnalysisPanel | `components/predictions/impact-analysis-panel.tsx` |
+| SseStreamViewer | `components/streaming/sse-stream-viewer.tsx` |
 
 Вспомогательные файлы:
-- `pages/ccr-review-detail/ccr-review-detail.types.ts` — типы для decisions, SafeGuard, feedback, risk, heatmaps
-- `pages/ccr-review-detail/ccr-review-detail.constants.ts` — константы
-- `pages/ccr-review-detail/ccr-review-detail.utils.ts` — утилиты
+- `pages/ccr-review-detail/ccr-review-detail.types.ts`
+- `pages/ccr-review-detail/ccr-review-detail.constants.ts`
+- `pages/ccr-review-detail/ccr-review-detail.utils.ts`
 - `pages/ccr-data.ts` — mock данные CCR
 
 ---
 
 ## 2. Issues Tracking
 
-> `pages/issues-tracking.page.tsx:249` — `IssuesTrackingPage`
+> `pages/issues-tracking.page.tsx` — `IssuesTrackingPage`
 
 Таблица обнаруженных проблем по всем репозиториям:
 
@@ -84,12 +91,12 @@
 
 ## 3. My Work — Triage Hub
 
-> `pages/my-work.page.tsx:260` — `MyWorkPage`
+> `pages/my-work.page.tsx` — `MyWorkPage`
 
 Персональная очередь задач с SLA-приоритизацией:
 
 - **5 категорий:** assigned_ccr, critical_issue, inbox_notification, pending_approval, stuck_job
-- **SLA-статус:** healthy (зелёный) / warning (жёлтый) / breach (красный) — цветовая индикация borders
+- **SLA-статус:** healthy (зелёный) / warning (жёлтый) / breach (красный)
 - **Escalation по ролям:** viewer → developer → lead → admin
 - **Scope переключение:** мои / команды / репозитория (Alt+1/2/3)
 - **Действия:** start work, mark done, escalate (role-gated), snooze, assign to me
@@ -99,180 +106,104 @@
 
 ## 4. Dashboard Mission Control
 
-> `pages/dashboard-mission-control.page.tsx:204` — `DashboardMissionControlPage`
+> `pages/dashboard-mission-control.page.tsx` — `DashboardMissionControlPage`
 
 Центральный командный центр с полной картиной состояния проекта:
 
 ### Метрики и виджеты
 
-| Виджет | Компонент | Строка | Что показывает |
-|---|---|---|---|
-| Hero Metric | `components/dashboard/dashboard-hero-metric.tsx` | 69 | SVG radial gauge (270°) — ключевой KPI с severity-coloring |
-| KPI Cards | `components/dashboard/metric-card.tsx` | 69 | Open CCRs, reviewed, suggestions, active jobs — CountUp анимация, тренд |
-| Metrics Grid | `components/dashboard/metrics-grid.tsx` | 32 | Staggered grid из MetricCards (1/2/4 колонки) |
-| Flow Metrics | `components/dashboard/flow-metrics-widget.tsx` | 86 | Throughput/capacity — ComposedChart (line + area) |
-| Team Activity | `components/dashboard/team-activity-widget.tsx` | 58 | CCRs merged per developer — BarChart |
-| Token Usage | `components/dashboard/token-usage-dashboard-widget.tsx` | 57 | Donut (по моделям) + AreaChart (тренд стоимости) |
-| Architecture Health | `components/dashboard/architecture-health-widget.tsx` | 25 | DDD compliance, layer violations — RadarChart |
-| Status Distribution | `components/dashboard/status-distribution-chart.tsx` | 40 | Распределение статусов CCR — PieChart |
-| Activity Timeline | `components/dashboard/activity-timeline.tsx` | 60 | Хронология событий (Today/Yesterday/...) |
-| Activity Timeline Item | `components/dashboard/activity-timeline-item.tsx` | — | Элемент хронологии событий |
-| Work Queue | `components/dashboard/dashboard-content.tsx` | 53 | Severity-aware карточки задач + timeline |
-| Critical Signals | `components/dashboard/dashboard-critical-signals.tsx` | 55 | Ops degradation, data freshness, explainability |
+| Виджет | Файл | Что показывает |
+|---|---|---|
+| Hero Metric | `components/dashboard/dashboard-hero-metric.tsx` | SVG radial gauge (270°) — ключевой KPI |
+| KPI Cards | `components/dashboard/metric-card.tsx` | Open CCRs, reviewed, suggestions, active jobs |
+| Metrics Grid | `components/dashboard/metrics-grid.tsx` | Staggered grid из MetricCards |
+| Flow Metrics | `components/dashboard/flow-metrics-widget.tsx` | Throughput/capacity — ComposedChart |
+| Team Activity | `components/dashboard/team-activity-widget.tsx` | CCRs merged per developer — BarChart |
+| Token Usage | `components/dashboard/token-usage-dashboard-widget.tsx` | Donut + AreaChart |
+| Architecture Health | `components/dashboard/architecture-health-widget.tsx` | DDD compliance — RadarChart |
+| Status Distribution | `components/dashboard/status-distribution-chart.tsx` | PieChart |
+| Activity Timeline | `components/dashboard/activity-timeline.tsx` | Хронология событий |
+| Activity Timeline Item | `components/dashboard/activity-timeline-item.tsx` | Элемент хронологии |
+| Work Queue | `components/dashboard/dashboard-content.tsx` | Severity-aware карточки |
+| Critical Signals | `components/dashboard/dashboard-critical-signals.tsx` | Ops degradation, freshness |
 
 ### Управление
 
-| Элемент | Компонент | Строка | Что делает |
-|---|---|---|---|
-| Scope Filters | `components/dashboard/dashboard-scope-filters.tsx` | 93 | Фильтры: org / repo / team / date range |
-| Scope Filter Utils | `components/dashboard/scope-filter-utils.ts` | — | Утилиты фильтров scope |
-| Date Range | `components/dashboard/dashboard-date-range-filter.tsx` | — | 24h / 7d / 30d / 90d |
-| Dashboard Zones | `components/dashboard/dashboard-zone.tsx` | 48 | Collapse/expand секций (primary/secondary/tertiary) |
-| Layout Presets | `components/dashboard/dashboard-layouts.ts` | — | Balanced / Focus / Operations |
-
-Персонализация: layout preset, pinned shortcuts, сохранение в localStorage, share link.
+| Элемент | Файл |
+|---|---|
+| Scope Filters | `components/dashboard/dashboard-scope-filters.tsx` |
+| Scope Filter Utils | `components/dashboard/scope-filter-utils.ts` |
+| Date Range | `components/dashboard/dashboard-date-range-filter.tsx` |
+| Dashboard Zones | `components/dashboard/dashboard-zone.tsx` |
+| Layout Presets | `components/dashboard/dashboard-layouts.ts` |
 
 Данные: `pages/dashboard-mock-data.ts`
 
 ---
 
-## 5. CodeCity — 3D визуализация кодовой базы
+## 5. CodeCity — визуализация кодовой базы
 
-> `pages/code-city-dashboard/code-city-dashboard.page.tsx:27` — `CodeCityDashboardPage`
+> `pages/code-city-dashboard/code-city-dashboard.page.tsx` — `CodeCityDashboardPage`
 
 Самая визуально-богатая часть продукта. 10 секций:
 
 ### Секции
 
-| Секция | Файл | Что даёт пользователю |
+| Секция | Файл |
+|---|---|
+| Tour | `pages/code-city-dashboard/sections/tour-section.tsx` |
+| Controls | `pages/code-city-dashboard/sections/controls-section.tsx` |
+| Overview | `pages/code-city-dashboard/sections/overview-section.tsx` |
+| Visualization | `pages/code-city-dashboard/sections/visualization-section.tsx` |
+| Refactoring | `pages/code-city-dashboard/sections/refactoring-section.tsx` |
+| Prediction | `pages/code-city-dashboard/sections/prediction-section.tsx` |
+| Comparison | `pages/code-city-dashboard/sections/comparison-section.tsx` |
+| Gamification | `pages/code-city-dashboard/sections/gamification-section.tsx` |
+| Ownership | `pages/code-city-dashboard/sections/ownership-section.tsx` |
+| Analysis | `pages/code-city-dashboard/sections/analysis-section.tsx` |
+
+### Визуализации (`components/codecity/`)
+
+| Компонент | Файл | Тип |
 |---|---|---|
-| Tour | `pages/code-city-dashboard/sections/tour-section.tsx` | Guided walkthrough по визуализации |
-| Controls | `pages/code-city-dashboard/sections/controls-section.tsx` | Выбор метрики / репозитория |
-| Overview | `pages/code-city-dashboard/sections/overview-section.tsx` | Treemap overview |
-| Visualization | `pages/code-city-dashboard/sections/visualization-section.tsx` | Основная 3D/2D визуализация |
-| Refactoring | `pages/code-city-dashboard/sections/refactoring-section.tsx` | Refactoring planner |
-| Prediction | `pages/code-city-dashboard/sections/prediction-section.tsx` | Предсказание рисков |
-| Comparison | `pages/code-city-dashboard/sections/comparison-section.tsx` | Кросс-репозиторное сравнение |
-| Gamification | `pages/code-city-dashboard/sections/gamification-section.tsx` | Sprint gamification |
-| Ownership | `pages/code-city-dashboard/sections/ownership-section.tsx` | Knowledge/ownership maps |
-| Analysis | `pages/code-city-dashboard/sections/analysis-section.tsx` | Root cause analysis |
+| CodeCity3DScene | `components/codecity/codecity-3d-scene.tsx` | Three.js 3D город-метафора |
+| CodeCityTreemap | `components/codecity/codecity-treemap.tsx` | 2D treemap альтернатива |
+| 3D Scene Renderer | `components/codecity/codecity-3d-scene-renderer.tsx` | Barrel re-export |
+| 3D Layout Worker | `components/codecity/codecity-3d-layout.worker.ts` | Web Worker для layout |
 
-### Визуализации
+Утилиты:
+- `components/codecity/codecity-treemap.utils.ts`
+- `components/codecity/codecity-treemap.constants.ts`
+- `components/codecity/codecity-3d/` — scene types, constants, layout, render budget, arc builders, visual resolvers, rendering utils
 
-| Компонент | Файл | Строка | Тип |
-|---|---|---|---|
-| CodeCity3DScene | `components/graphs/codecity-3d-scene.tsx` | 329 | Three.js 3D город-метафора |
-| CodeCityTreemap | `components/graphs/codecity-treemap.tsx` | 501 | 2D treemap альтернатива |
-
-Утилиты treemap:
-- `components/graphs/codecity-treemap.utils.ts` — утилиты treemap
-- `components/graphs/codecity-treemap.constants.ts` — константы treemap
-| 3D Scene Renderer | `components/graphs/codecity-3d/codecity-3d-scene-renderer.tsx` | — | Оптимизированный рендерер |
-| 3D Scene Re-export | `components/graphs/codecity-3d-scene-renderer.tsx` | — | Barrel re-export из codecity-3d/ |
-| 3D Layout Worker | `components/graphs/codecity-3d-layout.worker.ts` | — | Web Worker для layout |
-
-Утилиты 3D:
-- `components/graphs/codecity-3d/codecity-scene-constants.ts` — константы сцены
-- `components/graphs/codecity-3d/codecity-scene-types.ts` — типы
-- `components/graphs/codecity-3d/codecity-treemap-layout.ts` — алгоритм layout
-- `components/graphs/codecity-3d/codecity-render-budget.ts` — бюджет рендеринга
-- `components/graphs/codecity-3d/codecity-arc-builders.ts` — билдеры дуг
-- `components/graphs/codecity-3d/codecity-visual-resolvers.ts` — визуальные резолверы
-- `components/graphs/codecity-3d/codecity-3d-rendering.utils.ts` — утилиты рендеринга
-- `components/graphs/codecity-3d/codecity-3d-rendering.constants.ts` — константы рендеринга
-
-### Оверлеи (слои на визуализации)
+### Оверлеи (`components/codecity/overlays/`)
 
 | Оверлей | Файл | Что показывает |
 |---|---|---|
-| Ownership | `components/graphs/city-ownership-overlay.tsx` | Кто владеет каким кодом |
-| Impact | `components/graphs/city-impact-overlay.tsx` | Зоны воздействия изменений |
-| Prediction | `components/graphs/city-prediction-overlay.tsx` | Предсказанные проблемные зоны |
-| Bus Factor | `components/graphs/city-bus-factor-overlay.tsx` | Риск bus factor |
-| Refactoring | `components/graphs/city-refactoring-overlay.tsx` | Кандидаты на рефакторинг |
-| Hot Areas | `components/graphs/hot-area-highlights.tsx` | Горячие точки кода |
-| Causal Selector | `components/graphs/causal-overlay-selector.tsx` | Выбор causal analysis слоя |
+| Ownership | `components/codecity/overlays/city-ownership-overlay.tsx` | Кто владеет кодом |
+| Impact | `components/codecity/overlays/city-impact-overlay.tsx` | Зоны воздействия |
+| Prediction | `components/codecity/overlays/city-prediction-overlay.tsx` | Проблемные зоны |
+| Bus Factor | `components/codecity/overlays/city-bus-factor-overlay.tsx` | Риск bus factor |
+| Refactoring | `components/codecity/overlays/city-refactoring-overlay.tsx` | Кандидаты на рефакторинг |
+| Causal Selector | `components/codecity/overlays/causal-overlay-selector.tsx` | Выбор overlay слоя |
 
-### Prediction & Analysis
+### Дополнительные компоненты CodeCity
 
-| Компонент | Файл | Строка | Что даёт |
-|---|---|---|---|
-| PredictionDashboard | `components/graphs/prediction-dashboard.tsx` | 103 | Обзор предсказаний |
-| PredictionAccuracyWidget | `components/graphs/prediction-accuracy-widget.tsx` | — | Точность модели |
-| PredictionExplainPanel | `components/graphs/prediction-explain-panel.tsx` | — | Объяснение факторов предсказания |
-| PredictionComparisonView | `components/graphs/prediction-comparison-view.tsx` | — | Сравнение моделей |
-| ChangeRiskGauge | `components/graphs/change-risk-gauge.tsx` | — | Визуальный gauge риска |
-| TrendForecastChart | `components/graphs/trend-forecast-chart.tsx` | — | Прогноз тренда |
-| TrendTimelineWidget | `components/graphs/trend-timeline-widget.tsx` | — | Timeline трендов |
-| DistrictTrendIndicators | `components/graphs/district-trend-indicators.tsx` | — | Тренды по районам кода |
+| Компонент | Файл |
+|---|---|
+| HotAreaHighlights | `components/codecity/hot-area-highlights.tsx` |
+| HealthTrendChart | `components/codecity/health-trend-chart.tsx` |
+| ChurnComplexityScatter | `components/codecity/churn-complexity-scatter.tsx` |
+| DistrictTrendIndicators | `components/codecity/district-trend-indicators.tsx` |
+| RootCauseChainViewer | `components/codecity/root-cause-chain-viewer.tsx` |
+| ExploreModeSidebar | `components/codecity/explore-mode-sidebar.tsx` |
+| ProjectOverviewPanel | `components/codecity/project-overview-panel.tsx` |
+| GuidedTourOverlay | `components/codecity/guided-tour-overlay.tsx` |
+| TourCustomizer | `components/codecity/tour-customizer.tsx` |
+| OnboardingProgressTracker | `components/codecity/onboarding-progress-tracker.tsx` |
+| AlertConfigDialog | `components/codecity/alert-config-dialog.tsx` |
 
-### Impact & Root Cause
-
-| Компонент | Файл | Строка | Что даёт |
-|---|---|---|---|
-| ImpactAnalysisPanel | `components/graphs/impact-analysis-panel.tsx` | 117 | Детали impact analysis |
-| ImpactGraphView | `components/graphs/impact-graph-view.tsx` | — | Граф распространения изменений |
-| RootCauseChainViewer | `components/graphs/root-cause-chain-viewer.tsx` | 46 | Причинно-следственные цепочки |
-
-### What-If & Simulation
-
-| Компонент | Файл | Строка | Что даёт |
-|---|---|---|---|
-| WhatIfPanel | `components/graphs/what-if-panel.tsx` | 55 | «Что будет если...» сценарии |
-| SimulationPanel | `components/graphs/simulation-panel.tsx` | 117 | Запуск и результаты симуляции |
-
-### Refactoring
-
-| Компонент | Файл | Строка | Что даёт |
-|---|---|---|---|
-| RefactoringDashboard | `components/graphs/refactoring-dashboard.tsx` | 99 | Кандидаты на рефакторинг |
-| RefactoringTimeline | `components/graphs/refactoring-timeline.tsx` | — | История рефакторингов |
-| RefactoringExportDialog | `components/graphs/refactoring-export-dialog.tsx` | — | Экспорт плана рефакторинга |
-
-### Team & Knowledge
-
-| Компонент | Файл | Строка | Что даёт |
-|---|---|---|---|
-| TeamLeaderboard | `components/graphs/team-leaderboard.tsx` | 99 | Лидерборд разработчиков |
-| KnowledgeSiloPanel | `components/graphs/knowledge-silo-panel.tsx` | 61 | Обнаружение knowledge silos |
-| KnowledgeMapExportWidget | `components/graphs/knowledge-map-export-widget.tsx` | — | Экспорт knowledge map |
-| KnowledgeMapExport | `components/graphs/knowledge-map-export.ts` | — | Утилиты экспорта knowledge map |
-| OwnershipTransitionWidget | `components/graphs/ownership-transition-widget.tsx` | — | Переходы ownership |
-| BusFactorTrendChart | `components/graphs/bus-factor-trend-chart.tsx` | — | Тренд bus factor |
-
-### Sprint & Gamification
-
-| Компонент | Файл | Что даёт |
-|---|---|---|
-| SprintComparisonView | `components/graphs/sprint-comparison-view.tsx` | Сравнение спринтов |
-| SprintSummaryCard | `components/graphs/sprint-summary-card.tsx` | Summary карточка спринта |
-| AchievementsPanel | `components/graphs/achievements-panel.tsx` | Achievement badges |
-| ROICalculatorWidget | `components/graphs/roi-calculator-widget.tsx` | Расчёт ROI |
-
-### Tour & Onboarding
-
-| Компонент | Файл | Строка | Что даёт |
-|---|---|---|---|
-| GuidedTourOverlay | `components/graphs/guided-tour-overlay.tsx` | 40 | Пошаговый тур |
-| TourCustomizer | `components/graphs/tour-customizer.tsx` | — | Кастомизация тура |
-| OnboardingProgressTracker | `components/graphs/onboarding-progress-tracker.tsx` | — | Прогресс онбординга |
-
-### Health & Scatter
-
-| Компонент | Файл | Что даёт |
-|---|---|---|
-| HealthTrendChart | `components/graphs/health-trend-chart.tsx` | Тренд health score (Recharts) |
-| ChurnComplexityScatter | `components/graphs/churn-complexity-scatter.tsx` | Churn vs complexity scatter plot |
-
-### Project Overview Panel
-
-| Компонент | Файл | Что даёт |
-|---|---|---|
-| ProjectOverviewPanel | `components/graphs/project-overview-panel.tsx` | Обзор проекта |
-| ExploreModesSidebar | `components/graphs/explore-mode-sidebar.tsx` | Sidebar для explore mode |
-| AlertConfigDialog | `components/graphs/alert-config-dialog.tsx` | Настройка alert thresholds |
-
-### Builders (CodeCity data builders)
+### Builders (data builders для секций)
 
 - `pages/code-city-dashboard/builders/sprint-gamification-builders.ts`
 - `pages/code-city-dashboard/builders/ownership-knowledge-builders.ts`
@@ -289,48 +220,88 @@ State и типы:
 
 ---
 
-## 6. Графы зависимостей
+## 6. Predictions & Analysis (`components/predictions/`)
 
-| Граф | Файл | Строка | Что показывает |
-|---|---|---|---|
-| Package Dependencies | `components/graphs/package-dependency-graph.tsx` | 97 | Зависимости между пакетами |
-| File Dependencies | `components/graphs/file-dependency-graph.tsx` | 245 | Зависимости между файлами |
-| Function/Class Calls | `components/graphs/function-class-call-graph.tsx` | 241 | Граф вызовов функций/классов |
-| Contributor Collaboration | `components/graphs/contributor-collaboration-graph.tsx` | 213 | Кто с кем работает |
-| Graph Renderer | `components/graphs/xyflow-graph.tsx` | 252 | Базовый React Flow рендерер |
-| Graph Renderer Core | `components/graphs/xyflow-graph-renderer.tsx` | — | Рендеринг с layout |
-| Graph Layout | `components/graphs/xyflow-graph-layout.ts` | — | Алгоритмы layout |
-| Graph Export | `components/graphs/graph-export.ts` | — | Экспорт графа |
-
-Утилиты package dependency graph:
-- `components/graphs/package-dependency-graph.constants.ts`
-- `components/graphs/package-dependency-graph.utils.ts`
+| Компонент | Файл | Что даёт |
+|---|---|---|
+| PredictionDashboard | `components/predictions/prediction-dashboard.tsx` | Обзор предсказаний |
+| PredictionAccuracyWidget | `components/predictions/prediction-accuracy-widget.tsx` | Точность модели |
+| PredictionExplainPanel | `components/predictions/prediction-explain-panel.tsx` | Объяснение факторов |
+| PredictionComparisonView | `components/predictions/prediction-comparison-view.tsx` | Сравнение моделей |
+| TrendForecastChart | `components/predictions/trend-forecast-chart.tsx` | Прогноз тренда |
+| TrendTimelineWidget | `components/predictions/trend-timeline-widget.tsx` | Timeline трендов |
+| ChangeRiskGauge | `components/predictions/change-risk-gauge.tsx` | Gauge риска |
+| ImpactAnalysisPanel | `components/predictions/impact-analysis-panel.tsx` | Детали impact analysis |
+| ImpactGraphView | `components/predictions/impact-graph-view.tsx` | Граф распространения |
+| WhatIfPanel | `components/predictions/what-if-panel.tsx` | «Что будет если...» сценарии |
+| SimulationPanel | `components/predictions/simulation-panel.tsx` | Запуск симуляции |
 
 ---
 
-## 7. Repository Management
+## 7. Refactoring (`components/refactoring/`)
+
+| Компонент | Файл | Что даёт |
+|---|---|---|
+| RefactoringDashboard | `components/refactoring/refactoring-dashboard.tsx` | Кандидаты на рефакторинг |
+| RefactoringTimeline | `components/refactoring/refactoring-timeline.tsx` | История рефакторингов |
+| RefactoringExportDialog | `components/refactoring/refactoring-export-dialog.tsx` | Экспорт плана |
+| ROICalculatorWidget | `components/refactoring/roi-calculator-widget.tsx` | Расчёт ROI |
+
+---
+
+## 8. Team Analytics (`components/team-analytics/`)
+
+| Компонент | Файл | Что даёт |
+|---|---|---|
+| TeamLeaderboard | `components/team-analytics/team-leaderboard.tsx` | Лидерборд разработчиков |
+| AchievementsPanel | `components/team-analytics/achievements-panel.tsx` | Achievement badges |
+| SprintSummaryCard | `components/team-analytics/sprint-summary-card.tsx` | Summary спринта |
+| SprintComparisonView | `components/team-analytics/sprint-comparison-view.tsx` | Сравнение спринтов |
+| KnowledgeSiloPanel | `components/team-analytics/knowledge-silo-panel.tsx` | Knowledge silos |
+| KnowledgeMapExportWidget | `components/team-analytics/knowledge-map-export-widget.tsx` | Экспорт knowledge map |
+| KnowledgeMapExport | `components/team-analytics/knowledge-map-export.ts` | Утилиты экспорта |
+| ContributorCollaborationGraph | `components/team-analytics/contributor-collaboration-graph.tsx` | Кто с кем работает |
+| OwnershipTransitionWidget | `components/team-analytics/ownership-transition-widget.tsx` | Переходы ownership |
+| BusFactorTrendChart | `components/team-analytics/bus-factor-trend-chart.tsx` | Тренд bus factor |
+
+---
+
+## 9. Dependency Graphs (`components/dependency-graphs/`)
+
+| Граф | Файл | Что показывает |
+|---|---|---|
+| Package Dependencies | `components/dependency-graphs/package-dependency-graph.tsx` | Зависимости пакетов |
+| File Dependencies | `components/dependency-graphs/file-dependency-graph.tsx` | Зависимости файлов |
+| Function/Class Calls | `components/dependency-graphs/function-class-call-graph.tsx` | Граф вызовов |
+| Graph Renderer | `components/dependency-graphs/xyflow-graph.tsx` | Базовый React Flow рендерер |
+| Graph Renderer Core | `components/dependency-graphs/xyflow-graph-renderer.tsx` | Рендеринг с layout |
+| Graph Layout | `components/dependency-graphs/xyflow-graph-layout.ts` | Алгоритмы layout |
+| Graph Export | `components/dependency-graphs/graph-export.ts` | Экспорт графа |
+
+Утилиты:
+- `components/dependency-graphs/package-dependency-graph.constants.ts`
+- `components/dependency-graphs/package-dependency-graph.utils.ts`
+
+---
+
+## 10. Repository Management
 
 ### Repositories List
 
-> `pages/repositories-list.page.tsx:347` — `RepositoriesListPage`
+> `pages/repositories-list.page.tsx` — `RepositoriesListPage`
 
 - Таблица подключённых репозиториев: name, owner, branch, last scan, status, issue count
 - Status: ready / scanning / error
-- Summary карточки (ready/scanning/error counts)
-- Поиск, фильтр по статусу, сортировка
-- Retry scan для errored repos
-- Inline scan error recovery (partial files, error messages)
+- Summary карточки, поиск, фильтр, сортировка
+- Retry scan, inline error recovery
 
 ### Repository Overview
 
-> `pages/repository-overview/repository-overview.page.tsx:365` — `RepositoryOverviewPage`
+> `pages/repository-overview/repository-overview.page.tsx` — `RepositoryOverviewPage`
 
-- **Health score** с progress bar
-- **Architecture summary** — DDD compliance, layer violations
-- **Tech stack** items
-- **Все 4 графа:** file dependency, function/class call, package dependency, CodeCity treemap
-- **Metrics grid** — ключевые показатели
-- **Rescan schedule** — frequency / weekday / hour / minute
+- Health score, architecture summary, tech stack
+- Все 4 графа: file dependency, function/class call, package dependency, CodeCity treemap
+- Metrics grid, rescan schedule
 
 Вспомогательные файлы:
 - `pages/repository-overview/repository-overview-types.ts`
@@ -339,91 +310,63 @@ State и типы:
 
 ### Scan Progress
 
-> `pages/scan-progress.page.tsx:350` — `ScanProgressPage`
+> `pages/scan-progress.page.tsx` — `ScanProgressPage`
 
-- **Progress bar** (%)
-- **5 фаз pipeline:** Queue → Clone → Analysis → Indexing → Report
-- Состояние каждой фазы: completed / active / waiting
-- **ETA** — estimated time
-- **Stage logs** с timestamps
-- **SSE EventSource** для real-time обновлений
-- Действия: retry, cancel, open repository (когда done)
+- Progress bar (%), 5 фаз pipeline, ETA, stage logs
+- SSE EventSource для real-time обновлений
+- Действия: retry, cancel, open repository
 
 ### Scan Error Recovery
 
-> `pages/scan-error-recovery.page.tsx:14` — `ScanErrorRecoveryPage`
+> `pages/scan-error-recovery.page.tsx` — `ScanErrorRecoveryPage`
 
 3-шаговый recovery flow после ошибок scan pipeline.
 
 ---
 
-## 8. Отчёты
+## 11. Отчёты
 
 ### Report Generator
 
-> `pages/report-generator.page.tsx:56` — `ReportGeneratorPage`
+> `pages/report-generator.page.tsx` — `ReportGeneratorPage`
 
-- Тип отчёта: architecture / delivery / quality
-- Формат: PDF / PNG / HTML
-- Date range, секции (executive summary, architecture drift, delivery flow, risk hotspots)
-- Preview payload, schedule
-
-| Компонент | Файл | Строка |
-|---|---|---|
-| ReportTemplateEditor | `components/reports/report-template-editor.tsx` | 63 |
-| ReportScheduleDialog | `components/reports/report-schedule-dialog.tsx` | 16 |
+| Компонент | Файл |
+|---|---|
+| ReportTemplateEditor | `components/reports/report-template-editor.tsx` |
+| ReportScheduleDialog | `components/reports/report-schedule-dialog.tsx` |
 
 ### Report List
 
-> `pages/report-list.page.tsx:79` — `ReportListPage`
-
-Фильтры (тип, date range), статус (completed/queued/failed), действия (open, regenerate, delete).
+> `pages/report-list.page.tsx` — `ReportListPage`
 
 ### Report Viewer
 
-> `pages/report-viewer.page.tsx:89` — `ReportViewerPage`
+> `pages/report-viewer.page.tsx` — `ReportViewerPage`
 
-- **LineChart** — тренд risk score / delivery velocity
-- **BarChart** — распределение секций
-- **AI Summary** — сгенерированный narrative
+| Компонент | Файл |
+|---|---|
+| AiSummaryWidget | `components/reports/ai-summary-widget.tsx` |
 
-| Компонент | Файл | Строка |
+---
+
+## 12. Chat / AI Agent
+
+| Компонент | Файл | Роль |
 |---|---|---|
-| AiSummaryWidget | `components/reports/ai-summary-widget.tsx` | 23 |
+| ChatPanel | `components/chat/chat-panel.tsx` | Sliding aside панель |
+| ChatInput | `components/chat/chat-input.tsx` | Ввод с file context |
+| ChatMessageBubble | `components/chat/chat-message-bubble.tsx` | Markdown rendering |
+| ChatStreamingResponse | `components/chat/chat-streaming-response.tsx` | Token-by-token streaming |
+| ChatThreadList | `components/chat/chat-thread-list.tsx` | Список тредов |
+| ChatContextIndicator | `components/chat/chat-context-indicator.tsx` | Контекст (repo + CCR) |
 
 ---
 
-## 9. Chat / AI Agent
-
-Полноценный разговорный AI-агент в контексте каждого CCR:
-
-| Компонент | Файл | Строка | Роль |
-|---|---|---|---|
-| ChatPanel | `components/chat/chat-panel.tsx` | 114 | Sliding aside панель |
-| ChatInput | `components/chat/chat-input.tsx` | 71 | Ввод с file context, quick actions |
-| ChatMessageBubble | `components/chat/chat-message-bubble.tsx` | 301 | Markdown rendering, code blocks, copy |
-| ChatStreamingResponse | `components/chat/chat-streaming-response.tsx` | 30 | Token-by-token streaming |
-| ChatThreadList | `components/chat/chat-thread-list.tsx` | 54 | Список тредов, filter, archive |
-| ChatContextIndicator | `components/chat/chat-context-indicator.tsx` | — | Контекст (repo + CCR + files) |
-
-Возможности:
-- Контекстный — привязан к repo + CCR + файлам
-- Streaming ответы token-by-token
-- Markdown с code blocks (expand/collapse, copy)
-- File path ссылки с номерами строк
-- Thread management (create, archive, filter by repo/CCR)
-- Quick actions
-- Cancel streaming
-
----
-
-## 10. Onboarding
+## 13. Onboarding
 
 ### Onboarding Wizard
 
-> `pages/onboarding-wizard/onboarding-wizard.page.tsx:24` — `OnboardingWizardPage`
-
-4-шаговый wizard:
+> `pages/onboarding-wizard/onboarding-wizard.page.tsx` — `OnboardingWizardPage`
 
 | Шаг | Файл |
 |---|---|
@@ -435,154 +378,65 @@ State и типы:
 
 Вспомогательные файлы:
 - `pages/onboarding-wizard/onboarding-wizard-types.ts`
-- `pages/onboarding-wizard/onboarding-wizard-schema.ts` — Zod validation
-- `pages/onboarding-wizard/use-onboarding-wizard-state.ts` — state management
-- `pages/onboarding-wizard/onboarding-templates.ts` — шаблоны конфигурации
-- `pages/onboarding-wizard/bulk-repository-parser.ts` — парсер bulk repos
+- `pages/onboarding-wizard/onboarding-wizard-schema.ts`
+- `pages/onboarding-wizard/use-onboarding-wizard-state.ts`
+- `pages/onboarding-wizard/onboarding-templates.ts`
+- `pages/onboarding-wizard/bulk-repository-parser.ts`
 
 ### Activation Checklist
 
-> `components/onboarding/activation-checklist.tsx:150` — `ActivationChecklist`
+> `components/onboarding/activation-checklist.tsx` — `ActivationChecklist`
 
-8 шагов до first value:
-1. Connect git provider
-2. Connect LLM provider
-3. Invite teammates
-4. Configure SSO
-5. Add repository
-6. Run first scan
-7. Set notifications
-8. Baseline rules dry-run
-
-Role-aware, прогресс %, persist в localStorage + API sync, dismissable.
+8 шагов до first value. Role-aware, прогресс %, persist.
 
 ---
 
-## 11. Settings (21 страница)
+## 14. Settings (9 консолидированных страниц + overview)
 
 ### Settings Hub
 
-> `pages/settings.page.tsx:24` — `SettingsPage`
+> `pages/settings.page.tsx` — `SettingsPage`
 
-Grid из карточек-навигации по всем настройкам.
+Grid из карточек-навигации по 4 группам настроек.
 
-### Code Review Configuration
+### Консолидированные страницы (HeroUI Tabs)
 
-> `pages/settings-code-review.page.tsx:92` — `SettingsCodeReviewPage`
-
-| Компонент | Файл | Строка | Что настраивает |
+| # | Страница | Файл | Табы |
 |---|---|---|---|
-| CodeReviewForm | `components/settings/code-review-form.tsx` | 34 | Cadence, severity, suggestions limit, drift signals |
-| IgnorePatternEditor | `components/settings/ignore-pattern-editor.tsx` | — | Паттерны игнорирования файлов |
-| RuleEditor | `components/settings/rule-editor.tsx` | 102 | Markdown правила с preview |
-| RuleEditorMarkdownPreview | `components/settings/rule-editor-markdown-preview.tsx` | — | Markdown preview для правил |
-| SuggestionLimitConfig | `components/settings/suggestion-limit-config.tsx` | — | Max suggestions per CCR |
-| ReviewCadenceSelector | `components/settings/review-cadence-selector.tsx` | — | Manual / auto / autoPause |
-| MCPToolList | `components/settings/mcp-tool-list.tsx` | — | MCP tools: ID, calls, errors, latency |
-| PromptOverrideEditor | `components/settings/prompt-override-editor.tsx` | — | Override AI prompts |
-| DryRunResultViewer | `components/settings/dry-run-result-viewer.tsx` | 33 | Тестовый прогон правил |
-| CCRSummaryPreview | `components/settings/ccr-summary-preview.tsx` | — | Preview настроек CCR summary |
-| ConfigurationEditor | `components/settings/configuration-editor.tsx` | 43 | YAML editor для codenautic-config |
+| 1 | **General** | `pages/settings-general.page.tsx` | Appearance, Notifications |
+| 2 | **Code Review** | `pages/settings-code-review.page.tsx` | Settings, Rules Library |
+| 3 | **Contract Validation** | `pages/settings-contract-validation/` | 6 секций |
+| 4 | **Providers** | `pages/settings-providers.page.tsx` | LLM, Git, Keys (BYOK) |
+| 5 | **Integrations** | `pages/settings-integrations.page.tsx` | Services, Webhooks |
+| 6 | **Security** | `pages/settings-security.page.tsx` | Privacy, SSO, Audit Logs |
+| 7 | **Operations** | `pages/settings-operations.page.tsx` | Health, Concurrency, Jobs |
+| 8 | **Billing & Usage** | `pages/settings-billing.page.tsx` | Billing, Token Usage |
+| 9 | **Organization** | `pages/settings-organization.page.tsx` | Profile, Team |
 
-### Git Providers
-
-> `pages/settings-git-providers.page.tsx:73` — `SettingsGitProvidersPage`
-
-GitHub / GitLab / Azure DevOps / Bitbucket — connect/disconnect, test connection.
+### Standalone settings компоненты (`components/settings/`)
 
 | Компонент | Файл |
 |---|---|
+| CodeReviewForm | `components/settings/code-review-form.tsx` |
+| IgnorePatternEditor | `components/settings/ignore-pattern-editor.tsx` |
+| RuleEditor | `components/settings/rule-editor.tsx` |
+| RuleEditorMarkdownPreview | `components/settings/rule-editor-markdown-preview.tsx` |
+| SuggestionLimitConfig | `components/settings/suggestion-limit-config.tsx` |
+| ReviewCadenceSelector | `components/settings/review-cadence-selector.tsx` |
+| MCPToolList | `components/settings/mcp-tool-list.tsx` |
+| PromptOverrideEditor | `components/settings/prompt-override-editor.tsx` |
+| DryRunResultViewer | `components/settings/dry-run-result-viewer.tsx` |
+| CCRSummaryPreview | `components/settings/ccr-summary-preview.tsx` |
+| ConfigurationEditor | `components/settings/configuration-editor.tsx` |
+| LlmProviderForm | `components/settings/llm-provider-form.tsx` |
 | GitProvidersList | `components/settings/git-providers-list.tsx` |
 | GitProviderCard | `components/settings/git-provider-card.tsx` |
 | TestConnectionButton | `components/settings/test-connection-button.tsx` |
-
-### LLM Providers
-
-> `pages/settings-llm-providers.page.tsx:213` — `SettingsLlmProvidersPage`
-
-OpenAI / Anthropic / Google / Groq — provider, model, API key, endpoint, test.
-
-| Компонент | Файл | Строка |
-|---|---|---|
-| LlmProviderForm | `components/settings/llm-provider-form.tsx` | 127 |
-
-### BYOK (Bring Your Own Key)
-
-> `pages/settings-byok.page.tsx:120` — `SettingsByokPage`
-
-- Список ключей: provider, label, masked secret, active, rotation count
-- Usage stats: requests, tokens
-- Aggregate stats: total/active keys, total requests/tokens
-- Действия: add, rotate, toggle, delete
-
-### Token Usage Analytics
-
-> `pages/settings-token-usage.page.tsx:341` — `SettingsTokenUsagePage`
-
-- Табы: by-model / by-developer / by-ccr
-- Date range filter, metrics grid
-- DataFreshnessPanel, ExplainabilityPanel
-
-### Integrations
-
-> `pages/settings-integrations.page.tsx:168` — `SettingsIntegrationsPage`
-
-Jira / Linear / Sentry / Slack — connect, sync toggle, context preview.
-
-| Компонент | Файл |
-|---|---|
 | ContextSourceCard | `components/settings/context-source-card.tsx` |
 | ContextPreview | `components/settings/context-preview.tsx` |
 | SettingsFormSchemas | `components/settings/settings-form-schemas.ts` |
 
-### Notifications
-
-> `pages/settings-notifications.page.tsx:175` — `SettingsNotificationsPage`
-
-Event types (review.completed, drift.alert, prediction.alert), channels (Slack/Discord/Teams/in-app).
-
-### Webhooks
-
-> `pages/settings-webhooks.page.tsx:206` — `SettingsWebhooksPage`
-
-Outbound endpoints: URL, events, secret, delivery status (success/retrying/failed/disconnected).
-
-### Team Management
-
-> `pages/settings-team.page.tsx:376` — `SettingsTeamPage`
-
-Teams с members (name, email, role), repository bindings, role-gated actions.
-
-### Organization
-
-> `pages/settings-organization.page.tsx:579` — `SettingsOrganizationPage`
-
-Profile, members, roles, billing, domain settings.
-
-### Billing
-
-> `pages/settings-billing.page.tsx:152` — `SettingsBillingPage`
-
-- Plans: starter / pro / enterprise
-- Status: trial / active / past_due / canceled
-- Premium entitlements: PR merge gate, cross-team policies, extended audit export
-- Paywall banner, plan change history
-
-### SSO
-
-> `pages/settings-sso.page.tsx:76` — `SettingsSsoPage`
-
-SAML (entity ID, SSO URL, X.509) + OIDC (issuer, client ID/secret), test connection.
-
-### Rules Library
-
-> `pages/settings-rules-library.page.tsx:116` — `SettingsRulesLibraryPage`
-
-Prebuilt + custom rules: categories (architecture/performance/security/style), DSL expressions, test runner.
-
-### Contract Validation
-
-> `pages/settings-contract-validation/settings-contract-validation.page.tsx:21` — `SettingsContractValidationPage`
+### Contract Validation (подсистема)
 
 | Секция | Файл |
 |---|---|
@@ -593,120 +447,105 @@ Prebuilt + custom rules: categories (architecture/performance/security/style), D
 | Drift Alerts | `pages/settings-contract-validation/sections/drift-alerts-section.tsx` |
 | Guardrails | `pages/settings-contract-validation/sections/guardrails-section.tsx` |
 
-Вспомогательные файлы:
-- `pages/settings-contract-validation/contract-validation-types.ts`
-- `pages/settings-contract-validation/contract-validator.ts`
-- `pages/settings-contract-validation/blueprint-parser.ts`
-- `pages/settings-contract-validation/drift-analysis-utils.ts`
-- `pages/settings-contract-validation/use-contract-validation-state.ts`
-- `pages/settings-contract-validation/contract-validation-mock-data.ts`
+Утилиты: types, validator, blueprint-parser, drift-analysis-utils, state hook, mock-data.
 
-### Privacy & Redaction
+### Навигация settings
 
-> `pages/settings-privacy-redaction.page.tsx:71` — `SettingsPrivacyRedactionPage`
+> `lib/navigation/settings-nav-items.tsx` — 4 группы, 9 items
 
-Обнаружение PII/secrets (email, API key, token, secret) и автоматическая редакция.
+| Группа | Items |
+|---|---|
+| Configuration | General, Code Review, Contract Validation |
+| Providers | Providers, Integrations |
+| Security | Security, Operations |
+| Organization | Billing, Organization |
 
-### Provider Degradation Console
+### Redirect'ы (обратная совместимость)
 
-> `pages/settings-provider-degradation.page.tsx:49` — `SettingsProviderDegradationPage`
+16 старых маршрутов (`/settings-appearance`, `/settings-llm-providers`, etc.) перенаправляют на консолидированные страницы.
 
-Мониторинг здоровья провайдеров: degradation level, affected features, ETA, queued actions.
+---
 
-### Adoption Analytics
+## 15. Adoption Analytics
 
-> `pages/settings-adoption-analytics.page.tsx:139` — `SettingsAdoptionAnalyticsPage`
+> `pages/settings-adoption-analytics.page.tsx` — `SettingsAdoptionAnalyticsPage`
+
+Промоутирован из Settings в основную навигацию (группа Intelligence):
 
 - Value realization KPIs: active users, median time to first value
 - Adoption funnel (5 этапов): connect → add repo → first scan → first insights → first CCR reviewed
 - Conversion + drop-off rates, workflow health per stage
 
-### Concurrency
+---
 
-> `pages/settings-concurrency.page.tsx:123` — `SettingsConcurrencyPage`
+## 16. Layout & Navigation
 
-Admin config с optimistic conflict resolution: severity threshold, ignore paths, approval toggle.
+| Компонент | Файл | Роль |
+|---|---|---|
+| DashboardLayout | `components/layout/dashboard-layout.tsx` | Root layout: sidebar + content |
+| Sidebar | `components/layout/sidebar.tsx` | Collapsible навигация |
+| SidebarNav | `components/layout/sidebar-nav.tsx` | 4 группы + utility items |
+| SidebarActions | `components/layout/sidebar-actions.tsx` | Search, notifications, theme |
+| SidebarFooter | `components/layout/sidebar-footer.tsx` | Avatar, org switcher |
+| ContentToolbar | `components/layout/content-toolbar.tsx` | Breadcrumbs, mobile menu |
+| Header | `components/layout/header.tsx` | Legacy header |
+| PageShell | `components/layout/page-shell.tsx` | Page wrapper |
+| SettingsLayout | `components/layout/settings-layout.tsx` | 2-column settings layout |
+| CommandPalette | `components/layout/command-palette.tsx` | Cmd+K глобальный поиск |
+| MobileSidebar | `components/layout/mobile-sidebar.tsx` | Drawer для мобильной |
+| BrandMark | `components/layout/brand-mark.tsx` | Лого |
+| UserMenu | `components/layout/user-menu.tsx` | Avatar dropdown |
+| ThemeModeToggle | `components/layout/theme-mode-toggle.tsx` | Dark/System/Light |
+| ThemeToggle | `components/layout/theme-toggle.tsx` | Full theme switcher |
+| NotificationAlerts | `components/layout/notification-alerts.tsx` | Alert stack |
+| ShortcutsHelpModal | `components/layout/shortcuts-help-modal.tsx` | Modal шорткатов |
+| SessionRecoveryModal | `components/layout/session-recovery-modal.tsx` | Re-auth при 401/419 |
 
-### Audit Logs
+Sidebar навигация:
+```
+My Work             /my-work
+Dashboard           /
 
-> `pages/settings-audit-logs.page.tsx:246` — `SettingsAuditLogsPage`
+Reviews
+  CCR Management    /reviews
+  Issues            /issues
 
-Аудит-трейл: actor, action type, timestamp, target, details. Фильтры + CSV export.
+Repositories        /repositories
 
-### Appearance
+Intelligence
+  CodeCity          /dashboard/code-city
+  Reports           /reports
+  Adoption Analytics /adoption-analytics
 
-> `pages/settings-appearance.page.tsx:123` — `SettingsAppearancePage`
-
-- Mode: light / dark / system
-- Preset themes (quick + full list), random preset (Alt+R)
-- Accent color picker + intensity slider
-- Border radius sliders (global + form)
-- Theme library CRUD: save, rename, duplicate, delete, export/import JSON
-- Locale switcher с date/number format preview
-
-Вспомогательные файлы:
-- `pages/settings-appearance/appearance-settings.constants.ts`
-- `pages/settings-appearance/appearance-settings.utils.ts`
-
-### Jobs Center
-
-> `pages/settings-jobs.page.tsx:305` — `SettingsJobsPage`
-
-Background jobs: kind, status (queued/running/completed/failed/paused/stuck/canceled), schedules (hourly/weekly + timezone).
+──────────
+Settings            /settings
+Help                /help-diagnostics
+```
 
 ---
 
-## 12. Layout & Navigation
+## 17. Infrastructure Components
 
-| Компонент | Файл | Строка | Роль |
-|---|---|---|---|
-| DashboardLayout | `components/layout/dashboard-layout.tsx` | 64 | Root layout: sidebar + content |
-| Sidebar | `components/layout/sidebar.tsx` | 31 | Collapsible навигация (240px / 48px) |
-| SidebarNav | `components/layout/sidebar-nav.tsx` | — | Группы: Reviews, Operations, Analytics |
-| SidebarActions | `components/layout/sidebar-actions.tsx` | — | Search, notifications, theme toggle |
-| SidebarFooter | `components/layout/sidebar-footer.tsx` | — | Avatar, org switcher, quick links |
-| ContentToolbar | `components/layout/content-toolbar.tsx` | — | Breadcrumbs, mobile menu, search, notifications |
-| Header | `components/layout/header.tsx` | 81 | Legacy header (deprecated) |
-| PageShell | `components/layout/page-shell.tsx` | 34 | Page wrapper: title, subtitle, actions |
-| SettingsLayout | `components/layout/settings-layout.tsx` | 23 | 2-column settings layout |
-| CommandPalette | `components/layout/command-palette.tsx` | 78 | Cmd+K глобальный поиск |
-| MobileSidebar | `components/layout/mobile-sidebar.tsx` | — | Drawer для мобильной навигации |
-| BrandMark | `components/layout/brand-mark.tsx` | — | Лого (compact / expanded) |
-| UserMenu | `components/layout/user-menu.tsx` | — | Avatar dropdown |
-| ThemeModeToggle | `components/layout/theme-mode-toggle.tsx` | — | Dark/System/Light toggle |
-| ThemeToggle | `components/layout/theme-toggle.tsx` | — | Full theme switcher |
-| NotificationAlerts | `components/layout/notification-alerts.tsx` | — | Animated alert stack |
-| ShortcutsHelpModal | `components/layout/shortcuts-help-modal.tsx` | — | Modal всех шорткатов |
-| SessionRecoveryModal | `components/layout/session-recovery-modal.tsx` | — | Re-auth при 401/419 |
-
-Command Palette files:
-- `components/layout/command-palette.constants.ts` — группы, ключи, storage keys
-- `components/layout/command-palette.utils.ts` — fuzzy search, localStorage, item building
+| Компонент | Файл | Роль |
+|---|---|---|
+| SystemStateCard | `components/infrastructure/system-state-card.tsx` | Empty/error/loading states |
+| DataFreshnessPanel | `components/infrastructure/data-freshness-panel.tsx` | Freshness + provenance |
+| ExplainabilityPanel | `components/infrastructure/explainability-panel.tsx` | Signal explainability |
 
 ---
 
-## 13. Infrastructure Components
+## 18. System Pages
 
-| Компонент | Файл | Строка | Роль |
-|---|---|---|---|
-| SystemStateCard | `components/infrastructure/system-state-card.tsx` | 53 | Empty/error/loading/partial states |
-| DataFreshnessPanel | `components/infrastructure/data-freshness-panel.tsx` | 129 | Freshness status + provenance drawer |
-| ExplainabilityPanel | `components/infrastructure/explainability-panel.tsx` | 54 | Signal explainability + factors + export |
-
----
-
-## 14. System Pages
-
-| Страница | Файл | Строка | Роль |
-|---|---|---|---|
-| System Health | `pages/system-health.page.tsx` | 18 | Health check + feature flags |
-| Help & Diagnostics | `pages/help-diagnostics.page.tsx` | 371 | Knowledge base + auto-diagnostics + support bundle |
-| Session Recovery | `pages/session-recovery.page.tsx` | 14 | Re-auth flow |
-| Scan Error Recovery | `pages/scan-error-recovery.page.tsx` | 14 | Scan failure recovery |
+| Страница | Файл | Роль |
+|---|---|---|
+| System Health | `pages/system-health.page.tsx` | Health check + feature flags |
+| Help & Diagnostics | `pages/help-diagnostics.page.tsx` | Knowledge base + diagnostics |
+| Session Recovery | `pages/session-recovery.page.tsx` | Re-auth flow |
+| Scan Error Recovery | `pages/scan-error-recovery.page.tsx` | Scan failure recovery |
 
 ---
 
-## 15. API Layer
+## 19. API Layer
 
 ### Endpoints
 
@@ -725,7 +564,7 @@ Command Palette files:
 | Repo Config | `lib/api/endpoints/repo-config.endpoint.ts` |
 | System | `lib/api/endpoints/system.endpoint.ts` |
 
-### Query Hooks
+### Query Hooks (`lib/hooks/queries/`)
 
 | Hook | Файл |
 |---|---|
@@ -749,12 +588,12 @@ Command Palette files:
 | useSSE | `lib/hooks/use-sse.ts` | SSE streaming + reconnection |
 | usePolicyDrift | `lib/hooks/use-policy-drift.ts` | Policy drift detection |
 | useOrganizationSwitcher | `lib/hooks/use-organization-switcher.ts` | Org switching |
-| useProviderDegradation | `lib/hooks/use-provider-degradation.ts` | Provider health monitoring |
-| useMultiTabSync | `lib/hooks/use-multi-tab-sync.ts` | Cross-tab synchronization |
+| useProviderDegradation | `lib/hooks/use-provider-degradation.ts` | Provider health |
+| useMultiTabSync | `lib/hooks/use-multi-tab-sync.ts` | Cross-tab sync |
 | useDashboardShortcuts | `lib/hooks/use-dashboard-shortcuts.ts` | Keyboard shortcuts |
-| useSessionRecovery | `lib/hooks/use-session-recovery.ts` | Session recovery logic |
+| useSessionRecovery | `lib/hooks/use-session-recovery.ts` | Session recovery |
 
-### Infrastructure
+### Infrastructure (`lib/`)
 
 | Модуль | Файл | Роль |
 |---|---|---|
@@ -764,7 +603,7 @@ Command Palette files:
 | Query Client | `lib/query/query-client.ts` | TanStack Query setup |
 | Query Keys | `lib/query/query-keys.ts` | Query key factory |
 | Analytics SDK | `lib/analytics/analytics-sdk.ts` | Event tracking |
-| Analytics Types | `lib/analytics/analytics-types.ts` | Analytics type definitions |
+| Analytics Types | `lib/analytics/analytics-types.ts` | Analytics types |
 | Analytics Context | `lib/analytics/analytics-context.tsx` | React context |
 | Sentry | `lib/monitoring/sentry.ts` | Error monitoring |
 | Web Vitals | `lib/monitoring/web-vitals.ts` | Performance metrics |
@@ -775,105 +614,65 @@ Command Palette files:
 | Toast | `lib/notifications/toast.ts` | Toast notifications |
 | i18n | `lib/i18n/i18n.ts` | Internationalization |
 | i18n Resources | `lib/i18n/i18n-resources.ts` | Translation resources |
-| i18n Types | `lib/i18n/i18n-types.ts` | i18n type definitions |
+| i18n Types | `lib/i18n/i18n-types.ts` | i18n types |
 | useLocale | `lib/i18n/use-locale.ts` | Locale hook |
-| useDynamicTranslation | `lib/i18n/use-dynamic-translation.ts` | Dynamic translation hook |
+| useDynamicTranslation | `lib/i18n/use-dynamic-translation.ts` | Dynamic translation |
 | Security Headers | `lib/security/security-headers.ts` | CSP/security headers |
+| cn() utility | `lib/utils.ts` | CSS class merge |
+| Generated Types | `lib/api/generated/index.ts` | OpenAPI types |
 
-### Auth
+### Auth (`lib/auth/`)
 
-| Модуль | Файл | Роль |
-|---|---|---|
-| AuthShell | `lib/auth/auth-shell.tsx` | Auth provider wrapper |
-| AuthBoundary | `lib/auth/auth-boundary.tsx` | Route protection |
-| AuthAccess | `lib/auth/auth-access.tsx` | Permission checks |
-| AuthLoginPanel | `lib/auth/auth-login-panel.tsx` | Login UI |
-| AuthSession | `lib/auth/auth-session.ts` | Session management |
-| AuthHandlers | `lib/auth/auth-handlers.ts` | Auth event handlers |
-| AuthRoleResolver | `lib/auth/auth-role-resolver.ts` | Role resolution |
-| AuthStatus | `lib/auth/auth-status.ts` | Auth state |
-| AuthUrl | `lib/auth/auth-url.ts` | Auth URL builder |
-| AuthLabels | `lib/auth/auth-labels.ts` | Auth UI labels |
-| AuthTypes | `lib/auth/types.ts` | Auth type definitions |
-| useAuthBoundaryState | `lib/auth/use-auth-boundary-state.ts` | Auth boundary state hook |
+| Модуль | Файл |
+|---|---|
+| AuthShell | `lib/auth/auth-shell.tsx` |
+| AuthBoundary | `lib/auth/auth-boundary.tsx` |
+| AuthAccess | `lib/auth/auth-access.tsx` |
+| AuthLoginPanel | `lib/auth/auth-login-panel.tsx` |
+| AuthSession | `lib/auth/auth-session.ts` |
+| AuthHandlers | `lib/auth/auth-handlers.ts` |
+| AuthRoleResolver | `lib/auth/auth-role-resolver.ts` |
+| AuthStatus | `lib/auth/auth-status.ts` |
+| AuthUrl | `lib/auth/auth-url.ts` |
+| AuthLabels | `lib/auth/auth-labels.ts` |
+| AuthTypes | `lib/auth/types.ts` |
+| useAuthBoundaryState | `lib/auth/use-auth-boundary-state.ts` |
 
-### Utilities & Support Modules
-
-| Модуль | Файл | Роль |
-|---|---|---|
-| cn() utility | `lib/utils.ts` | Утилита объединения CSS-классов (аналог clsx) |
-| Generated Types | `lib/api/generated/index.ts` | OpenAPI-generated types (via `bun run codegen`) |
-
-#### Access Control — `lib/access/`
+### Constants (`lib/constants/`)
 
 | Файл | Роль |
 |---|---|
-| `lib/access/access-types.ts` | Типы ролей и permission guards |
-
-#### Constants — `lib/constants/`
-
-| Файл | Роль |
-|---|---|
-| `lib/constants/animation.ts` | Анимационные токены (duration, easing) |
-| `lib/constants/chart-constants.ts` | Общие константы для графиков |
-| `lib/constants/chart-recharts-defaults.ts` | Дефолтные настройки Recharts |
-| `lib/constants/codecity-colors.ts` | Цветовая палитра CodeCity |
-| `lib/constants/graph-colors.ts` | Цвета для dependency графов |
+| `lib/constants/animation.ts` | Анимационные токены |
+| `lib/constants/chart-constants.ts` | Общие константы графиков |
+| `lib/constants/chart-recharts-defaults.ts` | Дефолты Recharts |
+| `lib/constants/codecity-colors.ts` | Палитра CodeCity |
+| `lib/constants/graph-colors.ts` | Цвета dependency графов |
 | `lib/constants/spacing.ts` | Spacing токены |
 | `lib/constants/typography.ts` | Типографические токены |
 
-#### Feature Flags — `lib/feature-flags/`
+### Прочие модули
 
-| Файл | Роль |
-|---|---|
-| `lib/feature-flags/feature-flags.ts` | Утилиты feature flags |
-
-#### Navigation — `lib/navigation/`
-
-| Файл | Роль |
-|---|---|
-| `lib/navigation/deep-link-guard.ts` | Валидация deep links |
-| `lib/navigation/route-guard-map.ts` | Маппинг route → permission guards |
-| `lib/navigation/settings-nav-items.tsx` | Построение навигации settings-страниц |
-
-#### Permissions — `lib/permissions/`
-
-| Файл | Роль |
-|---|---|
-| `lib/permissions/permissions.ts` | Permission checks |
-| `lib/permissions/policy-drift.ts` | Обнаружение policy drift |
-| `lib/permissions/ui-policy.ts` | UI policy enforcement |
-
-#### Providers — `lib/providers/`
-
-| Файл | Роль |
-|---|---|
-| `lib/providers/degradation-mode.ts` | State management деградации провайдеров |
-
-#### Theme — `lib/theme/`
-
-| Файл | Роль |
-|---|---|
-| `lib/theme/use-theme.ts` | Хук управления темой (mode, preset) |
-
-#### Types — `lib/types/`
-
-| Файл | Роль |
-|---|---|
-| `lib/types/ccr-types.ts` | Shared CCR type definitions |
-
-#### Utils — `lib/utils/`
-
-| Файл | Роль |
-|---|---|
-| `lib/utils/safe-json.ts` | Безопасный JSON.parse/stringify |
-| `lib/utils/safe-storage.ts` | Безопасная работа с localStorage/sessionStorage |
+| Область | Файл | Роль |
+|---|---|---|
+| Access | `lib/access/access-types.ts` | Типы ролей |
+| Feature Flags | `lib/feature-flags/feature-flags.ts` | Feature flags |
+| Deep Links | `lib/navigation/deep-link-guard.ts` | Валидация deep links |
+| Route Guards | `lib/navigation/route-guard-map.ts` | Route → permission |
+| Settings Nav | `lib/navigation/settings-nav-items.tsx` | Settings navigation |
+| Permissions | `lib/permissions/permissions.ts` | Permission checks |
+| Policy Drift | `lib/permissions/policy-drift.ts` | Policy drift |
+| UI Policy | `lib/permissions/ui-policy.ts` | UI enforcement |
+| Degradation | `lib/providers/degradation-mode.ts` | Provider degradation |
+| Theme | `lib/theme/use-theme.ts` | Theme management |
+| CCR Types | `lib/types/ccr-types.ts` | Shared CCR types |
+| Safe JSON | `lib/utils/safe-json.ts` | Safe JSON parse |
+| Safe Storage | `lib/utils/safe-storage.ts` | Safe localStorage |
 
 ---
 
-## 16. Routing
+## 20. Routing
 
-> `routes/` — TanStack Router file-based routing
+> `routes/` — TanStack Router file-based routing (46 файлов)
 
 | Route | Файл |
 |---|---|
@@ -891,6 +690,7 @@ Command Palette files:
 | Report Generator | `routes/reports.generate.tsx` |
 | Report Viewer | `routes/reports.viewer.tsx` |
 | Onboarding | `routes/onboarding.tsx` |
+| Adoption Analytics | `routes/adoption-analytics.tsx` |
 | Settings Hub | `routes/settings.tsx` |
 | Login | `routes/login.tsx` |
 | System Health | `routes/system-health.tsx` |
@@ -898,69 +698,71 @@ Command Palette files:
 | Scan Progress | `routes/scan-progress.tsx` |
 | Scan Error Recovery | `routes/scan-error-recovery.tsx` |
 | Session Recovery | `routes/session-recovery.tsx` |
-| 21 settings routes | `routes/settings-*.tsx` |
-
-Route tree generated: `routeTree.gen.ts`
+| 5 consolidated settings | `routes/settings-{general,providers,security,operations,code-review}.tsx` |
+| Contract Validation | `routes/settings-contract-validation.tsx` |
+| Integrations | `routes/settings-integrations.tsx` |
+| Billing | `routes/settings-billing.tsx` |
+| Organization | `routes/settings-organization.tsx` |
+| 16 redirect routes | `routes/settings-{appearance,notifications,...}.tsx` |
 
 ---
 
-## 17. App Shell & Entry Point
-
-Точка входа приложения, глобальные providers, error boundary, suspense.
+## 21. App Shell & Entry Point
 
 | Файл | Роль |
 |---|---|
-| `main.tsx` | Entry point: Sentry init, i18n init, Web Vitals, ReactDOM.createRoot |
-| `vite-env.d.ts` | Vite type declarations (import.meta.env) |
-| `app/globals.css` | Глобальные CSS стили (Tailwind directives) |
-| `app/app.tsx` | Root компонент: QueryClientProvider + ThemeProvider + RouterProvider + AnalyticsProvider + Toast |
-| `app/router.ts` | TanStack Router instance (createRouter с routeTree) |
-| `app/error-fallback.tsx` | Error boundary fallback (status code + retry) |
-| `app/route-suspense-fallback.tsx` | Suspense fallback для lazy-загрузки route-экранов |
+| `main.tsx` | Entry point: Sentry, i18n, Web Vitals, ReactDOM |
+| `vite-env.d.ts` | Vite type declarations |
+| `app/globals.css` | Глобальные CSS (Tailwind) |
+| `app/app.tsx` | Root: QueryClient + Theme + Router + Analytics + Toast |
+| `app/router.ts` | TanStack Router instance |
+| `app/error-fallback.tsx` | Error boundary fallback |
+| `app/route-suspense-fallback.tsx` | Suspense fallback |
 
 ---
 
-## 18. Иконки
+## 22. Иконки
 
-> `components/icons/app-icons.ts` — централизованный реестр Lucide-иконок
-
-Единый файл с именованными ре-экспортами из `lucide-react`. Все компоненты импортируют иконки через этот реестр.
+> `components/icons/app-icons.ts` — централизованный реестр Lucide-иконок (49 иконок)
 
 ---
 
-## 19. Общие типы форм
-
-> `components/forms/index.ts` — `IFormSelectOption`
-
-Shared-интерфейс для select-полей (value, label, description, isDisabled). Используется в settings-формах.
-
----
-
-## 20. Dev Mocks (MSW)
-
-Mock Service Worker для dev-режима — перехватывает HTTP-запросы к API.
+## 23. Dev Mocks (MSW)
 
 | Файл | Роль |
 |---|---|
-| `mocks/handlers.ts` | MSW request handlers (auth, endpoints) |
-| `mocks/browser.ts` | MSW browser worker (setupWorker) |
+| `mocks/handlers.ts` | MSW request handlers |
+| `mocks/browser.ts` | MSW browser worker |
 
 ---
 
 ## Сводка: что продукт даёт пользователю
 
-| Возможность | Количество | Ключевые страницы |
-|---|---|---|
-| AI Code Review | 20-stage pipeline + SafeGuard | CCR Management, CCR Detail |
-| Визуализация кода | 3D CodeCity + 4 типа графов + 6 оверлеев | CodeCity Dashboard, Repository Overview |
-| Предсказание проблем | Prediction + What-If + Simulation | CodeCity (prediction section) |
-| Командная аналитика | Leaderboard + Bus Factor + Knowledge Silos + Ownership | CodeCity (ownership/gamification sections) |
-| Triage Hub | SLA-aware с escalation | My Work |
-| Отчёты | Generate + Schedule + AI Summary + Export | Reports (3 страницы) |
-| AI Agent | Contextual chat + streaming | Chat (в CCR Detail) |
-| Multi-provider | 4 Git + 5 LLM + 4 Context + 5 Notification | Settings (4 страницы) |
-| Enterprise Controls | SSO + RBAC + Audit + BYOK + Privacy + Billing | Settings (6 страниц) |
-| Onboarding | Wizard + Activation Checklist | Onboarding, Dashboard |
-| Infrastructure | Health + Diagnostics + Session Recovery + Jobs | System (4 страницы) |
+| Возможность | Ключевые страницы |
+|---|---|
+| AI Code Review (20-stage pipeline + SafeGuard) | CCR Management, CCR Detail |
+| Визуализация кода (3D CodeCity + 4 графа + 6 оверлеев) | CodeCity Dashboard, Repository Overview |
+| Предсказание проблем (Prediction + What-If + Simulation) | CodeCity (prediction section) |
+| Командная аналитика (Leaderboard + Bus Factor + Knowledge) | CodeCity (ownership/gamification) |
+| Triage Hub (SLA-aware с escalation) | My Work |
+| Отчёты (Generate + Schedule + AI Summary) | Reports (3 страницы) |
+| AI Agent (Contextual chat + streaming) | Chat (в CCR Detail) |
+| Multi-provider (4 Git + 5 LLM + 4 Context + 5 Notification) | Settings Providers, Integrations |
+| Enterprise Controls (SSO + RBAC + Audit + BYOK + Privacy) | Settings Security, Organization |
+| Onboarding (Wizard + Activation Checklist) | Onboarding, Dashboard |
+| Infrastructure (Health + Diagnostics + Session Recovery) | System (4 страницы) |
+| Adoption Analytics (Funnel + KPIs + Health) | Adoption Analytics |
 
-**Итого: ~200 компонентов, 39 страниц (18 основных + 21 settings), 12 API endpoints, 12 query hooks, 7 custom hooks, 14 utility modules, ~412 файлов (.ts/.tsx).**
+**Итого: ~390 файлов (.ts/.tsx), 25 основных страниц, 9 settings (consolidated), 12 API endpoints, 12 query hooks, 7 custom hooks.**
+
+**Компоненты по домену:**
+- `codecity/` — 24 файла
+- `dependency-graphs/` — 9 файлов
+- `predictions/` — 11 файлов
+- `refactoring/` — 4 файла
+- `team-analytics/` — 10 файлов
+- `dashboard/` — 15 файлов
+- `layout/` — 21 файл
+- `settings/` — 18 файлов
+- `chat/` — 7 файлов
+- `reviews/` — 7 файлов
