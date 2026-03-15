@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     TrendForecastChart,
     type ITrendForecastChartPoint,
-} from "@/components/graphs/trend-forecast-chart"
+} from "@/components/predictions/trend-forecast-chart"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_POINTS: ReadonlyArray<ITrendForecastChartPoint> = [

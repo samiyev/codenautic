@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     RootCauseChainViewer,
     type IRootCauseIssueDescriptor,
-} from "@/components/graphs/root-cause-chain-viewer"
+} from "@/components/codecity/root-cause-chain-viewer"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_ISSUES: ReadonlyArray<IRootCauseIssueDescriptor> = [

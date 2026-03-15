@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     PredictionComparisonView,
     type IPredictionComparisonSnapshot,
-} from "@/components/graphs/prediction-comparison-view"
+} from "@/components/predictions/prediction-comparison-view"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_SNAPSHOTS: ReadonlyArray<IPredictionComparisonSnapshot> = [

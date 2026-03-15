@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     RefactoringTimeline,
     type IRefactoringTimelineTask,
-} from "@/components/graphs/refactoring-timeline"
+} from "@/components/refactoring/refactoring-timeline"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_TASKS: ReadonlyArray<IRefactoringTimelineTask> = [

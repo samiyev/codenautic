@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import { useState, type ReactElement } from "react"
 import { describe, expect, it } from "vitest"
 
-import { TourCustomizer, type ITourCustomizerProps } from "@/components/graphs/tour-customizer"
+import { TourCustomizer, type ITourCustomizerProps } from "@/components/codecity/tour-customizer"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_STEPS: ITourCustomizerProps["steps"] = [

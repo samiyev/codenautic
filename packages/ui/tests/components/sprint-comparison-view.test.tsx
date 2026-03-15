@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     SprintComparisonView,
     type ISprintComparisonSnapshot,
-} from "@/components/graphs/sprint-comparison-view"
+} from "@/components/team-analytics/sprint-comparison-view"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_SNAPSHOTS: ReadonlyArray<ISprintComparisonSnapshot> = [

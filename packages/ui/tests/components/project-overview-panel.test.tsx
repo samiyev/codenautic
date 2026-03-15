@@ -1,7 +1,7 @@
 import { screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import { ProjectOverviewPanel } from "@/components/graphs/project-overview-panel"
+import { ProjectOverviewPanel } from "@/components/codecity/project-overview-panel"
 import { renderWithProviders } from "../utils/render"
 
 describe("ProjectOverviewPanel", (): void => {

@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import { TeamLeaderboard, type ITeamLeaderboardEntry } from "@/components/graphs/team-leaderboard"
+import { TeamLeaderboard, type ITeamLeaderboardEntry } from "@/components/team-analytics/team-leaderboard"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_ENTRIES: ReadonlyArray<ITeamLeaderboardEntry> = [

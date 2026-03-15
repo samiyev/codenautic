@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     SprintSummaryCard,
     type ISprintSummaryCardModel,
-} from "@/components/graphs/sprint-summary-card"
+} from "@/components/team-analytics/sprint-summary-card"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_MODEL: ISprintSummaryCardModel = {

@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     RefactoringDashboard,
     type IRefactoringTargetDescriptor,
-} from "@/components/graphs/refactoring-dashboard"
+} from "@/components/refactoring/refactoring-dashboard"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_TARGETS: ReadonlyArray<IRefactoringTargetDescriptor> = [

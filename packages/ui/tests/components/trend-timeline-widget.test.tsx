@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 import {
     TrendTimelineWidget,
     type ITrendTimelineEntry,
-} from "@/components/graphs/trend-timeline-widget"
+} from "@/components/predictions/trend-timeline-widget"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_ENTRIES: ReadonlyArray<ITrendTimelineEntry> = [

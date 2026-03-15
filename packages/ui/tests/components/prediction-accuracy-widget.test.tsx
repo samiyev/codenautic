@@ -7,7 +7,7 @@ import {
     type IPredictionAccuracyCase,
     type IPredictionAccuracyPoint,
     type IPredictionConfusionMatrix,
-} from "@/components/graphs/prediction-accuracy-widget"
+} from "@/components/predictions/prediction-accuracy-widget"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_POINTS: ReadonlyArray<IPredictionAccuracyPoint> = [

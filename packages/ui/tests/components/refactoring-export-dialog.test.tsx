@@ -2,8 +2,8 @@ import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import { RefactoringExportDialog } from "@/components/graphs/refactoring-export-dialog"
-import type { IRefactoringTargetDescriptor } from "@/components/graphs/refactoring-dashboard"
+import { RefactoringExportDialog } from "@/components/refactoring/refactoring-export-dialog"
+import type { IRefactoringTargetDescriptor } from "@/components/refactoring/refactoring-dashboard"
 import { renderWithProviders } from "../utils/render"
 
 const TEST_TARGETS: ReadonlyArray<IRefactoringTargetDescriptor> = [
