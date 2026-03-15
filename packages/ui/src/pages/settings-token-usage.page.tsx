@@ -12,7 +12,6 @@ import {
 } from "@/components/dashboard/dashboard-date-range-filter"
 import { type IMetricGridMetric, MetricsGrid } from "@/components/dashboard/metrics-grid"
 import { Alert, Button, Card, CardContent, CardHeader, Table } from "@heroui/react"
-import { FormLayout } from "@/components/forms/form-layout"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 type TUsageTab = "by-ccr" | "by-developer" | "by-model"
@@ -458,10 +457,12 @@ export function SettingsTokenUsagePage(): ReactElement {
     }
 
     return (
-        <FormLayout
-            title={t("settings:tokenUsage.pageTitle")}
-            description={t("settings:tokenUsage.pageSubtitle")}
-        >
+        <div className="space-y-6 mx-auto max-w-[1400px]">
+            <div className="space-y-1.5">
+                <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:tokenUsage.pageTitle")}</h1>
+                <p className={TYPOGRAPHY.bodyMuted}>{t("settings:tokenUsage.pageSubtitle")}</p>
+            </div>
+            <div className="space-y-6">
             <div className="flex justify-end">
                 <DashboardDateRangeFilter
                     value={range}
@@ -555,6 +556,7 @@ export function SettingsTokenUsagePage(): ReactElement {
                     <UsageTable rows={byCcr} title={t("settings:tokenUsage.usageByCcr")} />
                 ) : null}
             </div>
-        </FormLayout>
+            </div>
+        </div>
     )
 }
