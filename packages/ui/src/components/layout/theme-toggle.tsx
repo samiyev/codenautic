@@ -3,16 +3,11 @@ import { useTranslation } from "react-i18next"
 
 import { Laptop, Moon, Sun } from "@/components/icons/app-icons"
 import { Button } from "@heroui/react"
-import {
-    type ThemeMode,
-    type ThemePresetId,
-    type IThemePreset,
-    useThemeMode,
-} from "@/lib/theme/theme-provider"
+import { type TThemeMode, type TThemePreset, useTheme } from "@/lib/theme/use-theme"
 
 const MODE_OPTIONS: ReadonlyArray<{
     /** Значение режима. */
-    readonly value: ThemeMode
+    readonly value: TThemeMode
     /** Иконка режима. */
     readonly Icon: typeof Moon
     /** Читаемое название. */
@@ -55,8 +50,7 @@ export interface IThemeToggleProps {
  * @returns Блок с тремя кнопками выбора `light`, `system`, `dark`.
  */
 export function ThemeToggle(props: IThemeToggleProps): ReactElement {
-    const { mode, preset, presets, resolvedMode, setMode, setPreset } = useThemeMode()
-    const previewPalette = getPresetPalette(presets, preset, resolvedMode)
+    const { mode, preset, presets, resolvedMode, setMode, setPreset } = useTheme()
 
     return (
         <div className={props.className}>
@@ -65,28 +59,31 @@ export function ThemeToggle(props: IThemeToggleProps): ReactElement {
                 <ThemePresetButtons
                     currentPreset={preset}
                     onPresetChange={(nextPreset): void => {
-                        setPreset(nextPreset as ThemePresetId)
+                        setPreset(nextPreset as TThemePreset)
                     }}
                     presets={presets}
                 />
-                <p className="px-1 text-xs text-muted">
-                    Preset: {getPresetLabel(presets, preset)}
-                </p>
+                <p className="px-1 text-xs text-muted">Preset: {getPresetLabel(presets, preset)}</p>
                 <p className="sr-only" aria-live="polite">
                     Active theme resolved mode is {resolvedMode}.
                 </p>
             </div>
-            <ThemePalettePreview palette={previewPalette} />
         </div>
     )
 }
 
+/**
+ * Кнопки переключения режима темы.
+ *
+ * @param props Конфигурация.
+ * @returns Кнопки Dark/System/Light.
+ */
 function ThemeModeButtons({
     currentMode,
     onModeChange,
 }: {
-    readonly currentMode: ThemeMode
-    readonly onModeChange: (nextMode: ThemeMode) => void
+    readonly currentMode: TThemeMode
+    readonly onModeChange: (nextMode: TThemeMode) => void
 }): ReactElement {
     const { t } = useTranslation(["navigation"])
 
@@ -124,6 +121,12 @@ function ThemeModeButtons({
     )
 }
 
+/**
+ * Кнопки выбора пресета темы.
+ *
+ * @param props Конфигурация.
+ * @returns Набор кнопок-пресетов.
+ */
 function ThemePresetButtons({
     currentPreset,
     onPresetChange,
@@ -131,15 +134,12 @@ function ThemePresetButtons({
 }: {
     readonly currentPreset: string
     readonly onPresetChange: (nextPreset: string) => void
-    readonly presets: ReadonlyArray<IThemePreset>
+    readonly presets: ReadonlyArray<{ readonly id: string; readonly label: string }>
 }): ReactElement {
     return (
         <div className="flex flex-wrap items-center gap-2">
             {presets.map((themePreset): ReactElement => {
                 const isActive = themePreset.id === currentPreset
-                const style = {
-                    background: `linear-gradient(135deg, ${themePreset.light.accent} 0%, ${themePreset.light.success} 45%, ${themePreset.light.surface} 100%)`,
-                }
 
                 return (
                     <Button
@@ -148,17 +148,12 @@ function ThemePresetButtons({
                         aria-pressed={isActive}
                         className="min-w-0 rounded-full"
                         size="sm"
-                        style={style}
                         variant={isActive ? "primary" : "ghost"}
                         onPress={(): void => {
                             onPresetChange(themePreset.id)
                         }}
                     >
-                        <span className="sr-only">{themePreset.label}</span>
-                        <span
-                            aria-hidden="true"
-                            className="inline-block h-2 w-2 rounded-full border border-[color:color-mix(in_oklab,var(--foreground)_20%,transparent)]"
-                        />
+                        {themePreset.label}
                     </Button>
                 )
             })}
@@ -166,60 +161,21 @@ function ThemePresetButtons({
     )
 }
 
-function ThemePalettePreview({
-    palette,
-}: {
-    readonly palette:
-        | {
-              readonly accent: string
-              readonly success: string
-          }
-        | undefined
-}): ReactElement | null {
-    if (palette === undefined) {
-        return null
-    }
-
-    return (
-        <div aria-hidden="true" className="mt-2 flex gap-2">
-            <span
-                className="h-3 w-8 rounded-full border border-border"
-                style={{ backgroundColor: palette.accent }}
-            />
-            <span
-                className="h-3 w-8 rounded-full border border-border"
-                style={{ backgroundColor: palette.accent }}
-            />
-            <span
-                className="h-3 w-8 rounded-full border border-border"
-                style={{ backgroundColor: palette.success }}
-            />
-        </div>
-    )
-}
-
-function getPresetLabel(presets: ReadonlyArray<IThemePreset>, presetId: string): string {
+/**
+ * Возвращает label пресета по id.
+ *
+ * @param presets Каталог пресетов.
+ * @param presetId Идентификатор пресета.
+ * @returns Человекочитаемое название.
+ */
+function getPresetLabel(
+    presets: ReadonlyArray<{ readonly id: string; readonly label: string }>,
+    presetId: string,
+): string {
     const nextPreset = presets.find((themePreset): boolean => themePreset.id === presetId)
     if (nextPreset === undefined) {
         return presetId
     }
 
     return nextPreset.label
-}
-
-function getPresetPalette(
-    presets: ReadonlyArray<{
-        readonly id: string
-        readonly light: Record<"accent" | "success", string>
-        readonly dark: Record<"accent" | "success", string>
-    }>,
-    presetId: string,
-    resolvedMode: "light" | "dark",
-): { readonly accent: string; readonly success: string } | undefined {
-    const activePreset = presets.find((item): boolean => item.id === presetId)
-    if (activePreset === undefined) {
-        return undefined
-    }
-
-    return resolvedMode === "light" ? activePreset.light : activePreset.dark
 }
