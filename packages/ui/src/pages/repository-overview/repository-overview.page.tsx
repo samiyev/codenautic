@@ -1,4 +1,4 @@
-import { type ChangeEvent, type ReactElement, useEffect, useState } from "react"
+import { type ChangeEvent, type ReactElement, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { FileDependencyGraph } from "@/components/dependency-graphs/file-dependency-graph"
@@ -7,8 +7,9 @@ import { FunctionClassCallGraph } from "@/components/dependency-graphs/function-
 import { PackageDependencyGraph } from "@/components/dependency-graphs/package-dependency-graph"
 import { Link } from "@tanstack/react-router"
 
-import { Alert, Button, Card, CardContent, CardHeader, Chip } from "@heroui/react"
+import { Alert, Button, Card, CardContent, CardHeader, Chip, Spinner } from "@heroui/react"
 import { MetricsGrid } from "@/components/dashboard/metrics-grid"
+import { useRepositoryOverview } from "@/lib/hooks/queries"
 import { PageShell } from "@/components/layout/page-shell"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { LINK_CLASSES, TYPOGRAPHY } from "@/lib/constants/typography"
@@ -22,9 +23,10 @@ import {
     RESCAN_HOUR_OPTIONS,
     RESCAN_MINUTE_OPTIONS,
     RESCAN_WEEKDAY_OPTIONS,
-} from "./repository-overview-mock-data"
+} from "./repository-overview-constants"
 import type {
     IArchitectureSummary,
+    IRepositoryOverviewProfile,
     IRepositoryOverviewProps,
     IRescanScheduleValues,
     ITechStackItem,
@@ -34,8 +36,6 @@ import {
     createCronExpressionFromReschedule,
     createRescanScheduleFromCron,
     formatOverviewTimestamp,
-    getRepositoryDefaultSchedule,
-    getRepositoryOverviewById,
     getRescanSummaryLabel,
     isRescanScheduleMode,
     mapRiskToChipColor,
@@ -364,9 +364,34 @@ function RescanScheduleDialog(props: {
  */
 export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactElement {
     const { t } = useTranslation(["reviews"])
-    const repository = getRepositoryOverviewById(props.repositoryId)
-    const defaultReschedule = createRescanScheduleFromCron(
-        getRepositoryDefaultSchedule(props.repositoryId),
+    const { overviewQuery } = useRepositoryOverview({ repositoryId: props.repositoryId })
+
+    const repository = useMemo((): IRepositoryOverviewProfile | undefined => {
+        if (overviewQuery.data === undefined) {
+            return undefined
+        }
+
+        const overview = overviewQuery.data.overview
+        return {
+            id: overview.repository.id,
+            owner: overview.repository.owner,
+            name: overview.repository.name,
+            branch: overview.repository.defaultBranch,
+            lastScanAt: overview.repository.lastScanAt,
+            filesScanned: 0,
+            totalFindings: overview.repository.issueCount,
+            healthScore: overview.healthScore,
+            architectureSummary: overview.architectureSummary,
+            keyMetrics: overview.keyMetrics,
+            techStack: overview.techStack,
+            defaultRescanCron: "manual",
+        }
+    }, [overviewQuery.data])
+
+    const defaultCron = repository?.defaultRescanCron ?? "manual"
+    const defaultReschedule = useMemo(
+        (): IRescanScheduleValues => createRescanScheduleFromCron(defaultCron),
+        [defaultCron],
     )
 
     const [isRescheduleDialogOpen, setIsRescheduleDialogOpen] = useState<boolean>(false)
@@ -375,12 +400,9 @@ export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactEl
     const [draftReschedule, setDraftReschedule] = useState<IRescanScheduleValues>(defaultReschedule)
 
     useEffect((): void => {
-        const nextReschedule = createRescanScheduleFromCron(
-            getRepositoryDefaultSchedule(props.repositoryId),
-        )
-        setCurrentReschedule(nextReschedule)
-        setDraftReschedule(nextReschedule)
-    }, [props.repositoryId])
+        setCurrentReschedule(defaultReschedule)
+        setDraftReschedule(defaultReschedule)
+    }, [defaultReschedule])
 
     const currentCron = createCronExpressionFromReschedule(currentReschedule)
     const draftCron = createCronExpressionFromReschedule(draftReschedule)
@@ -470,6 +492,14 @@ export function RepositoryOverviewPage(props: IRepositoryOverviewProps): ReactEl
                 ...previous,
                 customCron: nextCustomCron,
             }),
+        )
+    }
+
+    if (overviewQuery.isLoading === true) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <Spinner />
+            </div>
         )
     }
 
