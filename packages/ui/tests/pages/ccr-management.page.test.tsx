@@ -20,9 +20,33 @@ vi.mock("@/lib/hooks/use-intersection-observer", () => {
     }
 })
 
-import { CCR_FILTER_PRESETS_STORAGE_KEY, CcrManagementPage } from "@/pages/ccr-management.page"
+import type { ICcrWorkspaceListResponse } from "@/lib/api/endpoints/ccr-workspace.endpoint"
 import { FOCUS_REVIEWS_FILTERS_EVENT } from "@/lib/keyboard/shortcut-registry"
+import { CCR_FILTER_PRESETS_STORAGE_KEY, CcrManagementPage } from "@/pages/ccr-management.page"
+import { MOCK_CCR_ROWS } from "@/pages/ccr-data"
+import { createQueryClient } from "@/lib/query/query-client"
+import { queryKeys } from "@/lib/query/query-keys"
 import { renderWithProviders } from "../utils/render"
+
+function createSeededQueryClient(): ReturnType<typeof createQueryClient> {
+    const queryClient = createQueryClient()
+    const workspaceData: ICcrWorkspaceListResponse = {
+        ccrs: MOCK_CCR_ROWS.map((row) => ({
+            id: row.id,
+            title: row.title,
+            repository: row.repository,
+            assignee: row.assignee,
+            status: row.status,
+            comments: row.comments,
+            updatedAt: row.updatedAt,
+            team: row.team,
+            severity: row.severity,
+            attachedFiles: [...row.attachedFiles],
+        })),
+    }
+    queryClient.setQueryData(queryKeys.ccrWorkspace.list(), workspaceData)
+    return queryClient
+}
 
 interface IStoredPresetShape {
     readonly id: string
@@ -67,6 +91,7 @@ describe("ccr management page filter presets", (): void => {
                 team="all"
                 onFilterChange={onFilterChange}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const searchInput = screen.getByPlaceholderText("Search title / id / repo / assignee")
@@ -126,6 +151,7 @@ describe("ccr management page filter presets", (): void => {
                 team="all"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const table = screen.getByRole("grid", { name: "CCR management table" })
@@ -159,6 +185,7 @@ describe("ccr management page — фильтрация и UI", (): void => {
                 team="all"
                 onFilterChange={onFilterChange}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         await user.selectOptions(screen.getByRole("combobox", { name: "Filter by status" }), "new")
@@ -178,6 +205,7 @@ describe("ccr management page — фильтрация и UI", (): void => {
                 team="all"
                 onFilterChange={onFilterChange}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         await user.selectOptions(
@@ -202,6 +230,7 @@ describe("ccr management page — фильтрация и UI", (): void => {
                 team="all"
                 onFilterChange={onFilterChange}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const searchInput = screen.getByPlaceholderText("Search title / id / repo / assignee")
@@ -221,6 +250,7 @@ describe("ccr management page — фильтрация и UI", (): void => {
                 team="runtime"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const searchInput = screen.getByPlaceholderText("Search title / id / repo / assignee")
@@ -251,6 +281,7 @@ describe("ccr management page — фильтрация и UI", (): void => {
                 team="all"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         expect(screen.getByRole("heading", { level: 1, name: "CCR Management" })).not.toBeNull()
@@ -266,6 +297,7 @@ describe("ccr management page — фильтрация и UI", (): void => {
                 team="all"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const searchInput = screen.getByPlaceholderText("Search title / id / repo / assignee")
@@ -296,6 +328,7 @@ describe("ccr management page — preset edge cases", (): void => {
                 team="all"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         await user.click(screen.getByRole("button", { name: "Save preset" }))
@@ -326,6 +359,7 @@ describe("ccr management page — preset edge cases", (): void => {
                 team="all"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const presetOptions = screen.getAllByRole("option")
@@ -349,6 +383,7 @@ describe("ccr management page — preset edge cases", (): void => {
                 team="all"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const presetsSelect = screen.getByRole("combobox", { name: "Saved filter presets" })
@@ -368,6 +403,7 @@ describe("ccr management page — preset edge cases", (): void => {
                 team="all"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const presetsSelect = screen.getByRole("combobox", { name: "Saved filter presets" })
@@ -387,6 +423,7 @@ describe("ccr management page — preset edge cases", (): void => {
                 team="all"
                 onFilterChange={onFilterChange}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const applyButton = screen.getByRole("button", { name: "Apply preset" })
@@ -404,6 +441,7 @@ describe("ccr management page — preset edge cases", (): void => {
                 team="all"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const updateButton = screen.getByRole("button", { name: "Update preset" })
@@ -421,6 +459,7 @@ describe("ccr management page — preset edge cases", (): void => {
                 team="all"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const deleteButton = screen.getByRole("button", { name: "Delete preset" })
@@ -438,6 +477,7 @@ describe("ccr management page — preset edge cases", (): void => {
                 team="all"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const presetNameInput = screen.getByRole("textbox", { name: "Filter preset name" })
@@ -473,6 +513,7 @@ describe("ccr management page — preset edge cases", (): void => {
                 team="all"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const presetNameInput = screen.getByRole("textbox", { name: "Filter preset name" })
@@ -501,6 +542,7 @@ describe("ccr management page — preset edge cases", (): void => {
                 team="all"
                 onFilterChange={(): void => {}}
             />,
+            { queryClient: createSeededQueryClient() },
         )
 
         const presetNameInput = screen.getByRole("textbox", { name: "Filter preset name" })
