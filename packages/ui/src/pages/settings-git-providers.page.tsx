@@ -7,7 +7,7 @@ import {
     type IGitProviderConnection,
 } from "@/lib/api/endpoints/git-providers.endpoint"
 import { useGitProviders } from "@/lib/hooks/queries"
-import { FormLayout } from "@/components/forms/form-layout"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { GitProvidersList } from "@/components/settings/git-providers-list"
 import type { IGitProviderCardProps } from "@/components/settings/git-provider-card"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
@@ -113,10 +113,12 @@ export function SettingsGitProvidersPage(): ReactElement {
     const isTokenConfigured = hasAnyConfiguredToken(sourceProviders)
 
     return (
-        <FormLayout
-            title={t("settings:gitProviders.pageTitle")}
-            description={t("settings:gitProviders.pageSubtitle")}
-        >
+        <div className="space-y-6 mx-auto max-w-[1400px]">
+            <div className="space-y-1.5">
+                <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:gitProviders.pageTitle")}</h1>
+                <p className={TYPOGRAPHY.bodyMuted}>{t("settings:gitProviders.pageSubtitle")}</p>
+            </div>
+            <div className="space-y-6">
             <GitProvidersList providers={providerCards} />
             <Card>
                 <CardContent className="space-y-3">
@@ -161,6 +163,7 @@ export function SettingsGitProvidersPage(): ReactElement {
                     </p>
                 </CardContent>
             </Card>
-        </FormLayout>
+            </div>
+        </div>
     )
 }
