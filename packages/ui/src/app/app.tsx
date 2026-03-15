@@ -5,7 +5,6 @@ import { Toast } from "@heroui/react"
 
 import { AnalyticsProvider } from "@/lib/analytics/analytics-context"
 import { createQueryClient } from "@/lib/query/query-client"
-import { ThemeProvider } from "@/lib/theme/theme-provider"
 import { router } from "./router"
 
 /**
@@ -17,13 +16,11 @@ export function App(): ReactElement {
     const [queryClient] = useState(createQueryClient)
 
     return (
-        <ThemeProvider>
-            <QueryClientProvider client={queryClient}>
-                <AnalyticsProvider>
-                    <Toast.Provider />
-                    <RouterProvider router={router} />
-                </AnalyticsProvider>
-            </QueryClientProvider>
-        </ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+            <AnalyticsProvider>
+                <Toast.Provider />
+                <RouterProvider router={router} />
+            </AnalyticsProvider>
+        </QueryClientProvider>
     )
 }
