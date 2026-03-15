@@ -205,6 +205,20 @@ export {
     type OnboardingSummaryPromptErrorCode,
 } from "./onboarding-summary-prompt.error"
 export {
+    RefactoringAdvicePrompt,
+    type IRefactoringAdvicePrompt,
+    type IRefactoringAdvicePromptInput,
+    type IRefactoringAdvicePromptOptions,
+    type IRefactoringCouplingInput,
+    type IRefactoringMetricInput,
+} from "./refactoring-advice-prompt"
+export {
+    REFACTORING_ADVICE_PROMPT_ERROR_CODE,
+    RefactoringAdvicePromptError,
+    type IRefactoringAdvicePromptErrorDetails,
+    type RefactoringAdvicePromptErrorCode,
+} from "./refactoring-advice-prompt.error"
+export {
     LANGCHAIN_CALLBACK_EVENT_TYPE,
     LangChainCallbackHandler,
     type ILangChainCallbackDispatchInput,
