@@ -100,6 +100,12 @@ export {
     type IAstChurnCalculatorErrorDetails,
 } from "./ast-churn-calculator.error"
 export {
+    AST_OWNERSHIP_CALCULATOR_ERROR_CODE,
+    AstOwnershipCalculatorError,
+    type AstOwnershipCalculatorErrorCode,
+    type IAstOwnershipCalculatorErrorDetails,
+} from "./ast-ownership-calculator.error"
+export {
     AST_FILE_METRICS_PROVIDER_ERROR_CODE,
     AstFileMetricsProviderError,
     type AstFileMetricsProviderErrorCode,
@@ -550,6 +556,19 @@ export {
     type IAstChurnCalculatorServiceOptions,
     type IAstChurnCalculatorSummary,
 } from "./ast-churn-calculator.service"
+export {
+    AstOwnershipCalculatorService,
+    type AstOwnershipCalculatorFetchBlameBatch,
+    type AstOwnershipCalculatorNow,
+    type AstOwnershipCalculatorSleep,
+    type IAstFileOwnership,
+    type IAstOwnershipCalculatorInput,
+    type IAstOwnershipCalculatorResult,
+    type IAstOwnershipCalculatorService,
+    type IAstOwnershipCalculatorServiceOptions,
+    type IAstOwnershipCalculatorSummary,
+    type IAstOwnershipShare,
+} from "./ast-ownership-calculator.service"
 export {
     AstFileMetricsProvider,
     type AstFileMetricsProviderReadFile,
