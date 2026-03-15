@@ -302,10 +302,6 @@ export class AnalyticsSdk {
     }
 
     private bindOnlineListener(): () => void {
-        if (typeof window === "undefined") {
-            return () => undefined
-        }
-
         const onOnline = (): void => {
             void this.flush()
         }
