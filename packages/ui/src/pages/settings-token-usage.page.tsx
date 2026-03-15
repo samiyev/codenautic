@@ -13,43 +13,29 @@ import {
 import { type IMetricGridMetric, MetricsGrid } from "@/components/dashboard/metrics-grid"
 import { Alert, Button, Card, CardContent, CardHeader, Table } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
+import type {
+    IAggregatedUsageRow,
+    ITokenUsageRecord,
+    TModelName,
+    TTokenUsageGroupBy,
+    TTokenUsageRange,
+} from "@/lib/api/endpoints/token-usage.endpoint"
+import { useTokenUsage } from "@/lib/hooks/queries/use-token-usage"
 
 type TUsageTab = "by-ccr" | "by-developer" | "by-model"
-type TModelName = "claude-3-7-sonnet" | "gpt-4.1-mini" | "gpt-4o-mini" | "mistral-small-latest"
 
-interface ITokenUsageRecord {
-    /** Идентификатор usage строки. */
-    readonly id: string
-    /** LLM model. */
-    readonly model: TModelName
-    /** Имя разработчика. */
-    readonly developer: string
-    /** Идентификатор CCR. */
-    readonly ccr: string
-    /** Prompt tokens. */
-    readonly promptTokens: number
-    /** Completion tokens. */
-    readonly completionTokens: number
-}
-
+/**
+ * Ценообразование за 1k токенов по модели (page-local).
+ */
 interface IModelPricing {
-    /** Цена за 1k input tokens. */
+    /**
+     * Цена за 1k input tokens.
+     */
     readonly inputPer1kUsd: number
-    /** Цена за 1k output tokens. */
+    /**
+     * Цена за 1k output tokens.
+     */
     readonly outputPer1kUsd: number
-}
-
-interface IAggregatedUsageRow {
-    /** Группа (model/dev/CCR). */
-    readonly key: string
-    /** Prompt tokens. */
-    readonly promptTokens: number
-    /** Completion tokens. */
-    readonly completionTokens: number
-    /** Total tokens. */
-    readonly totalTokens: number
-    /** Estimated cost in USD. */
-    readonly estimatedCostUsd: number
 }
 
 const MODEL_PRICING: Readonly<Record<TModelName, IModelPricing>> = {
@@ -347,9 +333,20 @@ export function SettingsTokenUsagePage(): ReactElement {
     const refreshResetTimerRef = useRef<number | undefined>(undefined)
     const [freshnessActionMessage, setFreshnessActionMessage] = useState<string>("")
 
+    const usageRange = range as TTokenUsageRange
+    const { usageQuery } = useTokenUsage({
+        range: usageRange,
+        groupBy: selectedTab.replace("by-", "") as TTokenUsageGroupBy,
+    })
+
     const scaledRecords = useMemo(
-        (): ReadonlyArray<ITokenUsageRecord> => toScaledUsageRecords(BASE_USAGE_RECORDS, range),
-        [range],
+        (): ReadonlyArray<ITokenUsageRecord> => {
+            if (usageQuery.data !== undefined) {
+                return usageQuery.data.records
+            }
+            return toScaledUsageRecords(BASE_USAGE_RECORDS, range)
+        },
+        [range, usageQuery.data],
     )
     const byModel = useMemo(
         (): ReadonlyArray<IAggregatedUsageRow> =>
