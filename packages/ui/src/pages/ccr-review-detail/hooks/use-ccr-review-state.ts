@@ -24,14 +24,7 @@ import type {
 } from "@/lib/api/endpoints/ccr-workspace.endpoint"
 import { useCodeReview } from "@/lib/hooks/queries"
 import { getUiActionPolicy, useUiRole } from "@/lib/permissions/ui-policy"
-import {
-    ccrToContextItem,
-    getCcrDiffById,
-    getCcrReviewThreadsById,
-    type ICcrDiffFile,
-    type IReviewCommentThread,
-    type ICcrRowData,
-} from "@/pages/ccr-data"
+import type { ICcrDiffFile, ICcrRowData, IReviewCommentThread } from "@/lib/types/ccr-types"
 
 import type {
     IFileNeighborhoodDetails,
@@ -152,7 +145,12 @@ export function useCcrReviewState(props: ICcrReviewStateProps) {
     /* ─────────────────── useMemo / вычисляемые (23+) ─────────────────── */
 
     const contextItem = useMemo((): IChatPanelContext => {
-        return ccrToContextItem(ccr)
+        return {
+            attachedFiles: ccr.attachedFiles,
+            ccrNumber: ccr.id.replace("ccr-", ""),
+            id: ccr.id,
+            repoName: ccr.repository,
+        }
     }, [ccr])
 
     const ccrDiffFiles = useMemo((): ReadonlyArray<ICcrDiffFile> => {
@@ -169,7 +167,7 @@ export function useCcrReviewState(props: ICcrReviewStateProps) {
             })
         }
 
-        return getCcrDiffById(ccr.id)
+        return []
     }, [ccr.id, props.workspaceContext?.diffFiles, props.workspaceContext?.reviewId])
 
     const ccrReviewThreads = useMemo((): ReadonlyArray<IReviewCommentThread> => {
@@ -190,7 +188,7 @@ export function useCcrReviewState(props: ICcrReviewStateProps) {
             })
         }
 
-        return getCcrReviewThreadsById(ccr.id)
+        return []
     }, [ccr.id, props.workspaceContext?.reviewId, props.workspaceContext?.threads])
 
     const codeReview = useCodeReview({
