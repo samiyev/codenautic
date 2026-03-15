@@ -198,7 +198,9 @@ export function ActivationChecklist(props: IActivationChecklistProps): ReactElem
             <CardContent className="space-y-3">
                 <Alert status="accent">
                     <Alert.Title>Path to first value</Alert.Title>
-                    <Alert.Description>Complete steps to reach first successful scan and visible insights.</Alert.Description>
+                    <Alert.Description>
+                        Complete steps to reach first successful scan and visible insights.
+                    </Alert.Description>
                 </Alert>
                 <ul
                     aria-label={t("common:ariaLabel.activationChecklist.steps")}
@@ -217,7 +219,7 @@ export function ActivationChecklist(props: IActivationChecklistProps): ReactElem
                                         <p className="text-sm font-semibold text-foreground">
                                             {step.title}
                                         </p>
-                                        <p className="text-xs text-text-secondary">
+                                        <p className="text-xs text-muted">
                                             {step.description}
                                         </p>
                                     </div>
@@ -231,7 +233,7 @@ export function ActivationChecklist(props: IActivationChecklistProps): ReactElem
                                 </div>
                                 <div className="mt-2 flex flex-wrap gap-2">
                                     <Link
-                                        className="rounded-full border border-border px-3 py-1 text-xs text-text-tertiary"
+                                        className="rounded-full border border-border px-3 py-1 text-xs text-muted"
                                         to={step.path}
                                     >
                                         Open step
