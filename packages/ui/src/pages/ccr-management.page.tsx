@@ -13,7 +13,7 @@ import { PageShell } from "@/components/layout/page-shell"
 import { FOCUS_REVIEWS_FILTERS_EVENT } from "@/lib/keyboard/shortcut-registry"
 import { useCcrWorkspace } from "@/lib/hooks/queries"
 import { ReviewsContent, type IReviewRow } from "@/components/reviews/reviews-content"
-import { MOCK_CCR_ROWS, type ICcrRowData } from "@/pages/ccr-data"
+import type { ICcrRowData } from "@/lib/types/ccr-types"
 
 /** Параметры URL-фильтров для страницы CCR. */
 export interface ICcrFilters {
@@ -571,7 +571,7 @@ export function CcrManagementPage(props: ICcrManagementPageProps): ReactElement 
     const ccrRows = useMemo((): ReadonlyArray<ICcrRow> => {
         const workspaceRows = ccrWorkspace.ccrListQuery.data?.ccrs
         if (workspaceRows === undefined || workspaceRows.length === 0) {
-            return MOCK_CCR_ROWS
+            return []
         }
 
         return workspaceRows.map((row): ICcrRow => mapWorkspaceRowToCcrRow(row))
