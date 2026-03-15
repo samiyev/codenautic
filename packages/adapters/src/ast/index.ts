@@ -64,6 +64,12 @@ export {
     type IAstServiceClientLibraryErrorDetails,
 } from "./ast-service-client-library.error"
 export {
+    AST_SERVICE_HEALTH_MONITORING_ERROR_CODE,
+    AstServiceHealthMonitoringError,
+    type AstServiceHealthMonitoringErrorCode,
+    type IAstServiceHealthMonitoringErrorDetails,
+} from "./ast-service-health-monitoring.error"
+export {
     AST_SEMANTIC_CODE_UNDERSTANDING_ERROR_CODE,
     AstSemanticCodeUnderstandingError,
     type AstSemanticCodeUnderstandingErrorCode,
@@ -395,6 +401,22 @@ export {
     type IAstStartRepositoryScanInput,
     type IAstStartRepositoryScanResult,
 } from "./ast-service-client-library.service"
+export {
+    AST_SERVICE_HEALTH_MONITORING_CHECK_NAME,
+    AST_SERVICE_HEALTH_MONITORING_CHECK_STATUS,
+    AST_SERVICE_HEALTH_MONITORING_STATUS,
+    AstServiceHealthMonitoringService,
+    type AstServiceHealthMonitoringCheckName,
+    type AstServiceHealthMonitoringCheckStatus,
+    type AstServiceHealthMonitoringNow,
+    type AstServiceHealthMonitoringStatus,
+    type IAstServiceHealthMonitoringCheckResult,
+    type IAstServiceHealthMonitoringInput,
+    type IAstServiceHealthMonitoringResult,
+    type IAstServiceHealthMonitoringService,
+    type IAstServiceHealthMonitoringServiceOptions,
+    type IAstServiceHealthMonitoringSummary,
+} from "./ast-service-health-monitoring.service"
 export {
     AST_SEMANTIC_MODULE_ROLE,
     AstSemanticCodeUnderstandingService,
