@@ -70,6 +70,12 @@ export {
     type IAstServiceHealthMonitoringErrorDetails,
 } from "./ast-service-health-monitoring.error"
 export {
+    AST_SERVICE_HORIZONTAL_SCALING_ERROR_CODE,
+    AstServiceHorizontalScalingError,
+    type AstServiceHorizontalScalingErrorCode,
+    type IAstServiceHorizontalScalingErrorDetails,
+} from "./ast-service-horizontal-scaling.error"
+export {
     AST_SEMANTIC_CODE_UNDERSTANDING_ERROR_CODE,
     AstSemanticCodeUnderstandingError,
     type AstSemanticCodeUnderstandingErrorCode,
@@ -417,6 +423,27 @@ export {
     type IAstServiceHealthMonitoringServiceOptions,
     type IAstServiceHealthMonitoringSummary,
 } from "./ast-service-health-monitoring.service"
+export {
+    AST_SERVICE_HORIZONTAL_SCALING_ACTION,
+    AstServiceHorizontalScalingService,
+    type AstServiceHorizontalScalingAction,
+    type AstServiceHorizontalScalingMetricsProvider,
+    type AstServiceHorizontalScalingNow,
+    type AstServiceHorizontalScalingShouldRetry,
+    type AstServiceHorizontalScalingSleep,
+    type IAstServiceHorizontalScalingInput,
+    type IAstServiceHorizontalScalingMetricsProviderInput,
+    type IAstServiceHorizontalScalingMetricsSnapshot,
+    type IAstServiceHorizontalScalingMetricsSnapshotInput,
+    type IAstServiceHorizontalScalingReplicaAssignment,
+    type IAstServiceHorizontalScalingReplicaPlan,
+    type IAstServiceHorizontalScalingRepositoryLoad,
+    type IAstServiceHorizontalScalingResult,
+    type IAstServiceHorizontalScalingRetryPolicyInput,
+    type IAstServiceHorizontalScalingService,
+    type IAstServiceHorizontalScalingServiceOptions,
+    type IAstServiceHorizontalScalingSummary,
+} from "./ast-service-horizontal-scaling.service"
 export {
     AST_SEMANTIC_MODULE_ROLE,
     AstSemanticCodeUnderstandingService,
