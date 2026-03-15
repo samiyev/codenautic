@@ -219,6 +219,22 @@ export {
     type RefactoringAdvicePromptErrorCode,
 } from "./refactoring-advice-prompt.error"
 export {
+    EXECUTIVE_REPORT_TREND_DIRECTION,
+    ExecutiveReportPrompt,
+    type ExecutiveReportTrendDirection,
+    type IExecutiveRepoStateMetricInput,
+    type IExecutiveReportPrompt,
+    type IExecutiveReportPromptInput,
+    type IExecutiveReportPromptOptions,
+    type IExecutiveReportTrendInput,
+} from "./executive-report-prompt"
+export {
+    EXECUTIVE_REPORT_PROMPT_ERROR_CODE,
+    ExecutiveReportPromptError,
+    type ExecutiveReportPromptErrorCode,
+    type IExecutiveReportPromptErrorDetails,
+} from "./executive-report-prompt.error"
+export {
     LANGCHAIN_CALLBACK_EVENT_TYPE,
     LangChainCallbackHandler,
     type ILangChainCallbackDispatchInput,
