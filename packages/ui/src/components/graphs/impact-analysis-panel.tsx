@@ -174,14 +174,14 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
                 )}
             </ul>
 
-            <div className="mt-3 rounded border border-primary/30 bg-primary/10 p-2">
-                <p className={`${TYPOGRAPHY.overline} text-on-primary`}>
+            <div className="mt-3 rounded border border-accent/30 bg-accent/10 p-2">
+                <p className={`${TYPOGRAPHY.overline} text-accent-foreground`}>
                     {t("code-city:impactAnalysisComp.aggregatedRiskScore")}
                 </p>
-                <p className="text-lg font-semibold text-on-primary">
+                <p className="text-lg font-semibold text-accent-foreground">
                     {String(aggregatedImpact.riskScore)}
                 </p>
-                <p className="text-xs text-on-primary">
+                <p className="text-xs text-accent-foreground">
                     {t("code-city:impactAnalysisComp.selectedFiles", {
                         count: selectedSeeds.length,
                     })}
@@ -190,7 +190,7 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
 
             <div className="mt-3 grid gap-2 md:grid-cols-3">
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
+                    <p className={`${TYPOGRAPHY.micro} text-muted`}>
                         {t("code-city:impactAnalysisComp.affectedFiles")}
                     </p>
                     <p className="mt-1 text-xs text-foreground">
@@ -200,7 +200,7 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
                     </p>
                 </div>
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
+                    <p className={`${TYPOGRAPHY.micro} text-muted`}>
                         {t("code-city:impactAnalysisComp.affectedTests")}
                     </p>
                     <p className="mt-1 text-xs text-foreground">
@@ -210,7 +210,7 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
                     </p>
                 </div>
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
+                    <p className={`${TYPOGRAPHY.micro} text-muted`}>
                         {t("code-city:impactAnalysisComp.consumers")}
                     </p>
                     <p className="mt-1 text-xs text-foreground">
@@ -223,7 +223,7 @@ export function ImpactAnalysisPanel(props: IImpactAnalysisPanelProps): ReactElem
 
             <button
                 aria-label={t("code-city:impactAnalysisComp.ariaApplyFocus")}
-                className="mt-3 rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-3 rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={primarySeed === undefined}
                 onClick={(): void => {
                     if (primarySeed === undefined) {

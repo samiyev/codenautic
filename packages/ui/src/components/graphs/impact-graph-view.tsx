@@ -207,7 +207,7 @@ export function ImpactGraphView(props: IImpactGraphViewProps): ReactElement {
                                         aria-label={t("code-city:impactGraphComp.ariaInspectNode", {
                                             label: node.label,
                                         })}
-                                        className="rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary"
+                                        className="rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground"
                                         onClick={(): void => {
                                             props.onFocusNode?.(node)
                                         }}

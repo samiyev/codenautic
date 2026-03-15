@@ -144,7 +144,7 @@ export function KnowledgeMapExportWidget(props: IKnowledgeMapExportWidgetProps):
             <div className="mt-3 flex flex-wrap gap-2">
                 <button
                     aria-label={t("code-city:knowledgeMapExportComp.ariaExportSvg")}
-                    className="rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary"
+                    className="rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent"
                     onClick={handleSvgExport}
                     type="button"
                 >
@@ -152,7 +152,7 @@ export function KnowledgeMapExportWidget(props: IKnowledgeMapExportWidgetProps):
                 </button>
                 <button
                     aria-label={t("code-city:knowledgeMapExportComp.ariaExportPng")}
-                    className="rounded border border-primary/40 bg-primary/20 px-2 py-1 text-xs font-semibold text-on-primary hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded border border-accent/40 bg-accent/20 px-2 py-1 text-xs font-semibold text-accent-foreground hover:border-accent disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isPngExporting}
                     onClick={(): void => {
                         void handlePngExport()
