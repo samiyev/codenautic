@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardContent, CardHeader, Chip } from "@heroui/react"
 import { SystemStateCard } from "@/components/infrastructure/system-state-card"
-import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -502,10 +501,12 @@ export function SettingsJobsPage(): ReactElement {
     }
 
     return (
-        <FormLayout
-            title={t("settings:jobs.pageTitle")}
-            description={t("settings:jobs.pageSubtitle")}
-        >
+        <div className="space-y-6 mx-auto max-w-[1400px]">
+            <div className="space-y-1.5">
+                <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:jobs.pageTitle")}</h1>
+                <p className={TYPOGRAPHY.bodyMuted}>{t("settings:jobs.pageSubtitle")}</p>
+            </div>
+            <div className="space-y-6">
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>{t("settings:jobs.liveSummary")}</p>
@@ -779,9 +780,7 @@ export function SettingsJobsPage(): ReactElement {
                                                 <p className="text-sm font-semibold text-foreground">
                                                     {job.id} · {job.kind}
                                                 </p>
-                                                <p className="text-xs text-muted">
-                                                    {job.scope}
-                                                </p>
+                                                <p className="text-xs text-muted">{job.scope}</p>
                                             </button>
                                             <Chip
                                                 color={mapStatusColor(job.status)}
@@ -916,6 +915,7 @@ export function SettingsJobsPage(): ReactElement {
                     </Card>
                 </div>
             </div>
-        </FormLayout>
+            </div>
+        </div>
     )
 }
