@@ -110,6 +110,6 @@ describe("SprintSummaryCard", (): void => {
         const button = screen.getByRole("button", {
             name: "Inspect sprint summary metric Complexity",
         })
-        expect(button.className).toContain("border-primary")
+        expect(button.className).toContain("border-accent")
     })
 })
