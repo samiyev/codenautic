@@ -1,10 +1,9 @@
 import type { ReactElement } from "react"
 import { useTranslation } from "react-i18next"
-import { Cell, Pie, PieChart, Tooltip } from "recharts"
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 
-import { Chip } from "@heroui/react"
-import { RechartsChartWrapper } from "@/components/charts/recharts-chart-wrapper"
-import { ChartContainer } from "@/components/charts/chart-container"
+import { Card, CardContent, CardHeader, Chip, Skeleton } from "@heroui/react"
+import { TYPOGRAPHY } from "@/lib/constants/typography"
 
 /**
  * Строка для Recharts.
@@ -43,56 +42,54 @@ export function StatusDistributionChart(props: IStatusDistributionChartProps): R
     const title = props.title ?? "CCR status distribution"
 
     return (
-        <RechartsChartWrapper
-            data={props.data}
-            isLoading={props.isLoading === true}
-            loadingText={props.loadingText}
-            title={title}
-            scalePolicy={{
-                aggregator: "sum",
-                hardThreshold: 2000,
-                maxPoints: 500,
-                aggregatorKeys: ["count"],
-            }}
-        >
-            {({ displayData }): ReactElement => (
-                <>
-                    <ChartContainer height="xl">
-                        <PieChart>
-                            <Pie
-                                data={displayData}
-                                dataKey="count"
-                                nameKey="status"
-                                outerRadius={80}
-                                paddingAngle={2}
-                            >
-                                {displayData.map(
-                                    (point): ReactElement => (
-                                        <Cell key={point.status} fill={point.color} />
-                                    ),
-                                )}
-                            </Pie>
-                            <Tooltip />
-                        </PieChart>
-                    </ChartContainer>
-                    <div
-                        className="mt-2 flex flex-wrap gap-2"
-                        aria-label={t("dashboard:ariaLabel.statusDistribution.statusLegend")}
-                    >
-                        {displayData.map(
-                            (point): ReactElement => (
-                                <Chip
-                                    key={point.status}
-                                    style={{ backgroundColor: `${point.color}20` }}
-                                    className="border border-current/20"
+        <Card>
+            <CardHeader>
+                <h3 className={TYPOGRAPHY.subsectionTitle}>{title}</h3>
+            </CardHeader>
+            <CardContent>
+                {props.isLoading === true ? (
+                    <Skeleton className="h-72 w-full rounded-lg" />
+                ) : (
+                    <>
+                        <div className="h-72 w-full"><ResponsiveContainer height="100%" minHeight={1} minWidth={1} width="100%">
+                            <PieChart>
+                                <Pie
+                                    data={props.data as IStatusDistributionPoint[]}
+                                    dataKey="count"
+                                    nameKey="status"
+                                    outerRadius={80}
+                                    paddingAngle={2}
                                 >
-                                    {point.status}: {point.count}
-                                </Chip>
-                            ),
-                        )}
-                    </div>
-                </>
-            )}
-        </RechartsChartWrapper>
+                                    {props.data.map(
+                                        (point): ReactElement => (
+                                            <Cell key={point.status} fill={point.color} />
+                                        ),
+                                    )}
+                                </Pie>
+                                <Tooltip />
+                            </PieChart>
+                        </ResponsiveContainer></div>
+                        <div
+                            className="mt-2 flex flex-wrap gap-2"
+                            aria-label={t(
+                                "dashboard:ariaLabel.statusDistribution.statusLegend",
+                            )}
+                        >
+                            {props.data.map(
+                                (point): ReactElement => (
+                                    <Chip
+                                        key={point.status}
+                                        style={{ backgroundColor: `${point.color}20` }}
+                                        className="border border-current/20"
+                                    >
+                                        {point.status}: {point.count}
+                                    </Chip>
+                                ),
+                            )}
+                        </div>
+                    </>
+                )}
+            </CardContent>
+        </Card>
     )
 }
