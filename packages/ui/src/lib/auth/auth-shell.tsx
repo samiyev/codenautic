@@ -39,9 +39,9 @@ export function AuthenticatedShell(props: IAuthenticatedShellProps): ReactElemen
         <div className="min-h-screen">
             <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 pt-6">
                 <div>
-                    <p className="text-sm text-muted-foreground">{props.appTitle}</p>
+                    <p className="text-sm text-muted">{props.appTitle}</p>
                     <h2 className={TYPOGRAPHY.sectionTitle}>{props.userDisplayName}</h2>
-                    <p className="text-sm text-muted-foreground">{props.userEmail}</p>
+                    <p className="text-sm text-muted">{props.userEmail}</p>
                 </div>
                 <Button
                     className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition hover:bg-foreground/80"

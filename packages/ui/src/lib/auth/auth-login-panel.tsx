@@ -39,7 +39,7 @@ export function AuthLoginPanel(props: IAuthLoginPanelProps): ReactElement {
     return (
         <section className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8">
             <h1 className={TYPOGRAPHY.splash}>{props.appTitle}</h1>
-            <p className="mt-4 text-base text-muted-foreground">{props.description}</p>
+            <p className="mt-4 text-base text-muted">{props.description}</p>
             {props.statusMessage !== undefined ? (
                 <p aria-live="polite" className="mt-3 text-sm text-warning" role="status">
                     {props.statusMessage}
@@ -48,7 +48,7 @@ export function AuthLoginPanel(props: IAuthLoginPanelProps): ReactElement {
             <div className="mt-8 grid w-full max-w-sm gap-3">
                 {OAUTH_PROVIDERS.map((provider) => (
                     <Button
-                        className={`rounded-xl border border-border bg-surface px-4 py-3 ${TYPOGRAPHY.cardTitle} transition hover:border-border hover:bg-surface-muted`}
+                        className={`rounded-xl border border-border bg-surface px-4 py-3 ${TYPOGRAPHY.cardTitle} transition hover:border-border hover:bg-surface-secondary`}
                         isDisabled={pendingProvider !== null}
                         aria-busy={pendingProvider === provider}
                         key={provider}
@@ -83,7 +83,7 @@ export function renderAuthLoadingState(appTitle: string, message: string): React
             className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center p-8"
         >
             <h1 className={TYPOGRAPHY.splash}>{appTitle}</h1>
-            <p className="mt-4 text-base text-muted-foreground">{message}</p>
+            <p className="mt-4 text-base text-muted">{message}</p>
         </section>
     )
 }
