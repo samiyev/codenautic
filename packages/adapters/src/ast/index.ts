@@ -82,6 +82,12 @@ export {
     type IAstCrossFileIssueAggregatorErrorDetails,
 } from "./ast-cross-file-issue-aggregator.error"
 export {
+    AST_MONOREPO_PACKAGE_BOUNDARY_CHECKER_ERROR_CODE,
+    AstMonorepoPackageBoundaryCheckerError,
+    type AstMonorepoPackageBoundaryCheckerErrorCode,
+    type IAstMonorepoPackageBoundaryCheckerErrorDetails,
+} from "./ast-monorepo-package-boundary-checker.error"
+export {
     AST_CODE_CHUNK_EMBEDDING_GENERATOR_ERROR_CODE,
     AstCodeChunkEmbeddingGeneratorError,
     type AstCodeChunkEmbeddingGeneratorErrorCode,
@@ -300,6 +306,19 @@ export {
     type IAstCrossFileIssueFileSummary,
     type IAstCrossFileIssueInput,
 } from "./ast-cross-file-issue-aggregator.service"
+export {
+    AST_MONOREPO_BOUNDARY_VIOLATION_SEVERITY,
+    AST_MONOREPO_BOUNDARY_VIOLATION_TYPE,
+    AstMonorepoPackageBoundaryCheckerService,
+    type AstMonorepoBoundaryViolationSeverity,
+    type AstMonorepoBoundaryViolationType,
+    type IAstMonorepoBoundaryViolation,
+    type IAstMonorepoPackageBoundaryCheckerInput,
+    type IAstMonorepoPackageBoundaryCheckerResult,
+    type IAstMonorepoPackageBoundaryCheckerService,
+    type IAstMonorepoPackageBoundaryCheckerServiceOptions,
+    type IAstMonorepoPackageBoundaryCheckerSummary,
+} from "./ast-monorepo-package-boundary-checker.service"
 export {
     AstDependencyChainResolverService,
     type IAstDependencyChain,
