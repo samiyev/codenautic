@@ -57,21 +57,21 @@ export interface ITeamLeaderboardProps {
 
 function resolveMetricButtonClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-primary bg-primary/100/15 text-on-primary"
+        ? "border-accent bg-accent/15 text-accent-foreground"
         : "border-border bg-surface text-foreground hover:border-border"
     return `rounded border px-2 py-1 text-xs font-semibold transition ${baseClassName}`
 }
 
 function resolvePeriodButtonClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-emerald-400 bg-success/15 text-on-success"
+        ? "border-emerald-400 bg-success/15 text-success-foreground"
         : "border-border bg-surface text-foreground hover:border-border"
     return `rounded border px-2 py-1 text-xs font-semibold uppercase transition ${baseClassName}`
 }
 
 function resolveRowClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-primary bg-primary/10"
+        ? "border-accent bg-accent/10"
         : "border-border bg-surface hover:border-border"
     return `w-full rounded-lg border p-2 text-left transition ${baseClassName}`
 }
@@ -217,7 +217,7 @@ export function TeamLeaderboard(props: ITeamLeaderboardProps): ReactElement {
                                         </p>
                                     </div>
                                     <span
-                                        className={`rounded border border-border bg-surface-muted px-2 py-0.5 ${TYPOGRAPHY.micro} text-foreground`}
+                                        className={`rounded border border-border bg-surface-secondary px-2 py-0.5 ${TYPOGRAPHY.micro} text-foreground`}
                                     >
                                         {activeMetric}
                                     </span>

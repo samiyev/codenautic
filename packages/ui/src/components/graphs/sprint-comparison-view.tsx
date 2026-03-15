@@ -39,7 +39,7 @@ function resolveDeltaClassName(delta: number): string {
     if (delta > 0) {
         return "border-danger/30 bg-danger/10 text-danger"
     }
-    return "border-border bg-surface-muted text-foreground"
+    return "border-border bg-surface-secondary text-foreground"
 }
 
 /**
@@ -74,7 +74,7 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
                             })}
                             className={`w-full rounded border p-2 text-left text-xs transition ${
                                 isActive
-                                    ? "border-primary bg-primary/10 text-on-primary"
+                                    ? "border-accent bg-accent/10 text-accent-foreground"
                                     : "border-border bg-surface text-foreground hover:border-border"
                             }`}
                             key={snapshot.id}
@@ -128,9 +128,9 @@ export function SprintComparisonView(props: ISprintComparisonViewProps): ReactEl
                                         after: String(metric.afterValue),
                                     })}
                                 </p>
-                                <div className="mt-1 h-1.5 overflow-hidden rounded bg-surface-muted">
+                                <div className="mt-1 h-1.5 overflow-hidden rounded bg-surface-secondary">
                                     <div
-                                        className="h-full rounded bg-primary transition-all duration-500"
+                                        className="h-full rounded bg-accent transition-all duration-500"
                                         style={{ width: `${String(progressWidth)}%` }}
                                     />
                                 </div>

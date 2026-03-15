@@ -54,12 +54,12 @@ function resolveDeltaClassName(deltaPercent: number): string {
     if (deltaPercent < 0) {
         return "text-danger"
     }
-    return "text-muted-foreground"
+    return "text-muted"
 }
 
 function resolveMetricRowClassName(isActive: boolean): string {
     const baseClassName = isActive
-        ? "border-primary bg-primary/10"
+        ? "border-accent bg-accent/10"
         : "border-border bg-surface hover:border-border"
     return `w-full rounded-lg border p-2 text-left transition ${baseClassName}`
 }
@@ -81,11 +81,11 @@ export function SprintSummaryCard(props: ISprintSummaryCardProps): ReactElement 
             <p className="text-sm font-semibold text-foreground">
                 {t("code-city:sprintSummary.title")}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">{props.model.sprintLabel}</p>
+            <p className="mt-1 text-xs text-muted">{props.model.sprintLabel}</p>
 
             <div className="mt-3 grid grid-cols-2 gap-2">
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
+                    <p className={`${TYPOGRAPHY.micro} text-muted`}>
                         {t("code-city:sprintSummary.achievements")}
                     </p>
                     <p className="mt-1 text-sm font-semibold text-foreground">
@@ -93,7 +93,7 @@ export function SprintSummaryCard(props: ISprintSummaryCardProps): ReactElement 
                     </p>
                 </div>
                 <div className="rounded border border-border bg-surface p-2">
-                    <p className={`${TYPOGRAPHY.micro} text-muted-foreground`}>
+                    <p className={`${TYPOGRAPHY.micro} text-muted`}>
                         {t("code-city:sprintSummary.overallScore")}
                     </p>
                     <p className="mt-1 text-sm font-semibold text-foreground">
@@ -125,7 +125,7 @@ export function SprintSummaryCard(props: ISprintSummaryCardProps): ReactElement 
                                         <p className="text-sm font-semibold text-foreground">
                                             {metric.label}
                                         </p>
-                                        <p className="mt-1 text-xs text-muted-foreground">
+                                        <p className="mt-1 text-xs text-muted">
                                             {metric.value}
                                         </p>
                                     </div>
