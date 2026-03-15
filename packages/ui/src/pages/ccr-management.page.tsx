@@ -38,7 +38,7 @@ export interface ICcrManagementPageProps extends ICcrFilters {
 
 const PAGE_SIZE = 8
 const CCR_SORT_ORDER = ["new", "queued", "in_progress", "approved", "rejected"] as const
-export const CCR_FILTER_PRESETS_STORAGE_KEY = "codenautic:ui:ccr-filter-presets:v1"
+export const CCR_FILTER_PRESETS_STORAGE_KEY = "cn:ccr-filter-presets:v1"
 type TCcrFilterField = keyof ICcrFilters
 type TCcrFilterPresetField = "name" | "selected"
 
