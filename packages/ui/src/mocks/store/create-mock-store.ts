@@ -2,11 +2,13 @@ import { MockStore } from "./mock-store"
 import {
     seedAdminConfig,
     seedAuth,
+    seedBilling,
     seedByok,
     seedCodeCity,
     seedContractValidation,
     seedDashboard,
     seedIssues,
+    seedJobs,
     seedNotifications,
     seedOrganization,
     seedProviders,
@@ -18,6 +20,7 @@ import {
     seedSso,
     seedTeams,
     seedTriage,
+    seedWebhooks,
 } from "./seed"
 
 /**
@@ -53,6 +56,9 @@ export function createMockStore(): MockStore {
     seedTriage(store.triage)
     seedByok(store.byok)
     seedSso(store.sso)
+    seedJobs(store.jobs)
+    seedWebhooks(store.webhooks)
+    seedBilling(store.billing)
     return store
 }
 
@@ -98,5 +104,8 @@ export function resetMockStore(): void {
         seedTriage(instance.triage)
         seedByok(instance.byok)
         seedSso(instance.sso)
+        seedJobs(instance.jobs)
+        seedWebhooks(instance.webhooks)
+        seedBilling(instance.billing)
     }
 }
