@@ -26,10 +26,6 @@ export function useProviderDegradation(): IProviderDegradationResult {
     >(undefined)
 
     useEffect((): (() => void) | void => {
-        if (typeof window === "undefined") {
-            return
-        }
-
         const handleProviderDegradation = (event: Event): void => {
             const customEvent = event as CustomEvent<unknown>
             const detail = customEvent.detail
