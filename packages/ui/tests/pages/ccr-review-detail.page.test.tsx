@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import type { ICcrWorkspaceContextResponse } from "@/lib/api/endpoints/ccr-workspace.endpoint"
 import type { ICcrRowData } from "@/lib/types/ccr-types"
-import { getCcrDiffById, getCcrReviewThreadsById, MOCK_CCR_ROWS } from "@/pages/ccr-data"
+import { getCcrDiffById, getCcrReviewThreadsById, MOCK_CCR_ROWS } from "../fixtures/ccr-data"
 import { CcrReviewDetailPage } from "@/pages/ccr-review-detail/ccr-review-detail.page"
 import { renderWithProviders } from "../utils/render"
 
