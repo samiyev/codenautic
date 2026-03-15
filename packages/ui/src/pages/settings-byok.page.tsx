@@ -2,7 +2,6 @@ import { type ReactElement, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Alert, Button, Card, CardContent, CardHeader, Chip, Input, Switch } from "@heroui/react"
-import { FormLayout } from "@/components/forms/form-layout"
 import { NATIVE_FORM } from "@/lib/constants/spacing"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastError, showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
@@ -266,10 +265,12 @@ export function SettingsByokPage(): ReactElement {
     }
 
     return (
-        <FormLayout
-            title={t("settings:byok.pageTitle")}
-            description={t("settings:byok.pageSubtitle")}
-        >
+        <div className="space-y-6 mx-auto max-w-[1400px]">
+            <div className="space-y-1.5">
+                <h1 className={TYPOGRAPHY.pageTitle}>{t("settings:byok.pageTitle")}</h1>
+                <p className={TYPOGRAPHY.bodyMuted}>{t("settings:byok.pageSubtitle")}</p>
+            </div>
+            <div className="space-y-6">
             <Card>
                 <CardHeader>
                     <p className={TYPOGRAPHY.sectionTitle}>{t("settings:byok.addApiKey")}</p>
@@ -528,6 +529,7 @@ export function SettingsByokPage(): ReactElement {
                     )}
                 </CardContent>
             </Card>
-        </FormLayout>
+            </div>
+        </div>
     )
 }
