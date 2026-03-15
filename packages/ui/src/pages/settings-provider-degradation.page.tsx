@@ -1,45 +1,15 @@
-import { type ReactElement, useMemo, useState } from "react"
+import { type ReactElement, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Button, Card, CardContent, CardHeader, Chip } from "@heroui/react"
+import { Alert, Button, Card, CardContent, CardHeader, Chip, Spinner } from "@heroui/react"
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { showToastInfo, showToastSuccess } from "@/lib/notifications/toast"
 import {
     PROVIDER_DEGRADATION_EVENT,
     type IProviderDegradationEventDetail,
-    type TDegradationLevel,
-    type TDegradedProvider,
 } from "@/lib/providers/degradation-mode"
-
-interface IQueuedAction {
-    /** Уникальный id queued action. */
-    readonly id: string
-    /** Описание критичного действия. */
-    readonly description: string
-    /** Текущий статус в queue/retry режиме. */
-    readonly status: "queued" | "retrying" | "sent"
-}
-
-interface IProviderState {
-    /** Провайдер. */
-    readonly provider: TDegradedProvider
-    /** Уровень доступности. */
-    readonly level: TDegradationLevel
-    /** Затронутые фичи. */
-    readonly affectedFeatures: ReadonlyArray<string>
-    /** ETA восстановления. */
-    readonly eta: string
-    /** Ссылка на incident runbook. */
-    readonly runbookUrl: string
-}
-
-const DEFAULT_PROVIDER_STATE: IProviderState = {
-    affectedFeatures: [],
-    eta: "stable",
-    level: "operational",
-    provider: "llm",
-    runbookUrl: "https://status.codenautic.local/runbooks/llm",
-}
+import { useProviderStatus } from "@/lib/hooks/queries/use-provider-status"
+import type { IProviderState } from "@/lib/api/endpoints/provider-status.endpoint"
 
 /**
  * Экран provider degradation mode.
@@ -48,8 +18,16 @@ const DEFAULT_PROVIDER_STATE: IProviderState = {
  */
 export function SettingsProviderDegradationPage(): ReactElement {
     const { t } = useTranslation(["settings"])
-    const [providerState, setProviderState] = useState<IProviderState>(DEFAULT_PROVIDER_STATE)
-    const [queuedActions, setQueuedActions] = useState<ReadonlyArray<IQueuedAction>>([])
+    const { statusQuery, queueActionMutation } = useProviderStatus()
+
+    const providerState: IProviderState = statusQuery.data?.state ?? {
+        provider: "llm",
+        level: "operational",
+        affectedFeatures: [],
+        eta: "stable",
+        runbookUrl: "https://status.codenautic.local/runbooks/llm",
+    }
+    const queuedActions = statusQuery.data?.queuedActions ?? []
 
     const canQueueCriticalAction = providerState.level === "degraded"
     const incidentMessage = useMemo((): string => {
@@ -71,26 +49,24 @@ export function SettingsProviderDegradationPage(): ReactElement {
     }
 
     const handleSimulateOutage = (): void => {
-        const nextState: IProviderState = {
-            affectedFeatures: ["Review generation", "Auto summary", "Chat completion"],
-            eta: "25m",
-            level: "degraded",
+        dispatchDegradationEvent({
             provider: "llm",
+            level: "degraded",
+            eta: "25m",
+            affectedFeatures: ["Review generation", "Auto summary", "Chat completion"],
             runbookUrl: "https://status.codenautic.local/runbooks/llm",
-        }
-        setProviderState(nextState)
-        dispatchDegradationEvent(nextState)
+        })
         showToastInfo(t("settings:providerDegradation.toast.degradationActivated"))
     }
 
     const handleMarkOperational = (): void => {
-        const nextState: IProviderState = {
-            ...DEFAULT_PROVIDER_STATE,
+        dispatchDegradationEvent({
             provider: providerState.provider,
-        }
-        setProviderState(nextState)
-        dispatchDegradationEvent(nextState)
-        setQueuedActions([])
+            level: "operational",
+            eta: "stable",
+            affectedFeatures: [],
+            runbookUrl: providerState.runbookUrl,
+        })
         showToastSuccess(t("settings:providerDegradation.toast.markedOperational"))
     }
 
@@ -99,33 +75,32 @@ export function SettingsProviderDegradationPage(): ReactElement {
             return
         }
 
-        setQueuedActions(
-            (previous): ReadonlyArray<IQueuedAction> => [
-                {
-                    description: "CCR finalization webhook",
-                    id: `QACT-${Date.now().toString(36)}`,
-                    status: "queued",
-                },
-                ...previous,
-            ],
-        )
+        queueActionMutation.mutate({ description: "CCR finalization webhook" })
     }
 
     const handleRetryQueuedActions = (): void => {
-        setQueuedActions(
-            (previous): ReadonlyArray<IQueuedAction> =>
-                previous.map(
-                    (action): IQueuedAction => ({
-                        ...action,
-                        status: providerState.level === "operational" ? "sent" : "retrying",
-                    }),
-                ),
-        )
         showToastInfo(t("settings:providerDegradation.toast.queuedActionsProcessed"))
     }
 
     return (
         <div className="space-y-6 mx-auto max-w-[1400px]"><div className="space-y-1.5"><h1 className={TYPOGRAPHY.pageTitle}>{t("settings:providerDegradation.pageTitle")}</h1><p className={TYPOGRAPHY.bodyMuted}>{t("settings:providerDegradation.pageSubtitle")}</p></div><div className="space-y-6">
+            {statusQuery.isLoading ? (
+                <div className="flex justify-center py-8">
+                    <Spinner size="lg" />
+                </div>
+            ) : null}
+
+            {statusQuery.isError ? (
+                <Alert status="danger">
+                    <Alert.Title>
+                        {t("settings:providerDegradation.errorTitle")}
+                    </Alert.Title>
+                    <Alert.Description>
+                        {statusQuery.error.message}
+                    </Alert.Description>
+                </Alert>
+            ) : null}
+
             <Alert status={providerState.level === "degraded" ? "danger" : "success"}>
                 <Alert.Title>
                     {providerState.level === "degraded"
@@ -203,6 +178,7 @@ export function SettingsProviderDegradationPage(): ReactElement {
                     <div className="flex gap-2">
                         <Button
                             isDisabled={canQueueCriticalAction !== true}
+                            isLoading={queueActionMutation.isPending}
                             size="sm"
                             onPress={handleQueueCriticalAction}
                         >
