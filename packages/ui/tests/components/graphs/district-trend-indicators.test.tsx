@@ -83,6 +83,6 @@ describe("DistrictTrendIndicators", (): void => {
 
         const buttons = container.querySelectorAll("button")
         const secondButton = buttons[1]
-        expect(secondButton?.className).toContain("border-primary")
+        expect(secondButton?.className).toContain("border-accent")
     })
 })
