@@ -39,12 +39,12 @@ export interface IStaticCommandKey {
 /**
  * LocalStorage key for persisting recent command palette selections.
  */
-export const COMMAND_PALETTE_RECENT_STORAGE_KEY = "codenautic:ui:command-palette:recent:v1"
+export const COMMAND_PALETTE_RECENT_STORAGE_KEY = "cn:command-palette:recent:v1"
 
 /**
  * LocalStorage key for persisting pinned command palette items.
  */
-export const COMMAND_PALETTE_PINNED_STORAGE_KEY = "codenautic:ui:command-palette:pinned:v1"
+export const COMMAND_PALETTE_PINNED_STORAGE_KEY = "cn:command-palette:pinned:v1"
 
 /**
  * Maximum number of recent commands stored in the palette history.
