@@ -22,7 +22,9 @@ export function ScanErrorRecoveryPage(): ReactElement {
         >
             <Alert status="warning">
                 <Alert.Title>{t("system:scanErrorRecovery.recoveryFlowTitle")}</Alert.Title>
-                <Alert.Description>{t("system:scanErrorRecovery.recoveryFlowMessage")}</Alert.Description>
+                <Alert.Description>
+                    {t("system:scanErrorRecovery.recoveryFlowMessage")}
+                </Alert.Description>
             </Alert>
 
             <Card>

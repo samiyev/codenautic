@@ -360,7 +360,7 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
     const progressState = useMemo(() => buildProgressState(state), [state])
     const progressClass =
         progressState.percent < 50
-            ? "bg-primary"
+            ? "bg-accent"
             : progressState.percent < 90
               ? "bg-success"
               : "bg-purple-500"
@@ -383,7 +383,7 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
             title={t("system:scanProgress.pageTitle")}
         >
             {batchRepositoriesCount > 1 ? (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted">
                     {td("system:scanProgress.batchOnboarding", {
                         count: String(batchRepositoriesCount),
                     })}
@@ -401,7 +401,7 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                                 ? progressState.currentMessage
                                 : t("system:scanProgress.waitingForScanStart")}
                         </p>
-                        <div className="h-3 w-full rounded-full bg-surface-muted">
+                        <div className="h-3 w-full rounded-full bg-surface-secondary">
                             <div
                                 aria-label={t("system:scanProgress.progressBarLabel")}
                                 aria-valuemax={100}
@@ -412,7 +412,7 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                                 style={{ width: formatProgressLabel(progressState.percent) }}
                             />
                         </div>
-                        <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
+                        <div className="mt-2 flex items-center justify-between text-sm text-muted">
                             <span>
                                 {td("system:scanProgress.progressLabel", {
                                     percent: String(progressState.percent),
@@ -434,12 +434,12 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                                         phase.isCompleted
                                             ? "border-success/30 bg-success/10"
                                             : phase.isActive
-                                              ? "border-primary/30 bg-primary/10"
+                                              ? "border-accent/30 bg-accent/10"
                                               : "border-border bg-surface"
                                     }`}
                                     key={phase.phase}
                                 >
-                                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                                    <p className="text-xs uppercase tracking-wider text-muted">
                                         {phase.phase}
                                     </p>
                                     <p className={TYPOGRAPHY.cardTitle}>
@@ -465,12 +465,7 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                         <Button onPress={props.onRetry} size="sm" type="button" variant="ghost">
                             {t("system:scanProgress.retryButton")}
                         </Button>
-                        <Button
-                            variant="danger"
-                            onPress={props.onCancel}
-                            size="sm"
-                            type="button"
-                        >
+                        <Button variant="danger" onPress={props.onCancel} size="sm" type="button">
                             {t("system:scanProgress.cancelButton")}
                         </Button>
                         {progressState.isDone && props.repositoryId !== undefined ? (
@@ -492,7 +487,7 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                     <div className="flex items-center justify-between">
                         <p className={TYPOGRAPHY.cardTitle}>{t("system:scanProgress.stageLogs")}</p>
                         <p
-                            className={`text-xs ${progressState.isDone ? "text-success" : "text-muted-foreground"}`}
+                            className={`text-xs ${progressState.isDone ? "text-success" : "text-muted"}`}
                         >
                             {progressState.isDone
                                 ? t("system:scanProgress.statusDone")
@@ -513,7 +508,7 @@ export function ScanProgressPage(props: IScanProgressPageProps): ReactElement {
                         role="log"
                     >
                         {state.events.length === 0 ? (
-                            <li className="rounded-md border border-border p-3 text-muted-foreground">
+                            <li className="rounded-md border border-border p-3 text-muted">
                                 {t("system:scanProgress.noEventsYet")}
                             </li>
                         ) : null}
