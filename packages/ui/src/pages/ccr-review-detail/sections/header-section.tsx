@@ -12,7 +12,7 @@ import { Alert, Button, Card, CardContent, CardHeader } from "@heroui/react"
 import { Link } from "@tanstack/react-router"
 
 import { LINK_CLASSES, TYPOGRAPHY } from "@/lib/constants/typography"
-import type { ICcrRowData } from "@/pages/ccr-data"
+import type { ICcrRowData } from "@/lib/types/ccr-types"
 
 import type { ICcrReviewState } from "../hooks/use-ccr-review-state"
 
