@@ -277,7 +277,7 @@ export function RechartsChartWrapper<TPoint extends TChartPoint>(
             </CardHeader>
             <CardContent>
                 {props.isLoading === true ? (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted">
                         {props.loadingText ?? "Loading chart..."}
                     </p>
                 ) : (
