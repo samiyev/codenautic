@@ -2,6 +2,51 @@ import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
+import type { IUseBillingResult } from "@/lib/hooks/queries/use-billing"
+
+vi.mock("@/lib/hooks/queries/use-billing", () => {
+    return {
+        useBilling: (): IUseBillingResult => {
+            return {
+                billingQuery: {
+                    data: {
+                        snapshot: { plan: "pro", status: "active" },
+                        history: [
+                            {
+                                action: "plan_change",
+                                actor: "System",
+                                id: "BILL-2001",
+                                occurredAt: "2026-03-03T16:12:00Z",
+                                outcome: "Upgraded from starter to pro",
+                            },
+                            {
+                                action: "status_change",
+                                actor: "Neo Anderson",
+                                id: "BILL-2002",
+                                occurredAt: "2026-03-02T10:40:00Z",
+                                outcome: "Set status to trial for workspace onboarding",
+                            },
+                        ],
+                    },
+                    isLoading: false,
+                    isError: false,
+                    error: null,
+                } as unknown as IUseBillingResult["billingQuery"],
+                historyQuery: {
+                    data: [],
+                    isLoading: false,
+                    isError: false,
+                    error: null,
+                } as unknown as IUseBillingResult["historyQuery"],
+                updatePlan: {
+                    mutate: vi.fn(),
+                    isPending: false,
+                } as unknown as IUseBillingResult["updatePlan"],
+            }
+        },
+    }
+})
+
 import { SettingsBillingPage } from "@/pages/settings-billing.page"
 import { renderWithProviders } from "../utils/render"
 
