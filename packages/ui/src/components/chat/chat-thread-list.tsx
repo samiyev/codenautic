@@ -91,7 +91,7 @@ export function ChatThreadList(props: IChatThreadListProps): ReactElement {
     return (
         <aside
             aria-label={t("common:ariaLabel.chatThreadList.threads")}
-            className="h-full min-w-0 bg-surface-muted p-3"
+            className="h-full min-w-0 bg-surface-secondary p-3"
         >
             <div className="mb-3 flex items-center justify-between gap-2">
                 <h3 className="text-sm font-semibold">Threads</h3>
@@ -132,7 +132,7 @@ export function ChatThreadList(props: IChatThreadListProps): ReactElement {
                             <li
                                 className={`rounded-lg border p-2 ${
                                     isActive
-                                        ? "border-primary bg-[color:color-mix(in oklab, var(--primary) 12%, var(--surface))]"
+                                        ? "border-accent bg-[color:color-mix(in oklab, var(--accent) 12%, var(--surface))]"
                                         : "border-border bg-surface"
                                 }`}
                                 key={thread.id}
@@ -151,8 +151,8 @@ export function ChatThreadList(props: IChatThreadListProps): ReactElement {
                                         <p className="truncate text-sm font-medium">
                                             {thread.title}
                                         </p>
-                                        <p className="text-xs text-text-secondary">{thread.repo}</p>
-                                        <p className="text-xs text-text-secondary">
+                                        <p className="text-xs text-muted">{thread.repo}</p>
+                                        <p className="text-xs text-muted">
                                             CCR: {thread.ccr}
                                         </p>
                                     </button>
