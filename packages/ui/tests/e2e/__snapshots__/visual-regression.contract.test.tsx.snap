@@ -21,7 +21,7 @@ exports[`visual regression contract > фиксирует визуальный sh
       </h2>
     </div>
     <div
-      class="card__content flex min-h-0 flex-1 flex-col gap-3 bg-surface-muted p-0"
+      class="card__content flex min-h-0 flex-1 flex-col gap-3 bg-surface-secondary p-0"
       data-slot="card-content"
     >
       <ul
@@ -42,7 +42,7 @@ exports[`visual regression contract > фиксирует визуальный sh
               class="mb-0.5 flex items-start gap-2"
             >
               <span
-                class="avatar avatar--sm"
+                class="avatar avatar--md"
               >
                 <span
                   class="avatar__fallback avatar__fallback--default"
@@ -60,14 +60,14 @@ exports[`visual regression contract > фиксирует визуальный sh
                   System
                 </p>
                 <p
-                  class="text-xs text-text-secondary"
+                  class="text-xs text-muted"
                 >
                   01:00 PM
                 </p>
               </div>
               <button
                 aria-label="Copy message System"
-                class="button button--icon-only button--sm button--ghost"
+                class="button button--sm button--ghost rounded-sm p-2"
                 data-rac=""
                 data-react-aria-pressable="true"
                 data-slot="button"
@@ -75,35 +75,31 @@ exports[`visual regression contract > фиксирует визуальный sh
                 tabindex="0"
                 type="button"
               >
-                <span
-                  class="inline-flex items-center gap-2"
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-copy size-4"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <svg
-                    aria-hidden="true"
-                    class="lucide lucide-copy size-4"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <rect
-                      height="14"
-                      rx="2"
-                      ry="2"
-                      width="14"
-                      x="8"
-                      y="8"
-                    />
-                    <path
-                      d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
-                    />
-                  </svg>
-                </span>
+                  <rect
+                    height="14"
+                    rx="2"
+                    ry="2"
+                    width="14"
+                    x="8"
+                    y="8"
+                  />
+                  <path
+                    d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+                  />
+                </svg>
               </button>
             </header>
             <div
@@ -129,7 +125,7 @@ exports[`visual regression contract > фиксирует визуальный sh
               class="mb-0.5 flex items-start gap-2"
             >
               <span
-                class="avatar avatar--sm"
+                class="avatar avatar--md"
               >
                 <span
                   class="avatar__fallback avatar__fallback--default"
@@ -147,14 +143,14 @@ exports[`visual regression contract > фиксирует визуальный sh
                   AI
                 </p>
                 <p
-                  class="text-xs text-text-secondary"
+                  class="text-xs text-muted"
                 >
                   01:00 PM
                 </p>
               </div>
               <button
                 aria-label="Copy message AI"
-                class="button button--icon-only button--sm button--ghost"
+                class="button button--sm button--ghost rounded-sm p-2"
                 data-rac=""
                 data-react-aria-pressable="true"
                 data-slot="button"
@@ -162,35 +158,31 @@ exports[`visual regression contract > фиксирует визуальный sh
                 tabindex="0"
                 type="button"
               >
-                <span
-                  class="inline-flex items-center gap-2"
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-copy size-4"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <svg
-                    aria-hidden="true"
-                    class="lucide lucide-copy size-4"
-                    fill="none"
-                    height="24"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <rect
-                      height="14"
-                      rx="2"
-                      ry="2"
-                      width="14"
-                      x="8"
-                      y="8"
-                    />
-                    <path
-                      d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
-                    />
-                  </svg>
-                </span>
+                  <rect
+                    height="14"
+                    rx="2"
+                    ry="2"
+                    width="14"
+                    x="8"
+                    y="8"
+                  />
+                  <path
+                    d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+                  />
+                </svg>
               </button>
             </header>
             <div
@@ -202,7 +194,7 @@ exports[`visual regression contract > фиксирует визуальный sh
                 Проверь 
                 <a
                   aria-label="Code reference src/routes/reviews.tsx:42"
-                  class="text-primary underline underline-offset-4"
+                  class="text-accent underline underline-offset-4"
                   href="src/routes/reviews.tsx:42"
                 >
                   src/routes/reviews.tsx:42
@@ -233,14 +225,13 @@ exports[`visual regression contract > фиксирует визуальный sh
             id="conversation-input"
             maxlength="4000"
             placeholder="Type a message and press Enter"
-            rows="2"
           />
           <div
             class="mt-2 flex items-center justify-between gap-2"
           >
             <p
               aria-label="Message character count"
-              class="text-xs text-text-secondary"
+              class="text-xs text-muted"
             >
               0/4000
             </p>
@@ -251,14 +242,10 @@ exports[`visual regression contract > фиксирует визуальный sh
               data-react-aria-pressable="true"
               data-slot="button"
               disabled=""
-              id="react-aria-_r_5_"
+              id="react-aria-_r_4_"
               type="submit"
             >
-              <span
-                class="inline-flex items-center gap-2"
-              >
-                Отправить
-              </span>
+              Отправить
             </button>
           </div>
         </div>
@@ -280,7 +267,7 @@ exports[`visual regression contract > фиксирует визуальный sh
         Help & diagnostics center
       </h1>
       <p
-        class="text-sm text-text-secondary"
+        class="text-sm text-muted"
       >
         Search help knowledge base, run diagnostics checks, and generate a redacted support bundle without losing workflow context.
       </p>
@@ -308,7 +295,7 @@ exports[`visual regression contract > фиксирует визуальный sh
         class="grid gap-3 md:grid-cols-[1fr_220px]"
       >
         <label
-          class="flex flex-col gap-1 text-sm text-text-tertiary"
+          class="flex flex-col gap-1 text-sm text-muted"
         >
           Search
           <input
@@ -319,7 +306,7 @@ exports[`visual regression contract > фиксирует визуальный sh
           />
         </label>
         <label
-          class="flex flex-col gap-1 text-sm text-text-tertiary"
+          class="flex flex-col gap-1 text-sm text-muted"
         >
           Category
           <select
@@ -372,7 +359,7 @@ exports[`visual regression contract > фиксирует визуальный sh
             Auth session recovery
           </p>
           <p
-            class="text-xs text-text-secondary"
+            class="text-xs text-muted"
           >
             What to check when session expired and 401/403 access errors.
           </p>
@@ -392,7 +379,7 @@ exports[`visual regression contract > фиксирует визуальный sh
             Network timeout diagnostics
           </p>
           <p
-            class="text-xs text-text-secondary"
+            class="text-xs text-muted"
           >
             Diagnosing network timeouts and API unavailability issues.
           </p>
@@ -412,7 +399,7 @@ exports[`visual regression contract > фиксирует визуальный sh
             Provider outage playbook
           </p>
           <p
-            class="text-xs text-text-secondary"
+            class="text-xs text-muted"
           >
             Checking LLM/Git provider degradation and fallback strategies.
           </p>
@@ -432,7 +419,7 @@ exports[`visual regression contract > фиксирует визуальный sh
             Scan failure triage
           </p>
           <p
-            class="text-xs text-text-secondary"
+            class="text-xs text-muted"
           >
             How to investigate scan/review worker failures and restart jobs.
           </p>
@@ -452,7 +439,7 @@ exports[`visual regression contract > фиксирует визуальный sh
             WebGL readiness and fallback
           </p>
           <p
-            class="text-xs text-text-secondary"
+            class="text-xs text-muted"
           >
             Checking browser and WebGL readiness for CodeCity screens.
           </p>
@@ -488,7 +475,7 @@ exports[`visual regression contract > фиксирует визуальный sh
         class="flex flex-wrap items-center justify-between gap-2"
       >
         <p
-          class="text-sm text-text-tertiary"
+          class="text-sm text-muted"
         >
           Checks: auth/session, network, provider connectivity, feature flags, browser/webgl readiness.
         </p>
@@ -502,75 +489,55 @@ exports[`visual regression contract > фиксирует визуальный sh
             data-rac=""
             data-react-aria-pressable="true"
             data-slot="button"
-            id="react-aria-_r_7_"
+            id="react-aria-_r_6_"
             tabindex="0"
             type="button"
           >
-            <span
-              class="inline-flex items-center gap-2"
-            >
-              Run diagnostics
-            </span>
+            Run diagnostics
           </button>
           <button
             class="button button--sm button--secondary"
             data-rac=""
             data-react-aria-pressable="true"
             data-slot="button"
-            id="react-aria-_r_9_"
+            id="react-aria-_r_8_"
             tabindex="0"
             type="button"
           >
-            <span
-              class="inline-flex items-center gap-2"
-            >
-              Open degradation console
-            </span>
+            Open degradation console
           </button>
           <button
             class="button button--sm button--secondary"
             data-rac=""
             data-react-aria-pressable="true"
             data-slot="button"
-            id="react-aria-_r_b_"
+            id="react-aria-_r_a_"
             tabindex="0"
             type="button"
           >
-            <span
-              class="inline-flex items-center gap-2"
-            >
-              Open scan recovery
-            </span>
+            Open scan recovery
           </button>
           <button
             class="button button--sm button--secondary"
             data-rac=""
             data-react-aria-pressable="true"
             data-slot="button"
-            id="react-aria-_r_d_"
+            id="react-aria-_r_c_"
             tabindex="0"
             type="button"
           >
-            <span
-              class="inline-flex items-center gap-2"
-            >
-              Open session recovery
-            </span>
+            Open session recovery
           </button>
           <button
             class="button button--sm button--secondary"
             data-rac=""
             data-react-aria-pressable="true"
             data-slot="button"
-            id="react-aria-_r_f_"
+            id="react-aria-_r_e_"
             tabindex="0"
             type="button"
           >
-            <span
-              class="inline-flex items-center gap-2"
-            >
-              Generate support bundle
-            </span>
+            Generate support bundle
           </button>
         </div>
       </div>
@@ -602,7 +569,7 @@ exports[`visual regression contract > фиксирует визуальный sh
             </span>
           </div>
           <p
-            class="text-xs text-text-secondary"
+            class="text-xs text-muted"
           >
             No session token found. Re-authentication may be required.
           </p>
@@ -637,7 +604,7 @@ exports[`visual regression contract > фиксирует визуальный sh
             </span>
           </div>
           <p
-            class="text-xs text-text-secondary"
+            class="text-xs text-muted"
           >
             Network looks reachable from browser context.
           </p>
@@ -672,7 +639,7 @@ exports[`visual regression contract > фиксирует визуальный sh
             </span>
           </div>
           <p
-            class="text-xs text-text-secondary"
+            class="text-xs text-muted"
           >
             Detected degraded providers: 1.
           </p>
@@ -707,7 +674,7 @@ exports[`visual regression contract > фиксирует визуальный sh
             </span>
           </div>
           <p
-            class="text-xs text-text-secondary"
+            class="text-xs text-muted"
           >
             Feature flags loaded and evaluated.
           </p>
@@ -742,7 +709,7 @@ exports[`visual regression contract > фиксирует визуальный sh
             </span>
           </div>
           <p
-            class="text-xs text-text-secondary"
+            class="text-xs text-muted"
           >
             WebGL context unavailable, fallback renderer recommended.
           </p>
@@ -775,7 +742,7 @@ exports[`visual regression contract > фиксирует визуальный sh
               Open session recovery
             </p>
             <p
-              class="text-xs text-text-secondary"
+              class="text-xs text-muted"
             >
               Re-authenticate and restore draft/session state before retrying.
             </p>
@@ -784,15 +751,11 @@ exports[`visual regression contract > фиксирует визуальный sh
               data-rac=""
               data-react-aria-pressable="true"
               data-slot="button"
-              id="react-aria-_r_j_"
+              id="react-aria-_r_i_"
               tabindex="0"
               type="button"
             >
-              <span
-                class="inline-flex items-center gap-2"
-              >
-                Open action
-              </span>
+              Open action
             </button>
           </li>
           <li
@@ -804,7 +767,7 @@ exports[`visual regression contract > фиксирует визуальный sh
               Open degradation console
             </p>
             <p
-              class="text-xs text-text-secondary"
+              class="text-xs text-muted"
             >
               Switch provider fallback and inspect degradation timeline.
             </p>
@@ -813,15 +776,11 @@ exports[`visual regression contract > фиксирует визуальный sh
               data-rac=""
               data-react-aria-pressable="true"
               data-slot="button"
-              id="react-aria-_r_l_"
+              id="react-aria-_r_k_"
               tabindex="0"
               type="button"
             >
-              <span
-                class="inline-flex items-center gap-2"
-              >
-                Open action
-              </span>
+              Open action
             </button>
           </li>
           <li
@@ -833,7 +792,7 @@ exports[`visual regression contract > фиксирует визуальный sh
               Open CodeCity fallback check
             </p>
             <p
-              class="text-xs text-text-secondary"
+              class="text-xs text-muted"
             >
               Use safe fallback renderer or validate browser WebGL support.
             </p>
@@ -842,15 +801,11 @@ exports[`visual regression contract > фиксирует визуальный sh
               data-rac=""
               data-react-aria-pressable="true"
               data-slot="button"
-              id="react-aria-_r_n_"
+              id="react-aria-_r_m_"
               tabindex="0"
               type="button"
             >
-              <span
-                class="inline-flex items-center gap-2"
-              >
-                Open action
-              </span>
+              Open action
             </button>
           </li>
         </ul>
@@ -880,15 +835,11 @@ exports[`visual regression contract > фиксирует визуальный sh
         data-rac=""
         data-react-aria-pressable="true"
         data-slot="button"
-        id="react-aria-_r_h_"
+        id="react-aria-_r_g_"
         tabindex="0"
         type="button"
       >
-        <span
-          class="inline-flex items-center gap-2"
-        >
-          Generate redacted bundle
-        </span>
+        Generate redacted bundle
       </button>
     </div>
   </div>

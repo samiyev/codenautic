@@ -39,7 +39,7 @@ describe("EmptyState", (): void => {
     it("when icon is not provided, then does not render the icon container", (): void => {
         const { container } = renderWithProviders(<EmptyState title="No data" />)
 
-        const iconContainer = container.querySelector(".text-text-subtle")
+        const iconContainer = container.querySelector(".text-muted")
         expect(iconContainer).toBeNull()
     })
 
