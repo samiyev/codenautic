@@ -7,22 +7,54 @@ import { renderWithProviders } from "../utils/render"
 
 const {
     mockUseExternalContext,
+    mockUseIntegrations,
     mockUpdateSource,
     mockRefreshSource,
     mockShowToastSuccess,
     mockShowToastInfo,
     mockShowToastError,
+    mockToggleConnection,
+    mockSaveConfig,
+    mockTestConnection,
 } = vi.hoisted(() => ({
     mockUseExternalContext: vi.fn(),
+    mockUseIntegrations: vi.fn(),
     mockUpdateSource: vi.fn(async (): Promise<unknown> => ({ source: {} })),
     mockRefreshSource: vi.fn(async (): Promise<unknown> => ({ accepted: true })),
     mockShowToastSuccess: vi.fn(),
     mockShowToastInfo: vi.fn(),
     mockShowToastError: vi.fn(),
+    mockToggleConnection: {
+        mutate: vi.fn((_data: unknown, options?: { readonly onSuccess?: () => void }): void => {
+            options?.onSuccess?.()
+        }),
+        mutateAsync: vi.fn(),
+        isPending: false,
+    },
+    mockSaveConfig: {
+        mutate: vi.fn((_data: unknown, options?: { readonly onSuccess?: () => void }): void => {
+            options?.onSuccess?.()
+        }),
+        mutateAsync: vi.fn(),
+        isPending: false,
+    },
+    mockTestConnection: {
+        mutate: vi.fn(),
+        mutateAsync: vi.fn(async (request: { readonly id: string }): Promise<{ readonly ok: boolean; readonly id: string; readonly message: string }> => {
+            const connectedIds = new Set(["int-jira", "int-sentry", "int-slack"])
+            const ok = connectedIds.has(request.id)
+            return { ok, id: request.id, message: ok ? "ok" : "failed" }
+        }),
+        isPending: false,
+    },
 }))
 
 vi.mock("@/lib/hooks/queries/use-external-context", () => ({
     useExternalContext: mockUseExternalContext,
+}))
+
+vi.mock("@/lib/hooks/queries/use-integrations", () => ({
+    useIntegrations: mockUseIntegrations,
 }))
 
 vi.mock("@/lib/notifications/toast", () => ({
@@ -30,6 +62,79 @@ vi.mock("@/lib/notifications/toast", () => ({
     showToastInfo: mockShowToastInfo,
     showToastError: mockShowToastError,
 }))
+
+/**
+ * Создаёт мок данных интеграций, соответствующий прежнему INITIAL_INTEGRATIONS.
+ *
+ * @returns Мок результат useIntegrations().
+ */
+function createDefaultIntegrationsMock(): ReturnType<typeof mockUseIntegrations> {
+    return {
+        integrationsQuery: {
+            isPending: false,
+            error: null,
+            data: {
+                integrations: [
+                    {
+                        id: "int-jira",
+                        provider: "Jira",
+                        description: "Issue sync and ticket linking for review findings.",
+                        workspace: "https://acme.atlassian.net",
+                        target: "PLAT",
+                        connected: true,
+                        status: "connected",
+                        syncEnabled: true,
+                        notificationsEnabled: true,
+                        secretConfigured: true,
+                        lastSyncAt: "2026-03-04 09:12",
+                    },
+                    {
+                        id: "int-linear",
+                        provider: "Linear",
+                        description: "Lightweight issue routing for triage and ownership.",
+                        workspace: "acme-workspace",
+                        target: "ENG",
+                        connected: false,
+                        status: "disconnected",
+                        syncEnabled: false,
+                        notificationsEnabled: false,
+                        secretConfigured: false,
+                    },
+                    {
+                        id: "int-sentry",
+                        provider: "Sentry",
+                        description: "Production incidents and error alerts correlation.",
+                        workspace: "acme-org",
+                        target: "web-frontend",
+                        connected: true,
+                        status: "degraded",
+                        syncEnabled: true,
+                        notificationsEnabled: true,
+                        secretConfigured: true,
+                        lastSyncAt: "2026-03-04 08:41",
+                    },
+                    {
+                        id: "int-slack",
+                        provider: "Slack",
+                        description: "Delivery channel for notifications and review events.",
+                        workspace: "acme-workspace",
+                        target: "#code-review",
+                        connected: true,
+                        status: "connected",
+                        syncEnabled: true,
+                        notificationsEnabled: true,
+                        secretConfigured: true,
+                        lastSyncAt: "2026-03-04 09:18",
+                    },
+                ],
+                total: 4,
+            },
+        },
+        toggleConnection: mockToggleConnection,
+        saveConfig: mockSaveConfig,
+        testConnection: mockTestConnection,
+    }
+}
 
 function findCardByProviderName(providerName: string): HTMLElement {
     const card = screen.getByText(providerName).closest('[data-slot="card"]')
@@ -96,6 +201,7 @@ function createDefaultExternalContextMock(): ReturnType<typeof mockUseExternalCo
 describe("settings integrations page", (): void => {
     it("рендерит external context sources и preview", async (): Promise<void> => {
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -107,6 +213,7 @@ describe("settings integrations page", (): void => {
 
     it("делегирует source actions в useExternalContext mutations", async (): Promise<void> => {
         const user = userEvent.setup()
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
         mockUseExternalContext.mockReturnValue({
             sourcesQuery: {
                 isPending: false,
@@ -158,6 +265,7 @@ describe("settings integrations page", (): void => {
 
     it("when страница рендерится, then отображает connection health summary с корректными счётчиками", (): void => {
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -181,6 +289,7 @@ describe("settings integrations page", (): void => {
 
     it("when страница рендерится, then отображает все четыре интеграции с описаниями", (): void => {
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -207,6 +316,7 @@ describe("settings integrations page", (): void => {
 
     it("when страница рендерится, then отображает статусные чипы Connected, Degraded, Disconnected", (): void => {
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -221,6 +331,7 @@ describe("settings integrations page", (): void => {
 
     it("when страница рендерится, then отображает secret/token статус и last sync для каждой интеграции", (): void => {
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -234,6 +345,7 @@ describe("settings integrations page", (): void => {
     it("when нажимается Disconnect на подключённой интеграции, then показывается toast", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -247,6 +359,7 @@ describe("settings integrations page", (): void => {
     it("when нажимается Connect на отключённой интеграции, then показывается toast", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -260,6 +373,7 @@ describe("settings integrations page", (): void => {
     it("when нажимается Save configuration, then показывается toast подтверждения", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -275,6 +389,7 @@ describe("settings integrations page", (): void => {
     it("when нажимается Test connection для здоровой интеграции, then показывается success toast", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -290,6 +405,7 @@ describe("settings integrations page", (): void => {
     it("when нажимается Test connection для отключённой интеграции, then показывается error toast", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -305,6 +421,7 @@ describe("settings integrations page", (): void => {
     it("when пользователь изменяет workspace поле, then значение обновляется", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -321,6 +438,7 @@ describe("settings integrations page", (): void => {
     it("when пользователь изменяет target поле, then значение обновляется", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -337,6 +455,7 @@ describe("settings integrations page", (): void => {
     it("when переключается sync switch, then состояние syncEnabled обновляется", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -351,6 +470,7 @@ describe("settings integrations page", (): void => {
     it("when переключается notifications switch, then состояние notificationsEnabled обновляется", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -363,6 +483,7 @@ describe("settings integrations page", (): void => {
     })
 
     it("when context sources загружаются, then показывается loading текст", (): void => {
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
         mockUseExternalContext.mockReturnValue({
             sourcesQuery: {
                 isPending: true,
@@ -390,6 +511,7 @@ describe("settings integrations page", (): void => {
     })
 
     it("when context sources не удалось загрузить, then показывается сообщение об ошибке", (): void => {
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
         mockUseExternalContext.mockReturnValue({
             sourcesQuery: {
                 isPending: false,
@@ -419,6 +541,7 @@ describe("settings integrations page", (): void => {
     it("when Save configuration с пустым workspace, then secretConfigured становится false", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -438,6 +561,7 @@ describe("settings integrations page", (): void => {
     it("when Connect нажимается на Linear с заполненными полями, then статус обновляется", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -456,6 +580,7 @@ describe("settings integrations page", (): void => {
             throw new Error("Update failed")
         })
 
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
         mockUseExternalContext.mockReturnValue({
             sourcesQuery: {
                 isPending: false,
@@ -506,6 +631,7 @@ describe("settings integrations page", (): void => {
             throw new Error("Refresh failed")
         })
 
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
         mockUseExternalContext.mockReturnValue({
             sourcesQuery: {
                 isPending: false,
@@ -547,9 +673,10 @@ describe("settings integrations page", (): void => {
         expect(mockShowToastError).toHaveBeenCalledWith("Unable to queue context source refresh.")
     })
 
-    it("when подключённая интеграция отключается и затем снова подключается, then показываются toast для обоих действий", async (): Promise<void> => {
+    it("when подключённая интеграция отключается, then toggle mutation вызывается и показывается toast", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -561,18 +688,17 @@ describe("settings integrations page", (): void => {
         await user.click(disconnectButton)
 
         expect(mockShowToastInfo).toHaveBeenCalledWith("Slack connection state updated.")
-
-        const connectButton = within(slackCard).getByRole("button", {
-            name: "Connect",
-        })
-        await user.click(connectButton)
-
-        expect(mockShowToastInfo).toHaveBeenCalledWith("Slack connection state updated.")
+        expect(mockToggleConnection.mutate).toHaveBeenCalledWith(
+            { id: "int-slack", connected: false },
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            expect.objectContaining({ onSuccess: expect.anything() }),
+        )
     })
 
     it("when Test connection нажимается на Sentry (connected), then проверяется здоровье", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -588,6 +714,7 @@ describe("settings integrations page", (): void => {
     it("when Save configuration для Sentry, then показывается toast подтверждения", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -602,6 +729,7 @@ describe("settings integrations page", (): void => {
 
     it("when страница рендерится, then кнопки Disconnect отображаются для подключённых интеграций", (): void => {
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -614,6 +742,7 @@ describe("settings integrations page", (): void => {
 
     it("when страница рендерится, then субтайтл и описание context sources отображаются корректно", (): void => {
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -630,6 +759,7 @@ describe("settings integrations page", (): void => {
     it("when Save configuration для Linear с пустым target, then toast подтверждения показывается", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -649,6 +779,7 @@ describe("settings integrations page", (): void => {
     it("when Test Slack connection нажимается, then проверяется здоровье Slack", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
@@ -664,6 +795,7 @@ describe("settings integrations page", (): void => {
     it("when Save configuration для Slack, then сохраняется конфигурация", async (): Promise<void> => {
         const user = userEvent.setup()
         mockUseExternalContext.mockReturnValue(createDefaultExternalContextMock())
+        mockUseIntegrations.mockReturnValue(createDefaultIntegrationsMock())
 
         renderWithProviders(<SettingsIntegrationsPage />)
 
