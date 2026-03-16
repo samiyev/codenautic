@@ -1,12 +1,47 @@
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { SettingsProviderDegradationPage } from "@/pages/settings-provider-degradation.page"
 import { renderWithProviders } from "../utils/render"
 
+const { mockGetStatus, mockQueueAction } = vi.hoisted(() => ({
+    mockGetStatus: vi.fn(),
+    mockQueueAction: vi.fn(),
+}))
+
+vi.mock("@/lib/api", () => ({
+    createApiContracts: (): {
+        readonly providerStatus: {
+            getStatus: typeof mockGetStatus
+            queueAction: typeof mockQueueAction
+        }
+    } => ({
+        providerStatus: {
+            getStatus: mockGetStatus,
+            queueAction: mockQueueAction,
+        },
+    }),
+}))
+
 describe("SettingsProviderDegradationPage", (): void => {
     it("переключает degraded mode и queue/retry критичных действий", async (): Promise<void> => {
+        mockGetStatus.mockResolvedValue({
+            state: {
+                provider: "llm",
+                level: "operational",
+                affectedFeatures: [],
+                eta: "stable",
+                runbookUrl: "https://status.codenautic.local/runbooks/llm",
+            },
+            queuedActions: [],
+        })
+        mockQueueAction.mockResolvedValue({
+            id: "qact-test-1",
+            description: "CCR finalization webhook",
+            status: "queued",
+        })
+
         const user = userEvent.setup()
         renderWithProviders(<SettingsProviderDegradationPage />)
 
