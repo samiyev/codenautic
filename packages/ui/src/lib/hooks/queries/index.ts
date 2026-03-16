@@ -174,3 +174,13 @@ export {
     type IUseScanProgressArgs,
     type IUseScanProgressResult,
 } from "./use-scan-progress"
+export {
+    useLlmProviders,
+    type IUseLlmProvidersArgs,
+    type IUseLlmProvidersResult,
+} from "./use-llm-providers"
+export {
+    useIntegrations,
+    type IUseIntegrationsArgs,
+    type IUseIntegrationsResult,
+} from "./use-integrations"
