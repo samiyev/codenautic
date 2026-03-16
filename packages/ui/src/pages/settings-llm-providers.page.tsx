@@ -11,9 +11,13 @@ import {
 import { TYPOGRAPHY } from "@/lib/constants/typography"
 import { LlmProviderForm } from "@/components/settings/llm-provider-form"
 import { TestConnectionButton } from "@/components/settings/test-connection-button"
+import { useLlmProviders } from "@/lib/hooks/queries/use-llm-providers"
+import type { ILlmProviderConfig as ILlmProviderConfigApi } from "@/lib/api/endpoints/llm-providers.endpoint"
 
-/** Конфигурация LLM integration. */
+/** Конфигурация LLM integration (локальная для формы). */
 interface ILlmProviderConfig {
+    /** Идентификатор провайдера из API. */
+    readonly id: string
     /** Провайдер. */
     readonly provider: TLlmProvider
     /** Активная модель. */
@@ -41,6 +45,7 @@ const DEFAULT_FORM_VALUES: INormalizedLlmProviderFormValues = {
 
 const INITIAL_CONFIG: Record<TLlmProvider, ILlmProviderConfig> = {
     OpenAI: {
+        id: "llm-openai",
         apiKey: "",
         connected: false,
         endpoint: "https://api.openai.com/v1",
@@ -48,6 +53,7 @@ const INITIAL_CONFIG: Record<TLlmProvider, ILlmProviderConfig> = {
         provider: "OpenAI",
     },
     Anthropic: {
+        id: "llm-anthropic",
         apiKey: "",
         connected: false,
         endpoint: "https://api.anthropic.com",
@@ -55,6 +61,7 @@ const INITIAL_CONFIG: Record<TLlmProvider, ILlmProviderConfig> = {
         provider: "Anthropic",
     },
     "Azure OpenAI": {
+        id: "llm-azure-openai",
         apiKey: "",
         connected: false,
         endpoint: "",
@@ -62,6 +69,7 @@ const INITIAL_CONFIG: Record<TLlmProvider, ILlmProviderConfig> = {
         provider: "Azure OpenAI",
     },
     Mistral: {
+        id: "llm-mistral",
         apiKey: "",
         connected: false,
         endpoint: "https://api.mistral.ai/v1",
@@ -72,6 +80,23 @@ const INITIAL_CONFIG: Record<TLlmProvider, ILlmProviderConfig> = {
 
 function safeString(value: unknown, fallback: string): string {
     return typeof value === "string" ? value : fallback
+}
+
+/**
+ * Маппит API-конфиг в локальный формат для формы.
+ *
+ * @param apiConfig - Конфигурация из API.
+ * @returns Локальный конфиг для формы.
+ */
+function mapApiConfigToLocal(apiConfig: ILlmProviderConfigApi): ILlmProviderConfig {
+    return {
+        id: apiConfig.id,
+        provider: apiConfig.provider,
+        model: apiConfig.model as TLlmModel,
+        apiKey: apiConfig.maskedApiKey,
+        endpoint: apiConfig.endpoint,
+        connected: apiConfig.connected,
+    }
 }
 
 /**
@@ -212,7 +237,31 @@ function renderProviderCard(
  */
 export function SettingsLlmProvidersPage(): ReactElement {
     const { t } = useTranslation(["settings"])
+    const llmProviders = useLlmProviders()
     const [configs, setConfigs] = useState<Record<TLlmProvider, ILlmProviderConfig>>(INITIAL_CONFIG)
+    const [isHydrated, setIsHydrated] = useState<boolean>(false)
+
+    /**
+     * Гидратация локального состояния из API при первой загрузке.
+     */
+    const apiProviders = llmProviders.configQuery.data?.providers
+    useMemo((): void => {
+        if (apiProviders === undefined || isHydrated === true) {
+            return
+        }
+
+        const nextConfigs = { ...INITIAL_CONFIG }
+        for (const apiConfig of apiProviders) {
+            const localConfig = mapApiConfigToLocal(apiConfig)
+            const providerName = localConfig.provider
+            if (providerName in nextConfigs) {
+                nextConfigs[providerName] = localConfig
+            }
+        }
+
+        setConfigs(nextConfigs)
+        setIsHydrated(true)
+    }, [apiProviders, isHydrated])
 
     const hasAtLeastOneConfigured = useMemo<boolean>(
         (): boolean => hasConfiguredApiKey(configs),
@@ -220,42 +269,66 @@ export function SettingsLlmProvidersPage(): ReactElement {
     )
 
     const saveConfig = (provider: TLlmProvider, next: INormalizedLlmProviderFormValues): void => {
+        const config = getProviderConfig(configs, provider)
+
         setConfigs((previousValue): Record<TLlmProvider, ILlmProviderConfig> => {
             return toNextProviderConfig(previousValue, provider, next)
         })
-        showToastSuccess(t("settings:llmProviders.toast.configSaved", { provider }))
-    }
 
-    const testProvider = (provider: TLlmProvider): Promise<boolean> => {
-        const config = getProviderConfig(configs, provider)
-
-        return Promise.resolve(config.apiKey.length >= 10)
-    }
-
-    const handleConnectionResult = (provider: TLlmProvider, next: boolean): void => {
-        setConfigs((previousValue): Record<TLlmProvider, ILlmProviderConfig> => {
-            const currentConfig = getProviderConfig(previousValue, provider)
-
-            return {
-                ...previousValue,
-                [provider]: {
-                    ...currentConfig,
-                    connected: next,
+        llmProviders.updateConfig.mutate(
+            {
+                id: config.id,
+                model: next.model,
+                apiKey: next.apiKey,
+                endpoint: next.endpoint,
+            },
+            {
+                onSuccess: (): void => {
+                    showToastSuccess(
+                        t("settings:llmProviders.toast.configSaved", { provider }),
+                    )
                 },
-            }
-        })
-        if (next === true) {
-            showToastSuccess(t("settings:llmProviders.toast.markedAsConnected", { provider }))
-            return
-        }
-
-        showToastError(t("settings:llmProviders.toast.notConnected", { provider }))
+                onError: (): void => {
+                    showToastError(
+                        t("settings:llmProviders.toast.configSaved", { provider }),
+                    )
+                },
+            },
+        )
     }
 
     const testAndPersistConnection = async (provider: TLlmProvider): Promise<boolean> => {
-        const result = await testProvider(provider)
-        handleConnectionResult(provider, result)
-        return result
+        const config = getProviderConfig(configs, provider)
+
+        try {
+            const result = await llmProviders.testConnection.mutateAsync({
+                id: config.id,
+            })
+
+            setConfigs((previousValue): Record<TLlmProvider, ILlmProviderConfig> => {
+                const currentConfig = getProviderConfig(previousValue, provider)
+                return {
+                    ...previousValue,
+                    [provider]: {
+                        ...currentConfig,
+                        connected: result.ok,
+                    },
+                }
+            })
+
+            if (result.ok === true) {
+                showToastSuccess(
+                    t("settings:llmProviders.toast.markedAsConnected", { provider }),
+                )
+            } else {
+                showToastError(t("settings:llmProviders.toast.notConnected", { provider }))
+            }
+
+            return result.ok
+        } catch {
+            showToastError(t("settings:llmProviders.toast.notConnected", { provider }))
+            return false
+        }
     }
 
     return (
