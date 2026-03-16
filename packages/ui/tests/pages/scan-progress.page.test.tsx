@@ -4,6 +4,18 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { ScanProgressPage } from "@/pages/scan-progress.page"
 import { renderWithProviders } from "../utils/render"
 
+const { mockGetProgress } = vi.hoisted(() => ({
+    mockGetProgress: vi.fn(),
+}))
+
+vi.mock("@/lib/api", () => ({
+    createApiContracts: (): {
+        readonly scanProgress: { getProgress: typeof mockGetProgress }
+    } => ({
+        scanProgress: { getProgress: mockGetProgress },
+    }),
+}))
+
 const seedEvents: ReadonlyArray<{
     readonly etaSeconds: number
     readonly log: string
@@ -52,6 +64,11 @@ afterEach((): void => {
 
 describe("ScanProgressPage", (): void => {
     it("показывает прогресс и логи из seed событий", (): void => {
+        mockGetProgress.mockResolvedValue({
+            jobId: "scan-job-seed",
+            events: [],
+        })
+
         renderWithProviders(<ScanProgressPage jobId="scan-job-seed" seedEvents={seedEvents} />)
 
         expect(screen.getByText("Scan Progress")).not.toBeNull()
@@ -63,6 +80,11 @@ describe("ScanProgressPage", (): void => {
     })
 
     it("добавляет обновления из EventSource потока", async (): Promise<void> => {
+        mockGetProgress.mockResolvedValue({
+            jobId: "scan-stream",
+            events: [],
+        })
+
         const createdSources: Array<{
             emit: (payload: string) => void
             close: () => void
